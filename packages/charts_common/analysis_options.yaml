@@ -1,6 +1,8 @@
 # Vendored package — suppress warnings that originate from the upstream
 # Google Charts code and would require invasive refactoring to resolve.
 analyzer:
+  exclude:
+    - test/**
   errors:
     dead_null_aware_expression: ignore
     invalid_null_aware_operator: ignore
