@@ -1,0 +1,11 @@
+name: deleteable_tile
+description: A widget that animates when appearing and disappearing. Local fork for Dart 3 compatibility.
+version: 0.0.1
+publish_to: none
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter

@@ -572,13 +572,18 @@ class DayWidget extends StatelessWidget {
                             ? Colors.white
                             : null,
                       ),
-                      badgeColor: day.deletedHomework.any((h) => h.isChanged)
-                          ? Colors.red
-                          : Theme.of(context).scaffoldBackgroundColor,
-                      toAnimate: day.deletedHomework.any((h) => h.isChanged),
-                      padding: EdgeInsets.zero,
+                      badgeStyle: badge.BadgeStyle(
+                        badgeColor: day.deletedHomework.any((h) => h.isChanged)
+                            ? Colors.red
+                            : Theme.of(context).scaffoldBackgroundColor,
+                        padding: EdgeInsets.zero,
+                        elevation: 0,
+                      ),
+                      badgeAnimation: day.deletedHomework
+                              .any((h) => h.isChanged)
+                          ? const badge.BadgeAnimation.fade()
+                          : const badge.BadgeAnimation.slide(toAnimate: false),
                       position: badge.BadgePosition.topStart(),
-                      elevation: 0,
                       child: const Icon(Icons.info_outline),
                     ),
                     onPressed: () {
@@ -817,8 +822,10 @@ class ItemWidget extends StatelessWidget {
                                   Positioned(
                                     right: 0,
                                     child: badge.Badge(
-                                      shape: badge.BadgeShape.square,
-                                      borderRadius: BorderRadius.circular(20),
+                                      badgeStyle: badge.BadgeStyle(
+                                        shape: badge.BadgeShape.square,
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
                                       badgeContent: Text(
                                         isHistory && isCurrent
                                             ? "aktuell"
@@ -886,13 +893,18 @@ class ItemWidget extends StatelessWidget {
                               ? badge.Badge(
                                   badgeContent:
                                       const Icon(Icons.edit, size: 15),
-                                  padding: EdgeInsets.zero,
-                                  badgeColor: isDeletedView
-                                      ? Theme.of(context).dialogBackgroundColor
-                                      : Theme.of(context)
-                                          .scaffoldBackgroundColor,
-                                  toAnimate: false,
-                                  elevation: 0,
+                                  badgeStyle: badge.BadgeStyle(
+                                    padding: EdgeInsets.zero,
+                                    badgeColor: isDeletedView
+                                        ? Theme.of(context)
+                                            .dialogBackgroundColor
+                                        : Theme.of(context)
+                                            .scaffoldBackgroundColor,
+                                    elevation: 0,
+                                  ),
+                                  badgeAnimation:
+                                      const badge.BadgeAnimation.slide(
+                                          toAnimate: false),
                                   child: const Icon(
                                     Icons.info_outline,
                                   ),

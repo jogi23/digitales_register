@@ -1,0 +1,14 @@
+name: flutter_built_redux
+description: Built_redux provider for Flutter. Local fork for Dart 3 compatibility.
+version: 0.6.0
+publish_to: none
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  built_redux:
+    path: ../built_redux/
+  meta: ^1.9.0

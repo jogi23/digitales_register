@@ -53,8 +53,7 @@ void main() {
                           ..lastNotSeen = UtcDateTime(2019, 12, 24)
                           ..subtitle = "Untertitel"
                           ..title = "Titel"
-                          ..type = HomeworkType.lessonHomework
-                          ..warningServerSaid = false,
+                          ..type = HomeworkType.lessonHomework,
                       ),
                     ),
                 ),
@@ -106,7 +105,6 @@ void main() {
           ..subtitle = "Neuer Untertitel"
           ..title = "Neuer Titel"
           ..type = HomeworkType.lessonHomework
-          ..warningServerSaid = false
           ..previousVersion = (HomeworkBuilder()
             ..checkable = true
             ..checked = false
@@ -120,8 +118,7 @@ void main() {
             ..lastNotSeen = UtcDateTime(2019, 12, 24)
             ..subtitle = "Untertitel"
             ..title = "Titel"
-            ..type = HomeworkType.lessonHomework
-            ..warningServerSaid = false),
+            ..type = HomeworkType.lessonHomework),
       ),
     );
   });

@@ -141,7 +141,7 @@ class StorageHelper {
   }
 
   Future<String?> read(String user) async {
-    return secureStorage.read(key: getStorageKey(user, serverUrl));
+    return secureStorage.read(key: escapeKey(getStorageKey(user, serverUrl)));
   }
 
   Future<void> cleanup() async {
@@ -153,7 +153,9 @@ void main() {
   secureStorage = FakeSecureStorage();
   final storageHelper = StorageHelper();
 
+  setUp(() => skipUnmaintainedAlert = true);
   tearDown(() {
+    skipUnmaintainedAlert = false;
     deletedData = false;
     storageHelper.cleanup();
   });

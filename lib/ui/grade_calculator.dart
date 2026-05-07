@@ -626,6 +626,7 @@ class _InputState extends State<_Input> {
           return null;
         }
     }
+    return null;
   }
 
   @override

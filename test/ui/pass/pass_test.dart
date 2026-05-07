@@ -36,6 +36,9 @@ class MockDio extends Mock implements Dio {}
 class MockWrapper extends Mock implements Wrapper {}
 
 void main() {
+  setUp(() => skipUnmaintainedAlert = true);
+  tearDown(() => skipUnmaintainedAlert = false);
+
   testGoldens("Request pass reset", (WidgetTester tester) async {
     secureStorage = FakeSecureStorage();
     navigatorKey = GlobalKey();
@@ -60,13 +63,20 @@ void main() {
     await tester.enterText(find.byType(TextField).first, "Vinze");
     // Debounced
     await tester.pump(const Duration(milliseconds: 700));
-    await tester.pumpAndSettle();
+    // Note: cannot use pumpAndSettle here — RawAutocomplete in Flutter 3.x uses
+    // OverlayPortal.overlayChildLayoutBuilder whose _RenderLayoutBuilder schedules
+    // a frame callback every layout pass, causing pumpAndSettle to never settle in
+    // tests. Use bounded pumps while the autocomplete overlay is visible.
+    await tester.pump(const Duration(milliseconds: 500));
     await expectLater(
       find.byType(MaterialApp),
       matchesGoldenFile("suggestions.png"),
     );
     await tester.tap(find.text("Vinzentinum"));
-    await tester.pumpAndSettle();
+    // Let the first frame process the tap (overlay still in tree, _frameCallback
+    // fires → scheduleFrame) and the second frame clear any residual dirty state.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
     await expectLater(
       find.byType(MaterialApp),
       matchesGoldenFile("school_selected.png"),

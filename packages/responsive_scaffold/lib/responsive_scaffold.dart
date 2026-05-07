@@ -1,5 +1,3 @@
-library responsive_scaffold;
-
 import 'package:flutter/material.dart' hide SizeTransition;
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:responsive_scaffold/size_transition.dart';
@@ -70,7 +68,7 @@ class ResponsiveScaffold<T> extends StatefulWidget {
   final void Function(T newSelectedRoute)? onRouteChanged;
 
   const ResponsiveScaffold({
-    Key? key,
+    super.key,
     required this.homeBody,
     required this.drawerBuilder,
     required this.homeId,
@@ -78,7 +76,7 @@ class ResponsiveScaffold<T> extends StatefulWidget {
     required this.homeAppBar,
     this.homeFloatingActionButton,
     this.onRouteChanged,
-  }) : super(key: key);
+  });
 
   @override
   ResponsiveScaffoldState<T> createState() => ResponsiveScaffoldState<T>();
@@ -244,11 +242,9 @@ class ResponsiveScaffoldState<T> extends State<ResponsiveScaffold<T>>
 
 class _Drawer extends StatefulWidget {
   const _Drawer({
-    Key? key,
     required AnimationController drawerAnimationController,
     required this.child,
-  })  : _drawerAnimationController = drawerAnimationController,
-        super(key: key);
+  }) : _drawerAnimationController = drawerAnimationController;
 
   final AnimationController _drawerAnimationController;
   final Widget child;
@@ -276,12 +272,14 @@ class __DrawerState extends State<_Drawer> {
 
   @override
   Widget build(BuildContext context) {
-    return PortalEntry(
+    return PortalTarget(
       visible: visible,
-      portalAnchor: Alignment.topLeft,
-      childAnchor: Alignment.topRight,
+      anchor: const Aligned(
+        follower: Alignment.topLeft,
+        target: Alignment.topRight,
+      ),
       // The following is a hacky way to draw a shadow divider
-      portal: Stack(
+      portalFollower: Stack(
         children: [
           Positioned(
             left: 0,
@@ -312,8 +310,7 @@ class __DrawerState extends State<_Drawer> {
 class _InheritedTabletMode extends InheritedWidget {
   final bool tabletMode;
 
-  const _InheritedTabletMode({required this.tabletMode, required Widget child})
-      : super(child: child);
+  const _InheritedTabletMode({required this.tabletMode, required super.child});
 
   static _InheritedTabletMode? of(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<_InheritedTabletMode>();
@@ -334,12 +331,12 @@ class _InheritedHomePage extends InheritedWidget {
 
   const _InheritedHomePage({
     required this.body,
-    required Widget child,
+    required super.child,
     required this.appBar,
     required this.drawer,
     required this.scaffoldKey,
     this.fab,
-  }) : super(child: child);
+  });
 
   static _InheritedHomePage? of(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<_InheritedHomePage>();
@@ -359,11 +356,10 @@ class _Body<T> extends StatelessWidget {
   final T homeId;
 
   const _Body(
-      {Key? key,
+      {super.key,
       required this.navKey,
       required this.navObserver,
-      required this.homeId})
-      : super(key: key);
+      required this.homeId});
   @override
   Widget build(BuildContext context) {
     return ClipRect(
@@ -402,8 +398,7 @@ class ResponsiveAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Widget title;
   final List<Widget>? actions;
 
-  const ResponsiveAppBar({Key? key, required this.title, this.actions})
-      : super(key: key);
+  const ResponsiveAppBar({super.key, required this.title, this.actions});
   @override
   Widget build(BuildContext context) {
     final tabletMode = _InheritedTabletMode.of(context)?.tabletMode ?? false;

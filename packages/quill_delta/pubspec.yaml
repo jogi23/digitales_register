@@ -1,0 +1,7 @@
+name: quill_delta
+description: Minimal Quill Delta implementation. Local fork of quill_delta for Dart 3 compatibility.
+version: 3.0.0
+publish_to: none
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"

@@ -130,14 +130,11 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
         case _Theme.light:
           widget.onSetFollowDeviceDarkMode(false);
           widget.onSetDarkMode(false);
-          break;
         case _Theme.dark:
           widget.onSetFollowDeviceDarkMode(false);
           widget.onSetDarkMode(true);
-          break;
         case _Theme.followDevice:
           widget.onSetFollowDeviceDarkMode(true);
-          break;
       }
     });
   }

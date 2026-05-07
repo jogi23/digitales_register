@@ -200,7 +200,6 @@ Future<void> main() async {
                           ..isChanged = false
                           ..isNew = false
                           ..type = HomeworkType.lessonHomework
-                          ..warningServerSaid = true
                           ..title = "Test"
                           ..subtitle = "Subtitle"
                           ..gradeFormatted = "7/9",
@@ -231,7 +230,6 @@ Future<void> main() async {
                             ..isChanged = false
                             ..isNew = false
                             ..type = HomeworkType.lessonHomework
-                            ..warningServerSaid = false
                             ..title = "Titel"
                             ..subtitle = "Subtitle",
                         ),
@@ -250,7 +248,6 @@ Future<void> main() async {
                             ..isChanged = false
                             ..isNew = false
                             ..type = HomeworkType.lessonHomework
-                            ..warningServerSaid = false
                             ..title = "Title"
                             ..subtitle = "Subtitle",
                         ),
@@ -265,7 +262,6 @@ Future<void> main() async {
                             ..isChanged = false
                             ..isNew = false
                             ..type = HomeworkType.lessonHomework
-                            ..warningServerSaid = true
                             ..title = "Test"
                             ..subtitle = "Subtitle",
                         ),
@@ -408,7 +404,6 @@ Future<void> main() async {
                           ..isChanged = false
                           ..isNew = false
                           ..type = HomeworkType.lessonHomework
-                          ..warningServerSaid = false
                           ..title = "Title"
                           ..subtitle = "Subtitle",
                       ),
@@ -469,7 +464,6 @@ Future<void> main() async {
                           ..isChanged = false
                           ..isNew = false
                           ..type = HomeworkType.homework
-                          ..warningServerSaid = false
                           ..title = "Title"
                           ..subtitle = "Subtitle",
                       ),
@@ -530,7 +524,6 @@ Future<void> main() async {
                           ..isChanged = false
                           ..isNew = false
                           ..type = HomeworkType.homework
-                          ..warningServerSaid = false
                           ..title = "Title"
                           ..subtitle = "Subtitle",
                       ),
@@ -589,7 +582,6 @@ Future<void> main() async {
                         ..isChanged = false
                         ..isNew = false
                         ..type = HomeworkType.homework
-                        ..warningServerSaid = false
                         ..title = "Title"
                         ..subtitle = "Subtitle",
                     ),

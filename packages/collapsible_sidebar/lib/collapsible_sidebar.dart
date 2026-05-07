@@ -1,4 +1,3 @@
-library collapsible_sidebar;
 
 import 'dart:math' as math show pi;
 
@@ -13,7 +12,7 @@ typedef ExpansionChangeCallback = void Function(bool isExpanded);
 
 class CollapsibleSidebar extends StatefulWidget {
   const CollapsibleSidebar({
-    Key? key,
+    super.key,
     required this.items,
     this.title,
     this.titleStyle,
@@ -46,7 +45,7 @@ class CollapsibleSidebar extends StatefulWidget {
     required this.titleTooltip,
     required this.toggleTooltipCollapsed,
     required this.toggleTooltipExpanded,
-  }) : super(key: key);
+  });
 
   final Widget? title, toggleTitle;
   final String titleTooltip, toggleTooltipCollapsed, toggleTooltipExpanded;
