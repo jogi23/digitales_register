@@ -1,8 +1,8 @@
 name: charts_flutter
 version: 0.11.0
 description: Material Design charting library for flutter.
-author: Charts Team <charts_flutter@google.com>
 homepage: https://github.com/google/charts
+publish_to: none
 
 environment:
   sdk: '>=3.0.0 <4.0.0'

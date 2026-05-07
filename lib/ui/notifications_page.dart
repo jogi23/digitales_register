@@ -81,10 +81,10 @@ class NotificationPage extends StatelessWidget {
                         ),
                       );
                     }
-                    n -= 1;
+                    final idx = n - 1;
                     return NotificationWidget(
-                      key: ObjectKey(notifications[n]),
-                      notification: notifications[n],
+                      key: ObjectKey(notifications[idx]),
+                      notification: notifications[idx],
                       onDelete: deleteNotification,
                       noInternet: noInternet,
                       goToMessage: goToMessage,

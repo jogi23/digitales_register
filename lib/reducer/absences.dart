@@ -82,18 +82,15 @@ AbsenceGroup _parseAbsence(dynamic g) {
           },
         ),
       )
-      ..minutes = b.absences.build().fold<int>(0, (min, a) {
-        if (a.minutes != 50) {
-          min += a.minutesCameTooLate + a.minutesLeftTooEarly;
-        }
-        return min;
-      })
-      ..hours = b.absences.build().fold<int>(0, (h, a) {
-        if (a.minutes == 50) {
-          h++;
-        }
-        return h;
-      }),
+      ..minutes = b.absences.build().fold<int>(
+          0,
+          (min, a) => min +
+              (a.minutes != 50
+                  ? a.minutesCameTooLate + a.minutesLeftTooEarly
+                  : 0))
+      ..hours = b.absences
+          .build()
+          .fold<int>(0, (h, a) => h + (a.minutes == 50 ? 1 : 0)),
   );
 }
 
