@@ -77,12 +77,12 @@ class SizeTransition extends AnimatedWidget {
   /// defaults to 0.0, which centers the child along the main axis during the
   /// transition.
   const SizeTransition({
-    Key? key,
+    super.key,
     this.axis = Axis.vertical,
     required Animation<double> sizeFactor,
     this.axisAlignment = 0.0,
     this.child,
-  }) : super(key: key, listenable: sizeFactor);
+  }) : super(listenable: sizeFactor);
 
   /// [Axis.horizontal] if [sizeFactor] modifies the width, otherwise
   /// [Axis.vertical].

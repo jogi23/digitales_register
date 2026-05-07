@@ -43,6 +43,29 @@ function(APPLY_STANDARD_SETTINGS TARGET)
   target_compile_options(${TARGET} PRIVATE /EHsc)
   target_compile_definitions(${TARGET} PRIVATE "_HAS_EXCEPTIONS=0")
   target_compile_definitions(${TARGET} PRIVATE "$<$<CONFIG:Debug>:_DEBUG>")
+  # ATL headers (atlmfc/include) are not always on the default include path.
+  # Search all installed MSVC toolset versions for atlmfc.
+  if(MSVC)
+    if(DEFINED ENV{VCToolsInstallDir} AND EXISTS "$ENV{VCToolsInstallDir}atlmfc/include")
+      target_include_directories(${TARGET} PRIVATE
+        "$ENV{VCToolsInstallDir}atlmfc/include")
+      target_link_directories(${TARGET} PRIVATE
+        "$ENV{VCToolsInstallDir}atlmfc/lib/x64")
+    else()
+      # Derive the VS install root from cl.exe: bin/HostX64/x64/../../../..
+      get_filename_component(_cl_dir "${CMAKE_CXX_COMPILER}" DIRECTORY)
+      get_filename_component(_vc_tools_root "${_cl_dir}/../../../.." ABSOLUTE)
+      file(GLOB _atl_candidates "${_vc_tools_root}/*/atlmfc/include")
+      foreach(_atl_dir ${_atl_candidates})
+        if(EXISTS "${_atl_dir}/atlstr.h")
+          target_include_directories(${TARGET} PRIVATE "${_atl_dir}")
+          get_filename_component(_atl_base "${_atl_dir}" DIRECTORY)
+          target_link_directories(${TARGET} PRIVATE "${_atl_base}/lib/x64")
+          break()
+        endif()
+      endforeach()
+    endif()
+  endif()
 endfunction()
 
 # Flutter library and tool build rules.

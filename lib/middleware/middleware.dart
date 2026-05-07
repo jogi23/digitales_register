@@ -74,6 +74,11 @@ part 'settings.dart';
 
 late FlutterSecureStorage secureStorage;
 
+/// Set to [true] in tests to prevent [_checkShowUnmaintainedAlert] from
+/// displaying the dialog (which would block [pumpAndSettle] indefinitely).
+@visibleForTesting
+bool skipUnmaintainedAlert = false;
+
 @visibleForTesting
 Wrapper wrapper = Wrapper();
 
@@ -517,7 +522,6 @@ Future<void> _start(
         await api.actions.loginActions.addAfterLoginCallback(
           () => api.actions.gradesActions.setSemester(Semester.first),
         );
-        break;
       case "2":
         await api.actions.loginActions.addAfterLoginCallback(
           () => api.actions.gradesActions.setSemester(Semester.second),
@@ -548,7 +552,6 @@ Future<void> _start(
           await redirectAfterLogin(
               parameters["redirect"]!.replaceFirst("#", ""), api);
         }
-        break;
       default:
         showSnackBar("Dieser Link konnte nicht geöffnet werden");
     }
@@ -567,27 +570,22 @@ Future<void> redirectAfterLogin(String location,
       await api.actions.loginActions.addAfterLoginCallback(
         api.actions.routingActions.showAbsences.call,
       );
-      break;
     case "calendar/student":
       await api.actions.loginActions.addAfterLoginCallback(
         api.actions.routingActions.showCalendar.call,
       );
-      break;
     case "student/subjects":
       await api.actions.loginActions.addAfterLoginCallback(
         api.actions.routingActions.showGrades.call,
       );
-      break;
     case "student/certificate":
       await api.actions.loginActions.addAfterLoginCallback(
         api.actions.routingActions.showCertificate.call,
       );
-      break;
     case "message/list":
       await api.actions.loginActions.addAfterLoginCallback(
         api.actions.routingActions.showMessages.call,
       );
-      break;
     default:
       showSnackBar("Dieser Link konnte nicht geöffnet werden");
   }
@@ -710,6 +708,7 @@ Future<bool?> askShouldOverwriteFile(String fileName) async {
 }
 
 Future<void> _checkShowUnmaintainedAlert() async {
+  if (skipUnmaintainedAlert) return;
   final appDirectory = await getApplicationSupportDirectory();
   final file = File("${appDirectory.path}/unmaintainedAlertShown");
   if (file.existsSync()) {

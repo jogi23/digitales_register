@@ -7,7 +7,7 @@ class QuillDeltaViewer extends StatelessWidget {
   /// The document delta to be rendered
   final Delta delta;
 
-  const QuillDeltaViewer({Key? key, required this.delta}) : super(key: key);
+  const QuillDeltaViewer({super.key, required this.delta});
   @override
   Widget build(BuildContext context) {
     return render(removeLastNewline(isolateLines(delta)), context);

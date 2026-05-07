@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 class CollapsibleItemWidget extends StatelessWidget {
   const CollapsibleItemWidget({
-    Key? key,
+    super.key,
     required this.leading,
     required this.title,
     required this.tooltip,
@@ -15,7 +15,7 @@ class CollapsibleItemWidget extends StatelessWidget {
     this.selectedBoxColor,
     this.hasDivider = false,
     this.curve,
-  }) : super(key: key);
+  });
 
   final Widget leading;
   final Widget? title;

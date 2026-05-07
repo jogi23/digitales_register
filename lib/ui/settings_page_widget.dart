@@ -130,14 +130,11 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
         case _Theme.light:
           widget.onSetFollowDeviceDarkMode(false);
           widget.onSetDarkMode(false);
-          break;
         case _Theme.dark:
           widget.onSetFollowDeviceDarkMode(false);
           widget.onSetDarkMode(true);
-          break;
         case _Theme.followDevice:
           widget.onSetFollowDeviceDarkMode(true);
-          break;
       }
     });
   }
@@ -466,8 +463,8 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
                     ),
                   );
                 }
-                i -= 1;
-                final key = widget.vm.subjectNicks.entries.toList()[i].key;
+                final idx = i - 1;
+                final key = widget.vm.subjectNicks.entries.toList()[idx].key;
                 final value = widget.vm.subjectNicks[key];
                 return Deleteable(
                   key: ValueKey(key),
@@ -499,7 +496,7 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
                               widget.onSetSubjectNicks(
                                 Map.fromEntries(
                                   List.of(widget.vm.subjectNicks.entries)
-                                    ..[i] = newValue,
+                                    ..[idx] = newValue,
                                 ),
                               );
                             }

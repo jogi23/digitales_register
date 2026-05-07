@@ -76,7 +76,8 @@ Future<void> main() async {
                                       ..name = "Foo"
                                       ..online = false
                                       ..typeId = 500
-                                      ..typeName = "Hausaufgabe",
+                                      ..typeName = "Hausaufgabe"
+                                      ..warning = false,
                                   )
                                 ],
                               ),
