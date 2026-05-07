@@ -84,7 +84,8 @@ AbsenceGroup _parseAbsence(dynamic g) {
       )
       ..minutes = b.absences.build().fold<int>(
           0,
-          (min, a) => min +
+          (min, a) =>
+              min +
               (a.minutes != 50
                   ? a.minutesCameTooLate + a.minutesLeftTooEarly
                   : 0))

@@ -40,13 +40,13 @@ void main() {
     });
 
     test('strips trailing v2/login path', () {
-      expect(
-          fixupUrl('https://example.com/v2/login'), 'https://example.com/');
+      expect(fixupUrl('https://example.com/v2/login'), 'https://example.com/');
       expect(fixupUrl('example.com/v2/login'), 'https://example.com/');
     });
 
     test('does not strip non-default paths', () {
-      expect(fixupUrl('https://example.com/other'), 'https://example.com/other');
+      expect(
+          fixupUrl('https://example.com/other'), 'https://example.com/other');
     });
   });
 
@@ -85,7 +85,7 @@ void main() {
   // ---------------------------------------------------------------------------
   group('UtcDateTime', () {
     test('is always UTC', () {
-      final dt = UtcDateTime(2024, 6, 1, 12, 0, 0);
+      final dt = UtcDateTime(2024, 6, 1, 12);
       expect(dt.isUtc, isTrue);
     });
 
@@ -106,7 +106,7 @@ void main() {
     });
 
     test('add preserves UTC', () {
-      final dt = UtcDateTime(2024, 1, 1);
+      final dt = UtcDateTime(2024);
       final result = dt.add(const Duration(days: 1));
       expect(result.isUtc, isTrue);
       expect(result, UtcDateTime(2024, 1, 2));
@@ -116,7 +116,7 @@ void main() {
       final dt = UtcDateTime(2024, 1, 5);
       final result = dt.subtract(const Duration(days: 4));
       expect(result.isUtc, isTrue);
-      expect(result, UtcDateTime(2024, 1, 1));
+      expect(result, UtcDateTime(2024));
     });
 
     test('stripTime removes time component', () {
@@ -164,8 +164,10 @@ void main() {
     // On Windows, getStorageKey produces JSON which contains characters like
     // '"', ':', '/' that are forbidden in Windows registry key names.
     // escapeKey must replace them so secure_storage can store the key.
-    test('storage key produced by getStorageKey is always valid after escaping', () {
-      final rawKey = getStorageKey('user@example.com', 'https://school.example.com/v2/');
+    test('storage key produced by getStorageKey is always valid after escaping',
+        () {
+      final rawKey =
+          getStorageKey('user@example.com', 'https://school.example.com/v2/');
       // The raw JSON key contains '"', ':', '/' — all potentially dangerous on Windows.
       expect(rawKey, contains('"'));
       expect(rawKey, contains(':'));
@@ -191,8 +193,10 @@ void main() {
     });
 
     test('different servers produce different keys', () {
-      final key1 = escapeKey(getStorageKey('alice', 'https://school1.example.com'));
-      final key2 = escapeKey(getStorageKey('alice', 'https://school2.example.com'));
+      final key1 =
+          escapeKey(getStorageKey('alice', 'https://school1.example.com'));
+      final key2 =
+          escapeKey(getStorageKey('alice', 'https://school2.example.com'));
       expect(key1, isNot(equals(key2)));
     });
   });
@@ -202,7 +206,8 @@ void main() {
   // ---------------------------------------------------------------------------
   group('getStorageKey', () {
     test('produces a JSON-encoded string with username and server_url', () {
-      final key = getStorageKey('user@example.com', 'https://school.example.com');
+      final key =
+          getStorageKey('user@example.com', 'https://school.example.com');
       final decoded = json.decode(key) as Map;
       expect(decoded['username'], 'user@example.com');
       expect(decoded['server_url'], 'https://school.example.com');
@@ -234,7 +239,7 @@ void main() {
       );
       final encoded = json.encode(serializers.serialize(state));
       final decoded =
-          serializers.deserialize(json.decode(encoded) as Object) as AppState;
+          serializers.deserialize(json.decode(encoded) as Object)! as AppState;
       // Settings are serialized and survive the roundtrip
       expect(decoded.settingsState.noDataSaving, isTrue);
       expect(decoded.settingsState.noPasswordSaving, isTrue);
@@ -249,8 +254,8 @@ void main() {
           ..noPasswordSaving = false,
       );
       final encoded = json.encode(serializers.serialize(state.settingsState));
-      final decoded =
-          serializers.deserialize(json.decode(encoded) as Object) as SettingsState;
+      final decoded = serializers.deserialize(json.decode(encoded) as Object)!
+          as SettingsState;
       expect(decoded.noDataSaving, isTrue);
       expect(decoded.noPasswordSaving, isFalse);
     });
