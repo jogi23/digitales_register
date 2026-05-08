@@ -20,16 +20,15 @@ import 'package:dr/app_state.dart';
 import 'package:dr/ui/profile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_built_redux/flutter_built_redux.dart';
-import 'package:tuple/tuple.dart';
 
 class ProfileContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return StoreConnection<AppState, AppActions, Tuple2<bool, ProfileState>>(
+    return StoreConnection<AppState, AppActions, (bool, ProfileState)>(
       builder: (context, vm, actions) {
         return Profile(
-          profileState: vm.item2,
-          noInternet: vm.item1,
+          profileState: vm.$2,
+          noInternet: vm.$1,
           setSendNotificationEmails:
               actions.profileActions.sendNotificationEmails.call,
           changeEmail: actions.routingActions.showChangeEmail.call,
@@ -37,7 +36,7 @@ class ProfileContainer extends StatelessWidget {
         );
       },
       connect: (AppState state) {
-        return Tuple2(state.noInternet, state.profileState);
+        return (state.noInternet, state.profileState);
       },
     );
   }

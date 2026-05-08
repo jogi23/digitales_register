@@ -22,7 +22,6 @@ import 'package:dr/ui/grades_chart.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_built_redux/flutter_built_redux.dart';
-import 'package:tuple/tuple.dart';
 
 class GradesChartContainer extends StatelessWidget {
   final bool isFullscreen;
@@ -45,7 +44,7 @@ class GradesChartContainer extends StatelessWidget {
           return SubjectGrades(
             {
               for (final grade in grades)
-                grade.date: Tuple2(grade.grade!, grade.type),
+                grade.date: (grade.grade!, grade.type),
             },
             subject.name,
           );
@@ -72,7 +71,7 @@ class GradesChartContainer extends StatelessWidget {
 }
 
 class SubjectGrades {
-  final Map<UtcDateTime, Tuple2<int, String>> grades;
+  final Map<UtcDateTime, (int, String)> grades;
   final String name;
 
   SubjectGrades(this.grades, this.name);

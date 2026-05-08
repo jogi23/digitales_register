@@ -24,7 +24,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:tuple/tuple.dart';
 
 late final PackageInfo packageInfo;
 
@@ -83,11 +82,6 @@ String stringifyMaybeJson(dynamic param) {
   return encoder.convert(param);
 }
 
-extension MapEntryToTuple<K, V> on MapEntry<K, V> {
-  Tuple2<K, V> toTuple() {
-    return Tuple2(key, value);
-  }
-}
 
 NumberFormat gradeAverageFormat = NumberFormat("#0.##", "de");
 

@@ -706,7 +706,7 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: master
+      ref: "5028bb18379df881d30b42c61b0e6e686daba60e"
       resolved-ref: "5028bb18379df881d30b42c61b0e6e686daba60e"
       url: "https://github.com/miDeb/open_file.git"
     source: git
@@ -1105,14 +1105,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.1"
-  tuple:
-    dependency: "direct main"
-    description:
-      name: tuple
-      sha256: a97ce2013f240b2f3807bcbaf218765b6f301c3eff91092bcfa23a039e7dd151
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.2"
   typed_data:
     dependency: transitive
     description:
@@ -1125,7 +1117,7 @@ packages:
     dependency: "direct main"
     description:
       path: uni_links
-      ref: modernized
+      ref: "7d9c079b9b07e2eac5f1d25a08b40e7f0c5c6cf0"
       resolved-ref: "7d9c079b9b07e2eac5f1d25a08b40e7f0c5c6cf0"
       url: "https://github.com/miDeb/uni_links.git"
     source: git

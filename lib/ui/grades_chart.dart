@@ -23,7 +23,6 @@ import 'package:dr/data.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:tuple/tuple.dart';
 
 class _Selection {
   final String text;
@@ -37,10 +36,10 @@ class GradesChart extends StatelessWidget {
   final bool isFullscreen;
   final List<
           charts
-              .Series<MapEntry<UtcDateTime, Tuple2<int, String>>, UtcDateTime>>
+              .Series<MapEntry<UtcDateTime, (int, String)>, UtcDateTime>>
       grades;
 
-  final ValueNotifier<Tuple2<UtcDateTime, BuiltList<_Selection>>?> selection =
+  final ValueNotifier<(UtcDateTime, BuiltList<_Selection>)?> selection =
       ValueNotifier(null);
 
   GradesChart({
@@ -52,17 +51,17 @@ class GradesChart extends StatelessWidget {
 
   static List<
           charts
-              .Series<MapEntry<UtcDateTime, Tuple2<int, String>>, UtcDateTime>>
+              .Series<MapEntry<UtcDateTime, (int, String)>, UtcDateTime>>
       convert(Map<SubjectGrades, SubjectTheme> data) {
     return data.entries.where((entry) => entry.value.thick != 0).map(
       (entry) {
         final s = entry.key;
         final strokeWidth = entry.value.thick;
         final color = Color(entry.value.color);
-        return charts.Series<MapEntry<UtcDateTime, Tuple2<int, String>>,
+        return charts.Series<MapEntry<UtcDateTime, (int, String)>,
             UtcDateTime>(
           domainFn: (grade, _) => grade.key,
-          measureFn: (grade, _) => grade.value.item1 / 100,
+          measureFn: (grade, _) => grade.value.$1 / 100,
           data: s.grades.entries.toList(),
           strokeWidthPxFn: (_, __) => strokeWidth,
           id: s.name,
@@ -186,8 +185,8 @@ class GradesChart extends StatelessWidget {
                   changedListener: (model) {
                     UtcDateTime? allDate;
                     final selections = model.selectedDatum.map((datum) {
-                      final grade = datum.datum.value.item1 as int;
-                      final type = datum.datum.value.item2 as String;
+                      final grade = datum.datum.value.$1 as int;
+                      final type = datum.datum.value.$2 as String;
                       final subject = datum.series.displayName;
                       final color = datum.series.colorFn!(0)!;
                       final date = datum.datum.key as UtcDateTime;
@@ -204,7 +203,7 @@ class GradesChart extends StatelessWidget {
                       );
                     }).toBuiltList();
                     if (allDate != null) {
-                      selection.value = Tuple2(
+                      selection.value = (
                         allDate!,
                         selections,
                       );
@@ -265,7 +264,7 @@ class GradesChart extends StatelessWidget {
             ),
           ),
           if (isFullscreen)
-            ValueListenableBuilder<Tuple2<UtcDateTime, BuiltList<_Selection>>?>(
+            ValueListenableBuilder<(UtcDateTime, BuiltList<_Selection>)?>(
                 valueListenable: selection,
                 builder: (context, data, _) {
                   return Align(
@@ -273,8 +272,8 @@ class GradesChart extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.all(32),
                       child: SelectionWidget(
-                        date: data?.item1,
-                        selections: data?.item2,
+                        date: data?.$1,
+                        selections: data?.$2,
                       ),
                     ),
                   );
