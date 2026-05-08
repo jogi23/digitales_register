@@ -41,6 +41,7 @@ import 'package:flutter_built_redux/flutter_built_redux.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:responsive_scaffold/responsive_scaffold.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:uni_links/uni_links.dart';
 
 GlobalKey<NavigatorState>? navigatorKey;
@@ -55,7 +56,20 @@ typedef SingleArgumentVoidCallback<T> = void Function(T arg);
 // TODO: This is actually a bad idea for testing. It should be removed again.
 final AppActions actions = AppActions();
 
+const _sentryDsn =
+    'https://73cb18b60e94a8e3849143d837584fa1@o4511353325486080.ingest.de.sentry.io/4511353328173136';
+
 Future<void> main() async {
+  await SentryFlutter.init(
+    (options) {
+      options.dsn = _sentryDsn;
+      options.tracesSampleRate = 0.2;
+    },
+    appRunner: _runApp,
+  );
+}
+
+Future<void> _runApp() async {
   final binding = WidgetsFlutterBinding.ensureInitialized();
   binding.deferFirstFrame();
   try {
@@ -78,7 +92,7 @@ Future<void> main() async {
     actions,
     middleware: middleware(),
   );
-  runApp(RegisterApp(store: store));
+  runApp(SentryWidget(child: RegisterApp(store: store)));
   WidgetsBinding.instance.addPostFrameCallback(
     (_) async {
       binding.allowFirstFrame();
@@ -122,10 +136,10 @@ class RegisterApp extends StatelessWidget {
               platform = TargetPlatform.iOS;
             }
             return ThemeData(
-                    colorSchemeSeed: Colors.deepOrange,
-                    brightness: brightness,
-                    platform: platform,
-                  );
+              colorSchemeSeed: Colors.deepOrange,
+              brightness: brightness,
+              platform: platform,
+            );
           },
           themedWidgetBuilder: (context, theme) => MaterialApp(
             localizationsDelegates: const [
