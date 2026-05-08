@@ -136,10 +136,10 @@ class RegisterApp extends StatelessWidget {
               platform = TargetPlatform.iOS;
             }
             return ThemeData(
-                    colorSchemeSeed: Colors.deepOrange,
-                    brightness: brightness,
-                    platform: platform,
-                  );
+              colorSchemeSeed: Colors.deepOrange,
+              brightness: brightness,
+              platform: platform,
+            );
           },
           themedWidgetBuilder: (context, theme) => MaterialApp(
             localizationsDelegates: const [
