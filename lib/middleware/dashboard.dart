@@ -72,8 +72,8 @@ Future<void> _addReminder(
       "text": action.payload.msg,
     },
   );
-  if (result == null && !wrapper.noInternet) {
-    showSnackBar("Beim Speichern ist ein Fehler aufgetreten");
+  if (result == null) {
+    _showErrorIfOnline("Beim Speichern ist ein Fehler aufgetreten");
     return;
   }
   await api.actions.dashboardActions.homeworkAdded(
@@ -97,8 +97,8 @@ Future<void> _deleteHomework(
   );
   if (result != null && result["success"] == true) {
     await next(action);
-  } else if (!wrapper.noInternet) {
-    showSnackBar("Beim Speichern ist ein Fehler aufgetreten");
+  } else {
+    _showErrorIfOnline("Beim Speichern ist ein Fehler aufgetreten");
   }
 }
 
@@ -129,9 +129,7 @@ Future<void> _toggleDone(
         ),
       ),
     );
-    if (!wrapper.noInternet) {
-      showSnackBar("Beim Speichern ist ein Fehler aufgetreten");
-    }
+    _showErrorIfOnline("Beim Speichern ist ein Fehler aufgetreten");
   }
 }
 
@@ -172,4 +170,10 @@ Future<void> _openAttachment(
   }
 
   await openFile(action.payload.uniqueName);
+}
+
+void _showErrorIfOnline(String message) {
+  if (!wrapper.noInternet) {
+    showSnackBar(message);
+  }
 }
