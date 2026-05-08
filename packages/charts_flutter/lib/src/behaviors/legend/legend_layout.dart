@@ -125,10 +125,11 @@ class TabularLegendLayout implements LegendLayout {
         ? legendEntries.length
         : min(legendEntries.length, desiredMaxRows);
 
-    final rows = List.generate(maxRows, (_) => const TableRow());
+    final rowChildren = List.generate(maxRows, (_) => <Widget>[]);
     for (var i = 0; i < legendEntries.length; i++) {
-      rows[i % maxRows].children.add(legendEntries[i]);
+      rowChildren[i % maxRows].add(legendEntries[i]);
     }
+    final rows = rowChildren.map((c) => TableRow(children: c)).toList();
 
     return _buildTableFromRows(rows);
   }

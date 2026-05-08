@@ -21,20 +21,18 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       navigatorKey: rootNavKey,
       title: 'Flutter Demo',
-      home: WillPopScope(
-        onWillPop: () {
+      home: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
           // We have to manually handle the back press.
           // If the nested navigator can handle it, let it handle it.
           // If not, check if the root navigator could.
-          // Otherwise don't handle it.
           if (nestedNavKey.currentState!.canPop()) {
             nestedNavKey.currentState!.pop();
-            return Future.value(false);
           } else if (rootNavKey.currentState!.canPop()) {
             rootNavKey.currentState!.pop();
-            return Future.value(false);
           }
-          return Future.value(true);
         },
         child: ResponsiveScaffold<int>(
           navKey: nestedNavKey,
