@@ -41,6 +41,7 @@ import 'package:flutter_built_redux/flutter_built_redux.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:responsive_scaffold/responsive_scaffold.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:uni_links/uni_links.dart';
 
 GlobalKey<NavigatorState>? navigatorKey;
@@ -55,7 +56,20 @@ typedef SingleArgumentVoidCallback<T> = void Function(T arg);
 // TODO: This is actually a bad idea for testing. It should be removed again.
 final AppActions actions = AppActions();
 
+// TODO: replace with your Sentry DSN from https://sentry.io
+const _sentryDsn = String.fromEnvironment('SENTRY_DSN');
+
 Future<void> main() async {
+  await SentryFlutter.init(
+    (options) {
+      options.dsn = _sentryDsn.isEmpty ? null : _sentryDsn;
+      options.tracesSampleRate = 0.2;
+    },
+    appRunner: _runApp,
+  );
+}
+
+Future<void> _runApp() async {
   final binding = WidgetsFlutterBinding.ensureInitialized();
   binding.deferFirstFrame();
   try {
@@ -78,7 +92,7 @@ Future<void> main() async {
     actions,
     middleware: middleware(),
   );
-  runApp(RegisterApp(store: store));
+  runApp(SentryWidget(child: RegisterApp(store: store)));
   WidgetsBinding.instance.addPostFrameCallback(
     (_) async {
       binding.allowFirstFrame();

@@ -57,6 +57,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:mutex/mutex.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 part 'absences.dart';
@@ -120,6 +121,7 @@ NextActionHandler _errorMiddleware(
           Future<void> handleError(dynamic e, StackTrace? trace) async {
             log("Error caught by error middleware",
                 error: e, stackTrace: trace);
+            unawaited(Sentry.captureException(e, stackTrace: trace));
             var stackTrace = trace;
             try {
               stackTrace ??= e.stackTrace as StackTrace?;
@@ -145,16 +147,10 @@ NextActionHandler _errorMiddleware(
                     body: ListView(
                       padding: const EdgeInsets.all(16),
                       children: <Widget>[
-                        Center(
-                          child: ElevatedButton(
-                            onPressed: () async {
-                              await launchUrl(
-                                Uri.parse(
-                                  "https://docs.google.com/forms/d/e/1FAIpQLScTmSAZzj0bjwX_8IHVx9dVTTVrncJJpZo_D20dF7mrnU_zdQ/viewform?usp=sf_link&entry.1875208362=${Uri.encodeQueryComponent(error)}",
-                                ),
-                              );
-                            },
-                            child: const Text("Entwickler benachrichtigen"),
+                        const Center(
+                          child: Text(
+                            "Der Fehler wurde automatisch gemeldet.",
+                            style: TextStyle(fontStyle: FontStyle.italic),
                           ),
                         ),
                         Padding(
