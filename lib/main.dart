@@ -56,13 +56,13 @@ typedef SingleArgumentVoidCallback<T> = void Function(T arg);
 // TODO: This is actually a bad idea for testing. It should be removed again.
 final AppActions actions = AppActions();
 
-// TODO: replace with your Sentry DSN from https://sentry.io
-const _sentryDsn = String.fromEnvironment('SENTRY_DSN');
+const _sentryDsn =
+    'https://73cb18b60e94a8e3849143d837584fa1@o4511353325486080.ingest.de.sentry.io/4511353328173136';
 
 Future<void> main() async {
   await SentryFlutter.init(
     (options) {
-      options.dsn = _sentryDsn.isEmpty ? null : _sentryDsn;
+      options.dsn = _sentryDsn;
       options.tracesSampleRate = 0.2;
     },
     appRunner: _runApp,
