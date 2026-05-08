@@ -5,8 +5,8 @@ import 'package:dr/app_state.dart';
 import 'package:dr/data.dart';
 import 'package:dr/middleware/middleware.dart';
 import 'package:dr/reducer/reducer.dart';
-import 'package:dr/util.dart';
 import 'package:dr/utc_date_time.dart';
+import 'package:dr/util.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const _hw1 = {
@@ -61,7 +61,10 @@ void main() {
 
       await store.actions.dashboardActions.loaded(_loaded(
         days: [
-          {"date": "2021-01-10", "items": [_hw1]}
+          {
+            "date": "2021-01-10",
+            "items": [_hw1]
+          }
         ],
       ));
 
@@ -100,14 +103,15 @@ void main() {
       // response doesn't include Jan 5 — past day should be deleted
       await store.actions.dashboardActions.loaded(_loaded(
         days: [
-          {"date": "2021-01-10", "items": [_hw1]},
+          {
+            "date": "2021-01-10",
+            "items": [_hw1]
+          },
         ],
-        future: false,
       ));
 
-      final dates = store.state.dashboardState.allDays!
-          .map((d) => d.date.day)
-          .toList();
+      final dates =
+          store.state.dashboardState.allDays!.map((d) => d.date.day).toList();
       expect(dates, isNot(contains(5)));
       expect(dates, contains(10));
     });
@@ -140,14 +144,16 @@ void main() {
       // future=true → past day kept even if not in response
       await store.actions.dashboardActions.loaded(_loaded(
         days: [
-          {"date": "2021-01-10", "items": [_hw1]},
+          {
+            "date": "2021-01-10",
+            "items": [_hw1]
+          },
         ],
         future: true,
       ));
 
-      final dates = store.state.dashboardState.allDays!
-          .map((d) => d.date.day)
-          .toList();
+      final dates =
+          store.state.dashboardState.allDays!.map((d) => d.date.day).toList();
       expect(dates, contains(5));
     });
 
@@ -190,7 +196,6 @@ void main() {
             "items": [_hw1, _hw1],
           }
         ],
-        deduplicateEntries: false,
       ));
 
       expect(store.state.dashboardState.allDays!.first.homework.length, 2);
@@ -207,8 +212,14 @@ void main() {
 
       await store.actions.dashboardActions.loaded(_loaded(
         days: [
-          {"date": "2021-01-12", "items": [_hw2]},
-          {"date": "2021-01-10", "items": [_hw1]},
+          {
+            "date": "2021-01-12",
+            "items": [_hw2]
+          },
+          {
+            "date": "2021-01-10",
+            "items": [_hw1]
+          },
         ],
       ));
 

@@ -115,7 +115,7 @@ void main() {
     // startSession + ensureLoggedIn auto-logout
     // -----------------------------------------------------------------------
     group('startSession + ensureLoggedIn', () {
-      _MockAuthService _makeAuth() {
+      _MockAuthService makeAuth() {
         final auth = _MockAuthService();
         when(() => auth.demoMode).thenReturn(false);
         when(() => auth.loggedIn).thenAnswer((_) async => false);
@@ -124,7 +124,7 @@ void main() {
         return auth;
       }
 
-      Config _expiredConfig() => Config(
+      Config expiredConfig() => Config(
             (b) => b
               ..autoLogoutSeconds = -100
               ..userId = 1
@@ -134,7 +134,7 @@ void main() {
               ..isStudentOrParent = true,
           );
 
-      Config _validConfig() => Config(
+      Config validConfig() => Config(
             (b) => b
               ..autoLogoutSeconds = 3600
               ..userId = 1
@@ -146,9 +146,9 @@ void main() {
 
       test('ensureLoggedIn calls forceLoggedOut when session has expired',
           () async {
-        final auth = _makeAuth();
+        final auth = makeAuth();
         final sm = SessionManager(ApiClient(), auth);
-        sm.startSession(_expiredConfig());
+        sm.startSession(expiredConfig());
         await sm.ensureLoggedIn();
         verify(() => auth.forceLoggedOut()).called(greaterThanOrEqualTo(1));
       });
@@ -156,9 +156,9 @@ void main() {
       test(
           'ensureLoggedIn does NOT call forceLoggedOut when session is still valid',
           () async {
-        final auth = _makeAuth();
+        final auth = makeAuth();
         final sm = SessionManager(ApiClient(), auth);
-        sm.startSession(_validConfig());
+        sm.startSession(validConfig());
         await sm.ensureLoggedIn();
         verifyNever(() => auth.forceLoggedOut());
       });
