@@ -116,9 +116,7 @@ Future<void> _toggleDone(
     },
   );
   if (result != null && result["success"] == true) {
-    // duplicate - protection from multiple, failing and not failing requests
-    // TODO: Does this even work??
-    await next(action);
+    // optimistic update already applied before the API call — nothing to do
   } else {
     await next(
       Action<ToggleDonePayload>(
