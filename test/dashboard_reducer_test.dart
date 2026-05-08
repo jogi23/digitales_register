@@ -65,9 +65,9 @@ void main() {
         ],
       ));
 
-      expect(store.state.dashboardState.allDays.length, 1);
+      expect(store.state.dashboardState.allDays!.length, 1);
       expect(
-        store.state.dashboardState.allDays.first.homework.length,
+        store.state.dashboardState.allDays!.first.homework.length,
         1,
       );
     });
@@ -105,7 +105,7 @@ void main() {
         future: false,
       ));
 
-      final dates = store.state.dashboardState.allDays
+      final dates = store.state.dashboardState.allDays!
           .map((d) => d.date.day)
           .toList();
       expect(dates, isNot(contains(5)));
@@ -145,7 +145,7 @@ void main() {
         future: true,
       ));
 
-      final dates = store.state.dashboardState.allDays
+      final dates = store.state.dashboardState.allDays!
           .map((d) => d.date.day)
           .toList();
       expect(dates, contains(5));
@@ -171,7 +171,7 @@ void main() {
         deduplicateEntries: true,
       ));
 
-      expect(store.state.dashboardState.allDays.first.homework.length, 1);
+      expect(store.state.dashboardState.allDays!.first.homework.length, 1);
     });
 
     test('deduplication off: duplicate items are kept', () async {
@@ -193,7 +193,7 @@ void main() {
         deduplicateEntries: false,
       ));
 
-      expect(store.state.dashboardState.allDays.first.homework.length, 2);
+      expect(store.state.dashboardState.allDays!.first.homework.length, 2);
     });
 
     test('multiple days are sorted by date', () async {
@@ -212,7 +212,7 @@ void main() {
         ],
       ));
 
-      final days = store.state.dashboardState.allDays;
+      final days = store.state.dashboardState.allDays!;
       expect(days.length, 2);
       expect(days[0].date.day, 10);
       expect(days[1].date.day, 12);
