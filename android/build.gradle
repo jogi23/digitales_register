@@ -1,20 +1,21 @@
-buildscript {
-    ext.kotlin_version = '1.7.10'
-    repositories {
-        google()
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath 'com.android.tools.build:gradle:7.2.0'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-    }
-}
-
 allprojects {
     repositories {
         google()
         mavenCentral()
+    }
+    // Workaround for old Flutter plugins that have no namespace in build.gradle (AGP 8.x requirement)
+    afterEvaluate {
+        if (it.hasProperty('android') && !it.android.hasProperty('namespace')) {
+            def manifestFile = it.android.sourceSets.main.manifest.srcFile
+            if (manifestFile != null && manifestFile.exists()) {
+                def xmlSlurper = new groovy.xml.XmlSlurper()
+                def manifest = xmlSlurper.parse(manifestFile)
+                def packageAttr = manifest['@package']
+                if (packageAttr && !packageAttr.toString().isEmpty()) {
+                    it.android.namespace = packageAttr.toString()
+                }
+            }
+        }
     }
 }
 
