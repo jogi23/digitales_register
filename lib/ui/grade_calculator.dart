@@ -24,7 +24,6 @@ import 'package:dr/ui/dialog.dart';
 import 'package:dr/util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_built_redux/flutter_built_redux.dart';
-import 'package:tuple/tuple.dart';
 
 bool isGradeInRange(int grade) {
   return grade >= 0 && grade <= 1000;
@@ -144,7 +143,7 @@ class _Grade {
 class _GradeCalculatorState extends State<GradeCalculator> {
   final List<_Grade> grades = [];
   Future<void> addGrade() async {
-    final Tuple2<int, int>? grade = await showDialog(
+    final (int, int)? grade = await showDialog(
       context: context,
       builder: (context) {
         int? grade;
@@ -188,7 +187,7 @@ class _GradeCalculatorState extends State<GradeCalculator> {
               ElevatedButton(
                 onPressed: grade != null && weight != null
                     ? () {
-                        Navigator.pop(context, Tuple2(grade!, weight!));
+                        Navigator.pop(context, (grade!, weight!));
                       }
                     : null,
                 child: const Text(
@@ -202,7 +201,7 @@ class _GradeCalculatorState extends State<GradeCalculator> {
     );
     if (grade != null) {
       setState(() {
-        grades.add(_Grade(grade: grade.item1, weightPercentage: grade.item2));
+        grades.add(_Grade(grade: grade.$1, weightPercentage: grade.$2));
       });
     }
   }

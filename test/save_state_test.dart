@@ -27,112 +27,11 @@ import 'package:dr/middleware/middleware.dart';
 import 'package:dr/reducer/reducer.dart';
 import 'package:dr/serializers.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'test_utils.dart';
 import 'package:quiver/testing/src/async/fake_async.dart';
 
 const serverUrl = "null/v2/api/auth/login";
-
-/// Implememts [FlutterSecureStorage] in memory.
-class FakeSecureStorage implements FlutterSecureStorage {
-  FakeSecureStorage({Map<String, String>? storage}) : storage = storage ?? {};
-
-  final Map<String, String> storage;
-  @override
-  Future<bool> containsKey({
-    String? key,
-    IOSOptions? iOptions,
-    AndroidOptions? aOptions,
-    LinuxOptions? lOptions,
-    MacOsOptions? mOptions,
-    WindowsOptions? wOptions,
-    WebOptions? webOptions,
-  }) async {
-    return storage.containsKey(key);
-  }
-
-  @override
-  Future<void> delete({
-    String? key,
-    IOSOptions? iOptions,
-    AndroidOptions? aOptions,
-    LinuxOptions? lOptions,
-    MacOsOptions? mOptions,
-    WindowsOptions? wOptions,
-    WebOptions? webOptions,
-  }) async {
-    storage.remove(key);
-  }
-
-  @override
-  Future<void> deleteAll({
-    IOSOptions? iOptions,
-    AndroidOptions? aOptions,
-    LinuxOptions? lOptions,
-    MacOsOptions? mOptions,
-    WindowsOptions? wOptions,
-    WebOptions? webOptions,
-  }) async {
-    storage.clear();
-  }
-
-  @override
-  Future<String?> read({
-    String? key,
-    IOSOptions? iOptions,
-    AndroidOptions? aOptions,
-    LinuxOptions? lOptions,
-    MacOsOptions? mOptions,
-    WindowsOptions? wOptions,
-    WebOptions? webOptions,
-  }) async {
-    return storage[key];
-  }
-
-  @override
-  Future<Map<String, String>> readAll({
-    IOSOptions? iOptions,
-    AndroidOptions? aOptions,
-    LinuxOptions? lOptions,
-    MacOsOptions? mOptions,
-    WindowsOptions? wOptions,
-    WebOptions? webOptions,
-  }) async {
-    return storage;
-  }
-
-  @override
-  Future<void> write({
-    String? key,
-    String? value,
-    IOSOptions? iOptions,
-    AndroidOptions? aOptions,
-    LinuxOptions? lOptions,
-    MacOsOptions? mOptions,
-    WindowsOptions? wOptions,
-    WebOptions? webOptions,
-  }) async {
-    storage[key!] = value!;
-  }
-
-  @override
-  AndroidOptions get aOptions => throw UnimplementedError();
-
-  @override
-  IOSOptions get iOptions => throw UnimplementedError();
-
-  @override
-  LinuxOptions get lOptions => throw UnimplementedError();
-
-  @override
-  MacOsOptions get mOptions => throw UnimplementedError();
-
-  @override
-  WindowsOptions get wOptions => throw UnimplementedError();
-
-  @override
-  WebOptions get webOptions => throw UnimplementedError();
-}
 
 class StorageHelper {
   Future<bool> exists(String user) async {

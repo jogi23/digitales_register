@@ -49,12 +49,11 @@ dependencies:
   hive: ^2.0.0
   http: ^1.2.0
   intl: ^0.20.2
-  mocktail: ^1.0.4
   mutex: ^3.0.0
   open_file:
     git:
       url: https://github.com/miDeb/open_file.git
-      ref: master
+      ref: 5028bb18379df881d30b42c61b0e6e686daba60e
   package_info_plus: ^8.0.3
   path_provider: ^2.1.5
   quill_delta:
@@ -67,11 +66,10 @@ dependencies:
   scrollable_positioned_list: ^0.3.1
   sentry_flutter: ^8.14.2
   shared_preferences: ^2.0.15
-  tuple: ^2.0.0
   uni_links:
     git:
       url: https://github.com/miDeb/uni_links.git
-      ref: modernized
+      ref: 7d9c079b9b07e2eac5f1d25a08b40e7f0c5c6cf0
       path: uni_links/
   url_launcher: ^6.3.1
 
@@ -89,6 +87,7 @@ dev_dependencies:
   golden_toolkit: ^0.15.0
   lint: ^2.8.0
   matcher: ^0.12.16
+  mocktail: ^1.0.4
   msix: ^3.16.7
   quiver: ^3.2.1
   sentry_dart_plugin: ^3.3.0

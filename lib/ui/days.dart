@@ -37,7 +37,6 @@ import 'package:flutter/rendering.dart';
 import 'package:intl/intl.dart';
 import 'package:responsive_scaffold/responsive_scaffold.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
-import 'package:tuple/tuple.dart';
 
 typedef AddReminderCallback = void Function(Day day, String reminder);
 typedef RemoveReminderCallback = void Function(Homework hw, Day day);
@@ -689,7 +688,7 @@ class ItemWidget extends StatelessWidget {
     required this.colorTestsInRed,
   });
 
-  Future<Tuple2<bool, bool>> _showConfirmDelete(BuildContext context) async {
+  Future<(bool, bool)> _showConfirmDelete(BuildContext context) async {
     var ask = true;
     final delete = await showDialog<bool>(
       context: context,
@@ -720,7 +719,7 @@ class ItemWidget extends StatelessWidget {
         );
       },
     );
-    return Tuple2(delete ?? false, ask);
+    return (delete ?? false, ask);
   }
 
   void _showHistory(BuildContext context) {
@@ -758,19 +757,19 @@ class ItemWidget extends StatelessWidget {
     );
   }
 
-  Tuple2<Color, double> _getBorderConfig() {
+  (Color, double) _getBorderConfig() {
     if (item.warning && colorTestsInRed) {
-      return const Tuple2(Colors.red, 1.5);
+      return (Colors.red, 1.5);
     }
     if (colorBorder &&
         item.label != null &&
         subjectThemes.containsKey(item.label!)) {
-      return Tuple2(Color(subjectThemes[item.label]!.color), 1.5);
+      return (Color(subjectThemes[item.label]!.color), 1.5);
     }
     if (item.type == HomeworkType.grade || item.checked) {
-      return const Tuple2(Colors.green, 0);
+      return (Colors.green, 0);
     }
-    return const Tuple2(Colors.grey, 0);
+    return (Colors.grey, 0);
   }
 
   @override
@@ -784,8 +783,8 @@ class ItemWidget extends StatelessWidget {
         elevation: 0,
         shape: RoundedRectangleBorder(
           side: BorderSide(
-            color: _getBorderConfig().item1,
-            width: _getBorderConfig().item2,
+            color: _getBorderConfig().$1,
+            width: _getBorderConfig().$2,
           ),
           borderRadius: BorderRadius.circular(16),
         ),
@@ -859,9 +858,9 @@ class ItemWidget extends StatelessWidget {
                                                       await _showConfirmDelete(
                                                           context);
                                                   final shouldDelete =
-                                                      confirmationResult.item1;
+                                                      confirmationResult.$1;
                                                   final ask =
-                                                      confirmationResult.item2;
+                                                      confirmationResult.$2;
                                                   if (shouldDelete == true) {
                                                     if (!ask) {
                                                       setDoNotAskWhenDelete!();

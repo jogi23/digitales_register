@@ -16,6 +16,7 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:dr/api_client.dart';
+import 'package:dr/app_state.dart';
 import 'package:dr/auth_service.dart';
 import 'package:dr/session_manager.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -107,6 +108,59 @@ void main() {
         final result = await sm
             .send('api/student/dashboard/save_reminder', args: {'title': 'x'});
         expect(result, isNotNull);
+      });
+    });
+
+    // -----------------------------------------------------------------------
+    // startSession + ensureLoggedIn auto-logout
+    // -----------------------------------------------------------------------
+    group('startSession + ensureLoggedIn', () {
+      _MockAuthService makeAuth() {
+        final auth = _MockAuthService();
+        when(() => auth.demoMode).thenReturn(false);
+        when(() => auth.loggedIn).thenAnswer((_) async => false);
+        when(() => auth.user).thenReturn(null);
+        when(() => auth.pass).thenReturn(null);
+        return auth;
+      }
+
+      Config expiredConfig() => Config(
+            (b) => b
+              ..autoLogoutSeconds = -100
+              ..userId = 1
+              ..fullName = 'Test'
+              ..imgSource = ''
+              ..currentSemesterMaybe = 1
+              ..isStudentOrParent = true,
+          );
+
+      Config validConfig() => Config(
+            (b) => b
+              ..autoLogoutSeconds = 3600
+              ..userId = 1
+              ..fullName = 'Test'
+              ..imgSource = ''
+              ..currentSemesterMaybe = 1
+              ..isStudentOrParent = true,
+          );
+
+      test('ensureLoggedIn calls forceLoggedOut when session has expired',
+          () async {
+        final auth = makeAuth();
+        final sm = SessionManager(ApiClient(), auth);
+        sm.startSession(expiredConfig());
+        await sm.ensureLoggedIn();
+        verify(() => auth.forceLoggedOut()).called(greaterThanOrEqualTo(1));
+      });
+
+      test(
+          'ensureLoggedIn does NOT call forceLoggedOut when session is still valid',
+          () async {
+        final auth = makeAuth();
+        final sm = SessionManager(ApiClient(), auth);
+        sm.startSession(validConfig());
+        await sm.ensureLoggedIn();
+        verifyNever(() => auth.forceLoggedOut());
       });
     });
   });

@@ -23,7 +23,6 @@ import 'package:dr/util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fuzzy/fuzzy.dart';
-import 'package:tuple/tuple.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 typedef LoginCallback = void Function(String user, String pass, String url);
@@ -73,7 +72,7 @@ class _LoginPageContentState extends State<LoginPageContent> {
   final _schoolFocusNode = FocusNode();
   late bool safeMode;
   bool newPasswordsMatch = true;
-  Tuple2<String, String?>? selectedPresetServer;
+  (String, String?)? selectedPresetServer;
   @override
   void initState() {
     safeMode = widget.vm.safeMode;
@@ -87,7 +86,7 @@ class _LoginPageContentState extends State<LoginPageContent> {
             Uri.parse(entry.value).host == Uri.parse(widget.vm.url!).host,
       );
       if (school != null) {
-        selectedPresetServer = Tuple2(school.key, school.value);
+        selectedPresetServer = (school.key, school.value);
         _schoolController.text = school.key;
       } else {
         _schoolController.text = "Andere Schule";
@@ -101,7 +100,7 @@ class _LoginPageContentState extends State<LoginPageContent> {
     super.initState();
   }
 
-  String get url => selectedPresetServer?.item2 ?? _urlController.text;
+  String get url => selectedPresetServer?.$2 ?? _urlController.text;
 
   @override
   Widget build(BuildContext context) {
@@ -159,9 +158,9 @@ class _LoginPageContentState extends State<LoginPageContent> {
                                     selectedPresetServer = null;
                                   } else {
                                     selectedPresetServer =
-                                        Tuple2(value, widget.vm.servers[value]);
+                                        (value, widget.vm.servers[value]);
                                     _urlController.text =
-                                        selectedPresetServer!.item2!;
+                                        selectedPresetServer!.$2!;
                                   }
                                 });
                               },
@@ -208,7 +207,7 @@ class _LoginPageContentState extends State<LoginPageContent> {
                           onSelected: (option) {
                             _schoolFocusNode.unfocus();
                             setState(() {
-                              selectedPresetServer = Tuple2(
+                              selectedPresetServer = (
                                 option,
                                 widget.vm.servers[option],
                               );
@@ -221,7 +220,7 @@ class _LoginPageContentState extends State<LoginPageContent> {
                                 );
                               } else {
                                 _urlController.text =
-                                    selectedPresetServer!.item2!;
+                                    selectedPresetServer!.$2!;
                               }
                             });
                           },

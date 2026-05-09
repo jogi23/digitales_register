@@ -20,20 +20,19 @@ import 'package:dr/app_state.dart';
 import 'package:dr/ui/absences_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_built_redux/flutter_built_redux.dart';
-import 'package:tuple/tuple.dart';
 
 class AbsencesPageContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return StoreConnection<AppState, AppActions, Tuple2<AbsencesState, bool>>(
+    return StoreConnection<AppState, AppActions, (AbsencesState, bool)>(
       builder: (context, vm, actions) {
         return AbsencesPage(
-          state: vm.item1,
-          noInternet: vm.item2,
+          state: vm.$1,
+          noInternet: vm.$2,
         );
       },
       connect: (state) {
-        return Tuple2(state.absencesState, state.noInternet);
+        return (state.absencesState, state.noInternet);
       },
     );
   }

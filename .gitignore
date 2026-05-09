@@ -51,3 +51,4 @@ app.*.map.json
 
 # Private requests & answers
 **/lib/requests/
+.sentry-native/*.lock

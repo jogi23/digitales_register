@@ -22,25 +22,24 @@ import 'package:dr/ui/notifications_page.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:flutter/material.dart' hide Notification;
 import 'package:flutter_built_redux/flutter_built_redux.dart';
-import 'package:tuple/tuple.dart';
 
 class NotificationPageContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StoreConnection<AppState, AppActions,
-        Tuple3<List<Notification>, UtcDateTime?, bool>>(
+        (List<Notification>, UtcDateTime?, bool)>(
       builder: (context, vm, actions) {
         return NotificationPage(
-          notifications: vm.item1,
-          noInternet: vm.item3,
+          notifications: vm.$1,
+          noInternet: vm.$3,
           deleteNotification: actions.notificationsActions.delete.call,
           deleteAllNotifications: actions.notificationsActions.deleteAll.call,
           goToMessage: actions.routingActions.showMessage.call,
-          lastFetched: vm.item2,
+          lastFetched: vm.$2,
         );
       },
       connect: (state) {
-        return Tuple3(
+        return (
           state.notificationState.notifications!.toList(),
           state.notificationState.lastFetched,
           state.noInternet,

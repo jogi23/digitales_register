@@ -50,8 +50,7 @@ Future<void> _savePass(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
         "user": wrapper.user,
         "pass": wrapper.pass,
         "url": wrapper.url,
-        "otherAccounts": json.decode(
-            await secureStorage.read(key: "login") ?? "{}")["otherAccounts"],
+        "otherAccounts": await _readStoredOtherAccounts(),
       },
     ),
   );
@@ -67,9 +66,13 @@ Future<void> _deletePass(
     value: json.encode(
       <String, Object?>{
         "url": wrapper.url,
-        "otherAccounts": json.decode(
-            await secureStorage.read(key: "login") ?? "{}")["otherAccounts"],
+        "otherAccounts": await _readStoredOtherAccounts(),
       },
     ),
   );
+}
+
+Future<dynamic> _readStoredOtherAccounts() async {
+  return json
+      .decode(await secureStorage.read(key: "login") ?? "{}")["otherAccounts"];
 }
