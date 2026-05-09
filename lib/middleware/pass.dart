@@ -73,6 +73,6 @@ Future<void> _deletePass(
 }
 
 Future<dynamic> _readStoredOtherAccounts() async {
-  return json.decode(
-      await secureStorage.read(key: "login") ?? "{}")["otherAccounts"];
+  return json
+      .decode(await secureStorage.read(key: "login") ?? "{}")["otherAccounts"];
 }

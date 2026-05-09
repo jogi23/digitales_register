@@ -160,7 +160,7 @@ class _LoginPageContentState extends State<LoginPageContent> {
                                     selectedPresetServer =
                                         (value, widget.vm.servers[value]);
                                     _urlController.text =
-                                        selectedPresetServer!.$2!;;
+                                        selectedPresetServer!.$2!;
                                   }
                                 });
                               },
