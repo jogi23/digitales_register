@@ -291,6 +291,7 @@ class HourWidget extends StatelessWidget {
             child: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     subjectNicks[hour.subject.toLowerCase()] ?? hour.subject,
