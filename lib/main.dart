@@ -136,6 +136,7 @@ class RegisterApp extends StatelessWidget {
               platform = TargetPlatform.iOS;
             }
             return ThemeData(
+              useMaterial3: true,
               colorSchemeSeed: Colors.deepOrange,
               brightness: brightness,
               platform: platform,
