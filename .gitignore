@@ -52,3 +52,12 @@ app.*.map.json
 # Private requests & answers
 **/lib/requests/
 .sentry-native/*.lock
+
+# Local package pubspec.locks (not published)
+packages/built_redux/pubspec.lock
+packages/charts_flutter/build/
+packages/deleteable_tile/pubspec.lock
+packages/flutter_built_redux/pubspec.lock
+
+# Flutter ephemeral generated files
+packages/responsive_scaffold/example/ios/Flutter/ephemeral/
