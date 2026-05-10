@@ -43,8 +43,9 @@ class AbsenceGroupWidget extends StatelessWidget {
       shape: RoundedRectangleBorder(
         side: vm.justified == AbsenceJustified.notYetJustified ||
                 vm.justified == AbsenceJustified.notJustified
-            ? const BorderSide(color: Colors.red)
-            : const BorderSide(color: Colors.green, width: 0),
+            ? BorderSide(color: Theme.of(context).colorScheme.error)
+            : BorderSide(
+                color: Theme.of(context).colorScheme.primary, width: 0),
         borderRadius: BorderRadius.circular(16),
       ),
       color: Colors.transparent,
@@ -133,8 +134,9 @@ class FutureAbsenceWidget extends StatelessWidget {
       shape: RoundedRectangleBorder(
         side: absence.justified == AbsenceJustified.notYetJustified ||
                 absence.justified == AbsenceJustified.notJustified
-            ? const BorderSide(color: Colors.red)
-            : const BorderSide(color: Colors.green, width: 0),
+            ? BorderSide(color: Theme.of(context).colorScheme.error)
+            : BorderSide(
+                color: Theme.of(context).colorScheme.primary, width: 0),
         borderRadius: BorderRadius.circular(16),
       ),
       color: Colors.transparent,

@@ -329,7 +329,7 @@ class _DaysWidgetState extends State<DaysWidget> {
               }
             },
             child: FloatingActionButton(
-              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
               heroTag: null,
               onPressed: () {
                 controller.animateTo(
@@ -339,27 +339,29 @@ class _DaysWidgetState extends State<DaysWidget> {
                 );
               },
               mini: true,
+              tooltip: 'Zum aktuellen Tag scrollen',
               child: Icon(
                 Icons.arrow_drop_up,
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? Colors.white
-                    : Colors.black,
+                color: Theme.of(context).colorScheme.onPrimaryContainer,
               ),
             ),
           ),
           if (_targets.isNotEmpty || _focused.isNotEmpty)
             FloatingActionButton(
-              backgroundColor: Colors.red,
+              backgroundColor: Theme.of(context).colorScheme.error,
+              foregroundColor: Theme.of(context).colorScheme.onError,
               heroTag: null,
               onPressed: () {
                 widget.markAllAsSeenCallback();
               },
               mini: true,
+              tooltip: 'Alle als gesehen markieren',
               child: const Icon(Icons.close),
             ),
           if (_targets.isNotEmpty && _afterFirstFrame)
             FloatingActionButton.extended(
-              backgroundColor: Colors.red,
+              backgroundColor: Theme.of(context).colorScheme.error,
+              foregroundColor: Theme.of(context).colorScheme.onError,
               icon: const Icon(Icons.arrow_drop_down),
               label: const Text("Neue Einträge"),
               onPressed: () async {
@@ -846,35 +848,35 @@ class ItemWidget extends StatelessWidget {
                             subtitle: item.subtitle.isNullOrEmpty
                                 ? null
                                 : SelectableText(item.subtitle),
-                            leading:
-                                !isHistory && !isDeletedView && item.deleteable
-                                    ? IconButton(
-                                        icon: const Icon(Icons.close),
-                                        onPressed: noInternet
-                                            ? null
-                                            : () async {
-                                                if (askWhenDelete) {
-                                                  final confirmationResult =
-                                                      await _showConfirmDelete(
-                                                          context);
-                                                  final shouldDelete =
-                                                      confirmationResult.$1;
-                                                  final ask =
-                                                      confirmationResult.$2;
-                                                  if (shouldDelete == true) {
-                                                    if (!ask) {
-                                                      setDoNotAskWhenDelete!();
-                                                    }
-                                                    await delete();
-                                                    removeThis!();
-                                                  }
-                                                } else {
-                                                  await delete();
-                                                  removeThis!();
+                            leading: !isHistory &&
+                                    !isDeletedView &&
+                                    item.deleteable
+                                ? IconButton(
+                                    icon: const Icon(Icons.close),
+                                    onPressed: noInternet
+                                        ? null
+                                        : () async {
+                                            if (askWhenDelete) {
+                                              final confirmationResult =
+                                                  await _showConfirmDelete(
+                                                      context);
+                                              final shouldDelete =
+                                                  confirmationResult.$1;
+                                              final ask = confirmationResult.$2;
+                                              if (shouldDelete == true) {
+                                                if (!ask) {
+                                                  setDoNotAskWhenDelete!();
                                                 }
-                                              },
-                                        padding: EdgeInsets.zero)
-                                    : null,
+                                                await delete();
+                                                removeThis!();
+                                              }
+                                            } else {
+                                              await delete();
+                                              removeThis!();
+                                            }
+                                          },
+                                    padding: EdgeInsets.zero)
+                                : null,
                           ),
                         ],
                       ),

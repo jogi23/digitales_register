@@ -30,14 +30,15 @@ class NoInternet extends StatelessWidget {
             style: Theme.of(context)
                 .textTheme
                 .titleLarge!
-                .copyWith(color: Colors.red),
+                .copyWith(color: Theme.of(context).colorScheme.error),
           ),
           const SizedBox(
             height: 20,
           ),
-          const Text(
+          Text(
             ":(",
-            style: TextStyle(fontSize: 50, color: Colors.redAccent),
+            style: TextStyle(
+                fontSize: 50, color: Theme.of(context).colorScheme.error),
           ),
         ],
       ),

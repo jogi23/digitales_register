@@ -262,15 +262,20 @@ class _SubmissionWidget extends StatelessWidget {
               AnimatedLinearProgressIndicator(show: submission.downloading),
               SizedBox(
                 width: double.infinity,
-                child: TextButton(
-                  onPressed: !submission.fileAvailable && noInternet
-                      ? null
-                      : () {
-                          onOpenFile(submission);
-                        },
-                  child: const Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text("Öffnen"),
+                child: Semantics(
+                  label: 'Öffne ${submission.originalName}',
+                  button: true,
+                  excludeSemantics: true,
+                  child: TextButton(
+                    onPressed: !submission.fileAvailable && noInternet
+                        ? null
+                        : () {
+                            onOpenFile(submission);
+                          },
+                    child: const Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text("Öffnen"),
+                    ),
                   ),
                 ),
               ),

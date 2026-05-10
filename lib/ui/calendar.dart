@@ -256,7 +256,14 @@ class _CalendarState extends State<Calendar> with TickerProviderStateMixin {
                                       )
                                     : widget.vm.noInternet
                                         ? const Text("Wähle ein Datum")
-                                        : const CircularProgressIndicator(),
+                                        : Semantics(
+                                            label: 'Lade Termine',
+                                            child: const SizedBox(
+                                              width: 20,
+                                              height: 20,
+                                              child: CircularProgressIndicator(strokeWidth: 2),
+                                            ),
+                                          ),
                               ),
                             ),
                             Expanded(

@@ -104,13 +104,11 @@ class _LoginPageContentState extends State<LoginPageContent> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        if (widget.vm.changePass && !widget.vm.mustChangePass) {
-          return true;
-        }
+    return PopScope(
+      canPop: widget.vm.changePass && !widget.vm.mustChangePass,
+      onPopInvokedWithResult: (didPop, _) async {
+        if (didPop) return;
         await SystemNavigator.pop();
-        return false;
       },
       child: Scaffold(
         appBar: AppBar(
@@ -219,8 +217,7 @@ class _LoginPageContentState extends State<LoginPageContent> {
                                   const TextPosition(offset: 0),
                                 );
                               } else {
-                                _urlController.text =
-                                    selectedPresetServer!.$2!;
+                                _urlController.text = selectedPresetServer!.$2!;
                               }
                             });
                           },
@@ -450,7 +447,9 @@ class _LoginPageContentState extends State<LoginPageContent> {
                               style: Theme.of(context)
                                   .textTheme
                                   .bodyMedium!
-                                  .copyWith(color: Colors.red),
+                                  .copyWith(
+                                      color:
+                                          Theme.of(context).colorScheme.error),
                             ),
                           )
                         : const SizedBox(),

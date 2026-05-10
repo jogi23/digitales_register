@@ -32,16 +32,15 @@ class HomePageContent extends StatelessWidget {
   });
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () {
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
         if (nestedNavKey.currentState!.canPop()) {
           nestedNavKey.currentState!.pop();
-          return Future.value(false);
         } else if (navigatorKey!.currentState!.canPop()) {
           navigatorKey!.currentState!.pop();
-          return Future.value(false);
         }
-        return Future.value(true);
       },
       child: SplashScreen(
         splash: vm.splash,
