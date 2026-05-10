@@ -47,10 +47,10 @@ class FakeSecureStorage implements FlutterSecureStorage {
   @override
   Future<bool> containsKey({
     String? key,
-    IOSOptions? iOptions,
+    AppleOptions? iOptions,
     AndroidOptions? aOptions,
     LinuxOptions? lOptions,
-    MacOsOptions? mOptions,
+    AppleOptions? mOptions,
     WindowsOptions? wOptions,
     WebOptions? webOptions,
   }) async {
@@ -60,10 +60,10 @@ class FakeSecureStorage implements FlutterSecureStorage {
   @override
   Future<void> delete({
     String? key,
-    IOSOptions? iOptions,
+    AppleOptions? iOptions,
     AndroidOptions? aOptions,
     LinuxOptions? lOptions,
-    MacOsOptions? mOptions,
+    AppleOptions? mOptions,
     WindowsOptions? wOptions,
     WebOptions? webOptions,
   }) async {
@@ -72,10 +72,10 @@ class FakeSecureStorage implements FlutterSecureStorage {
 
   @override
   Future<void> deleteAll({
-    IOSOptions? iOptions,
+    AppleOptions? iOptions,
     AndroidOptions? aOptions,
     LinuxOptions? lOptions,
-    MacOsOptions? mOptions,
+    AppleOptions? mOptions,
     WindowsOptions? wOptions,
     WebOptions? webOptions,
   }) async {
@@ -85,10 +85,10 @@ class FakeSecureStorage implements FlutterSecureStorage {
   @override
   Future<String?> read({
     String? key,
-    IOSOptions? iOptions,
+    AppleOptions? iOptions,
     AndroidOptions? aOptions,
     LinuxOptions? lOptions,
-    MacOsOptions? mOptions,
+    AppleOptions? mOptions,
     WindowsOptions? wOptions,
     WebOptions? webOptions,
   }) async {
@@ -97,10 +97,10 @@ class FakeSecureStorage implements FlutterSecureStorage {
 
   @override
   Future<Map<String, String>> readAll({
-    IOSOptions? iOptions,
+    AppleOptions? iOptions,
     AndroidOptions? aOptions,
     LinuxOptions? lOptions,
-    MacOsOptions? mOptions,
+    AppleOptions? mOptions,
     WindowsOptions? wOptions,
     WebOptions? webOptions,
   }) async {
@@ -111,10 +111,10 @@ class FakeSecureStorage implements FlutterSecureStorage {
   Future<void> write({
     String? key,
     String? value,
-    IOSOptions? iOptions,
+    AppleOptions? iOptions,
     AndroidOptions? aOptions,
     LinuxOptions? lOptions,
-    MacOsOptions? mOptions,
+    AppleOptions? mOptions,
     WindowsOptions? wOptions,
     WebOptions? webOptions,
   }) async {
@@ -131,11 +131,38 @@ class FakeSecureStorage implements FlutterSecureStorage {
   LinuxOptions get lOptions => throw UnimplementedError();
 
   @override
-  MacOsOptions get mOptions => throw UnimplementedError();
+  AppleOptions get mOptions => throw UnimplementedError();
 
   @override
   WindowsOptions get wOptions => throw UnimplementedError();
 
   @override
   WebOptions get webOptions => throw UnimplementedError();
+
+  @override
+  void registerListener({
+    required String key,
+    required void Function(String?) listener,
+  }) {}
+
+  @override
+  void unregisterListener({
+    required String key,
+    required void Function(String?) listener,
+  }) {}
+
+  @override
+  void unregisterAllListenersForKey({required String key}) {}
+
+  @override
+  void unregisterAllListeners() {}
+
+  @override
+  Future<bool?> isCupertinoProtectedDataAvailable() async => null;
+
+  @override
+  Stream<bool>? get onCupertinoProtectedDataAvailabilityChanged => null;
+
+  @override
+  Map<String, List<void Function(String?)>> get getListeners => {};
 }
