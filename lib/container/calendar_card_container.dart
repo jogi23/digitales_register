@@ -52,7 +52,8 @@ class CalendarCardContainer extends ConsumerWidget {
           noInternet: noInternet,
         );
       },
-      connect: (state) => state.settingsState.subjectThemes[hour.subject]!,
+      connect: (state) =>
+          state.settingsState.subjectThemes[hour.subject] ?? SubjectTheme(),
     );
   }
 }

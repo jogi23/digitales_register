@@ -60,20 +60,12 @@ class DaysContainer extends ConsumerWidget {
                 .toList() ??
             [];
 
-        final vm = DaysViewModel(
-          (b) => b
-            ..days = ListBuilder(
-              !dashboard.future ? unorderedDays.reversed : unorderedDays,
-            )
-            ..noInternet = noInternet
-            ..future = dashboard.future
-            ..loading = dashboard.loading || reduxData.loginLoading
-            ..askWhenDelete = reduxData.askWhenDelete
-            ..showAddReminder = !blacklist.contains(HomeworkType.homework)
-            ..showNotifications = reduxData.showNotifications
-            ..colorBorders = reduxData.colorBorders
-            ..colorTestsInRed = reduxData.colorTestsInRed
-            ..subjectThemes = reduxData.subjectThemes.toBuilder(),
+        final vm = DaysViewModel.from(
+          dashboard,
+          noInternet,
+          reduxData,
+          unorderedDays,
+          blacklist,
         );
 
         return DaysWidget(
@@ -155,6 +147,29 @@ abstract class DaysViewModel
   factory DaysViewModel([void Function(DaysViewModelBuilder)? updates]) =
       _$DaysViewModel;
   DaysViewModel._();
+
+  static DaysViewModel from(
+    DashboardState dashboard,
+    bool noInternet,
+    _ReduxDaysData reduxData,
+    List<Day> unorderedDays,
+    BuiltList<HomeworkType> blacklist,
+  ) =>
+      DaysViewModel(
+        (b) => b
+          ..days = ListBuilder(
+            !dashboard.future ? unorderedDays.reversed : unorderedDays,
+          )
+          ..noInternet = noInternet
+          ..future = dashboard.future
+          ..loading = dashboard.loading || reduxData.loginLoading
+          ..askWhenDelete = reduxData.askWhenDelete
+          ..showAddReminder = !blacklist.contains(HomeworkType.homework)
+          ..showNotifications = reduxData.showNotifications
+          ..colorBorders = reduxData.colorBorders
+          ..colorTestsInRed = reduxData.colorTestsInRed
+          ..subjectThemes = reduxData.subjectThemes.toBuilder(),
+      );
 }
 
 // Map all (previously by the server used) homework types to the titles they

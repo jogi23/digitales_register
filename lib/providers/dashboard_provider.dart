@@ -15,8 +15,6 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
-import 'dart:developer';
-
 import 'package:built_collection/built_collection.dart';
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:dr/app_state.dart';
@@ -24,6 +22,7 @@ import 'package:dr/data.dart';
 import 'package:dr/middleware/middleware.dart'
     show canOpenFile, downloadFile, openFile, wrapper;
 import 'package:dr/providers/dashboard_error_provider.dart';
+import 'package:dr/providers/dashboard_parser.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
@@ -192,130 +191,166 @@ class DashboardNotifier extends Notifier<DashboardState> {
 
   void _applyLoaded(Object data, bool future, bool markNew, bool deduplicate) {
     final loadTime = now;
-    final loadedDays = [
-      for (final day in data as Iterable)
-        tryParse<Day, dynamic>(
-          day,
-          (dynamic day) => _parseDay(getMap(day)!, deduplicate),
-        )
-    ];
-
-    final List<Day> daysToDelete = [];
-    // Due to a bug some days might have been duplicated.
-    // TODO: Remove this once we are confident no users migrate from an affected version anymore.
-    final Set<UtcDateTime> seenDates = {};
+    final loadedDays =
+        parseDays(data, deduplicate: deduplicate).whereType<Day>().toList();
 
     state = state.rebuild((b) {
-      b.allDays.map(
-        (day) => day.rebuild(
-          (b) {
-            final newDay = loadedDays.firstWhereOrNull(
-              (d) => d.date.stripTime() == day.date.stripTime(),
-            );
-            if (seenDates.contains(day.date.stripTime())) {
-              daysToDelete.add(day);
-            } else {
-              seenDates.add(day.date.stripTime());
-            }
-            if (newDay == null) {
-              if (!future &&
-                  day.date.isBefore(
-                    loadTime.subtract(
-                      const Duration(days: 1),
-                    ),
-                  )) {
-                daysToDelete.add(day);
-              }
-              return;
-            }
-            loadedDays.remove(newDay);
-            final List<Homework> newHomework = newDay.homework.toList();
-            for (final oldHw in day.homework.toList()) {
-              final newHw = newHomework.firstWhereOrNull(
-                    (d) => d.id == oldHw.id,
-                  ) ??
-                  newHomework.firstWhereOrNull(
-                    (d) => d.isSuccessorOf(oldHw),
-                  );
-              if (newHw == null) {
-                b.homework.remove(oldHw);
-                if (oldHw.type != HomeworkType.homework) {
-                  b.deletedHomework.add(
-                    oldHw.rebuild((b) => b
-                      ..deleted = true
-                      ..isChanged = markNew
-                      ..previousVersion = oldHw.toBuilder()
-                      ..lastNotSeen = day.lastRequested
-                      ..firstSeen = loadTime),
-                  );
-                }
-              } else if (!newHw.serverEquals(oldHw)) {
-                b.homework.remove(oldHw);
-                b.homework.add(newHw.rebuild((b) => b
-                  ..previousVersion = oldHw.toBuilder()
-                  ..lastNotSeen = day.lastRequested
-                  ..firstSeen = loadTime
-                  ..isChanged = markNew &&
-                      // there was already a notification in this case (new grade)
-                      !(oldHw.type == HomeworkType.gradeGroup &&
-                          newHw.type == HomeworkType.grade)));
-              } else {
-                // preserve client-custom data, but update everything else
-                final mergedHw = newHw.toBuilder()
-                  ..firstSeen = oldHw.firstSeen
-                  ..lastNotSeen = oldHw.lastNotSeen
-                  ..previousVersion = oldHw.previousVersion?.toBuilder();
-                mergedHw.gradeGroupSubmissions.map(
-                  (ggs) => ggs.rebuild(
-                    (ggs) =>
-                        ggs.fileAvailable = oldHw.gradeGroupSubmissions?.any(
-                              (oldGgs) => oldGgs.file == ggs.file,
-                            ) ??
-                            false,
-                  ),
-                );
-                b.homework[b.homework.build().indexOf(oldHw)] =
-                    mergedHw.build();
-              }
-              newHomework.remove(newHw);
-            }
-            for (final newHw in newHomework) {
-              final deletedHw = day.deletedHomework.firstWhereOrNull(
-                    (d) => d.id == newHw.id,
-                  ) ??
-                  day.deletedHomework.firstWhereOrNull(
-                    (d) => d.isSuccessorOf(newHw),
-                  );
-              if (deletedHw != null) {
-                b.deletedHomework.remove(deletedHw);
-                b.homework.add(newHw.rebuild((b) => b
-                  ..previousVersion = deletedHw.toBuilder()
-                  ..lastNotSeen = day.lastRequested
-                  ..firstSeen = loadTime
-                  ..isChanged = markNew));
-              } else {
-                b.homework.add(newHw.rebuild((b) => b
-                  ..lastNotSeen = day.lastRequested
-                  ..firstSeen = loadTime
-                  ..isNew = newHw.type != HomeworkType.grade &&
-                      newHw.type != HomeworkType.homework &&
-                      markNew));
-              }
-            }
-            b.lastRequested = loadTime;
-          },
-        ),
-      );
-      b.allDays.removeWhere((day) => daysToDelete.contains(day));
-      for (final newDay in loadedDays) {
-        b.allDays.add(newDay.rebuild((b) => b
-          ..lastRequested = loadTime
-          ..homework.map((h) => h.rebuild((b) => b..firstSeen = loadTime))));
-      }
+      _mergeExistingDays(b, loadedDays, loadTime, future, markNew);
+      _addNewDays(b, loadedDays, loadTime, markNew);
       b.allDays.sort((a, b) => a.date.compareTo(b.date));
       b.loading = false;
       b.future = future;
     });
+  }
+
+  /// Updates and merges days already present in state with newly loaded data.
+  /// Days that no longer exist on the server and are old enough are removed.
+  /// Removes exact duplicates (server-side bug workaround).
+  void _mergeExistingDays(
+    DashboardStateBuilder b,
+    List<Day> loadedDays,
+    UtcDateTime loadTime,
+    bool future,
+    bool markNew,
+  ) {
+    final Set<UtcDateTime> seenDates = {};
+    final List<Day> daysToDelete = [];
+
+    b.allDays.map(
+      (day) => day.rebuild(
+        (b) {
+          if (seenDates.contains(day.date.stripTime())) {
+            daysToDelete.add(day);
+            return;
+          }
+          seenDates.add(day.date.stripTime());
+
+          final newDay = loadedDays.firstWhereOrNull(
+            (d) => d.date.stripTime() == day.date.stripTime(),
+          );
+          if (newDay == null) {
+            if (!future &&
+                day.date.isBefore(
+                  loadTime.subtract(const Duration(days: 1)),
+                )) {
+              daysToDelete.add(day);
+            }
+            return;
+          }
+          loadedDays.remove(newDay);
+          _mergeHomework(b, day, newDay, loadTime, markNew);
+          b.lastRequested = loadTime;
+        },
+      ),
+    );
+    b.allDays.removeWhere((day) => daysToDelete.contains(day));
+  }
+
+  /// Merges homework from [newDay] into the existing day builder [b],
+  /// tracking changes, deletions, and restorations.
+  void _mergeHomework(
+    DayBuilder b,
+    Day oldDay,
+    Day newDay,
+    UtcDateTime loadTime,
+    bool markNew,
+  ) {
+    final List<Homework> newHomework = newDay.homework.toList();
+    for (final oldHw in oldDay.homework.toList()) {
+      final newHw = newHomework.firstWhereOrNull(
+                (d) => d.id == oldHw.id,
+              ) ??
+          newHomework.firstWhereOrNull(
+            (d) => d.isSuccessorOf(oldHw),
+          );
+      if (newHw == null) {
+        b.homework.remove(oldHw);
+        if (oldHw.type != HomeworkType.homework) {
+          b.deletedHomework.add(
+            oldHw.rebuild((b) => b
+              ..deleted = true
+              ..isChanged = markNew
+              ..previousVersion = oldHw.toBuilder()
+              ..lastNotSeen = oldDay.lastRequested
+              ..firstSeen = loadTime),
+          );
+        }
+      } else if (!newHw.serverEquals(oldHw)) {
+        b.homework.remove(oldHw);
+        b.homework.add(newHw.rebuild((b) => b
+          ..previousVersion = oldHw.toBuilder()
+          ..lastNotSeen = oldDay.lastRequested
+          ..firstSeen = loadTime
+          ..isChanged = markNew &&
+              !(oldHw.type == HomeworkType.gradeGroup &&
+                  newHw.type == HomeworkType.grade)));
+      } else {
+        final mergedHw = newHw.toBuilder()
+          ..firstSeen = oldHw.firstSeen
+          ..lastNotSeen = oldHw.lastNotSeen
+          ..previousVersion = oldHw.previousVersion?.toBuilder();
+        mergedHw.gradeGroupSubmissions.map(
+          (ggs) => ggs.rebuild(
+            (ggs) =>
+                ggs.fileAvailable = oldHw.gradeGroupSubmissions?.any(
+                      (oldGgs) => oldGgs.file == ggs.file,
+                    ) ??
+                    false,
+          ),
+        );
+        b.homework[b.homework.build().indexOf(oldHw)] = mergedHw.build();
+      }
+      newHomework.remove(newHw);
+    }
+    _restoreOrAddNewHomework(b, oldDay, newHomework, loadTime, markNew);
+  }
+
+  /// Handles homework entries in [newHomework] that had no match in the old day:
+  /// restores previously deleted homework or marks brand-new entries.
+  void _restoreOrAddNewHomework(
+    DayBuilder b,
+    Day oldDay,
+    List<Homework> newHomework,
+    UtcDateTime loadTime,
+    bool markNew,
+  ) {
+    for (final newHw in newHomework) {
+      final deletedHw = oldDay.deletedHomework.firstWhereOrNull(
+                (d) => d.id == newHw.id,
+              ) ??
+          oldDay.deletedHomework.firstWhereOrNull(
+            (d) => d.isSuccessorOf(newHw),
+          );
+      if (deletedHw != null) {
+        b.deletedHomework.remove(deletedHw);
+        b.homework.add(newHw.rebuild((b) => b
+          ..previousVersion = deletedHw.toBuilder()
+          ..lastNotSeen = oldDay.lastRequested
+          ..firstSeen = loadTime
+          ..isChanged = markNew));
+      } else {
+        b.homework.add(newHw.rebuild((b) => b
+          ..lastNotSeen = oldDay.lastRequested
+          ..firstSeen = loadTime
+          ..isNew = newHw.type != HomeworkType.grade &&
+              newHw.type != HomeworkType.homework &&
+              markNew));
+      }
+    }
+  }
+
+  /// Appends days from [loadedDays] that had no match in state (brand new days).
+  void _addNewDays(
+    DashboardStateBuilder b,
+    List<Day> loadedDays,
+    UtcDateTime loadTime,
+    bool markNew,
+  ) {
+    for (final newDay in loadedDays) {
+      b.allDays.add(newDay.rebuild((b) => b
+        ..lastRequested = loadTime
+        ..homework.map((h) => h.rebuild((b) => b..firstSeen = loadTime))));
+    }
   }
 
   void _applyHomeworkAdded(Object data, UtcDateTime date) {
@@ -325,7 +360,7 @@ class DashboardNotifier extends Notifier<DashboardState> {
             ? day.rebuild(
                 (b) => b
                   ..homework.add(
-                    _parseHomework(getMap(data)!).rebuild(
+                    parseHomework(getMap(data)!).rebuild(
                       (b) => b
                         ..firstSeen = now
                         ..lastNotSeen = now,
@@ -391,88 +426,6 @@ class DashboardNotifier extends Notifier<DashboardState> {
             )
           : s,
     );
-  }
-
-  // ─── Private parse helpers ───────────────────────────────────────────────────
-
-  Day _parseDay(Map<dynamic, dynamic> data, bool deduplicate) {
-    final items = ListBuilder<Homework>(
-      getList(data['items'])!.map<Homework>(
-        (dynamic m) => tryParse(getMap(m)!, _parseHomework),
-      ),
-    );
-    if (deduplicate) {
-      for (var i = 0; i < items.length; i++) {
-        final item = items[i];
-        for (var ii = i + 1; ii < items.length;) {
-          if (items[ii].serverEquals(item)) {
-            items.removeAt(ii);
-          } else {
-            ii++;
-          }
-        }
-      }
-    }
-    return Day(
-      (b) => b
-        ..date = UtcDateTime.parse(getString(data['date'])!)
-        ..homework = items,
-    );
-  }
-
-  Homework _parseHomework(Map<dynamic, dynamic> data) {
-    return Homework((b) {
-      b
-        ..id = getInt(data['id'])
-        ..title = getString(data['title'])
-        ..subtitle = getString(data['subtitle'])
-        ..label = getString(data['label'])
-        ..warning = data['homework'] == 0
-        ..checkable = getBool(data['checkable']) ?? b.checkable
-        ..checked = getBool(data['checked']) ?? false
-        ..deleteable = getBool(data['deleteable']) ?? b.deleteable
-        ..gradeGroupSubmissions = data['gradeGroupSubmissions'] == null
-            ? null
-            : ListBuilder(
-                getList(data['gradeGroupSubmissions'])!
-                    .map((dynamic s) =>
-                        tryParse(getMap(s)!, _parseGradeGroupSubmission))
-                    .where((s) => s != null),
-              );
-
-      b.type = switch (getString(data['type'])) {
-        'lessonHomework' => HomeworkType.lessonHomework,
-        'gradeGroup' => HomeworkType.gradeGroup,
-        'grade' => HomeworkType.grade,
-        'observation' => HomeworkType.observation,
-        'homework' => HomeworkType.homework,
-        _ => HomeworkType.unknown,
-      };
-
-      if (b.type == HomeworkType.grade) {
-        b
-          ..gradeFormatted = formatGradeFromString(getString(data['grade']))
-          ..grade = getString(data['grade']);
-      }
-    });
-  }
-
-  GradeGroupSubmission? _parseGradeGroupSubmission(Map<dynamic, dynamic> data) {
-    try {
-      return GradeGroupSubmission(
-        (b) => b
-          ..file = getString(data['file'])
-          ..originalName = getString(data['originalName'])
-          ..timestamp = UtcDateTime.parse(getString(data['timestamp'])!)
-          ..typeName = getString(data['typeName'])
-          ..id = getInt(data['id'])
-          ..gradeGroupId = getInt(data['gradeGroupId'])
-          ..userId = getInt(data['userId']),
-      );
-    } catch (e, s) {
-      log('Failed to parse GradeGroupSubmission', error: e, stackTrace: s);
-      return null;
-    }
   }
 
   void _showErrorIfOnline(String message) {
