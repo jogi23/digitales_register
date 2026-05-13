@@ -17,23 +17,24 @@
 
 import 'package:dr/actions/app_actions.dart';
 import 'package:dr/app_state.dart';
+import 'package:dr/providers/notifications_provider.dart';
 import 'package:dr/ui/notification_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_built_redux/flutter_built_redux.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class NotificationIconContainer extends StatelessWidget {
+class NotificationIconContainer extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
-    return StoreConnection<AppState, AppActions, int>(
-      builder: (context, vm, actions) {
-        return NotificationIcon(
-          notifications: vm,
-          onTap: actions.routingActions.showNotifications.call,
-        );
-      },
-      connect: (state) {
-        return state.notificationState.notifications?.length ?? 0;
-      },
+  Widget build(BuildContext context, WidgetRef ref) {
+    final count = ref.watch(
+      notificationsProvider.select((s) => s.notifications.length),
+    );
+    return StoreConnection<AppState, AppActions, Null>(
+      connect: (_) => null,
+      builder: (context, _, actions) => NotificationIcon(
+        notifications: count,
+        onTap: actions.routingActions.showNotifications.call,
+      ),
     );
   }
 }

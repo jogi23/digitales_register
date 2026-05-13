@@ -28,7 +28,7 @@ import 'package:dr/actions/calendar_actions.dart';
 import 'package:dr/actions/grades_actions.dart';
 import 'package:dr/actions/login_actions.dart';
 import 'package:dr/actions/messages_actions.dart';
-import 'package:dr/actions/notifications_actions.dart';
+import 'package:dr/providers/notifications_provider.dart';
 import 'package:dr/actions/profile_actions.dart';
 import 'package:dr/actions/routing_actions.dart';
 import 'package:dr/actions/save_pass_actions.dart';
@@ -102,7 +102,6 @@ List<Middleware<AppState, AppStateBuilder, AppActions>> middleware({
             ..combine(_calendarMiddleware)
             ..combine(_gradesMiddleware)
             ..combine(_loginMiddleware)
-            ..combine(_notificationsMiddleware)
             ..combine(_passMiddleware)
             ..combine(routingMiddleware)
             ..combine(_messagesMiddleware)
@@ -367,7 +366,7 @@ Future<void> _loggedIn(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
           markNew: api.state.settingsState.dashboardMarkNewOrChangedEntries,
           deduplicate: api.state.settingsState.dashboardDeduplicateEntries,
         );
-    await api.actions.notificationsActions.load();
+    await providerContainer.read(notificationsProvider.notifier).load();
     // Restore the subject-themes update that was lost when DashboardActionsNames.loaded
     // was removed during the Riverpod migration. The dashboard is now loaded above via
     // Riverpod, so we trigger the update manually here using extractAllSubjects() which

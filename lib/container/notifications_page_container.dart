@@ -17,34 +17,29 @@
 
 import 'package:dr/actions/app_actions.dart';
 import 'package:dr/app_state.dart';
-import 'package:dr/data.dart';
+import 'package:dr/providers/no_internet_provider.dart';
+import 'package:dr/providers/notifications_provider.dart';
 import 'package:dr/ui/notifications_page.dart';
-import 'package:dr/utc_date_time.dart';
 import 'package:flutter/material.dart' hide Notification;
 import 'package:flutter_built_redux/flutter_built_redux.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class NotificationPageContainer extends StatelessWidget {
+class NotificationPageContainer extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
-    return StoreConnection<AppState, AppActions,
-        (List<Notification>, UtcDateTime?, bool)>(
-      builder: (context, vm, actions) {
-        return NotificationPage(
-          notifications: vm.$1,
-          noInternet: vm.$3,
-          deleteNotification: actions.notificationsActions.delete.call,
-          deleteAllNotifications: actions.notificationsActions.deleteAll.call,
-          goToMessage: actions.routingActions.showMessage.call,
-          lastFetched: vm.$2,
-        );
-      },
-      connect: (state) {
-        return (
-          state.notificationState.notifications!.toList(),
-          state.notificationState.lastFetched,
-          state.noInternet,
-        );
-      },
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(notificationsProvider);
+    final noInternet = ref.watch(noInternetProvider);
+    final notifier = ref.read(notificationsProvider.notifier);
+    return StoreConnection<AppState, AppActions, Null>(
+      connect: (_) => null,
+      builder: (context, _, actions) => NotificationPage(
+        notifications: state.notifications,
+        noInternet: noInternet,
+        deleteNotification: notifier.delete,
+        deleteAllNotifications: notifier.deleteAll,
+        goToMessage: actions.routingActions.showMessage.call,
+        lastFetched: state.lastFetched,
+      ),
     );
   }
 }

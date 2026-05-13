@@ -337,6 +337,7 @@ Future<void> _selectAccount(
   await secureStorage.write(key: "login", value: json.encode(login));
   await api.actions.mountAppState(AppState());
   providerContainer.read(dashboardProvider.notifier).reset();
+  providerContainer.read(notificationsProvider.notifier).reset();
   await api.actions.load();
 }
 

@@ -15,7 +15,6 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
-import 'package:built_collection/built_collection.dart';
 import 'package:built_redux/built_redux.dart';
 import 'package:dr/actions/app_actions.dart';
 import 'package:dr/app_state.dart';
@@ -24,38 +23,65 @@ import 'package:dr/container/notifications_page_container.dart';
 import 'package:dr/data.dart';
 import 'package:dr/main.dart';
 import 'package:dr/middleware/middleware.dart';
+import 'package:dr/providers/notifications_provider.dart';
+import 'package:dr/providers/provider_container.dart' as pc;
 import 'package:dr/reducer/reducer.dart';
 import 'package:dr/ui/notifications_page.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/wrapper.dart';
 import 'package:flutter/material.dart' hide Notification;
 import 'package:flutter_built_redux/flutter_built_redux.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockWrapper extends Mock implements Wrapper {}
 
-void main() {
-  testGoldens('Notification icon shows badge', (WidgetTester tester) async {
-    final widget = ReduxProvider(
+class _TestNotificationsNotifier extends NotificationsNotifier {
+  _TestNotificationsNotifier(this._initialState);
+  final NotificationsState _initialState;
+  @override
+  NotificationsState build() => _initialState;
+}
+
+Widget _buildTestWidget({
+  required NotificationsState initialState,
+  Widget? child,
+}) {
+  return ProviderScope(
+    overrides: [
+      notificationsProvider.overrideWith(
+        () => _TestNotificationsNotifier(initialState),
+      ),
+    ],
+    child: ReduxProvider(
       store: Store<AppState, AppStateBuilder, AppActions>(
         ReducerBuilder<AppState, AppStateBuilder>().build(),
-        AppState(
-          (b) => b.notificationState.notifications = ListBuilder(
-            <Notification>[
-              Notification(
-                (b) => b
-                  ..id = 0
-                  ..title = "title"
-                  ..timeSent = UtcDateTime.now(),
-              ),
-            ],
-          ),
-        ),
+        AppState(),
         AppActions(),
       ),
-      child: MaterialApp(home: Material(child: NotificationIconContainer())),
+      child: MaterialApp(
+        home: child ?? NotificationPageContainer(),
+        theme: ThemeData(primarySwatch: Colors.deepOrange),
+      ),
+    ),
+  );
+}
+
+void main() {
+  testGoldens('Notification icon shows badge', (WidgetTester tester) async {
+    final notifications = [
+      Notification(
+        (b) => b
+          ..id = 0
+          ..title = "title"
+          ..timeSent = UtcDateTime.now(),
+      ),
+    ];
+    final widget = _buildTestWidget(
+      initialState: NotificationsState(notifications: notifications),
+      child: Material(child: NotificationIconContainer()),
     );
     await tester.pumpWidget(widget);
     expect(find.byIcon(Icons.notifications), findsOneWidget);
@@ -70,41 +96,28 @@ void main() {
         matchesGoldenFile("icon_animated.png"));
   });
   testGoldens('Notification page', (WidgetTester tester) async {
-    final widget = ReduxProvider(
-      store: Store<AppState, AppStateBuilder, AppActions>(
-        ReducerBuilder<AppState, AppStateBuilder>().build(),
-        AppState(
-          (b) => b.notificationState.notifications = ListBuilder(
-            <Notification>[
-              Notification(
-                (b) => b
-                  ..id = 0
-                  ..title = "title1"
-                  ..timeSent = UtcDateTime(2020, 1, 2),
-              ),
-              Notification(
-                (b) => b
-                  ..id = 0
-                  ..title = "title2"
-                  ..timeSent = UtcDateTime(2020, 1, 2),
-              ),
-              Notification(
-                (b) => b
-                  ..id = 0
-                  ..title = "title3"
-                  ..timeSent = UtcDateTime(2020, 1, 2),
-              ),
-            ],
-          ),
-        ),
-        AppActions(),
+    final notifications = [
+      Notification(
+        (b) => b
+          ..id = 0
+          ..title = "title1"
+          ..timeSent = UtcDateTime(2020, 1, 2),
       ),
-      child: MaterialApp(
-        home: NotificationPageContainer(),
-        theme: ThemeData(
-          primarySwatch: Colors.deepOrange,
-        ),
+      Notification(
+        (b) => b
+          ..id = 0
+          ..title = "title2"
+          ..timeSent = UtcDateTime(2020, 1, 2),
       ),
+      Notification(
+        (b) => b
+          ..id = 0
+          ..title = "title3"
+          ..timeSent = UtcDateTime(2020, 1, 2),
+      ),
+    ];
+    final widget = _buildTestWidget(
+      initialState: NotificationsState(notifications: notifications),
     );
     await tester.pumpWidget(widget);
     expect(find.byType(NotificationWidget), findsNWidgets(3));
@@ -114,41 +127,28 @@ void main() {
 
   testGoldens('Notification page delete single animation',
       (WidgetTester tester) async {
-    final widget = ReduxProvider(
-      store: Store<AppState, AppStateBuilder, AppActions>(
-        appReducerBuilder.build(),
-        AppState(
-          (b) => b.notificationState.notifications = ListBuilder(
-            <Notification>[
-              Notification(
-                (b) => b
-                  ..id = 0
-                  ..title = "title1"
-                  ..timeSent = UtcDateTime(2020, 1, 2),
-              ),
-              Notification(
-                (b) => b
-                  ..id = 0
-                  ..title = "title2"
-                  ..timeSent = UtcDateTime(2020, 1, 2),
-              ),
-              Notification(
-                (b) => b
-                  ..id = 0
-                  ..title = "title3"
-                  ..timeSent = UtcDateTime(2020, 1, 2),
-              ),
-            ],
-          ),
-        ),
-        AppActions(),
+    final notifications = [
+      Notification(
+        (b) => b
+          ..id = 0
+          ..title = "title1"
+          ..timeSent = UtcDateTime(2020, 1, 2),
       ),
-      child: MaterialApp(
-        home: NotificationPageContainer(),
-        theme: ThemeData(
-          primarySwatch: Colors.deepOrange,
-        ),
+      Notification(
+        (b) => b
+          ..id = 0
+          ..title = "title2"
+          ..timeSent = UtcDateTime(2020, 1, 2),
       ),
+      Notification(
+        (b) => b
+          ..id = 0
+          ..title = "title3"
+          ..timeSent = UtcDateTime(2020, 1, 2),
+      ),
+    ];
+    final widget = _buildTestWidget(
+      initialState: NotificationsState(notifications: notifications),
     );
     await tester.pumpWidget(widget);
     expect(find.byType(NotificationWidget), findsNWidgets(3));
@@ -166,41 +166,28 @@ void main() {
   });
   testGoldens('Notification page delete all animation',
       (WidgetTester tester) async {
-    final widget = ReduxProvider(
-      store: Store<AppState, AppStateBuilder, AppActions>(
-        appReducerBuilder.build(),
-        AppState(
-          (b) => b.notificationState.notifications = ListBuilder(
-            <Notification>[
-              Notification(
-                (b) => b
-                  ..id = 0
-                  ..title = "title1"
-                  ..timeSent = UtcDateTime(2020, 1, 2),
-              ),
-              Notification(
-                (b) => b
-                  ..id = 0
-                  ..title = "title2"
-                  ..timeSent = UtcDateTime(2020, 1, 2),
-              ),
-              Notification(
-                (b) => b
-                  ..id = 0
-                  ..title = "title3"
-                  ..timeSent = UtcDateTime(2020, 1, 2),
-              ),
-            ],
-          ),
-        ),
-        AppActions(),
+    final notifications = [
+      Notification(
+        (b) => b
+          ..id = 0
+          ..title = "title1"
+          ..timeSent = UtcDateTime(2020, 1, 2),
       ),
-      child: MaterialApp(
-        home: NotificationPageContainer(),
-        theme: ThemeData(
-          primarySwatch: Colors.deepOrange,
-        ),
+      Notification(
+        (b) => b
+          ..id = 0
+          ..title = "title2"
+          ..timeSent = UtcDateTime(2020, 1, 2),
       ),
+      Notification(
+        (b) => b
+          ..id = 0
+          ..title = "title3"
+          ..timeSent = UtcDateTime(2020, 1, 2),
+      ),
+    ];
+    final widget = _buildTestWidget(
+      initialState: NotificationsState(notifications: notifications),
     );
     await tester.pumpWidget(widget);
     expect(find.byType(NotificationWidget), findsNWidgets(3));
@@ -218,29 +205,16 @@ void main() {
   });
   testGoldens('Notification page delete last animation',
       (WidgetTester tester) async {
-    final widget = ReduxProvider(
-      store: Store<AppState, AppStateBuilder, AppActions>(
-        appReducerBuilder.build(),
-        AppState(
-          (b) => b.notificationState.notifications = ListBuilder(
-            <Notification>[
-              Notification(
-                (b) => b
-                  ..id = 0
-                  ..title = "title1"
-                  ..timeSent = UtcDateTime(2020, 1, 2),
-              ),
-            ],
-          ),
-        ),
-        AppActions(),
+    final notifications = [
+      Notification(
+        (b) => b
+          ..id = 0
+          ..title = "title1"
+          ..timeSent = UtcDateTime(2020, 1, 2),
       ),
-      child: MaterialApp(
-        home: NotificationPageContainer(),
-        theme: ThemeData(
-          primarySwatch: Colors.deepOrange,
-        ),
-      ),
+    ];
+    final widget = _buildTestWidget(
+      initialState: NotificationsState(notifications: notifications),
     );
     await tester.pumpWidget(widget);
     expect(find.byType(NotificationWidget), findsOneWidget);
@@ -291,27 +265,36 @@ void main() {
       ),
     ];
 
-    final store = Store<AppState, AppStateBuilder, AppActions>(
-      appReducerBuilder.build(),
-      AppState(
-        (b) {
-          b.notificationState.notifications = ListBuilder(notifications);
-        },
-      ),
-      AppActions(),
-      middleware: middleware(includeErrorMiddleware: false),
+    final container = ProviderContainer(
+      overrides: [
+        notificationsProvider.overrideWith(
+          () => _TestNotificationsNotifier(
+            NotificationsState(notifications: notifications),
+          ),
+        ),
+      ],
     );
+    pc.providerContainer = container;
+    addTearDown(container.dispose);
 
     // An attempt to do networking will result in 400 and a "no internet" snack bar
     scaffoldMessengerKey = GlobalKey();
 
-    final widget = ReduxProvider(
-      store: store,
-      child: MaterialApp(
-        scaffoldMessengerKey: scaffoldMessengerKey,
-        home: NotificationPageContainer(),
-        theme: ThemeData(
-          primarySwatch: Colors.deepOrange,
+    final widget = UncontrolledProviderScope(
+      container: container,
+      child: ReduxProvider(
+        store: Store<AppState, AppStateBuilder, AppActions>(
+          appReducerBuilder.build(),
+          AppState(),
+          AppActions(),
+          middleware: middleware(includeErrorMiddleware: false),
+        ),
+        child: MaterialApp(
+          scaffoldMessengerKey: scaffoldMessengerKey,
+          home: NotificationPageContainer(),
+          theme: ThemeData(
+            primarySwatch: Colors.deepOrange,
+          ),
         ),
       ),
     );
@@ -333,8 +316,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text("title0"), findsNothing);
     expect(
-      store.state.notificationState.notifications,
-      (notifications.toList()..removeAt(0)).build(),
+      container.read(notificationsProvider).notifications,
+      isNot(contains(notifications[0])),
     );
 
     // delete all
@@ -366,8 +349,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.textContaining("title"), findsNothing);
     expect(
-      store.state.notificationState.notifications,
-      BuiltList<Notification>(),
+      container.read(notificationsProvider).notifications,
+      isEmpty,
     );
   });
 }
