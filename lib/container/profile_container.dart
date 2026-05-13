@@ -17,26 +17,30 @@
 
 import 'package:dr/actions/app_actions.dart';
 import 'package:dr/app_state.dart';
+import 'package:dr/providers/no_internet_provider.dart';
+import 'package:dr/providers/profile_provider.dart';
 import 'package:dr/ui/profile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_built_redux/flutter_built_redux.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class ProfileContainer extends StatelessWidget {
+class ProfileContainer extends ConsumerWidget {
+  const ProfileContainer({super.key});
   @override
-  Widget build(BuildContext context) {
-    return StoreConnection<AppState, AppActions, (bool, ProfileState)>(
-      builder: (context, vm, actions) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final profileState = ref.watch(profileProvider);
+    final noInternet = ref.watch(noInternetProvider);
+    return StoreConnection<AppState, AppActions, Object>(
+      connect: (_) => Object(),
+      builder: (context, _, actions) {
         return Profile(
-          profileState: vm.$2,
-          noInternet: vm.$1,
-          setSendNotificationEmails:
-              actions.profileActions.sendNotificationEmails.call,
+          profileState: profileState,
+          noInternet: noInternet,
+          setSendNotificationEmails: (value) =>
+              ref.read(profileProvider.notifier).setSendNotificationEmails(value),
           changeEmail: actions.routingActions.showChangeEmail.call,
           changePass: () => actions.loginActions.showChangePass(false),
         );
-      },
-      connect: (AppState state) {
-        return (state.noInternet, state.profileState);
       },
     );
   }

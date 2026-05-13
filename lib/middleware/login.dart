@@ -338,6 +338,8 @@ Future<void> _selectAccount(
   await api.actions.mountAppState(AppState());
   providerContainer.read(dashboardProvider.notifier).reset();
   providerContainer.read(notificationsProvider.notifier).reset();
+  providerContainer.read(absencesProvider.notifier).reset();
+  providerContainer.read(profileProvider.notifier).reset();
   await api.actions.load();
 }
 

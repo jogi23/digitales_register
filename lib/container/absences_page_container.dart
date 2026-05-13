@@ -15,25 +15,21 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
-import 'package:dr/actions/app_actions.dart';
-import 'package:dr/app_state.dart';
+import 'package:dr/providers/absences_provider.dart';
+import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/ui/absences_page.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_built_redux/flutter_built_redux.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class AbsencesPageContainer extends StatelessWidget {
+class AbsencesPageContainer extends ConsumerWidget {
+  const AbsencesPageContainer({super.key});
   @override
-  Widget build(BuildContext context) {
-    return StoreConnection<AppState, AppActions, (AbsencesState, bool)>(
-      builder: (context, vm, actions) {
-        return AbsencesPage(
-          state: vm.$1,
-          noInternet: vm.$2,
-        );
-      },
-      connect: (state) {
-        return (state.absencesState, state.noInternet);
-      },
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(absencesProvider);
+    final noInternet = ref.watch(noInternetProvider);
+    return AbsencesPage(
+      state: state,
+      noInternet: noInternet,
     );
   }
 }

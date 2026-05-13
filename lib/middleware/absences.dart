@@ -17,18 +17,4 @@
 
 part of 'middleware.dart';
 
-final _absencesMiddleware =
-    MiddlewareBuilder<AppState, AppStateBuilder, AppActions>()
-      ..add(AbsencesActionsNames.load, _loadAbsences);
-
-Future<void> _loadAbsences(
-    MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
-    ActionHandler next,
-    Action<void> action) async {
-  if (api.state.noInternet) return;
-  await next(action);
-  final dynamic response = await wrapper.send("api/student/dashboard/absences");
-  if (response != null) {
-    await api.actions.absencesActions.loaded(response);
-  }
-}
+// Absences middleware migrated to AbsencesNotifier (providers/absences_provider.dart)

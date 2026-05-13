@@ -99,7 +99,7 @@ Future<void> _showProfile(
     ActionHandler next,
     Action<void> action) async {
   unawaited(navigatorKey!.currentState!.pushNamed("/profile"));
-  await api.actions.profileActions.load();
+  unawaited(providerContainer.read(profileProvider.notifier).load());
   await next(action);
 }
 
@@ -162,8 +162,8 @@ Future<void> _showAbsences(
     ActionHandler next,
     Action<void> action) async {
   scaffoldKey!.currentState!
-      .selectContentWidget(AbsencesPageContainer(), Pages.absences);
-  await api.actions.absencesActions.load();
+      .selectContentWidget(const AbsencesPageContainer(), Pages.absences);
+  unawaited(providerContainer.read(absencesProvider.notifier).load());
   await next(action);
 }
 

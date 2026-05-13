@@ -1,0 +1,123 @@
+// Copyright (C) 2021 Michael Debertol
+//
+// This file is part of digitales_register.
+//
+// digitales_register is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// digitales_register is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
+
+import 'package:built_collection/built_collection.dart';
+import 'package:dr/app_state.dart';
+import 'package:dr/data.dart';
+import 'package:dr/middleware/middleware.dart' show wrapper;
+import 'package:dr/providers/no_internet_provider.dart';
+import 'package:dr/utc_date_time.dart';
+import 'package:dr/util.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+class AbsencesNotifier extends Notifier<AbsencesState> {
+  @override
+  AbsencesState build() => AbsencesState();
+
+  void reset() {
+    state = AbsencesState();
+  }
+
+  Future<void> load() async {
+    if (ref.read(noInternetProvider)) return;
+    final dynamic response =
+        await wrapper.send("api/student/dashboard/absences");
+    if (response != null) {
+      state = tryParse(getMap(response)!, _parseAbsences);
+    }
+  }
+
+  AbsencesState _parseAbsences(Map json) {
+    final rawStats = getMap(json["statistics"])!;
+    final stats = AbsenceStatisticBuilder()
+      ..counter = getInt(rawStats["counter"])
+      ..counterForSchool = getInt(rawStats["counterForSchool"])
+      ..delayed = getInt(rawStats["delayed"])
+      ..justified = getInt(rawStats["justified"])
+      ..notJustified = getInt(rawStats["notJustified"])
+      ..percentage = rawStats["percentage"]?.toString().isNotEmpty == true
+          ? rawStats["percentage"].toString()
+          : null;
+    final absences = (json["absences"] as List).map(_parseAbsence);
+    final futureAbsences =
+        (json["futureAbsences"] as List).map(_parseFutureAbsence);
+    return AbsencesState(
+      (b) => b
+        ..statistic = stats
+        ..absences = ListBuilder(absences)
+        ..futureAbsences = ListBuilder(futureAbsences)
+        ..lastFetched = UtcDateTime.now(),
+    );
+  }
+
+  AbsenceGroup _parseAbsence(dynamic g) {
+    return AbsenceGroup(
+      (b) => b
+        ..justified = AbsenceJustified.fromInt(getInt(g["justified"])!)
+        ..reasonSignature = getString(g["reason_signature"])
+        ..reasonTimestamp = g["reason_timestamp"] is String
+            ? UtcDateTime.tryParse(g["reason_timestamp"] as String)
+            : null
+        ..reason = getString(g["reason"])
+        ..note = getString(g["note"])
+        ..absences = ListBuilder(
+          (g["group"] as List).map<Absence>(
+            (dynamic a) {
+              return Absence(
+                (b) => b
+                  ..minutes = getInt(a["minutes"])
+                  ..date = UtcDateTime.parse(getString(a["date"])!)
+                  ..hour = getInt(a["hour"])
+                  ..minutesCameTooLate = getInt(a["minutes_begin"])
+                  ..minutesLeftTooEarly = getInt(a["minutes_end"]),
+              );
+            },
+          ),
+        )
+        ..minutes = b.absences.build().fold<int>(
+            0,
+            (min, a) =>
+                min +
+                (a.minutes != 50
+                    ? a.minutesCameTooLate + a.minutesLeftTooEarly
+                    : 0))
+        ..hours = b.absences
+            .build()
+            .fold<int>(0, (h, a) => h + (a.minutes == 50 ? 1 : 0)),
+    );
+  }
+
+  FutureAbsence _parseFutureAbsence(dynamic absence) {
+    return FutureAbsence(
+      (b) => b
+        ..note = getString(absence["note"])
+        ..startDate = UtcDateTime.parse(getString(absence["startDate"])!)
+        ..endDate = UtcDateTime.parse(getString(absence["endDate"])!)
+        ..startHour = getInt(absence["startTime"])
+        ..endHour = getInt(absence["endTime"])
+        ..justified = AbsenceJustified.fromInt(getInt(absence["justified"])!)
+        ..reason = getString(absence["reason"])
+        ..reasonSignature = getString(absence["reason_signature"])
+        ..reasonTimestamp = absence["reason_timestamp"] is String
+            ? UtcDateTime.tryParse(absence["reason_timestamp"] as String)
+            : null,
+    );
+  }
+}
+
+final absencesProvider =
+    NotifierProvider<AbsencesNotifier, AbsencesState>(AbsencesNotifier.new);

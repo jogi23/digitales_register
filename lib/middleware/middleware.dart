@@ -22,14 +22,11 @@ import 'dart:io';
 
 import 'package:built_redux/built_redux.dart';
 import 'package:dio/dio.dart' as dio;
-import 'package:dr/actions/absences_actions.dart';
 import 'package:dr/actions/app_actions.dart';
 import 'package:dr/actions/calendar_actions.dart';
 import 'package:dr/actions/grades_actions.dart';
 import 'package:dr/actions/login_actions.dart';
 import 'package:dr/actions/messages_actions.dart';
-import 'package:dr/providers/notifications_provider.dart';
-import 'package:dr/actions/profile_actions.dart';
 import 'package:dr/actions/routing_actions.dart';
 import 'package:dr/actions/save_pass_actions.dart';
 import 'package:dr/actions/settings_actions.dart';
@@ -41,9 +38,12 @@ import 'package:dr/container/messages_container.dart';
 import 'package:dr/container/settings_page.dart';
 import 'package:dr/data.dart';
 import 'package:dr/main.dart';
+import 'package:dr/providers/absences_provider.dart';
 import 'package:dr/providers/certificate_provider.dart';
 import 'package:dr/providers/dashboard_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
+import 'package:dr/providers/notifications_provider.dart';
+import 'package:dr/providers/profile_provider.dart';
 import 'package:dr/providers/provider_container.dart';
 import 'package:dr/serializers.dart';
 import 'package:dr/ui/certificate.dart';
@@ -98,14 +98,12 @@ List<Middleware<AppState, AppStateBuilder, AppActions>> middleware({
             ..add(AppActionsNames.noInternet, _noInternet)
             ..add(LoginActionsNames.loggedIn, _loggedIn)
             ..add(AppActionsNames.restarted, _restarted)
-            ..combine(_absencesMiddleware)
             ..combine(_calendarMiddleware)
             ..combine(_gradesMiddleware)
             ..combine(_loginMiddleware)
             ..combine(_passMiddleware)
             ..combine(routingMiddleware)
             ..combine(_messagesMiddleware)
-            ..combine(_profileMiddleware)
             ..combine(_settingsMiddleware))
           .build(),
     ];
