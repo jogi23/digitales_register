@@ -19,7 +19,8 @@ import 'package:built_collection/built_collection.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/container/calendar_week_container.dart';
 import 'package:dr/data.dart';
-import 'package:dr/main.dart';
+import 'package:dr/providers/calendar_provider.dart';
+import 'package:dr/providers/provider_container.dart';
 import 'package:dr/ui/last_fetched_overlay.dart';
 import 'package:dr/ui/no_internet.dart';
 import 'package:dr/utc_date_time.dart';
@@ -275,11 +276,11 @@ class HourWidget extends StatelessWidget {
       child: ClipRect(
         child: InkWell(
           onTap: () {
-            actions.calendarActions.select(
-              CalendarSelection((b) => b
-                ..date = day.date
-                ..hour = hour.fromHour),
-            );
+            providerContainer.read(calendarProvider.notifier).select(
+                  CalendarSelection((b) => b
+                    ..date = day.date
+                    ..hour = hour.fromHour),
+                );
           },
           child: DecoratedBox(
             decoration: BoxDecoration(

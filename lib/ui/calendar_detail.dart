@@ -19,7 +19,8 @@ import 'package:dr/app_state.dart';
 import 'package:dr/container/calendar_card_container.dart';
 import 'package:dr/container/calendar_detail_container.dart';
 import 'package:dr/data.dart';
-import 'package:dr/main.dart';
+import 'package:dr/providers/calendar_provider.dart';
+import 'package:dr/providers/provider_container.dart';
 import 'package:dr/ui/calendar_week.dart';
 import 'package:dr/ui/last_fetched_overlay.dart';
 import 'package:dr/ui/no_internet.dart';
@@ -130,9 +131,9 @@ class _CalendarDetailPageState extends State<CalendarDetailPage> {
       return;
     }
     final date = _dateForPageViewIndex(index);
-    actions.calendarActions.select(
-      CalendarSelection((b) => b..date = date),
-    );
+    providerContainer.read(calendarProvider.notifier).select(
+          CalendarSelection((b) => b..date = date),
+        );
     setState(() {
       selectedDate = date;
     });
@@ -143,7 +144,7 @@ class _CalendarDetailPageState extends State<CalendarDetailPage> {
     super.didUpdateWidget(oldWidget);
     if (!widget.show && oldWidget.show) {
       // clear the selection
-      actions.calendarActions.select(null);
+      providerContainer.read(calendarProvider.notifier).select(null);
     }
     if (widget.selectedDay == null) {
       return;
@@ -199,7 +200,9 @@ class _CalendarDetailPageState extends State<CalendarDetailPage> {
               ? IconButton(
                   icon: const Icon(Icons.arrow_forward_ios),
                   onPressed: () {
-                    actions.calendarActions.select(null);
+                    providerContainer
+                        .read(calendarProvider.notifier)
+                        .select(null);
                   },
                 )
               : null,

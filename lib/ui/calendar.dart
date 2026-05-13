@@ -18,7 +18,8 @@
 import 'package:dr/app_state.dart';
 import 'package:dr/container/calendar_detail_container.dart';
 import 'package:dr/container/calendar_week_container.dart';
-import 'package:dr/main.dart';
+import 'package:dr/providers/calendar_provider.dart';
+import 'package:dr/providers/provider_container.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
 import 'package:flutter/material.dart';
@@ -180,7 +181,11 @@ class _CalendarState extends State<Calendar> with TickerProviderStateMixin {
                 fullscreenDialog: true,
               ),
             )
-            .then((_) => actions.calendarActions.select(null));
+            .then(
+              (_) => providerContainer
+                  .read(calendarProvider.notifier)
+                  .select(null),
+            );
       });
     }
     super.didUpdateWidget(oldWidget);
