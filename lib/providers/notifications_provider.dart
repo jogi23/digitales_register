@@ -20,7 +20,6 @@ import 'package:dr/middleware/middleware.dart' show wrapper;
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
-import 'package:flutter/material.dart' hide Notification;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class NotificationsState {

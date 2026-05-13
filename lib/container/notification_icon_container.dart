@@ -29,8 +29,8 @@ class NotificationIconContainer extends ConsumerWidget {
     final count = ref.watch(
       notificationsProvider.select((s) => s.notifications.length),
     );
-    return StoreConnection<AppState, AppActions, Null>(
-      connect: (_) => null,
+    return StoreConnection<AppState, AppActions, void>(
+      connect: (_) {},
       builder: (context, _, actions) => NotificationIcon(
         notifications: count,
         onTap: actions.routingActions.showNotifications.call,

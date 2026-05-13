@@ -30,8 +30,8 @@ class NotificationPageContainer extends ConsumerWidget {
     final state = ref.watch(notificationsProvider);
     final noInternet = ref.watch(noInternetProvider);
     final notifier = ref.read(notificationsProvider.notifier);
-    return StoreConnection<AppState, AppActions, Null>(
-      connect: (_) => null,
+    return StoreConnection<AppState, AppActions, void>(
+      connect: (_) {},
       builder: (context, _, actions) => NotificationPage(
         notifications: state.notifications,
         noInternet: noInternet,

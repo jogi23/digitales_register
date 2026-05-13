@@ -66,7 +66,9 @@ Future<void> _markAsRead(
     ActionHandler next,
     Action<int> action) async {
   await next(action);
-  providerContainer.read(notificationsProvider.notifier).markMessageAsRead(action.payload);
+  providerContainer
+      .read(notificationsProvider.notifier)
+      .markMessageAsRead(action.payload);
   await wrapper.send(
     "api/message/markAsRead",
     args: {"messageId": action.payload},
