@@ -20,40 +20,77 @@ import 'package:built_redux/built_redux.dart';
 import 'package:dr/actions/app_actions.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/container/settings_page.dart';
+import 'package:dr/providers/provider_container.dart' as pc;
+import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/reducer/reducer.dart';
 import 'package:dr/ui/dialog.dart';
 import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_built_redux/flutter_built_redux.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
+
+class _TestSettingsNotifier extends SettingsNotifier {
+  final SettingsState initial;
+
+  _TestSettingsNotifier(this.initial);
+
+  @override
+  SettingsState build() => initial;
+}
+
+Future<ProviderContainer> _pumpSettingsPage(
+  WidgetTester tester, {
+  SettingsState? settings,
+  AppState? appState,
+}) async {
+  final container = ProviderContainer(
+    overrides: [
+      settingsProvider.overrideWith(
+        () => _TestSettingsNotifier(settings ?? SettingsState()),
+      ),
+    ],
+  );
+  pc.providerContainer = container;
+  final store = Store<AppState, AppStateBuilder, AppActions>(
+    appReducerBuilder.build(),
+    appState ?? AppState(),
+    AppActions(),
+  );
+  final widget = UncontrolledProviderScope(
+    container: container,
+    child: ReduxProvider(
+      store: store,
+      child: MaterialApp(
+        home: SettingsPageContainer(),
+      ),
+    ),
+  );
+  await tester.pumpWidget(
+    DynamicTheme(
+      data: (brightness, overridePlatform, seedColor) {
+        return ThemeData(
+          primarySwatch: Colors.deepOrange,
+          brightness: brightness,
+        );
+      },
+      themedWidgetBuilder: (context, data) => widget,
+    ),
+  );
+  await tester.pumpAndSettle();
+  return container;
+}
 
 void main() {
   testGoldens(
     'scrolls to grades settings',
     (tester) async {
-      final widget = ReduxProvider(
-        store: Store<AppState, AppStateBuilder, AppActions>(
-          ReducerBuilder<AppState, AppStateBuilder>().build(),
-          AppState((b) => b.settingsState.scrollToGrades = true),
-          AppActions(),
-        ),
-        child: MaterialApp(
-          home: SettingsPageContainer(),
-        ),
+      final container = await _pumpSettingsPage(
+        tester,
+        settings: SettingsState((b) => b.scrollToGrades = true),
       );
-      await tester.pumpWidget(
-        DynamicTheme(
-          data: (brightness, overridePlatform, seedColor) {
-            return ThemeData(
-              primarySwatch: Colors.deepOrange,
-              brightness: brightness,
-            );
-          },
-          themedWidgetBuilder: (context, data) => widget,
-        ),
-      );
-      await tester.pumpAndSettle();
+      addTearDown(container.dispose);
 
       await expectLater(
         find.byType(SettingsPageContainer),
@@ -66,29 +103,11 @@ void main() {
     testWidgets(
       'scrolls to subject nicks and adds one directly',
       (tester) async {
-        final store = Store<AppState, AppStateBuilder, AppActions>(
-          appReducerBuilder.build(),
-          AppState((b) => b.settingsState.scrollToSubjectNicks = true),
-          AppActions(),
+        final container = await _pumpSettingsPage(
+          tester,
+          settings: SettingsState((b) => b.scrollToSubjectNicks = true),
         );
-        final widget = ReduxProvider(
-          store: store,
-          child: MaterialApp(
-            home: SettingsPageContainer(),
-          ),
-        );
-        await tester.pumpWidget(
-          DynamicTheme(
-            data: (brightness, overridePlatform, seedColor) {
-              return ThemeData(
-                primarySwatch: Colors.deepOrange,
-                brightness: brightness,
-              );
-            },
-            themedWidgetBuilder: (context, data) => widget,
-          ),
-        );
-        await tester.pumpAndSettle();
+        addTearDown(container.dispose);
 
         // a dialog should be opened
         expect(find.byType(InfoDialog), findsOneWidget);
@@ -111,35 +130,14 @@ void main() {
         );
         await tester.pumpAndSettle();
         await tester.tap(find.text("Fertig"));
-        expect(store.state.settingsState.subjectNicks["Fach1"], "F1");
+        expect(container.read(settingsProvider).subjectNicks["Fach1"], "F1");
       },
     );
     testWidgets(
       'adds a subject nick',
       (tester) async {
-        final store = Store<AppState, AppStateBuilder, AppActions>(
-          appReducerBuilder.build(),
-          AppState(),
-          AppActions(),
-        );
-        final widget = ReduxProvider(
-          store: store,
-          child: MaterialApp(
-            home: SettingsPageContainer(),
-          ),
-        );
-        await tester.pumpWidget(
-          DynamicTheme(
-            data: (brightness, overridePlatform, seedColor) {
-              return ThemeData(
-                primarySwatch: Colors.deepOrange,
-                brightness: brightness,
-              );
-            },
-            themedWidgetBuilder: (context, data) => widget,
-          ),
-        );
-        await tester.pumpAndSettle();
+        final container = await _pumpSettingsPage(tester);
+        addTearDown(container.dispose);
         await tester.scrollUntilVisible(
           find.text("Fächerkürzel"),
           200,
@@ -176,41 +174,23 @@ void main() {
             "F1");
         await tester.pumpAndSettle();
         await tester.tap(find.text("Fertig"));
-        expect(store.state.settingsState.subjectNicks["Fach1"], "F1");
+        expect(container.read(settingsProvider).subjectNicks["Fach1"], "F1");
       },
     );
     testWidgets(
       'removes a subject nick',
       (tester) async {
-        final store = Store<AppState, AppStateBuilder, AppActions>(
-          appReducerBuilder.build(),
-          AppState(
-            (b) => b.settingsState.subjectNicks = MapBuilder(
+        final container = await _pumpSettingsPage(
+          tester,
+          settings: SettingsState(
+            (b) => b.subjectNicks = MapBuilder(
               {
                 "Fach1": "f1",
               },
             ),
           ),
-          AppActions(),
         );
-        final widget = ReduxProvider(
-          store: store,
-          child: MaterialApp(
-            home: SettingsPageContainer(),
-          ),
-        );
-        await tester.pumpWidget(
-          DynamicTheme(
-            data: (brightness, overridePlatform, seedColor) {
-              return ThemeData(
-                primarySwatch: Colors.deepOrange,
-                brightness: brightness,
-              );
-            },
-            themedWidgetBuilder: (context, data) => widget,
-          ),
-        );
-        await tester.pumpAndSettle();
+        addTearDown(container.dispose);
         await tester.scrollUntilVisible(
           find.text("Fächerkürzel"),
           200,
@@ -245,41 +225,23 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
-        expect(store.state.settingsState.subjectNicks["Fach1"], null);
+        expect(container.read(settingsProvider).subjectNicks["Fach1"], null);
       },
     );
     testWidgets(
       'edits a subject nick',
       (tester) async {
-        final store = Store<AppState, AppStateBuilder, AppActions>(
-          appReducerBuilder.build(),
-          AppState(
-            (b) => b.settingsState.subjectNicks = MapBuilder(
+        final container = await _pumpSettingsPage(
+          tester,
+          settings: SettingsState(
+            (b) => b.subjectNicks = MapBuilder(
               {
                 "Fach1": "f1",
               },
             ),
           ),
-          AppActions(),
         );
-        final widget = ReduxProvider(
-          store: store,
-          child: MaterialApp(
-            home: SettingsPageContainer(),
-          ),
-        );
-        await tester.pumpWidget(
-          DynamicTheme(
-            data: (brightness, overridePlatform, seedColor) {
-              return ThemeData(
-                primarySwatch: Colors.deepOrange,
-                brightness: brightness,
-              );
-            },
-            themedWidgetBuilder: (context, data) => widget,
-          ),
-        );
-        await tester.pumpAndSettle();
+        addTearDown(container.dispose);
         await tester.scrollUntilVisible(
           find.text("Fächerkürzel"),
           200,
@@ -360,7 +322,10 @@ void main() {
         await tester.tap(find.text("Fertig"));
 
         await tester.pumpAndSettle();
-        expect(store.state.settingsState.subjectNicks["Fach1"], "new_nick");
+        expect(
+          container.read(settingsProvider).subjectNicks["Fach1"],
+          "new_nick",
+        );
       },
     );
   });
@@ -369,29 +334,8 @@ void main() {
     testWidgets(
       'adds an item',
       (tester) async {
-        final store = Store<AppState, AppStateBuilder, AppActions>(
-          appReducerBuilder.build(),
-          AppState(),
-          AppActions(),
-        );
-        final widget = ReduxProvider(
-          store: store,
-          child: MaterialApp(
-            home: SettingsPageContainer(),
-          ),
-        );
-        await tester.pumpWidget(
-          DynamicTheme(
-            data: (brightness, overridePlatform, seedColor) {
-              return ThemeData(
-                primarySwatch: Colors.deepOrange,
-                brightness: brightness,
-              );
-            },
-            themedWidgetBuilder: (context, data) => widget,
-          ),
-        );
-        await tester.pumpAndSettle();
+        final container = await _pumpSettingsPage(tester);
+        addTearDown(container.dispose);
         await tester.scrollUntilVisible(
           find.text("Fächer aus dem Notendurchschnitt ausschließen"),
           150,
@@ -413,12 +357,12 @@ void main() {
         tester.testTextInput.enterText("Fach1");
         await tester.pumpAndSettle();
         expect(
-          store.state.settingsState.ignoreForGradesAverage,
+          container.read(settingsProvider).ignoreForGradesAverage,
           <String>[].toBuiltList(),
         );
         await tester.tap(find.text("Fertig"));
         expect(
-          store.state.settingsState.ignoreForGradesAverage,
+          container.read(settingsProvider).ignoreForGradesAverage,
           ["Fach1"].toBuiltList(),
         );
       },
@@ -426,33 +370,13 @@ void main() {
     testWidgets(
       'removes an item',
       (tester) async {
-        final store = Store<AppState, AppStateBuilder, AppActions>(
-          appReducerBuilder.build(),
-          AppState(
-            (b) => b.settingsState.ignoreForGradesAverage = ListBuilder(
-              <String>["Fach1"],
-            ),
-          ),
-          AppActions(),
-        );
-        final widget = ReduxProvider(
-          store: store,
-          child: MaterialApp(
-            home: SettingsPageContainer(),
+        final container = await _pumpSettingsPage(
+          tester,
+          settings: SettingsState(
+            (b) => b.ignoreForGradesAverage = ListBuilder(<String>["Fach1"]),
           ),
         );
-        await tester.pumpWidget(
-          DynamicTheme(
-            data: (brightness, overridePlatform, seedColor) {
-              return ThemeData(
-                primarySwatch: Colors.deepOrange,
-                brightness: brightness,
-              );
-            },
-            themedWidgetBuilder: (context, data) => widget,
-          ),
-        );
-        await tester.pumpAndSettle();
+        addTearDown(container.dispose);
         await tester.scrollUntilVisible(
           find.text("Fächer aus dem Notendurchschnitt ausschließen"),
           150,
@@ -468,7 +392,7 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(
-          store.state.settingsState.ignoreForGradesAverage,
+          container.read(settingsProvider).ignoreForGradesAverage,
           <String>[].toBuiltList(),
         );
       },

@@ -115,6 +115,7 @@ Future<void> _showSettings(
     MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
     ActionHandler next,
     Action<void> action) async {
+  providerContainer.read(settingsProvider.notifier).resetScroll();
   scaffoldKey!.currentState!
       .selectContentWidget(SettingsPageContainer(), Pages.settings);
   await next(action);
@@ -124,6 +125,9 @@ Future<void> _showEditCalendarSubjectNicks(
     MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
     ActionHandler next,
     Action<void> action) async {
+  providerContainer
+      .read(settingsProvider.notifier)
+      .scrollToSubjectNicksSection();
   await next(action);
   unawaited(navigatorKey!.currentState!.pushNamed("/settings"));
 }
@@ -132,6 +136,7 @@ Future<void> _showEditGradesAverageSettings(
     MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
     ActionHandler next,
     Action<void> action) async {
+  providerContainer.read(settingsProvider.notifier).scrollToGradesSection();
   unawaited(navigatorKey!.currentState!.pushNamed("/settings"));
   await next(action);
 }

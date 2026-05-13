@@ -18,16 +18,23 @@
 import 'package:built_collection/built_collection.dart';
 import 'package:dr/actions/app_actions.dart';
 import 'package:dr/app_state.dart';
+import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/ui/settings_page_widget.dart';
 import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_built_redux/flutter_built_redux.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class SettingsPageContainer extends StatelessWidget {
+class SettingsPageContainer extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
-    return StoreConnection<AppState, AppActions, SettingsViewModel>(
-      builder: (context, vm, actions) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(settingsProvider);
+    final notifier = ref.read(settingsProvider.notifier);
+    return StoreConnection<AppState, AppActions, _ReduxSettingsData>(
+      connect: _ReduxSettingsData.from,
+      builder: (context, redux, actions) {
+        final vm =
+            SettingsViewModel.from(settings, redux.allSubjects, redux.isDemo);
         return SettingsPageWidget(
           vm: vm,
           onSetDarkMode: (dm) {
@@ -41,41 +48,39 @@ class SettingsPageContainer extends StatelessWidget {
           onSetPlatformOverride: (o) {
             DynamicTheme.of(context)!.setPlatformOverride(o);
           },
-          onSetNoPassSaving: actions.settingsActions.saveNoPass.call,
-          onSetNoDataSaving: actions.settingsActions.saveNoData.call,
-          onSetAskWhenDelete:
-              actions.settingsActions.askWhenDeleteReminder.call,
-          onSetDeleteDataOnLogout:
-              actions.settingsActions.deleteDataOnLogout.call,
-          onSetSubjectNicks: (map) =>
-              actions.settingsActions.subjectNicks(BuiltMap(map)),
-          onSetShowCalendarEditNicksBar:
-              actions.settingsActions.showCalendarSubjectNicksBar.call,
-          onSetShowGradesDiagram:
-              actions.settingsActions.showGradesDiagram.call,
-          onSetShowAllSubjectsAverage:
-              actions.settingsActions.showAllSubjectsAverage.call,
-          onSetDashboardMarkNewOrChangedEntries:
-              actions.settingsActions.markNotSeenDashboardEntries.call,
-          onSetDashboardDeduplicateEntries:
-              actions.settingsActions.deduplicateDashboardEntries.call,
+          onSetNoPassSaving: notifier.setSaveNoPass,
+          onSetNoDataSaving: notifier.setSaveNoData,
+          onSetAskWhenDelete: notifier.setAskWhenDelete,
+          onSetDeleteDataOnLogout: notifier.setDeleteDataOnLogout,
+          onSetSubjectNicks: (map) => notifier.setSubjectNicks(BuiltMap(map)),
+          onSetShowCalendarEditNicksBar: notifier.setShowCalendarNicksBar,
+          onSetShowGradesDiagram: notifier.setShowGradesDiagram,
+          onSetShowAllSubjectsAverage: notifier.setShowAllSubjectsAverage,
+          onSetDashboardMarkNewOrChangedEntries: notifier.setMarkNewOrChanged,
+          onSetDashboardDeduplicateEntries: notifier.setDeduplicate,
           onShowProfile: actions.routingActions.showProfile.call,
           onSetIgnoreForGradesAverage: (list) =>
-              actions.settingsActions.ignoreSubjectsForAverage(BuiltList(list)),
-          onSetDashboardColorBorders:
-              actions.settingsActions.dashboardColorBorders.call,
-          onSetCalenderColorBackground:
-              actions.settingsActions.calendarColorBackground.call,
-          onSetDashboardColorTestsInRed:
-              actions.settingsActions.dashboardColorTestsInRed.call,
-          onSetSubjectTheme: actions.settingsActions.setSubjectTheme.call,
+              notifier.setIgnoreForGradesAverage(BuiltList(list)),
+          onSetDashboardColorBorders: notifier.setDashboardColorBorders,
+          onSetCalenderColorBackground: notifier.setCalendarColorBackground,
+          onSetDashboardColorTestsInRed: notifier.setDashboardColorTestsInRed,
+          onSetSubjectTheme: notifier.setSubjectTheme,
         );
-      },
-      connect: (state) {
-        return SettingsViewModel(state);
       },
     );
   }
+}
+
+class _ReduxSettingsData {
+  final List<String> allSubjects;
+  final bool isDemo;
+
+  const _ReduxSettingsData({required this.allSubjects, required this.isDemo});
+
+  factory _ReduxSettingsData.from(AppState state) => _ReduxSettingsData(
+        allSubjects: state.extractAllSubjects(),
+        isDemo: state.isDemo,
+      );
 }
 
 typedef OnSettingChanged<T> = void Function(T newValue);
@@ -100,27 +105,50 @@ class SettingsViewModel {
   final List<String> allSubjects;
   final List<String> ignoreForGradesAverage;
   final BuiltMap<String, SubjectTheme> subjectThemes;
-  SettingsViewModel(AppState state)
-      : noPassSaving = state.settingsState.noPasswordSaving,
-        noDataSaving = state.settingsState.noDataSaving,
-        askWhenDelete = state.settingsState.askWhenDelete,
-        deleteDataOnLogout = state.settingsState.deleteDataOnLogout,
-        subjectNicks = state.settingsState.subjectNicks.toMap(),
-        showSubjectNicks = state.settingsState.scrollToSubjectNicks,
-        showGradesSettings = state.settingsState.scrollToGrades,
-        showCalendarEditNicksBar = state.settingsState.showCalendarNicksBar,
-        showGradesDiagram = state.settingsState.showGradesDiagram,
-        showAllSubjectsAverage = state.settingsState.showAllSubjectsAverage,
-        dashboardMarkNewOrChangedEntries =
-            state.settingsState.dashboardMarkNewOrChangedEntries,
-        dashboardDeduplicateEntries =
-            state.settingsState.dashboardDeduplicateEntries,
-        dashboardColorBorders = state.settingsState.dashboardColorBorders,
-        calendarColorBackground = state.settingsState.calendarColorBackground,
-        dashboardColorTestsInRed = state.settingsState.dashboardColorTestsInRed,
-        allSubjects = state.extractAllSubjects(),
-        ignoreForGradesAverage =
-            state.settingsState.ignoreForGradesAverage.toList(),
-        subjectThemes = state.settingsState.subjectThemes,
-        demoMode = state.isDemo;
+
+  const SettingsViewModel({
+    required this.noPassSaving,
+    required this.noDataSaving,
+    required this.askWhenDelete,
+    required this.deleteDataOnLogout,
+    required this.subjectNicks,
+    required this.showSubjectNicks,
+    required this.showGradesSettings,
+    required this.showCalendarEditNicksBar,
+    required this.showGradesDiagram,
+    required this.showAllSubjectsAverage,
+    required this.dashboardMarkNewOrChangedEntries,
+    required this.dashboardDeduplicateEntries,
+    required this.dashboardColorBorders,
+    required this.calendarColorBackground,
+    required this.dashboardColorTestsInRed,
+    required this.allSubjects,
+    required this.ignoreForGradesAverage,
+    required this.subjectThemes,
+    required this.demoMode,
+  });
+
+  factory SettingsViewModel.from(
+          SettingsState s, List<String> allSubjects, bool isDemo) =>
+      SettingsViewModel(
+        noPassSaving: s.noPasswordSaving,
+        noDataSaving: s.noDataSaving,
+        askWhenDelete: s.askWhenDelete,
+        deleteDataOnLogout: s.deleteDataOnLogout,
+        subjectNicks: s.subjectNicks.toMap(),
+        showSubjectNicks: s.scrollToSubjectNicks,
+        showGradesSettings: s.scrollToGrades,
+        showCalendarEditNicksBar: s.showCalendarNicksBar,
+        showGradesDiagram: s.showGradesDiagram,
+        showAllSubjectsAverage: s.showAllSubjectsAverage,
+        dashboardMarkNewOrChangedEntries: s.dashboardMarkNewOrChangedEntries,
+        dashboardDeduplicateEntries: s.dashboardDeduplicateEntries,
+        dashboardColorBorders: s.dashboardColorBorders,
+        calendarColorBackground: s.calendarColorBackground,
+        dashboardColorTestsInRed: s.dashboardColorTestsInRed,
+        allSubjects: allSubjects,
+        ignoreForGradesAverage: s.ignoreForGradesAverage.toList(),
+        subjectThemes: s.subjectThemes,
+        demoMode: isDemo,
+      );
 }

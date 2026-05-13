@@ -21,13 +21,15 @@ import 'package:dr/actions/app_actions.dart';
 import 'package:dr/actions/login_actions.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/middleware/middleware.dart';
+import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/ui/sidebar.dart';
 import 'package:flutter/material.dart' hide Builder;
 import 'package:flutter_built_redux/flutter_built_redux.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 part 'sidebar_container.g.dart';
 
-class SidebarContainer extends StatelessWidget {
+class SidebarContainer extends ConsumerWidget {
   final bool tabletMode;
   final VoidCallback goHome;
   final Pages currentSelected;
@@ -38,15 +40,16 @@ class SidebarContainer extends StatelessWidget {
       required this.goHome,
       required this.currentSelected});
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(settingsProvider);
+    final settingsNotifier = ref.read(settingsProvider.notifier);
     return StoreConnection<AppState, AppActions, SidebarViewModel>(
       builder: (BuildContext context, state, AppActions actions) {
         return Sidebar(
           currentSelected: currentSelected,
-          drawerExpanded: state.drawerInitiallyFullyExpanded,
+          drawerExpanded: settings.drawerFullyExpanded,
           goHome: goHome,
-          onDrawerExpansionChange:
-              actions.settingsActions.drawerExpandedChange.call,
+          onDrawerExpansionChange: settingsNotifier.setDrawerFullyExpanded,
           tabletMode: tabletMode,
           userIcon: state.userIcon,
           username: state.username,
@@ -66,7 +69,7 @@ class SidebarContainer extends StatelessWidget {
                 ..forced = false,
             ),
           ),
-          passwordSavingEnabled: state.passwordSavingEnabled,
+          passwordSavingEnabled: !settings.noPasswordSaving,
         );
       },
       connect: (AppState state) {
@@ -74,10 +77,11 @@ class SidebarContainer extends StatelessWidget {
           (b) => b
             ..username = state.config?.fullName ?? state.loginState.username
             ..userIcon = state.config?.imgSource
-            ..drawerInitiallyFullyExpanded =
-                state.settingsState.drawerFullyExpanded
+            // drawerInitiallyFullyExpanded and passwordSavingEnabled are read
+            // directly from settingsProvider in the builder above.
+            ..drawerInitiallyFullyExpanded = false
             ..otherAccounts = state.loginState.otherAccounts.toBuilder()
-            ..passwordSavingEnabled = !state.settingsState.noPasswordSaving,
+            ..passwordSavingEnabled = false,
         );
       },
     );

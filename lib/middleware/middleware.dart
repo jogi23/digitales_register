@@ -45,6 +45,7 @@ import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/providers/notifications_provider.dart';
 import 'package:dr/providers/profile_provider.dart';
 import 'package:dr/providers/provider_container.dart';
+import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/serializers.dart';
 import 'package:dr/ui/certificate.dart';
 import 'package:dr/ui/dialog.dart';
@@ -219,9 +220,10 @@ Future<void> _noInternet(
         logoutForcedByServer: true,
       );
     } else {
+        final settings = providerContainer.read(settingsProvider);
       await providerContainer.read(dashboardProvider.notifier).refresh(
-            markNew: api.state.settingsState.dashboardMarkNewOrChangedEntries,
-            deduplicate: api.state.settingsState.dashboardDeduplicateEntries,
+            markNew: settings.dashboardMarkNewOrChangedEntries,
+            deduplicate: settings.dashboardDeduplicateEntries,
           );
     }
   }
@@ -285,12 +287,12 @@ Future<void> _load(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
 
 Future<void> _loggedIn(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
     ActionHandler next, Action<LoggedInPayload> action) async {
+  final currentSettings = providerContainer.read(settingsProvider);
   if (action.payload.fromStorage) {
     // If we logged in with saved credentials password saving must be enabled.
     wrapper.safeMode = false;
   }
-  if (!api.state.settingsState.noPasswordSaving &&
-      !action.payload.fromStorage) {
+  if (!currentSettings.noPasswordSaving && !action.payload.fromStorage) {
     await api.actions.savePassActions.save();
   }
   deletedData = false;
@@ -303,19 +305,24 @@ Future<void> _loggedIn(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
         final serializedState =
             serializers.deserialize(json.decode(state) as Object);
         if (serializedState is SettingsState) {
+          final restoredSettings = serializedState.rebuild(
+            (b) => b.noPasswordSaving = currentSettings.noPasswordSaving,
+          );
           await api.actions.mountAppState(
             api.state.rebuild(
               (b) => b
                 ..settingsState.replace(
-                  // Override the previous password saving setting with whatever the user chose this time.
-                  serializedState.rebuild(
-                    (b) => b.noPasswordSaving =
-                        api.state.settingsState.noPasswordSaving,
-                  ),
+                  restoredSettings,
                 ),
             ),
           );
+          providerContainer
+              .read(settingsProvider.notifier)
+              .load(restoredSettings);
         } else if (serializedState is AppState) {
+          final restoredSettings = serializedState.settingsState.rebuild(
+            (b) => b.noPasswordSaving = currentSettings.noPasswordSaving,
+          );
           final currentState = api.state;
           await api.actions.mountAppState(
             serializedState.rebuild(
@@ -328,18 +335,19 @@ Future<void> _loggedIn(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
                           ? serializedState.gradesState.semester
                           : currentState.gradesState.semester,
                     )
-                // Override the previous password saving setting with whatever the user chose this time.
-                ..settingsState.noPasswordSaving =
-                    api.state.settingsState.noPasswordSaving,
+                ..settingsState.replace(restoredSettings),
             ),
           );
+          providerContainer
+              .read(settingsProvider.notifier)
+              .load(restoredSettings);
         }
 
         // next not at the beginning: bug fix (serialization)
         await next(action);
 
         await api.actions.settingsActions
-            .saveNoPass(api.state.settingsState.noPasswordSaving);
+            .saveNoPass(providerContainer.read(settingsProvider).noPasswordSaving);
       } catch (e) {
         showSnackBar("Fehler beim Laden der gespeicherten Daten");
         log("Failed to load data", error: e);
@@ -357,10 +365,11 @@ Future<void> _loggedIn(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
     callback();
   }
   if (!action.payload.offlineOnly) {
+    final settings = providerContainer.read(settingsProvider);
     await providerContainer.read(dashboardProvider.notifier).load(
           true,
-          markNew: api.state.settingsState.dashboardMarkNewOrChangedEntries,
-          deduplicate: api.state.settingsState.dashboardDeduplicateEntries,
+          markNew: settings.dashboardMarkNewOrChangedEntries,
+          deduplicate: settings.dashboardDeduplicateEntries,
         );
     await providerContainer.read(notificationsProvider.notifier).load();
     // Restore the subject-themes update that was lost when DashboardActionsNames.loaded
@@ -399,19 +408,22 @@ NextActionHandler _saveStateMiddleware(
 
             Future<void> save() async {
               final state = _stateToSave;
+              final settings = providerContainer.read(settingsProvider);
               final user = getStorageKey(
                 state.loginState.username,
                 wrapper.loginAddress,
               );
               _saveUnderway = false;
               String toSave;
-              if (!state.settingsState.noDataSaving && !deletedData) {
+              if (!settings.noDataSaving && !deletedData) {
                 toSave = json.encode(
-                  serializers.serialize(state),
+                  serializers.serialize(
+                    state.rebuild((b) => b.settingsState.replace(settings)),
+                  ),
                 );
               } else {
                 toSave = json.encode(
-                  serializers.serialize(state.settingsState),
+                  serializers.serialize(settings),
                 );
               }
               if (_lastSave == toSave && _lastUsernameSaved == user) return;
@@ -465,9 +477,12 @@ Future<String?> _readFromStorage(String key) async {
 Future<void> _saveNoData(
   MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
   ActionHandler next,
-  Action<void> action,
+  Action<bool> action,
 ) async {
   await next(action);
+  providerContainer
+      .read(settingsProvider.notifier)
+      .setSaveNoData(action.payload);
   await api.actions.saveState();
 }
 
@@ -492,11 +507,12 @@ Future<void> _restarted(
     wrapper.interaction();
     final poppedAnything = _popAll();
     if (!poppedAnything) {
+      final settings = providerContainer.read(settingsProvider);
       // If we pop something the routeObserver will trigger a reload of the dasboard.
       // However, if we are on the dashboard already, we need to this here.
       await providerContainer.read(dashboardProvider.notifier).refresh(
-            markNew: api.state.settingsState.dashboardMarkNewOrChangedEntries,
-            deduplicate: api.state.settingsState.dashboardDeduplicateEntries,
+            markNew: settings.dashboardMarkNewOrChangedEntries,
+            deduplicate: settings.dashboardDeduplicateEntries,
           );
     }
   }

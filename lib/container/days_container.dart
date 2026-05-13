@@ -24,6 +24,7 @@ import 'package:dr/main.dart' show showSnackBar;
 import 'package:dr/providers/dashboard_error_provider.dart';
 import 'package:dr/providers/dashboard_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
+import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/ui/days.dart';
 import 'package:flutter/material.dart' hide Builder;
 import 'package:flutter_built_redux/flutter_built_redux.dart';
@@ -36,6 +37,7 @@ class DaysContainer extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final dashboard = ref.watch(dashboardProvider);
     final noInternet = ref.watch(noInternetProvider);
+    final settings = ref.watch(settingsProvider);
     ref.listen<String?>(dashboardErrorProvider, (_, error) {
       if (error != null) {
         showSnackBar(error);
@@ -64,6 +66,7 @@ class DaysContainer extends ConsumerWidget {
           dashboard,
           noInternet,
           reduxData,
+          settings,
           unorderedDays,
           blacklist,
         );
@@ -71,20 +74,20 @@ class DaysContainer extends ConsumerWidget {
         return DaysWidget(
           vm: vm,
           onSwitchFuture: () => notifier.switchFuture(
-            markNew: reduxData.markNewOrChanged,
-            deduplicate: reduxData.deduplicate,
+            markNew: settings.dashboardMarkNewOrChangedEntries,
+            deduplicate: settings.dashboardDeduplicateEntries,
           ),
           refresh: () => notifier.refresh(
-            markNew: reduxData.markNewOrChanged,
-            deduplicate: reduxData.deduplicate,
+            markNew: settings.dashboardMarkNewOrChangedEntries,
+            deduplicate: settings.dashboardDeduplicateEntries,
           ),
           addReminderCallback: (day, msg) =>
               notifier.addReminder(day.date, msg),
           removeReminderCallback: (hw, day) => notifier.deleteHomework(hw),
           toggleDoneCallback: (hw, done) =>
               notifier.toggleDone(hw.id, hw.type.name, done),
-          setDoNotAskWhenDeleteCallback: () =>
-              actions.settingsActions.askWhenDeleteReminder(false),
+            setDoNotAskWhenDeleteCallback: () =>
+              ref.read(settingsProvider.notifier).setAskWhenDelete(false),
           markAsSeenCallback: notifier.markAsSeen,
           markDeletedHomeworkAsSeenCallback: notifier.markDeletedHomeworkAsSeen,
           markAllAsSeenCallback: notifier.markAllAsSeen,
@@ -97,36 +100,18 @@ class DaysContainer extends ConsumerWidget {
 }
 
 class _ReduxDaysData {
-  final bool askWhenDelete;
   final bool loginLoading;
   final bool showNotifications;
-  final bool colorBorders;
-  final bool colorTestsInRed;
-  final BuiltMap<String, SubjectTheme> subjectThemes;
-  final bool markNewOrChanged;
-  final bool deduplicate;
 
   const _ReduxDaysData({
-    required this.askWhenDelete,
     required this.loginLoading,
     required this.showNotifications,
-    required this.colorBorders,
-    required this.colorTestsInRed,
-    required this.subjectThemes,
-    required this.markNewOrChanged,
-    required this.deduplicate,
   });
 
   factory _ReduxDaysData.from(AppState state) => _ReduxDaysData(
-        askWhenDelete: state.settingsState.askWhenDelete,
         loginLoading: state.loginState.loading,
         showNotifications:
             (state.notificationState.notifications?.length ?? 0) > 0,
-        colorBorders: state.settingsState.dashboardColorBorders,
-        colorTestsInRed: state.settingsState.dashboardColorTestsInRed,
-        subjectThemes: state.settingsState.subjectThemes,
-        markNewOrChanged: state.settingsState.dashboardMarkNewOrChangedEntries,
-        deduplicate: state.settingsState.dashboardDeduplicateEntries,
       );
 }
 
@@ -152,6 +137,7 @@ abstract class DaysViewModel
     DashboardState dashboard,
     bool noInternet,
     _ReduxDaysData reduxData,
+    SettingsState settings,
     List<Day> unorderedDays,
     BuiltList<HomeworkType> blacklist,
   ) =>
@@ -163,12 +149,12 @@ abstract class DaysViewModel
           ..noInternet = noInternet
           ..future = dashboard.future
           ..loading = dashboard.loading || reduxData.loginLoading
-          ..askWhenDelete = reduxData.askWhenDelete
+            ..askWhenDelete = settings.askWhenDelete
           ..showAddReminder = !blacklist.contains(HomeworkType.homework)
           ..showNotifications = reduxData.showNotifications
-          ..colorBorders = reduxData.colorBorders
-          ..colorTestsInRed = reduxData.colorTestsInRed
-          ..subjectThemes = reduxData.subjectThemes.toBuilder(),
+            ..colorBorders = settings.dashboardColorBorders
+            ..colorTestsInRed = settings.dashboardColorTestsInRed
+            ..subjectThemes = settings.subjectThemes.toBuilder(),
       );
 }
 

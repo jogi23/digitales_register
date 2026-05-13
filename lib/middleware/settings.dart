@@ -27,5 +27,7 @@ Future<void> _updateSubjectThemes(
     Action action) async {
   await next(action);
   final allSubjects = api.state.extractAllSubjects();
-  await api.actions.settingsActions.updateSubjectThemes(allSubjects);
+  providerContainer
+      .read(settingsProvider.notifier)
+      .updateSubjectThemes(allSubjects);
 }

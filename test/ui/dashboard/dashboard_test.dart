@@ -28,6 +28,7 @@ import 'package:dr/middleware/middleware.dart';
 import 'package:dr/providers/dashboard_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/providers/provider_container.dart' as pc;
+import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/reducer/reducer.dart';
 import 'package:dr/ui/days.dart';
 import 'package:dr/ui/no_internet.dart';
@@ -49,6 +50,15 @@ class _TestDashboardNotifier extends DashboardNotifier {
   final DashboardState _initialState;
   @override
   DashboardState build() => _initialState;
+}
+
+class _TestSettingsNotifier extends SettingsNotifier {
+  final SettingsState initial;
+
+  _TestSettingsNotifier(this.initial);
+
+  @override
+  SettingsState build() => initial;
 }
 
 Future<void> main() async {
@@ -425,12 +435,17 @@ Future<void> main() async {
 
   testWidgets('correct collapse label', (WidgetTester tester) async {
     final widget = ProviderScope(
+      overrides: [
+        settingsProvider.overrideWith(
+          () => _TestSettingsNotifier(
+            SettingsState((b) => b.drawerFullyExpanded = false),
+          ),
+        ),
+      ],
       child: ReduxProvider(
         store: Store<AppState, AppStateBuilder, AppActions>(
           ReducerBuilder<AppState, AppStateBuilder>().build(),
-          AppState(
-            (b) => b.settingsState.drawerFullyExpanded = false,
-          ),
+          AppState(),
           AppActions(),
         ),
         child: MaterialApp(

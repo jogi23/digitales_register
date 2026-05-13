@@ -24,12 +24,16 @@ import 'package:dr/actions/login_actions.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/main.dart';
 import 'package:dr/middleware/middleware.dart';
+import 'package:dr/providers/provider_container.dart' as pc;
+import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/reducer/reducer.dart';
 import 'package:dr/serializers.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'test_utils.dart';
 import 'package:quiver/testing/src/async/fake_async.dart';
+
+import 'test_utils.dart';
 
 const serverUrl = "null/v2/api/auth/login";
 
@@ -48,6 +52,27 @@ class StorageHelper {
   }
 }
 
+class _TestSettingsNotifier extends SettingsNotifier {
+  final SettingsState initial;
+
+  _TestSettingsNotifier(this.initial);
+
+  @override
+  SettingsState build() => initial;
+}
+
+ProviderContainer _makeContainer({SettingsState? settings}) {
+  final container = ProviderContainer(
+    overrides: [
+      settingsProvider.overrideWith(
+        () => _TestSettingsNotifier(settings ?? SettingsState()),
+      ),
+    ],
+  );
+  pc.providerContainer = container;
+  return container;
+}
+
 void main() {
   secureStorage = FakeSecureStorage();
   final storageHelper = StorageHelper();
@@ -62,6 +87,8 @@ void main() {
   test('save state occurs after five seconds', () {
     FakeAsync().run((async) async {
       const username = "test_username";
+      final container = _makeContainer();
+      addTearDown(container.dispose);
       final store = Store<AppState, AppStateBuilder, AppActions>(
         appReducerBuilder.build(),
         AppState((b) => b.loginState
@@ -89,6 +116,8 @@ void main() {
   });
   test('save state occurs immediately', () async {
     const username = "test_username2";
+    final container = _makeContainer();
+    addTearDown(container.dispose);
     final store = Store<AppState, AppStateBuilder, AppActions>(
       appReducerBuilder.build(),
       AppState((b) => b.loginState
@@ -112,6 +141,10 @@ void main() {
   });
   test('state is not saved when data saving is disabled', () async {
     const username = "test_username2";
+    final container = _makeContainer(
+      settings: SettingsState((b) => b.noDataSaving = true),
+    );
+    addTearDown(container.dispose);
     final store = Store<AppState, AppStateBuilder, AppActions>(
       appReducerBuilder.build(),
       AppState(
@@ -141,6 +174,8 @@ void main() {
   test('state is deleted on logout when state saving is disabled', () async {
     navigatorKey = GlobalKey();
     const username = "test_username3";
+    final container = _makeContainer();
+    addTearDown(container.dispose);
     final store = Store<AppState, AppStateBuilder, AppActions>(
       appReducerBuilder.build(),
       AppState(
@@ -182,6 +217,8 @@ void main() {
   });
   test('state is deleted/saved when the setting is switched', () async {
     const username = "test_username4";
+    final container = _makeContainer();
+    addTearDown(container.dispose);
     final store = Store<AppState, AppStateBuilder, AppActions>(
       appReducerBuilder.build(),
       AppState(

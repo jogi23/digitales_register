@@ -15,14 +15,13 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
-import 'package:dr/actions/app_actions.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/providers/calendar_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
+import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/ui/calendar_card.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_built_redux/flutter_built_redux.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class CalendarCardContainer extends ConsumerWidget {
@@ -40,20 +39,16 @@ class CalendarCardContainer extends ConsumerWidget {
     final calendarState = ref.watch(calendarProvider);
     final noInternet = ref.watch(noInternetProvider);
     final hour = calendarState.days[day]!.hours[hourIndex];
-    return StoreConnection<AppState, AppActions, SubjectTheme>(
-      builder: (context, theme, actions) {
-        return CalendarCard(
-          hour: hour,
-          theme: theme,
-          selected: calendarState.selection?.date == day &&
-              calendarState.selection?.hour == hour.fromHour,
-          onOpenFile: (submission) =>
-              ref.read(calendarProvider.notifier).openLessonFile(submission),
-          noInternet: noInternet,
-        );
-      },
-      connect: (state) =>
-          state.settingsState.subjectThemes[hour.subject] ?? SubjectTheme(),
+    final theme =
+      ref.watch(settingsProvider).subjectThemes[hour.subject] ?? SubjectTheme();
+    return CalendarCard(
+      hour: hour,
+      theme: theme,
+      selected: calendarState.selection?.date == day &&
+          calendarState.selection?.hour == hour.fromHour,
+      onOpenFile: (submission) =>
+          ref.read(calendarProvider.notifier).openLessonFile(submission),
+      noInternet: noInternet,
     );
   }
 }
