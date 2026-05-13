@@ -18,58 +18,61 @@
 import 'package:collection/collection.dart';
 import 'package:dr/actions/app_actions.dart';
 import 'package:dr/app_state.dart';
+import 'package:dr/providers/calendar_provider.dart';
+import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/ui/calendar.dart';
-import 'package:dr/utc_date_time.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_built_redux/flutter_built_redux.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class CalendarContainer extends StatelessWidget {
+class CalendarContainer extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
-    return StoreConnection<AppState, AppActions, CalendarViewModel>(
-      builder: (context, vm, actions) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final calendarState = ref.watch(calendarProvider);
+    final noInternet = ref.watch(noInternetProvider);
+    return StoreConnection<AppState, AppActions, _SettingsVM>(
+      builder: (context, settingsVm, actions) {
+        final currentDays = calendarState.currentDays;
+        final vm = CalendarViewModel(
+          first: currentDays.isEmpty ? null : currentDays.first.date,
+          last: currentDays.isEmpty ? null : currentDays.last.date,
+          currentMonday: calendarState.currentMonday!,
+          showEditNicksBar: currentDays.any(
+                (day) => day.hours.any(
+                  (hour) => settingsVm.subjectNicks.entries.none(
+                    (entry) => equalsIgnoreAsciiCase(entry.key, hour.subject),
+                  ),
+                ),
+              ) &&
+              settingsVm.showCalendarNicksBar,
+          noInternet: noInternet,
+          selection: calendarState.selection,
+        );
         return Calendar(
           vm: vm,
           showEditSubjectNicks:
               actions.routingActions.showEditCalendarSubjectNicks.call,
           closeEditNicksBar: () =>
               actions.settingsActions.showCalendarSubjectNicksBar(false),
-          dayCallback: actions.calendarActions.load.call,
-          currentMondayCallback: actions.calendarActions.setCurrentMonday.call,
+          dayCallback: (monday) =>
+              ref.read(calendarProvider.notifier).load(monday),
+          currentMondayCallback: (monday) =>
+              ref.read(calendarProvider.notifier).setCurrentMonday(monday),
         );
       },
-      connect: (state) {
-        return CalendarViewModel(state);
-      },
+      connect: (state) => _SettingsVM(
+        subjectNicks: state.settingsState.subjectNicks.toMap(),
+        showCalendarNicksBar: state.settingsState.showCalendarNicksBar,
+      ),
     );
   }
 }
 
-typedef DayCallback = void Function(UtcDateTime day);
-
-class CalendarViewModel {
-  final bool showEditNicksBar, noInternet;
-  final UtcDateTime? first;
-  final UtcDateTime? last;
-  final UtcDateTime currentMonday;
-  final CalendarSelection? selection;
-
-  CalendarViewModel(AppState state)
-      : first = state.calendarState.currentDays.isEmpty
-            ? null
-            : state.calendarState.currentDays.first.date,
-        last = state.calendarState.currentDays.isEmpty
-            ? null
-            : state.calendarState.currentDays.last.date,
-        currentMonday = state.calendarState.currentMonday!,
-        showEditNicksBar = state.calendarState.currentDays.any(
-              (day) => day.hours.any(
-                (hour) => state.settingsState.subjectNicks.entries.none(
-                  (entry) => equalsIgnoreAsciiCase(entry.key, hour.subject),
-                ),
-              ),
-            ) &&
-            state.settingsState.showCalendarNicksBar,
-        noInternet = state.noInternet,
-        selection = state.calendarState.selection;
+class _SettingsVM {
+  final Map<String, String> subjectNicks;
+  final bool showCalendarNicksBar;
+  _SettingsVM({
+    required this.subjectNicks,
+    required this.showCalendarNicksBar,
+  });
 }

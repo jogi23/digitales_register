@@ -340,6 +340,7 @@ Future<void> _selectAccount(
   providerContainer.read(notificationsProvider.notifier).reset();
   providerContainer.read(absencesProvider.notifier).reset();
   providerContainer.read(profileProvider.notifier).reset();
+  providerContainer.read(calendarProvider.notifier).reset();
   await api.actions.load();
 }
 

@@ -17,13 +17,7 @@
 
 part of 'middleware.dart';
 
-final _calendarMiddleware =
-    MiddlewareBuilder<AppState, AppStateBuilder, AppActions>()
-      ..add(CalendarActionsNames.load, _loadCalendar)
-      ..add(CalendarActionsNames.select, _selectionChanged)
-      ..add(CalendarActionsNames.setCurrentMonday, _weekChanged)
-      ..add(CalendarActionsNames.onOpenFile, _openSubmission)
-      ..add(RoutingActionsNames.showCalendar, _clearSelection);
+// Calendar middleware migrated to CalendarNotifier in lib/providers/calendar_provider.dart
 
 Future<void> _loadCalendar(
     MiddlewareApi<AppState, AppStateBuilder, AppActions> api,

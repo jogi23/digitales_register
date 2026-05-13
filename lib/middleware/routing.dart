@@ -142,7 +142,13 @@ Future<void> _showCalendar(
     Action<void> action) async {
   scaffoldKey!.currentState!
       .selectContentWidget(CalendarContainer(), Pages.calendar);
-  await api.actions.calendarActions.setCurrentMonday(toMonday(now));
+  providerContainer.read(calendarProvider.notifier).clearSelection();
+  providerContainer
+      .read(calendarProvider.notifier)
+      .setCurrentMonday(toMonday(now));
+  unawaited(
+    providerContainer.read(calendarProvider.notifier).load(toMonday(now)),
+  );
 
   await next(action);
 }

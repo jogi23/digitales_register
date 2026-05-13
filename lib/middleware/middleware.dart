@@ -23,7 +23,6 @@ import 'dart:io';
 import 'package:built_redux/built_redux.dart';
 import 'package:dio/dio.dart' as dio;
 import 'package:dr/actions/app_actions.dart';
-import 'package:dr/actions/calendar_actions.dart';
 import 'package:dr/actions/grades_actions.dart';
 import 'package:dr/actions/login_actions.dart';
 import 'package:dr/actions/messages_actions.dart';
@@ -39,6 +38,7 @@ import 'package:dr/container/settings_page.dart';
 import 'package:dr/data.dart';
 import 'package:dr/main.dart';
 import 'package:dr/providers/absences_provider.dart';
+import 'package:dr/providers/calendar_provider.dart';
 import 'package:dr/providers/certificate_provider.dart';
 import 'package:dr/providers/dashboard_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
@@ -98,7 +98,6 @@ List<Middleware<AppState, AppStateBuilder, AppActions>> middleware({
             ..add(AppActionsNames.noInternet, _noInternet)
             ..add(LoginActionsNames.loggedIn, _loggedIn)
             ..add(AppActionsNames.restarted, _restarted)
-            ..combine(_calendarMiddleware)
             ..combine(_gradesMiddleware)
             ..combine(_loginMiddleware)
             ..combine(_passMiddleware)

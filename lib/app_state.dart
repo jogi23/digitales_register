@@ -21,6 +21,7 @@ import 'package:built_collection/built_collection.dart';
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
 import 'package:dr/data.dart';
+import 'package:dr/providers/calendar_provider.dart';
 import 'package:dr/providers/dashboard_provider.dart';
 import 'package:dr/providers/provider_container.dart';
 import 'package:dr/utc_date_time.dart';
@@ -62,7 +63,7 @@ abstract class AppState implements Built<AppState, AppStateBuilder> {
 
   List<String> extractAllSubjects() {
     final subjects = <String>{};
-    for (final day in calendarState.days.values) {
+    for (final day in providerContainer.read(calendarProvider).days.values) {
       for (final hour in day.hours) {
         subjects.add(hour.subject);
       }

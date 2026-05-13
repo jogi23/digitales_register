@@ -24,6 +24,9 @@ import 'package:dr/container/settings_page.dart';
 import 'package:dr/data.dart';
 import 'package:dr/main.dart';
 import 'package:dr/middleware/middleware.dart';
+import 'package:dr/providers/calendar_provider.dart';
+import 'package:dr/providers/no_internet_provider.dart';
+import 'package:dr/providers/provider_container.dart' as pc;
 import 'package:dr/reducer/reducer.dart';
 import 'package:dr/ui/dialog.dart';
 import 'package:dr/utc_date_time.dart';
@@ -32,91 +35,123 @@ import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_built_redux/flutter_built_redux.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
+
+class _TestCalendarNotifier extends CalendarNotifier {
+  final CalendarState initialState;
+  _TestCalendarNotifier(this.initialState);
+
+  @override
+  CalendarState build() => initialState;
+}
+
+CalendarState _buildCalendarState({
+  required bool hasSubjectWithoutNick,
+}) {
+  return CalendarState(
+    (b) {
+      b
+        ..currentMonday = UtcDateTime(2021, 2, 20)
+        ..days = MapBuilder(
+          <UtcDateTime, CalendarDay>{
+            UtcDateTime(2021, 2, 20): CalendarDay(
+              (b) => b
+                ..date = UtcDateTime(2021, 2, 20)
+                ..hours = ListBuilder(
+                  <CalendarHour>[
+                    CalendarHour(
+                      (b) => b
+                        ..subject = "Fach1"
+                        ..fromHour = 1
+                        ..toHour = 2
+                        ..rooms = ListBuilder()
+                        ..timeSpans = ListBuilder(<TimeSpan>[
+                          TimeSpan((b) => b
+                            ..from = UtcDateTime(2022, 9, 5, 22)
+                            ..to = UtcDateTime(2022, 9, 5, 23))
+                        ])
+                        ..homeworkExams = ListBuilder(
+                          <HomeworkExam>[
+                            HomeworkExam(
+                              (b) => b
+                                ..deadline = UtcDateTime.now()
+                                ..hasGradeGroupSubmissions = false
+                                ..hasGrades = false
+                                ..homework = false
+                                ..id = 5
+                                ..name = "Foo"
+                                ..online = false
+                                ..typeId = 500
+                                ..typeName = "Hausaufgabe"
+                                ..warning = false,
+                            )
+                          ],
+                        ),
+                    ),
+                  ],
+                ),
+            ),
+          },
+        );
+    },
+  );
+}
 
 Future<void> main() async {
   Widget getCalendar(
       {required bool nicksBarEnabled, required bool hasSubjctWithoutNick}) {
     navigatorKey = GlobalKey();
-    return ReduxProvider(
-      store: Store<AppState, AppStateBuilder, AppActions>(
-        appReducerBuilder.build(),
-        AppState(
-          (b) {
-            b.calendarState
-              ..currentMonday = UtcDateTime(2021, 2, 20)
-              ..days = MapBuilder(
-                <UtcDateTime, CalendarDay>{
-                  UtcDateTime(2021, 2, 20): CalendarDay(
-                    (b) => b
-                      ..date = UtcDateTime(2021, 2, 20)
-                      ..hours = ListBuilder(
-                        <CalendarHour>[
-                          CalendarHour(
-                            (b) => b
-                              ..subject = "Fach1"
-                              ..fromHour = 1
-                              ..toHour = 2
-                              ..rooms = ListBuilder()
-                              ..timeSpans = ListBuilder(<TimeSpan>[
-                                TimeSpan((b) => b
-                                  ..from = UtcDateTime(2022, 9, 5, 22)
-                                  ..to = UtcDateTime(2022, 9, 5, 23))
-                              ])
-                              ..homeworkExams = ListBuilder(
-                                <HomeworkExam>[
-                                  HomeworkExam(
-                                    (b) => b
-                                      ..deadline = UtcDateTime.now()
-                                      ..hasGradeGroupSubmissions = false
-                                      ..hasGrades = false
-                                      ..homework = false
-                                      ..id = 5
-                                      ..name = "Foo"
-                                      ..online = false
-                                      ..typeId = 500
-                                      ..typeName = "Hausaufgabe"
-                                      ..warning = false,
-                                  )
-                                ],
-                              ),
-                          ),
-                        ],
-                      ),
-                  ),
-                },
-              );
-            b.settingsState.showCalendarNicksBar = nicksBarEnabled;
-            if (!hasSubjctWithoutNick) {
-              b.settingsState.subjectNicks = MapBuilder(<String, String>{
-                "Fach1": "F",
-              });
-            }
+    final calendarState =
+        _buildCalendarState(hasSubjectWithoutNick: hasSubjctWithoutNick);
+    final container = ProviderContainer(
+      overrides: [
+        calendarProvider.overrideWith(
+          () => _TestCalendarNotifier(calendarState),
+        ),
+        noInternetProvider.overrideWith((ref) => false),
+      ],
+    );
+    pc.providerContainer = container;
+    return UncontrolledProviderScope(
+      container: container,
+      child: ReduxProvider(
+        store: Store<AppState, AppStateBuilder, AppActions>(
+          appReducerBuilder.build(),
+          AppState(
+            (b) {
+              b.settingsState.showCalendarNicksBar = nicksBarEnabled;
+              if (!hasSubjctWithoutNick) {
+                b.settingsState.subjectNicks = MapBuilder(<String, String>{
+                  "Fach1": "F",
+                });
+              }
+            },
+          ),
+          AppActions(),
+          middleware: [routingMiddleware.build()],
+        ),
+        child: MaterialApp(
+          navigatorKey: navigatorKey,
+          home: CalendarContainer(),
+          theme: ThemeData(primarySwatch: Colors.deepOrange),
+          localizationsDelegates: const [
+            GlobalCupertinoLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale("de"),
+          ],
+          onGenerateRoute: (settings) {
+            assert(settings.name == "/settings");
+            return MaterialPageRoute<void>(
+              fullscreenDialog: true,
+              builder: (context) => SettingsPageContainer(),
+            );
           },
         ),
-        AppActions(),
-        middleware: [routingMiddleware.build()],
-      ),
-      child: MaterialApp(
-        navigatorKey: navigatorKey,
-        home: CalendarContainer(),
-        theme: ThemeData(primarySwatch: Colors.deepOrange),
-        localizationsDelegates: const [
-          GlobalCupertinoLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-        ],
-        supportedLocales: const [
-          Locale("de"),
-        ],
-        onGenerateRoute: (settings) {
-          assert(settings.name == "/settings");
-          return MaterialPageRoute<void>(
-            fullscreenDialog: true,
-            builder: (context) => SettingsPageContainer(),
-          );
-        },
       ),
     );
   }
@@ -156,27 +191,39 @@ Future<void> main() async {
     });
   });
   testWidgets('jump to current week', (WidgetTester tester) async {
-    final widget = ReduxProvider(
-      store: Store<AppState, AppStateBuilder, AppActions>(
-        appReducerBuilder.build(),
-        AppState(
-          (b) {
-            b.calendarState.currentMonday = UtcDateTime(2021, 1, 20);
-          },
+    final calendarState = CalendarState(
+      (b) => b..currentMonday = UtcDateTime(2021, 1, 20),
+    );
+    final container = ProviderContainer(
+      overrides: [
+        calendarProvider.overrideWith(
+          () => _TestCalendarNotifier(calendarState),
         ),
-        AppActions(),
-      ),
-      child: MaterialApp(
-        home: CalendarContainer(),
-        theme: ThemeData(primarySwatch: Colors.deepOrange),
-        localizationsDelegates: const [
-          GlobalCupertinoLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-        ],
-        supportedLocales: const [
-          Locale("de"),
-        ],
+        noInternetProvider.overrideWith((ref) => false),
+      ],
+    );
+    pc.providerContainer = container;
+    addTearDown(container.dispose);
+    final widget = UncontrolledProviderScope(
+      container: container,
+      child: ReduxProvider(
+        store: Store<AppState, AppStateBuilder, AppActions>(
+          appReducerBuilder.build(),
+          AppState(),
+          AppActions(),
+        ),
+        child: MaterialApp(
+          home: CalendarContainer(),
+          theme: ThemeData(primarySwatch: Colors.deepOrange),
+          localizationsDelegates: const [
+            GlobalCupertinoLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale("de"),
+          ],
+        ),
       ),
     );
     // the shown week is the previous week

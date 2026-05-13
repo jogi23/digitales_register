@@ -19,8 +19,7 @@ part of 'middleware.dart';
 
 final _settingsMiddleware =
     MiddlewareBuilder<AppState, AppStateBuilder, AppActions>()
-      ..add(GradesActionsNames.loaded, _updateSubjectThemes)
-      ..add(CalendarActionsNames.loaded, _updateSubjectThemes);
+      ..add(GradesActionsNames.loaded, _updateSubjectThemes);
 
 Future<void> _updateSubjectThemes(
     MiddlewareApi<AppState, AppStateBuilder, AppActions> api,

@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
-import 'package:dr/container/calendar_container.dart';
+import 'package:dr/app_state.dart';
 import 'package:dr/container/calendar_detail_container.dart';
 import 'package:dr/container/calendar_week_container.dart';
 import 'package:dr/main.dart';
@@ -28,6 +28,24 @@ import 'package:responsive_scaffold/responsive_scaffold.dart';
 const tabletLayoutBreakPoint = 825;
 
 typedef DayCallback = void Function(UtcDateTime day);
+
+class CalendarViewModel {
+  final UtcDateTime? first;
+  final UtcDateTime? last;
+  final UtcDateTime currentMonday;
+  final bool showEditNicksBar;
+  final bool noInternet;
+  final CalendarSelection? selection;
+
+  CalendarViewModel({
+    required this.first,
+    required this.last,
+    required this.currentMonday,
+    required this.showEditNicksBar,
+    required this.noInternet,
+    required this.selection,
+  });
+}
 
 class Calendar extends StatefulWidget {
   final CalendarViewModel vm;
