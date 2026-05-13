@@ -25,7 +25,6 @@ import 'package:dio/dio.dart' as dio;
 import 'package:dr/actions/absences_actions.dart';
 import 'package:dr/actions/app_actions.dart';
 import 'package:dr/actions/calendar_actions.dart';
-import 'package:dr/actions/dashboard_actions.dart';
 import 'package:dr/actions/grades_actions.dart';
 import 'package:dr/actions/login_actions.dart';
 import 'package:dr/actions/messages_actions.dart';
@@ -43,6 +42,7 @@ import 'package:dr/container/settings_page.dart';
 import 'package:dr/data.dart';
 import 'package:dr/main.dart';
 import 'package:dr/providers/certificate_provider.dart';
+import 'package:dr/providers/dashboard_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/providers/provider_container.dart';
 import 'package:dr/serializers.dart';
@@ -63,7 +63,6 @@ import 'package:url_launcher/url_launcher.dart';
 
 part 'absences.dart';
 part 'calendar.dart';
-part 'dashboard.dart';
 part 'grades.dart';
 part 'login.dart';
 part 'messages.dart';
@@ -95,14 +94,12 @@ List<Middleware<AppState, AppStateBuilder, AppActions>> middleware({
             ..add(AppActionsNames.deleteData, _deleteData)
             ..add(AppActionsNames.load, _load)
             ..add(AppActionsNames.start, _start)
-            ..add(DashboardActionsNames.refresh, _refresh)
             ..add(AppActionsNames.refreshNoInternet, _refreshNoInternet)
             ..add(AppActionsNames.noInternet, _noInternet)
             ..add(LoginActionsNames.loggedIn, _loggedIn)
             ..add(AppActionsNames.restarted, _restarted)
             ..combine(_absencesMiddleware)
             ..combine(_calendarMiddleware)
-            ..combine(_dashboardMiddleware)
             ..combine(_gradesMiddleware)
             ..combine(_loginMiddleware)
             ..combine(_notificationsMiddleware)
@@ -227,7 +224,10 @@ Future<void> _noInternet(
         logoutForcedByServer: true,
       );
     } else {
-      await api.actions.dashboardActions.refresh();
+      await providerContainer.read(dashboardProvider.notifier).refresh(
+            markNew: api.state.settingsState.dashboardMarkNewOrChangedEntries,
+            deduplicate: api.state.settingsState.dashboardDeduplicateEntries,
+          );
     }
   }
 }
@@ -288,15 +288,6 @@ Future<void> _load(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
   }
 }
 
-Future<void> _refresh(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
-    ActionHandler next, Action<void> action) async {
-  await next(action);
-  await Future.wait([
-    api.actions.dashboardActions.load(api.state.dashboardState.future),
-    api.actions.notificationsActions.load(),
-  ]);
-}
-
 Future<void> _loggedIn(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
     ActionHandler next, Action<LoggedInPayload> action) async {
   if (action.payload.fromStorage) {
@@ -337,7 +328,6 @@ Future<void> _loggedIn(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
                 ..loginState.replace(currentState.loginState)
                 ..noInternet = currentState.noInternet
                 ..config = currentState.config?.toBuilder()
-                ..dashboardState.future = true
                 ..gradesState.semester.replace(
                       currentState.gradesState.semester == Semester.all
                           ? serializedState.gradesState.semester
@@ -372,7 +362,11 @@ Future<void> _loggedIn(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
     callback();
   }
   if (!action.payload.offlineOnly) {
-    await api.actions.dashboardActions.load(api.state.dashboardState.future);
+    await providerContainer.read(dashboardProvider.notifier).load(
+          true,
+          markNew: api.state.settingsState.dashboardMarkNewOrChangedEntries,
+          deduplicate: api.state.settingsState.dashboardDeduplicateEntries,
+        );
     await api.actions.notificationsActions.load();
   }
 }
@@ -499,7 +493,10 @@ Future<void> _restarted(
     if (!poppedAnything) {
       // If we pop something the routeObserver will trigger a reload of the dasboard.
       // However, if we are on the dashboard already, we need to this here.
-      await api.actions.dashboardActions.refresh();
+      await providerContainer.read(dashboardProvider.notifier).refresh(
+            markNew: api.state.settingsState.dashboardMarkNewOrChangedEntries,
+            deduplicate: api.state.settingsState.dashboardDeduplicateEntries,
+          );
     }
   }
 }

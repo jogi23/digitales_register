@@ -18,7 +18,6 @@
 import 'package:built_redux/built_redux.dart';
 import 'package:dr/actions/absences_actions.dart';
 import 'package:dr/actions/calendar_actions.dart';
-import 'package:dr/actions/dashboard_actions.dart';
 import 'package:dr/actions/grades_actions.dart';
 import 'package:dr/actions/login_actions.dart';
 import 'package:dr/actions/messages_actions.dart';
@@ -48,7 +47,6 @@ abstract class AppActions extends ReduxActions {
   abstract final VoidActionDispatcher restarted;
   abstract final AbsencesActions absencesActions;
   abstract final CalendarActions calendarActions;
-  abstract final DashboardActions dashboardActions;
   abstract final GradesActions gradesActions;
   abstract final LoginActions loginActions;
   abstract final NotificationsActions notificationsActions;

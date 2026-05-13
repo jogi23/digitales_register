@@ -25,6 +25,9 @@ import 'package:dr/container/days_container.dart';
 import 'package:dr/data.dart';
 import 'package:dr/main.dart';
 import 'package:dr/middleware/middleware.dart';
+import 'package:dr/providers/dashboard_provider.dart';
+import 'package:dr/providers/no_internet_provider.dart';
+import 'package:dr/providers/provider_container.dart' as pc;
 import 'package:dr/reducer/reducer.dart';
 import 'package:dr/ui/days.dart';
 import 'package:dr/ui/no_internet.dart';
@@ -33,6 +36,7 @@ import 'package:dr/utc_date_time.dart';
 import 'package:dr/wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_built_redux/flutter_built_redux.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
@@ -40,19 +44,28 @@ import 'package:mocktail/mocktail.dart';
 
 class MockWrapper extends Mock implements Wrapper {}
 
+class _TestDashboardNotifier extends DashboardNotifier {
+  _TestDashboardNotifier(this._initialState);
+  final DashboardState _initialState;
+  @override
+  DashboardState build() => _initialState;
+}
+
 Future<void> main() async {
   testGoldens('Open drawer in phone mode', (WidgetTester tester) async {
     ScaffoldState getScaffoldState() {
       return tester.state(find.byType(Scaffold));
     }
 
-    final widget = ReduxProvider(
-      store: Store<AppState, AppStateBuilder, AppActions>(
-        ReducerBuilder<AppState, AppStateBuilder>().build(),
-        AppState(),
-        AppActions(),
+    final widget = ProviderScope(
+      child: ReduxProvider(
+        store: Store<AppState, AppStateBuilder, AppActions>(
+          ReducerBuilder<AppState, AppStateBuilder>().build(),
+          AppState(),
+          AppActions(),
+        ),
+        child: MaterialApp(home: DaysContainer()),
       ),
-      child: MaterialApp(home: DaysContainer()),
     );
     await tester.pumpWidget(
       Center(
@@ -75,13 +88,18 @@ Future<void> main() async {
   });
   testWidgets('Home page shows no internet message',
       (WidgetTester tester) async {
-    final widget = ReduxProvider(
-      store: Store<AppState, AppStateBuilder, AppActions>(
-        ReducerBuilder<AppState, AppStateBuilder>().build(),
-        AppState((b) => b.noInternet = true),
-        AppActions(),
+    final widget = ProviderScope(
+      overrides: [
+        noInternetProvider.overrideWith((ref) => true),
+      ],
+      child: ReduxProvider(
+        store: Store<AppState, AppStateBuilder, AppActions>(
+          ReducerBuilder<AppState, AppStateBuilder>().build(),
+          AppState((b) => b.noInternet = true),
+          AppActions(),
+        ),
+        child: MaterialApp(home: DaysContainer()),
       ),
-      child: MaterialApp(home: DaysContainer()),
     );
     await tester.pumpWidget(widget);
     expect(find.text("Keine Verbindung"), findsNWidgets(2));
@@ -93,18 +111,20 @@ Future<void> main() async {
 
   testGoldens('Long user name is wrapped', (WidgetTester tester) async {
     const longName = "Michael Debertol Elternaccount-1";
-    final widget = ReduxProvider(
-      store: Store<AppState, AppStateBuilder, AppActions>(
-        ReducerBuilder<AppState, AppStateBuilder>().build(),
-        AppState(
-          (b) => b..loginState.username = longName,
+    final widget = ProviderScope(
+      child: ReduxProvider(
+        store: Store<AppState, AppStateBuilder, AppActions>(
+          ReducerBuilder<AppState, AppStateBuilder>().build(),
+          AppState(
+            (b) => b..loginState.username = longName,
+          ),
+          AppActions(),
         ),
-        AppActions(),
-      ),
-      child: MaterialApp(
-        home: DaysContainer(),
-        theme: ThemeData(
-          primarySwatch: Colors.deepOrange,
+        child: MaterialApp(
+          home: DaysContainer(),
+          theme: ThemeData(
+            primarySwatch: Colors.deepOrange,
+          ),
         ),
       ),
     );
@@ -114,18 +134,25 @@ Future<void> main() async {
 
   testGoldens('shows circular progress indicator if there are no entries',
       (WidgetTester tester) async {
-    final widget = ReduxProvider(
-      store: Store<AppState, AppStateBuilder, AppActions>(
-        ReducerBuilder<AppState, AppStateBuilder>().build(),
-        AppState(
-          (b) => b..dashboardState.loading = true,
+    final widget = ProviderScope(
+      overrides: [
+        dashboardProvider.overrideWith(
+          () => _TestDashboardNotifier(
+            DashboardState((b) => b..loading = true),
+          ),
         ),
-        AppActions(),
-      ),
-      child: MaterialApp(
-        home: DaysContainer(),
-        theme: ThemeData(
-          primarySwatch: Colors.deepOrange,
+      ],
+      child: ReduxProvider(
+        store: Store<AppState, AppStateBuilder, AppActions>(
+          ReducerBuilder<AppState, AppStateBuilder>().build(),
+          AppState(),
+          AppActions(),
+        ),
+        child: MaterialApp(
+          home: DaysContainer(),
+          theme: ThemeData(
+            primarySwatch: Colors.deepOrange,
+          ),
         ),
       ),
     );
@@ -139,30 +166,39 @@ Future<void> main() async {
   testGoldens(
       'shows linear progress indicator if there are one or more entries',
       (WidgetTester tester) async {
-    final widget = ReduxProvider(
-      store: Store<AppState, AppStateBuilder, AppActions>(
-        ReducerBuilder<AppState, AppStateBuilder>().build(),
-        AppState(
-          (b) => b.dashboardState
-            ..loading = true
-            ..allDays = ListBuilder(
-              <Day>[
-                Day(
-                  (b) => b
-                    ..date = UtcDateTime.now()
-                    ..deletedHomework = ListBuilder()
-                    ..homework = ListBuilder()
-                    ..lastRequested = UtcDateTime.now(),
+    final widget = ProviderScope(
+      overrides: [
+        dashboardProvider.overrideWith(
+          () => _TestDashboardNotifier(
+            DashboardState(
+              (b) => b
+                ..loading = true
+                ..allDays = ListBuilder(
+                  <Day>[
+                    Day(
+                      (b) => b
+                        ..date = UtcDateTime.now()
+                        ..deletedHomework = ListBuilder()
+                        ..homework = ListBuilder()
+                        ..lastRequested = UtcDateTime.now(),
+                    ),
+                  ],
                 ),
-              ],
             ),
+          ),
         ),
-        AppActions(),
-      ),
-      child: MaterialApp(
-        home: DaysContainer(),
-        theme: ThemeData(
-          primarySwatch: Colors.deepOrange,
+      ],
+      child: ReduxProvider(
+        store: Store<AppState, AppStateBuilder, AppActions>(
+          ReducerBuilder<AppState, AppStateBuilder>().build(),
+          AppState(),
+          AppActions(),
+        ),
+        child: MaterialApp(
+          home: DaysContainer(),
+          theme: ThemeData(
+            primarySwatch: Colors.deepOrange,
+          ),
         ),
       ),
     );
@@ -177,80 +213,18 @@ Future<void> main() async {
 
   testGoldens('Multiple Entries', (WidgetTester tester) async {
     final now = UtcDateTime(2050);
-    final widget = ReduxProvider(
-      store: Store<AppState, AppStateBuilder, AppActions>(
-        ReducerBuilder<AppState, AppStateBuilder>().build(),
-        AppState(
-          (b) => b.dashboardState
-            ..allDays = ListBuilder(
-              <Day>[
-                Day(
-                  (b) => b
-                    ..date = now
-                    ..deletedHomework = ListBuilder()
-                    ..homework = ListBuilder(<Homework>[
-                      Homework(
-                        (b) => b
-                          ..checkable = true
-                          ..checked = false
-                          ..deleteable = false
-                          ..deleted = false
-                          ..firstSeen = now
-                          ..id = 1
-                          ..isChanged = false
-                          ..isNew = false
-                          ..type = HomeworkType.lessonHomework
-                          ..title = "Test"
-                          ..subtitle = "Subtitle"
-                          ..gradeFormatted = "7/9",
-                      ),
-                    ])
-                    ..lastRequested = now,
-                ),
-                Day(
-                  (b) => b
-                    ..date = now.add(const Duration(days: 1))
-                    ..deletedHomework = ListBuilder()
-                    ..homework = ListBuilder()
-                    ..lastRequested = now,
-                ),
-                Day(
-                  (b) => b
-                    ..date = now.add(const Duration(days: 2))
-                    ..deletedHomework = ListBuilder(
-                      <Homework>[
-                        Homework(
-                          (b) => b
-                            ..checkable = true
-                            ..checked = true
-                            ..deleteable = false
-                            ..deleted = true
-                            ..firstSeen = now
-                            ..id = 1234
-                            ..isChanged = false
-                            ..isNew = false
-                            ..type = HomeworkType.lessonHomework
-                            ..title = "Titel"
-                            ..subtitle = "Subtitle",
-                        ),
-                      ],
-                    )
-                    ..homework = ListBuilder(
-                      <Homework>[
-                        Homework(
-                          (b) => b
-                            ..checkable = true
-                            ..checked = true
-                            ..deleteable = false
-                            ..deleted = false
-                            ..firstSeen = now
-                            ..id = 0
-                            ..isChanged = false
-                            ..isNew = false
-                            ..type = HomeworkType.lessonHomework
-                            ..title = "Title"
-                            ..subtitle = "Subtitle",
-                        ),
+    final widget = ProviderScope(
+      overrides: [
+        dashboardProvider.overrideWith(
+          () => _TestDashboardNotifier(
+            DashboardState(
+              (b) => b.allDays = ListBuilder(
+                <Day>[
+                  Day(
+                    (b) => b
+                      ..date = now
+                      ..deletedHomework = ListBuilder()
+                      ..homework = ListBuilder(<Homework>[
                         Homework(
                           (b) => b
                             ..checkable = true
@@ -263,28 +237,98 @@ Future<void> main() async {
                             ..isNew = false
                             ..type = HomeworkType.lessonHomework
                             ..title = "Test"
-                            ..subtitle = "Subtitle",
+                            ..subtitle = "Subtitle"
+                            ..gradeFormatted = "7/9",
                         ),
-                      ],
-                    )
-                    ..lastRequested = now,
-                ),
-                Day(
-                  (b) => b
-                    ..date = now.add(const Duration(days: 3))
-                    ..deletedHomework = ListBuilder()
-                    ..homework = ListBuilder()
-                    ..lastRequested = now,
-                ),
-              ],
+                      ])
+                      ..lastRequested = now,
+                  ),
+                  Day(
+                    (b) => b
+                      ..date = now.add(const Duration(days: 1))
+                      ..deletedHomework = ListBuilder()
+                      ..homework = ListBuilder()
+                      ..lastRequested = now,
+                  ),
+                  Day(
+                    (b) => b
+                      ..date = now.add(const Duration(days: 2))
+                      ..deletedHomework = ListBuilder(
+                        <Homework>[
+                          Homework(
+                            (b) => b
+                              ..checkable = true
+                              ..checked = true
+                              ..deleteable = false
+                              ..deleted = true
+                              ..firstSeen = now
+                              ..id = 1234
+                              ..isChanged = false
+                              ..isNew = false
+                              ..type = HomeworkType.lessonHomework
+                              ..title = "Titel"
+                              ..subtitle = "Subtitle",
+                          ),
+                        ],
+                      )
+                      ..homework = ListBuilder(
+                        <Homework>[
+                          Homework(
+                            (b) => b
+                              ..checkable = true
+                              ..checked = true
+                              ..deleteable = false
+                              ..deleted = false
+                              ..firstSeen = now
+                              ..id = 0
+                              ..isChanged = false
+                              ..isNew = false
+                              ..type = HomeworkType.lessonHomework
+                              ..title = "Title"
+                              ..subtitle = "Subtitle",
+                          ),
+                          Homework(
+                            (b) => b
+                              ..checkable = true
+                              ..checked = false
+                              ..deleteable = false
+                              ..deleted = false
+                              ..firstSeen = now
+                              ..id = 1
+                              ..isChanged = false
+                              ..isNew = false
+                              ..type = HomeworkType.lessonHomework
+                              ..title = "Test"
+                              ..subtitle = "Subtitle",
+                          ),
+                        ],
+                      )
+                      ..lastRequested = now,
+                  ),
+                  Day(
+                    (b) => b
+                      ..date = now.add(const Duration(days: 3))
+                      ..deletedHomework = ListBuilder()
+                      ..homework = ListBuilder()
+                      ..lastRequested = now,
+                  ),
+                ],
+              ),
             ),
+          ),
         ),
-        AppActions(),
-      ),
-      child: MaterialApp(
-        home: DaysContainer(),
-        theme:
-            ThemeData(primarySwatch: Colors.teal, brightness: Brightness.dark),
+      ],
+      child: ReduxProvider(
+        store: Store<AppState, AppStateBuilder, AppActions>(
+          ReducerBuilder<AppState, AppStateBuilder>().build(),
+          AppState(),
+          AppActions(),
+        ),
+        child: MaterialApp(
+          home: DaysContainer(),
+          theme: ThemeData(
+              primarySwatch: Colors.teal, brightness: Brightness.dark),
+        ),
       ),
     );
     await tester.pumpWidget(widget);
@@ -299,29 +343,37 @@ Future<void> main() async {
   });
 
   testGoldens('dark mode', (WidgetTester tester) async {
-    final widget = ReduxProvider(
-      store: Store<AppState, AppStateBuilder, AppActions>(
-        ReducerBuilder<AppState, AppStateBuilder>().build(),
-        AppState(
-          (b) => b.dashboardState
-            ..allDays = ListBuilder(
-              <Day>[
-                Day(
-                  (b) => b
-                    ..date = UtcDateTime.now()
-                    ..deletedHomework = ListBuilder()
-                    ..homework = ListBuilder()
-                    ..lastRequested = UtcDateTime.now(),
-                ),
-              ],
+    final widget = ProviderScope(
+      overrides: [
+        dashboardProvider.overrideWith(
+          () => _TestDashboardNotifier(
+            DashboardState(
+              (b) => b.allDays = ListBuilder(
+                <Day>[
+                  Day(
+                    (b) => b
+                      ..date = UtcDateTime.now()
+                      ..deletedHomework = ListBuilder()
+                      ..homework = ListBuilder()
+                      ..lastRequested = UtcDateTime.now(),
+                  ),
+                ],
+              ),
             ),
+          ),
         ),
-        AppActions(),
-      ),
-      child: MaterialApp(
-        home: DaysContainer(),
-        theme:
-            ThemeData(primarySwatch: Colors.teal, brightness: Brightness.dark),
+      ],
+      child: ReduxProvider(
+        store: Store<AppState, AppStateBuilder, AppActions>(
+          ReducerBuilder<AppState, AppStateBuilder>().build(),
+          AppState(),
+          AppActions(),
+        ),
+        child: MaterialApp(
+          home: DaysContainer(),
+          theme: ThemeData(
+              primarySwatch: Colors.teal, brightness: Brightness.dark),
+        ),
       ),
     );
     await tester.pumpWidget(widget);
@@ -334,18 +386,20 @@ Future<void> main() async {
 
   testWidgets('tooltips', (WidgetTester tester) async {
     const username = "Michael Debertol";
-    final widget = ReduxProvider(
-      store: Store<AppState, AppStateBuilder, AppActions>(
-        ReducerBuilder<AppState, AppStateBuilder>().build(),
-        AppState(
-          (b) => b.loginState.username = username,
+    final widget = ProviderScope(
+      child: ReduxProvider(
+        store: Store<AppState, AppStateBuilder, AppActions>(
+          ReducerBuilder<AppState, AppStateBuilder>().build(),
+          AppState(
+            (b) => b.loginState.username = username,
+          ),
+          AppActions(),
         ),
-        AppActions(),
-      ),
-      child: MaterialApp(
-        home: DaysContainer(),
-        theme:
-            ThemeData(primarySwatch: Colors.teal, brightness: Brightness.dark),
+        child: MaterialApp(
+          home: DaysContainer(),
+          theme: ThemeData(
+              primarySwatch: Colors.teal, brightness: Brightness.dark),
+        ),
       ),
     );
     await tester.pumpWidget(widget);
@@ -361,18 +415,20 @@ Future<void> main() async {
   });
 
   testWidgets('correct collapse label', (WidgetTester tester) async {
-    final widget = ReduxProvider(
-      store: Store<AppState, AppStateBuilder, AppActions>(
-        ReducerBuilder<AppState, AppStateBuilder>().build(),
-        AppState(
-          (b) => b.settingsState.drawerFullyExpanded = false,
+    final widget = ProviderScope(
+      child: ReduxProvider(
+        store: Store<AppState, AppStateBuilder, AppActions>(
+          ReducerBuilder<AppState, AppStateBuilder>().build(),
+          AppState(
+            (b) => b.settingsState.drawerFullyExpanded = false,
+          ),
+          AppActions(),
         ),
-        AppActions(),
-      ),
-      child: MaterialApp(
-        home: DaysContainer(),
-        theme:
-            ThemeData(primarySwatch: Colors.teal, brightness: Brightness.dark),
+        child: MaterialApp(
+          home: DaysContainer(),
+          theme: ThemeData(
+              primarySwatch: Colors.teal, brightness: Brightness.dark),
+        ),
       ),
     );
     await tester.pumpWidget(widget);
@@ -381,43 +437,51 @@ Future<void> main() async {
   });
 
   testGoldens('new entries are animated', (WidgetTester tester) async {
-    final widget = ReduxProvider(
-      store: Store<AppState, AppStateBuilder, AppActions>(
-        appReducerBuilder.build(),
-        AppState(
-          (b) => b.dashboardState
-            ..allDays = ListBuilder(
-              <Day>[
-                Day(
-                  (b) => b
-                    ..date = UtcDateTime.now()
-                    ..deletedHomework = ListBuilder()
-                    ..homework = ListBuilder(<Homework>[
-                      Homework(
-                        (b) => b
-                          ..checkable = true
-                          ..checked = false
-                          ..deleteable = false
-                          ..deleted = false
-                          ..firstSeen = UtcDateTime.now()
-                          ..id = 0
-                          ..isChanged = false
-                          ..isNew = false
-                          ..type = HomeworkType.lessonHomework
-                          ..title = "Title"
-                          ..subtitle = "Subtitle",
-                      ),
-                    ])
-                    ..lastRequested = UtcDateTime.now(),
-                ),
-              ],
+    final widget = ProviderScope(
+      overrides: [
+        dashboardProvider.overrideWith(
+          () => _TestDashboardNotifier(
+            DashboardState(
+              (b) => b.allDays = ListBuilder(
+                <Day>[
+                  Day(
+                    (b) => b
+                      ..date = UtcDateTime.now()
+                      ..deletedHomework = ListBuilder()
+                      ..homework = ListBuilder(<Homework>[
+                        Homework(
+                          (b) => b
+                            ..checkable = true
+                            ..checked = false
+                            ..deleteable = false
+                            ..deleted = false
+                            ..firstSeen = UtcDateTime.now()
+                            ..id = 0
+                            ..isChanged = false
+                            ..isNew = false
+                            ..type = HomeworkType.lessonHomework
+                            ..title = "Title"
+                            ..subtitle = "Subtitle",
+                        ),
+                      ])
+                      ..lastRequested = UtcDateTime.now(),
+                  ),
+                ],
+              ),
             ),
+          ),
         ),
-        AppActions(),
-      ),
-      child: MaterialApp(
-        home: DaysContainer(),
-        theme: ThemeData(primarySwatch: Colors.deepOrange),
+      ],
+      child: ReduxProvider(
+        store: Store<AppState, AppStateBuilder, AppActions>(
+          appReducerBuilder.build(),
+          AppState(),
+          AppActions(),
+        ),
+        child: MaterialApp(
+          home: DaysContainer(),
+          theme: ThemeData(primarySwatch: Colors.deepOrange),
+        ),
       ),
     );
     await tester.pumpWidget(widget);
@@ -439,45 +503,57 @@ Future<void> main() async {
   });
 
   testGoldens('animation for reminder deletion', (WidgetTester tester) async {
-    final widget = ReduxProvider(
-      store: Store<AppState, AppStateBuilder, AppActions>(
-        appReducerBuilder.build(),
-        AppState(
-          (b) => b.dashboardState
-            ..allDays = ListBuilder(
-              <Day>[
-                Day(
-                  (b) => b
-                    ..date = UtcDateTime.now()
-                    ..deletedHomework = ListBuilder()
-                    ..homework = ListBuilder(<Homework>[
-                      Homework(
-                        (b) => b
-                          ..checkable = true
-                          ..checked = true
-                          ..deleteable = true
-                          ..deleted = false
-                          ..firstSeen = UtcDateTime.now()
-                              // do not show a entry animation
-                              .subtract(const Duration(seconds: 10))
-                          ..id = 0
-                          ..isChanged = false
-                          ..isNew = false
-                          ..type = HomeworkType.homework
-                          ..title = "Title"
-                          ..subtitle = "Subtitle",
-                      ),
-                    ])
-                    ..lastRequested = UtcDateTime.now(),
-                ),
-              ],
+    wrapper = MockWrapper();
+    when(() => wrapper.send(any(), args: any(named: 'args')))
+        .thenAnswer((_) async => <String, dynamic>{'success': true});
+    when(() => wrapper.noInternet).thenReturn(false);
+    final widget = ProviderScope(
+      overrides: [
+        dashboardProvider.overrideWith(
+          () => _TestDashboardNotifier(
+            DashboardState(
+              (b) => b.allDays = ListBuilder(
+                <Day>[
+                  Day(
+                    (b) => b
+                      ..date = UtcDateTime.now()
+                      ..deletedHomework = ListBuilder()
+                      ..homework = ListBuilder(<Homework>[
+                        Homework(
+                          (b) => b
+                            ..checkable = true
+                            ..checked = true
+                            ..deleteable = true
+                            ..deleted = false
+                            ..firstSeen = UtcDateTime.now()
+                                // do not show a entry animation
+                                .subtract(const Duration(seconds: 10))
+                            ..id = 0
+                            ..isChanged = false
+                            ..isNew = false
+                            ..type = HomeworkType.homework
+                            ..title = "Title"
+                            ..subtitle = "Subtitle",
+                        ),
+                      ])
+                      ..lastRequested = UtcDateTime.now(),
+                  ),
+                ],
+              ),
             ),
+          ),
         ),
-        AppActions(),
-      ),
-      child: MaterialApp(
-        home: DaysContainer(),
-        theme: ThemeData(primarySwatch: Colors.deepOrange),
+      ],
+      child: ReduxProvider(
+        store: Store<AppState, AppStateBuilder, AppActions>(
+          appReducerBuilder.build(),
+          AppState(),
+          AppActions(),
+        ),
+        child: MaterialApp(
+          home: DaysContainer(),
+          theme: ThemeData(primarySwatch: Colors.deepOrange),
+        ),
       ),
     );
     await tester.pumpWidget(widget);
@@ -499,45 +575,57 @@ Future<void> main() async {
   });
 
   testGoldens('animation for checking an item', (WidgetTester tester) async {
-    final widget = ReduxProvider(
-      store: Store<AppState, AppStateBuilder, AppActions>(
-        appReducerBuilder.build(),
-        AppState(
-          (b) => b.dashboardState
-            ..allDays = ListBuilder(
-              <Day>[
-                Day(
-                  (b) => b
-                    ..date = UtcDateTime.now()
-                    ..deletedHomework = ListBuilder()
-                    ..homework = ListBuilder(<Homework>[
-                      Homework(
-                        (b) => b
-                          ..checkable = true
-                          ..checked = false
-                          ..deleteable = true
-                          ..deleted = false
-                          ..firstSeen = UtcDateTime.now()
-                              // do not show a entry animation
-                              .subtract(const Duration(seconds: 10))
-                          ..id = 0
-                          ..isChanged = false
-                          ..isNew = false
-                          ..type = HomeworkType.homework
-                          ..title = "Title"
-                          ..subtitle = "Subtitle",
-                      ),
-                    ])
-                    ..lastRequested = UtcDateTime.now(),
-                ),
-              ],
+    wrapper = MockWrapper();
+    when(() => wrapper.send(any(), args: any(named: 'args')))
+        .thenAnswer((_) async => <String, dynamic>{'success': true});
+    when(() => wrapper.noInternet).thenReturn(false);
+    final widget = ProviderScope(
+      overrides: [
+        dashboardProvider.overrideWith(
+          () => _TestDashboardNotifier(
+            DashboardState(
+              (b) => b.allDays = ListBuilder(
+                <Day>[
+                  Day(
+                    (b) => b
+                      ..date = UtcDateTime.now()
+                      ..deletedHomework = ListBuilder()
+                      ..homework = ListBuilder(<Homework>[
+                        Homework(
+                          (b) => b
+                            ..checkable = true
+                            ..checked = false
+                            ..deleteable = true
+                            ..deleted = false
+                            ..firstSeen = UtcDateTime.now()
+                                // do not show a entry animation
+                                .subtract(const Duration(seconds: 10))
+                            ..id = 0
+                            ..isChanged = false
+                            ..isNew = false
+                            ..type = HomeworkType.homework
+                            ..title = "Title"
+                            ..subtitle = "Subtitle",
+                        ),
+                      ])
+                      ..lastRequested = UtcDateTime.now(),
+                  ),
+                ],
+              ),
             ),
+          ),
         ),
-        AppActions(),
-      ),
-      child: MaterialApp(
-        home: DaysContainer(),
-        theme: ThemeData(primarySwatch: Colors.deepOrange),
+      ],
+      child: ReduxProvider(
+        store: Store<AppState, AppStateBuilder, AppActions>(
+          appReducerBuilder.build(),
+          AppState(),
+          AppActions(),
+        ),
+        child: MaterialApp(
+          home: DaysContainer(),
+          theme: ThemeData(primarySwatch: Colors.deepOrange),
+        ),
       ),
     );
     await tester.pumpWidget(widget);
@@ -560,46 +648,57 @@ Future<void> main() async {
       (WidgetTester tester) async {
     secureStorage = const FlutterSecureStorage();
     scaffoldMessengerKey = GlobalKey();
+    final initialDashboardState = DashboardState(
+      (b) => b.allDays = ListBuilder(
+        <Day>[
+          Day(
+            (b) => b
+              ..date = UtcDateTime.now()
+              ..deletedHomework = ListBuilder()
+              ..homework = ListBuilder(<Homework>[
+                Homework(
+                  (b) => b
+                    ..checkable = true
+                    ..checked = false
+                    ..deleteable = true
+                    ..deleted = false
+                    ..firstSeen = UtcDateTime(2021, 2, 2)
+                    ..id = 0
+                    ..isChanged = false
+                    ..isNew = false
+                    ..type = HomeworkType.homework
+                    ..title = "Title"
+                    ..subtitle = "Subtitle",
+                ),
+              ])
+              ..lastRequested = UtcDateTime.now(),
+          ),
+        ],
+      ),
+    );
+    final container = ProviderContainer(
+      overrides: [
+        dashboardProvider
+            .overrideWith(() => _TestDashboardNotifier(initialDashboardState)),
+      ],
+    );
+    pc.providerContainer = container;
+    addTearDown(container.dispose);
     final store = Store<AppState, AppStateBuilder, AppActions>(
       appReducerBuilder.build(),
-      AppState(
-        (b) => b.dashboardState
-          ..allDays = ListBuilder(
-            <Day>[
-              Day(
-                (b) => b
-                  ..date = UtcDateTime.now()
-                  ..deletedHomework = ListBuilder()
-                  ..homework = ListBuilder(<Homework>[
-                    Homework(
-                      (b) => b
-                        ..checkable = true
-                        ..checked = false
-                        ..deleteable = true
-                        ..deleted = false
-                        ..firstSeen = UtcDateTime(2021, 2, 2)
-                        ..id = 0
-                        ..isChanged = false
-                        ..isNew = false
-                        ..type = HomeworkType.homework
-                        ..title = "Title"
-                        ..subtitle = "Subtitle",
-                    ),
-                  ])
-                  ..lastRequested = UtcDateTime.now(),
-              ),
-            ],
-          ),
-      ),
+      AppState(),
       AppActions(),
       middleware: middleware(includeErrorMiddleware: false),
     );
-    final widget = ReduxProvider(
-      store: store,
-      child: MaterialApp(
-        scaffoldMessengerKey: scaffoldMessengerKey,
-        home: DaysContainer(),
-        theme: ThemeData(primarySwatch: Colors.deepOrange),
+    final widget = UncontrolledProviderScope(
+      container: container,
+      child: ReduxProvider(
+        store: store,
+        child: MaterialApp(
+          scaffoldMessengerKey: scaffoldMessengerKey,
+          home: DaysContainer(),
+          theme: ThemeData(primarySwatch: Colors.deepOrange),
+        ),
       ),
     );
     wrapper = MockWrapper();

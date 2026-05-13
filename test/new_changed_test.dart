@@ -15,81 +15,90 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
-import 'package:built_redux/built_redux.dart';
-import 'package:dr/actions/app_actions.dart';
-import 'package:dr/actions/dashboard_actions.dart';
+import 'package:built_collection/built_collection.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/data.dart';
-import 'package:dr/middleware/middleware.dart';
-import 'package:dr/reducer/reducer.dart';
+import 'package:dr/providers/dashboard_provider.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+class _TestDashboardNotifier extends DashboardNotifier {
+  _TestDashboardNotifier(this._initialState);
+  final DashboardState _initialState;
+  @override
+  DashboardState build() => _initialState;
+}
 
 void main() {
   test('new entries are marked', () {
     mockNow = UtcDateTime(2020, 1, 10);
-    final store = Store<AppState, AppStateBuilder, AppActions>(
-      appReducerBuilder.build(),
-      AppState(
-        (b) => b
-          ..dashboardState.allDays.add(
-                Day(
-                  (b) => b
-                    ..date = UtcDateTime(2020, 1, 5)
-                    ..lastRequested = UtcDateTime(2020)
-                    ..homework.add(
-                      Homework(
-                        (b) => b
-                          ..checkable = true
-                          ..checked = false
-                          ..deleteable = false
-                          ..deleted = false
-                          ..firstSeen = UtcDateTime(2020)
-                          ..id = 1
-                          ..isChanged = false
-                          ..isNew = false
-                          ..label = "Fach"
-                          ..lastNotSeen = UtcDateTime(2019, 12, 24)
-                          ..subtitle = "Untertitel"
-                          ..title = "Titel"
-                          ..type = HomeworkType.lessonHomework,
-                      ),
+    final initialState = DashboardState(
+      (b) => b
+        ..allDays = ListBuilder(
+          [
+            Day(
+              (b) => b
+                ..date = UtcDateTime(2020, 1, 5)
+                ..lastRequested = UtcDateTime(2020)
+                ..deletedHomework = ListBuilder()
+                ..homework = ListBuilder(
+                  [
+                    Homework(
+                      (b) => b
+                        ..checkable = true
+                        ..checked = false
+                        ..deleteable = false
+                        ..deleted = false
+                        ..firstSeen = UtcDateTime(2020)
+                        ..id = 1
+                        ..isChanged = false
+                        ..isNew = false
+                        ..label = "Fach"
+                        ..lastNotSeen = UtcDateTime(2019, 12, 24)
+                        ..subtitle = "Untertitel"
+                        ..title = "Titel"
+                        ..type = HomeworkType.lessonHomework,
                     ),
+                  ],
                 ),
-              ),
-      ),
-      AppActions(),
-      middleware: middleware(includeErrorMiddleware: false),
-    );
-    store.actions.dashboardActions.loaded(
-      DaysLoadedPayload(
-        (b) => b
-          ..future = false
-          ..markNewOrChangedEntries = true
-          ..deduplicateEntries = false
-          ..data = [
-            {
-              "items": [
-                {
-                  "id": 1,
-                  "type": "lessonHomework",
-                  "title": "Neuer Titel",
-                  "subtitle": "Neuer Untertitel",
-                  "label": "Fach",
-                  "warning": false,
-                  "checkable": true,
-                  "checked": false,
-                  "deleteable": false
-                },
-              ],
-              "date": "2020-01-05",
-            }
+            ),
           ],
-      ),
+        ),
+    );
+    final container = ProviderContainer(
+      overrides: [
+        dashboardProvider
+            .overrideWith(() => _TestDashboardNotifier(initialState)),
+      ],
+    );
+    addTearDown(container.dispose);
+    container.read(dashboardProvider.notifier).testApplyLoaded(
+      [
+        {
+          "items": [
+            {
+              "id": 1,
+              "type": "lessonHomework",
+              "title": "Neuer Titel",
+              "subtitle": "Neuer Untertitel",
+              "label": "Fach",
+              "warning": false,
+              "checkable": true,
+              "checked": false,
+              "deleteable": false
+            },
+          ],
+          "date": "2020-01-05",
+        }
+      ],
+      false,
+      true,
+      false,
     );
     expect(
-      store.state.dashboardState.allDays!.single.homework.single,
+      container.read(dashboardProvider).allDays!.single.homework.single,
       Homework(
         (b) => b
           ..checkable = true

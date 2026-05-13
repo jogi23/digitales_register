@@ -19,4 +19,4 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Global [ProviderContainer] used to bridge non-widget code (middleware) to
 /// Riverpod providers. Initialised in [main] before the app starts.
-late final ProviderContainer providerContainer;
+late ProviderContainer providerContainer;

@@ -18,14 +18,13 @@ targets:
           exclude:
             # Action files that have hand-maintained built_redux boilerplate.
             # built_value only generates for the Built<> payload classes in
-            # dashboard_actions, grades_actions, login_actions, profile_actions,
-            # routing_actions — but we exclude the others to prevent empty file
-            # generation that could delete the redux boilerplate.
+            # grades_actions, login_actions, profile_actions, routing_actions —
+            # but we exclude ALL action files to prevent build_runner from
+            # overwriting the built_redux boilerplate sections.
             - lib/actions/absences_actions.dart
             - lib/actions/app_actions.dart
             - lib/actions/calendar_actions.dart
             - lib/actions/certificate_actions.dart
-            - lib/actions/dashboard_actions.dart
             - lib/actions/grades_actions.dart
             - lib/actions/login_actions.dart
             - lib/actions/messages_actions.dart

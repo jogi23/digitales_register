@@ -21,6 +21,8 @@ import 'package:built_collection/built_collection.dart';
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
 import 'package:dr/data.dart';
+import 'package:dr/providers/dashboard_provider.dart';
+import 'package:dr/providers/provider_container.dart';
 import 'package:dr/utc_date_time.dart';
 
 part 'app_state.g.dart';
@@ -31,7 +33,6 @@ bool isDemoUser({required String? url, required String? username}) {
 }
 
 abstract class AppState implements Built<AppState, AppStateBuilder> {
-  DashboardState get dashboardState;
   @BuiltValueField(serialize: false)
   LoginState get loginState;
   NotificationState get notificationState;
@@ -69,8 +70,9 @@ abstract class AppState implements Built<AppState, AppStateBuilder> {
     for (final subject in gradesState.subjects) {
       subjects.add(subject.name);
     }
-    if (dashboardState.allDays != null) {
-      for (final day in dashboardState.allDays!) {
+    final dashboardAllDays = providerContainer.read(dashboardProvider).allDays;
+    if (dashboardAllDays != null) {
+      for (final day in dashboardAllDays) {
         for (final homework in day.homework) {
           if (homework.label != null) subjects.add(homework.label!);
         }
@@ -83,7 +85,6 @@ abstract class AppState implements Built<AppState, AppStateBuilder> {
   AppState._();
   static void _initializeBuilder(AppStateBuilder builder) {
     builder
-      ..dashboardState = DashboardStateBuilder()
       ..loginState = LoginStateBuilder()
       ..notificationState = NotificationStateBuilder()
       ..gradesState = GradesStateBuilder()

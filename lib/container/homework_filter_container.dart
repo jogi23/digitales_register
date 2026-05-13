@@ -17,33 +17,26 @@
 
 import 'package:built_collection/built_collection.dart';
 import 'package:built_value/built_value.dart';
-import 'package:dr/actions/app_actions.dart';
-import 'package:dr/app_state.dart';
 import 'package:dr/data.dart';
+import 'package:dr/providers/dashboard_provider.dart';
 import 'package:dr/ui/homework_filter.dart';
 import 'package:flutter/material.dart' hide Builder;
-import 'package:flutter_built_redux/flutter_built_redux.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 part 'homework_filter_container.g.dart';
 
-class HomeworkFilterContainer extends StatelessWidget {
+class HomeworkFilterContainer extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
-    return StoreConnection<AppState, AppActions, HomeworkFilterVM>(
-      builder: (context, vm, actions) {
-        return HomeworkFilter(
-          vm: vm,
-          callback: (list) =>
-              actions.dashboardActions.updateBlacklist(list.build()),
-        );
-      },
-      connect: (AppState state) {
-        return HomeworkFilterVM(
-          (b) => b
-            ..currentBlacklist = state.dashboardState.blacklist!.toBuilder()
-            ..allTypes = HomeworkType.values.toBuilder(),
-        );
-      },
+  Widget build(BuildContext context, WidgetRef ref) {
+    final blacklist = ref.watch(dashboardProvider.select((s) => s.blacklist!));
+    final notifier = ref.read(dashboardProvider.notifier);
+    return HomeworkFilter(
+      vm: HomeworkFilterVM(
+        (b) => b
+          ..currentBlacklist = blacklist.toBuilder()
+          ..allTypes = HomeworkType.values.toBuilder(),
+      ),
+      callback: (list) => notifier.updateBlacklist(list.build()),
     );
   }
 }
