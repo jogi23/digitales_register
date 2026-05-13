@@ -25,7 +25,6 @@ import 'package:dio/dio.dart' as dio;
 import 'package:dr/actions/app_actions.dart';
 import 'package:dr/actions/grades_actions.dart';
 import 'package:dr/actions/login_actions.dart';
-import 'package:dr/actions/messages_actions.dart';
 import 'package:dr/actions/routing_actions.dart';
 import 'package:dr/actions/save_pass_actions.dart';
 import 'package:dr/actions/settings_actions.dart';
@@ -41,6 +40,7 @@ import 'package:dr/providers/absences_provider.dart';
 import 'package:dr/providers/calendar_provider.dart';
 import 'package:dr/providers/certificate_provider.dart';
 import 'package:dr/providers/dashboard_provider.dart';
+import 'package:dr/providers/messages_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/providers/notifications_provider.dart';
 import 'package:dr/providers/profile_provider.dart';
@@ -102,7 +102,6 @@ List<Middleware<AppState, AppStateBuilder, AppActions>> middleware({
             ..combine(_loginMiddleware)
             ..combine(_passMiddleware)
             ..combine(routingMiddleware)
-            ..combine(_messagesMiddleware)
             ..combine(_settingsMiddleware))
           .build(),
     ];

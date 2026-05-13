@@ -17,11 +17,7 @@
 
 part of 'middleware.dart';
 
-final _messagesMiddleware =
-    MiddlewareBuilder<AppState, AppStateBuilder, AppActions>()
-      ..add(MessagesActionsNames.load, _loadMessages)
-      ..add(MessagesActionsNames.markAsRead, _markAsRead)
-      ..add(MessagesActionsNames.openFile, _openFile);
+// Messages middleware migrated to MessagesNotifier in providers/messages_provider.dart
 
 Future<void> _loadMessages(
     MiddlewareApi<AppState, AppStateBuilder, AppActions> api,

@@ -189,7 +189,7 @@ Future<void> _showMessages(
     Action<void> action) async {
   scaffoldKey!.currentState!
       .selectContentWidget(MessagesPageContainer(), Pages.messages);
-  await api.actions.messagesActions.load();
+  unawaited(providerContainer.read(messagesProvider.notifier).load());
   await next(action);
 }
 
@@ -199,6 +199,7 @@ Future<void> _showMessage(
     Action<int> action) async {
   navigatorKey!.currentState!.pop();
   await api.actions.routingActions.showMessages();
+  providerContainer.read(messagesProvider.notifier).select(action.payload);
   await next(action);
 }
 
