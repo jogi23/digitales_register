@@ -759,9 +759,9 @@ class ItemWidget extends StatelessWidget {
     );
   }
 
-  (Color, double) _getBorderConfig() {
+  (Color, double) _getBorderConfig(BuildContext context) {
     if (item.warning && colorTestsInRed) {
-      return (Colors.red, 1.5);
+      return (Theme.of(context).colorScheme.error, 1.5);
     }
     if (colorBorder &&
         item.label != null &&
@@ -769,7 +769,7 @@ class ItemWidget extends StatelessWidget {
       return (Color(subjectThemes[item.label]!.color), 1.5);
     }
     if (item.type == HomeworkType.grade || item.checked) {
-      return (Colors.green, 0);
+      return (Theme.of(context).colorScheme.primary, 0);
     }
     return (Colors.grey, 0);
   }
@@ -785,8 +785,8 @@ class ItemWidget extends StatelessWidget {
         elevation: 0,
         shape: RoundedRectangleBorder(
           side: BorderSide(
-            color: _getBorderConfig().$1,
-            width: _getBorderConfig().$2,
+            color: _getBorderConfig(context).$1,
+            width: _getBorderConfig(context).$2,
           ),
           borderRadius: BorderRadius.circular(16),
         ),
@@ -922,14 +922,15 @@ class ItemWidget extends StatelessWidget {
                           padding: const EdgeInsets.only(right: 8.0),
                           child: Text(
                             item.gradeFormatted!,
-                            style: const TextStyle(
-                                color: Colors.green, fontSize: 30),
+                            style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
+                                fontSize: 30),
                           ),
                         )
                       else if (!isHistory && !isDeletedView && item.checkable)
                         Checkbox(
                           visualDensity: VisualDensity.standard,
-                          activeColor: Colors.green,
+                          activeColor: Theme.of(context).colorScheme.primary,
                           value: item.checked,
                           onChanged: noInternet
                               ? null
@@ -978,7 +979,7 @@ class ItemWidget extends StatelessWidget {
         index: index!,
         key: ValueKey(index),
         controller: controller!,
-        highlightColor: Colors.grey.withOpacity(0.5),
+        highlightColor: Colors.grey.withValues(alpha: 0.5),
         child: child,
       );
     }

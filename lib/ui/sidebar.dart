@@ -123,18 +123,11 @@ class Sidebar extends StatelessWidget {
       selectedTextColor: Theme.of(context).colorScheme.secondary,
       selectedIconBox: Theme.of(context).colorScheme.secondary.withAlpha(20),
       items: [
-        if (tabletMode)
-          CollapsibleItem(
-            isSelected: currentSelected == Pages.homework,
-            icon: Icons.assignment,
-            text: "Hausaufgaben",
-            onPressed: goHome,
-          ),
         CollapsibleItem(
-          onPressed: showGrades,
-          isSelected: currentSelected == Pages.grades,
-          text: "Noten",
-          icon: Icons.grade,
+          isSelected: currentSelected == Pages.homework,
+          icon: Icons.assignment,
+          text: "Merkheft",
+          onPressed: goHome,
         ),
         CollapsibleItem(
             text: "Absenzen",
@@ -148,16 +141,22 @@ class Sidebar extends StatelessWidget {
           onPressed: showCalendar,
         ),
         CollapsibleItem(
-          text: "Zeugnis",
-          icon: Icons.list,
-          isSelected: currentSelected == Pages.certificate,
-          onPressed: showCertificate,
+          onPressed: showGrades,
+          isSelected: currentSelected == Pages.grades,
+          text: "Bewertungen",
+          icon: Icons.grade,
         ),
         CollapsibleItem(
           text: "Mitteilungen",
           icon: Icons.message,
           isSelected: currentSelected == Pages.messages,
           onPressed: showMessages,
+        ),
+        CollapsibleItem(
+          text: "Zeugnis",
+          icon: Icons.list,
+          isSelected: currentSelected == Pages.certificate,
+          onPressed: showCertificate,
         ),
         CollapsibleItem(
           hasDivider: true,

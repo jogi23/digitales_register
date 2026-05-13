@@ -132,11 +132,13 @@ class _HoursChunk extends StatelessWidget {
                       subjectNicks: subjectNicks,
                       day: day,
                       isSelected: selectedHour == hours[n ~/ 2].fromHour,
-                      backgroundColor: colorBackground
+                      backgroundColor: colorBackground &&
+                              subjectThemes.containsKey(hours[n ~/ 2].subject)
                           ? Color(subjectThemes[hours[n ~/ 2].subject]!.color)
                               .withOpacity(0.25)
                           : Colors.transparent,
-                      selectedBackgroundColor: colorBackground
+                      selectedBackgroundColor: colorBackground &&
+                              subjectThemes.containsKey(hours[n ~/ 2].subject)
                           ? Color(subjectThemes[hours[n ~/ 2].subject]!.color)
                               .withOpacity(0.5)
                           : Theme.of(context)
@@ -268,7 +270,7 @@ class HourWidget extends StatelessWidget {
   });
   @override
   Widget build(BuildContext context) {
-    return Flexible(
+    return Expanded(
       flex: hour.length,
       child: ClipRect(
         child: InkWell(
@@ -282,52 +284,54 @@ class HourWidget extends StatelessWidget {
           child: DecoratedBox(
             decoration: BoxDecoration(
               border: hour.warning
-                  ? const Border(
-                      left: BorderSide(color: Colors.red, width: 5),
+                  ? Border(
+                      left: BorderSide(
+                          color: Theme.of(context).colorScheme.error, width: 5),
                     )
                   : null,
               color: isSelected ? selectedBackgroundColor : backgroundColor,
             ),
-            child: Center(
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      subjectNicks[hour.subject.toLowerCase()] ?? hour.subject,
-                      maxLines: 1,
-                      softWrap: false,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    subjectNicks[hour.subject.toLowerCase()] ?? hour.subject,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    softWrap: false,
+                  ),
+                  if (hour.teachers.isNotEmpty)
+                    const SizedBox(
+                      height: 5,
                     ),
-                    if (hour.teachers.isNotEmpty)
-                      const SizedBox(
-                        height: 5,
-                      ),
-                    for (final teacher in hour.teachers)
-                      Text(
-                        teacher.lastName,
-                        maxLines: 1,
-                        softWrap: false,
-                        style: DefaultTextStyle.of(context)
-                            .style
-                            .copyWith(fontSize: 11),
-                      ),
-                    if (hour.rooms.isNotEmpty)
-                      const SizedBox(
-                        height: 5,
-                      ),
-                    for (final room in hour.rooms)
-                      Text(
-                        room,
-                        maxLines: 1,
-                        softWrap: false,
-                        style: DefaultTextStyle.of(context)
-                            .style
-                            .copyWith(fontSize: 11),
-                      ),
-                  ],
-                ),
+                  for (final teacher in hour.teachers)
+                    Text(
+                      teacher.lastName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      softWrap: false,
+                      style: DefaultTextStyle.of(context)
+                          .style
+                          .copyWith(fontSize: 11),
+                    ),
+                  if (hour.rooms.isNotEmpty)
+                    const SizedBox(
+                      height: 5,
+                    ),
+                  for (final room in hour.rooms)
+                    Text(
+                      room,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      softWrap: false,
+                      style: DefaultTextStyle.of(context)
+                          .style
+                          .copyWith(fontSize: 11),
+                    ),
+                ],
               ),
             ),
           ),

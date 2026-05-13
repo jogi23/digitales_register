@@ -172,8 +172,8 @@ Future<void> _showCertificate(
     ActionHandler next,
     Action<void> action) async {
   scaffoldKey!.currentState!
-      .selectContentWidget(CertificateContainer(), Pages.certificate);
-  await api.actions.certificateActions.load();
+      .selectContentWidget(const Certificate(), Pages.certificate);
+  unawaited(providerContainer.read(certificateProvider.notifier).load());
   await next(action);
 }
 

@@ -44,7 +44,7 @@ void main() {
       );
       await tester.pumpWidget(
         DynamicTheme(
-          data: (brightness, overridePlatform) {
+          data: (brightness, overridePlatform, seedColor) {
             return ThemeData(
               primarySwatch: Colors.deepOrange,
               brightness: brightness,
@@ -79,7 +79,7 @@ void main() {
         );
         await tester.pumpWidget(
           DynamicTheme(
-            data: (brightness, overridePlatform) {
+            data: (brightness, overridePlatform, seedColor) {
               return ThemeData(
                 primarySwatch: Colors.deepOrange,
                 brightness: brightness,
@@ -130,7 +130,7 @@ void main() {
         );
         await tester.pumpWidget(
           DynamicTheme(
-            data: (brightness, overridePlatform) {
+            data: (brightness, overridePlatform, seedColor) {
               return ThemeData(
                 primarySwatch: Colors.deepOrange,
                 brightness: brightness,
@@ -201,7 +201,7 @@ void main() {
         );
         await tester.pumpWidget(
           DynamicTheme(
-            data: (brightness, overridePlatform) {
+            data: (brightness, overridePlatform, seedColor) {
               return ThemeData(
                 primarySwatch: Colors.deepOrange,
                 brightness: brightness,
@@ -270,7 +270,7 @@ void main() {
         );
         await tester.pumpWidget(
           DynamicTheme(
-            data: (brightness, overridePlatform) {
+            data: (brightness, overridePlatform, seedColor) {
               return ThemeData(
                 primarySwatch: Colors.deepOrange,
                 brightness: brightness,
@@ -382,7 +382,7 @@ void main() {
         );
         await tester.pumpWidget(
           DynamicTheme(
-            data: (brightness, overridePlatform) {
+            data: (brightness, overridePlatform, seedColor) {
               return ThemeData(
                 primarySwatch: Colors.deepOrange,
                 brightness: brightness,
@@ -443,7 +443,7 @@ void main() {
         );
         await tester.pumpWidget(
           DynamicTheme(
-            data: (brightness, overridePlatform) {
+            data: (brightness, overridePlatform, seedColor) {
               return ThemeData(
                 primarySwatch: Colors.deepOrange,
                 brightness: brightness,

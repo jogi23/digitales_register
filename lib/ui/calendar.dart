@@ -261,7 +261,8 @@ class _CalendarState extends State<Calendar> with TickerProviderStateMixin {
                                             child: const SizedBox(
                                               width: 20,
                                               height: 20,
-                                              child: CircularProgressIndicator(strokeWidth: 2),
+                                              child: CircularProgressIndicator(
+                                                  strokeWidth: 2),
                                             ),
                                           ),
                               ),

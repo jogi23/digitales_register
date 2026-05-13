@@ -350,8 +350,8 @@ Future<void> main() async {
     );
     await tester.pumpWidget(widget);
     expect(find.byTooltip(username), findsOneWidget);
-    expect(find.byTooltip("Hausaufgaben"), findsOneWidget);
-    expect(find.byTooltip("Noten"), findsOneWidget);
+    expect(find.byTooltip("Merkheft"), findsOneWidget);
+    expect(find.byTooltip("Bewertungen"), findsOneWidget);
     expect(find.byTooltip("Absenzen"), findsOneWidget);
     expect(find.byTooltip("Kalender"), findsOneWidget);
     expect(find.byTooltip("Einstellungen"), findsOneWidget);

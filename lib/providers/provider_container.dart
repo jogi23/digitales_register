@@ -15,14 +15,8 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
-import 'package:built_redux/built_redux.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-part 'certificate_actions.g.dart';
-
-abstract class CertificateActions extends ReduxActions {
-  factory CertificateActions() => _$CertificateActions();
-  CertificateActions._();
-
-  abstract final VoidActionDispatcher load;
-  abstract final ActionDispatcher<String> loaded;
-}
+/// Global [ProviderContainer] used to bridge non-widget code (middleware) to
+/// Riverpod providers. Initialised in [main] before the app starts.
+late final ProviderContainer providerContainer;

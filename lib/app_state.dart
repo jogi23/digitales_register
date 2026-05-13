@@ -20,7 +20,6 @@ library;
 import 'package:built_collection/built_collection.dart';
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
-
 import 'package:dr/data.dart';
 import 'package:dr/utc_date_time.dart';
 
@@ -49,8 +48,6 @@ abstract class AppState implements Built<AppState, AppStateBuilder> {
 
   ProfileState get profileState;
   CalendarState get calendarState;
-  CertificateState get certificateState;
-
   MessagesState get messagesState;
 
   @BuiltValueField(serialize: false)
@@ -92,7 +89,6 @@ abstract class AppState implements Built<AppState, AppStateBuilder> {
       ..gradesState = GradesStateBuilder()
       ..calendarState = CalendarStateBuilder()
       ..settingsState = SettingsStateBuilder()
-      ..certificateState = CertificateStateBuilder()
       ..absencesState = AbsencesStateBuilder()
       ..messagesState = MessagesStateBuilder()
       ..profileState = ProfileStateBuilder()
@@ -426,18 +422,6 @@ abstract class CalendarSelection
   CalendarSelection._();
   static Serializer<CalendarSelection> get serializer =>
       _$calendarSelectionSerializer;
-}
-
-abstract class CertificateState
-    implements Built<CertificateState, CertificateStateBuilder> {
-  String? get html;
-  UtcDateTime? get lastFetched;
-
-  factory CertificateState([void Function(CertificateStateBuilder)? updates]) =
-      _$CertificateState;
-  CertificateState._();
-  static Serializer<CertificateState> get serializer =>
-      _$certificateStateSerializer;
 }
 
 abstract class NetworkProtocolState

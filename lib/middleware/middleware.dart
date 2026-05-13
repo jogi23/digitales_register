@@ -25,7 +25,6 @@ import 'package:dio/dio.dart' as dio;
 import 'package:dr/actions/absences_actions.dart';
 import 'package:dr/actions/app_actions.dart';
 import 'package:dr/actions/calendar_actions.dart';
-import 'package:dr/actions/certificate_actions.dart';
 import 'package:dr/actions/dashboard_actions.dart';
 import 'package:dr/actions/grades_actions.dart';
 import 'package:dr/actions/login_actions.dart';
@@ -38,18 +37,20 @@ import 'package:dr/actions/settings_actions.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/container/absences_page_container.dart';
 import 'package:dr/container/calendar_container.dart';
-import 'package:dr/container/certificate_container.dart';
 import 'package:dr/container/grades_page_container.dart';
 import 'package:dr/container/messages_container.dart';
 import 'package:dr/container/settings_page.dart';
 import 'package:dr/data.dart';
 import 'package:dr/main.dart';
+import 'package:dr/providers/certificate_provider.dart';
+import 'package:dr/providers/no_internet_provider.dart';
+import 'package:dr/providers/provider_container.dart';
 import 'package:dr/serializers.dart';
+import 'package:dr/ui/certificate.dart';
 import 'package:dr/ui/dialog.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
 import 'package:dr/wrapper.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart' hide Action, Notification;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl/intl.dart';
@@ -62,7 +63,6 @@ import 'package:url_launcher/url_launcher.dart';
 
 part 'absences.dart';
 part 'calendar.dart';
-part 'certificate.dart';
 part 'dashboard.dart';
 part 'grades.dart';
 part 'login.dart';
@@ -108,7 +108,6 @@ List<Middleware<AppState, AppStateBuilder, AppActions>> middleware({
             ..combine(_notificationsMiddleware)
             ..combine(_passMiddleware)
             ..combine(routingMiddleware)
-            ..combine(_certificateMiddleware)
             ..combine(_messagesMiddleware)
             ..combine(_profileMiddleware)
             ..combine(_settingsMiddleware))
@@ -218,6 +217,7 @@ Future<void> _noInternet(
   final prevNoInternet = api.state.noInternet;
   await next(action);
   final noInternet = api.state.noInternet;
+  providerContainer.read(noInternetProvider.notifier).state = noInternet;
   if (prevNoInternet != noInternet) {
     if (noInternet) {
       showSnackBar("Keine Verbindung");
@@ -721,50 +721,6 @@ Future<void> _checkShowUnmaintainedAlert() async {
     file.createSync();
     return;
   }
-
-  final isBeforeJuly2023 = DateTime.now().isBefore(DateTime(2023, 7));
-
-  await showDialog<void>(
-    context: navigatorKey!.currentContext!,
-    builder: (context) {
-      return InfoDialog(
-        title: const Text("Hi!"),
-        content: Text.rich(
-          TextSpan(
-            text:
-                "Wie Du vielleicht weißt, ist diese App ein Hobbyprojekt von mir. Nachdem ich ${isBeforeJuly2023 ? "dieses Jahr maturiere" : "2023 maturiert habe"}, "
-                "werde ich mich in Zukunft nicht mehr selbst um Fehlerbehebungen in der App kümmern können, "
-                "auch wenn sie wahrscheinlich noch weiter funktionieren wird.\n\n"
-                "${isBeforeJuly2023 ? "Ich hoffe, die App war euch bisher eine Hilfe. " : ""}Für Interessierte: ",
-            children: [
-              TextSpan(
-                text: "github.com/mideb/digitales_register",
-                style: const TextStyle(color: Colors.blue),
-                recognizer: TapGestureRecognizer()
-                  ..onTap = () {
-                    launchUrl(
-                      Uri.parse("https://github.com/mideb/digitales_register"),
-                      mode: LaunchMode.externalApplication,
-                    );
-                  },
-              ),
-              const TextSpan(
-                  text: ".\n\n"
-                      "Die offizielle Seite (digitalesregister.it) ist davon natürlich nicht betroffen!\n\n"
-                      "Danke nochmal an alle, die diese App in den letzten Jahren genutzt haben.\n\n"
-                      "Michael")
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("OK"),
-          ),
-        ],
-      );
-    },
-  );
 
   await file.create();
 }

@@ -31,6 +31,7 @@ import 'package:dr/container/request_pass_reset_container.dart';
 import 'package:dr/container/settings_page.dart';
 import 'package:dr/desktop.dart';
 import 'package:dr/middleware/middleware.dart';
+import 'package:dr/providers/provider_container.dart';
 import 'package:dr/reducer/reducer.dart';
 import 'package:dr/ui/grade_calculator.dart';
 import 'package:dr/ui/grades_chart_page.dart';
@@ -39,6 +40,7 @@ import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_built_redux/flutter_built_redux.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:responsive_scaffold/responsive_scaffold.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -92,7 +94,13 @@ Future<void> _runApp() async {
     actions,
     middleware: middleware(),
   );
-  runApp(SentryWidget(child: RegisterApp(store: store)));
+  providerContainer = ProviderContainer();
+  runApp(SentryWidget(
+    child: UncontrolledProviderScope(
+      container: providerContainer,
+      child: RegisterApp(store: store),
+    ),
+  ));
   WidgetsBinding.instance.addPostFrameCallback(
     (_) async {
       binding.allowFirstFrame();
@@ -130,14 +138,14 @@ class RegisterApp extends StatelessWidget {
       child: Listener(
         onPointerDown: (_) => store.actions.loginActions.updateLogout(),
         child: DynamicTheme(
-          data: (brightness, overridePlatform) {
+          data: (brightness, overridePlatform, seedColor) {
             TargetPlatform? platform;
             if (overridePlatform && Platform.isAndroid) {
               platform = TargetPlatform.iOS;
             }
             return ThemeData(
               useMaterial3: true,
-              colorSchemeSeed: Colors.deepOrange,
+              colorSchemeSeed: seedColor,
               brightness: brightness,
               platform: platform,
             );

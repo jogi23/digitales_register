@@ -125,7 +125,7 @@ class CalendarCard extends StatelessWidget {
                   title: homeworkExam.typeName,
                   content: homeworkExam.name,
                   icon: Icons.grade,
-                  iconColor: Colors.red,
+                  iconColor: Theme.of(context).colorScheme.error,
                 )
               else
                 _ContentItem(

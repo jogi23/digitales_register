@@ -12,7 +12,8 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace 'it.digitalesregisterapp'
-    compileSdkVersion 34
+    compileSdkVersion 36
+    ndkVersion "28.2.13676358"
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
@@ -30,7 +31,7 @@ android {
     defaultConfig {
         applicationId "it.digitalesregisterapp"
         minSdkVersion flutter.minSdkVersion
-        targetSdkVersion 34
+        targetSdkVersion 36
         versionCode flutter.versionCode
         versionName flutter.versionName
     }
@@ -51,19 +52,19 @@ android {
             // this is my (michael) release key. Used for dev purposes only.
             if (signingConfigs.release.keyAlias == "myandroidkey") {
                 applicationIdSuffix ".irelease"
-                resValue "string", "app_name", "dr Irelease"
+                resValue "string", "app_name", "DigiReg ST"
             } else {
                 // This is the normal release build type
-                resValue "string", "app_name", "Register"
+                resValue "string", "app_name", "DigiReg ST"
             }
         }
         debug {
             applicationIdSuffix ".debug"
-            resValue "string", "app_name", "dr DEBUG"
+            resValue "string", "app_name", "DigiReg ST"
         }
         profile {
             applicationIdSuffix ".profile"
-            resValue "string", "app_name", "dr PROFILE"
+            resValue "string", "app_name", "DigiReg ST"
         }
     }
 }

@@ -15,21 +15,10 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
-part of 'middleware.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final _certificateMiddleware =
-    MiddlewareBuilder<AppState, AppStateBuilder, AppActions>()
-      ..add(CertificateActionsNames.load, _loadCertificate);
-
-Future<void> _loadCertificate(
-    MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
-    ActionHandler next,
-    Action<void> action) async {
-  if (api.state.noInternet) return;
-  await next(action);
-  final dynamic response =
-      await wrapper.send("student/certificate", method: "GET");
-  if (response != null) {
-    await api.actions.certificateActions.loaded(response as String);
-  }
-}
+/// Mirrors the Redux `AppState.noInternet` flag so that Riverpod features can
+/// react to connectivity changes without depending on the Redux store.
+///
+/// Updated by the `_noInternet` middleware whenever the Redux flag changes.
+final noInternetProvider = StateProvider<bool>((ref) => false);

@@ -41,7 +41,7 @@ class GradesPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: ResponsiveAppBar(
-        title: const Text("Noten"),
+        title: const Text("Bewertungen"),
         actions: <Widget>[
           DropdownButtonHideUnderline(
             child: DropdownButton<Semester>(

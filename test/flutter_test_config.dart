@@ -18,11 +18,14 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:dr/providers/provider_container.dart' as pc;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> testExecutable(FutureOr<void> Function() testMain) async {
   SharedPreferences.setMockInitialValues({});
+  pc.providerContainer = ProviderContainer();
 
   return GoldenToolkit.runWithConfiguration(
     () async {

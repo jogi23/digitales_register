@@ -15,34 +15,37 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
-import 'package:dr/container/certificate_container.dart';
+import 'package:dr/providers/certificate_provider.dart';
+import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/ui/last_fetched_overlay.dart';
 import 'package:dr/ui/no_internet.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
 import 'package:responsive_scaffold/responsive_scaffold.dart';
 
-class Certificate extends StatelessWidget {
-  final CertificateViewModel vm;
+class Certificate extends ConsumerWidget {
+  const Certificate({super.key});
 
-  const Certificate({super.key, required this.vm});
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final certState = ref.watch(certificateProvider);
+    final noInternet = ref.watch(noInternetProvider);
     return Scaffold(
       appBar: const ResponsiveAppBar(title: Text("Zeugnis")),
-      body: vm.html == null
+      body: certState.html == null
           ? Center(
-              child: vm.noInternet
+              child: noInternet
                   ? const NoInternet()
                   : const CircularProgressIndicator(),
             )
           : LastFetchedOverlay(
-              lastFetched: vm.lastFetched,
-              noInternet: vm.noInternet,
+              lastFetched: certState.lastFetched,
+              noInternet: noInternet,
               child: SingleChildScrollView(
                 child: Padding(
                   padding: const EdgeInsets.all(8),
-                  child: HtmlWidget(vm.html!),
+                  child: HtmlWidget(certState.html!),
                 ),
               ),
             ),

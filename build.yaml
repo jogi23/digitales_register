@@ -25,7 +25,12 @@ targets:
             - lib/actions/app_actions.dart
             - lib/actions/calendar_actions.dart
             - lib/actions/certificate_actions.dart
+            - lib/actions/dashboard_actions.dart
+            - lib/actions/grades_actions.dart
+            - lib/actions/login_actions.dart
             - lib/actions/messages_actions.dart
             - lib/actions/notifications_actions.dart
+            - lib/actions/profile_actions.dart
+            - lib/actions/routing_actions.dart
             - lib/actions/save_pass_actions.dart
             - lib/actions/settings_actions.dart
