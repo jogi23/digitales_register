@@ -41,8 +41,6 @@ class HomeworkFilterContainer extends ConsumerWidget {
   }
 }
 
-typedef HomeworkBlacklistCallback = void Function(List<HomeworkType> blacklist);
-
 abstract class HomeworkFilterVM
     implements Built<HomeworkFilterVM, HomeworkFilterVMBuilder> {
   BuiltList<HomeworkType> get currentBlacklist;

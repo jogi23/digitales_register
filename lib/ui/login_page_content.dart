@@ -29,7 +29,6 @@ typedef LoginCallback = void Function(String user, String pass, String url);
 typedef ChangePassCallback = void Function(
     String user, String oldPass, String newPass, String url);
 typedef SetSafeModeCallback = void Function(bool safeMode);
-typedef SelectAccountCallback = void Function(int index);
 
 class LoginPageContent extends StatefulWidget {
   final LoginPageViewModel vm;
@@ -38,7 +37,7 @@ class LoginPageContent extends StatefulWidget {
   final SetSafeModeCallback setSaveNoPass;
   final VoidCallback onReload;
   final void Function(String url) onRequestPassReset;
-  final SelectAccountCallback onSelectAccount;
+  final void Function(int index) onSelectAccount;
 
   const LoginPageContent({
     super.key,

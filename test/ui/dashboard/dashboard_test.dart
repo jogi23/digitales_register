@@ -54,7 +54,7 @@ class _TestDashboardNotifier extends DashboardNotifier {
 Future<void> main() async {
   testGoldens('Open drawer in phone mode', (WidgetTester tester) async {
     ScaffoldState getScaffoldState() {
-      return tester.state(find.byType(Scaffold));
+      return tester.state(find.byType(Scaffold).at(0));
     }
 
     final widget = ProviderScope(
@@ -77,13 +77,21 @@ Future<void> main() async {
     );
     expect(getScaffoldState().isDrawerOpen, isFalse);
     // scroll vertically
-    await tester.fling(find.byType(Scaffold), const Offset(0, 500), 1000);
+    await tester.fling(find.byType(Scaffold).at(0), const Offset(0, 500), 1000);
+    await tester.pumpAndSettle();
     expect(getScaffoldState().isDrawerOpen, isFalse);
     // scroll vertically, but also a bit horizontally
-    await tester.fling(find.byType(Scaffold), const Offset(30, 100), 1000);
+    await tester.fling(find.byType(Scaffold).at(0), const Offset(30, 100), 1000);
+    await tester.pumpAndSettle();
     expect(getScaffoldState().isDrawerOpen, isFalse);
-    // scroll mostly horizontally
-    await tester.fling(find.byType(Scaffold), const Offset(100, 30), 1000);
+    // scroll mostly horizontally from left edge — triggers drawer edge drag
+    final scaffoldRect = tester.getRect(find.byType(Scaffold).at(0));
+    await tester.flingFrom(
+      Offset(scaffoldRect.left + 10, scaffoldRect.center.dy),
+      const Offset(100, 30),
+      1000,
+    );
+    await tester.pumpAndSettle();
     expect(getScaffoldState().isDrawerOpen, isTrue);
   });
   testWidgets('Home page shows no internet message',

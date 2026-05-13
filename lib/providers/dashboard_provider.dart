@@ -440,25 +440,16 @@ class DashboardNotifier extends Notifier<DashboardState> {
                     .where((s) => s != null),
               );
 
-      final typeString = getString(data['type']);
-      HomeworkType type;
-      switch (typeString) {
-        case 'lessonHomework':
-          type = HomeworkType.lessonHomework;
-        case 'gradeGroup':
-          type = HomeworkType.gradeGroup;
-        case 'grade':
-          type = HomeworkType.grade;
-        case 'observation':
-          type = HomeworkType.observation;
-        case 'homework':
-          type = HomeworkType.homework;
-        default:
-          type = HomeworkType.unknown;
-      }
-      b.type = type;
+      b.type = switch (getString(data['type'])) {
+        'lessonHomework' => HomeworkType.lessonHomework,
+        'gradeGroup' => HomeworkType.gradeGroup,
+        'grade' => HomeworkType.grade,
+        'observation' => HomeworkType.observation,
+        'homework' => HomeworkType.homework,
+        _ => HomeworkType.unknown,
+      };
 
-      if (type == HomeworkType.grade) {
+      if (b.type == HomeworkType.grade) {
         b
           ..gradeFormatted = formatGradeFromString(getString(data['grade']))
           ..grade = getString(data['grade']);

@@ -126,8 +126,6 @@ abstract class DashboardState
   BuiltList<HomeworkType>? get blacklist;
 
   BuiltList<Day>? get allDays;
-  static Serializer<DashboardState> get serializer =>
-      _$dashboardStateSerializer;
 
   factory DashboardState([Function(DashboardStateBuilder b)? updates]) =
       _$DashboardState;

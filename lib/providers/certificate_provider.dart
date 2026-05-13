@@ -41,9 +41,9 @@ class CertificateNotifier extends Notifier<CertificateState> {
     if (ref.read(noInternetProvider)) return;
     final dynamic response =
         await wrapper.send("student/certificate", method: "GET");
-    if (response != null) {
+    if (response is String) {
       state = state.copyWith(
-        html: response as String,
+        html: response,
         lastFetched: UtcDateTime.now(),
       );
     }

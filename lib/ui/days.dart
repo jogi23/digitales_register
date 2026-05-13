@@ -43,6 +43,7 @@ typedef RemoveReminderCallback = void Function(Homework hw, Day day);
 typedef ToggleDoneCallback = void Function(Homework hw, bool done);
 typedef MarkAsNotNewOrChangedCallback = void Function(Homework hw);
 typedef MarkDeletedHomeworkAsSeenCallback = void Function(Day day);
+typedef AttachmentCallback = void Function(GradeGroupSubmission ggs);
 
 class DaysWidget extends StatefulWidget {
   final DaysViewModel vm;

@@ -130,13 +130,6 @@ class _ReduxDaysData {
       );
 }
 
-typedef AddReminderCallback = void Function(Day day, String reminder);
-typedef RemoveReminderCallback = void Function(Homework hw, Day day);
-typedef ToggleDoneCallback = void Function(Homework hw, bool done);
-typedef MarkAsNotNewOrChangedCallback = void Function(Homework hw);
-typedef MarkDeletedHomeworkAsSeenCallback = void Function(Day day);
-typedef AttachmentCallback = void Function(GradeGroupSubmission ggs);
-
 abstract class DaysViewModel
     implements Built<DaysViewModel, DaysViewModelBuilder> {
   bool get future;
