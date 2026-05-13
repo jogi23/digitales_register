@@ -16,7 +16,6 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:flutter/material.dart';
-
 import 'package:url_launcher/url_launcher.dart';
 
 class Donate extends StatelessWidget {

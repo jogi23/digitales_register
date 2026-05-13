@@ -20,6 +20,8 @@ import 'package:built_value/built_value.dart';
 import 'package:dr/actions/app_actions.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/data.dart';
+import 'package:dr/main.dart' show showSnackBar;
+import 'package:dr/providers/dashboard_error_provider.dart';
 import 'package:dr/providers/dashboard_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/ui/days.dart';
@@ -34,6 +36,12 @@ class DaysContainer extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final dashboard = ref.watch(dashboardProvider);
     final noInternet = ref.watch(noInternetProvider);
+    ref.listen<String?>(dashboardErrorProvider, (_, error) {
+      if (error != null) {
+        showSnackBar(error);
+        ref.read(dashboardErrorProvider.notifier).state = null;
+      }
+    });
     final notifier = ref.read(dashboardProvider.notifier);
     return StoreConnection<AppState, AppActions, _ReduxDaysData>(
       connect: _ReduxDaysData.from,

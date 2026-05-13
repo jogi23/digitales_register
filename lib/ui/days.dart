@@ -764,15 +764,19 @@ class ItemWidget extends StatelessWidget {
     if (item.warning && colorTestsInRed) {
       return (Theme.of(context).colorScheme.error, 1.5);
     }
-    if (colorBorder &&
-        item.label != null &&
-        subjectThemes.containsKey(item.label!)) {
-      return (Color(subjectThemes[item.label]!.color), 1.5);
-    }
     if (item.type == HomeworkType.grade || item.checked) {
       return (Theme.of(context).colorScheme.primary, 0);
     }
     return (Colors.grey, 0);
+  }
+
+  Color? _getCardColor() {
+    if (colorBorder &&
+        item.label != null &&
+        subjectThemes.containsKey(item.label!)) {
+      return Color(subjectThemes[item.label]!.color).withOpacity(0.15);
+    }
+    return null;
   }
 
   @override
@@ -791,7 +795,7 @@ class ItemWidget extends StatelessWidget {
           ),
           borderRadius: BorderRadius.circular(16),
         ),
-        color: Colors.transparent,
+        color: _getCardColor(),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Column(
@@ -953,7 +957,10 @@ class ItemWidget extends StatelessWidget {
                   ),
                 ),
               ],
-              if (item.gradeGroupSubmissions?.isNotEmpty == true) ...[
+              if (!isHistory &&
+                  !isDeletedView &&
+                  item.gradeGroupSubmissions?.isNotEmpty == true &&
+                  onOpenAttachment != null) ...[
                 const Divider(),
                 Align(
                   alignment: Alignment.centerLeft,

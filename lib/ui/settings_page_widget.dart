@@ -281,7 +281,7 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
           ),
           SwitchListTile.adaptive(
             title: const Text(
-              "Hausaufgaben mit diesen Farben umrahmen",
+              "Hausaufgaben mit diesen Farben färben",
             ),
             value: widget.vm.dashboardColorBorders,
             onChanged: widget.onSetDashboardColorBorders,

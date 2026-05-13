@@ -368,6 +368,12 @@ Future<void> _loggedIn(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
           deduplicate: api.state.settingsState.dashboardDeduplicateEntries,
         );
     await api.actions.notificationsActions.load();
+    // Restore the subject-themes update that was lost when DashboardActionsNames.loaded
+    // was removed during the Riverpod migration. The dashboard is now loaded above via
+    // Riverpod, so we trigger the update manually here using extractAllSubjects() which
+    // already reads providerContainer.read(dashboardProvider).allDays.
+    await api.actions.settingsActions
+        .updateSubjectThemes(api.state.extractAllSubjects());
   }
 }
 

@@ -81,7 +81,8 @@ Future<void> main() async {
     await tester.pumpAndSettle();
     expect(getScaffoldState().isDrawerOpen, isFalse);
     // scroll vertically, but also a bit horizontally
-    await tester.fling(find.byType(Scaffold).at(0), const Offset(30, 100), 1000);
+    await tester.fling(
+        find.byType(Scaffold).at(0), const Offset(30, 100), 1000);
     await tester.pumpAndSettle();
     expect(getScaffoldState().isDrawerOpen, isFalse);
     // scroll mostly horizontally from left edge — triggers drawer edge drag
@@ -650,6 +651,169 @@ Future<void> main() async {
     await tester.pump();
     await expectLater(
         find.byType(DaysWidget), matchesGoldenFile("item_checked.png"));
+  });
+
+  testGoldens('colored background when setting enabled',
+      (WidgetTester tester) async {
+    final now = UtcDateTime(2050);
+    final widget = ProviderScope(
+      overrides: [
+        dashboardProvider.overrideWith(
+          () => _TestDashboardNotifier(
+            DashboardState(
+              (b) => b.allDays = ListBuilder(
+                <Day>[
+                  Day(
+                    (b) => b
+                      ..date = now
+                      ..deletedHomework = ListBuilder()
+                      ..homework = ListBuilder(<Homework>[
+                        Homework(
+                          (b) => b
+                            ..checkable = false
+                            ..checked = false
+                            ..deleteable = false
+                            ..deleted = false
+                            ..firstSeen = now
+                            ..id = 1
+                            ..isChanged = false
+                            ..isNew = false
+                            ..label = "Mathematik"
+                            ..type = HomeworkType.lessonHomework
+                            ..title = "Seite 42 aufgabe 3"
+                            ..subtitle = "Für morgen",
+                        ),
+                        Homework(
+                          (b) => b
+                            ..checkable = false
+                            ..checked = false
+                            ..deleteable = false
+                            ..deleted = false
+                            ..firstSeen = now
+                            ..id = 2
+                            ..isChanged = false
+                            ..isNew = false
+                            ..label = "Deutsch"
+                            ..type = HomeworkType.lessonHomework
+                            ..title = "Aufsatz schreiben"
+                            ..subtitle = "Für morgen",
+                        ),
+                        Homework(
+                          (b) => b
+                            ..checkable = false
+                            ..checked = false
+                            ..deleteable = false
+                            ..deleted = false
+                            ..firstSeen = now
+                            ..id = 3
+                            ..isChanged = false
+                            ..isNew = false
+                            // no matching theme → transparent
+                            ..label = "Sport"
+                            ..type = HomeworkType.lessonHomework
+                            ..title = "Turnschuhe mitbringen"
+                            ..subtitle = "Für morgen",
+                        ),
+                      ])
+                      ..lastRequested = now,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+      child: ReduxProvider(
+        store: Store<AppState, AppStateBuilder, AppActions>(
+          ReducerBuilder<AppState, AppStateBuilder>().build(),
+          AppState(
+            (b) => b.settingsState
+              ..dashboardColorBorders = true
+              ..subjectThemes = MapBuilder<String, SubjectTheme>({
+                'Mathematik': SubjectTheme(
+                    (b) => b..thick = 2..color = Colors.blue.value),
+                'Deutsch': SubjectTheme(
+                    (b) => b..thick = 2..color = Colors.green.value),
+              }),
+          ),
+          AppActions(),
+        ),
+        child: MaterialApp(
+          home: DaysContainer(),
+          theme: ThemeData(primarySwatch: Colors.deepOrange),
+        ),
+      ),
+    );
+    await tester.pumpWidget(widget);
+    await tester.pumpAndSettle();
+    await expectLater(
+        find.byType(DaysWidget),
+        matchesGoldenFile("colored_background_enabled.png"));
+  });
+
+  testGoldens('no colored background when setting disabled',
+      (WidgetTester tester) async {
+    final now = UtcDateTime(2050);
+    final widget = ProviderScope(
+      overrides: [
+        dashboardProvider.overrideWith(
+          () => _TestDashboardNotifier(
+            DashboardState(
+              (b) => b.allDays = ListBuilder(
+                <Day>[
+                  Day(
+                    (b) => b
+                      ..date = now
+                      ..deletedHomework = ListBuilder()
+                      ..homework = ListBuilder(<Homework>[
+                        Homework(
+                          (b) => b
+                            ..checkable = false
+                            ..checked = false
+                            ..deleteable = false
+                            ..deleted = false
+                            ..firstSeen = now
+                            ..id = 1
+                            ..isChanged = false
+                            ..isNew = false
+                            ..label = "Mathematik"
+                            ..type = HomeworkType.lessonHomework
+                            ..title = "Seite 42 aufgabe 3"
+                            ..subtitle = "Für morgen",
+                        ),
+                      ])
+                      ..lastRequested = now,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+      child: ReduxProvider(
+        store: Store<AppState, AppStateBuilder, AppActions>(
+          ReducerBuilder<AppState, AppStateBuilder>().build(),
+          AppState(
+            (b) => b.settingsState
+              ..dashboardColorBorders = false
+              ..subjectThemes = MapBuilder<String, SubjectTheme>({
+                'Mathematik': SubjectTheme(
+                    (b) => b..thick = 2..color = Colors.blue.value),
+              }),
+          ),
+          AppActions(),
+        ),
+        child: MaterialApp(
+          home: DaysContainer(),
+          theme: ThemeData(primarySwatch: Colors.deepOrange),
+        ),
+      ),
+    );
+    await tester.pumpWidget(widget);
+    await tester.pumpAndSettle();
+    await expectLater(
+        find.byType(DaysWidget),
+        matchesGoldenFile("colored_background_disabled.png"));
   });
 
   testWidgets("check box when offline but not yet in offline mode",

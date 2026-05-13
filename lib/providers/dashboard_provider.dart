@@ -21,9 +21,9 @@ import 'package:built_collection/built_collection.dart';
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:dr/app_state.dart';
 import 'package:dr/data.dart';
-import 'package:dr/main.dart' show showSnackBar;
 import 'package:dr/middleware/middleware.dart'
     show canOpenFile, downloadFile, openFile, wrapper;
+import 'package:dr/providers/dashboard_error_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
@@ -34,6 +34,12 @@ import 'package:intl/intl.dart';
 class DashboardNotifier extends Notifier<DashboardState> {
   @override
   DashboardState build() => DashboardState();
+
+  /// Clears all dashboard data. Call this before loading data for a different
+  /// account so that stale entries are not shown as deleted.
+  void reset() {
+    state = DashboardState();
+  }
 
   Future<void> load(
     bool future, {
@@ -355,41 +361,35 @@ class DashboardNotifier extends Notifier<DashboardState> {
     );
   }
 
-  void _applyDownloadAttachment(GradeGroupSubmission ggs) {
+  void _mapSubmissions(
+    GradeGroupSubmission Function(GradeGroupSubmission) fn,
+  ) {
     state = state.rebuild(
       (b) => b.allDays.map(
         (day) => day.rebuild(
           (b) => b.homework.map(
-            (hw) => hw.rebuild(
-              (b) => b.gradeGroupSubmissions.map(
-                (s) => s == ggs ? s.rebuild((b) => b..downloading = true) : s,
-              ),
-            ),
+            (hw) => hw.rebuild((b) => b.gradeGroupSubmissions.map(fn)),
           ),
         ),
       ),
     );
   }
 
+  void _applyDownloadAttachment(GradeGroupSubmission ggs) {
+    _mapSubmissions(
+      (s) => s == ggs ? s.rebuild((b) => b..downloading = true) : s,
+    );
+  }
+
   void _applyAttachmentReady(GradeGroupSubmission ggs) {
-    state = state.rebuild(
-      (b) => b.allDays.map(
-        (day) => day.rebuild(
-          (b) => b.homework.map(
-            (hw) => hw.rebuild(
-              (b) => b.gradeGroupSubmissions.map(
-                (s) => s.file == ggs.file
-                    ? s.rebuild(
-                        (b) => b
-                          ..fileAvailable = ggs.fileAvailable
-                          ..downloading = false,
-                      )
-                    : s,
-              ),
-            ),
-          ),
-        ),
-      ),
+    _mapSubmissions(
+      (s) => s.file == ggs.file
+          ? s.rebuild(
+              (b) => b
+                ..fileAvailable = ggs.fileAvailable
+                ..downloading = false,
+            )
+          : s,
     );
   }
 
@@ -476,8 +476,8 @@ class DashboardNotifier extends Notifier<DashboardState> {
   }
 
   void _showErrorIfOnline(String message) {
-    if (!wrapper.noInternet) {
-      showSnackBar(message);
+    if (!ref.read(noInternetProvider)) {
+      ref.read(dashboardErrorProvider.notifier).state = message;
     }
   }
 

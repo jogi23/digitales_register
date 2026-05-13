@@ -336,6 +336,7 @@ Future<void> _selectAccount(
   login["url"] = selected["url"];
   await secureStorage.write(key: "login", value: json.encode(login));
   await api.actions.mountAppState(AppState());
+  providerContainer.read(dashboardProvider.notifier).reset();
   await api.actions.load();
 }
 
