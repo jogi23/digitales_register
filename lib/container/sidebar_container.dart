@@ -19,8 +19,10 @@ import 'package:dr/actions/app_actions.dart';
 import 'package:dr/actions/login_actions.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/middleware/middleware.dart';
+import 'package:dr/providers/config_provider.dart';
 import 'package:dr/providers/login_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
+import 'package:dr/services/app_router.dart';
 import 'package:dr/ui/sidebar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_built_redux/flutter_built_redux.dart';
@@ -42,25 +44,26 @@ class SidebarContainer extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsProvider);
     final login = ref.watch(loginProvider);
+    final config = ref.watch(configProvider);
     final settingsNotifier = ref.read(settingsProvider.notifier);
-    return StoreConnection<AppState, AppActions, (String?, String?)>(
-      connect: (state) => (state.config?.fullName, state.config?.imgSource),
-      builder: (context, configData, actions) {
-        final (fullName, imgSource) = configData;
+    final router = ref.read(appRouterProvider);
+    return StoreConnection<AppState, AppActions, Object>(
+      connect: (_) => const Object(),
+      builder: (context, _, actions) {
         return Sidebar(
           currentSelected: currentSelected,
           drawerExpanded: settings.drawerFullyExpanded,
           goHome: goHome,
           onDrawerExpansionChange: settingsNotifier.setDrawerFullyExpanded,
           tabletMode: tabletMode,
-          userIcon: imgSource,
-          username: fullName ?? login.username,
-          showAbsences: actions.routingActions.showAbsences.call,
-          showCalendar: actions.routingActions.showCalendar.call,
-          showCertificate: actions.routingActions.showCertificate.call,
-          showGrades: actions.routingActions.showGrades.call,
-          showMessages: actions.routingActions.showMessages.call,
-          showSettings: actions.routingActions.showSettings.call,
+          userIcon: config?.imgSource,
+          username: config?.fullName ?? login.username,
+          showAbsences: router.showAbsences,
+          showCalendar: router.showCalendar,
+          showCertificate: router.showCertificate,
+          showGrades: router.showGrades,
+          showMessages: router.showMessages,
+          showSettings: router.showSettings,
           otherAccounts: login.otherAccounts,
           selectAccount: actions.loginActions.selectAccount.call,
           addAccount: actions.loginActions.addAccount.call,

@@ -115,6 +115,7 @@ Future<void> _login(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
     ),
     configLoaded: () {
       api.actions.setConfig(wrapper.config);
+      providerContainer.read(configProvider.notifier).state = wrapper.config;
       providerContainer
           .read(gradesProvider.notifier)
           .setConfig(wrapper.config);
