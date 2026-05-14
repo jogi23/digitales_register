@@ -15,51 +15,53 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
-import 'package:built_collection/built_collection.dart';
-import 'package:built_value/built_value.dart';
 import 'package:dr/actions/app_actions.dart';
 import 'package:dr/actions/login_actions.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/middleware/middleware.dart';
+import 'package:dr/providers/login_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/ui/sidebar.dart';
-import 'package:flutter/material.dart' hide Builder;
+import 'package:flutter/material.dart';
 import 'package:flutter_built_redux/flutter_built_redux.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-part 'sidebar_container.g.dart';
 
 class SidebarContainer extends ConsumerWidget {
   final bool tabletMode;
   final VoidCallback goHome;
   final Pages currentSelected;
 
-  const SidebarContainer(
-      {super.key,
-      required this.tabletMode,
-      required this.goHome,
-      required this.currentSelected});
+  const SidebarContainer({
+    super.key,
+    required this.tabletMode,
+    required this.goHome,
+    required this.currentSelected,
+  });
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsProvider);
+    final login = ref.watch(loginProvider);
     final settingsNotifier = ref.read(settingsProvider.notifier);
-    return StoreConnection<AppState, AppActions, SidebarViewModel>(
-      builder: (BuildContext context, state, AppActions actions) {
+    return StoreConnection<AppState, AppActions, (String?, String?)>(
+      connect: (state) => (state.config?.fullName, state.config?.imgSource),
+      builder: (context, configData, actions) {
+        final (fullName, imgSource) = configData;
         return Sidebar(
           currentSelected: currentSelected,
           drawerExpanded: settings.drawerFullyExpanded,
           goHome: goHome,
           onDrawerExpansionChange: settingsNotifier.setDrawerFullyExpanded,
           tabletMode: tabletMode,
-          userIcon: state.userIcon,
-          username: state.username,
+          userIcon: imgSource,
+          username: fullName ?? login.username,
           showAbsences: actions.routingActions.showAbsences.call,
           showCalendar: actions.routingActions.showCalendar.call,
           showCertificate: actions.routingActions.showCertificate.call,
           showGrades: actions.routingActions.showGrades.call,
           showMessages: actions.routingActions.showMessages.call,
           showSettings: actions.routingActions.showSettings.call,
-          otherAccounts: state.otherAccounts.toList(),
+          otherAccounts: login.otherAccounts,
           selectAccount: actions.loginActions.selectAccount.call,
           addAccount: actions.loginActions.addAccount.call,
           logout: () => actions.loginActions.logout(
@@ -72,32 +74,6 @@ class SidebarContainer extends ConsumerWidget {
           passwordSavingEnabled: !settings.noPasswordSaving,
         );
       },
-      connect: (AppState state) {
-        return SidebarViewModel(
-          (b) => b
-            ..username = state.config?.fullName ?? state.loginState.username
-            ..userIcon = state.config?.imgSource
-            // drawerInitiallyFullyExpanded and passwordSavingEnabled are read
-            // directly from settingsProvider in the builder above.
-            ..drawerInitiallyFullyExpanded = false
-            ..otherAccounts = state.loginState.otherAccounts.toBuilder()
-            ..passwordSavingEnabled = false,
-        );
-      },
     );
   }
-}
-
-abstract class SidebarViewModel
-    implements Built<SidebarViewModel, SidebarViewModelBuilder> {
-  String? get username;
-
-  String? get userIcon;
-  bool get drawerInitiallyFullyExpanded;
-  bool get passwordSavingEnabled;
-  BuiltList<String> get otherAccounts;
-
-  factory SidebarViewModel([void Function(SidebarViewModelBuilder)? updates]) =
-      _$SidebarViewModel;
-  SidebarViewModel._();
 }

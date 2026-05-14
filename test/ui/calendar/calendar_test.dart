@@ -27,6 +27,7 @@ import 'package:dr/middleware/middleware.dart';
 import 'package:dr/providers/calendar_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/providers/provider_container.dart' as pc;
+import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/reducer/reducer.dart';
 import 'package:dr/ui/dialog.dart';
 import 'package:dr/utc_date_time.dart';
@@ -45,6 +46,14 @@ class _TestCalendarNotifier extends CalendarNotifier {
 
   @override
   CalendarState build() => initialState;
+}
+
+class _TestSettingsNotifier extends SettingsNotifier {
+  final SettingsState initial;
+  _TestSettingsNotifier(this.initial);
+
+  @override
+  SettingsState build() => initial;
 }
 
 CalendarState _buildCalendarState({
@@ -111,6 +120,18 @@ Future<void> main() async {
           () => _TestCalendarNotifier(calendarState),
         ),
         noInternetProvider.overrideWith((ref) => false),
+        settingsProvider.overrideWith(
+          () => _TestSettingsNotifier(
+            SettingsState(
+              (b) {
+                b.showCalendarNicksBar = nicksBarEnabled;
+                if (!hasSubjctWithoutNick) {
+                  b.subjectNicks = MapBuilder(<String, String>{"Fach1": "F"});
+                }
+              },
+            ),
+          ),
+        ),
       ],
     );
     pc.providerContainer = container;
@@ -119,16 +140,7 @@ Future<void> main() async {
       child: ReduxProvider(
         store: Store<AppState, AppStateBuilder, AppActions>(
           appReducerBuilder.build(),
-          AppState(
-            (b) {
-              b.settingsState.showCalendarNicksBar = nicksBarEnabled;
-              if (!hasSubjctWithoutNick) {
-                b.settingsState.subjectNicks = MapBuilder(<String, String>{
-                  "Fach1": "F",
-                });
-              }
-            },
-          ),
+          AppState(),
           AppActions(),
           middleware: [routingMiddleware.build()],
         ),

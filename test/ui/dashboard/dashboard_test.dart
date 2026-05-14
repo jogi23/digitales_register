@@ -20,12 +20,13 @@ import 'dart:core';
 import 'package:built_collection/built_collection.dart';
 import 'package:built_redux/built_redux.dart';
 import 'package:dr/actions/app_actions.dart';
-import 'package:dr/app_state.dart';
+import 'package:dr/app_state.dart' hide LoginState;
 import 'package:dr/container/days_container.dart';
 import 'package:dr/data.dart';
 import 'package:dr/main.dart';
 import 'package:dr/middleware/middleware.dart';
 import 'package:dr/providers/dashboard_provider.dart';
+import 'package:dr/providers/login_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/providers/provider_container.dart' as pc;
 import 'package:dr/providers/settings_provider.dart';
@@ -59,6 +60,15 @@ class _TestSettingsNotifier extends SettingsNotifier {
 
   @override
   SettingsState build() => initial;
+}
+
+class _TestLoginNotifier extends LoginNotifier {
+  final LoginState initial;
+
+  _TestLoginNotifier(this.initial);
+
+  @override
+  LoginState build() => initial;
 }
 
 Future<void> main() async {
@@ -131,6 +141,11 @@ Future<void> main() async {
   testGoldens('Long user name is wrapped', (WidgetTester tester) async {
     const longName = "Michael Debertol Elternaccount-1";
     final widget = ProviderScope(
+      overrides: [
+        loginProvider.overrideWith(
+          () => _TestLoginNotifier(const LoginState(username: longName)),
+        ),
+      ],
       child: ReduxProvider(
         store: Store<AppState, AppStateBuilder, AppActions>(
           ReducerBuilder<AppState, AppStateBuilder>().build(),
@@ -406,6 +421,11 @@ Future<void> main() async {
   testWidgets('tooltips', (WidgetTester tester) async {
     const username = "Michael Debertol";
     final widget = ProviderScope(
+      overrides: [
+        loginProvider.overrideWith(
+          () => _TestLoginNotifier(const LoginState(username: username)),
+        ),
+      ],
       child: ReduxProvider(
         store: Store<AppState, AppStateBuilder, AppActions>(
           ReducerBuilder<AppState, AppStateBuilder>().build(),

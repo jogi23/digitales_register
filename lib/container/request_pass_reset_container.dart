@@ -18,16 +18,19 @@
 import 'package:dr/actions/app_actions.dart';
 import 'package:dr/actions/login_actions.dart';
 import 'package:dr/app_state.dart';
+import 'package:dr/providers/login_provider.dart';
 import 'package:dr/ui/request_pass_reset.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_built_redux/flutter_built_redux.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class RequestPassResetContainer extends StatelessWidget {
+class RequestPassResetContainer extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
-    return StoreConnection<AppState, AppActions, ResetPassState>(
-      connect: (AppState appState) => appState.loginState.resetPassState,
-      builder: (context, state, actions) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final resetPass = ref.watch(loginProvider.select((s) => s.resetPassState));
+    return StoreConnection<AppState, AppActions, Object>(
+      connect: (_) => const Object(),
+      builder: (context, _, actions) {
         return RequestPassReset(
           resetPass: (user, email) => actions.loginActions.requestPassReset(
             RequestPassResetPayload(
@@ -36,8 +39,8 @@ class RequestPassResetContainer extends StatelessWidget {
                 ..email = email,
             ),
           ),
-          message: state.message,
-          failure: state.failure,
+          message: resetPass.message,
+          failure: resetPass.failure,
         );
       },
     );

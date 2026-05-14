@@ -17,19 +17,22 @@
 
 import 'package:dr/actions/app_actions.dart';
 import 'package:dr/app_state.dart';
+import 'package:dr/providers/login_provider.dart';
 import 'package:dr/ui/pass_reset.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_built_redux/flutter_built_redux.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class PassResetContainer extends StatelessWidget {
+class PassResetContainer extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
-    return StoreConnection<AppState, AppActions, ResetPassState>(
-      connect: (AppState appState) => appState.loginState.resetPassState,
-      builder: (context, state, actions) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final resetPass = ref.watch(loginProvider.select((s) => s.resetPassState));
+    return StoreConnection<AppState, AppActions, Object>(
+      connect: (_) => const Object(),
+      builder: (context, _, actions) {
         return PassReset(
-          message: state.message,
-          failure: state.failure,
+          message: resetPass.message,
+          failure: resetPass.failure,
           resetPass: actions.loginActions.resetPass.call,
           onClose: actions.load.call,
         );

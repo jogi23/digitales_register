@@ -21,9 +21,11 @@ import 'package:dr/actions/app_actions.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/main.dart';
 import 'package:dr/middleware/middleware.dart';
+import 'package:dr/providers/provider_container.dart' as pc;
 import 'package:dr/reducer/reducer.dart';
 import 'package:dr/wrapper.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:mocktail/mocktail.dart';
@@ -53,7 +55,13 @@ void main() {
       AppActions(),
       middleware: middleware(includeErrorMiddleware: false),
     );
-    await tester.pumpWidget(RegisterApp(store: store));
+    pc.providerContainer = ProviderContainer();
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: pc.providerContainer,
+        child: RegisterApp(store: store),
+      ),
+    );
     await store.actions.start(null);
     await tester.pumpAndSettle();
     await expectLater(
@@ -197,7 +205,13 @@ void main() {
       middleware: middleware(includeErrorMiddleware: false),
     );
 
-    await tester.pumpWidget(RegisterApp(store: store));
+    pc.providerContainer = ProviderContainer();
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: pc.providerContainer,
+        child: RegisterApp(store: store),
+      ),
+    );
     await store.actions.start(null);
     await tester.pumpAndSettle();
 

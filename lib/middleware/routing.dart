@@ -67,6 +67,7 @@ Future<void> _showLogin(
   if (currentRoute?.settings.name != "/login") {
     unawaited(navigatorKey!.currentState?.pushNamed("/login"));
   }
+  providerContainer.read(loginProvider.notifier).showLogin();
 }
 
 Future<void> _showRequestPassReset(
@@ -76,14 +77,20 @@ Future<void> _showRequestPassReset(
   await api.actions.setUrl(action.payload);
   unawaited(navigatorKey!.currentState!.pushNamed("/request_pass_reset"));
   await next(action);
+  providerContainer
+      .read(loginProvider.notifier)
+      .updatePassResetState(const PassResetState());
 }
 
 Future<void> _showPassReset(
     MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
     ActionHandler next,
-    Action<void> action) async {
+    Action<ShowPassResetPayload> action) async {
   unawaited(navigatorKey!.currentState!.pushNamed("/pass_reset"));
   await next(action);
+  providerContainer.read(loginProvider.notifier).updatePassResetState(
+        PassResetState(email: action.payload.email, token: action.payload.token),
+      );
 }
 
 Future<void> _showChangeEmail(

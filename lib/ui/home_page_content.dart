@@ -16,7 +16,6 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:dr/container/days_container.dart';
-import 'package:dr/container/home_page.dart';
 import 'package:dr/main.dart';
 import 'package:dr/ui/splash.dart';
 import 'package:flutter/material.dart';
@@ -24,11 +23,11 @@ import 'package:flutter/material.dart';
 typedef DrawerCallback = void Function(bool isOpened);
 
 class HomePageContent extends StatelessWidget {
-  final HomePageContentViewModel vm;
+  final bool splash;
 
   const HomePageContent({
     super.key,
-    required this.vm,
+    required this.splash,
   });
   @override
   Widget build(BuildContext context) {
@@ -43,7 +42,7 @@ class HomePageContent extends StatelessWidget {
         }
       },
       child: SplashScreen(
-        splash: vm.splash,
+        splash: splash,
         child: DaysContainer(),
       ),
     );

@@ -20,34 +20,54 @@ import 'package:dr/actions/login_actions.dart';
 import 'package:dr/app_state.dart';
 // ignore_for_file: avoid_escaping_inner_quotes
 import 'package:dr/config.dart';
+import 'package:dr/providers/login_provider.dart';
+import 'package:dr/providers/no_internet_provider.dart';
+import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/ui/login_page_content.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_built_redux/flutter_built_redux.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
-    return StoreConnection<AppState, AppActions, LoginPageViewModel>(
-      builder: (context, vm, actions) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final login = ref.watch(loginProvider);
+    final noInternet = ref.watch(noInternetProvider);
+    final safeMode = ref.watch(settingsProvider.select((s) => s.noPasswordSaving));
+    return StoreConnection<AppState, AppActions, String?>(
+      connect: (state) => state.url,
+      builder: (context, url, actions) {
+        final vm = LoginPageViewModel(
+          error: login.errorMsg,
+          loading: login.loading,
+          safeMode: safeMode,
+          noInternet: noInternet,
+          servers: schools,
+          changePass: login.changePassword,
+          mustChangePass: login.mustChangePassword,
+          username: login.username,
+          url: url,
+          otherAccounts: login.otherAccounts,
+        );
         return LoginPageContent(
           vm: vm,
-          onLogin: (user, pass, url) {
+          onLogin: (user, pass, loginUrl) {
             actions.loginActions.login(
               LoginPayload(
                 (b) => b
                   ..user = user
                   ..pass = pass
-                  ..url = url
+                  ..url = loginUrl
                   ..fromStorage = false,
               ),
             );
           },
-          onChangePass: (user, oldPass, newPass, url) {
+          onChangePass: (user, oldPass, newPass, loginUrl) {
             actions.loginActions.changePass(
               ChangePassPayload(
                 (b) => b
                   ..user = user
-                  ..url = url
+                  ..url = loginUrl
                   ..oldPass = oldPass
                   ..newPass = newPass,
               ),
@@ -58,9 +78,6 @@ class LoginPage extends StatelessWidget {
           onRequestPassReset: actions.routingActions.showRequestPassReset.call,
           onSelectAccount: actions.loginActions.selectAccount.call,
         );
-      },
-      connect: (state) {
-        return LoginPageViewModel.from(state);
       },
     );
   }
@@ -77,15 +94,16 @@ class LoginPageViewModel {
   final Map<String, String> servers;
   final List<String> otherAccounts;
 
-  LoginPageViewModel.from(AppState state)
-      : error = state.loginState.errorMsg,
-        loading = state.loginState.loading,
-        safeMode = state.settingsState.noPasswordSaving,
-        noInternet = state.noInternet,
-        servers = schools,
-        changePass = state.loginState.changePassword,
-        mustChangePass = state.loginState.mustChangePassword,
-        username = state.loginState.username,
-        url = state.url,
-        otherAccounts = state.loginState.otherAccounts.toList();
+  const LoginPageViewModel({
+    required this.error,
+    required this.loading,
+    required this.safeMode,
+    required this.noInternet,
+    required this.servers,
+    required this.changePass,
+    required this.mustChangePass,
+    required this.username,
+    required this.url,
+    required this.otherAccounts,
+  });
 }

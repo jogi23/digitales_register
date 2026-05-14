@@ -263,6 +263,7 @@ Future<void> _load(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
         <String>[],
   );
   await api.actions.loginActions.setAvailableAccounts(otherAccounts);
+  providerContainer.read(loginProvider.notifier).setOtherAccounts(otherAccounts);
   if ((api.state.url != null && api.state.url != url) ||
       (api.state.loginState.username != null &&
           api.state.loginState.username != user)) {
@@ -363,6 +364,10 @@ Future<void> _loggedIn(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
   } else {
     await next(action);
   }
+  providerContainer.read(loginProvider.notifier).setLoggedIn(
+    username: action.payload.username,
+    keepLoading: action.payload.keepShowingLoadingIndicator,
+  );
   providerContainer.read(isDemoProvider.notifier).state =
       api.state.isDemo;
   for (final callback in api.state.loginState.callAfterLogin) {
@@ -553,6 +558,7 @@ Future<void> _start(
         }
         if (parameters["username"] != null) {
           await api.actions.loginActions.setUsername(parameters["username"]!);
+          providerContainer.read(loginProvider.notifier).setUsername(parameters["username"]!);
         }
         if (parameters["redirect"] != null) {
           await redirectAfterLogin(

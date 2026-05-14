@@ -52,6 +52,7 @@ Future<void> _logout(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
     wrapper.logout(hard: action.payload.hard);
   }
   await next(action);
+  providerContainer.read(loginProvider.notifier).logout(hard: action.payload.hard);
   providerContainer.read(isDemoProvider.notifier).state = false;
   if (action.payload.hard) {
     wrapper = Wrapper();
@@ -76,6 +77,7 @@ Future<void> _login(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
 
   final url = fixupUrl(action.payload.url);
   await api.actions.loginActions.loggingIn();
+  providerContainer.read(loginProvider.notifier).setLoggingIn();
 
   // We need to set the url earlier because other parts of the app will try to read it
   // because we pretend we are logged in earlier than we actually are.
@@ -215,7 +217,10 @@ Future<void> _loginFailed(
     ActionHandler next,
     Action<LoginFailedPayload> action) async {
   await next(action);
-
+  providerContainer.read(loginProvider.notifier).setLoginFailed(
+    cause: action.payload.cause,
+    username: action.payload.username,
+  );
   await api.actions.savePassActions.delete();
   await api.actions.routingActions.showLogin();
 }
@@ -223,9 +228,10 @@ Future<void> _loginFailed(
 Future<void> _showChangePass(
     MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
     ActionHandler next,
-    Action<void> action) async {
+    Action<bool> action) async {
   await api.actions.routingActions.showLogin();
   await next(action);
+  providerContainer.read(loginProvider.notifier).setChangePassword(mustChange: action.payload);
 }
 
 @visibleForTesting
@@ -247,16 +253,25 @@ Future<void> _requestPassReset(
     ))
         .data;
     if (getMap(result)?["error"] != null) {
-      await api.actions.loginActions
-          .passResetFailed("[${result["error"]}]: ${result["message"]}");
+      final msg = "[${result["error"]}]: ${result["message"]}";
+      await api.actions.loginActions.passResetFailed(msg);
+      providerContainer.read(loginProvider.notifier).updatePassResetState(
+            providerContainer.read(loginProvider).resetPassState.copyWith(failure: true, message: msg),
+          );
     } else {
-      await api.actions.loginActions
-          .passResetSucceeded((result["message"] as String?)!);
+      final msg = (result["message"] as String?)!;
+      await api.actions.loginActions.passResetSucceeded(msg);
+      providerContainer.read(loginProvider.notifier).updatePassResetState(
+            providerContainer.read(loginProvider).resetPassState.copyWith(failure: false, message: msg),
+          );
     }
   } catch (e) {
     if (await cannotConnectTo(api.state.url!)) {
-      await api.actions.loginActions
-          .passResetFailed("Keine Verbindung mit \"${api.state.url}\" möglich");
+      final msg = "Keine Verbindung mit \"${api.state.url}\" möglich";
+      await api.actions.loginActions.passResetFailed(msg);
+      providerContainer.read(loginProvider.notifier).updatePassResetState(
+            providerContainer.read(loginProvider).resetPassState.copyWith(failure: true, message: msg),
+          );
     } else {
       rethrow;
     }
@@ -280,11 +295,17 @@ Future<void> _resetPass(
   ))
       .data;
   if (result["error"] != null) {
-    await api.actions.loginActions
-        .passResetFailed("[${result["error"]}]: ${result["message"]}");
+    final msg = "[${result["error"]}]: ${result["message"]}";
+    await api.actions.loginActions.passResetFailed(msg);
+    providerContainer.read(loginProvider.notifier).updatePassResetState(
+          providerContainer.read(loginProvider).resetPassState.copyWith(failure: true, message: msg),
+        );
   } else {
-    await api.actions.loginActions
-        .passResetSucceeded(result["message"] as String);
+    final msg = result["message"] as String;
+    await api.actions.loginActions.passResetSucceeded(msg);
+    providerContainer.read(loginProvider.notifier).updatePassResetState(
+          providerContainer.read(loginProvider).resetPassState.copyWith(failure: false, message: msg),
+        );
   }
 }
 

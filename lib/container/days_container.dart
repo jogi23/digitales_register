@@ -23,7 +23,9 @@ import 'package:dr/data.dart';
 import 'package:dr/main.dart' show showSnackBar;
 import 'package:dr/providers/dashboard_error_provider.dart';
 import 'package:dr/providers/dashboard_provider.dart';
+import 'package:dr/providers/login_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
+import 'package:dr/providers/notifications_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/ui/days.dart';
 import 'package:flutter/material.dart' hide Builder;
@@ -38,6 +40,8 @@ class DaysContainer extends ConsumerWidget {
     final dashboard = ref.watch(dashboardProvider);
     final noInternet = ref.watch(noInternetProvider);
     final settings = ref.watch(settingsProvider);
+    final loginLoading = ref.watch(loginProvider.select((s) => s.loading));
+    final showNotifications = ref.watch(notificationsProvider.select((s) => s.notifications.isNotEmpty));
     ref.listen<String?>(dashboardErrorProvider, (_, error) {
       if (error != null) {
         showSnackBar(error);
@@ -45,9 +49,9 @@ class DaysContainer extends ConsumerWidget {
       }
     });
     final notifier = ref.read(dashboardProvider.notifier);
-    return StoreConnection<AppState, AppActions, _ReduxDaysData>(
-      connect: _ReduxDaysData.from,
-      builder: (context, reduxData, actions) {
+    return StoreConnection<AppState, AppActions, Object>(
+      connect: (_) => const Object(),
+      builder: (context, _, actions) {
         final blacklist = dashboard.blacklist!;
         final unorderedDays = dashboard.allDays
                 ?.where((day) => day.future == dashboard.future)
@@ -65,7 +69,8 @@ class DaysContainer extends ConsumerWidget {
         final vm = DaysViewModel.from(
           dashboard,
           noInternet,
-          reduxData,
+          loginLoading,
+          showNotifications,
           settings,
           unorderedDays,
           blacklist,
@@ -93,22 +98,6 @@ class DaysContainer extends ConsumerWidget {
   }
 }
 
-class _ReduxDaysData {
-  final bool loginLoading;
-  final bool showNotifications;
-
-  const _ReduxDaysData({
-    required this.loginLoading,
-    required this.showNotifications,
-  });
-
-  factory _ReduxDaysData.from(AppState state) => _ReduxDaysData(
-        loginLoading: state.loginState.loading,
-        showNotifications:
-            (state.notificationState.notifications?.length ?? 0) > 0,
-      );
-}
-
 abstract class DaysViewModel
     implements Built<DaysViewModel, DaysViewModelBuilder> {
   bool get future;
@@ -130,7 +119,8 @@ abstract class DaysViewModel
   static DaysViewModel from(
     DashboardState dashboard,
     bool noInternet,
-    _ReduxDaysData reduxData,
+    bool loginLoading,
+    bool showNotifications,
     SettingsState settings,
     List<Day> unorderedDays,
     BuiltList<HomeworkType> blacklist,
@@ -142,13 +132,13 @@ abstract class DaysViewModel
           )
           ..noInternet = noInternet
           ..future = dashboard.future
-          ..loading = dashboard.loading || reduxData.loginLoading
-            ..askWhenDelete = settings.askWhenDelete
+          ..loading = dashboard.loading || loginLoading
+          ..askWhenDelete = settings.askWhenDelete
           ..showAddReminder = !blacklist.contains(HomeworkType.homework)
-          ..showNotifications = reduxData.showNotifications
-            ..colorBorders = settings.dashboardColorBorders
-            ..colorTestsInRed = settings.dashboardColorTestsInRed
-            ..subjectThemes = settings.subjectThemes.toBuilder(),
+          ..showNotifications = showNotifications
+          ..colorBorders = settings.dashboardColorBorders
+          ..colorTestsInRed = settings.dashboardColorTestsInRed
+          ..subjectThemes = settings.subjectThemes.toBuilder(),
       );
 }
 
