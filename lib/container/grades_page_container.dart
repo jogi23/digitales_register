@@ -16,18 +16,17 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:built_collection/built_collection.dart';
-import 'package:dr/actions/app_actions.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/data.dart';
 import 'package:dr/providers/grades_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
+import 'package:dr/services/app_router.dart';
 import 'package:dr/ui/grades_page.dart';
 import 'package:dr/ui/last_fetched_overlay.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_built_redux/flutter_built_redux.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class GradesPageContainer extends ConsumerWidget {
@@ -38,34 +37,28 @@ class GradesPageContainer extends ConsumerWidget {
     final gradesState = ref.watch(gradesProvider);
     final settings = ref.watch(settingsProvider);
     final noInternet = ref.watch(noInternetProvider);
-    final vm = GradesPageViewModel(
-      showSemester: gradesState.semester,
-      loading: gradesState.loading,
-      allSubjectsAverage: calculateAllSubjectsAverage(
-        gradesState.subjects,
-        gradesState.semester,
-        settings.ignoreForGradesAverage,
+    return GradesPage(
+      vm: GradesPageViewModel(
+        showSemester: gradesState.semester,
+        loading: gradesState.loading,
+        allSubjectsAverage: calculateAllSubjectsAverage(
+          gradesState.subjects,
+          gradesState.semester,
+          settings.ignoreForGradesAverage,
+        ),
+        hasData: gradesState.subjects.any(
+          (s) => gradesState.semester != Semester.all
+              ? s.gradesAll.containsKey(gradesState.semester)
+              : s.gradesAll.isNotEmpty,
+        ),
+        noInternet: noInternet,
+        showGradesDiagram: settings.showGradesDiagram,
+        showAllSubjectsAverage: settings.showAllSubjectsAverage,
+        lastFetchedMessage: _lastFetchedMessage(gradesState, noInternet),
       ),
-      hasData: gradesState.subjects.any(
-        (s) => gradesState.semester != Semester.all
-            ? s.gradesAll.containsKey(gradesState.semester)
-            : s.gradesAll.isNotEmpty,
-      ),
-      noInternet: noInternet,
-      showGradesDiagram: settings.showGradesDiagram,
-      showAllSubjectsAverage: settings.showAllSubjectsAverage,
-      lastFetchedMessage: _lastFetchedMessage(gradesState, noInternet),
-    );
-    return StoreConnection<AppState, AppActions, Object>(
-      connect: (_) => const Object(),
-      builder: (context, _, actions) {
-        return GradesPage(
-          vm: vm,
-          changeSemester: ref.read(gradesProvider.notifier).setSemester,
-          showGradesSettings:
-              actions.routingActions.showEditGradesAverageSettings.call,
-        );
-      },
+      changeSemester: ref.read(gradesProvider.notifier).setSemester,
+      showGradesSettings:
+          ref.read(appRouterProvider).showEditGradesAverageSettings,
     );
   }
 }

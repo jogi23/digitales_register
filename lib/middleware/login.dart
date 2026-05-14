@@ -123,7 +123,10 @@ Future<void> _login(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
       api.actions.loginActions.automaticallyReloggedIn();
       providerContainer.read(gradesProvider.notifier).resetForRelogin();
     },
-    addProtocolItem: api.actions.addNetworkProtocolItem.call,
+    addProtocolItem: (item) {
+      api.actions.addNetworkProtocolItem(item);
+      providerContainer.read(networkProtocolProvider.notifier).add(item);
+    },
   );
   if (await wrapper.loggedIn) {
     if (!wrapper.config.isStudentOrParent) {

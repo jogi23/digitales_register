@@ -15,15 +15,14 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
-import 'package:dr/actions/app_actions.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/data.dart';
 import 'package:dr/providers/grades_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
+import 'package:dr/services/app_router.dart';
 import 'package:dr/ui/grades_chart.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_built_redux/flutter_built_redux.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class GradesChartContainer extends ConsumerWidget {
@@ -62,15 +61,10 @@ class GradesChartContainer extends ConsumerWidget {
           getKey(subject): getValue(subject)
     };
 
-    return StoreConnection<AppState, AppActions, Object>(
-      connect: (_) => const Object(),
-      builder: (context, _, actions) {
-        return GradesChart(
-          graphs: graphs,
-          isFullscreen: isFullscreen,
-          goFullscreen: actions.routingActions.showGradesChart.call,
-        );
-      },
+    return GradesChart(
+      graphs: graphs,
+      isFullscreen: isFullscreen,
+      goFullscreen: ref.read(appRouterProvider).showGradesChart,
     );
   }
 }

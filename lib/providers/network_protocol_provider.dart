@@ -15,17 +15,19 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
-import 'package:dr/container/network_protocol_container.dart';
-import 'package:flutter/material.dart';
+import 'package:dr/app_state.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class NetworkProtocolPage extends StatelessWidget {
+class NetworkProtocolNotifier extends Notifier<List<NetworkProtocolItem>> {
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Netzwerkprotokoll"),
-      ),
-      body: const NetworkProtocolContainer(),
-    );
+  List<NetworkProtocolItem> build() => [];
+
+  void add(NetworkProtocolItem item) {
+    state = [...state, item];
   }
 }
+
+final networkProtocolProvider =
+    NotifierProvider<NetworkProtocolNotifier, List<NetworkProtocolItem>>(
+  NetworkProtocolNotifier.new,
+);

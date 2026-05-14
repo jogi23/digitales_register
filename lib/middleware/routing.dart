@@ -17,16 +17,6 @@
 
 part of 'middleware.dart';
 
-enum Pages {
-  homework,
-  grades,
-  absences,
-  calendar,
-  certificate,
-  messages,
-  settings,
-}
-
 // This allows tests to just include the routingMiddleware
 @visibleForTesting
 final routingMiddleware =

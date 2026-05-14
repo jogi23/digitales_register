@@ -36,6 +36,7 @@ import 'package:dr/container/messages_container.dart';
 import 'package:dr/container/settings_page.dart';
 import 'package:dr/data.dart';
 import 'package:dr/main.dart';
+import 'package:dr/pages.dart';
 import 'package:dr/providers/absences_provider.dart';
 import 'package:dr/providers/all_subjects_provider.dart';
 import 'package:dr/providers/calendar_provider.dart';
@@ -44,6 +45,7 @@ import 'package:dr/providers/dashboard_provider.dart';
 import 'package:dr/providers/grades_provider.dart';
 import 'package:dr/providers/login_provider.dart';
 import 'package:dr/providers/messages_provider.dart';
+import 'package:dr/providers/network_protocol_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/providers/notifications_provider.dart';
 import 'package:dr/providers/profile_provider.dart';
@@ -64,6 +66,8 @@ import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+export 'package:dr/pages.dart';
 
 part 'absences.dart';
 part 'calendar.dart';

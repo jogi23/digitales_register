@@ -16,15 +16,14 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:built_collection/built_collection.dart';
-import 'package:dr/actions/app_actions.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/providers/all_subjects_provider.dart';
 import 'package:dr/providers/login_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
+import 'package:dr/services/app_router.dart';
 import 'package:dr/ui/settings_page_widget.dart';
 import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_built_redux/flutter_built_redux.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class SettingsPageContainer extends ConsumerWidget {
@@ -35,41 +34,36 @@ class SettingsPageContainer extends ConsumerWidget {
     final allSubjects = ref.watch(allSubjectsProvider);
     final isDemo = ref.watch(isDemoProvider);
     final vm = SettingsViewModel.from(settings, allSubjects, isDemo);
-    return StoreConnection<AppState, AppActions, Object>(
-      connect: (_) => const Object(),
-      builder: (context, _, actions) {
-        return SettingsPageWidget(
-          vm: vm,
-          onSetDarkMode: (dm) {
-            DynamicTheme.of(context)!.setBrightness(
-              dm ? Brightness.dark : Brightness.light,
-            );
-          },
-          onSetFollowDeviceDarkMode: (dm) {
-            DynamicTheme.of(context)!.setFollowDevice(dm);
-          },
-          onSetPlatformOverride: (o) {
-            DynamicTheme.of(context)!.setPlatformOverride(o);
-          },
-          onSetNoPassSaving: notifier.setSaveNoPass,
-          onSetNoDataSaving: notifier.setSaveNoData,
-          onSetAskWhenDelete: notifier.setAskWhenDelete,
-          onSetDeleteDataOnLogout: notifier.setDeleteDataOnLogout,
-          onSetSubjectNicks: (map) => notifier.setSubjectNicks(BuiltMap(map)),
-          onSetShowCalendarEditNicksBar: notifier.setShowCalendarNicksBar,
-          onSetShowGradesDiagram: notifier.setShowGradesDiagram,
-          onSetShowAllSubjectsAverage: notifier.setShowAllSubjectsAverage,
-          onSetDashboardMarkNewOrChangedEntries: notifier.setMarkNewOrChanged,
-          onSetDashboardDeduplicateEntries: notifier.setDeduplicate,
-          onShowProfile: actions.routingActions.showProfile.call,
-          onSetIgnoreForGradesAverage: (list) =>
-              notifier.setIgnoreForGradesAverage(BuiltList(list)),
-          onSetDashboardColorBorders: notifier.setDashboardColorBorders,
-          onSetCalenderColorBackground: notifier.setCalendarColorBackground,
-          onSetDashboardColorTestsInRed: notifier.setDashboardColorTestsInRed,
-          onSetSubjectTheme: notifier.setSubjectTheme,
+    return SettingsPageWidget(
+      vm: vm,
+      onSetDarkMode: (dm) {
+        DynamicTheme.of(context)!.setBrightness(
+          dm ? Brightness.dark : Brightness.light,
         );
       },
+      onSetFollowDeviceDarkMode: (dm) {
+        DynamicTheme.of(context)!.setFollowDevice(dm);
+      },
+      onSetPlatformOverride: (o) {
+        DynamicTheme.of(context)!.setPlatformOverride(o);
+      },
+      onSetNoPassSaving: notifier.setSaveNoPass,
+      onSetNoDataSaving: notifier.setSaveNoData,
+      onSetAskWhenDelete: notifier.setAskWhenDelete,
+      onSetDeleteDataOnLogout: notifier.setDeleteDataOnLogout,
+      onSetSubjectNicks: (map) => notifier.setSubjectNicks(BuiltMap(map)),
+      onSetShowCalendarEditNicksBar: notifier.setShowCalendarNicksBar,
+      onSetShowGradesDiagram: notifier.setShowGradesDiagram,
+      onSetShowAllSubjectsAverage: notifier.setShowAllSubjectsAverage,
+      onSetDashboardMarkNewOrChangedEntries: notifier.setMarkNewOrChanged,
+      onSetDashboardDeduplicateEntries: notifier.setDeduplicate,
+      onShowProfile: ref.read(appRouterProvider).showProfile,
+      onSetIgnoreForGradesAverage: (list) =>
+          notifier.setIgnoreForGradesAverage(BuiltList(list)),
+      onSetDashboardColorBorders: notifier.setDashboardColorBorders,
+      onSetCalenderColorBackground: notifier.setCalendarColorBackground,
+      onSetDashboardColorTestsInRed: notifier.setDashboardColorTestsInRed,
+      onSetSubjectTheme: notifier.setSubjectTheme,
     );
   }
 }

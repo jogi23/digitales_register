@@ -16,15 +16,14 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:built_collection/built_collection.dart';
-import 'package:dr/actions/app_actions.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/data.dart';
 import 'package:dr/providers/grades_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
+import 'package:dr/services/app_router.dart';
 import 'package:dr/ui/sorted_grades_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_built_redux/flutter_built_redux.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class SortedGradesContainer extends ConsumerWidget {
@@ -33,30 +32,23 @@ class SortedGradesContainer extends ConsumerWidget {
     final gradesState = ref.watch(gradesProvider);
     final settings = ref.watch(settingsProvider);
     final noInternet = ref.watch(noInternetProvider);
-    final vm = SortedGradesViewModel(
-      subjects: gradesState.subjects,
-      semester: gradesState.semester,
-      sortByType: settings.typeSorted,
-      showCancelled: settings.showCancelled,
-      noInternet: noInternet,
-      ignoredSubjectsForAverage: settings.ignoreForGradesAverage,
-    );
-    return StoreConnection<AppState, AppActions, Object>(
-      connect: (_) => const Object(),
-      builder: (context, _, actions) {
-        return SortedGradesWidget(
-          vm: vm,
-          showCancelledCallback:
-              ref.read(settingsProvider.notifier).setShowCancelledGrades,
-          sortByTypeCallback:
-              ref.read(settingsProvider.notifier).setGradesTypeSorted,
-          showGradeCalculator:
-              actions.routingActions.showGradeCalculator.call,
-          viewSubjectDetail: (s) => ref
-              .read(gradesProvider.notifier)
-              .loadDetails(s, gradesState.semester),
-        );
-      },
+    return SortedGradesWidget(
+      vm: SortedGradesViewModel(
+        subjects: gradesState.subjects,
+        semester: gradesState.semester,
+        sortByType: settings.typeSorted,
+        showCancelled: settings.showCancelled,
+        noInternet: noInternet,
+        ignoredSubjectsForAverage: settings.ignoreForGradesAverage,
+      ),
+      showCancelledCallback:
+          ref.read(settingsProvider.notifier).setShowCancelledGrades,
+      sortByTypeCallback:
+          ref.read(settingsProvider.notifier).setGradesTypeSorted,
+      showGradeCalculator: ref.read(appRouterProvider).showGradeCalculator,
+      viewSubjectDetail: (s) => ref
+          .read(gradesProvider.notifier)
+          .loadDetails(s, gradesState.semester),
     );
   }
 }

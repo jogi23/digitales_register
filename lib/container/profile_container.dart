@@ -15,13 +15,11 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
-import 'package:dr/actions/app_actions.dart';
-import 'package:dr/app_state.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/providers/profile_provider.dart';
+import 'package:dr/services/app_router.dart';
 import 'package:dr/ui/profile.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_built_redux/flutter_built_redux.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class ProfileContainer extends ConsumerWidget {
@@ -30,18 +28,14 @@ class ProfileContainer extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final profileState = ref.watch(profileProvider);
     final noInternet = ref.watch(noInternetProvider);
-    return StoreConnection<AppState, AppActions, Object>(
-      connect: (_) => Object(),
-      builder: (context, _, actions) {
-        return Profile(
-          profileState: profileState,
-          noInternet: noInternet,
-          setSendNotificationEmails: (value) =>
-              ref.read(profileProvider.notifier).setSendNotificationEmails(value),
-          changeEmail: actions.routingActions.showChangeEmail.call,
-          changePass: () => actions.loginActions.showChangePass(false),
-        );
-      },
+    final router = ref.read(appRouterProvider);
+    return Profile(
+      profileState: profileState,
+      noInternet: noInternet,
+      setSendNotificationEmails: (value) =>
+          ref.read(profileProvider.notifier).setSendNotificationEmails(value),
+      changeEmail: router.showChangeEmail,
+      changePass: router.showChangePass,
     );
   }
 }

@@ -16,14 +16,12 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:collection/collection.dart';
-import 'package:dr/actions/app_actions.dart';
-import 'package:dr/app_state.dart';
 import 'package:dr/providers/calendar_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
+import 'package:dr/services/app_router.dart';
 import 'package:dr/ui/calendar.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_built_redux/flutter_built_redux.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class CalendarContainer extends ConsumerWidget {
@@ -34,34 +32,30 @@ class CalendarContainer extends ConsumerWidget {
     final settings = ref.watch(settingsProvider);
     final currentDays = calendarState.currentDays;
     final subjectNicks = settings.subjectNicks.toMap();
-    final vm = CalendarViewModel(
-      first: currentDays.isEmpty ? null : currentDays.first.date,
-      last: currentDays.isEmpty ? null : currentDays.last.date,
-      currentMonday: calendarState.currentMonday!,
-      showEditNicksBar: currentDays.any(
-            (day) => day.hours.any(
-              (hour) => subjectNicks.entries.none(
-                (entry) => equalsIgnoreAsciiCase(entry.key, hour.subject),
+    return Calendar(
+      vm: CalendarViewModel(
+        first: currentDays.isEmpty ? null : currentDays.first.date,
+        last: currentDays.isEmpty ? null : currentDays.last.date,
+        currentMonday: calendarState.currentMonday!,
+        showEditNicksBar: currentDays.any(
+              (day) => day.hours.any(
+                (hour) => subjectNicks.entries.none(
+                  (entry) => equalsIgnoreAsciiCase(entry.key, hour.subject),
+                ),
               ),
-            ),
-          ) &&
-          settings.showCalendarNicksBar,
-      noInternet: noInternet,
-      selection: calendarState.selection,
-    );
-    return StoreConnection<AppState, AppActions, Object>(
-      connect: (_) => const Object(),
-      builder: (context, _, actions) => Calendar(
-        vm: vm,
-        showEditSubjectNicks:
-            actions.routingActions.showEditCalendarSubjectNicks.call,
-        closeEditNicksBar: () =>
-            ref.read(settingsProvider.notifier).setShowCalendarNicksBar(false),
-        dayCallback: (monday) =>
-            ref.read(calendarProvider.notifier).load(monday),
-        currentMondayCallback: (monday) =>
-            ref.read(calendarProvider.notifier).setCurrentMonday(monday),
+            ) &&
+            settings.showCalendarNicksBar,
+        noInternet: noInternet,
+        selection: calendarState.selection,
       ),
+      showEditSubjectNicks:
+          ref.read(appRouterProvider).showEditCalendarSubjectNicks,
+      closeEditNicksBar: () =>
+          ref.read(settingsProvider.notifier).setShowCalendarNicksBar(false),
+      dayCallback: (monday) =>
+          ref.read(calendarProvider.notifier).load(monday),
+      currentMondayCallback: (monday) =>
+          ref.read(calendarProvider.notifier).setCurrentMonday(monday),
     );
   }
 }
