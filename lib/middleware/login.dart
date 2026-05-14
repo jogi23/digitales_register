@@ -52,6 +52,7 @@ Future<void> _logout(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
     wrapper.logout(hard: action.payload.hard);
   }
   await next(action);
+  providerContainer.read(isDemoProvider.notifier).state = false;
   if (action.payload.hard) {
     wrapper = Wrapper();
     await api.actions.mountAppState(AppState());
@@ -110,8 +111,16 @@ Future<void> _login(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
           ..forced = true,
       ),
     ),
-    configLoaded: () => api.actions.setConfig(wrapper.config),
-    relogin: api.actions.loginActions.automaticallyReloggedIn.call,
+    configLoaded: () {
+      api.actions.setConfig(wrapper.config);
+      providerContainer
+          .read(gradesProvider.notifier)
+          .setConfig(wrapper.config);
+    },
+    relogin: () {
+      api.actions.loginActions.automaticallyReloggedIn();
+      providerContainer.read(gradesProvider.notifier).resetForRelogin();
+    },
     addProtocolItem: api.actions.addNetworkProtocolItem.call,
   );
   if (await wrapper.loggedIn) {

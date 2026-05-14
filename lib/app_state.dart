@@ -21,9 +21,6 @@ import 'package:built_collection/built_collection.dart';
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
 import 'package:dr/data.dart';
-import 'package:dr/providers/calendar_provider.dart';
-import 'package:dr/providers/dashboard_provider.dart';
-import 'package:dr/providers/provider_container.dart';
 import 'package:dr/utc_date_time.dart';
 
 part 'app_state.g.dart';
@@ -61,28 +58,7 @@ abstract class AppState implements Built<AppState, AppStateBuilder> {
 
   bool get isDemo => isDemoUser(url: url, username: loginState.username);
 
-  List<String> extractAllSubjects() {
-    final subjects = <String>{};
-    for (final day in providerContainer.read(calendarProvider).days.values) {
-      for (final hour in day.hours) {
-        subjects.add(hour.subject);
-      }
-    }
-    for (final subject in gradesState.subjects) {
-      subjects.add(subject.name);
-    }
-    final dashboardAllDays = providerContainer.read(dashboardProvider).allDays;
-    if (dashboardAllDays != null) {
-      for (final day in dashboardAllDays) {
-        for (final homework in day.homework) {
-          if (homework.label != null) subjects.add(homework.label!);
-        }
-      }
-    }
-    return subjects.toList();
-  }
-
-  factory AppState([Function(AppStateBuilder b)? updates]) = _$AppState;
+factory AppState([Function(AppStateBuilder b)? updates]) = _$AppState;
   AppState._();
   static void _initializeBuilder(AppStateBuilder builder) {
     builder

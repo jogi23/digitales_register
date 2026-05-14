@@ -164,7 +164,9 @@ Future<void> _showGrades(
     Action<void> action) async {
   scaffoldKey!.currentState!
       .selectContentWidget(const GradesPageContainer(), Pages.grades);
-  await api.actions.gradesActions.load(api.state.gradesState.semester);
+  unawaited(providerContainer
+      .read(gradesProvider.notifier)
+      .load(providerContainer.read(gradesProvider).semester));
   await next(action);
 }
 
@@ -221,6 +223,6 @@ Future<void> _showGradeCalculator(
     ActionHandler next,
     Action<void> action) async {
   unawaited(navigatorKey!.currentState!.pushNamed("/gradeCalculator"));
-  await api.actions.gradesActions.load(Semester.all);
+  unawaited(providerContainer.read(gradesProvider.notifier).load(Semester.all));
   await next(action);
 }

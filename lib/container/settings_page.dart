@@ -18,6 +18,8 @@
 import 'package:built_collection/built_collection.dart';
 import 'package:dr/actions/app_actions.dart';
 import 'package:dr/app_state.dart';
+import 'package:dr/providers/all_subjects_provider.dart';
+import 'package:dr/providers/login_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/ui/settings_page_widget.dart';
 import 'package:dynamic_theme/dynamic_theme.dart';
@@ -30,11 +32,12 @@ class SettingsPageContainer extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsProvider);
     final notifier = ref.read(settingsProvider.notifier);
-    return StoreConnection<AppState, AppActions, _ReduxSettingsData>(
-      connect: _ReduxSettingsData.from,
-      builder: (context, redux, actions) {
-        final vm =
-            SettingsViewModel.from(settings, redux.allSubjects, redux.isDemo);
+    final allSubjects = ref.watch(allSubjectsProvider);
+    final isDemo = ref.watch(isDemoProvider);
+    final vm = SettingsViewModel.from(settings, allSubjects, isDemo);
+    return StoreConnection<AppState, AppActions, Object>(
+      connect: (_) => const Object(),
+      builder: (context, _, actions) {
         return SettingsPageWidget(
           vm: vm,
           onSetDarkMode: (dm) {
@@ -69,18 +72,6 @@ class SettingsPageContainer extends ConsumerWidget {
       },
     );
   }
-}
-
-class _ReduxSettingsData {
-  final List<String> allSubjects;
-  final bool isDemo;
-
-  const _ReduxSettingsData({required this.allSubjects, required this.isDemo});
-
-  factory _ReduxSettingsData.from(AppState state) => _ReduxSettingsData(
-        allSubjects: state.extractAllSubjects(),
-        isDemo: state.isDemo,
-      );
 }
 
 typedef OnSettingChanged<T> = void Function(T newValue);

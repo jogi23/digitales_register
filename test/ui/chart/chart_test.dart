@@ -21,14 +21,45 @@ import 'package:dr/actions/app_actions.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/container/grades_chart_container.dart';
 import 'package:dr/data.dart';
+import 'package:dr/providers/grades_provider.dart';
+import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/reducer/reducer.dart';
 import 'package:dr/ui/grades_chart_page.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_built_redux/flutter_built_redux.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
+
+class _TestGradesNotifier extends GradesNotifier {
+  final GradesState initial;
+  _TestGradesNotifier(this.initial);
+  @override
+  GradesState build() => initial;
+  @override
+  Future<void> loadDetails(Subject subject, Semester semester) async {}
+  @override
+  Future<void> load(Semester semester) async {}
+}
+
+class _TestSettingsNotifier extends SettingsNotifier {
+  final SettingsState initial;
+  _TestSettingsNotifier(this.initial);
+  @override
+  SettingsState build() => initial;
+}
+
+Widget _wrapWithScope(Widget child, AppState appState) => ProviderScope(
+      overrides: [
+        gradesProvider.overrideWith(
+            () => _TestGradesNotifier(appState.gradesState)),
+        settingsProvider.overrideWith(
+            () => _TestSettingsNotifier(appState.settingsState)),
+      ],
+      child: child,
+    );
 
 AppState get _gradesState {
   return AppState(
@@ -117,10 +148,12 @@ void main() {
   testGoldens(
     'grades chart interactions',
     (tester) async {
-      final widget = ReduxProvider(
+      final appState = _gradesState;
+      final widget = _wrapWithScope(
+        ReduxProvider(
         store: Store<AppState, AppStateBuilder, AppActions>(
           appReducerBuilder.build(),
-          _gradesState,
+          appState,
           AppActions(),
         ),
         child: MaterialApp(
@@ -141,6 +174,8 @@ void main() {
             primarySwatch: Colors.deepOrange,
           ),
         ),
+      ),
+      appState,
       );
 
       await tester.pumpWidget(widget);
@@ -185,28 +220,32 @@ void main() {
   testGoldens(
     'grades chart legend interactions',
     (tester) async {
-      final widget = ReduxProvider(
-        store: Store<AppState, AppStateBuilder, AppActions>(
-          appReducerBuilder.build(),
-          _gradesState,
-          AppActions(),
-        ),
-        child: MaterialApp(
-          localizationsDelegates: const [
-            GlobalCupertinoLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-          ],
-          supportedLocales: const [
-            Locale("de"),
-          ],
-          home: const Material(
-            child: GradesChartPage(),
+      final appState = _gradesState;
+      final widget = _wrapWithScope(
+        ReduxProvider(
+          store: Store<AppState, AppStateBuilder, AppActions>(
+            appReducerBuilder.build(),
+            appState,
+            AppActions(),
           ),
-          theme: ThemeData(
-            primarySwatch: Colors.deepOrange,
+          child: MaterialApp(
+            localizationsDelegates: const [
+              GlobalCupertinoLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+            ],
+            supportedLocales: const [
+              Locale("de"),
+            ],
+            home: const Material(
+              child: GradesChartPage(),
+            ),
+            theme: ThemeData(
+              primarySwatch: Colors.deepOrange,
+            ),
           ),
         ),
+        appState,
       );
 
       await tester.pumpWidget(widget);
@@ -228,28 +267,32 @@ void main() {
   testWidgets(
     'changing the thickness of a subject clears the selection',
     (tester) async {
-      final widget = ReduxProvider(
-        store: Store<AppState, AppStateBuilder, AppActions>(
-          appReducerBuilder.build(),
-          _gradesState,
-          AppActions(),
-        ),
-        child: MaterialApp(
-          localizationsDelegates: const [
-            GlobalCupertinoLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-          ],
-          supportedLocales: const [
-            Locale("de"),
-          ],
-          home: const Material(
-            child: GradesChartPage(),
+      final appState = _gradesState;
+      final widget = _wrapWithScope(
+        ReduxProvider(
+          store: Store<AppState, AppStateBuilder, AppActions>(
+            appReducerBuilder.build(),
+            appState,
+            AppActions(),
           ),
-          theme: ThemeData(
-            primarySwatch: Colors.deepOrange,
+          child: MaterialApp(
+            localizationsDelegates: const [
+              GlobalCupertinoLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+            ],
+            supportedLocales: const [
+              Locale("de"),
+            ],
+            home: const Material(
+              child: GradesChartPage(),
+            ),
+            theme: ThemeData(
+              primarySwatch: Colors.deepOrange,
+            ),
           ),
         ),
+        appState,
       );
 
       await tester.pumpWidget(widget);

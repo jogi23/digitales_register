@@ -24,6 +24,7 @@ import 'package:dr/middleware/middleware.dart'
 import 'package:dr/providers/dashboard_error_provider.dart';
 import 'package:dr/providers/dashboard_parser.dart';
 import 'package:dr/providers/no_internet_provider.dart';
+import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
 import 'package:flutter/foundation.dart' show visibleForTesting;
@@ -40,11 +41,7 @@ class DashboardNotifier extends Notifier<DashboardState> {
     state = DashboardState();
   }
 
-  Future<void> load(
-    bool future, {
-    required bool markNew,
-    required bool deduplicate,
-  }) async {
+  Future<void> load(bool future) async {
     if (ref.read(noInternetProvider)) return;
     state = state.rebuild((b) => b
       ..loading = true
@@ -57,22 +54,17 @@ class DashboardNotifier extends Notifier<DashboardState> {
       state = state.rebuild((b) => b..loading = false);
       return;
     }
-    _applyLoaded(data, future, markNew, deduplicate);
+    final settings = ref.read(settingsProvider);
+    _applyLoaded(
+        data, future, settings.dashboardMarkNewOrChangedEntries, settings.dashboardDeduplicateEntries);
   }
 
-  Future<void> refresh({
-    required bool markNew,
-    required bool deduplicate,
-  }) async {
-    await load(state.future, markNew: markNew, deduplicate: deduplicate);
+  Future<void> refresh() async {
+    await load(state.future);
   }
 
-  Future<void> switchFuture({
-    required bool markNew,
-    required bool deduplicate,
-  }) async {
-    final newFuture = !state.future;
-    await load(newFuture, markNew: markNew, deduplicate: deduplicate);
+  Future<void> switchFuture() async {
+    await load(!state.future);
   }
 
   Future<void> addReminder(UtcDateTime date, String msg) async {

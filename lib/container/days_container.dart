@@ -73,14 +73,8 @@ class DaysContainer extends ConsumerWidget {
 
         return DaysWidget(
           vm: vm,
-          onSwitchFuture: () => notifier.switchFuture(
-            markNew: settings.dashboardMarkNewOrChangedEntries,
-            deduplicate: settings.dashboardDeduplicateEntries,
-          ),
-          refresh: () => notifier.refresh(
-            markNew: settings.dashboardMarkNewOrChangedEntries,
-            deduplicate: settings.dashboardDeduplicateEntries,
-          ),
+          onSwitchFuture: notifier.switchFuture,
+          refresh: notifier.refresh,
           addReminderCallback: (day, msg) =>
               notifier.addReminder(day.date, msg),
           removeReminderCallback: (hw, day) => notifier.deleteHomework(hw),

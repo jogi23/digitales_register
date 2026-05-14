@@ -20,13 +20,13 @@ import 'package:dr/container/calendar_card_container.dart';
 import 'package:dr/container/calendar_detail_container.dart';
 import 'package:dr/data.dart';
 import 'package:dr/providers/calendar_provider.dart';
-import 'package:dr/providers/provider_container.dart';
 import 'package:dr/ui/calendar_week.dart';
 import 'package:dr/ui/last_fetched_overlay.dart';
 import 'package:dr/ui/no_internet.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:responsive_scaffold/size_transition.dart' as rsc;
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
@@ -91,7 +91,7 @@ UtcDateTime _dateForPageViewIndex(int idx) {
   return UtcDateTime(date.year, date.month, date.day);
 }
 
-class CalendarDetailPage extends StatefulWidget {
+class CalendarDetailPage extends ConsumerStatefulWidget {
   final UtcDateTime? selectedDay;
   final int? selectedHour;
   final bool isSidebar, show;
@@ -107,7 +107,7 @@ class CalendarDetailPage extends StatefulWidget {
   _CalendarDetailPageState createState() => _CalendarDetailPageState();
 }
 
-class _CalendarDetailPageState extends State<CalendarDetailPage> {
+class _CalendarDetailPageState extends ConsumerState<CalendarDetailPage> {
   late PageController _controller;
   UtcDateTime? selectedDate;
   int programmaticPageAnimations = 0;
@@ -131,7 +131,7 @@ class _CalendarDetailPageState extends State<CalendarDetailPage> {
       return;
     }
     final date = _dateForPageViewIndex(index);
-    providerContainer.read(calendarProvider.notifier).select(
+    ref.read(calendarProvider.notifier).select(
           CalendarSelection((b) => b..date = date),
         );
     setState(() {
@@ -144,7 +144,7 @@ class _CalendarDetailPageState extends State<CalendarDetailPage> {
     super.didUpdateWidget(oldWidget);
     if (!widget.show && oldWidget.show) {
       // clear the selection
-      providerContainer.read(calendarProvider.notifier).select(null);
+      ref.read(calendarProvider.notifier).select(null);
     }
     if (widget.selectedDay == null) {
       return;
@@ -200,9 +200,7 @@ class _CalendarDetailPageState extends State<CalendarDetailPage> {
               ? IconButton(
                   icon: const Icon(Icons.arrow_forward_ios),
                   onPressed: () {
-                    providerContainer
-                        .read(calendarProvider.notifier)
-                        .select(null);
+                    ref.read(calendarProvider.notifier).select(null);
                   },
                 )
               : null,

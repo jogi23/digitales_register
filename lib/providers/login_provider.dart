@@ -15,26 +15,10 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
-import 'package:dr/providers/settings_provider.dart';
-import 'package:dr/ui/grades_chart_legend_entry.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class ChartLegendEntryContainer extends ConsumerWidget {
-  final String subjectName;
-
-  const ChartLegendEntryContainer({super.key, required this.subjectName});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = ref.watch(settingsProvider).subjectThemes[subjectName];
-    if (theme == null) return const SizedBox.shrink();
-    return GradesChartLegendEntry(
-      config: theme,
-      name: subjectName,
-      setThickness: (thickness) => ref
-          .read(settingsProvider.notifier)
-          .setSubjectTheme(MapEntry(subjectName, theme.rebuild((b) => b..thick = thickness))),
-    );
-  }
-}
+/// Mirrors the Redux `AppState.isDemo` flag so Riverpod widgets can react
+/// without depending on the Redux store.
+///
+/// Updated by the login middleware whenever the logged-in user changes.
+final isDemoProvider = StateProvider<bool>((ref) => false);

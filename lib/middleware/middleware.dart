@@ -37,9 +37,12 @@ import 'package:dr/container/settings_page.dart';
 import 'package:dr/data.dart';
 import 'package:dr/main.dart';
 import 'package:dr/providers/absences_provider.dart';
+import 'package:dr/providers/all_subjects_provider.dart';
 import 'package:dr/providers/calendar_provider.dart';
 import 'package:dr/providers/certificate_provider.dart';
 import 'package:dr/providers/dashboard_provider.dart';
+import 'package:dr/providers/grades_provider.dart';
+import 'package:dr/providers/login_provider.dart';
 import 'package:dr/providers/messages_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/providers/notifications_provider.dart';
@@ -220,11 +223,7 @@ Future<void> _noInternet(
         logoutForcedByServer: true,
       );
     } else {
-        final settings = providerContainer.read(settingsProvider);
-      await providerContainer.read(dashboardProvider.notifier).refresh(
-            markNew: settings.dashboardMarkNewOrChangedEntries,
-            deduplicate: settings.dashboardDeduplicateEntries,
-          );
+      await providerContainer.read(dashboardProvider.notifier).refresh();
     }
   }
 }
@@ -341,6 +340,9 @@ Future<void> _loggedIn(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
           providerContainer
               .read(settingsProvider.notifier)
               .load(restoredSettings);
+          providerContainer
+              .read(gradesProvider.notifier)
+              .restore(serializedState.gradesState);
         }
 
         // next not at the beginning: bug fix (serialization)
@@ -361,23 +363,17 @@ Future<void> _loggedIn(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
   } else {
     await next(action);
   }
+  providerContainer.read(isDemoProvider.notifier).state =
+      api.state.isDemo;
   for (final callback in api.state.loginState.callAfterLogin) {
     callback();
   }
   if (!action.payload.offlineOnly) {
-    final settings = providerContainer.read(settingsProvider);
-    await providerContainer.read(dashboardProvider.notifier).load(
-          true,
-          markNew: settings.dashboardMarkNewOrChangedEntries,
-          deduplicate: settings.dashboardDeduplicateEntries,
-        );
+    await providerContainer.read(dashboardProvider.notifier).load(true);
     await providerContainer.read(notificationsProvider.notifier).load();
-    // Restore the subject-themes update that was lost when DashboardActionsNames.loaded
-    // was removed during the Riverpod migration. The dashboard is now loaded above via
-    // Riverpod, so we trigger the update manually here using extractAllSubjects() which
-    // already reads providerContainer.read(dashboardProvider).allDays.
-    await api.actions.settingsActions
-        .updateSubjectThemes(api.state.extractAllSubjects());
+    providerContainer
+        .read(settingsProvider.notifier)
+        .updateSubjectThemes(providerContainer.read(allSubjectsProvider));
   }
 }
 
@@ -507,13 +503,9 @@ Future<void> _restarted(
     wrapper.interaction();
     final poppedAnything = _popAll();
     if (!poppedAnything) {
-      final settings = providerContainer.read(settingsProvider);
       // If we pop something the routeObserver will trigger a reload of the dasboard.
       // However, if we are on the dashboard already, we need to this here.
-      await providerContainer.read(dashboardProvider.notifier).refresh(
-            markNew: settings.dashboardMarkNewOrChangedEntries,
-            deduplicate: settings.dashboardDeduplicateEntries,
-          );
+      await providerContainer.read(dashboardProvider.notifier).refresh();
     }
   }
 }
@@ -530,11 +522,15 @@ Future<void> _start(
     switch (parameters["semesterWechsel"]) {
       case "1":
         await api.actions.loginActions.addAfterLoginCallback(
-          () => api.actions.gradesActions.setSemester(Semester.first),
+          () => providerContainer
+              .read(gradesProvider.notifier)
+              .setSemester(Semester.first),
         );
       case "2":
         await api.actions.loginActions.addAfterLoginCallback(
-          () => api.actions.gradesActions.setSemester(Semester.second),
+          () => providerContainer
+              .read(gradesProvider.notifier)
+              .setSemester(Semester.second),
         );
     }
     switch (action.payload!.path) {

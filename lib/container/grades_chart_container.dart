@@ -18,50 +18,55 @@
 import 'package:dr/actions/app_actions.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/data.dart';
+import 'package:dr/providers/grades_provider.dart';
+import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/ui/grades_chart.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_built_redux/flutter_built_redux.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class GradesChartContainer extends StatelessWidget {
+class GradesChartContainer extends ConsumerWidget {
   final bool isFullscreen;
 
   const GradesChartContainer({super.key, required this.isFullscreen});
 
   @override
-  Widget build(BuildContext context) {
-    return StoreConnection<AppState, AppActions,
-        Map<SubjectGrades, SubjectTheme>>(
-      connect: (state) {
-        SubjectGrades getKey(Subject subject) {
-          final grades = state.gradesState.semester == Semester.all
-              ? (subject.gradesAll.values.fold<List<GradeAll>>(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final gradesState = ref.watch(gradesProvider);
+    final settings = ref.watch(settingsProvider);
+
+    SubjectGrades getKey(Subject subject) {
+      final grades = gradesState.semester == Semester.all
+          ? (subject.gradesAll.values.fold<List<GradeAll>>(
                   <GradeAll>[], (a, b) => <GradeAll>[...a, ...b])
-                ..sort((GradeAll a, GradeAll b) => a.date.compareTo(b.date)))
-              : subject.gradesAll[state.gradesState.semester]?.toList() ?? [];
-          grades.removeWhere((grade) => grade.cancelled || grade.grade == null);
+              ..sort((GradeAll a, GradeAll b) => a.date.compareTo(b.date)))
+          : subject.gradesAll[gradesState.semester]?.toList() ?? [];
+      grades.removeWhere((grade) => grade.cancelled || grade.grade == null);
+      return SubjectGrades(
+        {
+          for (final grade in grades)
+            grade.date: (grade.grade!, grade.type),
+        },
+        subject.name,
+      );
+    }
 
-          return SubjectGrades(
-            {
-              for (final grade in grades)
-                grade.date: (grade.grade!, grade.type),
-            },
-            subject.name,
-          );
-        }
+    SubjectTheme getValue(Subject subject) {
+      return settings.subjectThemes[subject.name]!;
+    }
 
-        SubjectTheme getValue(Subject subject) {
-          return state.settingsState.subjectThemes[subject.name]!;
-        }
+    final graphs = {
+      for (final subject in gradesState.subjects)
+        if (settings.subjectThemes.containsKey(subject.name))
+          getKey(subject): getValue(subject)
+    };
 
-        return {
-          for (final subject in state.gradesState.subjects)
-            getKey(subject): getValue(subject)
-        };
-      },
-      builder: (context, vm, actions) {
+    return StoreConnection<AppState, AppActions, Object>(
+      connect: (_) => const Object(),
+      builder: (context, _, actions) {
         return GradesChart(
-          graphs: vm,
+          graphs: graphs,
           isFullscreen: isFullscreen,
           goFullscreen: actions.routingActions.showGradesChart.call,
         );

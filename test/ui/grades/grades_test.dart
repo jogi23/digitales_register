@@ -21,13 +21,44 @@ import 'package:dr/actions/app_actions.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/container/grades_page_container.dart';
 import 'package:dr/data.dart';
+import 'package:dr/providers/grades_provider.dart';
+import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/reducer/reducer.dart';
 import 'package:dr/ui/sorted_grades_widget.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_built_redux/flutter_built_redux.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
+
+class _TestGradesNotifier extends GradesNotifier {
+  final GradesState initial;
+  _TestGradesNotifier(this.initial);
+  @override
+  GradesState build() => initial;
+  @override
+  Future<void> loadDetails(Subject subject, Semester semester) async {}
+  @override
+  Future<void> load(Semester semester) async {}
+}
+
+class _TestSettingsNotifier extends SettingsNotifier {
+  final SettingsState initial;
+  _TestSettingsNotifier(this.initial);
+  @override
+  SettingsState build() => initial;
+}
+
+Widget _wrapWithScope(Widget child, AppState appState) => ProviderScope(
+      overrides: [
+        gradesProvider.overrideWith(
+            () => _TestGradesNotifier(appState.gradesState)),
+        settingsProvider.overrideWith(
+            () => _TestSettingsNotifier(appState.settingsState)),
+      ],
+      child: child,
+    );
 
 AppState _getGradesState({bool loading = false}) {
   return AppState(
@@ -175,16 +206,20 @@ AppState _getGradesState({bool loading = false}) {
 
 void main() {
   testGoldens('grades page loading when empty', (tester) async {
-    final widget = ReduxProvider(
-      store: Store<AppState, AppStateBuilder, AppActions>(
-        appReducerBuilder.build(),
-        AppState((b) => b.gradesState.loading = true),
-        AppActions(),
+    final appState = AppState((b) => b.gradesState.loading = true);
+    final widget = _wrapWithScope(
+      ReduxProvider(
+        store: Store<AppState, AppStateBuilder, AppActions>(
+          appReducerBuilder.build(),
+          appState,
+          AppActions(),
+        ),
+        child: MaterialApp(
+          home: const GradesPageContainer(),
+          theme: ThemeData(primarySwatch: Colors.deepOrange),
+        ),
       ),
-      child: MaterialApp(
-        home: const GradesPageContainer(),
-        theme: ThemeData(primarySwatch: Colors.deepOrange),
-      ),
+      appState,
     );
     await tester.pumpWidget(widget);
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
@@ -195,16 +230,20 @@ void main() {
     );
   });
   testGoldens('grades page loading when not empty', (tester) async {
-    final widget = ReduxProvider(
-      store: Store<AppState, AppStateBuilder, AppActions>(
-        appReducerBuilder.build(),
-        _getGradesState(loading: true),
-        AppActions(),
+    final appState = _getGradesState(loading: true);
+    final widget = _wrapWithScope(
+      ReduxProvider(
+        store: Store<AppState, AppStateBuilder, AppActions>(
+          appReducerBuilder.build(),
+          appState,
+          AppActions(),
+        ),
+        child: MaterialApp(
+          home: const GradesPageContainer(),
+          theme: ThemeData(primarySwatch: Colors.deepOrange),
+        ),
       ),
-      child: MaterialApp(
-        home: const GradesPageContainer(),
-        theme: ThemeData(primarySwatch: Colors.deepOrange),
-      ),
+      appState,
     );
     await tester.pumpWidget(widget);
     expect(find.byType(CircularProgressIndicator), findsNothing);
@@ -217,16 +256,20 @@ void main() {
     );
   });
   testGoldens('grades page interactions', (tester) async {
-    final widget = ReduxProvider(
-      store: Store<AppState, AppStateBuilder, AppActions>(
-        appReducerBuilder.build(),
-        _getGradesState(),
-        AppActions(),
+    final appState = _getGradesState();
+    final widget = _wrapWithScope(
+      ReduxProvider(
+        store: Store<AppState, AppStateBuilder, AppActions>(
+          appReducerBuilder.build(),
+          appState,
+          AppActions(),
+        ),
+        child: MaterialApp(
+          home: const GradesPageContainer(),
+          theme: ThemeData(primarySwatch: Colors.deepOrange),
+        ),
       ),
-      child: MaterialApp(
-        home: const GradesPageContainer(),
-        theme: ThemeData(primarySwatch: Colors.deepOrange),
-      ),
+      appState,
     );
     await tester.pumpWidget(widget);
     expect(find.text("Dritte Schularbeit"), findsNothing);
@@ -250,16 +293,20 @@ void main() {
     );
   });
   testWidgets('competences', (tester) async {
-    final widget = ReduxProvider(
-      store: Store<AppState, AppStateBuilder, AppActions>(
-        appReducerBuilder.build(),
-        _getGradesState(),
-        AppActions(),
+    final appState = _getGradesState();
+    final widget = _wrapWithScope(
+      ReduxProvider(
+        store: Store<AppState, AppStateBuilder, AppActions>(
+          appReducerBuilder.build(),
+          appState,
+          AppActions(),
+        ),
+        child: MaterialApp(
+          home: const GradesPageContainer(),
+          theme: ThemeData(primarySwatch: Colors.deepOrange),
+        ),
       ),
-      child: MaterialApp(
-        home: const GradesPageContainer(),
-        theme: ThemeData(primarySwatch: Colors.deepOrange),
-      ),
+      appState,
     );
     await tester.pumpWidget(widget);
     await tester.tap(find.text("Fach1"));

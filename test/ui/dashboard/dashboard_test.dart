@@ -737,20 +737,25 @@ Future<void> main() async {
             ),
           ),
         ),
+        settingsProvider.overrideWith(
+          () => _TestSettingsNotifier(
+            SettingsState(
+              (b) => b
+                ..dashboardColorBorders = true
+                ..subjectThemes = MapBuilder<String, SubjectTheme>({
+                  'Mathematik': SubjectTheme(
+                      (b) => b..thick = 2..color = Colors.blue.value),
+                  'Deutsch': SubjectTheme(
+                      (b) => b..thick = 2..color = Colors.green.value),
+                }),
+            ),
+          ),
+        ),
       ],
       child: ReduxProvider(
         store: Store<AppState, AppStateBuilder, AppActions>(
           ReducerBuilder<AppState, AppStateBuilder>().build(),
-          AppState(
-            (b) => b.settingsState
-              ..dashboardColorBorders = true
-              ..subjectThemes = MapBuilder<String, SubjectTheme>({
-                'Mathematik': SubjectTheme(
-                    (b) => b..thick = 2..color = Colors.blue.value),
-                'Deutsch': SubjectTheme(
-                    (b) => b..thick = 2..color = Colors.green.value),
-              }),
-          ),
+          AppState(),
           AppActions(),
         ),
         child: MaterialApp(

@@ -20,11 +20,11 @@ import 'package:dr/app_state.dart';
 import 'package:dr/container/calendar_week_container.dart';
 import 'package:dr/data.dart';
 import 'package:dr/providers/calendar_provider.dart';
-import 'package:dr/providers/provider_container.dart';
 import 'package:dr/ui/last_fetched_overlay.dart';
 import 'package:dr/ui/no_internet.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 
@@ -252,7 +252,7 @@ class CalendarDayWidget extends StatelessWidget {
   }
 }
 
-class HourWidget extends StatelessWidget {
+class HourWidget extends ConsumerWidget {
   final CalendarHour hour;
   final CalendarDay day;
   final BuiltMap<String, String> subjectNicks;
@@ -270,13 +270,13 @@ class HourWidget extends StatelessWidget {
     required this.selectedBackgroundColor,
   });
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Expanded(
       flex: hour.length,
       child: ClipRect(
         child: InkWell(
           onTap: () {
-            providerContainer.read(calendarProvider.notifier).select(
+            ref.read(calendarProvider.notifier).select(
                   CalendarSelection((b) => b
                     ..date = day.date
                     ..hour = hour.fromHour),

@@ -19,10 +19,10 @@ import 'package:dr/app_state.dart';
 import 'package:dr/container/calendar_detail_container.dart';
 import 'package:dr/container/calendar_week_container.dart';
 import 'package:dr/providers/calendar_provider.dart';
-import 'package:dr/providers/provider_container.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:responsive_scaffold/responsive_scaffold.dart';
 
@@ -48,7 +48,7 @@ class CalendarViewModel {
   });
 }
 
-class Calendar extends StatefulWidget {
+class Calendar extends ConsumerStatefulWidget {
   final CalendarViewModel vm;
 
   final DayCallback dayCallback;
@@ -69,7 +69,7 @@ class Calendar extends StatefulWidget {
   _CalendarState createState() => _CalendarState();
 }
 
-class _CalendarState extends State<Calendar> with TickerProviderStateMixin {
+class _CalendarState extends ConsumerState<Calendar> with TickerProviderStateMixin {
   late PageController _controller;
   late AnimationController _chevronOpacityController;
   late Animation<double> _chevronOpacityAnimation;
@@ -182,9 +182,7 @@ class _CalendarState extends State<Calendar> with TickerProviderStateMixin {
               ),
             )
             .then(
-              (_) => providerContainer
-                  .read(calendarProvider.notifier)
-                  .select(null),
+              (_) => ref.read(calendarProvider.notifier).select(null),
             );
       });
     }

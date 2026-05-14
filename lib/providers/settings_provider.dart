@@ -149,6 +149,7 @@ class SettingsNotifier extends Notifier<SettingsState> {
 final settingsProvider =
     NotifierProvider<SettingsNotifier, SettingsState>(SettingsNotifier.new);
 
+
 // ─── Color palette helpers (same logic as former settings reducer) ───────────
 
 final _colors = List.of(Colors.primaries)

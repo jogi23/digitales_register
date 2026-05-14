@@ -16,15 +16,14 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:built_collection/built_collection.dart';
-import 'package:dr/actions/app_actions.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/data.dart';
 import 'package:dr/providers/calendar_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
+import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/ui/calendar_week.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_built_redux/flutter_built_redux.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class CalendarWeekContainer extends ConsumerWidget {
@@ -34,47 +33,26 @@ class CalendarWeekContainer extends ConsumerWidget {
     super.key,
     required this.monday,
   });
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final calendarState = ref.watch(calendarProvider);
     final noInternet = ref.watch(noInternetProvider);
-    return StoreConnection<AppState, AppActions, _SettingsVM>(
-      builder: (context, settingsVm, actions) {
-        final vm = CalendarWeekViewModel(
-          days: BuiltList(calendarState.daysForWeek(monday)),
-          subjectNicks: BuiltMap(
-            settingsVm.subjectNicks.map(
-              (key, value) => MapEntry(key.toLowerCase(), value),
-            ),
-          ),
-          noInternet: noInternet,
-          selection: calendarState.selection,
-          colorBackground: settingsVm.colorBackground,
-          subjectThemes: BuiltMap(settingsVm.subjectThemes),
-        );
-        return CalendarWeek(
-          vm: vm,
-          key: key,
-        );
-      },
-      connect: (state) => _SettingsVM(
-        subjectNicks: state.settingsState.subjectNicks.toMap(),
-        colorBackground: state.settingsState.calendarColorBackground,
-        subjectThemes: state.settingsState.subjectThemes.toMap(),
+    final settings = ref.watch(settingsProvider);
+    final vm = CalendarWeekViewModel(
+      days: BuiltList(calendarState.daysForWeek(monday)),
+      subjectNicks: BuiltMap(
+        settings.subjectNicks.toMap().map(
+          (key, value) => MapEntry(key.toLowerCase(), value),
+        ),
       ),
+      noInternet: noInternet,
+      selection: calendarState.selection,
+      colorBackground: settings.calendarColorBackground,
+      subjectThemes: BuiltMap(settings.subjectThemes.toMap()),
     );
+    return CalendarWeek(vm: vm, key: key);
   }
-}
-
-class _SettingsVM {
-  final Map<String, String> subjectNicks;
-  final bool colorBackground;
-  final Map<String, SubjectTheme> subjectThemes;
-  _SettingsVM({
-    required this.subjectNicks,
-    required this.colorBackground,
-    required this.subjectThemes,
-  });
 }
 
 class CalendarWeekViewModel {

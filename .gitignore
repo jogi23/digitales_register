@@ -1,3 +1,9 @@
+# Golden test failure artifacts (auto-generated, not source)
+**/failures/
+
+# Claude Code project files
+.claude/
+
 # Miscellaneous
 *.class
 *.log

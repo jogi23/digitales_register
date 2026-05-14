@@ -17,17 +17,7 @@
 
 part of 'middleware.dart';
 
+// Subject themes are now updated directly in GradesNotifier._applyLoaded
+// and after dashboard load in _loggedIn. This middleware is no longer needed.
 final _settingsMiddleware =
-    MiddlewareBuilder<AppState, AppStateBuilder, AppActions>()
-      ..add(GradesActionsNames.loaded, _updateSubjectThemes);
-
-Future<void> _updateSubjectThemes(
-    MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
-    ActionHandler next,
-    Action action) async {
-  await next(action);
-  final allSubjects = api.state.extractAllSubjects();
-  providerContainer
-      .read(settingsProvider.notifier)
-      .updateSubjectThemes(allSubjects);
-}
+    MiddlewareBuilder<AppState, AppStateBuilder, AppActions>();
