@@ -18,14 +18,23 @@
 import 'dart:async';
 
 import 'package:dr/app_state.dart';
+import 'package:dr/container/absences_page_container.dart';
+import 'package:dr/container/calendar_container.dart';
+import 'package:dr/container/grades_page_container.dart';
 import 'package:dr/container/messages_container.dart';
+import 'package:dr/container/settings_page.dart';
 import 'package:dr/main.dart';
 import 'package:dr/pages.dart';
+import 'package:dr/providers/absences_provider.dart';
+import 'package:dr/providers/calendar_provider.dart';
+import 'package:dr/providers/certificate_provider.dart';
 import 'package:dr/providers/grades_provider.dart';
 import 'package:dr/providers/login_provider.dart';
 import 'package:dr/providers/messages_provider.dart';
 import 'package:dr/providers/profile_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
+import 'package:dr/ui/certificate.dart';
+import 'package:dr/util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -33,6 +42,18 @@ class AppRouter {
   final Ref _ref;
 
   const AppRouter(this._ref);
+
+  void showLogin() {
+    Route? currentRoute;
+    navigatorKey!.currentState?.popUntil((route) {
+      currentRoute = route;
+      return true;
+    });
+    if (currentRoute?.settings.name != "/login") {
+      unawaited(navigatorKey!.currentState?.pushNamed("/login"));
+    }
+    _ref.read(loginProvider.notifier).showLogin();
+  }
 
   void showProfile() {
     unawaited(navigatorKey!.currentState!.pushNamed("/profile"));
@@ -44,7 +65,7 @@ class AppRouter {
   }
 
   void showChangePass() {
-    _navigateToLogin();
+    showLogin();
     _ref.read(loginProvider.notifier).setChangePassword(mustChange: false);
   }
 
@@ -52,9 +73,49 @@ class AppRouter {
     unawaited(navigatorKey!.currentState!.pushNamed("/notifications"));
   }
 
+  void showSettings() {
+    _ref.read(settingsProvider.notifier).resetScroll();
+    scaffoldKey!.currentState!
+        .selectContentWidget(SettingsPageContainer(), Pages.settings);
+  }
+
+  void showCalendar() {
+    scaffoldKey!.currentState!
+        .selectContentWidget(CalendarContainer(), Pages.calendar);
+    _ref.read(calendarProvider.notifier).clearSelection();
+    _ref.read(calendarProvider.notifier).setCurrentMonday(toMonday(now));
+    unawaited(_ref.read(calendarProvider.notifier).load(toMonday(now)));
+  }
+
+  void showGrades() {
+    scaffoldKey!.currentState!
+        .selectContentWidget(const GradesPageContainer(), Pages.grades);
+    unawaited(_ref
+        .read(gradesProvider.notifier)
+        .load(_ref.read(gradesProvider).semester));
+  }
+
+  void showAbsences() {
+    scaffoldKey!.currentState!
+        .selectContentWidget(const AbsencesPageContainer(), Pages.absences);
+    unawaited(_ref.read(absencesProvider.notifier).load());
+  }
+
+  void showCertificate() {
+    scaffoldKey!.currentState!
+        .selectContentWidget(const Certificate(), Pages.certificate);
+    unawaited(_ref.read(certificateProvider.notifier).load());
+  }
+
+  void showMessages() {
+    scaffoldKey!.currentState!
+        .selectContentWidget(MessagesPageContainer(), Pages.messages);
+    unawaited(_ref.read(messagesProvider.notifier).load());
+  }
+
   void showMessage(int id) {
     navigatorKey!.currentState!.pop();
-    _showMessages();
+    showMessages();
     _ref.read(messagesProvider.notifier).select(id);
   }
 
@@ -75,24 +136,6 @@ class AppRouter {
   void showEditCalendarSubjectNicks() {
     _ref.read(settingsProvider.notifier).scrollToSubjectNicksSection();
     unawaited(navigatorKey!.currentState!.pushNamed("/settings"));
-  }
-
-  void _showMessages() {
-    scaffoldKey!.currentState!
-        .selectContentWidget(MessagesPageContainer(), Pages.messages);
-    unawaited(_ref.read(messagesProvider.notifier).load());
-  }
-
-  void _navigateToLogin() {
-    Route? currentRoute;
-    navigatorKey!.currentState?.popUntil((route) {
-      currentRoute = route;
-      return true;
-    });
-    if (currentRoute?.settings.name != "/login") {
-      unawaited(navigatorKey!.currentState?.pushNamed("/login"));
-    }
-    _ref.read(loginProvider.notifier).showLogin();
   }
 }
 

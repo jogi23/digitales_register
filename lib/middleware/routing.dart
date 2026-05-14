@@ -46,18 +46,7 @@ Future<void> _showLogin(
     ActionHandler next,
     Action<void> action) async {
   await next(action);
-  // hack since the current route is not exposed otherwise
-  Route? currentRoute;
-  navigatorKey!.currentState?.popUntil((route) {
-    currentRoute = route;
-    // by returning true here no route is actually popped.
-    return true;
-  });
-
-  if (currentRoute?.settings.name != "/login") {
-    unawaited(navigatorKey!.currentState?.pushNamed("/login"));
-  }
-  providerContainer.read(loginProvider.notifier).showLogin();
+  providerContainer.read(appRouterProvider).showLogin();
 }
 
 Future<void> _showRequestPassReset(
@@ -112,9 +101,7 @@ Future<void> _showSettings(
     MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
     ActionHandler next,
     Action<void> action) async {
-  providerContainer.read(settingsProvider.notifier).resetScroll();
-  scaffoldKey!.currentState!
-      .selectContentWidget(SettingsPageContainer(), Pages.settings);
+  providerContainer.read(appRouterProvider).showSettings();
   await next(action);
 }
 
@@ -142,16 +129,7 @@ Future<void> _showCalendar(
     MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
     ActionHandler next,
     Action<void> action) async {
-  scaffoldKey!.currentState!
-      .selectContentWidget(CalendarContainer(), Pages.calendar);
-  providerContainer.read(calendarProvider.notifier).clearSelection();
-  providerContainer
-      .read(calendarProvider.notifier)
-      .setCurrentMonday(toMonday(now));
-  unawaited(
-    providerContainer.read(calendarProvider.notifier).load(toMonday(now)),
-  );
-
+  providerContainer.read(appRouterProvider).showCalendar();
   await next(action);
 }
 
@@ -159,11 +137,7 @@ Future<void> _showGrades(
     MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
     ActionHandler next,
     Action<void> action) async {
-  scaffoldKey!.currentState!
-      .selectContentWidget(const GradesPageContainer(), Pages.grades);
-  unawaited(providerContainer
-      .read(gradesProvider.notifier)
-      .load(providerContainer.read(gradesProvider).semester));
+  providerContainer.read(appRouterProvider).showGrades();
   await next(action);
 }
 
@@ -171,9 +145,7 @@ Future<void> _showAbsences(
     MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
     ActionHandler next,
     Action<void> action) async {
-  scaffoldKey!.currentState!
-      .selectContentWidget(const AbsencesPageContainer(), Pages.absences);
-  unawaited(providerContainer.read(absencesProvider.notifier).load());
+  providerContainer.read(appRouterProvider).showAbsences();
   await next(action);
 }
 
@@ -181,9 +153,7 @@ Future<void> _showCertificate(
     MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
     ActionHandler next,
     Action<void> action) async {
-  scaffoldKey!.currentState!
-      .selectContentWidget(const Certificate(), Pages.certificate);
-  unawaited(providerContainer.read(certificateProvider.notifier).load());
+  providerContainer.read(appRouterProvider).showCertificate();
   await next(action);
 }
 
@@ -191,9 +161,7 @@ Future<void> _showMessages(
     MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
     ActionHandler next,
     Action<void> action) async {
-  scaffoldKey!.currentState!
-      .selectContentWidget(MessagesPageContainer(), Pages.messages);
-  unawaited(providerContainer.read(messagesProvider.notifier).load());
+  providerContainer.read(appRouterProvider).showMessages();
   await next(action);
 }
 
@@ -201,9 +169,7 @@ Future<void> _showMessage(
     MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
     ActionHandler next,
     Action<int> action) async {
-  navigatorKey!.currentState!.pop();
-  await api.actions.routingActions.showMessages();
-  providerContainer.read(messagesProvider.notifier).select(action.payload);
+  providerContainer.read(appRouterProvider).showMessage(action.payload);
   await next(action);
 }
 
