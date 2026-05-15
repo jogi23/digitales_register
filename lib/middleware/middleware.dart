@@ -82,7 +82,6 @@ late FlutterSecureStorage secureStorage;
 @visibleForTesting
 bool skipUnmaintainedAlert = false;
 
-@visibleForTesting
 Wrapper wrapper = Wrapper();
 
 List<Middleware<AppState, AppStateBuilder, AppActions>> middleware({
@@ -92,12 +91,10 @@ List<Middleware<AppState, AppStateBuilder, AppActions>> middleware({
       if (includeErrorMiddleware) _errorMiddleware,
       _saveStateMiddleware,
       (MiddlewareBuilder<AppState, AppStateBuilder, AppActions>()
-            ..add(LoginActionsNames.updateLogout, _tap)
             ..add(SettingsActionsNames.saveNoData, _saveNoData)
             ..add(AppActionsNames.deleteData, _deleteData)
             ..add(AppActionsNames.load, _load)
             ..add(AppActionsNames.start, _start)
-            ..add(AppActionsNames.refreshNoInternet, _refreshNoInternet)
             ..add(AppActionsNames.noInternet, _noInternet)
             ..add(LoginActionsNames.loggedIn, _loggedIn)
             ..add(AppActionsNames.restarted, _restarted)
@@ -189,21 +186,6 @@ $error""",
             }
           }
         };
-
-void _tap(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
-    ActionHandler next, Action<void> action) {
-  wrapper.interaction();
-  // do not call next: this action is only to update the logout time
-}
-
-Future<void> _refreshNoInternet(
-    MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
-    ActionHandler next,
-    Action<void> action) async {
-  await next(action);
-  final noInternet = await wrapper.refreshNoInternet();
-  await api.actions.noInternet(noInternet);
-}
 
 Future<void> _noInternet(
     MiddlewareApi<AppState, AppStateBuilder, AppActions> api,

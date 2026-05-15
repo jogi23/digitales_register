@@ -931,7 +931,7 @@ Future<void> main() async {
     await tester.tap(find.byType(Checkbox));
     await tester.pumpAndSettle();
     expect(tester.widget<Checkbox>(find.byType(Checkbox)).value, isFalse);
-    await store.actions.refreshNoInternet();
+    await store.actions.noInternet(true);
     await tester.pumpAndSettle();
     expect(tester.widget<Checkbox>(find.byType(Checkbox)).onChanged, isNull);
   });

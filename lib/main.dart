@@ -169,7 +169,10 @@ class _RegisterAppState extends State<RegisterApp> {
       saveNoPass: a.settingsActions.saveNoPass.call,
       load: a.load.call,
       showRequestPassReset: a.routingActions.showRequestPassReset.call,
-      refreshNoInternet: a.refreshNoInternet.call,
+      refreshNoInternet: () => unawaited(() async {
+        final noInternet = await wrapper.refreshNoInternet();
+        await a.noInternet(noInternet);
+      }()),
       resetPass: a.loginActions.resetPass.call,
       requestPassReset: (user, email) => a.loginActions.requestPassReset(
         RequestPassResetPayload((b) => b
@@ -185,7 +188,7 @@ class _RegisterAppState extends State<RegisterApp> {
     return ReduxProvider(
       store: store,
       child: Listener(
-        onPointerDown: (_) => store.actions.loginActions.updateLogout(),
+        onPointerDown: (_) => wrapper.interaction(),
         child: DynamicTheme(
           data: (brightness, overridePlatform, seedColor) {
             TargetPlatform? platform;
