@@ -35,8 +35,6 @@ abstract class LoginActions extends ReduxActions {
   abstract final VoidActionDispatcher automaticallyReloggedIn;
   abstract final ActionDispatcher<bool> showChangePass;
   abstract final ActionDispatcher<ChangePassPayload> changePass;
-  abstract final ActionDispatcher<void Function()> addAfterLoginCallback;
-  abstract final VoidActionDispatcher clearAfterLoginCallbacks;
   abstract final ActionDispatcher<RequestPassResetPayload> requestPassReset;
   abstract final ActionDispatcher<String> resetPass;
   abstract final ActionDispatcher<String> passResetFailed;

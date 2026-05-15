@@ -329,9 +329,7 @@ Future<void> _loggedIn(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
   );
   providerContainer.read(isDemoProvider.notifier).state =
       api.state.isDemo;
-  for (final callback in api.state.loginState.callAfterLogin) {
-    callback();
-  }
+  providerContainer.read(loginProvider.notifier).executeAfterLoginCallbacks();
   if (!action.payload.offlineOnly) {
     await providerContainer.read(dashboardProvider.notifier).load(true);
     await providerContainer.read(notificationsProvider.notifier).load();
@@ -450,20 +448,20 @@ Future<void> _start(
   ActionHandler next,
   Action<Uri?> action,
 ) async {
-  await api.actions.loginActions.clearAfterLoginCallbacks();
+  providerContainer.read(loginProvider.notifier).clearAfterLoginCallbacks();
   if (action.payload != null) {
     await api.actions.setUrl(action.payload!.origin);
     providerContainer.read(loginProvider.notifier).setUrl(action.payload!.origin);
     final parameters = action.payload!.queryParameters;
     switch (parameters["semesterWechsel"]) {
       case "1":
-        await api.actions.loginActions.addAfterLoginCallback(
+        providerContainer.read(loginProvider.notifier).addAfterLoginCallback(
           () => providerContainer
               .read(gradesProvider.notifier)
               .setSemester(Semester.first),
         );
       case "2":
-        await api.actions.loginActions.addAfterLoginCallback(
+        providerContainer.read(loginProvider.notifier).addAfterLoginCallback(
           () => providerContainer
               .read(gradesProvider.notifier)
               .setSemester(Semester.second),
@@ -510,23 +508,23 @@ Future<void> redirectAfterLogin(String location,
     case "dashboard/student":
       break;
     case "student/absences":
-      await api.actions.loginActions.addAfterLoginCallback(
+      providerContainer.read(loginProvider.notifier).addAfterLoginCallback(
         api.actions.routingActions.showAbsences.call,
       );
     case "calendar/student":
-      await api.actions.loginActions.addAfterLoginCallback(
+      providerContainer.read(loginProvider.notifier).addAfterLoginCallback(
         api.actions.routingActions.showCalendar.call,
       );
     case "student/subjects":
-      await api.actions.loginActions.addAfterLoginCallback(
+      providerContainer.read(loginProvider.notifier).addAfterLoginCallback(
         api.actions.routingActions.showGrades.call,
       );
     case "student/certificate":
-      await api.actions.loginActions.addAfterLoginCallback(
+      providerContainer.read(loginProvider.notifier).addAfterLoginCallback(
         api.actions.routingActions.showCertificate.call,
       );
     case "message/list":
-      await api.actions.loginActions.addAfterLoginCallback(
+      providerContainer.read(loginProvider.notifier).addAfterLoginCallback(
         api.actions.routingActions.showMessages.call,
       );
     default:

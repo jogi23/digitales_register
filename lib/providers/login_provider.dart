@@ -217,6 +217,25 @@ class LoginNotifier extends Notifier<LoginState> {
   void resetPass(String newPass) => _resetPassDispatch?.call(newPass);
   void requestPassReset(String user, String email) =>
       _requestPassResetDispatch?.call(user, email);
+
+  // ─── callAfterLogin ───────────────────────────────────────────────────────
+
+  final List<void Function()> _callAfterLogin = [];
+
+  void addAfterLoginCallback(void Function() callback) {
+    _callAfterLogin.add(callback);
+  }
+
+  void clearAfterLoginCallbacks() {
+    _callAfterLogin.clear();
+  }
+
+  void executeAfterLoginCallbacks() {
+    for (final callback in List.of(_callAfterLogin)) {
+      callback();
+    }
+    _callAfterLogin.clear();
+  }
 }
 
 final loginProvider =

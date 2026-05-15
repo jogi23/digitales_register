@@ -35,8 +35,6 @@ final loginReducerBuilder = NestedReducerBuilder<AppState, AppStateBuilder,
   ..add(LoginActionsNames.loggingIn, _loggingIn)
   ..add(LoginActionsNames.logout, _logout)
   ..add(LoginActionsNames.showChangePass, _changePass)
-  ..add(LoginActionsNames.addAfterLoginCallback, _addAfterLoginCallback)
-  ..add(LoginActionsNames.clearAfterLoginCallbacks, _clearAfterLoginCallbacks)
   ..add(LoginActionsNames.setAvailableAccounts, _setAvailableAccounts)
   ..add(RoutingActionsNames.showLogin, _showLogin)
   ..combineReducerBuilder(
@@ -88,16 +86,6 @@ void _changePass(
 void _showLogin(
     LoginState state, Action<void> action, LoginStateBuilder builder) {
   builder.changePassword = false;
-}
-
-void _addAfterLoginCallback(LoginState state, Action<void Function()> action,
-    LoginStateBuilder builder) {
-  builder.callAfterLogin.add(action.payload);
-}
-
-void _clearAfterLoginCallbacks(
-    LoginState state, Action<void> action, LoginStateBuilder builder) {
-  builder.callAfterLogin.clear();
 }
 
 void _setUsername(

@@ -125,7 +125,6 @@ abstract class LoginState implements Built<LoginState, LoginStateBuilder> {
   String? get username;
   bool get changePassword;
   bool get mustChangePassword;
-  BuiltList<void Function()> get callAfterLogin;
   BuiltList<String> get otherAccounts;
   ResetPassState get resetPassState;
   factory LoginState([Function(LoginStateBuilder b)? updates]) = _$LoginState;
@@ -136,7 +135,6 @@ abstract class LoginState implements Built<LoginState, LoginStateBuilder> {
       ..loading = false
       ..changePassword = false
       ..mustChangePassword = true
-      ..callAfterLogin = ListBuilder()
       ..resetPassState = ResetPassStateBuilder()
       ..otherAccounts = ListBuilder();
   }
