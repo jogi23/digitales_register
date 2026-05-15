@@ -72,6 +72,19 @@ class _TestLoginNotifier extends LoginNotifier {
   LoginState build() => initial;
 }
 
+class _TrueNoInternetNotifier extends NoInternetNotifier {
+  @override
+  bool build() => true;
+}
+
+class _TestNoInternetNotifier extends NoInternetNotifier {
+  @override
+  bool build() => false;
+
+  @override
+  void setNoInternet(bool value) => state = value;
+}
+
 Future<void> main() async {
   testGoldens('Open drawer in phone mode', (WidgetTester tester) async {
     ScaffoldState getScaffoldState() {
@@ -120,7 +133,7 @@ Future<void> main() async {
       (WidgetTester tester) async {
     final widget = ProviderScope(
       overrides: [
-        noInternetProvider.overrideWith((ref) => true),
+        noInternetProvider.overrideWith(_TrueNoInternetNotifier.new),
       ],
       child: ReduxProvider(
         store: Store<AppState, AppStateBuilder, AppActions>(
@@ -893,6 +906,7 @@ Future<void> main() async {
       overrides: [
         dashboardProvider
             .overrideWith(() => _TestDashboardNotifier(initialDashboardState)),
+        noInternetProvider.overrideWith(_TestNoInternetNotifier.new),
       ],
     );
     pc.providerContainer = container;
@@ -931,7 +945,7 @@ Future<void> main() async {
     await tester.tap(find.byType(Checkbox));
     await tester.pumpAndSettle();
     expect(tester.widget<Checkbox>(find.byType(Checkbox)).value, isFalse);
-    await store.actions.noInternet(true);
+    container.read(noInternetProvider.notifier).setNoInternet(true);
     await tester.pumpAndSettle();
     expect(tester.widget<Checkbox>(find.byType(Checkbox)).onChanged, isNull);
   });

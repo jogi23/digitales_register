@@ -77,7 +77,7 @@ Widget _buildWidget(MessagesState state) {
   return ProviderScope(
     overrides: [
       messagesProvider.overrideWith(() => _TestMessagesNotifier(state)),
-      noInternetProvider.overrideWith((ref) => false),
+      noInternetProvider.overrideWith(NoInternetNotifier.new),
     ],
     child: MaterialApp(
       home: MessagesPageContainer(),

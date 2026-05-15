@@ -120,7 +120,7 @@ Future<void> main() async {
         calendarProvider.overrideWith(
           () => _TestCalendarNotifier(calendarState),
         ),
-        noInternetProvider.overrideWith((ref) => false),
+        noInternetProvider.overrideWith(NoInternetNotifier.new),
         settingsProvider.overrideWith(
           () => _TestSettingsNotifier(
             SettingsState(
@@ -212,7 +212,7 @@ Future<void> main() async {
         calendarProvider.overrideWith(
           () => _TestCalendarNotifier(calendarState),
         ),
-        noInternetProvider.overrideWith((ref) => false),
+        noInternetProvider.overrideWith(NoInternetNotifier.new),
       ],
     );
     pc.providerContainer = container;

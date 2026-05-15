@@ -47,7 +47,7 @@ Widget _buildTestWidget({required AbsencesState initialState}) {
       absencesProvider.overrideWith(
         () => _TestAbsencesNotifier(initialState),
       ),
-      noInternetProvider.overrideWith((ref) => false),
+      noInternetProvider.overrideWith(NoInternetNotifier.new),
     ],
     child: ReduxProvider(
       store: Store<AppState, AppStateBuilder, AppActions>(

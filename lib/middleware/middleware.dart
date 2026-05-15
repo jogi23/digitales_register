@@ -31,7 +31,7 @@ import 'package:dr/actions/save_pass_actions.dart';
 import 'package:dr/actions/settings_actions.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/data.dart';
-import 'package:dr/main.dart';
+import 'package:dr/main.dart' hide scaffoldMessengerKey, showSnackBar;
 import 'package:dr/providers/absences_provider.dart';
 import 'package:dr/providers/all_subjects_provider.dart';
 import 'package:dr/providers/calendar_provider.dart';
@@ -49,6 +49,7 @@ import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/serializers.dart';
 import 'package:dr/services/app_router.dart';
 import 'package:dr/ui/dialog.dart';
+import 'package:dr/ui/snack_bar.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
 import 'package:dr/wrapper.dart';
@@ -95,7 +96,6 @@ List<Middleware<AppState, AppStateBuilder, AppActions>> middleware({
             ..add(AppActionsNames.deleteData, _deleteData)
             ..add(AppActionsNames.load, _load)
             ..add(AppActionsNames.start, _start)
-            ..add(AppActionsNames.noInternet, _noInternet)
             ..add(LoginActionsNames.loggedIn, _loggedIn)
             ..add(AppActionsNames.restarted, _restarted)
             ..combine(_gradesMiddleware)
@@ -187,38 +187,17 @@ $error""",
           }
         };
 
-Future<void> _noInternet(
-    MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
-    ActionHandler next,
-    Action<bool> action) async {
-  final prevNoInternet = api.state.noInternet;
-  await next(action);
-  final noInternet = api.state.noInternet;
-  providerContainer.read(noInternetProvider.notifier).state = noInternet;
-  if (prevNoInternet != noInternet) {
-    if (noInternet) {
-      showSnackBar("Keine Verbindung");
-
-      wrapper.logout(
-        hard: false,
-        logoutForcedByServer: true,
-      );
-    } else {
-      await providerContainer.read(dashboardProvider.notifier).refresh();
-    }
-  }
-}
-
 Future<void> _load(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
     ActionHandler next, Action<void> action) async {
   // By resetting the wrapper we clear all cookies.
   // However we don't want to reset the wrapper in tests
   if (wrapper is! Mock) {
-    wrapper = Wrapper();
+    wrapper = Wrapper()
+      ..onNoInternet = (bool v) =>
+          providerContainer.read(noInternetProvider.notifier).setNoInternet(v);
   }
-  wrapper.noInternet = api.state.noInternet;
   await next(action);
-  if (!api.state.noInternet) _popAll();
+  if (!providerContainer.read(noInternetProvider)) _popAll();
   dynamic login;
   try {
     login = json.decode(await secureStorage.read(key: "login") ?? "{}");

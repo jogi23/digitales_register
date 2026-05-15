@@ -22,7 +22,6 @@ import 'package:dr/api_client.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/auth_service.dart';
 import 'package:dr/demo.dart';
-import 'package:dr/main.dart';
 import 'package:dr/util.dart';
 import 'package:mutex/mutex.dart';
 
@@ -42,6 +41,8 @@ class SessionManager {
   bool safeMode = false;
   bool noInternet = false;
   DateTime lastInteraction = DateTime.now();
+
+  void Function(bool)? onNoInternet;
 
   DateTime? _serverLogoutTime;
   final _loginMutex = Mutex();
@@ -94,7 +95,7 @@ class SessionManager {
               _authService.user, _authService.pass, null, _apiClient.url);
           if (!await _authService.loggedIn) {
             if (noInternet) {
-              await actions.noInternet(true);
+              onNoInternet?.call(true);
             } else {
               _authService.logout(hard: true, logoutForcedByServer: true);
             }
@@ -104,7 +105,7 @@ class SessionManager {
           }
         } else {
           if (noInternet) {
-            await actions.noInternet(true);
+            onNoInternet?.call(true);
           }
           return false;
         }
@@ -188,7 +189,7 @@ class SessionManager {
     if (e is TimeoutException || await refreshNoInternet()) {
       noInternet = true;
       _authService.forceLoggedOut();
-      await actions.noInternet(true);
+      onNoInternet?.call(true);
       _authService.error = "Keine Internetverbindung";
     } else {
       _authService.error = e.toString();

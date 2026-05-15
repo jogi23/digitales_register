@@ -43,16 +43,18 @@ import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_built_redux/flutter_built_redux.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:dr/ui/snack_bar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:responsive_scaffold/responsive_scaffold.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:uni_links/uni_links.dart';
 
+export 'package:dr/ui/snack_bar.dart' show scaffoldMessengerKey, showSnackBar;
+
 GlobalKey<NavigatorState>? navigatorKey;
 GlobalKey<NavigatorState> nestedNavKey = GlobalKey();
 GlobalKey<ResponsiveScaffoldState<Pages>>? scaffoldKey;
-GlobalKey<ScaffoldMessengerState>? scaffoldMessengerKey;
 
 typedef SingleArgumentVoidCallback<T> = void Function(T arg);
 
@@ -169,10 +171,6 @@ class _RegisterAppState extends State<RegisterApp> {
       saveNoPass: a.settingsActions.saveNoPass.call,
       load: a.load.call,
       showRequestPassReset: a.routingActions.showRequestPassReset.call,
-      refreshNoInternet: () => unawaited(() async {
-        final noInternet = await wrapper.refreshNoInternet();
-        await a.noInternet(noInternet);
-      }()),
       resetPass: a.loginActions.resetPass.call,
       requestPassReset: (user, email) => a.loginActions.requestPassReset(
         RequestPassResetPayload((b) => b

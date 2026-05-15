@@ -156,7 +156,7 @@ Future<void> _login(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
   } else {
     final noInternet = wrapper.noInternet;
     if (noInternet) {
-      await api.actions.noInternet(true);
+      providerContainer.read(noInternetProvider.notifier).setNoInternet(true);
       if (action.payload.fromStorage) {
         assert(action.payload.fromStorage);
         await api.actions.loginActions.loggedIn(

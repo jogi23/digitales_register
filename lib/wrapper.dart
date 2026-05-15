@@ -77,6 +77,9 @@ class Wrapper {
   bool get noInternet => _session.noInternet;
   set noInternet(bool value) => _session.noInternet = value;
 
+  set onNoInternet(void Function(bool)? callback) =>
+      _session.onNoInternet = callback;
+
   bool get safeMode => _session.safeMode;
   set safeMode(bool value) => _session.safeMode = value;
 

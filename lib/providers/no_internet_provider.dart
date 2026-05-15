@@ -15,10 +15,34 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'dart:async';
+
+import 'package:dr/middleware/middleware.dart' show wrapper;
+import 'package:dr/providers/dashboard_provider.dart';
+import 'package:dr/ui/snack_bar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Mirrors the Redux `AppState.noInternet` flag so that Riverpod features can
-/// react to connectivity changes without depending on the Redux store.
-///
-/// Updated by the `_noInternet` middleware whenever the Redux flag changes.
-final noInternetProvider = StateProvider<bool>((ref) => false);
+class NoInternetNotifier extends Notifier<bool> {
+  @override
+  bool build() => false;
+
+  void setNoInternet(bool value) {
+    final prev = state;
+    state = value;
+    if (prev == value) return;
+    if (value) {
+      showSnackBar("Keine Verbindung");
+      wrapper.logout(hard: false, logoutForcedByServer: true);
+    } else {
+      unawaited(ref.read(dashboardProvider.notifier).refresh());
+    }
+  }
+
+  Future<void> refresh() async {
+    final noInternet = await wrapper.refreshNoInternet();
+    setNoInternet(noInternet);
+  }
+}
+
+final noInternetProvider =
+    NotifierProvider<NoInternetNotifier, bool>(NoInternetNotifier.new);

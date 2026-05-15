@@ -15,6 +15,9 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'dart:async';
+
+import 'package:dr/providers/no_internet_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Mirrors the Redux `AppState.isDemo` flag so Riverpod widgets can react
@@ -114,7 +117,6 @@ class LoginNotifier extends Notifier<LoginState> {
   void Function(bool)? _saveNoPassDispatch;
   void Function()? _loadDispatch;
   void Function(String url)? _showRequestPassResetDispatch;
-  void Function()? _refreshNoInternetDispatch;
   void Function(String newPass)? _resetPassDispatch;
   void Function(String user, String email)? _requestPassResetDispatch;
 
@@ -130,7 +132,6 @@ class LoginNotifier extends Notifier<LoginState> {
     required void Function(bool) saveNoPass,
     required void Function() load,
     required void Function(String url) showRequestPassReset,
-    required void Function() refreshNoInternet,
     required void Function(String newPass) resetPass,
     required void Function(String user, String email) requestPassReset,
   }) {
@@ -142,7 +143,6 @@ class LoginNotifier extends Notifier<LoginState> {
     _saveNoPassDispatch = saveNoPass;
     _loadDispatch = load;
     _showRequestPassResetDispatch = showRequestPassReset;
-    _refreshNoInternetDispatch = refreshNoInternet;
     _resetPassDispatch = resetPass;
     _requestPassResetDispatch = requestPassReset;
   }
@@ -212,7 +212,8 @@ class LoginNotifier extends Notifier<LoginState> {
   void loadApp() => _loadDispatch?.call();
   void showRequestPassReset(String url) =>
       _showRequestPassResetDispatch?.call(url);
-  void refreshNoInternet() => _refreshNoInternetDispatch?.call();
+  void refreshNoInternet() =>
+      unawaited(ref.read(noInternetProvider.notifier).refresh());
   void resetPass(String newPass) => _resetPassDispatch?.call(newPass);
   void requestPassReset(String user, String email) =>
       _requestPassResetDispatch?.call(user, email);
