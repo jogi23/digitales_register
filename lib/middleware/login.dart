@@ -46,7 +46,8 @@ Future<void> _logout(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
     );
   }
   if (api.state.settingsState.deleteDataOnLogout && action.payload.hard) {
-    await api.actions.deleteData();
+    deletedData = true;
+    await api.actions.saveState();
   }
   if (!action.payload.forced) {
     assert(action.payload.hard);

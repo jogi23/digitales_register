@@ -21,6 +21,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class SettingsNotifier extends Notifier<SettingsState> {
+  /// Called after [setSaveNoData] to trigger an immediate storage write.
+  /// Wired by middleware._load once the Redux store is available.
+  void Function()? onSaveState;
+
   @override
   SettingsState build() => SettingsState();
 
@@ -38,8 +42,10 @@ class SettingsNotifier extends Notifier<SettingsState> {
   void setSaveNoPass(bool value) =>
       state = state.rebuild((b) => b..noPasswordSaving = value);
 
-  void setSaveNoData(bool value) =>
-      state = state.rebuild((b) => b..noDataSaving = value);
+  void setSaveNoData(bool value) {
+    state = state.rebuild((b) => b..noDataSaving = value);
+    onSaveState?.call();
+  }
 
   void setAskWhenDelete(bool value) =>
       state = state.rebuild((b) => b..askWhenDelete = value);

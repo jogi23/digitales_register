@@ -92,12 +92,9 @@ List<Middleware<AppState, AppStateBuilder, AppActions>> middleware({
       if (includeErrorMiddleware) _errorMiddleware,
       _saveStateMiddleware,
       (MiddlewareBuilder<AppState, AppStateBuilder, AppActions>()
-            ..add(SettingsActionsNames.saveNoData, _saveNoData)
-            ..add(AppActionsNames.deleteData, _deleteData)
             ..add(AppActionsNames.load, _load)
             ..add(AppActionsNames.start, _start)
             ..add(LoginActionsNames.loggedIn, _loggedIn)
-            ..add(AppActionsNames.restarted, _restarted)
             ..combine(_gradesMiddleware)
             ..combine(_loginMiddleware)
             ..combine(_passMiddleware)
@@ -196,6 +193,8 @@ Future<void> _load(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
       ..onNoInternet = (bool v) =>
           providerContainer.read(noInternetProvider.notifier).setNoInternet(v);
   }
+  providerContainer.read(settingsProvider.notifier).onSaveState =
+      () => unawaited(api.actions.saveState());
   await next(action);
   if (!providerContainer.read(noInternetProvider)) _popAll();
   dynamic login;
@@ -435,41 +434,12 @@ Future<String?> _readFromStorage(String key) async {
   }
 }
 
-Future<void> _saveNoData(
-  MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
-  ActionHandler next,
-  Action<bool> action,
-) async {
-  await next(action);
-  providerContainer
-      .read(settingsProvider.notifier)
-      .setSaveNoData(action.payload);
-  await api.actions.saveState();
-}
-
-Future<void> _deleteData(
-  MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
-  ActionHandler next,
-  Action<void> action,
-) async {
-  await next(action);
-  deletedData = true;
-  await api.actions.saveState();
-}
-
-Future<void> _restarted(
-  MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
-  ActionHandler next,
-  Action<void> action,
-) async {
-  await next(action);
-  if (api.state.loginState.loggedIn &&
+Future<void> handleRestarted() async {
+  if (providerContainer.read(loginProvider).loggedIn &&
       DateTime.now().difference(wrapper.lastInteraction).inMinutes > 3) {
     wrapper.interaction();
     final poppedAnything = _popAll();
     if (!poppedAnything) {
-      // If we pop something the routeObserver will trigger a reload of the dasboard.
-      // However, if we are on the dashboard already, we need to this here.
       await providerContainer.read(dashboardProvider.notifier).refresh();
     }
   }

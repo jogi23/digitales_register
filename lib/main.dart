@@ -119,7 +119,7 @@ Future<void> _runApp() async {
       unawaited(store.actions.start(uri));
       WidgetsBinding.instance.addObserver(
         LifecycleObserver(
-          store.actions.restarted.call,
+          () => unawaited(handleRestarted()),
           // this might not finish in time:
           store.actions.saveState.call,
         ),

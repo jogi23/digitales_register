@@ -16,6 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 
@@ -233,6 +234,8 @@ void main() {
       AppActions(),
       middleware: middleware(includeErrorMiddleware: false),
     );
+    container.read(settingsProvider.notifier).onSaveState =
+        () => unawaited(store.actions.saveState());
 
     await store.actions.saveState();
 
@@ -247,28 +250,32 @@ void main() {
             json.decode((await storageHelper.read(username))!) as Object),
         const TypeMatcher<AppState>());
 
-    await store.actions.settingsActions.saveNoData(true);
+    container.read(settingsProvider.notifier).setSaveNoData(true);
+    await Future<void>.value();
 
     expect(
         serializers.deserialize(
             json.decode((await storageHelper.read(username))!) as Object),
         const TypeMatcher<SettingsState>());
 
-    await store.actions.settingsActions.saveNoData(false);
+    container.read(settingsProvider.notifier).setSaveNoData(false);
+    await Future<void>.value();
 
     expect(
         serializers.deserialize(
             json.decode((await storageHelper.read(username))!) as Object),
         const TypeMatcher<AppState>());
 
-    await store.actions.settingsActions.saveNoData(true);
+    container.read(settingsProvider.notifier).setSaveNoData(true);
+    await Future<void>.value();
 
     expect(
         serializers.deserialize(
             json.decode((await storageHelper.read(username))!) as Object),
         const TypeMatcher<SettingsState>());
 
-    await store.actions.settingsActions.saveNoData(false);
+    container.read(settingsProvider.notifier).setSaveNoData(false);
+    await Future<void>.value();
 
     expect(
         serializers.deserialize(
