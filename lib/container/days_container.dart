@@ -18,7 +18,6 @@
 
 import 'package:built_collection/built_collection.dart';
 import 'package:built_value/built_value.dart';
-import 'package:dr/actions/app_actions.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/data.dart';
 import 'package:dr/main.dart' show showSnackBar;
@@ -30,7 +29,6 @@ import 'package:dr/providers/notifications_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/ui/days.dart';
 import 'package:flutter/material.dart' hide Builder;
-import 'package:flutter_built_redux/flutter_built_redux.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 part 'days_container.g.dart';
@@ -50,51 +48,45 @@ class DaysContainer extends ConsumerWidget {
       }
     });
     final notifier = ref.read(dashboardProvider.notifier);
-    return StoreConnection<AppState, AppActions, Object>(
-      connect: (_) => const Object(),
-      builder: (context, _, actions) {
-        final blacklist = dashboard.blacklist!;
-        final unorderedDays = dashboard.allDays
-                ?.where((day) => day.future == dashboard.future)
-                .map(
-                  (day) => day.rebuild(
-                    (b) => b
-                      ..deletedHomework
-                          .where((hw) => !isBlacklisted(hw, blacklist))
-                      ..homework.where((hw) => !isBlacklisted(hw, blacklist)),
-                  ),
-                )
-                .toList() ??
-            [];
+    final blacklist = dashboard.blacklist!;
+    final unorderedDays = dashboard.allDays
+            ?.where((day) => day.future == dashboard.future)
+            .map(
+              (day) => day.rebuild(
+                (b) => b
+                  ..deletedHomework
+                      .where((hw) => !isBlacklisted(hw, blacklist))
+                  ..homework.where((hw) => !isBlacklisted(hw, blacklist)),
+              ),
+            )
+            .toList() ??
+        [];
 
-        final vm = DaysViewModel.from(
-          dashboard,
-          noInternet,
-          loginLoading,
-          showNotifications,
-          settings,
-          unorderedDays,
-          blacklist,
-        );
+    final vm = DaysViewModel.from(
+      dashboard,
+      noInternet,
+      loginLoading,
+      showNotifications,
+      settings,
+      unorderedDays,
+      blacklist,
+    );
 
-        return DaysWidget(
-          vm: vm,
-          onSwitchFuture: notifier.switchFuture,
-          refresh: notifier.refresh,
-          addReminderCallback: (day, msg) =>
-              notifier.addReminder(day.date, msg),
-          removeReminderCallback: (hw, day) => notifier.deleteHomework(hw),
-          toggleDoneCallback: (hw, done) =>
-              notifier.toggleDone(hw.id, hw.type.name, done),
-            setDoNotAskWhenDeleteCallback: () =>
-              ref.read(settingsProvider.notifier).setAskWhenDelete(false),
-          markAsSeenCallback: notifier.markAsSeen,
-          markDeletedHomeworkAsSeenCallback: notifier.markDeletedHomeworkAsSeen,
-          markAllAsSeenCallback: notifier.markAllAsSeen,
-          refreshNoInternet: actions.refreshNoInternet.call,
-          onOpenAttachment: notifier.openAttachment,
-        );
-      },
+    return DaysWidget(
+      vm: vm,
+      onSwitchFuture: notifier.switchFuture,
+      refresh: notifier.refresh,
+      addReminderCallback: (day, msg) => notifier.addReminder(day.date, msg),
+      removeReminderCallback: (hw, day) => notifier.deleteHomework(hw),
+      toggleDoneCallback: (hw, done) =>
+          notifier.toggleDone(hw.id, hw.type.name, done),
+      setDoNotAskWhenDeleteCallback: () =>
+          ref.read(settingsProvider.notifier).setAskWhenDelete(false),
+      markAsSeenCallback: notifier.markAsSeen,
+      markDeletedHomeworkAsSeenCallback: notifier.markDeletedHomeworkAsSeen,
+      markAllAsSeenCallback: notifier.markAllAsSeen,
+      refreshNoInternet: ref.read(loginProvider.notifier).refreshNoInternet,
+      onOpenAttachment: notifier.openAttachment,
     );
   }
 }

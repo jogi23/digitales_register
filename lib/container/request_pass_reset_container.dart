@@ -16,34 +16,20 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
-import 'package:dr/actions/app_actions.dart';
-import 'package:dr/actions/login_actions.dart';
-import 'package:dr/app_state.dart';
 import 'package:dr/providers/login_provider.dart';
 import 'package:dr/ui/request_pass_reset.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_built_redux/flutter_built_redux.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class RequestPassResetContainer extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final resetPass = ref.watch(loginProvider.select((s) => s.resetPassState));
-    return StoreConnection<AppState, AppActions, Object>(
-      connect: (_) => const Object(),
-      builder: (context, _, actions) {
-        return RequestPassReset(
-          resetPass: (user, email) => actions.loginActions.requestPassReset(
-            RequestPassResetPayload(
-              (b) => b
-                ..user = user
-                ..email = email,
-            ),
-          ),
-          message: resetPass.message,
-          failure: resetPass.failure,
-        );
-      },
+    final notifier = ref.read(loginProvider.notifier);
+    return RequestPassReset(
+      resetPass: notifier.requestPassReset,
+      message: resetPass.message,
+      failure: resetPass.failure,
     );
   }
 }

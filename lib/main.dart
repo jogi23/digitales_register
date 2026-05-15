@@ -169,6 +169,13 @@ class _RegisterAppState extends State<RegisterApp> {
       saveNoPass: a.settingsActions.saveNoPass.call,
       load: a.load.call,
       showRequestPassReset: a.routingActions.showRequestPassReset.call,
+      refreshNoInternet: a.refreshNoInternet.call,
+      resetPass: a.loginActions.resetPass.call,
+      requestPassReset: (user, email) => a.loginActions.requestPassReset(
+        RequestPassResetPayload((b) => b
+          ..user = user
+          ..email = email),
+      ),
     );
   }
 

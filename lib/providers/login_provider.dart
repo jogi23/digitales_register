@@ -114,6 +114,9 @@ class LoginNotifier extends Notifier<LoginState> {
   void Function(bool)? _saveNoPassDispatch;
   void Function()? _loadDispatch;
   void Function(String url)? _showRequestPassResetDispatch;
+  void Function()? _refreshNoInternetDispatch;
+  void Function(String newPass)? _resetPassDispatch;
+  void Function(String user, String email)? _requestPassResetDispatch;
 
   /// Wires up Redux dispatchers for actions that still require middleware side
   /// effects. Called once by [RegisterApp.initState] so both the real app and
@@ -127,6 +130,9 @@ class LoginNotifier extends Notifier<LoginState> {
     required void Function(bool) saveNoPass,
     required void Function() load,
     required void Function(String url) showRequestPassReset,
+    required void Function() refreshNoInternet,
+    required void Function(String newPass) resetPass,
+    required void Function(String user, String email) requestPassReset,
   }) {
     _addAccountDispatch = addAccount;
     _selectAccountDispatch = selectAccount;
@@ -136,6 +142,9 @@ class LoginNotifier extends Notifier<LoginState> {
     _saveNoPassDispatch = saveNoPass;
     _loadDispatch = load;
     _showRequestPassResetDispatch = showRequestPassReset;
+    _refreshNoInternetDispatch = refreshNoInternet;
+    _resetPassDispatch = resetPass;
+    _requestPassResetDispatch = requestPassReset;
   }
 
   @override
@@ -203,6 +212,10 @@ class LoginNotifier extends Notifier<LoginState> {
   void loadApp() => _loadDispatch?.call();
   void showRequestPassReset(String url) =>
       _showRequestPassResetDispatch?.call(url);
+  void refreshNoInternet() => _refreshNoInternetDispatch?.call();
+  void resetPass(String newPass) => _resetPassDispatch?.call(newPass);
+  void requestPassReset(String user, String email) =>
+      _requestPassResetDispatch?.call(user, email);
 }
 
 final loginProvider =
