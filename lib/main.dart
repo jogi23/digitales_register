@@ -21,7 +21,6 @@ import 'dart:io';
 
 import 'package:built_redux/built_redux.dart';
 import 'package:dr/actions/app_actions.dart';
-import 'package:dr/actions/login_actions.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/container/change_email_container.dart';
 import 'package:dr/container/home_page.dart';
@@ -144,39 +143,9 @@ class _RegisterAppState extends State<RegisterApp> {
   @override
   void initState() {
     super.initState();
-    final a = widget.store.actions;
-    providerContainer.read(loginProvider.notifier).initReduxDispatchers(
-      addAccount: a.loginActions.addAccount.call,
-      selectAccount: a.loginActions.selectAccount.call,
-      logout: ({required bool hard, bool forced = false}) =>
-          a.loginActions.logout(
-            LogoutPayload((b) => b
-              ..hard = hard
-              ..forced = forced),
-          ),
-      login: (user, pass, url) => a.loginActions.login(
-        LoginPayload((b) => b
-          ..user = user
-          ..pass = pass
-          ..url = url
-          ..fromStorage = false),
-      ),
-      changePass: (user, oldPass, newPass, url) => a.loginActions.changePass(
-        ChangePassPayload((b) => b
-          ..user = user
-          ..oldPass = oldPass
-          ..newPass = newPass
-          ..url = url),
-      ),
-      saveNoPass: a.settingsActions.saveNoPass.call,
-      load: a.load.call,
-      showRequestPassReset: a.routingActions.showRequestPassReset.call,
-      resetPass: a.loginActions.resetPass.call,
-      requestPassReset: (user, email) => a.loginActions.requestPassReset(
-        RequestPassResetPayload((b) => b
-          ..user = user
-          ..email = email),
-      ),
+    wireLoginDispatchers(
+      providerContainer.read(loginProvider.notifier),
+      widget.store.actions,
     );
   }
 

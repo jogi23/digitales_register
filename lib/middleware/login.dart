@@ -18,18 +18,6 @@
 
 part of 'middleware.dart';
 
-final _loginMiddleware =
-    MiddlewareBuilder<AppState, AppStateBuilder, AppActions>()
-      ..add(LoginActionsNames.logout, _logout)
-      ..add(LoginActionsNames.login, _login)
-      ..add(LoginActionsNames.loginFailed, _loginFailed)
-      ..add(LoginActionsNames.showChangePass, _showChangePass)
-      ..add(LoginActionsNames.changePass, _changePass)
-      ..add(LoginActionsNames.requestPassReset, _requestPassReset)
-      ..add(LoginActionsNames.resetPass, _resetPass)
-      ..add(LoginActionsNames.addAccount, _addAccount)
-      ..add(LoginActionsNames.selectAccount, _selectAccount);
-
 void _resetAllProviders() {
   providerContainer.read(dashboardProvider.notifier).reset();
   providerContainer.read(notificationsProvider.notifier).reset();
@@ -44,9 +32,8 @@ void _resetAllProviders() {
   providerContainer.read(dashboardErrorProvider.notifier).state = null;
 }
 
-Future<void> _logout(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
-    ActionHandler next, Action<LogoutPayload> action) async {
-  if (!providerContainer.read(settingsProvider).noPasswordSaving && action.payload.hard) {
+Future<void> _doLogout({required bool hard, bool forced = false}) async {
+  if (!providerContainer.read(settingsProvider).noPasswordSaving && hard) {
     await secureStorage.write(
       key: "login",
       value: json.encode(
@@ -59,240 +46,270 @@ Future<void> _logout(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
       ),
     );
   }
-  if (providerContainer.read(settingsProvider).deleteDataOnLogout && action.payload.hard) {
+  if (providerContainer.read(settingsProvider).deleteDataOnLogout && hard) {
     deletedData = true;
-    await api.actions.saveState();
+    await _reduxActions.saveState();
   }
-  if (!action.payload.forced) {
-    assert(action.payload.hard);
-    wrapper.logout(hard: action.payload.hard);
+  if (!forced) {
+    assert(hard);
+    wrapper.logout(hard: hard);
   }
-  await next(action);
-  providerContainer.read(loginProvider.notifier).logout(hard: action.payload.hard);
+  providerContainer.read(loginProvider.notifier).logout(hard: hard);
   providerContainer.read(isDemoProvider.notifier).state = false;
-  if (action.payload.hard) {
+  if (hard) {
     wrapper = Wrapper();
     _resetAllProviders();
-    await api.actions.load();
+    await _reduxActions.load();
   }
 }
 
-Future<void> _login(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
-    ActionHandler next, Action<LoginPayload> action) async {
-  await next(action);
-  if (action.payload.user == "" || action.payload.pass == "") {
-    await api.actions.loginActions.loginFailed(
-      LoginFailedPayload(
-        (b) async => b
-          ..cause = "Bitte gib etwas ein"
-          ..username = action.payload.user,
-      ),
+Future<void> _doLogin(
+  String user,
+  String pass,
+  String url, {
+  bool fromStorage = false,
+}) async {
+  if (user == "" || pass == "") {
+    providerContainer.read(loginProvider.notifier).setLoginFailed(
+      cause: "Bitte gib etwas ein",
+      username: user,
     );
+    await _doDeletePass();
+    providerContainer.read(appRouterProvider).showLogin();
     return;
   }
 
-  final url = fixupUrl(action.payload.url);
-  await api.actions.loginActions.loggingIn();
+  final fixedUrl = fixupUrl(url);
   providerContainer.read(loginProvider.notifier).setLoggingIn();
-
-  // We need to set the url earlier because other parts of the app will try to read it
-  // because we pretend we are logged in earlier than we actually are.
-  wrapper.url = url;
-  providerContainer.read(loginProvider.notifier).setUrl(url);
+  wrapper.url = fixedUrl;
+  providerContainer.read(loginProvider.notifier).setUrl(fixedUrl);
 
   bool offlineLogin = false;
-  if (action.payload.fromStorage) {
-    // log the user in locally so they don't have to
-    // wait for the network request to finish
-    assert(action.payload.fromStorage);
-    await api.actions.loginActions.loggedIn(
-      LoggedInPayload(
-        (b) => b
-          ..username = action.payload.user
-          ..fromStorage = true
-          ..offlineOnly = true
-          ..keepShowingLoadingIndicator = true,
-      ),
+  if (fromStorage) {
+    await _doLoggedIn(
+      username: user,
+      fromStorage: true,
+      offlineOnly: true,
+      keepShowingLoadingIndicator: true,
     );
-    await api.actions.setUrl(url);
     offlineLogin = true;
   }
 
   final dynamic result = await wrapper.login(
-    action.payload.user,
-    action.payload.pass,
+    user,
+    pass,
     null,
-    url,
-    logout: () => api.actions.loginActions.logout(
-      LogoutPayload(
-        (b) => b
-          ..hard = providerContainer.read(settingsProvider).noPasswordSaving
-          ..forced = true,
-      ),
+    fixedUrl,
+    logout: () => _doLogout(
+      hard: providerContainer.read(settingsProvider).noPasswordSaving,
+      forced: true,
     ),
     configLoaded: () {
-      api.actions.setConfig(wrapper.config);
       providerContainer.read(configProvider.notifier).state = wrapper.config;
-      providerContainer
-          .read(gradesProvider.notifier)
-          .setConfig(wrapper.config);
+      providerContainer.read(gradesProvider.notifier).setConfig(wrapper.config);
     },
     relogin: () {
-      api.actions.loginActions.automaticallyReloggedIn();
       providerContainer.read(gradesProvider.notifier).resetForRelogin();
     },
     addProtocolItem: (item) {
-      api.actions.addNetworkProtocolItem(item);
       providerContainer.read(networkProtocolProvider.notifier).add(item);
     },
   );
+
   if (await wrapper.loggedIn) {
     if (!wrapper.config.isStudentOrParent) {
       wrapper.logout(hard: true);
-      await api.actions.loginActions.loginFailed(
-        LoginFailedPayload(
-          (b) => b..cause = "Dieser Benutzertyp wird nicht unterstützt.",
-        ),
+      providerContainer.read(loginProvider.notifier).setLoginFailed(
+        cause: "Dieser Benutzertyp wird nicht unterstützt.",
       );
-      _showUserTypeNotSupported(url);
+      await _doDeletePass();
+      providerContainer.read(appRouterProvider).showLogin();
+      _showUserTypeNotSupported(fixedUrl);
       return;
     }
-    await api.actions.loginActions.loggedIn(
-      LoggedInPayload(
-        (b) => b
-          ..username = wrapper.user
-          ..fromStorage = action.payload.fromStorage
-          ..secondaryOnlineLogin = offlineLogin,
-      ),
+    await _doLoggedIn(
+      username: wrapper.user!,
+      fromStorage: fromStorage,
+      secondaryOnlineLogin: offlineLogin,
     );
   } else if (result is Map && result["error"] == "password_expired") {
-    await api.actions.savePassActions.delete();
-    await api.actions.loginActions.showChangePass(true);
+    await _doDeletePass();
+    providerContainer.read(appRouterProvider).showLogin();
+    providerContainer
+        .read(loginProvider.notifier)
+        .setChangePassword(mustChange: true);
   } else {
     final noInternet = wrapper.noInternet;
     if (noInternet) {
       providerContainer.read(noInternetProvider.notifier).setNoInternet(true);
-      if (action.payload.fromStorage) {
-        assert(action.payload.fromStorage);
-        await api.actions.loginActions.loggedIn(
-          LoggedInPayload(
-            (b) => b
-              ..username = action.payload.user
-              ..fromStorage = true
-              ..offlineOnly = true,
-          ),
+      if (fromStorage) {
+        await _doLoggedIn(
+          username: user,
+          fromStorage: true,
+          offlineOnly: true,
         );
-        await api.actions.setUrl(url);
         return;
       }
     }
-    await api.actions.loginActions.loginFailed(
-      LoginFailedPayload(
-        (b) => b
-          ..cause = wrapper.error ?? "Unknown error"
-          ..username = action.payload.user,
-      ),
+    providerContainer.read(loginProvider.notifier).setLoginFailed(
+      cause: wrapper.error ?? "Unknown error",
+      username: user,
     );
+    await _doDeletePass();
+    providerContainer.read(appRouterProvider).showLogin();
   }
-  await api.actions.setUrl(url);
 }
 
-Future<void> _changePass(
-    MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
-    ActionHandler next,
-    Action<ChangePassPayload> action) async {
-  await next(action);
-  final dynamic result = await wrapper.changePass(
-    action.payload.url,
-    action.payload.user,
-    action.payload.oldPass,
-    action.payload.newPass,
-  );
-  await api.actions.savePassActions.save();
-  if (result == null) {
-    return;
+Future<void> _doLoggedIn({
+  required String username,
+  bool fromStorage = false,
+  bool offlineOnly = false,
+  bool keepShowingLoadingIndicator = false,
+  bool secondaryOnlineLogin = false,
+}) async {
+  final currentSettings = providerContainer.read(settingsProvider);
+  if (fromStorage) {
+    wrapper.safeMode = false;
   }
+  if (!currentSettings.noPasswordSaving && !fromStorage) {
+    await _doSavePass();
+  }
+  deletedData = false;
+  final key = getStorageKey(username, wrapper.loginAddress);
+  if (!providerContainer.read(loginProvider).loggedIn && !secondaryOnlineLogin) {
+    log("loading state");
+    final state = await _readFromStorage(key);
+    if (state != null) {
+      try {
+        final serializedState =
+            serializers.deserialize(json.decode(state) as Object);
+        if (serializedState is SettingsState) {
+          final restoredSettings = serializedState.rebuild(
+            (b) => b.noPasswordSaving = currentSettings.noPasswordSaving,
+          );
+          providerContainer.read(settingsProvider.notifier).load(restoredSettings);
+        } else if (serializedState is AppState) {
+          final restoredSettings = serializedState.settingsState.rebuild(
+            (b) => b.noPasswordSaving = currentSettings.noPasswordSaving,
+          );
+          providerContainer.read(settingsProvider.notifier).load(restoredSettings);
+          providerContainer
+              .read(gradesProvider.notifier)
+              .restore(serializedState.gradesState);
+          providerContainer
+              .read(absencesProvider.notifier)
+              .restore(serializedState.absencesState);
+          providerContainer
+              .read(calendarProvider.notifier)
+              .restore(serializedState.calendarState);
+          providerContainer
+              .read(messagesProvider.notifier)
+              .restore(serializedState.messagesState);
+          providerContainer
+              .read(profileProvider.notifier)
+              .restore(serializedState.profileState);
+          providerContainer.read(notificationsProvider.notifier).restore(
+                NotificationsState(
+                  notifications: serializedState.notificationState.notifications
+                          ?.toList() ??
+                      [],
+                  lastFetched: serializedState.notificationState.lastFetched,
+                ),
+              );
+        }
+        await _doSaveNoPass(
+          providerContainer.read(settingsProvider).noPasswordSaving,
+        );
+      } catch (e) {
+        showSnackBar("Fehler beim Laden der gespeicherten Daten");
+        log("Failed to load data", error: e);
+      }
+    }
+    _popAll();
+  }
+
+  providerContainer.read(loginProvider.notifier).setLoggedIn(
+    username: username,
+    keepLoading: keepShowingLoadingIndicator,
+  );
+  final loggedInState = providerContainer.read(loginProvider);
+  providerContainer.read(isDemoProvider.notifier).state =
+      isDemoUser(url: loggedInState.url, username: loggedInState.username);
+  providerContainer.read(loginProvider.notifier).executeAfterLoginCallbacks();
+  if (!offlineOnly) {
+    await providerContainer.read(dashboardProvider.notifier).load(true);
+    await providerContainer.read(notificationsProvider.notifier).load();
+    providerContainer
+        .read(settingsProvider.notifier)
+        .updateSubjectThemes(providerContainer.read(allSubjectsProvider));
+  }
+
+  unawaited(_reduxActions.saveState());
+}
+
+Future<void> _doChangePass(
+  String user,
+  String oldPass,
+  String newPass,
+  String url,
+) async {
+  final dynamic result = await wrapper.changePass(url, user, oldPass, newPass);
+  await _doSavePass();
+  if (result == null) return;
   if (result["error"] != null) {
-    await api.actions.loginActions.loginFailed(
-      LoginFailedPayload((b) => b
-        ..cause = wrapper.error
-        ..username = action.payload.user),
+    providerContainer.read(loginProvider.notifier).setLoginFailed(
+      cause: wrapper.error ?? "Unknown error",
+      username: user,
     );
+    await _doDeletePass();
+    providerContainer.read(appRouterProvider).showLogin();
   } else {
-    await api.actions.loginActions.login(
-      LoginPayload(
-        (b) => b
-          ..user = action.payload.user
-          ..pass = action.payload.newPass
-          ..fromStorage = false
-          ..url = action.payload.url,
-      ),
-    );
+    await _doLogin(user, newPass, url);
     navigatorKey?.currentState?.pop();
     showSnackBar("Passwort erfolgreich geändert");
   }
 }
 
-Future<void> _loginFailed(
-    MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
-    ActionHandler next,
-    Action<LoginFailedPayload> action) async {
-  await next(action);
-  providerContainer.read(loginProvider.notifier).setLoginFailed(
-    cause: action.payload.cause,
-    username: action.payload.username,
-  );
-  await api.actions.savePassActions.delete();
-  await api.actions.routingActions.showLogin();
-}
-
-Future<void> _showChangePass(
-    MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
-    ActionHandler next,
-    Action<bool> action) async {
-  await api.actions.routingActions.showLogin();
-  await next(action);
-  providerContainer.read(loginProvider.notifier).setChangePassword(mustChange: action.payload);
-}
-
 @visibleForTesting
 dio.Dio? passDio;
 
-Future<void> _requestPassReset(
-    MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
-    ActionHandler next,
-    Action<RequestPassResetPayload> action) async {
-  await next(action);
+Future<void> _doRequestPassReset(String user, String email) async {
   // the api url DOES NOT contain /v2/ in the path. This is intentional.
   try {
     final dynamic result = (await (passDio ?? dio.Dio()).post<dynamic>(
       "${providerContainer.read(loginProvider).url}/api/auth/resetPassword",
       data: {
-        "email": action.payload.email,
-        "username": action.payload.user,
+        "email": email,
+        "username": user,
       },
     ))
         .data;
     if (getMap(result)?["error"] != null) {
       final msg = "[${result["error"]}]: ${result["message"]}";
-      await api.actions.loginActions.passResetFailed(msg);
       providerContainer.read(loginProvider.notifier).updatePassResetState(
-            providerContainer.read(loginProvider).resetPassState.copyWith(failure: true, message: msg),
+            providerContainer
+                .read(loginProvider)
+                .resetPassState
+                .copyWith(failure: true, message: msg),
           );
     } else {
       final msg = (result["message"] as String?)!;
-      await api.actions.loginActions.passResetSucceeded(msg);
       providerContainer.read(loginProvider.notifier).updatePassResetState(
-            providerContainer.read(loginProvider).resetPassState.copyWith(failure: false, message: msg),
+            providerContainer
+                .read(loginProvider)
+                .resetPassState
+                .copyWith(failure: false, message: msg),
           );
     }
   } catch (e) {
     final loginUrl = providerContainer.read(loginProvider).url;
     if (await cannotConnectTo(loginUrl!)) {
       final msg = "Keine Verbindung mit \"$loginUrl\" möglich";
-      await api.actions.loginActions.passResetFailed(msg);
       providerContainer.read(loginProvider.notifier).updatePassResetState(
-            providerContainer.read(loginProvider).resetPassState.copyWith(failure: true, message: msg),
+            providerContainer
+                .read(loginProvider)
+                .resetPassState
+                .copyWith(failure: true, message: msg),
           );
     } else {
       rethrow;
@@ -300,10 +317,7 @@ Future<void> _requestPassReset(
   }
 }
 
-Future<void> _resetPass(
-    MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
-    ActionHandler next,
-    Action<String> action) async {
+Future<void> _doResetPass(String newPass) async {
   // the api url DOES NOT contain /v2/ in the path. This is intentional.
   final resetState = providerContainer.read(loginProvider);
   final dynamic result = (await (passDio ?? dio.Dio()).post<dynamic>(
@@ -313,30 +327,30 @@ Future<void> _resetPass(
       "token": resetState.resetPassState.token,
       "email": resetState.resetPassState.email,
       "oldPassword": "",
-      "newPassword": action.payload,
+      "newPassword": newPass,
     },
   ))
       .data;
   if (result["error"] != null) {
     final msg = "[${result["error"]}]: ${result["message"]}";
-    await api.actions.loginActions.passResetFailed(msg);
     providerContainer.read(loginProvider.notifier).updatePassResetState(
-          providerContainer.read(loginProvider).resetPassState.copyWith(failure: true, message: msg),
+          providerContainer
+              .read(loginProvider)
+              .resetPassState
+              .copyWith(failure: true, message: msg),
         );
   } else {
     final msg = result["message"] as String;
-    await api.actions.loginActions.passResetSucceeded(msg);
     providerContainer.read(loginProvider.notifier).updatePassResetState(
-          providerContainer.read(loginProvider).resetPassState.copyWith(failure: false, message: msg),
+          providerContainer
+              .read(loginProvider)
+              .resetPassState
+              .copyWith(failure: false, message: msg),
         );
   }
 }
 
-Future<void> _addAccount(
-    MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
-    ActionHandler next,
-    Action<void> action) async {
-  await next(action);
+Future<void> _doAddAccount() async {
   // There might be no loginStorage if "stay logged in" is not enabled.
   final loginStorage = await secureStorage.read(key: "login");
   if (loginStorage != null) {
@@ -364,18 +378,15 @@ Future<void> _addAccount(
   }
   providerContainer.read(loginProvider.notifier).logout(hard: true);
   _resetAllProviders();
-  await api.actions.load();
+  await _reduxActions.load();
 }
 
-Future<void> _selectAccount(
-    MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
-    ActionHandler next,
-    Action<int> action) async {
-  await next(action);
-  final dynamic login = json.decode((await secureStorage.read(key: "login"))!);
+Future<void> _doSelectAccount(int index) async {
+  final dynamic login =
+      json.decode((await secureStorage.read(key: "login"))!);
   login["otherAccounts"] ??= <Object?>[];
   final otherAccounts = login["otherAccounts"] as List<Object?>;
-  var selectedIndex = action.payload;
+  var selectedIndex = index;
   if (login["user"] != null && login["pass"] != null && login["url"] != null) {
     otherAccounts.insert(0, <String, Object?>{
       "user": login["user"],
@@ -391,7 +402,7 @@ Future<void> _selectAccount(
   await secureStorage.write(key: "login", value: json.encode(login));
   providerContainer.read(loginProvider.notifier).logout(hard: true);
   _resetAllProviders();
-  await api.actions.load();
+  await _reduxActions.load();
 }
 
 void _showUserTypeNotSupported(String url) {

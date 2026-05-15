@@ -108,7 +108,7 @@ class LoginState {
 }
 
 class LoginNotifier extends Notifier<LoginState> {
-  // Redux dispatch bridges — set via initReduxDispatchers during app/test init.
+  // Function dispatch table — wired by wireLoginDispatchers() in middleware.dart.
   void Function()? _addAccountDispatch;
   void Function(int)? _selectAccountDispatch;
   void Function({required bool hard, bool forced})? _logoutDispatch;
@@ -120,9 +120,8 @@ class LoginNotifier extends Notifier<LoginState> {
   void Function(String newPass)? _resetPassDispatch;
   void Function(String user, String email)? _requestPassResetDispatch;
 
-  /// Wires up Redux dispatchers for actions that still require middleware side
-  /// effects. Called once by [RegisterApp.initState] so both the real app and
-  /// tests pick up the correct (store-connected) actions.
+  /// Wires up middleware function dispatchers. Called once from
+  /// [wireLoginDispatchers] (middleware.dart) after the store is ready.
   void initReduxDispatchers({
     required void Function() addAccount,
     required void Function(int) selectAccount,

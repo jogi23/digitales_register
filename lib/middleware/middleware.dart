@@ -24,10 +24,7 @@ import 'dart:io';
 import 'package:built_redux/built_redux.dart';
 import 'package:dio/dio.dart' as dio;
 import 'package:dr/actions/app_actions.dart';
-import 'package:dr/actions/login_actions.dart';
 import 'package:dr/actions/routing_actions.dart';
-import 'package:dr/actions/save_pass_actions.dart';
-import 'package:dr/actions/settings_actions.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/main.dart' hide scaffoldMessengerKey, showSnackBar;
 import 'package:dr/providers/absences_provider.dart';
@@ -75,6 +72,32 @@ bool skipUnmaintainedAlert = false;
 
 Wrapper wrapper = Wrapper();
 
+// Captured in _load/_start so plain-function handlers can dispatch Redux actions
+// that are still needed (load, saveState).
+late AppActions _reduxActions;
+
+/// Wires [LoginNotifier] to the plain middleware functions so the bridge no
+/// longer goes through Redux action dispatches. Called once from main.dart
+/// after the store is created.
+void wireLoginDispatchers(LoginNotifier notifier, AppActions actions) {
+  notifier.initReduxDispatchers(
+    load: () => unawaited(actions.load()),
+    addAccount: () => unawaited(_doAddAccount()),
+    selectAccount: (index) => unawaited(_doSelectAccount(index)),
+    logout: ({required bool hard, bool forced = false}) =>
+        unawaited(_doLogout(hard: hard, forced: forced)),
+    login: (user, pass, url) => unawaited(_doLogin(user, pass, url)),
+    changePass: (user, oldPass, newPass, url) =>
+        unawaited(_doChangePass(user, oldPass, newPass, url)),
+    saveNoPass: (value) => unawaited(_doSaveNoPass(value)),
+    resetPass: (newPass) => unawaited(_doResetPass(newPass)),
+    requestPassReset: (user, email) =>
+        unawaited(_doRequestPassReset(user, email)),
+    showRequestPassReset: (_) =>
+        unawaited(navigatorKey?.currentState?.pushNamed("/request_pass_reset")),
+  );
+}
+
 List<Middleware<AppState, AppStateBuilder, AppActions>> middleware({
   @visibleForTesting bool includeErrorMiddleware = true,
 }) =>
@@ -83,11 +106,7 @@ List<Middleware<AppState, AppStateBuilder, AppActions>> middleware({
       _saveStateMiddleware,
       (MiddlewareBuilder<AppState, AppStateBuilder, AppActions>()
             ..add(AppActionsNames.load, _load)
-            ..add(AppActionsNames.start, _start)
-            ..add(LoginActionsNames.loggedIn, _loggedIn)
-            ..combine(_loginMiddleware)
-            ..combine(_passMiddleware)
-            ..combine(routingMiddleware))
+            ..add(AppActionsNames.start, _start))
           .build(),
     ];
 
@@ -174,6 +193,7 @@ $error""",
 
 Future<void> _load(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
     ActionHandler next, Action<void> action) async {
+  _reduxActions = api.actions;
   // By resetting the wrapper we clear all cookies.
   // However we don't want to reset the wrapper in tests
   if (wrapper is! Mock) {
@@ -182,7 +202,7 @@ Future<void> _load(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
           providerContainer.read(noInternetProvider.notifier).setNoInternet(v);
   }
   providerContainer.read(settingsProvider.notifier).onSaveState =
-      () => unawaited(api.actions.saveState());
+      () => unawaited(_reduxActions.saveState());
   await next(action);
   if (!providerContainer.read(noInternetProvider)) _popAll();
   dynamic login;
@@ -209,120 +229,19 @@ Future<void> _load(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
             ?.map<String>((dynamic login) => login["user"] as String) ??
         <String>[],
   );
-  await api.actions.loginActions.setAvailableAccounts(otherAccounts);
   providerContainer.read(loginProvider.notifier).setOtherAccounts(otherAccounts);
   final currentLogin = providerContainer.read(loginProvider);
   if ((currentLogin.url != null && currentLogin.url != url) ||
       (currentLogin.username != null && currentLogin.username != user)) {
     // TODO: Figure out when exactly we'd hit this code path and how to handle it better.
-    await api.actions.savePassActions.delete();
-    await api.actions.routingActions.showLogin();
+    await _doDeletePass();
+    providerContainer.read(appRouterProvider).showLogin();
   } else {
     if (user != null && pass != null) {
-      await api.actions.loginActions.login(
-        LoginPayload((b) => b
-          ..user = user
-          ..pass = pass
-          ..url = url
-          ..fromStorage = true),
-      );
+      await _doLogin(user, pass, url ?? "", fromStorage: true);
     } else {
-      await api.actions.routingActions.showLogin();
+      providerContainer.read(appRouterProvider).showLogin();
     }
-  }
-}
-
-Future<void> _loggedIn(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
-    ActionHandler next, Action<LoggedInPayload> action) async {
-  final currentSettings = providerContainer.read(settingsProvider);
-  if (action.payload.fromStorage) {
-    // If we logged in with saved credentials password saving must be enabled.
-    wrapper.safeMode = false;
-  }
-  if (!currentSettings.noPasswordSaving && !action.payload.fromStorage) {
-    await api.actions.savePassActions.save();
-  }
-  deletedData = false;
-  final key = getStorageKey(action.payload.username, wrapper.loginAddress);
-  if (!providerContainer.read(loginProvider).loggedIn && !action.payload.secondaryOnlineLogin) {
-    log("loading state");
-    final state = await _readFromStorage(key);
-    if (state != null) {
-      try {
-        final serializedState =
-            serializers.deserialize(json.decode(state) as Object);
-        if (serializedState is SettingsState) {
-          final restoredSettings = serializedState.rebuild(
-            (b) => b.noPasswordSaving = currentSettings.noPasswordSaving,
-          );
-          providerContainer
-              .read(settingsProvider.notifier)
-              .load(restoredSettings);
-        } else if (serializedState is AppState) {
-          final restoredSettings = serializedState.settingsState.rebuild(
-            (b) => b.noPasswordSaving = currentSettings.noPasswordSaving,
-          );
-          providerContainer
-              .read(settingsProvider.notifier)
-              .load(restoredSettings);
-          providerContainer
-              .read(gradesProvider.notifier)
-              .restore(serializedState.gradesState);
-          providerContainer
-              .read(absencesProvider.notifier)
-              .restore(serializedState.absencesState);
-          providerContainer
-              .read(calendarProvider.notifier)
-              .restore(serializedState.calendarState);
-          providerContainer
-              .read(messagesProvider.notifier)
-              .restore(serializedState.messagesState);
-          providerContainer
-              .read(profileProvider.notifier)
-              .restore(serializedState.profileState);
-          providerContainer.read(notificationsProvider.notifier).restore(
-                NotificationsState(
-                  notifications: serializedState.notificationState.notifications
-                          ?.toList() ??
-                      [],
-                  lastFetched:
-                      serializedState.notificationState.lastFetched,
-                ),
-              );
-        }
-
-        // next not at the beginning: bug fix (serialization)
-        await next(action);
-
-        await api.actions.settingsActions
-            .saveNoPass(providerContainer.read(settingsProvider).noPasswordSaving);
-      } catch (e) {
-        showSnackBar("Fehler beim Laden der gespeicherten Daten");
-        log("Failed to load data", error: e);
-        await next(action);
-      }
-    } else {
-      await next(action);
-    }
-
-    _popAll();
-  } else {
-    await next(action);
-  }
-  providerContainer.read(loginProvider.notifier).setLoggedIn(
-    username: action.payload.username,
-    keepLoading: action.payload.keepShowingLoadingIndicator,
-  );
-  final loggedInState = providerContainer.read(loginProvider);
-  providerContainer.read(isDemoProvider.notifier).state =
-      isDemoUser(url: loggedInState.url, username: loggedInState.username);
-  providerContainer.read(loginProvider.notifier).executeAfterLoginCallbacks();
-  if (!action.payload.offlineOnly) {
-    await providerContainer.read(dashboardProvider.notifier).load(true);
-    await providerContainer.read(notificationsProvider.notifier).load();
-    providerContainer
-        .read(settingsProvider.notifier)
-        .updateSubjectThemes(providerContainer.read(allSubjectsProvider));
   }
 }
 
@@ -435,9 +354,9 @@ Future<void> _start(
   ActionHandler next,
   Action<Uri?> action,
 ) async {
+  _reduxActions = api.actions;
   providerContainer.read(loginProvider.notifier).clearAfterLoginCallbacks();
   if (action.payload != null) {
-    await api.actions.setUrl(action.payload!.origin);
     providerContainer.read(loginProvider.notifier).setUrl(action.payload!.origin);
     final parameters = action.payload!.queryParameters;
     switch (parameters["semesterWechsel"]) {
@@ -463,56 +382,53 @@ Future<void> _start(
         if (parameters["resetmail"] == "true") {
           final email = parameters["email"];
           final token = parameters["token"];
-          await api.actions.routingActions.showPassReset(
-            ShowPassResetPayload(
-              (b) => b
-                ..token = token
-                ..email = email,
-            ),
-          );
+          unawaited(navigatorKey?.currentState?.pushNamed("/pass_reset"));
+          providerContainer.read(loginProvider.notifier).updatePassResetState(
+                PassResetState(email: email, token: token),
+              );
           return;
         }
         if (parameters["username"] != null) {
-          await api.actions.loginActions.setUsername(parameters["username"]!);
-          providerContainer.read(loginProvider.notifier).setUsername(parameters["username"]!);
+          providerContainer
+              .read(loginProvider.notifier)
+              .setUsername(parameters["username"]!);
         }
         if (parameters["redirect"] != null) {
           await redirectAfterLogin(
-              parameters["redirect"]!.replaceFirst("#", ""), api);
+              parameters["redirect"]!.replaceFirst("#", ""));
         }
       default:
         showSnackBar("Dieser Link konnte nicht geöffnet werden");
     }
-    await redirectAfterLogin(action.payload!.fragment, api);
+    await redirectAfterLogin(action.payload!.fragment);
   }
   await api.actions.load();
 }
 
-Future<void> redirectAfterLogin(String location,
-    MiddlewareApi<AppState, AppStateBuilder, AppActions> api) async {
+Future<void> redirectAfterLogin(String location) async {
   switch (location) {
     case "":
     case "dashboard/student":
       break;
     case "student/absences":
       providerContainer.read(loginProvider.notifier).addAfterLoginCallback(
-        api.actions.routingActions.showAbsences.call,
+        () => providerContainer.read(appRouterProvider).showAbsences(),
       );
     case "calendar/student":
       providerContainer.read(loginProvider.notifier).addAfterLoginCallback(
-        api.actions.routingActions.showCalendar.call,
+        () => providerContainer.read(appRouterProvider).showCalendar(),
       );
     case "student/subjects":
       providerContainer.read(loginProvider.notifier).addAfterLoginCallback(
-        api.actions.routingActions.showGrades.call,
+        () => providerContainer.read(appRouterProvider).showGrades(),
       );
     case "student/certificate":
       providerContainer.read(loginProvider.notifier).addAfterLoginCallback(
-        api.actions.routingActions.showCertificate.call,
+        () => providerContainer.read(appRouterProvider).showCertificate(),
       );
     case "message/list":
       providerContainer.read(loginProvider.notifier).addAfterLoginCallback(
-        api.actions.routingActions.showMessages.call,
+        () => providerContainer.read(appRouterProvider).showMessages(),
       );
     default:
       showSnackBar("Dieser Link konnte nicht geöffnet werden");

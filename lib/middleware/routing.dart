@@ -54,7 +54,6 @@ Future<void> _showRequestPassReset(
     MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
     ActionHandler next,
     Action<String> action) async {
-  await api.actions.setUrl(action.payload);
   providerContainer.read(loginProvider.notifier).setUrl(action.payload);
   unawaited(navigatorKey!.currentState!.pushNamed("/request_pass_reset"));
   await next(action);
