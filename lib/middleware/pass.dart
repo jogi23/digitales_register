@@ -30,7 +30,7 @@ Future<void> _setSavePass(
     Action<bool> action) async {
   await next(action);
   wrapper.safeMode = action.payload;
-  if (!api.state.loginState.loggedIn) return;
+  if (!providerContainer.read(loginProvider).loggedIn) return;
   if (!action.payload) {
     await api.actions.savePassActions.save();
   } else {

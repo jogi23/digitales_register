@@ -32,7 +32,7 @@ final _loginMiddleware =
 
 Future<void> _logout(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
     ActionHandler next, Action<LogoutPayload> action) async {
-  if (!api.state.settingsState.noPasswordSaving && action.payload.hard) {
+  if (!providerContainer.read(settingsProvider).noPasswordSaving && action.payload.hard) {
     await secureStorage.write(
       key: "login",
       value: json.encode(
@@ -45,7 +45,7 @@ Future<void> _logout(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
       ),
     );
   }
-  if (api.state.settingsState.deleteDataOnLogout && action.payload.hard) {
+  if (providerContainer.read(settingsProvider).deleteDataOnLogout && action.payload.hard) {
     deletedData = true;
     await api.actions.saveState();
   }
@@ -112,7 +112,7 @@ Future<void> _login(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
     logout: () => api.actions.loginActions.logout(
       LogoutPayload(
         (b) => b
-          ..hard = api.state.settingsState.noPasswordSaving
+          ..hard = providerContainer.read(settingsProvider).noPasswordSaving
           ..forced = true,
       ),
     ),
@@ -252,7 +252,7 @@ Future<void> _requestPassReset(
   // the api url DOES NOT contain /v2/ in the path. This is intentional.
   try {
     final dynamic result = (await (passDio ?? dio.Dio()).post<dynamic>(
-      "${api.state.url}/api/auth/resetPassword",
+      "${providerContainer.read(loginProvider).url}/api/auth/resetPassword",
       data: {
         "email": action.payload.email,
         "username": action.payload.user,
@@ -273,8 +273,9 @@ Future<void> _requestPassReset(
           );
     }
   } catch (e) {
-    if (await cannotConnectTo(api.state.url!)) {
-      final msg = "Keine Verbindung mit \"${api.state.url}\" möglich";
+    final loginUrl = providerContainer.read(loginProvider).url;
+    if (await cannotConnectTo(loginUrl!)) {
+      final msg = "Keine Verbindung mit \"$loginUrl\" möglich";
       await api.actions.loginActions.passResetFailed(msg);
       providerContainer.read(loginProvider.notifier).updatePassResetState(
             providerContainer.read(loginProvider).resetPassState.copyWith(failure: true, message: msg),
@@ -290,12 +291,13 @@ Future<void> _resetPass(
     ActionHandler next,
     Action<String> action) async {
   // the api url DOES NOT contain /v2/ in the path. This is intentional.
+  final resetState = providerContainer.read(loginProvider);
   final dynamic result = (await (passDio ?? dio.Dio()).post<dynamic>(
-    "${api.state.url}/api/auth/setNewPassword",
+    "${resetState.url}/api/auth/setNewPassword",
     data: {
       "username": "",
-      "token": api.state.loginState.resetPassState.token,
-      "email": api.state.loginState.resetPassState.email,
+      "token": resetState.resetPassState.token,
+      "email": resetState.resetPassState.email,
       "oldPassword": "",
       "newPassword": action.payload,
     },

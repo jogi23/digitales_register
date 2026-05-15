@@ -122,7 +122,7 @@ NextActionHandler _errorMiddleware(
               error += "\n\n$stackTrace";
             }
             error +=
-                "\n\nApp Version: $appVersion\nOS: ${Platform.operatingSystem}\nServer: ${api.state.url}";
+                "\n\nApp Version: $appVersion\nOS: ${Platform.operatingSystem}\nServer: ${providerContainer.read(loginProvider).url}";
             await navigatorKey?.currentState?.push(
               MaterialPageRoute<void>(
                 fullscreenDialog: true,
@@ -256,7 +256,7 @@ Future<void> _loggedIn(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
   }
   deletedData = false;
   final key = getStorageKey(action.payload.username, wrapper.loginAddress);
-  if (!api.state.loginState.loggedIn && !action.payload.secondaryOnlineLogin) {
+  if (!providerContainer.read(loginProvider).loggedIn && !action.payload.secondaryOnlineLogin) {
     log("loading state");
     final state = await _readFromStorage(key);
     if (state != null) {
@@ -355,8 +355,8 @@ NextActionHandler _saveStateMiddleware(
         MiddlewareApi<AppState, AppStateBuilder, AppActions> api) =>
     (ActionHandler next) => (Action action) async {
           await next(action);
-          if (api.state.loginState.loggedIn &&
-              api.state.loginState.username != null) {
+          final loginState = providerContainer.read(loginProvider);
+          if (loginState.loggedIn && loginState.username != null) {
             _stateToSave = api.state;
             final bool immediately =
                 action.name == AppActionsNames.saveState.name;

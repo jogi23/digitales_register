@@ -27,6 +27,7 @@ import 'package:dr/app_state.dart';
 import 'package:dr/main.dart';
 import 'package:dr/middleware/middleware.dart';
 import 'package:dr/providers/provider_container.dart' as pc;
+import 'package:dr/providers/login_provider.dart' hide LoginState;
 import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/reducer/reducer.dart';
 import 'package:dr/serializers.dart';
@@ -91,6 +92,7 @@ void main() {
       const username = "test_username";
       final container = _makeContainer();
       addTearDown(container.dispose);
+      container.read(loginProvider.notifier).setLoggedIn(username: username);
       final store = Store<AppState, AppStateBuilder, AppActions>(
         appReducerBuilder.build(),
         AppState((b) => b.loginState
@@ -120,6 +122,7 @@ void main() {
     const username = "test_username2";
     final container = _makeContainer();
     addTearDown(container.dispose);
+    container.read(loginProvider.notifier).setLoggedIn(username: username);
     final store = Store<AppState, AppStateBuilder, AppActions>(
       appReducerBuilder.build(),
       AppState((b) => b.loginState
@@ -147,6 +150,7 @@ void main() {
       settings: SettingsState((b) => b.noDataSaving = true),
     );
     addTearDown(container.dispose);
+    container.read(loginProvider.notifier).setLoggedIn(username: username);
     final store = Store<AppState, AppStateBuilder, AppActions>(
       appReducerBuilder.build(),
       AppState(
@@ -176,8 +180,11 @@ void main() {
   test('state is deleted on logout when state saving is disabled', () async {
     navigatorKey = GlobalKey();
     const username = "test_username3";
-    final container = _makeContainer();
+    final container = _makeContainer(
+      settings: SettingsState((b) => b.deleteDataOnLogout = true),
+    );
     addTearDown(container.dispose);
+    container.read(loginProvider.notifier).setLoggedIn(username: username);
     final store = Store<AppState, AppStateBuilder, AppActions>(
       appReducerBuilder.build(),
       AppState(
@@ -221,6 +228,7 @@ void main() {
     const username = "test_username4";
     final container = _makeContainer();
     addTearDown(container.dispose);
+    container.read(loginProvider.notifier).setLoggedIn(username: username);
     final store = Store<AppState, AppStateBuilder, AppActions>(
       appReducerBuilder.build(),
       AppState(
