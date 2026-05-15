@@ -49,6 +49,8 @@ class NotificationsNotifier extends Notifier<NotificationsState> {
     state = const NotificationsState();
   }
 
+  void restore(NotificationsState saved) => state = saved;
+
   Future<void> load() async {
     if (ref.read(noInternetProvider)) return;
     final dynamic data = await wrapper.send("api/notification/unread");

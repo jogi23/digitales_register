@@ -34,6 +34,8 @@ class MessagesNotifier extends Notifier<MessagesState> {
     state = MessagesState();
   }
 
+  void restore(MessagesState saved) => state = saved;
+
   Future<void> load() async {
     if (wrapper.noInternet) return;
     final dynamic response = await wrapper.send("api/message/getMyMessages");

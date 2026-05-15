@@ -269,14 +269,6 @@ Future<void> _loggedIn(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
           final restoredSettings = serializedState.rebuild(
             (b) => b.noPasswordSaving = currentSettings.noPasswordSaving,
           );
-          await api.actions.mountAppState(
-            api.state.rebuild(
-              (b) => b
-                ..settingsState.replace(
-                  restoredSettings,
-                ),
-            ),
-          );
           providerContainer
               .read(settingsProvider.notifier)
               .load(restoredSettings);
@@ -284,27 +276,33 @@ Future<void> _loggedIn(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
           final restoredSettings = serializedState.settingsState.rebuild(
             (b) => b.noPasswordSaving = currentSettings.noPasswordSaving,
           );
-          final currentState = api.state;
-          await api.actions.mountAppState(
-            serializedState.rebuild(
-              (b) => b
-                ..loginState.replace(currentState.loginState)
-                ..noInternet = currentState.noInternet
-                ..config = currentState.config?.toBuilder()
-                ..gradesState.semester.replace(
-                      currentState.gradesState.semester == Semester.all
-                          ? serializedState.gradesState.semester
-                          : currentState.gradesState.semester,
-                    )
-                ..settingsState.replace(restoredSettings),
-            ),
-          );
           providerContainer
               .read(settingsProvider.notifier)
               .load(restoredSettings);
           providerContainer
               .read(gradesProvider.notifier)
               .restore(serializedState.gradesState);
+          providerContainer
+              .read(absencesProvider.notifier)
+              .restore(serializedState.absencesState);
+          providerContainer
+              .read(calendarProvider.notifier)
+              .restore(serializedState.calendarState);
+          providerContainer
+              .read(messagesProvider.notifier)
+              .restore(serializedState.messagesState);
+          providerContainer
+              .read(profileProvider.notifier)
+              .restore(serializedState.profileState);
+          providerContainer.read(notificationsProvider.notifier).restore(
+                NotificationsState(
+                  notifications: serializedState.notificationState.notifications
+                          ?.toList() ??
+                      [],
+                  lastFetched:
+                      serializedState.notificationState.lastFetched,
+                ),
+              );
         }
 
         // next not at the beginning: bug fix (serialization)
@@ -329,8 +327,9 @@ Future<void> _loggedIn(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
     username: action.payload.username,
     keepLoading: action.payload.keepShowingLoadingIndicator,
   );
+  final loggedInState = providerContainer.read(loginProvider);
   providerContainer.read(isDemoProvider.notifier).state =
-      api.state.isDemo;
+      isDemoUser(url: loggedInState.url, username: loggedInState.username);
   providerContainer.read(loginProvider.notifier).executeAfterLoginCallbacks();
   if (!action.payload.offlineOnly) {
     await providerContainer.read(dashboardProvider.notifier).load(true);
@@ -370,7 +369,7 @@ NextActionHandler _saveStateMiddleware(
               final state = _stateToSave;
               final settings = providerContainer.read(settingsProvider);
               final user = getStorageKey(
-                state.loginState.username,
+                providerContainer.read(loginProvider).username,
                 wrapper.loginAddress,
               );
               _saveUnderway = false;

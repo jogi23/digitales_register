@@ -32,6 +32,8 @@ class AbsencesNotifier extends Notifier<AbsencesState> {
     state = AbsencesState();
   }
 
+  void restore(AbsencesState saved) => state = saved;
+
   Future<void> load() async {
     if (ref.read(noInternetProvider)) return;
     final dynamic response =

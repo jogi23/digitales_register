@@ -36,6 +36,8 @@ class CalendarNotifier extends Notifier<CalendarState> {
     state = CalendarState();
   }
 
+  void restore(CalendarState saved) => state = saved;
+
   Future<void> load(UtcDateTime monday) async {
     if (ref.read(noInternetProvider)) return;
     final dynamic data = await wrapper.send(

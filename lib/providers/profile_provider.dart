@@ -30,6 +30,8 @@ class ProfileNotifier extends Notifier<ProfileState> {
     state = ProfileState();
   }
 
+  void restore(ProfileState saved) => state = saved;
+
   Future<void> load() async {
     if (ref.read(noInternetProvider)) return;
     final dynamic result = await wrapper.send("api/profile/get");
