@@ -24,13 +24,11 @@ import 'dart:io';
 import 'package:built_redux/built_redux.dart';
 import 'package:dio/dio.dart' as dio;
 import 'package:dr/actions/app_actions.dart';
-import 'package:dr/actions/grades_actions.dart';
 import 'package:dr/actions/login_actions.dart';
 import 'package:dr/actions/routing_actions.dart';
 import 'package:dr/actions/save_pass_actions.dart';
 import 'package:dr/actions/settings_actions.dart';
 import 'package:dr/app_state.dart';
-import 'package:dr/data.dart';
 import 'package:dr/main.dart' hide scaffoldMessengerKey, showSnackBar;
 import 'package:dr/providers/absences_provider.dart';
 import 'package:dr/providers/all_subjects_provider.dart';
@@ -52,14 +50,11 @@ import 'package:dr/serializers.dart';
 import 'package:dr/services/app_router.dart';
 import 'package:dr/ui/dialog.dart';
 import 'package:dr/ui/snack_bar.dart';
-import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
 import 'package:dr/wrapper.dart';
 import 'package:flutter/material.dart' hide Action, Notification;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:intl/intl.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:mutex/mutex.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -67,16 +62,9 @@ import 'package:url_launcher/url_launcher.dart';
 
 export 'package:dr/pages.dart';
 
-part 'absences.dart';
-part 'calendar.dart';
-part 'grades.dart';
 part 'login.dart';
-part 'messages.dart';
-part 'notifications.dart';
 part 'pass.dart';
-part 'profile.dart';
 part 'routing.dart';
-part 'settings.dart';
 
 late FlutterSecureStorage secureStorage;
 
@@ -97,11 +85,9 @@ List<Middleware<AppState, AppStateBuilder, AppActions>> middleware({
             ..add(AppActionsNames.load, _load)
             ..add(AppActionsNames.start, _start)
             ..add(LoginActionsNames.loggedIn, _loggedIn)
-            ..combine(_gradesMiddleware)
             ..combine(_loginMiddleware)
             ..combine(_passMiddleware)
-            ..combine(routingMiddleware)
-            ..combine(_settingsMiddleware))
+            ..combine(routingMiddleware))
           .build(),
     ];
 
