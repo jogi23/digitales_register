@@ -22,6 +22,8 @@ class NetworkProtocolNotifier extends Notifier<List<NetworkProtocolItem>> {
   @override
   List<NetworkProtocolItem> build() => [];
 
+  void reset() => state = [];
+
   void add(NetworkProtocolItem item) {
     state = [...state, item];
   }

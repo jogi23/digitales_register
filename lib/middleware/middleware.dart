@@ -35,7 +35,9 @@ import 'package:dr/main.dart' hide scaffoldMessengerKey, showSnackBar;
 import 'package:dr/providers/absences_provider.dart';
 import 'package:dr/providers/all_subjects_provider.dart';
 import 'package:dr/providers/calendar_provider.dart';
+import 'package:dr/providers/certificate_provider.dart';
 import 'package:dr/providers/config_provider.dart';
+import 'package:dr/providers/dashboard_error_provider.dart';
 import 'package:dr/providers/dashboard_provider.dart';
 import 'package:dr/providers/grades_provider.dart';
 import 'package:dr/providers/login_provider.dart';
@@ -223,9 +225,9 @@ Future<void> _load(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
   );
   await api.actions.loginActions.setAvailableAccounts(otherAccounts);
   providerContainer.read(loginProvider.notifier).setOtherAccounts(otherAccounts);
-  if ((api.state.url != null && api.state.url != url) ||
-      (api.state.loginState.username != null &&
-          api.state.loginState.username != user)) {
+  final currentLogin = providerContainer.read(loginProvider);
+  if ((currentLogin.url != null && currentLogin.url != url) ||
+      (currentLogin.username != null && currentLogin.username != user)) {
     // TODO: Figure out when exactly we'd hit this code path and how to handle it better.
     await api.actions.savePassActions.delete();
     await api.actions.routingActions.showLogin();

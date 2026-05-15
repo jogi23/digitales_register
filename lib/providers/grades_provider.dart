@@ -42,6 +42,8 @@ class GradesNotifier extends Notifier<GradesState> {
   @override
   GradesState build() => GradesState();
 
+  void reset() => state = GradesState();
+
   void restore(GradesState saved) {
     state = saved.rebuild((b) => b
       ..loading = false

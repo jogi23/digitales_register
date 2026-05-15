@@ -30,6 +30,20 @@ final _loginMiddleware =
       ..add(LoginActionsNames.addAccount, _addAccount)
       ..add(LoginActionsNames.selectAccount, _selectAccount);
 
+void _resetAllProviders() {
+  providerContainer.read(dashboardProvider.notifier).reset();
+  providerContainer.read(notificationsProvider.notifier).reset();
+  providerContainer.read(absencesProvider.notifier).reset();
+  providerContainer.read(profileProvider.notifier).reset();
+  providerContainer.read(calendarProvider.notifier).reset();
+  providerContainer.read(messagesProvider.notifier).reset();
+  providerContainer.read(gradesProvider.notifier).reset();
+  providerContainer.read(certificateProvider.notifier).reset();
+  providerContainer.read(networkProtocolProvider.notifier).reset();
+  providerContainer.read(configProvider.notifier).state = null;
+  providerContainer.read(dashboardErrorProvider.notifier).state = null;
+}
+
 Future<void> _logout(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
     ActionHandler next, Action<LogoutPayload> action) async {
   if (!providerContainer.read(settingsProvider).noPasswordSaving && action.payload.hard) {
@@ -58,7 +72,7 @@ Future<void> _logout(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
   providerContainer.read(isDemoProvider.notifier).state = false;
   if (action.payload.hard) {
     wrapper = Wrapper();
-    await api.actions.mountAppState(AppState());
+    _resetAllProviders();
     await api.actions.load();
   }
 }
@@ -348,7 +362,8 @@ Future<void> _addAccount(
       ),
     );
   }
-  await api.actions.mountAppState(AppState());
+  providerContainer.read(loginProvider.notifier).logout(hard: true);
+  _resetAllProviders();
   await api.actions.load();
 }
 
@@ -374,13 +389,8 @@ Future<void> _selectAccount(
   login["pass"] = selected["pass"];
   login["url"] = selected["url"];
   await secureStorage.write(key: "login", value: json.encode(login));
-  await api.actions.mountAppState(AppState());
-  providerContainer.read(dashboardProvider.notifier).reset();
-  providerContainer.read(notificationsProvider.notifier).reset();
-  providerContainer.read(absencesProvider.notifier).reset();
-  providerContainer.read(profileProvider.notifier).reset();
-  providerContainer.read(calendarProvider.notifier).reset();
-  providerContainer.read(messagesProvider.notifier).reset();
+  providerContainer.read(loginProvider.notifier).logout(hard: true);
+  _resetAllProviders();
   await api.actions.load();
 }
 

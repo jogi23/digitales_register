@@ -188,7 +188,7 @@ class LoginNotifier extends Notifier<LoginState> {
   // Called by middleware (dual-write) to apply logout state to Riverpod.
   void logout({required bool hard}) {
     if (hard) {
-      state = state.copyWith(loggedIn: false, username: null);
+      state = state.copyWith(loggedIn: false, username: null, url: null);
     }
   }
 

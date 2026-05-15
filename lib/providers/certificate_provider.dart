@@ -37,6 +37,8 @@ class CertificateNotifier extends Notifier<CertificateState> {
   @override
   CertificateState build() => const CertificateState();
 
+  void reset() => state = const CertificateState();
+
   Future<void> load() async {
     if (ref.read(noInternetProvider)) return;
     final dynamic response =
