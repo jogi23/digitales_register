@@ -17,18 +17,14 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:built_collection/built_collection.dart';
-import 'package:built_redux/built_redux.dart';
-import 'package:dr/actions/app_actions.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/container/grades_chart_container.dart';
 import 'package:dr/data.dart';
 import 'package:dr/providers/grades_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
-import 'package:dr/reducer/reducer.dart';
 import 'package:dr/ui/grades_chart_page.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_built_redux/flutter_built_redux.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -151,13 +147,7 @@ void main() {
     (tester) async {
       final appState = _gradesState;
       final widget = _wrapWithScope(
-        ReduxProvider(
-        store: Store<AppState, AppStateBuilder, AppActions>(
-          appReducerBuilder.build(),
-          appState,
-          AppActions(),
-        ),
-        child: MaterialApp(
+        MaterialApp(
           localizationsDelegates: const [
             GlobalCupertinoLocalizations.delegate,
             GlobalMaterialLocalizations.delegate,
@@ -175,8 +165,7 @@ void main() {
             primarySwatch: Colors.deepOrange,
           ),
         ),
-      ),
-      appState,
+        appState,
       );
 
       await tester.pumpWidget(widget);
@@ -223,27 +212,20 @@ void main() {
     (tester) async {
       final appState = _gradesState;
       final widget = _wrapWithScope(
-        ReduxProvider(
-          store: Store<AppState, AppStateBuilder, AppActions>(
-            appReducerBuilder.build(),
-            appState,
-            AppActions(),
+        MaterialApp(
+          localizationsDelegates: const [
+            GlobalCupertinoLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale("de"),
+          ],
+          home: const Material(
+            child: GradesChartPage(),
           ),
-          child: MaterialApp(
-            localizationsDelegates: const [
-              GlobalCupertinoLocalizations.delegate,
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-            ],
-            supportedLocales: const [
-              Locale("de"),
-            ],
-            home: const Material(
-              child: GradesChartPage(),
-            ),
-            theme: ThemeData(
-              primarySwatch: Colors.deepOrange,
-            ),
+          theme: ThemeData(
+            primarySwatch: Colors.deepOrange,
           ),
         ),
         appState,
@@ -270,27 +252,20 @@ void main() {
     (tester) async {
       final appState = _gradesState;
       final widget = _wrapWithScope(
-        ReduxProvider(
-          store: Store<AppState, AppStateBuilder, AppActions>(
-            appReducerBuilder.build(),
-            appState,
-            AppActions(),
+        MaterialApp(
+          localizationsDelegates: const [
+            GlobalCupertinoLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale("de"),
+          ],
+          home: const Material(
+            child: GradesChartPage(),
           ),
-          child: MaterialApp(
-            localizationsDelegates: const [
-              GlobalCupertinoLocalizations.delegate,
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-            ],
-            supportedLocales: const [
-              Locale("de"),
-            ],
-            home: const Material(
-              child: GradesChartPage(),
-            ),
-            theme: ThemeData(
-              primarySwatch: Colors.deepOrange,
-            ),
+          theme: ThemeData(
+            primarySwatch: Colors.deepOrange,
           ),
         ),
         appState,

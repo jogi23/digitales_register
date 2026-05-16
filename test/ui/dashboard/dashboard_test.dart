@@ -19,8 +19,6 @@
 import 'dart:core';
 
 import 'package:built_collection/built_collection.dart';
-import 'package:built_redux/built_redux.dart';
-import 'package:dr/actions/app_actions.dart';
 import 'package:dr/app_state.dart' hide LoginState;
 import 'package:dr/container/days_container.dart';
 import 'package:dr/data.dart';
@@ -31,14 +29,12 @@ import 'package:dr/providers/login_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/providers/provider_container.dart' as pc;
 import 'package:dr/providers/settings_provider.dart';
-import 'package:dr/reducer/reducer.dart';
 import 'package:dr/ui/days.dart';
 import 'package:dr/ui/no_internet.dart';
 import 'package:dr/ui/sidebar.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/wrapper.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_built_redux/flutter_built_redux.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -92,14 +88,7 @@ Future<void> main() async {
     }
 
     final widget = ProviderScope(
-      child: ReduxProvider(
-        store: Store<AppState, AppStateBuilder, AppActions>(
-          ReducerBuilder<AppState, AppStateBuilder>().build(),
-          AppState(),
-          AppActions(),
-        ),
-        child: MaterialApp(home: DaysContainer()),
-      ),
+      child: MaterialApp(home: DaysContainer()),
     );
     await tester.pumpWidget(
       Center(
@@ -135,14 +124,7 @@ Future<void> main() async {
       overrides: [
         noInternetProvider.overrideWith(_TrueNoInternetNotifier.new),
       ],
-      child: ReduxProvider(
-        store: Store<AppState, AppStateBuilder, AppActions>(
-          ReducerBuilder<AppState, AppStateBuilder>().build(),
-          AppState((b) => b.noInternet = true),
-          AppActions(),
-        ),
-        child: MaterialApp(home: DaysContainer()),
-      ),
+      child: MaterialApp(home: DaysContainer()),
     );
     await tester.pumpWidget(widget);
     expect(find.text("Keine Verbindung"), findsNWidgets(2));
@@ -160,19 +142,10 @@ Future<void> main() async {
           () => _TestLoginNotifier(const LoginState(username: longName)),
         ),
       ],
-      child: ReduxProvider(
-        store: Store<AppState, AppStateBuilder, AppActions>(
-          ReducerBuilder<AppState, AppStateBuilder>().build(),
-          AppState(
-            (b) => b..loginState.username = longName,
-          ),
-          AppActions(),
-        ),
-        child: MaterialApp(
-          home: DaysContainer(),
-          theme: ThemeData(
-            primarySwatch: Colors.deepOrange,
-          ),
+      child: MaterialApp(
+        home: DaysContainer(),
+        theme: ThemeData(
+          primarySwatch: Colors.deepOrange,
         ),
       ),
     );
@@ -190,17 +163,10 @@ Future<void> main() async {
           ),
         ),
       ],
-      child: ReduxProvider(
-        store: Store<AppState, AppStateBuilder, AppActions>(
-          ReducerBuilder<AppState, AppStateBuilder>().build(),
-          AppState(),
-          AppActions(),
-        ),
-        child: MaterialApp(
-          home: DaysContainer(),
-          theme: ThemeData(
-            primarySwatch: Colors.deepOrange,
-          ),
+      child: MaterialApp(
+        home: DaysContainer(),
+        theme: ThemeData(
+          primarySwatch: Colors.deepOrange,
         ),
       ),
     );
@@ -236,17 +202,10 @@ Future<void> main() async {
           ),
         ),
       ],
-      child: ReduxProvider(
-        store: Store<AppState, AppStateBuilder, AppActions>(
-          ReducerBuilder<AppState, AppStateBuilder>().build(),
-          AppState(),
-          AppActions(),
-        ),
-        child: MaterialApp(
-          home: DaysContainer(),
-          theme: ThemeData(
-            primarySwatch: Colors.deepOrange,
-          ),
+      child: MaterialApp(
+        home: DaysContainer(),
+        theme: ThemeData(
+          primarySwatch: Colors.deepOrange,
         ),
       ),
     );
@@ -256,7 +215,7 @@ Future<void> main() async {
     expect(find.byType(LinearProgressIndicator), findsOneWidget);
     expect(find.byType(DayWidget), findsOneWidget);
     await expectLater(
-        find.byType(ReduxProvider), matchesGoldenFile("loading_not_empty.png"));
+        find.byType(MaterialApp), matchesGoldenFile("loading_not_empty.png"));
   });
 
   testGoldens('Multiple Entries', (WidgetTester tester) async {
@@ -366,17 +325,10 @@ Future<void> main() async {
           ),
         ),
       ],
-      child: ReduxProvider(
-        store: Store<AppState, AppStateBuilder, AppActions>(
-          ReducerBuilder<AppState, AppStateBuilder>().build(),
-          AppState(),
-          AppActions(),
-        ),
-        child: MaterialApp(
-          home: DaysContainer(),
-          theme: ThemeData(
-              primarySwatch: Colors.teal, brightness: Brightness.dark),
-        ),
+      child: MaterialApp(
+        home: DaysContainer(),
+        theme: ThemeData(
+            primarySwatch: Colors.teal, brightness: Brightness.dark),
       ),
     );
     await tester.pumpWidget(widget);
@@ -411,17 +363,10 @@ Future<void> main() async {
           ),
         ),
       ],
-      child: ReduxProvider(
-        store: Store<AppState, AppStateBuilder, AppActions>(
-          ReducerBuilder<AppState, AppStateBuilder>().build(),
-          AppState(),
-          AppActions(),
-        ),
-        child: MaterialApp(
-          home: DaysContainer(),
-          theme: ThemeData(
-              primarySwatch: Colors.teal, brightness: Brightness.dark),
-        ),
+      child: MaterialApp(
+        home: DaysContainer(),
+        theme: ThemeData(
+            primarySwatch: Colors.teal, brightness: Brightness.dark),
       ),
     );
     await tester.pumpWidget(widget);
@@ -440,19 +385,10 @@ Future<void> main() async {
           () => _TestLoginNotifier(const LoginState(username: username)),
         ),
       ],
-      child: ReduxProvider(
-        store: Store<AppState, AppStateBuilder, AppActions>(
-          ReducerBuilder<AppState, AppStateBuilder>().build(),
-          AppState(
-            (b) => b.loginState.username = username,
-          ),
-          AppActions(),
-        ),
-        child: MaterialApp(
-          home: DaysContainer(),
-          theme: ThemeData(
-              primarySwatch: Colors.teal, brightness: Brightness.dark),
-        ),
+      child: MaterialApp(
+        home: DaysContainer(),
+        theme: ThemeData(
+            primarySwatch: Colors.teal, brightness: Brightness.dark),
       ),
     );
     await tester.pumpWidget(widget);
@@ -476,17 +412,10 @@ Future<void> main() async {
           ),
         ),
       ],
-      child: ReduxProvider(
-        store: Store<AppState, AppStateBuilder, AppActions>(
-          ReducerBuilder<AppState, AppStateBuilder>().build(),
-          AppState(),
-          AppActions(),
-        ),
-        child: MaterialApp(
-          home: DaysContainer(),
-          theme: ThemeData(
-              primarySwatch: Colors.teal, brightness: Brightness.dark),
-        ),
+      child: MaterialApp(
+        home: DaysContainer(),
+        theme: ThemeData(
+            primarySwatch: Colors.teal, brightness: Brightness.dark),
       ),
     );
     await tester.pumpWidget(widget);
@@ -530,16 +459,9 @@ Future<void> main() async {
           ),
         ),
       ],
-      child: ReduxProvider(
-        store: Store<AppState, AppStateBuilder, AppActions>(
-          appReducerBuilder.build(),
-          AppState(),
-          AppActions(),
-        ),
-        child: MaterialApp(
-          home: DaysContainer(),
-          theme: ThemeData(primarySwatch: Colors.deepOrange),
-        ),
+      child: MaterialApp(
+        home: DaysContainer(),
+        theme: ThemeData(primarySwatch: Colors.deepOrange),
       ),
     );
     await tester.pumpWidget(widget);
@@ -602,16 +524,9 @@ Future<void> main() async {
           ),
         ),
       ],
-      child: ReduxProvider(
-        store: Store<AppState, AppStateBuilder, AppActions>(
-          appReducerBuilder.build(),
-          AppState(),
-          AppActions(),
-        ),
-        child: MaterialApp(
-          home: DaysContainer(),
-          theme: ThemeData(primarySwatch: Colors.deepOrange),
-        ),
+      child: MaterialApp(
+        home: DaysContainer(),
+        theme: ThemeData(primarySwatch: Colors.deepOrange),
       ),
     );
     await tester.pumpWidget(widget);
@@ -674,16 +589,9 @@ Future<void> main() async {
           ),
         ),
       ],
-      child: ReduxProvider(
-        store: Store<AppState, AppStateBuilder, AppActions>(
-          appReducerBuilder.build(),
-          AppState(),
-          AppActions(),
-        ),
-        child: MaterialApp(
-          home: DaysContainer(),
-          theme: ThemeData(primarySwatch: Colors.deepOrange),
-        ),
+      child: MaterialApp(
+        home: DaysContainer(),
+        theme: ThemeData(primarySwatch: Colors.deepOrange),
       ),
     );
     await tester.pumpWidget(widget);
@@ -786,16 +694,9 @@ Future<void> main() async {
           ),
         ),
       ],
-      child: ReduxProvider(
-        store: Store<AppState, AppStateBuilder, AppActions>(
-          ReducerBuilder<AppState, AppStateBuilder>().build(),
-          AppState(),
-          AppActions(),
-        ),
-        child: MaterialApp(
-          home: DaysContainer(),
-          theme: ThemeData(primarySwatch: Colors.deepOrange),
-        ),
+      child: MaterialApp(
+        home: DaysContainer(),
+        theme: ThemeData(primarySwatch: Colors.deepOrange),
       ),
     );
     await tester.pumpWidget(widget);
@@ -844,23 +745,9 @@ Future<void> main() async {
           ),
         ),
       ],
-      child: ReduxProvider(
-        store: Store<AppState, AppStateBuilder, AppActions>(
-          ReducerBuilder<AppState, AppStateBuilder>().build(),
-          AppState(
-            (b) => b.settingsState
-              ..dashboardColorBorders = false
-              ..subjectThemes = MapBuilder<String, SubjectTheme>({
-                'Mathematik': SubjectTheme(
-                    (b) => b..thick = 2..color = Colors.blue.value),
-              }),
-          ),
-          AppActions(),
-        ),
-        child: MaterialApp(
-          home: DaysContainer(),
-          theme: ThemeData(primarySwatch: Colors.deepOrange),
-        ),
+      child: MaterialApp(
+        home: DaysContainer(),
+        theme: ThemeData(primarySwatch: Colors.deepOrange),
       ),
     );
     await tester.pumpWidget(widget);
@@ -911,21 +798,12 @@ Future<void> main() async {
     );
     pc.providerContainer = container;
     addTearDown(container.dispose);
-    final store = Store<AppState, AppStateBuilder, AppActions>(
-      appReducerBuilder.build(),
-      AppState(),
-      AppActions(),
-      middleware: middleware(includeErrorMiddleware: false),
-    );
     final widget = UncontrolledProviderScope(
       container: container,
-      child: ReduxProvider(
-        store: store,
-        child: MaterialApp(
-          scaffoldMessengerKey: scaffoldMessengerKey,
-          home: DaysContainer(),
-          theme: ThemeData(primarySwatch: Colors.deepOrange),
-        ),
+      child: MaterialApp(
+        scaffoldMessengerKey: scaffoldMessengerKey,
+        home: DaysContainer(),
+        theme: ThemeData(primarySwatch: Colors.deepOrange),
       ),
     );
     wrapper = MockWrapper();

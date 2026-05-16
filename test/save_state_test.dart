@@ -20,15 +20,12 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 
-import 'package:built_redux/built_redux.dart';
-import 'package:dr/actions/app_actions.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/main.dart';
 import 'package:dr/middleware/middleware.dart';
 import 'package:dr/providers/provider_container.dart' as pc;
 import 'package:dr/providers/login_provider.dart' hide LoginState;
 import 'package:dr/providers/settings_provider.dart';
-import 'package:dr/reducer/reducer.dart';
 import 'package:dr/serializers.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -92,16 +89,8 @@ void main() {
       final container = _makeContainer();
       addTearDown(container.dispose);
       container.read(loginProvider.notifier).setLoggedIn(username: username);
-      final store = Store<AppState, AppStateBuilder, AppActions>(
-        appReducerBuilder.build(),
-        AppState((b) => b.loginState
-          ..loggedIn = true
-          ..username = username),
-        AppActions(),
-        middleware: middleware(includeErrorMiddleware: false),
-      );
-      // dispatch any action to trigger a state save
-      await store.actions.setUrl("abc");
+      // trigger a deferred state save
+      unawaited(triggerDeferredSaveState());
       // saving the state is throttled by five seconds
       async.elapse(const Duration(seconds: 1));
 
@@ -122,16 +111,8 @@ void main() {
     final container = _makeContainer();
     addTearDown(container.dispose);
     container.read(loginProvider.notifier).setLoggedIn(username: username);
-    final store = Store<AppState, AppStateBuilder, AppActions>(
-      appReducerBuilder.build(),
-      AppState((b) => b.loginState
-        ..loggedIn = true
-        ..username = username),
-      AppActions(),
-      middleware: middleware(includeErrorMiddleware: false),
-    );
 
-    await store.actions.saveState();
+    await saveStateImmediately();
 
     // the state should be saved immediately
     expect(
@@ -150,21 +131,8 @@ void main() {
     );
     addTearDown(container.dispose);
     container.read(loginProvider.notifier).setLoggedIn(username: username);
-    final store = Store<AppState, AppStateBuilder, AppActions>(
-      appReducerBuilder.build(),
-      AppState(
-        (b) {
-          b.loginState
-            ..loggedIn = true
-            ..username = username;
-          b.settingsState.noDataSaving = true;
-        },
-      ),
-      AppActions(),
-      middleware: middleware(includeErrorMiddleware: false),
-    );
 
-    await store.actions.saveState();
+    await saveStateImmediately();
 
     expect(
       await storageHelper.exists(username),
@@ -184,21 +152,8 @@ void main() {
     );
     addTearDown(container.dispose);
     container.read(loginProvider.notifier).setLoggedIn(username: username);
-    final store = Store<AppState, AppStateBuilder, AppActions>(
-      appReducerBuilder.build(),
-      AppState(
-        (b) {
-          b.loginState
-            ..loggedIn = true
-            ..username = username;
-          b.settingsState.deleteDataOnLogout = true;
-        },
-      ),
-      AppActions(),
-      middleware: middleware(includeErrorMiddleware: false),
-    );
 
-    await store.actions.saveState();
+    await saveStateImmediately();
 
     // the state should be saved immediately
     expect(
@@ -211,7 +166,7 @@ void main() {
             json.decode((await storageHelper.read(username))!) as Object),
         const TypeMatcher<AppState>());
     deletedData = true;
-    await store.actions.saveState();
+    await saveStateImmediately();
 
     expect(
         serializers.deserialize(
@@ -223,23 +178,10 @@ void main() {
     final container = _makeContainer();
     addTearDown(container.dispose);
     container.read(loginProvider.notifier).setLoggedIn(username: username);
-    final store = Store<AppState, AppStateBuilder, AppActions>(
-      appReducerBuilder.build(),
-      AppState(
-        (b) {
-          b.loginState
-            ..loggedIn = true
-            ..username = username;
-          b.settingsState.noDataSaving = false;
-        },
-      ),
-      AppActions(),
-      middleware: middleware(includeErrorMiddleware: false),
-    );
     container.read(settingsProvider.notifier).onSaveState =
-        () => unawaited(store.actions.saveState());
+        () => unawaited(saveStateImmediately());
 
-    await store.actions.saveState();
+    await saveStateImmediately();
 
     // the state should be saved immediately
     expect(

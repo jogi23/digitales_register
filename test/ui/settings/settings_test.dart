@@ -17,17 +17,13 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:built_collection/built_collection.dart';
-import 'package:built_redux/built_redux.dart';
-import 'package:dr/actions/app_actions.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/container/settings_page.dart';
 import 'package:dr/providers/provider_container.dart' as pc;
 import 'package:dr/providers/settings_provider.dart';
-import 'package:dr/reducer/reducer.dart';
 import 'package:dr/ui/dialog.dart';
 import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_built_redux/flutter_built_redux.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
@@ -44,7 +40,6 @@ class _TestSettingsNotifier extends SettingsNotifier {
 Future<ProviderContainer> _pumpSettingsPage(
   WidgetTester tester, {
   SettingsState? settings,
-  AppState? appState,
 }) async {
   final container = ProviderContainer(
     overrides: [
@@ -54,18 +49,10 @@ Future<ProviderContainer> _pumpSettingsPage(
     ],
   );
   pc.providerContainer = container;
-  final store = Store<AppState, AppStateBuilder, AppActions>(
-    appReducerBuilder.build(),
-    appState ?? AppState(),
-    AppActions(),
-  );
   final widget = UncontrolledProviderScope(
     container: container,
-    child: ReduxProvider(
-      store: store,
-      child: MaterialApp(
-        home: SettingsPageContainer(),
-      ),
+    child: MaterialApp(
+      home: SettingsPageContainer(),
     ),
   );
   await tester.pumpWidget(

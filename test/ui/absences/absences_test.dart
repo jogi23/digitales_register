@@ -17,16 +17,12 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:built_collection/built_collection.dart';
-import 'package:built_redux/built_redux.dart';
-import 'package:dr/actions/app_actions.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/container/absences_page_container.dart';
 import 'package:dr/data.dart';
 import 'package:dr/providers/absences_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
-import 'package:dr/reducer/reducer.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_built_redux/flutter_built_redux.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -49,36 +45,23 @@ Widget _buildTestWidget({required AbsencesState initialState}) {
       ),
       noInternetProvider.overrideWith(NoInternetNotifier.new),
     ],
-    child: ReduxProvider(
-      store: Store<AppState, AppStateBuilder, AppActions>(
-        ReducerBuilder<AppState, AppStateBuilder>().build(),
-        AppState(),
-        AppActions(),
-      ),
-      child: const MaterialApp(
-        supportedLocales: [
-          Locale('de', 'DE'),
-        ],
-        localizationsDelegates: [
-          GlobalCupertinoLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-        ],
-        home: AbsencesPageContainer(),
-      ),
+    child: const MaterialApp(
+      supportedLocales: [
+        Locale('de', 'DE'),
+      ],
+      localizationsDelegates: [
+        GlobalCupertinoLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ],
+      home: AbsencesPageContainer(),
     ),
   );
 }
 
 void main() {
   testGoldens('simple absences', (WidgetTester tester) async {
-    final store = Store<AppState, AppStateBuilder, AppActions>(
-      appReducerBuilder.build(),
-      AppState(),
-      AppActions(),
-    );
-    await store.actions.absencesActions.loaded(absencesJson);
-    final parsedState = store.state.absencesState;
+    final parsedState = parseAbsencesFromJson(absencesJson);
 
     final widget = _buildTestWidget(initialState: parsedState);
     await tester.pumpWidget(widget);

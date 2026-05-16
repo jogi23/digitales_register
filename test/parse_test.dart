@@ -20,11 +20,9 @@
 
 import 'dart:convert';
 
-import 'package:built_redux/built_redux.dart';
-import 'package:dr/actions/app_actions.dart';
-import 'package:dr/app_state.dart';
-import 'package:dr/middleware/middleware.dart';
-import 'package:dr/reducer/reducer.dart';
+import 'package:dr/providers/absences_provider.dart';
+import 'package:dr/providers/calendar_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 // customer-submitted (name changed)
@@ -434,25 +432,19 @@ final calendarJson = {
 };
 
 void main() {
-  final store = Store<AppState, AppStateBuilder, AppActions>(
-    appReducerBuilder.build(),
-    AppState(),
-    AppActions(),
-    middleware: middleware(includeErrorMiddleware: false),
-  );
-
   test('parse absences', () {
     // should not throw
-    store.actions.absencesActions.loaded(absencesJson);
-    store.actions.absencesActions.loaded(json.encode(absencesJson));
-    store.actions.absencesActions
-        .loaded(json.decode(json.encode(absencesJson)));
+    parseAbsencesFromJson(absencesJson);
+    parseAbsencesFromJson(json.encode(absencesJson));
+    parseAbsencesFromJson(json.decode(json.encode(absencesJson)));
   });
 
   test('parse calendar', () {
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
     // should not throw
-    store.actions.calendarActions.loaded(calendarJson);
-    store.actions.calendarActions
-        .loaded(json.decode(json.encode(calendarJson)) as Map<String, dynamic>);
+    container.read(calendarProvider.notifier).parseLoaded(calendarJson);
+    container.read(calendarProvider.notifier).parseLoaded(
+        json.decode(json.encode(calendarJson)) as Map<String, dynamic>);
   });
 }

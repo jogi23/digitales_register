@@ -17,25 +17,20 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:built_collection/built_collection.dart';
-import 'package:built_redux/built_redux.dart';
-import 'package:dr/actions/app_actions.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/container/calendar_container.dart';
 import 'package:dr/container/settings_page.dart';
 import 'package:dr/data.dart';
 import 'package:dr/main.dart';
-import 'package:dr/middleware/middleware.dart';
 import 'package:dr/providers/calendar_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/providers/provider_container.dart' as pc;
 import 'package:dr/providers/settings_provider.dart';
-import 'package:dr/reducer/reducer.dart';
 import 'package:dr/ui/dialog.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
 import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_built_redux/flutter_built_redux.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -138,33 +133,25 @@ Future<void> main() async {
     pc.providerContainer = container;
     return UncontrolledProviderScope(
       container: container,
-      child: ReduxProvider(
-        store: Store<AppState, AppStateBuilder, AppActions>(
-          appReducerBuilder.build(),
-          AppState(),
-          AppActions(),
-          middleware: [routingMiddleware.build()],
-        ),
-        child: MaterialApp(
-          navigatorKey: navigatorKey,
-          home: CalendarContainer(),
-          theme: ThemeData(primarySwatch: Colors.deepOrange),
-          localizationsDelegates: const [
-            GlobalCupertinoLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-          ],
-          supportedLocales: const [
-            Locale("de"),
-          ],
-          onGenerateRoute: (settings) {
-            assert(settings.name == "/settings");
-            return MaterialPageRoute<void>(
-              fullscreenDialog: true,
-              builder: (context) => SettingsPageContainer(),
-            );
-          },
-        ),
+      child: MaterialApp(
+        navigatorKey: navigatorKey,
+        home: CalendarContainer(),
+        theme: ThemeData(primarySwatch: Colors.deepOrange),
+        localizationsDelegates: const [
+          GlobalCupertinoLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: const [
+          Locale("de"),
+        ],
+        onGenerateRoute: (settings) {
+          assert(settings.name == "/settings");
+          return MaterialPageRoute<void>(
+            fullscreenDialog: true,
+            builder: (context) => SettingsPageContainer(),
+          );
+        },
       ),
     );
   }
@@ -219,24 +206,17 @@ Future<void> main() async {
     addTearDown(container.dispose);
     final widget = UncontrolledProviderScope(
       container: container,
-      child: ReduxProvider(
-        store: Store<AppState, AppStateBuilder, AppActions>(
-          appReducerBuilder.build(),
-          AppState(),
-          AppActions(),
-        ),
-        child: MaterialApp(
-          home: CalendarContainer(),
-          theme: ThemeData(primarySwatch: Colors.deepOrange),
-          localizationsDelegates: const [
-            GlobalCupertinoLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-          ],
-          supportedLocales: const [
-            Locale("de"),
-          ],
-        ),
+      child: MaterialApp(
+        home: CalendarContainer(),
+        theme: ThemeData(primarySwatch: Colors.deepOrange),
+        localizationsDelegates: const [
+          GlobalCupertinoLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: const [
+          Locale("de"),
+        ],
       ),
     );
     // the shown week is the previous week

@@ -16,9 +16,6 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
-import 'package:built_redux/built_redux.dart';
-import 'package:dr/actions/app_actions.dart';
-import 'package:dr/app_state.dart';
 import 'package:dr/container/notification_icon_container.dart';
 import 'package:dr/container/notifications_page_container.dart';
 import 'package:dr/data.dart';
@@ -26,12 +23,10 @@ import 'package:dr/main.dart';
 import 'package:dr/middleware/middleware.dart';
 import 'package:dr/providers/notifications_provider.dart';
 import 'package:dr/providers/provider_container.dart' as pc;
-import 'package:dr/reducer/reducer.dart';
 import 'package:dr/ui/notifications_page.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/wrapper.dart';
 import 'package:flutter/material.dart' hide Notification;
-import 'package:flutter_built_redux/flutter_built_redux.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
@@ -56,16 +51,9 @@ Widget _buildTestWidget({
         () => _TestNotificationsNotifier(initialState),
       ),
     ],
-    child: ReduxProvider(
-      store: Store<AppState, AppStateBuilder, AppActions>(
-        ReducerBuilder<AppState, AppStateBuilder>().build(),
-        AppState(),
-        AppActions(),
-      ),
-      child: MaterialApp(
-        home: child ?? NotificationPageContainer(),
-        theme: ThemeData(primarySwatch: Colors.deepOrange),
-      ),
+    child: MaterialApp(
+      home: child ?? NotificationPageContainer(),
+      theme: ThemeData(primarySwatch: Colors.deepOrange),
     ),
   );
 }
@@ -283,19 +271,11 @@ void main() {
 
     final widget = UncontrolledProviderScope(
       container: container,
-      child: ReduxProvider(
-        store: Store<AppState, AppStateBuilder, AppActions>(
-          appReducerBuilder.build(),
-          AppState(),
-          AppActions(),
-          middleware: middleware(includeErrorMiddleware: false),
-        ),
-        child: MaterialApp(
-          scaffoldMessengerKey: scaffoldMessengerKey,
-          home: NotificationPageContainer(),
-          theme: ThemeData(
-            primarySwatch: Colors.deepOrange,
-          ),
+      child: MaterialApp(
+        scaffoldMessengerKey: scaffoldMessengerKey,
+        home: NotificationPageContainer(),
+        theme: ThemeData(
+          primarySwatch: Colors.deepOrange,
         ),
       ),
     );

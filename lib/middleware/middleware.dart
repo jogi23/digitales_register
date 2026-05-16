@@ -21,10 +21,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
-import 'package:built_redux/built_redux.dart';
 import 'package:dio/dio.dart' as dio;
-import 'package:dr/actions/app_actions.dart';
-import 'package:dr/actions/routing_actions.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/main.dart' hide scaffoldMessengerKey, showSnackBar;
 import 'package:dr/providers/absences_provider.dart';
@@ -49,7 +46,7 @@ import 'package:dr/ui/dialog.dart';
 import 'package:dr/ui/snack_bar.dart';
 import 'package:dr/util.dart';
 import 'package:dr/wrapper.dart';
-import 'package:flutter/material.dart' hide Action, Notification;
+import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:open_file/open_file.dart';
@@ -95,15 +92,6 @@ void wireLoginDispatchers(LoginNotifier notifier) {
     }()),
   );
 }
-
-@visibleForTesting
-List<Middleware<AppState, AppStateBuilder, AppActions>> middleware({
-  @visibleForTesting bool includeErrorMiddleware = true,
-}) =>
-    [
-      if (includeErrorMiddleware) _errorMiddleware,
-      _saveStateMiddleware,
-    ];
 
 Future<void> _handleError(dynamic e, StackTrace? trace) async {
   log("Error caught by error middleware", error: e, stackTrace: trace);
@@ -181,16 +169,8 @@ Future<void> _withErrorHandling(Future<void> Function() fn) async {
 
 Future<void> startApp(Uri? uri) => _withErrorHandling(() => _doStart(uri));
 Future<void> saveStateImmediately() => _doSaveState(immediately: true);
-
-NextActionHandler _errorMiddleware(
-        MiddlewareApi<AppState, AppStateBuilder, AppActions> api) =>
-    (ActionHandler next) => (Action action) async {
-          if (action.name == AppActionsNames.error.name) {
-            await _handleError(action.payload, null);
-          } else {
-            await _withErrorHandling(() async => next(action));
-          }
-        };
+@visibleForTesting
+Future<void> triggerDeferredSaveState() => _doSaveState();
 
 Future<void> _doLoad() async {
   // By resetting the wrapper we clear all cookies.
@@ -293,58 +273,6 @@ late AppState _stateToSave;
 // which would restore it.
 @visibleForTesting
 bool deletedData = false;
-
-NextActionHandler _saveStateMiddleware(
-        MiddlewareApi<AppState, AppStateBuilder, AppActions> api) =>
-    (ActionHandler next) => (Action action) async {
-          await next(action);
-          final loginState = providerContainer.read(loginProvider);
-          if (loginState.loggedIn && loginState.username != null) {
-            _stateToSave = api.state;
-            final bool immediately =
-                action.name == AppActionsNames.saveState.name;
-            if (_saveUnderway && !immediately) {
-              return;
-            }
-
-            _saveUnderway = true;
-
-            Future<void> save() async {
-              final state = _stateToSave;
-              final settings = providerContainer.read(settingsProvider);
-              final user = getStorageKey(
-                providerContainer.read(loginProvider).username,
-                wrapper.loginAddress,
-              );
-              _saveUnderway = false;
-              String toSave;
-              if (!settings.noDataSaving && !deletedData) {
-                toSave = json.encode(
-                  serializers.serialize(
-                    state.rebuild((b) => b.settingsState.replace(settings)),
-                  ),
-                );
-              } else {
-                toSave = json.encode(
-                  serializers.serialize(settings),
-                );
-              }
-              if (_lastSave == toSave && _lastUsernameSaved == user) return;
-              _lastSave = toSave;
-              _lastUsernameSaved = user;
-              await _writeToStorage(
-                user,
-                toSave,
-              );
-            }
-
-            if (immediately) {
-              await save();
-            } else {
-              Future.delayed(const Duration(seconds: 5), save);
-            }
-          }
-        };
 
 String getStorageKey(String? user, String server) {
   // This is safe because the default Map in dart is a LinkedHashMap, which mantains
