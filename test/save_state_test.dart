@@ -22,7 +22,6 @@ import 'dart:convert';
 
 import 'package:built_redux/built_redux.dart';
 import 'package:dr/actions/app_actions.dart';
-import 'package:dr/actions/login_actions.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/main.dart';
 import 'package:dr/middleware/middleware.dart';
@@ -211,13 +210,8 @@ void main() {
         serializers.deserialize(
             json.decode((await storageHelper.read(username))!) as Object),
         const TypeMatcher<AppState>());
-    await store.actions.loginActions.logout(
-      LogoutPayload(
-        (b) => b
-          ..hard = true
-          ..forced = true,
-      ),
-    );
+    deletedData = true;
+    await store.actions.saveState();
 
     expect(
         serializers.deserialize(

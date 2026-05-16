@@ -72,16 +72,11 @@ bool skipUnmaintainedAlert = false;
 
 Wrapper wrapper = Wrapper();
 
-// Captured in _load/_start so plain-function handlers can dispatch Redux actions
-// that are still needed (load, saveState).
-late AppActions _reduxActions;
-
-/// Wires [LoginNotifier] to the plain middleware functions so the bridge no
-/// longer goes through Redux action dispatches. Called once from main.dart
-/// after the store is created.
-void wireLoginDispatchers(LoginNotifier notifier, AppActions actions) {
+/// Wires [LoginNotifier] to the plain middleware functions. Called once from
+/// main.dart during startup.
+void wireLoginDispatchers(LoginNotifier notifier) {
   notifier.initReduxDispatchers(
-    load: () => unawaited(actions.load()),
+    load: () => unawaited(_withErrorHandling(_doLoad)),
     addAccount: () => unawaited(_doAddAccount()),
     selectAccount: (index) => unawaited(_doSelectAccount(index)),
     logout: ({required bool hard, bool forced = false}) =>
@@ -93,65 +88,61 @@ void wireLoginDispatchers(LoginNotifier notifier, AppActions actions) {
     resetPass: (newPass) => unawaited(_doResetPass(newPass)),
     requestPassReset: (user, email) =>
         unawaited(_doRequestPassReset(user, email)),
-    showRequestPassReset: (_) =>
-        unawaited(navigatorKey?.currentState?.pushNamed("/request_pass_reset")),
+    showRequestPassReset: (url) => unawaited(() async {
+      providerContainer.read(loginProvider.notifier).setUrl(url);
+      await navigatorKey?.currentState?.pushNamed("/request_pass_reset");
+      providerContainer.read(loginProvider.notifier).updatePassResetState(const PassResetState());
+    }()),
   );
 }
 
+@visibleForTesting
 List<Middleware<AppState, AppStateBuilder, AppActions>> middleware({
   @visibleForTesting bool includeErrorMiddleware = true,
 }) =>
     [
       if (includeErrorMiddleware) _errorMiddleware,
       _saveStateMiddleware,
-      (MiddlewareBuilder<AppState, AppStateBuilder, AppActions>()
-            ..add(AppActionsNames.load, _load)
-            ..add(AppActionsNames.start, _start))
-          .build(),
     ];
 
-NextActionHandler _errorMiddleware(
-        MiddlewareApi<AppState, AppStateBuilder, AppActions> api) =>
-    (ActionHandler next) => (Action action) async {
-          Future<void> handleError(dynamic e, StackTrace? trace) async {
-            log("Error caught by error middleware",
-                error: e, stackTrace: trace);
-            unawaited(Sentry.captureException(e, stackTrace: trace));
-            var stackTrace = trace;
-            try {
-              stackTrace ??= e.stackTrace as StackTrace?;
-            } catch (e) {
-              // we can't get a stack trace
-            }
-            var error = e.toString();
-            if (e is! ParseException) {
-              // ParseExceptions will already provide a more precise stack trace
-              error += "\n\n$stackTrace";
-            }
-            error +=
-                "\n\nApp Version: $appVersion\nOS: ${Platform.operatingSystem}\nServer: ${providerContainer.read(loginProvider).url}";
-            await navigatorKey?.currentState?.push(
-              MaterialPageRoute<void>(
-                fullscreenDialog: true,
-                builder: (_) {
-                  return Scaffold(
-                    appBar: AppBar(
-                      backgroundColor: Colors.red,
-                      title: const Text("Fehler!"),
-                    ),
-                    body: ListView(
-                      padding: const EdgeInsets.all(16),
-                      children: <Widget>[
-                        const Center(
-                          child: Text(
-                            "Der Fehler wurde automatisch gemeldet.",
-                            style: TextStyle(fontStyle: FontStyle.italic),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                            """
+Future<void> _handleError(dynamic e, StackTrace? trace) async {
+  log("Error caught by error middleware", error: e, stackTrace: trace);
+  unawaited(Sentry.captureException(e, stackTrace: trace));
+  var stackTrace = trace;
+  try {
+    stackTrace ??= e.stackTrace as StackTrace?;
+  } catch (e) {
+    // we can't get a stack trace
+  }
+  var error = e.toString();
+  if (e is! ParseException) {
+    // ParseExceptions will already provide a more precise stack trace
+    error += "\n\n$stackTrace";
+  }
+  error +=
+      "\n\nApp Version: $appVersion\nOS: ${Platform.operatingSystem}\nServer: ${providerContainer.read(loginProvider).url}";
+  await navigatorKey?.currentState?.push(
+    MaterialPageRoute<void>(
+      fullscreenDialog: true,
+      builder: (_) {
+        return Scaffold(
+          appBar: AppBar(
+            backgroundColor: Colors.red,
+            title: const Text("Fehler!"),
+          ),
+          body: ListView(
+            padding: const EdgeInsets.all(16),
+            children: <Widget>[
+              const Center(
+                child: Text(
+                  "Der Fehler wurde automatisch gemeldet.",
+                  style: TextStyle(fontStyle: FontStyle.italic),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  """
 Ein Fehler ist aufgetreten.
 ${e is UnexpectedLogoutException ? """
 
@@ -170,30 +161,38 @@ Bitte benachrichtige uns, damit wir diesen Fehler beheben können:"""}
  --  Fehlerprotokoll: --
 
 $error""",
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
+                ),
               ),
-            );
-          }
+            ],
+          ),
+        );
+      },
+    ),
+  );
+}
 
+Future<void> _withErrorHandling(Future<void> Function() fn) async {
+  try {
+    await fn();
+  } catch (e, stackTrace) {
+    await _handleError(e, stackTrace);
+  }
+}
+
+Future<void> startApp(Uri? uri) => _withErrorHandling(() => _doStart(uri));
+Future<void> saveStateImmediately() => _doSaveState(immediately: true);
+
+NextActionHandler _errorMiddleware(
+        MiddlewareApi<AppState, AppStateBuilder, AppActions> api) =>
+    (ActionHandler next) => (Action action) async {
           if (action.name == AppActionsNames.error.name) {
-            await handleError(action.payload, null);
+            await _handleError(action.payload, null);
           } else {
-            try {
-              await next(action);
-            } catch (e, stackTrace) {
-              await handleError(e, stackTrace);
-            }
+            await _withErrorHandling(() async => next(action));
           }
         };
 
-Future<void> _load(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
-    ActionHandler next, Action<void> action) async {
-  _reduxActions = api.actions;
+Future<void> _doLoad() async {
   // By resetting the wrapper we clear all cookies.
   // However we don't want to reset the wrapper in tests
   if (wrapper is! Mock) {
@@ -202,8 +201,7 @@ Future<void> _load(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
           providerContainer.read(noInternetProvider.notifier).setNoInternet(v);
   }
   providerContainer.read(settingsProvider.notifier).onSaveState =
-      () => unawaited(_reduxActions.saveState());
-  await next(action);
+      () => unawaited(_doSaveState(immediately: true));
   if (!providerContainer.read(noInternetProvider)) _popAll();
   dynamic login;
   try {
@@ -241,6 +239,47 @@ Future<void> _load(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
       await _doLogin(user, pass, url ?? "", fromStorage: true);
     } else {
       providerContainer.read(appRouterProvider).showLogin();
+    }
+  }
+}
+
+Future<void> _doSaveState({bool immediately = false}) async {
+  final loginState = providerContainer.read(loginProvider);
+  if (loginState.loggedIn && loginState.username != null) {
+    _stateToSave = AppState();
+    if (_saveUnderway && !immediately) return;
+    _saveUnderway = true;
+
+    Future<void> save() async {
+      final state = _stateToSave;
+      final settings = providerContainer.read(settingsProvider);
+      final user = getStorageKey(
+        providerContainer.read(loginProvider).username,
+        wrapper.loginAddress,
+      );
+      _saveUnderway = false;
+      String toSave;
+      if (!settings.noDataSaving && !deletedData) {
+        toSave = json.encode(
+          serializers.serialize(
+            state.rebuild((b) => b.settingsState.replace(settings)),
+          ),
+        );
+      } else {
+        toSave = json.encode(
+          serializers.serialize(settings),
+        );
+      }
+      if (_lastSave == toSave && _lastUsernameSaved == user) return;
+      _lastSave = toSave;
+      _lastUsernameSaved = user;
+      await _writeToStorage(user, toSave);
+    }
+
+    if (immediately) {
+      await save();
+    } else {
+      Future.delayed(const Duration(seconds: 5), save);
     }
   }
 }
@@ -349,16 +388,11 @@ Future<void> handleRestarted() async {
   }
 }
 
-Future<void> _start(
-  MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
-  ActionHandler next,
-  Action<Uri?> action,
-) async {
-  _reduxActions = api.actions;
+Future<void> _doStart(Uri? uri) async {
   providerContainer.read(loginProvider.notifier).clearAfterLoginCallbacks();
-  if (action.payload != null) {
-    providerContainer.read(loginProvider.notifier).setUrl(action.payload!.origin);
-    final parameters = action.payload!.queryParameters;
+  if (uri != null) {
+    providerContainer.read(loginProvider.notifier).setUrl(uri.origin);
+    final parameters = uri.queryParameters;
     switch (parameters["semesterWechsel"]) {
       case "1":
         providerContainer.read(loginProvider.notifier).addAfterLoginCallback(
@@ -373,7 +407,7 @@ Future<void> _start(
               .setSemester(Semester.second),
         );
     }
-    switch (action.payload!.path) {
+    switch (uri.path) {
       case "":
       case "/":
       case "/v2/":
@@ -400,9 +434,9 @@ Future<void> _start(
       default:
         showSnackBar("Dieser Link konnte nicht geöffnet werden");
     }
-    await redirectAfterLogin(action.payload!.fragment);
+    await redirectAfterLogin(uri.fragment);
   }
-  await api.actions.load();
+  await _doLoad();
 }
 
 Future<void> redirectAfterLogin(String location) async {

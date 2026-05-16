@@ -19,9 +19,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:built_redux/built_redux.dart';
-import 'package:dr/actions/app_actions.dart';
-import 'package:dr/app_state.dart';
 import 'package:dr/container/change_email_container.dart';
 import 'package:dr/container/home_page.dart';
 import 'package:dr/container/login_page.dart';
@@ -34,13 +31,11 @@ import 'package:dr/desktop.dart';
 import 'package:dr/middleware/middleware.dart';
 import 'package:dr/providers/login_provider.dart';
 import 'package:dr/providers/provider_container.dart';
-import 'package:dr/reducer/reducer.dart';
 import 'package:dr/ui/grade_calculator.dart';
 import 'package:dr/ui/grades_chart_page.dart';
 import 'package:dr/util.dart';
 import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_built_redux/flutter_built_redux.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:dr/ui/snack_bar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -56,11 +51,6 @@ GlobalKey<NavigatorState> nestedNavKey = GlobalKey();
 GlobalKey<ResponsiveScaffoldState<Pages>>? scaffoldKey;
 
 typedef SingleArgumentVoidCallback<T> = void Function(T arg);
-
-// Actions are now global (although this doesn't seem to be the case in the official example).
-// This way it is easier for ui code to dispatch actions.
-// TODO: This is actually a bad idea for testing. It should be removed again.
-final AppActions actions = AppActions();
 
 const _sentryDsn =
     'https://73cb18b60e94a8e3849143d837584fa1@o4511353325486080.ingest.de.sentry.io/4511353328173136';
@@ -92,17 +82,12 @@ Future<void> _runApp() async {
   scaffoldKey = GlobalKey();
   scaffoldMessengerKey = GlobalKey();
   secureStorage = getFlutterSecureStorage();
-  final store = Store<AppState, AppStateBuilder, AppActions>(
-    appReducerBuilder.build(),
-    AppState(),
-    actions,
-    middleware: middleware(),
-  );
   providerContainer = ProviderContainer();
+  wireLoginDispatchers(providerContainer.read(loginProvider.notifier));
   runApp(SentryWidget(
     child: UncontrolledProviderScope(
       container: providerContainer,
-      child: RegisterApp(store: store),
+      child: const RegisterApp(),
     ),
   ));
   WidgetsBinding.instance.addPostFrameCallback(
@@ -112,49 +97,27 @@ Future<void> _runApp() async {
       if (Platform.isAndroid) {
         uri = await getInitialUri();
         uriLinkStream.listen((event) {
-          store.actions.start(event);
+          unawaited(startApp(event));
         });
       }
-      unawaited(store.actions.start(uri));
+      unawaited(startApp(uri));
       WidgetsBinding.instance.addObserver(
         LifecycleObserver(
           () => unawaited(handleRestarted()),
           // this might not finish in time:
-          store.actions.saveState.call,
+          saveStateImmediately,
         ),
       );
     },
   );
 }
 
-class RegisterApp extends StatefulWidget {
-  const RegisterApp({
-    super.key,
-    required this.store,
-  });
-
-  final Store<AppState, AppStateBuilder, AppActions> store;
-
-  @override
-  State<RegisterApp> createState() => _RegisterAppState();
-}
-
-class _RegisterAppState extends State<RegisterApp> {
-  @override
-  void initState() {
-    super.initState();
-    wireLoginDispatchers(
-      providerContainer.read(loginProvider.notifier),
-      widget.store.actions,
-    );
-  }
+class RegisterApp extends StatelessWidget {
+  const RegisterApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final store = widget.store;
-    return ReduxProvider(
-      store: store,
-      child: Listener(
+    return Listener(
         onPointerDown: (_) => wrapper.interaction(),
         child: DynamicTheme(
           data: (brightness, overridePlatform, seedColor) {
@@ -247,7 +210,6 @@ class _RegisterAppState extends State<RegisterApp> {
             debugShowCheckedModeBanner: false,
           ),
         ),
-      ),
     );
   }
 }

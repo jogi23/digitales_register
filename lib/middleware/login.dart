@@ -48,7 +48,7 @@ Future<void> _doLogout({required bool hard, bool forced = false}) async {
   }
   if (providerContainer.read(settingsProvider).deleteDataOnLogout && hard) {
     deletedData = true;
-    await _reduxActions.saveState();
+    await _doSaveState(immediately: true);
   }
   if (!forced) {
     assert(hard);
@@ -59,7 +59,7 @@ Future<void> _doLogout({required bool hard, bool forced = false}) async {
   if (hard) {
     wrapper = Wrapper();
     _resetAllProviders();
-    await _reduxActions.load();
+    await _doLoad();
   }
 }
 
@@ -244,7 +244,7 @@ Future<void> _doLoggedIn({
         .updateSubjectThemes(providerContainer.read(allSubjectsProvider));
   }
 
-  unawaited(_reduxActions.saveState());
+  unawaited(_doSaveState(immediately: true));
 }
 
 Future<void> _doChangePass(
@@ -378,7 +378,7 @@ Future<void> _doAddAccount() async {
   }
   providerContainer.read(loginProvider.notifier).logout(hard: true);
   _resetAllProviders();
-  await _reduxActions.load();
+  await _doLoad();
 }
 
 Future<void> _doSelectAccount(int index) async {
@@ -402,7 +402,7 @@ Future<void> _doSelectAccount(int index) async {
   await secureStorage.write(key: "login", value: json.encode(login));
   providerContainer.read(loginProvider.notifier).logout(hard: true);
   _resetAllProviders();
-  await _reduxActions.load();
+  await _doLoad();
 }
 
 void _showUserTypeNotSupported(String url) {
