@@ -20,6 +20,7 @@ import 'dart:async';
 import 'package:dr/middleware/middleware.dart' show wrapper;
 import 'package:dr/providers/dashboard_provider.dart';
 import 'package:dr/ui/snack_bar.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class NoInternetNotifier extends Notifier<bool> {
@@ -31,11 +32,21 @@ class NoInternetNotifier extends Notifier<bool> {
     state = value;
     if (prev == value) return;
     if (value) {
-      showSnackBar("Keine Verbindung");
-      wrapper.logout(hard: false, logoutForcedByServer: true);
+      onGoingOffline();
     } else {
-      unawaited(ref.read(dashboardProvider.notifier).refresh());
+      unawaited(onGoingOnline());
     }
+  }
+
+  @protected
+  void onGoingOffline() {
+    showSnackBar("Keine Verbindung");
+    wrapper.logout(hard: false, logoutForcedByServer: true);
+  }
+
+  @protected
+  Future<void> onGoingOnline() {
+    return ref.read(dashboardProvider.notifier).refresh();
   }
 
   Future<void> refresh() async {
