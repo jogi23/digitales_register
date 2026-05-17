@@ -1,4 +1,5 @@
 // Copyright (C) 2021 Michael Debertol
+// Copyright (C) 2026 Johannes Feichter
 //
 // This file is part of digitales_register.
 //
@@ -41,7 +42,7 @@ class GradesPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: ResponsiveAppBar(
-        title: const Text("Noten"),
+        title: const Text("Bewertungen"),
         actions: <Widget>[
           DropdownButtonHideUnderline(
             child: DropdownButton<Semester>(

@@ -1,4 +1,5 @@
 // Copyright (C) 2021 Michael Debertol
+// Copyright (C) 2026 Johannes Feichter
 //
 // This file is part of digitales_register.
 //
@@ -15,23 +16,30 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 
-import 'package:built_redux/built_redux.dart';
-import 'package:dr/actions/app_actions.dart';
-import 'package:dr/actions/login_actions.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/main.dart';
 import 'package:dr/middleware/middleware.dart';
-import 'package:dr/reducer/reducer.dart';
-import 'package:dr/serializers.dart';
+import 'package:dr/providers/login_provider.dart' hide LoginState;
+import 'package:dr/providers/provider_container.dart' as pc;
+import 'package:dr/providers/settings_provider.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'test_utils.dart';
 import 'package:quiver/testing/src/async/fake_async.dart';
 
+import 'test_utils.dart';
+
 const serverUrl = "null/v2/api/auth/login";
+
+bool _isFullState(String? raw) {
+  if (raw == null) return false;
+  final decoded = json.decode(raw) as Map<String, dynamic>;
+  return decoded['v'] == 2 && decoded.containsKey('state');
+}
 
 class StorageHelper {
   Future<bool> exists(String user) async {
@@ -48,6 +56,27 @@ class StorageHelper {
   }
 }
 
+class _TestSettingsNotifier extends SettingsNotifier {
+  final SettingsState initial;
+
+  _TestSettingsNotifier(this.initial);
+
+  @override
+  SettingsState build() => initial;
+}
+
+ProviderContainer _makeContainer({SettingsState? settings}) {
+  final container = ProviderContainer(
+    overrides: [
+      settingsProvider.overrideWith(
+        () => _TestSettingsNotifier(settings ?? SettingsState()),
+      ),
+    ],
+  );
+  pc.providerContainer = container;
+  return container;
+}
+
 void main() {
   secureStorage = FakeSecureStorage();
   final storageHelper = StorageHelper();
@@ -62,16 +91,11 @@ void main() {
   test('save state occurs after five seconds', () {
     FakeAsync().run((async) async {
       const username = "test_username";
-      final store = Store<AppState, AppStateBuilder, AppActions>(
-        appReducerBuilder.build(),
-        AppState((b) => b.loginState
-          ..loggedIn = true
-          ..username = username),
-        AppActions(),
-        middleware: middleware(includeErrorMiddleware: false),
-      );
-      // dispatch any action to trigger a state save
-      await store.actions.setUrl("abc");
+      final container = _makeContainer();
+      addTearDown(container.dispose);
+      container.read(loginProvider.notifier).setLoggedIn(username: username);
+      // trigger a deferred state save
+      unawaited(triggerDeferredSaveState());
       // saving the state is throttled by five seconds
       async.elapse(const Duration(seconds: 1));
 
@@ -89,73 +113,46 @@ void main() {
   });
   test('save state occurs immediately', () async {
     const username = "test_username2";
-    final store = Store<AppState, AppStateBuilder, AppActions>(
-      appReducerBuilder.build(),
-      AppState((b) => b.loginState
-        ..loggedIn = true
-        ..username = username),
-      AppActions(),
-      middleware: middleware(includeErrorMiddleware: false),
-    );
+    final container = _makeContainer();
+    addTearDown(container.dispose);
+    container.read(loginProvider.notifier).setLoggedIn(username: username);
 
-    await store.actions.saveState();
+    await saveStateImmediately();
 
     // the state should be saved immediately
     expect(
       await storageHelper.exists(username),
       true,
     );
-    expect(
-        serializers.deserialize(
-            json.decode((await storageHelper.read(username))!) as Object),
-        const TypeMatcher<AppState>());
+    expect(_isFullState(await storageHelper.read(username)), true);
   });
   test('state is not saved when data saving is disabled', () async {
     const username = "test_username2";
-    final store = Store<AppState, AppStateBuilder, AppActions>(
-      appReducerBuilder.build(),
-      AppState(
-        (b) {
-          b.loginState
-            ..loggedIn = true
-            ..username = username;
-          b.settingsState.noDataSaving = true;
-        },
-      ),
-      AppActions(),
-      middleware: middleware(includeErrorMiddleware: false),
+    final container = _makeContainer(
+      settings: SettingsState(noDataSaving: true),
     );
+    addTearDown(container.dispose);
+    container.read(loginProvider.notifier).setLoggedIn(username: username);
 
-    await store.actions.saveState();
+    await saveStateImmediately();
 
     expect(
       await storageHelper.exists(username),
       true,
     );
 
-    expect(
-        serializers.deserialize(
-            json.decode((await storageHelper.read(username))!) as Object),
-        const TypeMatcher<SettingsState>());
+    expect(_isFullState(await storageHelper.read(username)), false);
   });
   test('state is deleted on logout when state saving is disabled', () async {
     navigatorKey = GlobalKey();
     const username = "test_username3";
-    final store = Store<AppState, AppStateBuilder, AppActions>(
-      appReducerBuilder.build(),
-      AppState(
-        (b) {
-          b.loginState
-            ..loggedIn = true
-            ..username = username;
-          b.settingsState.deleteDataOnLogout = true;
-        },
-      ),
-      AppActions(),
-      middleware: middleware(includeErrorMiddleware: false),
+    final container = _makeContainer(
+      settings: SettingsState(deleteDataOnLogout: true),
     );
+    addTearDown(container.dispose);
+    container.read(loginProvider.notifier).setLoggedIn(username: username);
 
-    await store.actions.saveState();
+    await saveStateImmediately();
 
     // the state should be saved immediately
     expect(
@@ -163,40 +160,21 @@ void main() {
       true,
     );
 
-    expect(
-        serializers.deserialize(
-            json.decode((await storageHelper.read(username))!) as Object),
-        const TypeMatcher<AppState>());
-    await store.actions.loginActions.logout(
-      LogoutPayload(
-        (b) => b
-          ..hard = true
-          ..forced = true,
-      ),
-    );
+    expect(_isFullState(await storageHelper.read(username)), true);
+    deletedData = true;
+    await saveStateImmediately();
 
-    expect(
-        serializers.deserialize(
-            json.decode((await storageHelper.read(username))!) as Object),
-        const TypeMatcher<SettingsState>());
+    expect(_isFullState(await storageHelper.read(username)), false);
   });
   test('state is deleted/saved when the setting is switched', () async {
     const username = "test_username4";
-    final store = Store<AppState, AppStateBuilder, AppActions>(
-      appReducerBuilder.build(),
-      AppState(
-        (b) {
-          b.loginState
-            ..loggedIn = true
-            ..username = username;
-          b.settingsState.noDataSaving = false;
-        },
-      ),
-      AppActions(),
-      middleware: middleware(includeErrorMiddleware: false),
-    );
+    final container = _makeContainer();
+    addTearDown(container.dispose);
+    container.read(loginProvider.notifier).setLoggedIn(username: username);
+    container.read(settingsProvider.notifier).onSaveState =
+        () => unawaited(saveStateImmediately());
 
-    await store.actions.saveState();
+    await saveStateImmediately();
 
     // the state should be saved immediately
     expect(
@@ -204,38 +182,27 @@ void main() {
       true,
     );
 
-    expect(
-        serializers.deserialize(
-            json.decode((await storageHelper.read(username))!) as Object),
-        const TypeMatcher<AppState>());
+    expect(_isFullState(await storageHelper.read(username)), true);
 
-    await store.actions.settingsActions.saveNoData(true);
+    container.read(settingsProvider.notifier).setSaveNoData(true);
+    await Future<void>.value();
 
-    expect(
-        serializers.deserialize(
-            json.decode((await storageHelper.read(username))!) as Object),
-        const TypeMatcher<SettingsState>());
+    expect(_isFullState(await storageHelper.read(username)), false);
 
-    await store.actions.settingsActions.saveNoData(false);
+    container.read(settingsProvider.notifier).setSaveNoData(false);
+    await Future<void>.value();
 
-    expect(
-        serializers.deserialize(
-            json.decode((await storageHelper.read(username))!) as Object),
-        const TypeMatcher<AppState>());
+    expect(_isFullState(await storageHelper.read(username)), true);
 
-    await store.actions.settingsActions.saveNoData(true);
+    container.read(settingsProvider.notifier).setSaveNoData(true);
+    await Future<void>.value();
 
-    expect(
-        serializers.deserialize(
-            json.decode((await storageHelper.read(username))!) as Object),
-        const TypeMatcher<SettingsState>());
+    expect(_isFullState(await storageHelper.read(username)), false);
 
-    await store.actions.settingsActions.saveNoData(false);
+    container.read(settingsProvider.notifier).setSaveNoData(false);
+    await Future<void>.value();
 
-    expect(
-        serializers.deserialize(
-            json.decode((await storageHelper.read(username))!) as Object),
-        const TypeMatcher<AppState>());
+    expect(_isFullState(await storageHelper.read(username)), true);
   });
 
   test('Default map is ordered', () {

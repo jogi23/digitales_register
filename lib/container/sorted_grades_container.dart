@@ -1,4 +1,5 @@
 // Copyright (C) 2021 Michael Debertol
+// Copyright (C) 2026 Johannes Feichter
 //
 // This file is part of digitales_register.
 //
@@ -16,40 +17,39 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:built_collection/built_collection.dart';
-import 'package:built_value/built_value.dart';
-import 'package:dr/actions/app_actions.dart';
-import 'package:dr/actions/grades_actions.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/data.dart';
+import 'package:dr/providers/grades_provider.dart';
+import 'package:dr/providers/no_internet_provider.dart';
+import 'package:dr/providers/settings_provider.dart';
+import 'package:dr/services/app_router.dart';
 import 'package:dr/ui/sorted_grades_widget.dart';
-import 'package:flutter/material.dart' hide Builder;
-import 'package:flutter_built_redux/flutter_built_redux.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-part 'sorted_grades_container.g.dart';
-
-class SortedGradesContainer extends StatelessWidget {
+class SortedGradesContainer extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
-    return StoreConnection<AppState, AppActions, SortedGradesViewModel>(
-      connect: (state) {
-        return SortedGradesViewModel.from(state);
-      },
-      builder: (context, vm, actions) {
-        return SortedGradesWidget(
-          vm: vm,
-          showCancelledCallback:
-              actions.settingsActions.showCancelledGrades.call,
-          sortByTypeCallback: actions.settingsActions.gradesTypeSorted.call,
-          showGradeCalculator: actions.routingActions.showGradeCalculator.call,
-          viewSubjectDetail: (s) => actions.gradesActions.loadDetails(
-            LoadSubjectDetailsPayload(
-              (b) => b
-                ..subject = s.toBuilder()
-                ..semester = vm.semester.toBuilder(),
-            ),
-          ),
-        );
-      },
+  Widget build(BuildContext context, WidgetRef ref) {
+    final gradesState = ref.watch(gradesProvider);
+    final settings = ref.watch(settingsProvider);
+    final noInternet = ref.watch(noInternetProvider);
+    return SortedGradesWidget(
+      vm: SortedGradesViewModel(
+        subjects: gradesState.subjects,
+        semester: gradesState.semester,
+        sortByType: settings.typeSorted,
+        showCancelled: settings.showCancelled,
+        noInternet: noInternet,
+        ignoredSubjectsForAverage: settings.ignoreForGradesAverage,
+      ),
+      showCancelledCallback:
+          ref.read(settingsProvider.notifier).setShowCancelledGrades,
+      sortByTypeCallback:
+          ref.read(settingsProvider.notifier).setGradesTypeSorted,
+      showGradeCalculator: ref.read(appRouterProvider).showGradeCalculator,
+      viewSubjectDetail: (s) => ref
+          .read(gradesProvider.notifier)
+          .loadDetails(s, gradesState.semester),
     );
   }
 }
@@ -57,30 +57,20 @@ class SortedGradesContainer extends StatelessWidget {
 typedef ViewSubjectDetailCallback = void Function(Subject s);
 typedef SetBoolCallback = void Function(bool byType);
 
-abstract class SortedGradesViewModel
-    implements Built<SortedGradesViewModel, SortedGradesViewModelBuilder> {
-  BuiltList<Subject> get subjects;
-  BuiltList<String> get ignoredSubjectsForAverage;
-  Semester get semester;
-  bool get sortByType;
-  bool? get showCancelled;
-  bool get noInternet;
+class SortedGradesViewModel {
+  final BuiltList<Subject> subjects;
+  final List<String> ignoredSubjectsForAverage;
+  final Semester semester;
+  final bool sortByType;
+  final bool? showCancelled;
+  final bool noInternet;
 
-  factory SortedGradesViewModel(
-          [void Function(SortedGradesViewModelBuilder)? updates]) =
-      _$SortedGradesViewModel;
-  SortedGradesViewModel._();
-
-  factory SortedGradesViewModel.from(AppState state) {
-    return SortedGradesViewModel(
-      (b) => b
-        ..subjects = state.gradesState.subjects.toBuilder()
-        ..sortByType = state.settingsState.typeSorted
-        ..semester = state.gradesState.semester.toBuilder()
-        ..showCancelled = state.settingsState.showCancelled
-        ..noInternet = state.noInternet
-        ..ignoredSubjectsForAverage =
-            state.settingsState.ignoreForGradesAverage.toBuilder(),
-    );
-  }
+  const SortedGradesViewModel({
+    required this.subjects,
+    required this.ignoredSubjectsForAverage,
+    required this.semester,
+    required this.sortByType,
+    required this.showCancelled,
+    required this.noInternet,
+  });
 }

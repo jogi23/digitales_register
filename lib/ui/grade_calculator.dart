@@ -1,4 +1,5 @@
 // Copyright (C) 2021 Michael Debertol
+// Copyright (C) 2026 Johannes Feichter
 //
 // This file is part of digitales_register.
 //
@@ -15,15 +16,14 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
-import 'package:built_collection/built_collection.dart';
 import 'package:deleteable_tile/deleteable_tile.dart';
-import 'package:dr/actions/app_actions.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/data.dart';
+import 'package:dr/providers/grades_provider.dart';
 import 'package:dr/ui/dialog.dart';
 import 'package:dr/util.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_built_redux/flutter_built_redux.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 bool isGradeInRange(int grade) {
   return grade >= 0 && grade <= 1000;
@@ -458,14 +458,11 @@ class _ImportGrades extends StatefulWidget {
   _ImportGradesState createState() => _ImportGradesState();
 }
 
-class _ImportGradesContainer extends StatelessWidget {
+class _ImportGradesContainer extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
-    return StoreConnection<AppState, AppActions, BuiltList<Subject>>(
-      connect: (state) => state.gradesState.subjects,
-      builder: (context, state, actions) => _ImportGrades(
-        subjects: state.toList(),
-      ),
+  Widget build(BuildContext context, WidgetRef ref) {
+    return _ImportGrades(
+      subjects: ref.watch(gradesProvider).subjects.toList(),
     );
   }
 }

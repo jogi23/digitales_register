@@ -1,4 +1,5 @@
 // Copyright (C) 2021 Michael Debertol
+// Copyright (C) 2026 Johannes Feichter
 //
 // This file is part of digitales_register.
 //
@@ -20,58 +21,44 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
-import 'package:built_redux/built_redux.dart';
 import 'package:dio/dio.dart' as dio;
-import 'package:dr/actions/absences_actions.dart';
-import 'package:dr/actions/app_actions.dart';
-import 'package:dr/actions/calendar_actions.dart';
-import 'package:dr/actions/certificate_actions.dart';
-import 'package:dr/actions/dashboard_actions.dart';
-import 'package:dr/actions/grades_actions.dart';
-import 'package:dr/actions/login_actions.dart';
-import 'package:dr/actions/messages_actions.dart';
-import 'package:dr/actions/notifications_actions.dart';
-import 'package:dr/actions/profile_actions.dart';
-import 'package:dr/actions/routing_actions.dart';
-import 'package:dr/actions/save_pass_actions.dart';
-import 'package:dr/actions/settings_actions.dart';
 import 'package:dr/app_state.dart';
-import 'package:dr/container/absences_page_container.dart';
-import 'package:dr/container/calendar_container.dart';
-import 'package:dr/container/certificate_container.dart';
-import 'package:dr/container/grades_page_container.dart';
-import 'package:dr/container/messages_container.dart';
-import 'package:dr/container/settings_page.dart';
-import 'package:dr/data.dart';
-import 'package:dr/main.dart';
+import 'package:dr/main.dart' hide scaffoldMessengerKey, showSnackBar;
+import 'package:dr/providers/absences_provider.dart';
+import 'package:dr/providers/all_subjects_provider.dart';
+import 'package:dr/providers/calendar_provider.dart';
+import 'package:dr/providers/certificate_provider.dart';
+import 'package:dr/providers/config_provider.dart';
+import 'package:dr/providers/dashboard_error_provider.dart';
+import 'package:dr/providers/dashboard_provider.dart';
+import 'package:dr/providers/grades_provider.dart';
+import 'package:dr/providers/login_provider.dart';
+import 'package:dr/providers/messages_provider.dart';
+import 'package:dr/providers/network_protocol_provider.dart';
+import 'package:dr/providers/no_internet_provider.dart';
+import 'package:dr/providers/notifications_provider.dart';
+import 'package:dr/providers/profile_provider.dart';
+import 'package:dr/providers/provider_container.dart';
+import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/serializers.dart';
+import 'package:dr/services/app_router.dart';
 import 'package:dr/ui/dialog.dart';
-import 'package:dr/utc_date_time.dart';
+import 'package:dr/ui/snack_bar.dart';
 import 'package:dr/util.dart';
 import 'package:dr/wrapper.dart';
-import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart' hide Action, Notification;
+import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:intl/intl.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:mutex/mutex.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-part 'absences.dart';
-part 'calendar.dart';
-part 'certificate.dart';
-part 'dashboard.dart';
-part 'grades.dart';
+export 'package:dr/pages.dart';
+
 part 'login.dart';
-part 'messages.dart';
-part 'notifications.dart';
 part 'pass.dart';
-part 'profile.dart';
 part 'routing.dart';
-part 'settings.dart';
 
 late FlutterSecureStorage secureStorage;
 
@@ -80,83 +67,70 @@ late FlutterSecureStorage secureStorage;
 @visibleForTesting
 bool skipUnmaintainedAlert = false;
 
-@visibleForTesting
 Wrapper wrapper = Wrapper();
 
-List<Middleware<AppState, AppStateBuilder, AppActions>> middleware({
-  @visibleForTesting bool includeErrorMiddleware = true,
-}) =>
-    [
-      if (includeErrorMiddleware) _errorMiddleware,
-      _saveStateMiddleware,
-      (MiddlewareBuilder<AppState, AppStateBuilder, AppActions>()
-            ..add(LoginActionsNames.updateLogout, _tap)
-            ..add(SettingsActionsNames.saveNoData, _saveNoData)
-            ..add(AppActionsNames.deleteData, _deleteData)
-            ..add(AppActionsNames.load, _load)
-            ..add(AppActionsNames.start, _start)
-            ..add(DashboardActionsNames.refresh, _refresh)
-            ..add(AppActionsNames.refreshNoInternet, _refreshNoInternet)
-            ..add(AppActionsNames.noInternet, _noInternet)
-            ..add(LoginActionsNames.loggedIn, _loggedIn)
-            ..add(AppActionsNames.restarted, _restarted)
-            ..combine(_absencesMiddleware)
-            ..combine(_calendarMiddleware)
-            ..combine(_dashboardMiddleware)
-            ..combine(_gradesMiddleware)
-            ..combine(_loginMiddleware)
-            ..combine(_notificationsMiddleware)
-            ..combine(_passMiddleware)
-            ..combine(routingMiddleware)
-            ..combine(_certificateMiddleware)
-            ..combine(_messagesMiddleware)
-            ..combine(_profileMiddleware)
-            ..combine(_settingsMiddleware))
-          .build(),
-    ];
+/// Wires [LoginNotifier] to the plain middleware functions. Called once from
+/// main.dart during startup.
+void wireLoginDispatchers(LoginNotifier notifier) {
+  notifier.initReduxDispatchers(
+    load: () => unawaited(_withErrorHandling(_doLoad)),
+    addAccount: () => unawaited(_doAddAccount()),
+    selectAccount: (index) => unawaited(_doSelectAccount(index)),
+    logout: ({required bool hard, bool forced = false}) =>
+        unawaited(_doLogout(hard: hard, forced: forced)),
+    login: (user, pass, url) => unawaited(_doLogin(user, pass, url)),
+    changePass: (user, oldPass, newPass, url) =>
+        unawaited(_doChangePass(user, oldPass, newPass, url)),
+    saveNoPass: (value) => unawaited(_doSaveNoPass(value)),
+    resetPass: (newPass) => unawaited(_doResetPass(newPass)),
+    requestPassReset: (user, email) =>
+        unawaited(_doRequestPassReset(user, email)),
+    showRequestPassReset: (url) => unawaited(() async {
+      providerContainer.read(loginProvider.notifier).setUrl(url);
+      await navigatorKey?.currentState?.pushNamed("/request_pass_reset");
+      providerContainer.read(loginProvider.notifier).updatePassResetState(const PassResetState());
+    }()),
+  );
+}
 
-NextActionHandler _errorMiddleware(
-        MiddlewareApi<AppState, AppStateBuilder, AppActions> api) =>
-    (ActionHandler next) => (Action action) async {
-          Future<void> handleError(dynamic e, StackTrace? trace) async {
-            log("Error caught by error middleware",
-                error: e, stackTrace: trace);
-            unawaited(Sentry.captureException(e, stackTrace: trace));
-            var stackTrace = trace;
-            try {
-              stackTrace ??= e.stackTrace as StackTrace?;
-            } catch (e) {
-              // we can't get a stack trace
-            }
-            var error = e.toString();
-            if (e is! ParseException) {
-              // ParseExceptions will already provide a more precise stack trace
-              error += "\n\n$stackTrace";
-            }
-            error +=
-                "\n\nApp Version: $appVersion\nOS: ${Platform.operatingSystem}\nServer: ${api.state.url}";
-            await navigatorKey?.currentState?.push(
-              MaterialPageRoute<void>(
-                fullscreenDialog: true,
-                builder: (_) {
-                  return Scaffold(
-                    appBar: AppBar(
-                      backgroundColor: Colors.red,
-                      title: const Text("Fehler!"),
-                    ),
-                    body: ListView(
-                      padding: const EdgeInsets.all(16),
-                      children: <Widget>[
-                        const Center(
-                          child: Text(
-                            "Der Fehler wurde automatisch gemeldet.",
-                            style: TextStyle(fontStyle: FontStyle.italic),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                            """
+Future<void> _handleError(dynamic e, StackTrace? trace) async {
+  log("Error caught by error middleware", error: e, stackTrace: trace);
+  unawaited(Sentry.captureException(e, stackTrace: trace));
+  var stackTrace = trace;
+  try {
+    stackTrace ??= e.stackTrace as StackTrace?;
+  } catch (e) {
+    // we can't get a stack trace
+  }
+  var error = e.toString();
+  if (e is! ParseException) {
+    // ParseExceptions will already provide a more precise stack trace
+    error += "\n\n$stackTrace";
+  }
+  error +=
+      "\n\nApp Version: $appVersion\nOS: ${Platform.operatingSystem}\nServer: ${providerContainer.read(loginProvider).url}";
+  await navigatorKey?.currentState?.push(
+    MaterialPageRoute<void>(
+      fullscreenDialog: true,
+      builder: (_) {
+        return Scaffold(
+          appBar: AppBar(
+            backgroundColor: Colors.red,
+            title: const Text("Fehler!"),
+          ),
+          body: ListView(
+            padding: const EdgeInsets.all(16),
+            children: <Widget>[
+              const Center(
+                child: Text(
+                  "Der Fehler wurde automatisch gemeldet.",
+                  style: TextStyle(fontStyle: FontStyle.italic),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  """
 Ein Fehler ist aufgetreten.
 ${e is UnexpectedLogoutException ? """
 
@@ -175,73 +149,40 @@ Bitte benachrichtige uns, damit wir diesen Fehler beheben können:"""}
  --  Fehlerprotokoll: --
 
 $error""",
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
+                ),
               ),
-            );
-          }
-
-          if (action.name == AppActionsNames.error.name) {
-            await handleError(action.payload, null);
-          } else {
-            try {
-              await next(action);
-            } catch (e, stackTrace) {
-              await handleError(e, stackTrace);
-            }
-          }
-        };
-
-void _tap(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
-    ActionHandler next, Action<void> action) {
-  wrapper.interaction();
-  // do not call next: this action is only to update the logout time
+            ],
+          ),
+        );
+      },
+    ),
+  );
 }
 
-Future<void> _refreshNoInternet(
-    MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
-    ActionHandler next,
-    Action<void> action) async {
-  await next(action);
-  final noInternet = await wrapper.refreshNoInternet();
-  await api.actions.noInternet(noInternet);
-}
-
-Future<void> _noInternet(
-    MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
-    ActionHandler next,
-    Action<bool> action) async {
-  final prevNoInternet = api.state.noInternet;
-  await next(action);
-  final noInternet = api.state.noInternet;
-  if (prevNoInternet != noInternet) {
-    if (noInternet) {
-      showSnackBar("Keine Verbindung");
-
-      wrapper.logout(
-        hard: false,
-        logoutForcedByServer: true,
-      );
-    } else {
-      await api.actions.dashboardActions.refresh();
-    }
+Future<void> _withErrorHandling(Future<void> Function() fn) async {
+  try {
+    await fn();
+  } catch (e, stackTrace) {
+    await _handleError(e, stackTrace);
   }
 }
 
-Future<void> _load(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
-    ActionHandler next, Action<void> action) async {
+Future<void> startApp(Uri? uri) => _withErrorHandling(() => _doStart(uri));
+Future<void> saveStateImmediately() => _doSaveState(immediately: true);
+@visibleForTesting
+Future<void> triggerDeferredSaveState() => _doSaveState();
+
+Future<void> _doLoad() async {
   // By resetting the wrapper we clear all cookies.
   // However we don't want to reset the wrapper in tests
   if (wrapper is! Mock) {
-    wrapper = Wrapper();
+    wrapper = Wrapper()
+      ..onNoInternet = (bool v) =>
+          providerContainer.read(noInternetProvider.notifier).setNoInternet(v);
   }
-  wrapper.noInternet = api.state.noInternet;
-  await next(action);
-  if (!api.state.noInternet) _popAll();
+  providerContainer.read(settingsProvider.notifier).onSaveState =
+      () => unawaited(_doSaveState(immediately: true));
+  if (!providerContainer.read(noInternetProvider)) _popAll();
   dynamic login;
   try {
     login = json.decode(await secureStorage.read(key: "login") ?? "{}");
@@ -266,114 +207,58 @@ Future<void> _load(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
             ?.map<String>((dynamic login) => login["user"] as String) ??
         <String>[],
   );
-  await api.actions.loginActions.setAvailableAccounts(otherAccounts);
-  if ((api.state.url != null && api.state.url != url) ||
-      (api.state.loginState.username != null &&
-          api.state.loginState.username != user)) {
+  providerContainer.read(loginProvider.notifier).setOtherAccounts(otherAccounts);
+  final currentLogin = providerContainer.read(loginProvider);
+  if ((currentLogin.url != null && currentLogin.url != url) ||
+      (currentLogin.username != null && currentLogin.username != user)) {
     // TODO: Figure out when exactly we'd hit this code path and how to handle it better.
-    await api.actions.savePassActions.delete();
-    await api.actions.routingActions.showLogin();
+    await _doDeletePass();
+    providerContainer.read(appRouterProvider).showLogin();
   } else {
     if (user != null && pass != null) {
-      await api.actions.loginActions.login(
-        LoginPayload((b) => b
-          ..user = user
-          ..pass = pass
-          ..url = url
-          ..fromStorage = true),
+      await _doLogin(user, pass, url ?? "", fromStorage: true);
+    } else {
+      providerContainer.read(appRouterProvider).showLogin();
+    }
+  }
+}
+
+Future<void> _doSaveState({bool immediately = false}) async {
+  final loginState = providerContainer.read(loginProvider);
+  if (loginState.loggedIn && loginState.username != null) {
+    _stateToSave = AppState();
+    if (_saveUnderway && !immediately) return;
+    _saveUnderway = true;
+
+    Future<void> save() async {
+      final state = _stateToSave;
+      final settings = providerContainer.read(settingsProvider);
+      final user = getStorageKey(
+        providerContainer.read(loginProvider).username,
+        wrapper.loginAddress,
       );
-    } else {
-      await api.actions.routingActions.showLogin();
-    }
-  }
-}
-
-Future<void> _refresh(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
-    ActionHandler next, Action<void> action) async {
-  await next(action);
-  await Future.wait([
-    api.actions.dashboardActions.load(api.state.dashboardState.future),
-    api.actions.notificationsActions.load(),
-  ]);
-}
-
-Future<void> _loggedIn(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
-    ActionHandler next, Action<LoggedInPayload> action) async {
-  if (action.payload.fromStorage) {
-    // If we logged in with saved credentials password saving must be enabled.
-    wrapper.safeMode = false;
-  }
-  if (!api.state.settingsState.noPasswordSaving &&
-      !action.payload.fromStorage) {
-    await api.actions.savePassActions.save();
-  }
-  deletedData = false;
-  final key = getStorageKey(action.payload.username, wrapper.loginAddress);
-  if (!api.state.loginState.loggedIn && !action.payload.secondaryOnlineLogin) {
-    log("loading state");
-    final state = await _readFromStorage(key);
-    if (state != null) {
-      try {
-        final serializedState =
-            serializers.deserialize(json.decode(state) as Object);
-        if (serializedState is SettingsState) {
-          await api.actions.mountAppState(
-            api.state.rebuild(
-              (b) => b
-                ..settingsState.replace(
-                  // Override the previous password saving setting with whatever the user chose this time.
-                  serializedState.rebuild(
-                    (b) => b.noPasswordSaving =
-                        api.state.settingsState.noPasswordSaving,
-                  ),
-                ),
-            ),
-          );
-        } else if (serializedState is AppState) {
-          final currentState = api.state;
-          await api.actions.mountAppState(
-            serializedState.rebuild(
-              (b) => b
-                ..loginState.replace(currentState.loginState)
-                ..noInternet = currentState.noInternet
-                ..config = currentState.config?.toBuilder()
-                ..dashboardState.future = true
-                ..gradesState.semester.replace(
-                      currentState.gradesState.semester == Semester.all
-                          ? serializedState.gradesState.semester
-                          : currentState.gradesState.semester,
-                    )
-                // Override the previous password saving setting with whatever the user chose this time.
-                ..settingsState.noPasswordSaving =
-                    api.state.settingsState.noPasswordSaving,
-            ),
-          );
-        }
-
-        // next not at the beginning: bug fix (serialization)
-        await next(action);
-
-        await api.actions.settingsActions
-            .saveNoPass(api.state.settingsState.noPasswordSaving);
-      } catch (e) {
-        showSnackBar("Fehler beim Laden der gespeicherten Daten");
-        log("Failed to load data", error: e);
-        await next(action);
+      _saveUnderway = false;
+      String toSave;
+      if (!settings.noDataSaving && !deletedData) {
+        toSave = json.encode({
+          'v': 2,
+          'state': serializers.serialize(state),
+          'settings': settings.toJson(),
+        });
+      } else {
+        toSave = json.encode({'v': 2, 'settings': settings.toJson()});
       }
-    } else {
-      await next(action);
+      if (_lastSave == toSave && _lastUsernameSaved == user) return;
+      _lastSave = toSave;
+      _lastUsernameSaved = user;
+      await _writeToStorage(user, toSave);
     }
 
-    _popAll();
-  } else {
-    await next(action);
-  }
-  for (final callback in api.state.loginState.callAfterLogin) {
-    callback();
-  }
-  if (!action.payload.offlineOnly) {
-    await api.actions.dashboardActions.load(api.state.dashboardState.future);
-    await api.actions.notificationsActions.load();
+    if (immediately) {
+      await save();
+    } else {
+      Future.delayed(const Duration(seconds: 5), save);
+    }
   }
 }
 
@@ -386,55 +271,6 @@ late AppState _stateToSave;
 // which would restore it.
 @visibleForTesting
 bool deletedData = false;
-
-NextActionHandler _saveStateMiddleware(
-        MiddlewareApi<AppState, AppStateBuilder, AppActions> api) =>
-    (ActionHandler next) => (Action action) async {
-          await next(action);
-          if (api.state.loginState.loggedIn &&
-              api.state.loginState.username != null) {
-            _stateToSave = api.state;
-            final bool immediately =
-                action.name == AppActionsNames.saveState.name;
-            if (_saveUnderway && !immediately) {
-              return;
-            }
-
-            _saveUnderway = true;
-
-            Future<void> save() async {
-              final state = _stateToSave;
-              final user = getStorageKey(
-                state.loginState.username,
-                wrapper.loginAddress,
-              );
-              _saveUnderway = false;
-              String toSave;
-              if (!state.settingsState.noDataSaving && !deletedData) {
-                toSave = json.encode(
-                  serializers.serialize(state),
-                );
-              } else {
-                toSave = json.encode(
-                  serializers.serialize(state.settingsState),
-                );
-              }
-              if (_lastSave == toSave && _lastUsernameSaved == user) return;
-              _lastSave = toSave;
-              _lastUsernameSaved = user;
-              await _writeToStorage(
-                user,
-                toSave,
-              );
-            }
-
-            if (immediately) {
-              await save();
-            } else {
-              Future.delayed(const Duration(seconds: 5), save);
-            }
-          }
-        };
 
 String getStorageKey(String? user, String server) {
   // This is safe because the default Map in dart is a LinkedHashMap, which mantains
@@ -467,63 +303,37 @@ Future<String?> _readFromStorage(String key) async {
   }
 }
 
-Future<void> _saveNoData(
-  MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
-  ActionHandler next,
-  Action<void> action,
-) async {
-  await next(action);
-  await api.actions.saveState();
-}
-
-Future<void> _deleteData(
-  MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
-  ActionHandler next,
-  Action<void> action,
-) async {
-  await next(action);
-  deletedData = true;
-  await api.actions.saveState();
-}
-
-Future<void> _restarted(
-  MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
-  ActionHandler next,
-  Action<void> action,
-) async {
-  await next(action);
-  if (api.state.loginState.loggedIn &&
+Future<void> handleRestarted() async {
+  if (providerContainer.read(loginProvider).loggedIn &&
       DateTime.now().difference(wrapper.lastInteraction).inMinutes > 3) {
     wrapper.interaction();
     final poppedAnything = _popAll();
     if (!poppedAnything) {
-      // If we pop something the routeObserver will trigger a reload of the dasboard.
-      // However, if we are on the dashboard already, we need to this here.
-      await api.actions.dashboardActions.refresh();
+      await providerContainer.read(dashboardProvider.notifier).refresh();
     }
   }
 }
 
-Future<void> _start(
-  MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
-  ActionHandler next,
-  Action<Uri?> action,
-) async {
-  await api.actions.loginActions.clearAfterLoginCallbacks();
-  if (action.payload != null) {
-    await api.actions.setUrl(action.payload!.origin);
-    final parameters = action.payload!.queryParameters;
+Future<void> _doStart(Uri? uri) async {
+  providerContainer.read(loginProvider.notifier).clearAfterLoginCallbacks();
+  if (uri != null) {
+    providerContainer.read(loginProvider.notifier).setUrl(uri.origin);
+    final parameters = uri.queryParameters;
     switch (parameters["semesterWechsel"]) {
       case "1":
-        await api.actions.loginActions.addAfterLoginCallback(
-          () => api.actions.gradesActions.setSemester(Semester.first),
+        providerContainer.read(loginProvider.notifier).addAfterLoginCallback(
+          () => providerContainer
+              .read(gradesProvider.notifier)
+              .setSemester(Semester.first),
         );
       case "2":
-        await api.actions.loginActions.addAfterLoginCallback(
-          () => api.actions.gradesActions.setSemester(Semester.second),
+        providerContainer.read(loginProvider.notifier).addAfterLoginCallback(
+          () => providerContainer
+              .read(gradesProvider.notifier)
+              .setSemester(Semester.second),
         );
     }
-    switch (action.payload!.path) {
+    switch (uri.path) {
       case "":
       case "/":
       case "/v2/":
@@ -532,55 +342,53 @@ Future<void> _start(
         if (parameters["resetmail"] == "true") {
           final email = parameters["email"];
           final token = parameters["token"];
-          await api.actions.routingActions.showPassReset(
-            ShowPassResetPayload(
-              (b) => b
-                ..token = token
-                ..email = email,
-            ),
-          );
+          unawaited(navigatorKey?.currentState?.pushNamed("/pass_reset"));
+          providerContainer.read(loginProvider.notifier).updatePassResetState(
+                PassResetState(email: email, token: token),
+              );
           return;
         }
         if (parameters["username"] != null) {
-          await api.actions.loginActions.setUsername(parameters["username"]!);
+          providerContainer
+              .read(loginProvider.notifier)
+              .setUsername(parameters["username"]!);
         }
         if (parameters["redirect"] != null) {
           await redirectAfterLogin(
-              parameters["redirect"]!.replaceFirst("#", ""), api);
+              parameters["redirect"]!.replaceFirst("#", ""));
         }
       default:
         showSnackBar("Dieser Link konnte nicht geöffnet werden");
     }
-    await redirectAfterLogin(action.payload!.fragment, api);
+    await redirectAfterLogin(uri.fragment);
   }
-  await api.actions.load();
+  await _doLoad();
 }
 
-Future<void> redirectAfterLogin(String location,
-    MiddlewareApi<AppState, AppStateBuilder, AppActions> api) async {
+Future<void> redirectAfterLogin(String location) async {
   switch (location) {
     case "":
     case "dashboard/student":
       break;
     case "student/absences":
-      await api.actions.loginActions.addAfterLoginCallback(
-        api.actions.routingActions.showAbsences.call,
+      providerContainer.read(loginProvider.notifier).addAfterLoginCallback(
+        () => providerContainer.read(appRouterProvider).showAbsences(),
       );
     case "calendar/student":
-      await api.actions.loginActions.addAfterLoginCallback(
-        api.actions.routingActions.showCalendar.call,
+      providerContainer.read(loginProvider.notifier).addAfterLoginCallback(
+        () => providerContainer.read(appRouterProvider).showCalendar(),
       );
     case "student/subjects":
-      await api.actions.loginActions.addAfterLoginCallback(
-        api.actions.routingActions.showGrades.call,
+      providerContainer.read(loginProvider.notifier).addAfterLoginCallback(
+        () => providerContainer.read(appRouterProvider).showGrades(),
       );
     case "student/certificate":
-      await api.actions.loginActions.addAfterLoginCallback(
-        api.actions.routingActions.showCertificate.call,
+      providerContainer.read(loginProvider.notifier).addAfterLoginCallback(
+        () => providerContainer.read(appRouterProvider).showCertificate(),
       );
     case "message/list":
-      await api.actions.loginActions.addAfterLoginCallback(
-        api.actions.routingActions.showMessages.call,
+      providerContainer.read(loginProvider.notifier).addAfterLoginCallback(
+        () => providerContainer.read(appRouterProvider).showMessages(),
       );
     default:
       showSnackBar("Dieser Link konnte nicht geöffnet werden");
@@ -721,50 +529,6 @@ Future<void> _checkShowUnmaintainedAlert() async {
     file.createSync();
     return;
   }
-
-  final isBeforeJuly2023 = DateTime.now().isBefore(DateTime(2023, 7));
-
-  await showDialog<void>(
-    context: navigatorKey!.currentContext!,
-    builder: (context) {
-      return InfoDialog(
-        title: const Text("Hi!"),
-        content: Text.rich(
-          TextSpan(
-            text:
-                "Wie Du vielleicht weißt, ist diese App ein Hobbyprojekt von mir. Nachdem ich ${isBeforeJuly2023 ? "dieses Jahr maturiere" : "2023 maturiert habe"}, "
-                "werde ich mich in Zukunft nicht mehr selbst um Fehlerbehebungen in der App kümmern können, "
-                "auch wenn sie wahrscheinlich noch weiter funktionieren wird.\n\n"
-                "${isBeforeJuly2023 ? "Ich hoffe, die App war euch bisher eine Hilfe. " : ""}Für Interessierte: ",
-            children: [
-              TextSpan(
-                text: "github.com/mideb/digitales_register",
-                style: const TextStyle(color: Colors.blue),
-                recognizer: TapGestureRecognizer()
-                  ..onTap = () {
-                    launchUrl(
-                      Uri.parse("https://github.com/mideb/digitales_register"),
-                      mode: LaunchMode.externalApplication,
-                    );
-                  },
-              ),
-              const TextSpan(
-                  text: ".\n\n"
-                      "Die offizielle Seite (digitalesregister.it) ist davon natürlich nicht betroffen!\n\n"
-                      "Danke nochmal an alle, die diese App in den letzten Jahren genutzt haben.\n\n"
-                      "Michael")
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("OK"),
-          ),
-        ],
-      );
-    },
-  );
 
   await file.create();
 }

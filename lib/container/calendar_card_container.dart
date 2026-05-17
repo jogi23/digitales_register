@@ -1,4 +1,5 @@
 // Copyright (C) 2021 Michael Debertol
+// Copyright (C) 2026 Johannes Feichter
 //
 // This file is part of digitales_register.
 //
@@ -15,15 +16,16 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
-import 'package:dr/actions/app_actions.dart';
 import 'package:dr/app_state.dart';
-import 'package:dr/data.dart';
+import 'package:dr/providers/calendar_provider.dart';
+import 'package:dr/providers/no_internet_provider.dart';
+import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/ui/calendar_card.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_built_redux/flutter_built_redux.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class CalendarCardContainer extends StatelessWidget {
+class CalendarCardContainer extends ConsumerWidget {
   final int hourIndex;
   final UtcDateTime day;
 
@@ -34,41 +36,20 @@ class CalendarCardContainer extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return StoreConnection<AppState, AppActions, CalendarCardViewModel>(
-      builder: (context, state, actions) {
-        return CalendarCard(
-          hour: state.hour,
-          theme: state.theme,
-          selected: state.selected,
-          onOpenFile: actions.calendarActions.onOpenFile.call,
-          noInternet: state.noInternet,
-        );
-      },
-      connect: (state) {
-        final hour = state.calendarState.days[day]!.hours[hourIndex];
-        return CalendarCardViewModel(
-          hour: hour,
-          theme: state.settingsState.subjectThemes[hour.subject]!,
-          selected: state.calendarState.selection?.date == day &&
-              state.calendarState.selection?.hour == hour.fromHour,
-          noInternet: state.noInternet,
-        );
-      },
+  Widget build(BuildContext context, WidgetRef ref) {
+    final calendarState = ref.watch(calendarProvider);
+    final noInternet = ref.watch(noInternetProvider);
+    final hour = calendarState.days[day]!.hours[hourIndex];
+    final theme =
+      ref.watch(settingsProvider).subjectThemes[hour.subject] ?? const SubjectTheme();
+    return CalendarCard(
+      hour: hour,
+      theme: theme,
+      selected: calendarState.selection?.date == day &&
+          calendarState.selection?.hour == hour.fromHour,
+      onOpenFile: (submission) =>
+          ref.read(calendarProvider.notifier).openLessonFile(submission),
+      noInternet: noInternet,
     );
   }
-}
-
-class CalendarCardViewModel {
-  final CalendarHour hour;
-  final SubjectTheme theme;
-  final bool selected;
-  final bool noInternet;
-
-  CalendarCardViewModel({
-    required this.noInternet,
-    required this.hour,
-    required this.theme,
-    required this.selected,
-  });
 }

@@ -1,4 +1,5 @@
 // Copyright (C) 2021 Michael Debertol
+// Copyright (C) 2026 Johannes Feichter
 //
 // This file is part of digitales_register.
 //
@@ -16,82 +17,86 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:built_collection/built_collection.dart';
-import 'package:built_value/built_value.dart';
-import 'package:dr/actions/app_actions.dart';
 import 'package:dr/app_state.dart';
+import 'package:dr/data.dart';
+import 'package:dr/providers/grades_provider.dart';
+import 'package:dr/providers/no_internet_provider.dart';
+import 'package:dr/providers/settings_provider.dart';
+import 'package:dr/services/app_router.dart';
 import 'package:dr/ui/grades_page.dart';
 import 'package:dr/ui/last_fetched_overlay.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
-import 'package:flutter/material.dart' hide Builder;
-import 'package:flutter_built_redux/flutter_built_redux.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-part 'grades_page_container.g.dart';
-
-class GradesPageContainer extends StatelessWidget {
+class GradesPageContainer extends ConsumerWidget {
   const GradesPageContainer({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return StoreConnection<AppState, AppActions, GradesPageViewModel>(
-      builder: (context, vm, actions) {
-        return GradesPage(
-          vm: vm,
-          changeSemester: actions.gradesActions.setSemester.call,
-          showGradesSettings:
-              actions.routingActions.showEditGradesAverageSettings.call,
-        );
-      },
-      connect: (state) {
-        return GradesPageViewModel.from(state);
-      },
-    );
-  }
-}
-
-abstract class GradesPageViewModel
-    implements Built<GradesPageViewModel, GradesPageViewModelBuilder> {
-  Semester get showSemester;
-
-  String get allSubjectsAverage;
-  String? get lastFetchedMessage;
-  bool get loading;
-  bool get showGradesDiagram;
-  bool get showAllSubjectsAverage;
-  bool get hasData;
-  bool get noInternet;
-
-  factory GradesPageViewModel(
-          [void Function(GradesPageViewModelBuilder)? updates]) =
-      _$GradesPageViewModel;
-  GradesPageViewModel._();
-
-  factory GradesPageViewModel.from(AppState state) {
-    return GradesPageViewModel(
-      (b) => b
-        ..showSemester = state.gradesState.semester.toBuilder()
-        ..loading = state.gradesState.loading
-        ..allSubjectsAverage = calculateAllSubjectsAverage(state)
-        ..hasData = state.gradesState.subjects.any(
-          (s) => state.gradesState.semester != Semester.all
-              ? s.gradesAll.containsKey(state.gradesState.semester)
+  Widget build(BuildContext context, WidgetRef ref) {
+    final gradesState = ref.watch(gradesProvider);
+    final settings = ref.watch(settingsProvider);
+    final noInternet = ref.watch(noInternetProvider);
+    return GradesPage(
+      vm: GradesPageViewModel(
+        showSemester: gradesState.semester,
+        loading: gradesState.loading,
+        allSubjectsAverage: calculateAllSubjectsAverage(
+          gradesState.subjects,
+          gradesState.semester,
+          settings.ignoreForGradesAverage,
+        ),
+        hasData: gradesState.subjects.any(
+          (s) => gradesState.semester != Semester.all
+              ? s.gradesAll.containsKey(gradesState.semester)
               : s.gradesAll.isNotEmpty,
-        )
-        ..noInternet = state.noInternet
-        ..showGradesDiagram = state.settingsState.showGradesDiagram
-        ..showAllSubjectsAverage = state.settingsState.showAllSubjectsAverage
-        ..lastFetchedMessage = _lastFetchedMessage(state),
+        ),
+        noInternet: noInternet,
+        showGradesDiagram: settings.showGradesDiagram,
+        showAllSubjectsAverage: settings.showAllSubjectsAverage,
+        lastFetchedMessage: _lastFetchedMessage(gradesState, noInternet),
+      ),
+      changeSemester: ref.read(gradesProvider.notifier).setSemester,
+      showGradesSettings:
+          ref.read(appRouterProvider).showEditGradesAverageSettings,
     );
   }
 }
 
-String calculateAllSubjectsAverage(AppState state) {
+class GradesPageViewModel {
+  final Semester showSemester;
+  final String allSubjectsAverage;
+  final String? lastFetchedMessage;
+  final bool loading;
+  final bool showGradesDiagram;
+  final bool showAllSubjectsAverage;
+  final bool hasData;
+  final bool noInternet;
+
+  const GradesPageViewModel({
+    required this.showSemester,
+    required this.allSubjectsAverage,
+    required this.lastFetchedMessage,
+    required this.loading,
+    required this.showGradesDiagram,
+    required this.showAllSubjectsAverage,
+    required this.hasData,
+    required this.noInternet,
+  });
+}
+
+String calculateAllSubjectsAverage(
+  BuiltList<Subject> subjects,
+  Semester semester,
+  List<String> ignoreForGradesAverage,
+) {
   var sum = 0;
   var n = 0;
-  for (final subject in state.gradesState.subjects) {
-    final average = subject.average(state.gradesState.semester);
+  for (final subject in subjects) {
+    final average = subject.average(semester);
     if (average != null &&
-        !state.settingsState.ignoreForGradesAverage.any(
+        !ignoreForGradesAverage.any(
           (element) => element.toLowerCase() == subject.name.toLowerCase(),
         )) {
       sum += average;
@@ -101,18 +106,18 @@ String calculateAllSubjectsAverage(AppState state) {
   if (n == 0) {
     return "/";
   } else {
-    return gradeAverageFormat.format(sum / n / 100);
+    return gradeAverageFormat.format(sum / n / 100.0);
   }
 }
 
-String? _lastFetchedMessage(AppState state) {
-  if (state.gradesState.subjects.isEmpty) {
+String? _lastFetchedMessage(GradesState gradesState, bool noInternet) {
+  if (gradesState.subjects.isEmpty) {
     return null;
   }
   final timeAgoString = formatTimeAgoPerSemester(
-    noInternet: state.noInternet,
-    lastFetched: state.gradesState.subjects.first.lastFetchedBasic,
-    semester: state.gradesState.semester,
+    noInternet: noInternet,
+    lastFetched: gradesState.subjects.first.lastFetchedBasic,
+    semester: gradesState.semester,
   );
   if (timeAgoString == null) {
     return null;

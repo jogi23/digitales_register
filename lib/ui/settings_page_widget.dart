@@ -1,4 +1,5 @@
 // Copyright (C) 2021 Michael Debertol
+// Copyright (C) 2026 Johannes Feichter
 //
 // This file is part of digitales_register.
 //
@@ -237,6 +238,7 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
             onChanged: _selectTheme,
             title: const Text("Dunkel"),
           ),
+          const _SeedColorPicker(),
           const Divider(
             indent: 15,
             endIndent: 15,
@@ -258,9 +260,7 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
                       widget.onSetSubjectTheme(
                         MapEntry(
                           theme.key,
-                          theme.value.rebuild(
-                            (b) => b.color = color.value,
-                          ),
+                          theme.value.copyWith(color: color.value),
                         ),
                       );
                     }
@@ -280,7 +280,7 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
           ),
           SwitchListTile.adaptive(
             title: const Text(
-              "Hausaufgaben mit diesen Farben umrahmen",
+              "Hausaufgaben mit diesen Farben färben",
             ),
             value: widget.vm.dashboardColorBorders,
             onChanged: widget.onSetDashboardColorBorders,
@@ -553,7 +553,7 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
               );
             },
           ),
-          if (!Platform.isMacOS)
+          if (false)
             ListTile(
               leading: const Icon(Icons.monetization_on),
               title: const Text(
@@ -570,8 +570,13 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
             trailing: const Icon(Icons.open_in_new),
             onTap: () async {
               await launchUrl(
-                Uri.parse(
-                  "https://docs.google.com/forms/d/e/1FAIpQLSeRYFLq346UH6sMzKicMHwE8KhtnTm4KBv_yho5b0GSrRsluA/viewform?usp=sf_link&entry.1362624919=${Uri.encodeQueryComponent(appVersion)}",
+                Uri(
+                  scheme: 'mailto',
+                  path: 'joe.fei23@gmail.com',
+                  queryParameters: {
+                    'subject':
+                        'Feedback Digitales Register Südtirol $appVersion',
+                  },
                 ),
               );
             },
@@ -581,7 +586,7 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
             trailing: const Icon(Icons.open_in_new),
             title: const Text("Zum Quellcode"),
             onTap: () => launchUrl(
-              Uri.parse("https://github.com/miDeb/digitales_register"),
+              Uri.parse("https://github.com/jogi23/digitales_register"),
             ),
           ),
           AboutListTile(
@@ -591,8 +596,8 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
               child: Image.asset("assets/transparent.png"),
             ),
             applicationLegalese:
-                "Copyright Michael Debertol und Simon Wachtler 2019-2022",
-            applicationName: "Digitales Register (Client)",
+                "Copyright Johannes Feichter 2026\n\t\tMichael Debertol und Simon Wachtler 2019-2022",
+            applicationName: "Digitales Register Südtirol",
             applicationVersion: appVersion,
             aboutBoxChildren: [
               const Text("Ein Client für das Digitale Register."),
@@ -600,8 +605,23 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
                 TextSpan(children: [
                   const TextSpan(text: "Entwickelt von "),
                   TextSpan(
+                    text: "Johannes Feichter",
+                    style:
+                        TextStyle(color: Theme.of(context).colorScheme.primary),
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () {
+                        launchUrl(
+                          Uri.parse(
+                              "https://blog.debertol.com"), // todo: fix url+create website
+                          mode: LaunchMode.externalApplication,
+                        );
+                      },
+                  ),
+                  const TextSpan(text: ", "),
+                  TextSpan(
                     text: "Michael Debertol",
-                    style: const TextStyle(color: Colors.blue),
+                    style:
+                        TextStyle(color: Theme.of(context).colorScheme.primary),
                     recognizer: TapGestureRecognizer()
                       ..onTap = () {
                         launchUrl(
@@ -610,14 +630,16 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
                         );
                       },
                   ),
-                  const TextSpan(text: " @ "),
+                  const TextSpan(text: " and "),
                   TextSpan(
-                    text: "evvvolution.com",
-                    style: const TextStyle(color: Colors.blue),
+                    text: "Simon Wachtler",
+                    style:
+                        TextStyle(color: Theme.of(context).colorScheme.primary),
                     recognizer: TapGestureRecognizer()
                       ..onTap = () {
                         launchUrl(
-                          Uri.parse("https://evvvolution.com"),
+                          Uri.parse(
+                              "https://www.evvvolution.com/team/simon-wachtler"),
                           mode: LaunchMode.externalApplication,
                         );
                       },
@@ -634,9 +656,10 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
               Align(
                 alignment: Alignment.centerLeft,
                 child: InkWell(
-                  child: const Text(
+                  child: Text(
                     "See the GNU General Public License for more details.",
-                    style: TextStyle(color: Colors.blue),
+                    style:
+                        TextStyle(color: Theme.of(context).colorScheme.primary),
                   ),
                   onTap: () {
                     launchUrl(
@@ -903,6 +926,77 @@ class _AddSubjectState extends State<AddSubject> {
           child: const Text("Fertig"),
         ),
       ],
+    );
+  }
+}
+
+class _SeedColorPicker extends StatelessWidget {
+  static const _colors = [
+    (label: 'Orange', color: Color(0xFFFF5722)),
+    (label: 'Rot', color: Color(0xFFF44336)),
+    (label: 'Pink', color: Color(0xFFE91E63)),
+    (label: 'Lila', color: Color(0xFF9C27B0)),
+    (label: 'Indigo', color: Color(0xFF3F51B5)),
+    (label: 'Blau', color: Color(0xFF2196F3)),
+    (label: 'Türkis', color: Color(0xFF009688)),
+    (label: 'Grün', color: Color(0xFF4CAF50)),
+    (label: 'Braun', color: Color(0xFF795548)),
+    (label: 'Grau', color: Color(0xFF607D8B)),
+  ];
+
+  const _SeedColorPicker();
+
+  @override
+  Widget build(BuildContext context) {
+    final currentSeed = DynamicTheme.of(context)!.seedColor;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Akzentfarbe', style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final entry in _colors)
+                Tooltip(
+                  message: entry.label,
+                  child: GestureDetector(
+                    onTap: () =>
+                        DynamicTheme.of(context)!.setSeedColor(entry.color),
+                    child: Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: entry.color,
+                        shape: BoxShape.circle,
+                        border: entry.color.value == currentSeed.value
+                            ? Border.all(
+                                color: Theme.of(context).colorScheme.onSurface,
+                                width: 3,
+                              )
+                            : null,
+                      ),
+                      child: entry.color.value == currentSeed.value
+                          ? Icon(
+                              Icons.check,
+                              size: 18,
+                              color: ThemeData.estimateBrightnessForColor(
+                                          entry.color) ==
+                                      Brightness.dark
+                                  ? Colors.white
+                                  : Colors.black,
+                            )
+                          : null,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

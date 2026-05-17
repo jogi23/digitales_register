@@ -1,4 +1,5 @@
 // Copyright (C) 2021 Michael Debertol
+// Copyright (C) 2026 Johannes Feichter
 //
 // This file is part of digitales_register.
 //
@@ -25,7 +26,7 @@ class NetworkProtocolPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text("Netzwerkprotokoll"),
       ),
-      body: NetworkProtocolContainer(),
+      body: const NetworkProtocolContainer(),
     );
   }
 }

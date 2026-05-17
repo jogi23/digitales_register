@@ -1,4 +1,5 @@
 // Copyright (C) 2021 Michael Debertol
+// Copyright (C) 2026 Johannes Feichter
 //
 // This file is part of digitales_register.
 //
@@ -16,60 +17,46 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:collection/collection.dart';
-import 'package:dr/actions/app_actions.dart';
-import 'package:dr/app_state.dart';
+import 'package:dr/providers/calendar_provider.dart';
+import 'package:dr/providers/no_internet_provider.dart';
+import 'package:dr/providers/settings_provider.dart';
+import 'package:dr/services/app_router.dart';
 import 'package:dr/ui/calendar.dart';
-import 'package:dr/utc_date_time.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_built_redux/flutter_built_redux.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class CalendarContainer extends StatelessWidget {
+class CalendarContainer extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
-    return StoreConnection<AppState, AppActions, CalendarViewModel>(
-      builder: (context, vm, actions) {
-        return Calendar(
-          vm: vm,
-          showEditSubjectNicks:
-              actions.routingActions.showEditCalendarSubjectNicks.call,
-          closeEditNicksBar: () =>
-              actions.settingsActions.showCalendarSubjectNicksBar(false),
-          dayCallback: actions.calendarActions.load.call,
-          currentMondayCallback: actions.calendarActions.setCurrentMonday.call,
-        );
-      },
-      connect: (state) {
-        return CalendarViewModel(state);
-      },
-    );
-  }
-}
-
-typedef DayCallback = void Function(UtcDateTime day);
-
-class CalendarViewModel {
-  final bool showEditNicksBar, noInternet;
-  final UtcDateTime? first;
-  final UtcDateTime? last;
-  final UtcDateTime currentMonday;
-  final CalendarSelection? selection;
-
-  CalendarViewModel(AppState state)
-      : first = state.calendarState.currentDays.isEmpty
-            ? null
-            : state.calendarState.currentDays.first.date,
-        last = state.calendarState.currentDays.isEmpty
-            ? null
-            : state.calendarState.currentDays.last.date,
-        currentMonday = state.calendarState.currentMonday!,
-        showEditNicksBar = state.calendarState.currentDays.any(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final calendarState = ref.watch(calendarProvider);
+    final noInternet = ref.watch(noInternetProvider);
+    final settings = ref.watch(settingsProvider);
+    final currentDays = calendarState.currentDays;
+    final subjectNicks = settings.subjectNicks;
+    return Calendar(
+      vm: CalendarViewModel(
+        first: currentDays.isEmpty ? null : currentDays.first.date,
+        last: currentDays.isEmpty ? null : currentDays.last.date,
+        currentMonday: calendarState.currentMonday!,
+        showEditNicksBar: currentDays.any(
               (day) => day.hours.any(
-                (hour) => state.settingsState.subjectNicks.entries.none(
+                (hour) => subjectNicks.entries.none(
                   (entry) => equalsIgnoreAsciiCase(entry.key, hour.subject),
                 ),
               ),
             ) &&
-            state.settingsState.showCalendarNicksBar,
-        noInternet = state.noInternet,
-        selection = state.calendarState.selection;
+            settings.showCalendarNicksBar,
+        noInternet: noInternet,
+        selection: calendarState.selection,
+      ),
+      showEditSubjectNicks:
+          ref.read(appRouterProvider).showEditCalendarSubjectNicks,
+      closeEditNicksBar: () =>
+          ref.read(settingsProvider.notifier).setShowCalendarNicksBar(false),
+      dayCallback: (monday) =>
+          ref.read(calendarProvider.notifier).load(monday),
+      currentMondayCallback: (monday) =>
+          ref.read(calendarProvider.notifier).setCurrentMonday(monday),
+    );
+  }
 }

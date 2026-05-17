@@ -1,4 +1,5 @@
 // Copyright (C) 2021 Michael Debertol
+// Copyright (C) 2026 Johannes Feichter
 //
 // This file is part of digitales_register.
 //
@@ -17,71 +18,78 @@
 
 import 'package:built_collection/built_collection.dart';
 import 'package:built_value/built_value.dart';
-import 'package:dr/actions/app_actions.dart';
-import 'package:dr/actions/dashboard_actions.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/data.dart';
+import 'package:dr/main.dart' show showSnackBar;
+import 'package:dr/providers/dashboard_error_provider.dart';
+import 'package:dr/providers/dashboard_provider.dart';
+import 'package:dr/providers/login_provider.dart';
+import 'package:dr/providers/no_internet_provider.dart';
+import 'package:dr/providers/notifications_provider.dart';
+import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/ui/days.dart';
 import 'package:flutter/material.dart' hide Builder;
-import 'package:flutter_built_redux/flutter_built_redux.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 part 'days_container.g.dart';
 
-class DaysContainer extends StatelessWidget {
+class DaysContainer extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
-    return StoreConnection<AppState, AppActions, DaysViewModel>(
-      builder: (context, vm, actions) {
-        return DaysWidget(
-          vm: vm,
-          onSwitchFuture: actions.dashboardActions.switchFuture.call,
-          refresh: actions.dashboardActions.refresh.call,
-          addReminderCallback: (day, msg) {
-            actions.dashboardActions.addReminder(
-              AddReminderPayload(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final dashboard = ref.watch(dashboardProvider);
+    final noInternet = ref.watch(noInternetProvider);
+    final settings = ref.watch(settingsProvider);
+    final loginLoading = ref.watch(loginProvider.select((s) => s.loading));
+    final showNotifications = ref.watch(notificationsProvider.select((s) => s.notifications.isNotEmpty));
+    ref.listen<String?>(dashboardErrorProvider, (_, error) {
+      if (error != null) {
+        showSnackBar(error);
+        ref.read(dashboardErrorProvider.notifier).state = null;
+      }
+    });
+    final notifier = ref.read(dashboardProvider.notifier);
+    final blacklist = dashboard.blacklist!;
+    final unorderedDays = dashboard.allDays
+            ?.where((day) => day.future == dashboard.future)
+            .map(
+              (day) => day.rebuild(
                 (b) => b
-                  ..msg = msg
-                  ..date = day.date,
+                  ..deletedHomework
+                      .where((hw) => !isBlacklisted(hw, blacklist))
+                  ..homework.where((hw) => !isBlacklisted(hw, blacklist)),
               ),
-            );
-          },
-          removeReminderCallback: (hw, day) {
-            actions.dashboardActions.deleteHomework(hw);
-          },
-          toggleDoneCallback: (hw, done) {
-            actions.dashboardActions.toggleDone(
-              ToggleDonePayload(
-                (b) => b
-                  ..homeworkId = hw.id
-                  ..type = hw.type.name
-                  ..done = done,
-              ),
-            );
-          },
-          setDoNotAskWhenDeleteCallback: () {
-            actions.settingsActions.askWhenDeleteReminder(false);
-          },
-          markAsSeenCallback: actions.dashboardActions.markAsSeen.call,
-          markDeletedHomeworkAsSeenCallback:
-              actions.dashboardActions.markDeletedHomeworkAsSeen.call,
-          markAllAsSeenCallback: actions.dashboardActions.markAllAsSeen.call,
-          refreshNoInternet: actions.refreshNoInternet.call,
-          onOpenAttachment: actions.dashboardActions.openAttachment.call,
-        );
-      },
-      connect: (state) {
-        return DaysViewModel.from(state);
-      },
+            )
+            .toList() ??
+        [];
+
+    final vm = DaysViewModel.from(
+      dashboard,
+      noInternet,
+      loginLoading,
+      showNotifications,
+      settings,
+      unorderedDays,
+      blacklist,
+    );
+
+    return DaysWidget(
+      vm: vm,
+      onSwitchFuture: notifier.switchFuture,
+      refresh: notifier.refresh,
+      addReminderCallback: (day, msg) => notifier.addReminder(day.date, msg),
+      removeReminderCallback: (hw, day) => notifier.deleteHomework(hw),
+      toggleDoneCallback: (hw, done) =>
+          notifier.toggleDone(hw.id, hw.type.name, done),
+      setDoNotAskWhenDeleteCallback: () =>
+          ref.read(settingsProvider.notifier).setAskWhenDelete(false),
+      markAsSeenCallback: notifier.markAsSeen,
+      markDeletedHomeworkAsSeenCallback: notifier.markDeletedHomeworkAsSeen,
+      markAllAsSeenCallback: notifier.markAllAsSeen,
+      refreshNoInternet: ref.read(loginProvider.notifier).refreshNoInternet,
+      onOpenAttachment: notifier.openAttachment,
     );
   }
 }
-
-typedef AddReminderCallback = void Function(Day day, String reminder);
-typedef RemoveReminderCallback = void Function(Homework hw, Day day);
-typedef ToggleDoneCallback = void Function(Homework hw, bool done);
-typedef MarkAsNotNewOrChangedCallback = void Function(Homework hw);
-typedef MarkDeletedHomeworkAsSeenCallback = void Function(Day day);
-typedef AttachmentCallback = void Function(GradeGroupSubmission ggs);
 
 abstract class DaysViewModel
     implements Built<DaysViewModel, DaysViewModelBuilder> {
@@ -101,41 +109,30 @@ abstract class DaysViewModel
       _$DaysViewModel;
   DaysViewModel._();
 
-  factory DaysViewModel.from(AppState state) {
-    final unorderedDays = state.dashboardState.allDays
-            ?.where((day) => day.future == state.dashboardState.future)
-            .map(
-              (day) => day.rebuild(
-                (b) => b
-                  ..deletedHomework.where(
-                    (hw) => !isBlacklisted(hw, state.dashboardState.blacklist!),
-                  )
-                  ..homework.where(
-                    (hw) => !isBlacklisted(hw, state.dashboardState.blacklist!),
-                  ),
-              ),
-            )
-            .toList() ??
-        [];
-
-    return DaysViewModel(
-      (b) => b
-        ..days = ListBuilder(
-          !state.dashboardState.future ? unorderedDays.reversed : unorderedDays,
-        )
-        ..noInternet = state.noInternet
-        ..future = state.dashboardState.future
-        ..loading = state.dashboardState.loading || state.loginState.loading
-        ..askWhenDelete = state.settingsState.askWhenDelete
-        ..showAddReminder =
-            !state.dashboardState.blacklist!.contains(HomeworkType.homework)
-        ..showNotifications =
-            (state.notificationState.notifications?.length ?? 0) > 0
-        ..colorBorders = state.settingsState.dashboardColorBorders
-        ..colorTestsInRed = state.settingsState.dashboardColorTestsInRed
-        ..subjectThemes = state.settingsState.subjectThemes.toBuilder(),
-    );
-  }
+  static DaysViewModel from(
+    DashboardState dashboard,
+    bool noInternet,
+    bool loginLoading,
+    bool showNotifications,
+    SettingsState settings,
+    List<Day> unorderedDays,
+    BuiltList<HomeworkType> blacklist,
+  ) =>
+      DaysViewModel(
+        (b) => b
+          ..days = ListBuilder(
+            !dashboard.future ? unorderedDays.reversed : unorderedDays,
+          )
+          ..noInternet = noInternet
+          ..future = dashboard.future
+          ..loading = dashboard.loading || loginLoading
+          ..askWhenDelete = settings.askWhenDelete
+          ..showAddReminder = !blacklist.contains(HomeworkType.homework)
+          ..showNotifications = showNotifications
+          ..colorBorders = settings.dashboardColorBorders
+          ..colorTestsInRed = settings.dashboardColorTestsInRed
+          ..subjectThemes = MapBuilder(settings.subjectThemes),
+      );
 }
 
 // Map all (previously by the server used) homework types to the titles they

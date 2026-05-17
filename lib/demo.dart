@@ -1,3 +1,4 @@
+// Copyright (C) 2026 Johannes Feichter
 // ignore_for_file:implicit_dynamic_list_literal,implicit_dynamic_map_literal
 
 import 'package:intl/intl.dart';

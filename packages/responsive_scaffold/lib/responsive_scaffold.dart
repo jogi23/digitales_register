@@ -158,6 +158,7 @@ class ResponsiveScaffoldState<T> extends State<ResponsiveScaffold<T>>
   /// Pops all routes and resets the body of this scaffold to [widget.homeBody].
   /// [currentSelected] will be accordingly set to [widget.homeId].
   void goHome() {
+    closeDrawerIfOpen();
     navigatorKey.currentState!.popUntil((route) => route.isFirst);
     _wentHome();
   }
@@ -194,43 +195,55 @@ class ResponsiveScaffoldState<T> extends State<ResponsiveScaffold<T>>
             tabletMode: tabletMode,
             child: _InheritedHomePage(
               fab: widget.homeFloatingActionButton,
-              scaffoldKey: scaffoldKey,
               body: widget.homeBody,
               appBar: widget.homeAppBar,
-              drawer: !tabletMode
-                  ? widget.drawerBuilder(
-                      selectContentWidget,
-                      goHome,
-                      currentSelected,
-                      false,
-                    )
-                  : null,
+              openDrawer: tabletMode
+                  ? () {}
+                  : () => scaffoldKey.currentState?.openDrawer(),
+              goHome: goHome,
               child: Material(
-                child: Row(
-                  children: [
-                    SizeTransition(
-                      axis: Axis.horizontal,
-                      sizeFactor: _drawerAnimationController,
-                      axisAlignment: 1,
-                      child: _Drawer(
-                        drawerAnimationController: _drawerAnimationController,
-                        child: widget.drawerBuilder(
+                child: tabletMode
+                    ? Row(
+                        children: [
+                          SizeTransition(
+                            axis: Axis.horizontal,
+                            sizeFactor: _drawerAnimationController,
+                            axisAlignment: 1,
+                            child: _Drawer(
+                              drawerAnimationController:
+                                  _drawerAnimationController,
+                              child: widget.drawerBuilder(
+                                selectContentWidget,
+                                goHome,
+                                currentSelected,
+                                true,
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: _Body<T>(
+                              navKey: navigatorKey,
+                              navObserver: _PopObserver(_wentHome),
+                              homeId: widget.homeId,
+                            ),
+                          ),
+                        ],
+                      )
+                    : Scaffold(
+                        key: scaffoldKey,
+                        drawer: widget.drawerBuilder(
                           selectContentWidget,
                           goHome,
                           currentSelected,
-                          true,
+                          false,
+                        ),
+                        drawerEdgeDragWidth: 20.0,
+                        body: _Body<T>(
+                          navKey: navigatorKey,
+                          navObserver: _PopObserver(_wentHome),
+                          homeId: widget.homeId,
                         ),
                       ),
-                    ),
-                    Expanded(
-                      child: _Body<T>(
-                        navKey: navigatorKey,
-                        navObserver: _PopObserver(_wentHome),
-                        homeId: widget.homeId,
-                      ),
-                    ),
-                  ],
-                ),
               ),
             ),
           );
@@ -324,17 +337,17 @@ class _InheritedTabletMode extends InheritedWidget {
 
 class _InheritedHomePage extends InheritedWidget {
   final Widget body;
-  final Widget? drawer;
   final PreferredSizeWidget appBar;
   final Widget? fab;
-  final Key scaffoldKey;
+  final VoidCallback openDrawer;
+  final VoidCallback goHome;
 
   const _InheritedHomePage({
     required this.body,
     required super.child,
     required this.appBar,
-    required this.drawer,
-    required this.scaffoldKey,
+    required this.openDrawer,
+    required this.goHome,
     this.fab,
   });
 
@@ -402,10 +415,31 @@ class ResponsiveAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final tabletMode = _InheritedTabletMode.of(context)?.tabletMode ?? false;
+    final homePage = _InheritedHomePage.of(context);
+    final canPop = ModalRoute.of(context)?.canPop ?? false;
+
+    Widget? leading;
+    if (!tabletMode) {
+      if (canPop) {
+        leading = IconButton(
+          icon: const Icon(Icons.home),
+          tooltip: 'Merkheft',
+          onPressed: homePage?.goHome,
+        );
+      } else {
+        leading = IconButton(
+          icon: const Icon(Icons.menu),
+          tooltip: 'Menü öffnen',
+          onPressed: homePage?.openDrawer,
+        );
+      }
+    }
+
     return AppBar(
       actions: actions,
       title: title,
-      automaticallyImplyLeading: !tabletMode,
+      leading: leading,
+      automaticallyImplyLeading: false,
     );
   }
 
@@ -419,11 +453,8 @@ class _HomePage extends StatelessWidget {
     final widgets = _InheritedHomePage.of(context)!;
     return Scaffold(
       appBar: widgets.appBar,
-      drawer: widgets.drawer,
       body: widgets.body,
-      key: widgets.scaffoldKey,
       floatingActionButton: widgets.fab,
-      drawerEdgeDragWidth: double.infinity,
     );
   }
 }

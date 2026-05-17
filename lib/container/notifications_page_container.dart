@@ -1,4 +1,5 @@
 // Copyright (C) 2021 Michael Debertol
+// Copyright (C) 2026 Johannes Feichter
 //
 // This file is part of digitales_register.
 //
@@ -15,36 +16,26 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
-import 'package:dr/actions/app_actions.dart';
-import 'package:dr/app_state.dart';
-import 'package:dr/data.dart';
+import 'package:dr/providers/no_internet_provider.dart';
+import 'package:dr/providers/notifications_provider.dart';
+import 'package:dr/services/app_router.dart';
 import 'package:dr/ui/notifications_page.dart';
-import 'package:dr/utc_date_time.dart';
 import 'package:flutter/material.dart' hide Notification;
-import 'package:flutter_built_redux/flutter_built_redux.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class NotificationPageContainer extends StatelessWidget {
+class NotificationPageContainer extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
-    return StoreConnection<AppState, AppActions,
-        (List<Notification>, UtcDateTime?, bool)>(
-      builder: (context, vm, actions) {
-        return NotificationPage(
-          notifications: vm.$1,
-          noInternet: vm.$3,
-          deleteNotification: actions.notificationsActions.delete.call,
-          deleteAllNotifications: actions.notificationsActions.deleteAll.call,
-          goToMessage: actions.routingActions.showMessage.call,
-          lastFetched: vm.$2,
-        );
-      },
-      connect: (state) {
-        return (
-          state.notificationState.notifications!.toList(),
-          state.notificationState.lastFetched,
-          state.noInternet,
-        );
-      },
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(notificationsProvider);
+    final noInternet = ref.watch(noInternetProvider);
+    final notifier = ref.read(notificationsProvider.notifier);
+    return NotificationPage(
+      notifications: state.notifications,
+      noInternet: noInternet,
+      deleteNotification: notifier.delete,
+      deleteAllNotifications: notifier.deleteAll,
+      goToMessage: ref.read(appRouterProvider).showMessage,
+      lastFetched: state.lastFetched,
     );
   }
 }

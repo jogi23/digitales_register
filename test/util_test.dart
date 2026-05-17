@@ -1,3 +1,4 @@
+// Copyright (C) 2026 Johannes Feichter
 // Copyright (C) 2024 Michael Debertol
 //
 // This file is part of digitales_register.
@@ -231,31 +232,20 @@ void main() {
       expect(decoded, isA<AppState>());
     });
 
-    test('AppState with settings roundtrips correctly', () {
-      final state = AppState(
-        (b) => b.settingsState
-          ..noDataSaving = true
-          ..noPasswordSaving = true,
-      );
+    test('AppState roundtrip does not preserve loginState', () {
+      final state = AppState();
       final encoded = json.encode(serializers.serialize(state));
       final decoded =
           serializers.deserialize(json.decode(encoded) as Object)! as AppState;
-      // Settings are serialized and survive the roundtrip
-      expect(decoded.settingsState.noDataSaving, isTrue);
-      expect(decoded.settingsState.noPasswordSaving, isTrue);
-      // loginState is a runtime field — not preserved across serialization
       expect(decoded.loginState.loggedIn, isFalse);
     });
 
-    test('SettingsState serializes and deserializes', () {
-      final state = AppState(
-        (b) => b.settingsState
-          ..noDataSaving = true
-          ..noPasswordSaving = false,
-      );
-      final encoded = json.encode(serializers.serialize(state.settingsState));
-      final decoded = serializers.deserialize(json.decode(encoded) as Object)!
-          as SettingsState;
+    test('SettingsState serializes and deserializes via toJson/fromJson', () {
+      final settings =
+          SettingsState(noDataSaving: true, noPasswordSaving: false);
+      final encoded = json.encode(settings.toJson());
+      final decoded = SettingsState.fromJson(
+          json.decode(encoded) as Map<dynamic, dynamic>);
       expect(decoded.noDataSaving, isTrue);
       expect(decoded.noPasswordSaving, isFalse);
     });

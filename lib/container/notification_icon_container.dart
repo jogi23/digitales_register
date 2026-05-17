@@ -1,4 +1,5 @@
 // Copyright (C) 2021 Michael Debertol
+// Copyright (C) 2026 Johannes Feichter
 //
 // This file is part of digitales_register.
 //
@@ -15,25 +16,21 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
-import 'package:dr/actions/app_actions.dart';
-import 'package:dr/app_state.dart';
+import 'package:dr/providers/notifications_provider.dart';
+import 'package:dr/services/app_router.dart';
 import 'package:dr/ui/notification_icon.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_built_redux/flutter_built_redux.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class NotificationIconContainer extends StatelessWidget {
+class NotificationIconContainer extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
-    return StoreConnection<AppState, AppActions, int>(
-      builder: (context, vm, actions) {
-        return NotificationIcon(
-          notifications: vm,
-          onTap: actions.routingActions.showNotifications.call,
-        );
-      },
-      connect: (state) {
-        return state.notificationState.notifications?.length ?? 0;
-      },
+  Widget build(BuildContext context, WidgetRef ref) {
+    final count = ref.watch(
+      notificationsProvider.select((s) => s.notifications.length),
+    );
+    return NotificationIcon(
+      notifications: count,
+      onTap: ref.read(appRouterProvider).showNotifications,
     );
   }
 }

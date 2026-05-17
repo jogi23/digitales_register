@@ -1,4 +1,5 @@
 // Copyright (C) 2021 Michael Debertol
+// Copyright (C) 2026 Johannes Feichter
 //
 // This file is part of digitales_register.
 //
@@ -15,15 +16,15 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
-import 'package:built_collection/built_collection.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/container/calendar_week_container.dart';
 import 'package:dr/data.dart';
-import 'package:dr/main.dart';
+import 'package:dr/providers/calendar_provider.dart';
 import 'package:dr/ui/last_fetched_overlay.dart';
 import 'package:dr/ui/no_internet.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 
@@ -80,13 +81,13 @@ class CalendarWeek extends StatelessWidget {
 }
 
 class _HoursChunk extends StatelessWidget {
-  final BuiltMap<String, String> subjectNicks;
+  final Map<String, String> subjectNicks;
   final List<CalendarHour> hours;
   final CalendarDay day;
   final int? selectedHour;
   final bool isSelected;
   final bool colorBackground;
-  final BuiltMap<String, SubjectTheme> subjectThemes;
+  final Map<String, SubjectTheme> subjectThemes;
 
   const _HoursChunk({
     required this.subjectNicks,
@@ -132,11 +133,13 @@ class _HoursChunk extends StatelessWidget {
                       subjectNicks: subjectNicks,
                       day: day,
                       isSelected: selectedHour == hours[n ~/ 2].fromHour,
-                      backgroundColor: colorBackground
+                      backgroundColor: colorBackground &&
+                              subjectThemes.containsKey(hours[n ~/ 2].subject)
                           ? Color(subjectThemes[hours[n ~/ 2].subject]!.color)
                               .withOpacity(0.25)
                           : Colors.transparent,
-                      selectedBackgroundColor: colorBackground
+                      selectedBackgroundColor: colorBackground &&
+                              subjectThemes.containsKey(hours[n ~/ 2].subject)
                           ? Color(subjectThemes[hours[n ~/ 2].subject]!.color)
                               .withOpacity(0.5)
                           : Theme.of(context)
@@ -158,11 +161,11 @@ class _HoursChunk extends StatelessWidget {
 class CalendarDayWidget extends StatelessWidget {
   final int max;
   final CalendarDay calendarDay;
-  final BuiltMap<String, String> subjectNicks;
+  final Map<String, String> subjectNicks;
   final bool isSelected;
   final int? selectedHour;
   final bool colorBackground;
-  final BuiltMap<String, SubjectTheme> subjectThemes;
+  final Map<String, SubjectTheme> subjectThemes;
 
   const CalendarDayWidget({
     super.key,
@@ -249,10 +252,10 @@ class CalendarDayWidget extends StatelessWidget {
   }
 }
 
-class HourWidget extends StatelessWidget {
+class HourWidget extends ConsumerWidget {
   final CalendarHour hour;
   final CalendarDay day;
-  final BuiltMap<String, String> subjectNicks;
+  final Map<String, String> subjectNicks;
   final bool isSelected;
   final Color backgroundColor;
   final Color selectedBackgroundColor;
@@ -267,28 +270,29 @@ class HourWidget extends StatelessWidget {
     required this.selectedBackgroundColor,
   });
   @override
-  Widget build(BuildContext context) {
-    return Flexible(
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Expanded(
       flex: hour.length,
       child: ClipRect(
         child: InkWell(
           onTap: () {
-            actions.calendarActions.select(
-              CalendarSelection((b) => b
-                ..date = day.date
-                ..hour = hour.fromHour),
-            );
+            ref.read(calendarProvider.notifier).select(
+                  CalendarSelection((b) => b
+                    ..date = day.date
+                    ..hour = hour.fromHour),
+                );
           },
           child: DecoratedBox(
             decoration: BoxDecoration(
               border: hour.warning
-                  ? const Border(
-                      left: BorderSide(color: Colors.red, width: 5),
+                  ? Border(
+                      left: BorderSide(
+                          color: Theme.of(context).colorScheme.error, width: 5),
                     )
                   : null,
               color: isSelected ? selectedBackgroundColor : backgroundColor,
             ),
-            child: Center(
+            child: SizedBox.expand(
               child: FittedBox(
                 fit: BoxFit.scaleDown,
                 child: Column(
@@ -298,6 +302,7 @@ class HourWidget extends StatelessWidget {
                     Text(
                       subjectNicks[hour.subject.toLowerCase()] ?? hour.subject,
                       maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       softWrap: false,
                     ),
                     if (hour.teachers.isNotEmpty)
@@ -308,6 +313,7 @@ class HourWidget extends StatelessWidget {
                       Text(
                         teacher.lastName,
                         maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         softWrap: false,
                         style: DefaultTextStyle.of(context)
                             .style
@@ -321,6 +327,7 @@ class HourWidget extends StatelessWidget {
                       Text(
                         room,
                         maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         softWrap: false,
                         style: DefaultTextStyle.of(context)
                             .style

@@ -1,4 +1,5 @@
 // Copyright (C) 2021 Michael Debertol
+// Copyright (C) 2026 Johannes Feichter
 //
 // This file is part of digitales_register.
 //
@@ -15,44 +16,15 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
-import 'package:built_value/built_value.dart';
-import 'package:dr/actions/app_actions.dart';
-import 'package:dr/app_state.dart';
+import 'package:dr/providers/login_provider.dart';
 import 'package:dr/ui/home_page_content.dart';
-import 'package:flutter/material.dart' hide Builder;
-import 'package:flutter_built_redux/flutter_built_redux.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-part 'home_page.g.dart';
-
-class HomePage extends StatelessWidget {
+class HomePage extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
-    return StoreConnection<AppState, AppActions, HomePageContentViewModel>(
-      builder: (context, vm, actions) {
-        return HomePageContent(
-          vm: vm,
-        );
-      },
-      connect: (state) {
-        return HomePageContentViewModel.from(state);
-      },
-    );
-  }
-}
-
-abstract class HomePageContentViewModel
-    implements
-        Built<HomePageContentViewModel, HomePageContentViewModelBuilder> {
-  bool get splash;
-
-  factory HomePageContentViewModel(
-          [void Function(HomePageContentViewModelBuilder)? updates]) =
-      _$HomePageContentViewModel;
-  HomePageContentViewModel._();
-
-  factory HomePageContentViewModel.from(AppState state) {
-    return HomePageContentViewModel(
-      (b) => b..splash = !state.loginState.loggedIn,
-    );
+  Widget build(BuildContext context, WidgetRef ref) {
+    final loggedIn = ref.watch(loginProvider.select((s) => s.loggedIn));
+    return HomePageContent(splash: !loggedIn);
   }
 }

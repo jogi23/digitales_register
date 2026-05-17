@@ -1,4 +1,5 @@
 // Copyright (C) 2021 Michael Debertol
+// Copyright (C) 2026 Johannes Feichter
 //
 // This file is part of digitales_register.
 //
@@ -15,20 +16,19 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
-import 'package:built_redux/built_redux.dart';
 import 'package:dio/dio.dart';
-import 'package:dr/actions/app_actions.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/main.dart';
 import 'package:dr/middleware/middleware.dart';
-import 'package:dr/reducer/reducer.dart';
+import 'package:dr/providers/login_provider.dart';
+import 'package:dr/providers/provider_container.dart' as pc;
 import 'package:dr/wrapper.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:mocktail/mocktail.dart';
 
-import '../../save_state_test.dart';
 import '../../test_utils.dart';
 
 class MockDio extends Mock implements Dio {}
@@ -47,14 +47,15 @@ void main() {
 
     passDio = MockDio();
 
-    final store = Store<AppState, AppStateBuilder, AppActions>(
-      appReducerBuilder.build(),
-      AppState(),
-      AppActions(),
-      middleware: middleware(includeErrorMiddleware: false),
+    pc.providerContainer = ProviderContainer();
+    wireLoginDispatchers(pc.providerContainer.read(loginProvider.notifier));
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: pc.providerContainer,
+        child: const RegisterApp(),
+      ),
     );
-    await tester.pumpWidget(RegisterApp(store: store));
-    await store.actions.start(null);
+    await startApp(null);
     await tester.pumpAndSettle();
     await expectLater(
       find.byType(MaterialApp),
@@ -190,15 +191,15 @@ void main() {
       ),
     ).thenAnswer((_) async => null);
 
-    final store = Store<AppState, AppStateBuilder, AppActions>(
-      appReducerBuilder.build(),
-      AppState(),
-      AppActions(),
-      middleware: middleware(includeErrorMiddleware: false),
+    pc.providerContainer = ProviderContainer();
+    wireLoginDispatchers(pc.providerContainer.read(loginProvider.notifier));
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: pc.providerContainer,
+        child: const RegisterApp(),
+      ),
     );
-
-    await tester.pumpWidget(RegisterApp(store: store));
-    await store.actions.start(null);
+    await startApp(null);
     await tester.pumpAndSettle();
 
     await tester.tap(find.byIcon(Icons.settings));

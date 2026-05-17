@@ -1,4 +1,5 @@
 // Copyright (C) 2021 Michael Debertol
+// Copyright (C) 2026 Johannes Feichter
 //
 // This file is part of digitales_register.
 //
@@ -17,32 +18,18 @@
 
 part of 'middleware.dart';
 
-final _passMiddleware =
-    MiddlewareBuilder<AppState, AppStateBuilder, AppActions>()
-      ..add(SettingsActionsNames.saveNoPass, _setSavePass)
-      ..add(SavePassActionsNames.save, _savePass)
-      ..add(SavePassActionsNames.delete, _deletePass);
-
-Future<void> _setSavePass(
-    MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
-    ActionHandler next,
-    Action<bool> action) async {
-  await next(action);
-  wrapper.safeMode = action.payload;
-  if (!api.state.loginState.loggedIn) return;
-  if (!action.payload) {
-    await api.actions.savePassActions.save();
+Future<void> _doSaveNoPass(bool value) async {
+  wrapper.safeMode = value;
+  if (!providerContainer.read(loginProvider).loggedIn) return;
+  if (!value) {
+    await _doSavePass();
   } else {
-    await api.actions.savePassActions.delete();
+    await _doDeletePass();
   }
 }
 
-Future<void> _savePass(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
-    ActionHandler next, Action<void> action) async {
-  await next(action);
-  if (wrapper.user == null || wrapper.pass == null || wrapper.safeMode) {
-    return;
-  }
+Future<void> _doSavePass() async {
+  if (wrapper.user == null || wrapper.pass == null || wrapper.safeMode) return;
   await secureStorage.write(
     key: "login",
     value: json.encode(
@@ -56,11 +43,7 @@ Future<void> _savePass(MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
   );
 }
 
-Future<void> _deletePass(
-    MiddlewareApi<AppState, AppStateBuilder, AppActions> api,
-    ActionHandler next,
-    Action<void> action) async {
-  await next(action);
+Future<void> _doDeletePass() async {
   await secureStorage.write(
     key: "login",
     value: json.encode(

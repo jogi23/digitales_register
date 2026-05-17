@@ -1,4 +1,5 @@
 // Copyright (C) 2021 Michael Debertol
+// Copyright (C) 2026 Johannes Feichter
 //
 // This file is part of digitales_register.
 //
@@ -75,6 +76,9 @@ class Wrapper {
 
   bool get noInternet => _session.noInternet;
   set noInternet(bool value) => _session.noInternet = value;
+
+  set onNoInternet(void Function(bool)? callback) =>
+      _session.onNoInternet = callback;
 
   bool get safeMode => _session.safeMode;
   set safeMode(bool value) => _session.safeMode = value;

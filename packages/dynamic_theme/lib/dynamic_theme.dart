@@ -7,7 +7,7 @@ typedef ThemedWidgetBuilder = Widget Function(
     BuildContext context, ThemeData data);
 
 typedef ThemeDataBuilder = ThemeData Function(
-    Brightness brightness, bool platformOverride);
+    Brightness brightness, bool platformOverride, Color seedColor);
 
 class DynamicTheme extends StatefulWidget {
   const DynamicTheme({
@@ -44,10 +44,14 @@ class DynamicThemeState extends State<DynamicTheme>
   late Brightness _deviceBrightness;
   late bool _followDevice;
   late bool _platformOverride;
+  late Color _seedColor;
 
   static const String _sharedPreferencesBrightnessKey = 'isDark';
   static const String _sharedPreferencesFollowDeviceKey = 'followDeviceTheme';
   static const String _sharedPreferencesPlatformKey = 'platformOverride';
+  static const String _sharedPreferencesSeedColorKey = 'seedColor';
+
+  static const Color _defaultSeedColor = Color(0xFFFF5722); // deepOrange
 
   /// Get the current `ThemeData`
   ThemeData get themeData => _themeData;
@@ -66,6 +70,9 @@ class DynamicThemeState extends State<DynamicTheme>
   /// Get the current `platformOverride`
   bool get platformOverride => _platformOverride;
 
+  /// Get the current seed color
+  Color get seedColor => _seedColor;
+
   Brightness _getDeviceBrightness() {
     return WidgetsBinding.instance.window.platformBrightness;
   }
@@ -83,8 +90,9 @@ class DynamicThemeState extends State<DynamicTheme>
     final bool isDark = await _getBrightnessBool();
     _platformOverride = await _getPlatformBool();
     _followDevice = await _getFollowDeviceBool();
+    _seedColor = await _getSeedColor();
     _brightness = isDark ? Brightness.dark : Brightness.light;
-    _themeData = widget.data(brightness, _platformOverride);
+    _themeData = widget.data(brightness, _platformOverride, _seedColor);
     if (mounted) {
       setState(() {});
     }
@@ -96,7 +104,8 @@ class DynamicThemeState extends State<DynamicTheme>
     _brightness = widget.defaultBrightness;
     _platformOverride = false;
     _followDevice = true;
-    _themeData = widget.data(brightness, _platformOverride);
+    _seedColor = _defaultSeedColor;
+    _themeData = widget.data(brightness, _platformOverride, _seedColor);
   }
 
   @override
@@ -104,7 +113,7 @@ class DynamicThemeState extends State<DynamicTheme>
     _deviceBrightness = _getDeviceBrightness();
     if (followDevice) {
       setState(() {
-        _themeData = widget.data(brightness, _platformOverride);
+        _themeData = widget.data(brightness, _platformOverride, _seedColor);
       });
     }
     super.didChangePlatformBrightness();
@@ -113,13 +122,13 @@ class DynamicThemeState extends State<DynamicTheme>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _themeData = widget.data(brightness, _platformOverride);
+    _themeData = widget.data(brightness, _platformOverride, _seedColor);
   }
 
   @override
   void didUpdateWidget(DynamicTheme oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _themeData = widget.data(brightness, _platformOverride);
+    _themeData = widget.data(brightness, _platformOverride, _seedColor);
   }
 
   @override
@@ -134,7 +143,7 @@ class DynamicThemeState extends State<DynamicTheme>
     // Update state with new values
     setState(() {
       _brightness = brightness;
-      _themeData = widget.data(this.brightness, _platformOverride);
+      _themeData = widget.data(this.brightness, _platformOverride, _seedColor);
     });
     // Save the brightness
     await _saveBrightness();
@@ -146,7 +155,7 @@ class DynamicThemeState extends State<DynamicTheme>
     // Update state with new values
     setState(() {
       _followDevice = followOS;
-      _themeData = widget.data(brightness, _platformOverride);
+      _themeData = widget.data(brightness, _platformOverride, _seedColor);
     });
     // Save
     await _saveFollowDevice();
@@ -157,11 +166,21 @@ class DynamicThemeState extends State<DynamicTheme>
   Future<void> setPlatformOverride(bool platformOverride) async {
     // Update state with new values
     setState(() {
-      _themeData = widget.data(brightness, platformOverride);
+      _themeData = widget.data(brightness, platformOverride, _seedColor);
       _platformOverride = platformOverride;
     });
     // Save
     await _savePlatformOverride();
+  }
+
+  /// Sets the new seed color
+  /// Rebuilds the tree
+  Future<void> setSeedColor(Color color) async {
+    setState(() {
+      _seedColor = color;
+      _themeData = widget.data(brightness, _platformOverride, _seedColor);
+    });
+    await _saveSeedColor();
   }
 
   /// Saves the provided brightness in `SharedPreferences`
@@ -186,6 +205,12 @@ class DynamicThemeState extends State<DynamicTheme>
     await prefs.setBool(_sharedPreferencesPlatformKey, _platformOverride);
   }
 
+  /// Saves the seed color in `SharedPreferences`
+  Future<void> _saveSeedColor() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_sharedPreferencesSeedColorKey, _seedColor.value);
+  }
+
   /// Returns a boolean that gives you the latest brightness
   Future<bool> _getBrightnessBool() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -205,6 +230,13 @@ class DynamicThemeState extends State<DynamicTheme>
   Future<bool> _getPlatformBool() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getBool(_sharedPreferencesPlatformKey) ?? false;
+  }
+
+  /// Returns the saved seed color
+  Future<Color> _getSeedColor() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final int? value = prefs.getInt(_sharedPreferencesSeedColorKey);
+    return value != null ? Color(value) : _defaultSeedColor;
   }
 
   @override

@@ -1,3 +1,4 @@
+// Copyright (C) 2026 Johannes Feichter
 class UtcDateTime extends DateTime {
   UtcDateTime(
     super.year, [

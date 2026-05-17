@@ -1,4 +1,5 @@
 // Copyright (C) 2021 Michael Debertol
+// Copyright (C) 2026 Johannes Feichter
 //
 // This file is part of digitales_register.
 //
@@ -43,8 +44,9 @@ class AbsenceGroupWidget extends StatelessWidget {
       shape: RoundedRectangleBorder(
         side: vm.justified == AbsenceJustified.notYetJustified ||
                 vm.justified == AbsenceJustified.notJustified
-            ? const BorderSide(color: Colors.red)
-            : const BorderSide(color: Colors.green, width: 0),
+            ? BorderSide(color: Theme.of(context).colorScheme.error)
+            : BorderSide(
+                color: Theme.of(context).colorScheme.primary, width: 0),
         borderRadius: BorderRadius.circular(16),
       ),
       color: Colors.transparent,
@@ -133,8 +135,9 @@ class FutureAbsenceWidget extends StatelessWidget {
       shape: RoundedRectangleBorder(
         side: absence.justified == AbsenceJustified.notYetJustified ||
                 absence.justified == AbsenceJustified.notJustified
-            ? const BorderSide(color: Colors.red)
-            : const BorderSide(color: Colors.green, width: 0),
+            ? BorderSide(color: Theme.of(context).colorScheme.error)
+            : BorderSide(
+                color: Theme.of(context).colorScheme.primary, width: 0),
         borderRadius: BorderRadius.circular(16),
       ),
       color: Colors.transparent,

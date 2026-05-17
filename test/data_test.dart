@@ -1,3 +1,4 @@
+// Copyright (C) 2026 Johannes Feichter
 import 'package:dr/data.dart';
 import 'package:flutter_test/flutter_test.dart';
 

@@ -1,3 +1,4 @@
+// Copyright (C) 2026 Johannes Feichter
 import 'package:dr/utc_date_time.dart';
 import 'package:flutter/material.dart';
 
@@ -50,12 +51,16 @@ class RawLastFetchedOverlay extends StatelessWidget {
               horizontal: 8,
             ).copyWith(right: 8),
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.55),
+              color: Theme.of(context)
+                  .colorScheme
+                  .inverseSurface
+                  .withValues(alpha: 0.85),
               borderRadius: BorderRadius.circular(5),
             ),
             child: Text(
               message!,
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(
+                  color: Theme.of(context).colorScheme.onInverseSurface),
             ),
           ),
         ),

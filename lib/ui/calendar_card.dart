@@ -1,4 +1,5 @@
 // Copyright (C) 2021 Michael Debertol
+// Copyright (C) 2026 Johannes Feichter
 //
 // This file is part of digitales_register.
 //
@@ -125,7 +126,7 @@ class CalendarCard extends StatelessWidget {
                   title: homeworkExam.typeName,
                   content: homeworkExam.name,
                   icon: Icons.grade,
-                  iconColor: Colors.red,
+                  iconColor: Theme.of(context).colorScheme.error,
                 )
               else
                 _ContentItem(
@@ -262,15 +263,20 @@ class _SubmissionWidget extends StatelessWidget {
               AnimatedLinearProgressIndicator(show: submission.downloading),
               SizedBox(
                 width: double.infinity,
-                child: TextButton(
-                  onPressed: !submission.fileAvailable && noInternet
-                      ? null
-                      : () {
-                          onOpenFile(submission);
-                        },
-                  child: const Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text("Öffnen"),
+                child: Semantics(
+                  label: 'Öffne ${submission.originalName}',
+                  button: true,
+                  excludeSemantics: true,
+                  child: TextButton(
+                    onPressed: !submission.fileAvailable && noInternet
+                        ? null
+                        : () {
+                            onOpenFile(submission);
+                          },
+                    child: const Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text("Öffnen"),
+                    ),
                   ),
                 ),
               ),

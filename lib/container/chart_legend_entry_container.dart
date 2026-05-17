@@ -1,4 +1,5 @@
 // Copyright (C) 2021 Michael Debertol
+// Copyright (C) 2026 Johannes Feichter
 //
 // This file is part of digitales_register.
 //
@@ -15,60 +16,26 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
-import 'package:built_value/built_value.dart';
-import 'package:dr/actions/app_actions.dart';
-import 'package:dr/app_state.dart';
+import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/ui/grades_chart_legend_entry.dart';
-import 'package:flutter/material.dart' hide Builder;
-import 'package:flutter_built_redux/flutter_built_redux.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-part 'chart_legend_entry_container.g.dart';
-
-class ChartLegendEntryContainer extends StatelessWidget {
+class ChartLegendEntryContainer extends ConsumerWidget {
   final String subjectName;
 
   const ChartLegendEntryContainer({super.key, required this.subjectName});
+
   @override
-  Widget build(BuildContext context) {
-    return StoreConnection<AppState, AppActions, ChartLegendEntryVM>(
-      builder: (context, vm, actions) {
-        return GradesChartLegendEntry(
-          config: vm.config,
-          name: vm.name,
-          setThickness: (thickness) {
-            actions.settingsActions.setSubjectTheme(
-              MapEntry(
-                subjectName,
-                vm.config.rebuild(
-                  (b) => b.thick = thickness,
-                ),
-              ),
-            );
-          },
-        );
-      },
-      connect: (state) {
-        return ChartLegendEntryVM.from(state, subjectName);
-      },
-    );
-  }
-}
-
-abstract class ChartLegendEntryVM
-    implements Built<ChartLegendEntryVM, ChartLegendEntryVMBuilder> {
-  String get name;
-  SubjectTheme get config;
-
-  factory ChartLegendEntryVM(
-          [void Function(ChartLegendEntryVMBuilder)? updates]) =
-      _$ChartLegendEntryVM;
-  ChartLegendEntryVM._();
-
-  factory ChartLegendEntryVM.from(AppState state, String name) {
-    return ChartLegendEntryVM(
-      (b) => b
-        ..name = name
-        ..config = state.settingsState.subjectThemes[name]!.toBuilder(),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(settingsProvider).subjectThemes[subjectName];
+    if (theme == null) return const SizedBox.shrink();
+    return GradesChartLegendEntry(
+      config: theme,
+      name: subjectName,
+      setThickness: (thickness) => ref
+          .read(settingsProvider.notifier)
+          .setSubjectTheme(MapEntry(subjectName, theme.copyWith(thick: thickness))),
     );
   }
 }

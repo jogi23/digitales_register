@@ -1,4 +1,5 @@
 // Copyright (C) 2021 Michael Debertol
+// Copyright (C) 2026 Johannes Feichter
 //
 // This file is part of digitales_register.
 //
@@ -15,20 +16,16 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
-import 'package:built_value/built_value.dart';
 import 'package:collection/collection.dart';
-import 'package:dr/actions/app_actions.dart';
-import 'package:dr/app_state.dart';
-import 'package:dr/data.dart';
+import 'package:dr/providers/calendar_provider.dart';
+import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/ui/calendar_detail.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
-import 'package:flutter/material.dart' hide Builder;
-import 'package:flutter_built_redux/flutter_built_redux.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-part 'calendar_detail_container.g.dart';
-
-class CalendarDetailContainer extends StatelessWidget {
+class CalendarDetailContainer extends ConsumerWidget {
   final bool isSidebar;
   final bool show;
   const CalendarDetailContainer({
@@ -38,36 +35,18 @@ class CalendarDetailContainer extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return StoreConnection<AppState, AppActions, CalendarDetailVM>(
-      builder: (context, state, actions) => CalendarDetailPage(
-        selectedDay: state.selectedDay,
-        selectedHour: state.selectedHour,
-        isSidebar: isSidebar,
-        show: show,
-      ),
-      connect: (state) {
-        final selection = state.calendarState.selection;
-        return CalendarDetailVM(
-          selectedDay: selection?.date,
-          selectedHour: selection?.hour,
-        );
-      },
+  Widget build(BuildContext context, WidgetRef ref) {
+    final selection = ref.watch(calendarProvider.select((s) => s.selection));
+    return CalendarDetailPage(
+      selectedDay: selection?.date,
+      selectedHour: selection?.hour,
+      isSidebar: isSidebar,
+      show: show,
     );
   }
 }
 
-class CalendarDetailVM {
-  final UtcDateTime? selectedDay;
-  final int? selectedHour;
-
-  CalendarDetailVM({
-    required this.selectedDay,
-    required this.selectedHour,
-  });
-}
-
-class CalendarDetailItemContainer extends StatelessWidget {
+class CalendarDetailItemContainer extends ConsumerWidget {
   final UtcDateTime date;
   final bool isSidebar;
   const CalendarDetailItemContainer({
@@ -77,48 +56,27 @@ class CalendarDetailItemContainer extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return StoreConnection<AppState, AppActions, CalendarDetailItemVM>(
-      builder: (context, state, actions) => CalendarDetailWrapper(
-        date: date,
-        day: state.day,
-        targetHour: state.hour,
-        noInternet: state.noInternet,
-        loading: state.loading,
-        isSidebar: isSidebar,
-      ),
-      connect: (state) {
-        final day = state.calendarState.days[date];
-        final hourIndex = state.calendarState.selection?.date == date
-            ? state.calendarState.selection?.hour
-            : null;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final calendarState = ref.watch(calendarProvider);
+    final noInternet = ref.watch(noInternetProvider);
 
-        final hour = day != null && hourIndex != null
-            ? day.hours.firstWhereOrNull(
-                (h) => h.fromHour <= hourIndex && h.toHour >= hourIndex)
-            : null;
-        final loading = state.calendarState.daysForWeek(toMonday(date)).isEmpty;
-        return CalendarDetailItemVM(
-          (b) => b
-            ..day = day?.toBuilder()
-            ..hour = hour?.toBuilder()
-            ..noInternet = state.noInternet
-            ..loading = loading,
-        );
-      },
+    final day = calendarState.days[date];
+    final hourIndex = calendarState.selection?.date == date
+        ? calendarState.selection?.hour
+        : null;
+    final hour = day != null && hourIndex != null
+        ? day.hours.firstWhereOrNull(
+            (h) => h.fromHour <= hourIndex && h.toHour >= hourIndex)
+        : null;
+    final loading = calendarState.daysForWeek(toMonday(date)).isEmpty;
+
+    return CalendarDetailWrapper(
+      date: date,
+      day: day,
+      targetHour: hour,
+      noInternet: noInternet,
+      loading: loading,
+      isSidebar: isSidebar,
     );
   }
-}
-
-abstract class CalendarDetailItemVM
-    implements Built<CalendarDetailItemVM, CalendarDetailItemVMBuilder> {
-  CalendarDay? get day;
-  CalendarHour? get hour;
-  bool get noInternet;
-  bool get loading;
-
-  factory CalendarDetailItemVM(
-          [void Function(CalendarDetailItemVMBuilder)? updates]) =
-      _$CalendarDetailItemVM;
-  CalendarDetailItemVM._();
 }

@@ -1,4 +1,4 @@
-// Copyright (C) 2021 Michael Debertol
+// Copyright (C) 2026 Johannes Feichter
 //
 // This file is part of digitales_register.
 //
@@ -35,7 +35,7 @@ class ApiClient {
     (dio.httpClientAdapter as IOHttpClientAdapter).onHttpClientCreate =
         (client) {
       client.userAgent =
-          "Digitales-Register-App $appVersion; https://github.com/miDeb/digitales_register";
+          "DigiRegST $appVersion; https://github.com/jogi23/digitales_register";
       return null;
     };
   }

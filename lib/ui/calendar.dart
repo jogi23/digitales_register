@@ -1,4 +1,5 @@
 // Copyright (C) 2021 Michael Debertol
+// Copyright (C) 2026 Johannes Feichter
 //
 // This file is part of digitales_register.
 //
@@ -15,13 +16,14 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
-import 'package:dr/container/calendar_container.dart';
+import 'package:dr/app_state.dart';
 import 'package:dr/container/calendar_detail_container.dart';
 import 'package:dr/container/calendar_week_container.dart';
-import 'package:dr/main.dart';
+import 'package:dr/providers/calendar_provider.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:responsive_scaffold/responsive_scaffold.dart';
 
@@ -29,7 +31,25 @@ const tabletLayoutBreakPoint = 825;
 
 typedef DayCallback = void Function(UtcDateTime day);
 
-class Calendar extends StatefulWidget {
+class CalendarViewModel {
+  final UtcDateTime? first;
+  final UtcDateTime? last;
+  final UtcDateTime currentMonday;
+  final bool showEditNicksBar;
+  final bool noInternet;
+  final CalendarSelection? selection;
+
+  CalendarViewModel({
+    required this.first,
+    required this.last,
+    required this.currentMonday,
+    required this.showEditNicksBar,
+    required this.noInternet,
+    required this.selection,
+  });
+}
+
+class Calendar extends ConsumerStatefulWidget {
   final CalendarViewModel vm;
 
   final DayCallback dayCallback;
@@ -50,7 +70,7 @@ class Calendar extends StatefulWidget {
   _CalendarState createState() => _CalendarState();
 }
 
-class _CalendarState extends State<Calendar> with TickerProviderStateMixin {
+class _CalendarState extends ConsumerState<Calendar> with TickerProviderStateMixin {
   late PageController _controller;
   late AnimationController _chevronOpacityController;
   late Animation<double> _chevronOpacityAnimation;
@@ -162,7 +182,9 @@ class _CalendarState extends State<Calendar> with TickerProviderStateMixin {
                 fullscreenDialog: true,
               ),
             )
-            .then((_) => actions.calendarActions.select(null));
+            .then(
+              (_) => ref.read(calendarProvider.notifier).select(null),
+            );
       });
     }
     super.didUpdateWidget(oldWidget);
@@ -256,7 +278,15 @@ class _CalendarState extends State<Calendar> with TickerProviderStateMixin {
                                       )
                                     : widget.vm.noInternet
                                         ? const Text("Wähle ein Datum")
-                                        : const CircularProgressIndicator(),
+                                        : Semantics(
+                                            label: 'Lade Termine',
+                                            child: const SizedBox(
+                                              width: 20,
+                                              height: 20,
+                                              child: CircularProgressIndicator(
+                                                  strokeWidth: 2),
+                                            ),
+                                          ),
                               ),
                             ),
                             Expanded(

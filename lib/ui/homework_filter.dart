@@ -1,4 +1,5 @@
 // Copyright (C) 2021 Michael Debertol
+// Copyright (C) 2026 Johannes Feichter
 //
 // This file is part of digitales_register.
 //
@@ -44,8 +45,8 @@ class _HomeworkFilterState extends State<HomeworkFilter>
       trailing: Padding(
         padding: const EdgeInsets.only(right: 8),
         child: badge.Badge(
-          badgeContent: const ColoredBox(
-            color: Colors.red,
+          badgeContent: ColoredBox(
+            color: Theme.of(context).colorScheme.error,
           ),
           showBadge: widget.vm.currentBlacklist.isNotEmpty,
           child: const Icon(Icons.filter_list),

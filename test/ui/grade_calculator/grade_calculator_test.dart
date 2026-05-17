@@ -1,4 +1,5 @@
 // Copyright (C) 2021 Michael Debertol
+// Copyright (C) 2026 Johannes Feichter
 //
 // This file is part of digitales_register.
 //
@@ -15,28 +16,17 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
-import 'package:built_redux/built_redux.dart';
-import 'package:dr/actions/app_actions.dart';
-import 'package:dr/app_state.dart';
 import 'package:dr/ui/dialog.dart';
 import 'package:dr/ui/grade_calculator.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_built_redux/flutter_built_redux.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
 
 void main() {
   testGoldens("welcome screen", (WidgetTester tester) async {
-    final widget = ReduxProvider(
-      store: Store<AppState, AppStateBuilder, AppActions>(
-        ReducerBuilder<AppState, AppStateBuilder>().build(),
-        AppState((b) => b.gradesState.loading = true),
-        AppActions(),
-      ),
-      child: MaterialApp(
-        home: const GradeCalculator(),
-        theme: ThemeData(primarySwatch: Colors.deepOrange),
-      ),
+    final widget = MaterialApp(
+      home: const GradeCalculator(),
+      theme: ThemeData(primarySwatch: Colors.deepOrange),
     );
     await tester.pumpWidget(widget);
     await expectLater(
@@ -45,16 +35,9 @@ void main() {
     );
   });
   testGoldens("add a grade", (WidgetTester tester) async {
-    final widget = ReduxProvider(
-      store: Store<AppState, AppStateBuilder, AppActions>(
-        ReducerBuilder<AppState, AppStateBuilder>().build(),
-        AppState((b) => b.gradesState.loading = true),
-        AppActions(),
-      ),
-      child: MaterialApp(
-        home: const GradeCalculator(),
-        theme: ThemeData(primarySwatch: Colors.deepOrange),
-      ),
+    final widget = MaterialApp(
+      home: const GradeCalculator(),
+      theme: ThemeData(primarySwatch: Colors.deepOrange),
     );
     await tester.pumpWidget(widget);
     await tester.tap(
@@ -141,16 +124,9 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    final widget = ReduxProvider(
-      store: Store<AppState, AppStateBuilder, AppActions>(
-        ReducerBuilder<AppState, AppStateBuilder>().build(),
-        AppState((b) => b.gradesState.loading = true),
-        AppActions(),
-      ),
-      child: MaterialApp(
-        home: const GradeCalculator(),
-        theme: ThemeData(primarySwatch: Colors.deepOrange),
-      ),
+    final widget = MaterialApp(
+      home: const GradeCalculator(),
+      theme: ThemeData(primarySwatch: Colors.deepOrange),
     );
     await tester.pumpWidget(widget);
     for (var i = 0; i < 11; i++) {

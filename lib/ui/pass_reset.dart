@@ -1,4 +1,5 @@
 // Copyright (C) 2021 Michael Debertol
+// Copyright (C) 2026 Johannes Feichter
 //
 // This file is part of digitales_register.
 //
@@ -118,7 +119,9 @@ class _PassResetState extends State<PassReset> {
                       child: Text(
                         widget.message!,
                         style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                            color: widget.failure ? Colors.red : Colors.green),
+                            color: widget.failure
+                                ? Theme.of(context).colorScheme.error
+                                : Theme.of(context).colorScheme.primary),
                       ),
                     ),
                   if (widget.message != null && !widget.failure)

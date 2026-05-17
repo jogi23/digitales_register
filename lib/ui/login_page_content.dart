@@ -1,4 +1,5 @@
 // Copyright (C) 2021 Michael Debertol
+// Copyright (C) 2026 Johannes Feichter
 //
 // This file is part of digitales_register.
 //
@@ -29,7 +30,6 @@ typedef LoginCallback = void Function(String user, String pass, String url);
 typedef ChangePassCallback = void Function(
     String user, String oldPass, String newPass, String url);
 typedef SetSafeModeCallback = void Function(bool safeMode);
-typedef SelectAccountCallback = void Function(int index);
 
 class LoginPageContent extends StatefulWidget {
   final LoginPageViewModel vm;
@@ -38,7 +38,7 @@ class LoginPageContent extends StatefulWidget {
   final SetSafeModeCallback setSaveNoPass;
   final VoidCallback onReload;
   final void Function(String url) onRequestPassReset;
-  final SelectAccountCallback onSelectAccount;
+  final void Function(int index) onSelectAccount;
 
   const LoginPageContent({
     super.key,
@@ -104,13 +104,11 @@ class _LoginPageContentState extends State<LoginPageContent> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        if (widget.vm.changePass && !widget.vm.mustChangePass) {
-          return true;
-        }
+    return PopScope(
+      canPop: widget.vm.changePass && !widget.vm.mustChangePass,
+      onPopInvokedWithResult: (didPop, _) async {
+        if (didPop) return;
         await SystemNavigator.pop();
-        return false;
       },
       child: Scaffold(
         appBar: AppBar(
@@ -219,8 +217,7 @@ class _LoginPageContentState extends State<LoginPageContent> {
                                   const TextPosition(offset: 0),
                                 );
                               } else {
-                                _urlController.text =
-                                    selectedPresetServer!.$2!;
+                                _urlController.text = selectedPresetServer!.$2!;
                               }
                             });
                           },
@@ -450,7 +447,9 @@ class _LoginPageContentState extends State<LoginPageContent> {
                               style: Theme.of(context)
                                   .textTheme
                                   .bodyMedium!
-                                  .copyWith(color: Colors.red),
+                                  .copyWith(
+                                      color:
+                                          Theme.of(context).colorScheme.error),
                             ),
                           )
                         : const SizedBox(),

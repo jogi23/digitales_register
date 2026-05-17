@@ -1,3 +1,4 @@
+// Copyright (C) 2026 Johannes Feichter
 // Copied from the flutter framework
 
 // The default Material-style Autocomplete options.

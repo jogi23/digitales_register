@@ -1,76 +1,35 @@
-## 8.12.15
-- Fächerfarben für den Kalender! (Danke an @yegvla!)
 
-## 8.2.13 / 8.2.14
-- Attempts to fix a failure to load any data from storage on Windows.
+## 1.1.0
 
-## 8.2.12
-- Bug fix for desktop
+### Interne Änderungen
+- State-Management vollständig auf Riverpod umgestellt (Redux entfernt)
+- Einstellungen und Fach-Themes intern vereinfacht (built_value teilweise entfernt)
 
-## 8.2.11
-- Minor bug fix
-- Update schools
+## 1.0.2
 
-## 8.2.10
-- Add "evvvolution.com" branding
-- Minor bug fix
+### Änderungen
+- Zeugnis-Ansicht intern auf Riverpod migriert (Vorbereitung für weiteren State-Management-Umbau)
 
-## 8.2.9
-- Eine Schule wurde hinzugefügt.
-- Ein Demo-Modus ist nun verfügbar (Schule: Vinzentinum, User: "demo-user-6540", PW: "demo").
-- Die UX von Dateianhängen wurde verbessert.
+## 1.0.1
 
-## 8.2.8
-- Dateianhänge von Stundenbeschreibungen im Kalender können nun heruntergeladen werden.
-- Unter Windows wird nun im "Über diese App"-Bereich die richtige App-Version angezeigt.
+### Änderungen
+- Merkheft-Tab in der Seitenleiste ist nun auf allen Plattformen (inkl. Android) sichtbar
+- Kalender: Fachfarben werden nun korrekt angezeigt (Absturz bei fehlendem Thema behoben)
+- Noten: Seitentitel auf "Bewertungen" vereinheitlicht
 
-## 8.2.7
-- Das Icon im Microsoft Store wurde korrigiert.
+## 1.0.0
+Diese App ist eine Fortsetzung des ursprünglichen Projekts von Michael Debertol und Simon Wachtler
+(https://github.com/miDeb/digitales_register). Herzlichen Dank für die großartige Arbeit!
 
-## 8.2.6
-- Neue Schulen wurden hinzugefügt.
-
-## 8.2.5
-- Unerwartete Logouts werden jetzt behandelt.
-
-## 8.2.0
-- Kalender-Detailansicht neu designt
-  - Sie ist nun eine eigene Seite
-  - Im Tablet- bzw. PC-Modus wird sie rechts in einer Seitenleiste angezeigt
-- Für Ferientage wurden passende Icons im Kalender hinzugefügt
-- Im Offline-Modus wird der Zeitpunkt der letzten Synchronisation angezeigt
-- Bei Mitteilungen können Anhänge wieder heruntergeladen werden
-- "Account hinzufügen" wurde zu "Account wechseln" geändert, wenn "angemeldet bleiben" nicht aktiviert ist
-- In der Notendiagramm-Vollbildansicht werden einzelne Punkte nun hervorgehoben
-
-## 8.1.10
-- Schulen hinzugefügt
-- Erste Open-Source Version
-- Bug fix: Fächer aus vorherigen Schuljahren werden nicht mehr in der Notenansicht angezeigt
-
-## 8.1.9
-- Schule hinzugefügt
-- Inhalte von Schulstunden im Kalender wieder hinzugefügt
-
-## 8.1.8
-- Schulen hinzugefügt
-
-## 8.1.7
-- Bug fix: Notenrechner konnte nicht gescrollt werden
-- Bug fix: Gelöschte Noten sollten nicht in den Notenrechner importiert werden
-- Kleinere Design-Änderungen für den Notenrechner
-
-## 8.1.6
-- Fehlende Schulen wurden hinzugefügt
-
-## 8.1.5
-- Fehler beim Tippen auf "Alle Gelesen" behoben
-- Schulen im Schulsprengel Sterzing I/III und im SSP Bozen Europa wurden aufgeschlüsselt,
-  sodass einzelne Schulen leichter zu finden sind.
-
-## 8.1.4
-- Menü öffnen, indem man überall auf der Startseite nach rechts wischt.
-- Anhänge von Mitteilungen herunterladen.
-- Fehler beim Ändern und Zurücksetzen von Passwörtern wurden behoben.
-- Ein Ladefehler wurde behoben.
-- Weitere Fehlerbehebungen
+### Änderungen
+- Akzentfarbe der App kann nun in den Einstellungen angepasst werden
+- Seitenleiste: "Hausaufgaben" wurde zu "Merkheft" umbenannt
+- Seitenleiste: "Noten" wurde zu "Bewertungen" umbenannt
+- Feedback-Schaltfläche öffnet nun direkt eine E-Mail
+- Kalender: Überlauf-Fehler im Querformat behoben
+- Kalender: Ladeindikator ist nun barrierefrei (Screenreader-Label)
+- Kalenderansicht: Anhang-Schaltfläche ist nun barrierefrei beschriftet
+- Abwesenheiten: Farben passen sich nun dem gewählten Theme an
+- Startseite: FAB-Farben und Tooltips für bessere Zugänglichkeit aktualisiert
+- Fehlermeldungen und "Kein Internet"-Anzeige verwenden nun Theme-Farben statt hartcodiertem Rot
+- `WillPopScope` durch `PopScope` ersetzt (Flutter-Deprecation behoben)

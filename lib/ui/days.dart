@@ -1,4 +1,5 @@
 // Copyright (C) 2021 Michael Debertol
+// Copyright (C) 2026 Johannes Feichter
 //
 // This file is part of digitales_register.
 //
@@ -16,7 +17,6 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:badges/badges.dart' as badge;
-import 'package:built_collection/built_collection.dart';
 import 'package:deleteable_tile/deleteable_tile.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/container/days_container.dart';
@@ -43,6 +43,7 @@ typedef RemoveReminderCallback = void Function(Homework hw, Day day);
 typedef ToggleDoneCallback = void Function(Homework hw, bool done);
 typedef MarkAsNotNewOrChangedCallback = void Function(Homework hw);
 typedef MarkDeletedHomeworkAsSeenCallback = void Function(Day day);
+typedef AttachmentCallback = void Function(GradeGroupSubmission ggs);
 
 class DaysWidget extends StatefulWidget {
   final DaysViewModel vm;
@@ -227,7 +228,7 @@ class _DaysWidgetState extends State<DaysWidget> {
       onOpenAttachment: widget.onOpenAttachment,
       colorBorders: widget.vm.colorBorders,
       colorTestsInRed: widget.vm.colorTestsInRed,
-      subjectThemes: widget.vm.subjectThemes,
+      subjectThemes: widget.vm.subjectThemes.toMap(),
       showLastFetched: showLastFetched,
     );
   }
@@ -329,7 +330,7 @@ class _DaysWidgetState extends State<DaysWidget> {
               }
             },
             child: FloatingActionButton(
-              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
               heroTag: null,
               onPressed: () {
                 controller.animateTo(
@@ -339,27 +340,29 @@ class _DaysWidgetState extends State<DaysWidget> {
                 );
               },
               mini: true,
+              tooltip: 'Zum aktuellen Tag scrollen',
               child: Icon(
                 Icons.arrow_drop_up,
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? Colors.white
-                    : Colors.black,
+                color: Theme.of(context).colorScheme.onPrimaryContainer,
               ),
             ),
           ),
           if (_targets.isNotEmpty || _focused.isNotEmpty)
             FloatingActionButton(
-              backgroundColor: Colors.red,
+              backgroundColor: Theme.of(context).colorScheme.error,
+              foregroundColor: Theme.of(context).colorScheme.onError,
               heroTag: null,
               onPressed: () {
                 widget.markAllAsSeenCallback();
               },
               mini: true,
+              tooltip: 'Alle als gesehen markieren',
               child: const Icon(Icons.close),
             ),
           if (_targets.isNotEmpty && _afterFirstFrame)
             FloatingActionButton.extended(
-              backgroundColor: Colors.red,
+              backgroundColor: Theme.of(context).colorScheme.error,
+              foregroundColor: Theme.of(context).colorScheme.onError,
               icon: const Icon(Icons.arrow_drop_down),
               label: const Text("Neue Einträge"),
               onPressed: () async {
@@ -463,7 +466,7 @@ class DayWidget extends StatelessWidget {
   final VoidCallback setDoNotAskWhenDeleteCallback;
   final AttachmentCallback onOpenAttachment;
   final bool colorBorders, colorTestsInRed;
-  final BuiltMap<String, SubjectTheme> subjectThemes;
+  final Map<String, SubjectTheme> subjectThemes;
 
   final Day day;
 
@@ -664,7 +667,7 @@ class ItemWidget extends StatelessWidget {
       colorBorder,
       colorTestsInRed;
   final AttachmentCallback? onOpenAttachment;
-  final BuiltMap<String, SubjectTheme> subjectThemes;
+  final Map<String, SubjectTheme> subjectThemes;
 
   final AutoScrollController? controller;
   final int? index;
@@ -757,19 +760,23 @@ class ItemWidget extends StatelessWidget {
     );
   }
 
-  (Color, double) _getBorderConfig() {
+  (Color, double) _getBorderConfig(BuildContext context) {
     if (item.warning && colorTestsInRed) {
-      return (Colors.red, 1.5);
+      return (Theme.of(context).colorScheme.error, 1.5);
     }
+    if (item.type == HomeworkType.grade || item.checked) {
+      return (Theme.of(context).colorScheme.primary, 0);
+    }
+    return (Colors.grey, 0);
+  }
+
+  Color? _getCardColor() {
     if (colorBorder &&
         item.label != null &&
         subjectThemes.containsKey(item.label!)) {
-      return (Color(subjectThemes[item.label]!.color), 1.5);
+      return Color(subjectThemes[item.label]!.color).withOpacity(0.15);
     }
-    if (item.type == HomeworkType.grade || item.checked) {
-      return (Colors.green, 0);
-    }
-    return (Colors.grey, 0);
+    return null;
   }
 
   @override
@@ -783,12 +790,12 @@ class ItemWidget extends StatelessWidget {
         elevation: 0,
         shape: RoundedRectangleBorder(
           side: BorderSide(
-            color: _getBorderConfig().$1,
-            width: _getBorderConfig().$2,
+            color: _getBorderConfig(context).$1,
+            width: _getBorderConfig(context).$2,
           ),
           borderRadius: BorderRadius.circular(16),
         ),
-        color: Colors.transparent,
+        color: _getCardColor(),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Column(
@@ -846,35 +853,35 @@ class ItemWidget extends StatelessWidget {
                             subtitle: item.subtitle.isNullOrEmpty
                                 ? null
                                 : SelectableText(item.subtitle),
-                            leading:
-                                !isHistory && !isDeletedView && item.deleteable
-                                    ? IconButton(
-                                        icon: const Icon(Icons.close),
-                                        onPressed: noInternet
-                                            ? null
-                                            : () async {
-                                                if (askWhenDelete) {
-                                                  final confirmationResult =
-                                                      await _showConfirmDelete(
-                                                          context);
-                                                  final shouldDelete =
-                                                      confirmationResult.$1;
-                                                  final ask =
-                                                      confirmationResult.$2;
-                                                  if (shouldDelete == true) {
-                                                    if (!ask) {
-                                                      setDoNotAskWhenDelete!();
-                                                    }
-                                                    await delete();
-                                                    removeThis!();
-                                                  }
-                                                } else {
-                                                  await delete();
-                                                  removeThis!();
+                            leading: !isHistory &&
+                                    !isDeletedView &&
+                                    item.deleteable
+                                ? IconButton(
+                                    icon: const Icon(Icons.close),
+                                    onPressed: noInternet
+                                        ? null
+                                        : () async {
+                                            if (askWhenDelete) {
+                                              final confirmationResult =
+                                                  await _showConfirmDelete(
+                                                      context);
+                                              final shouldDelete =
+                                                  confirmationResult.$1;
+                                              final ask = confirmationResult.$2;
+                                              if (shouldDelete == true) {
+                                                if (!ask) {
+                                                  setDoNotAskWhenDelete!();
                                                 }
-                                              },
-                                        padding: EdgeInsets.zero)
-                                    : null,
+                                                await delete();
+                                                removeThis!();
+                                              }
+                                            } else {
+                                              await delete();
+                                              removeThis!();
+                                            }
+                                          },
+                                    padding: EdgeInsets.zero)
+                                : null,
                           ),
                         ],
                       ),
@@ -920,14 +927,15 @@ class ItemWidget extends StatelessWidget {
                           padding: const EdgeInsets.only(right: 8.0),
                           child: Text(
                             item.gradeFormatted!,
-                            style: const TextStyle(
-                                color: Colors.green, fontSize: 30),
+                            style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
+                                fontSize: 30),
                           ),
                         )
                       else if (!isHistory && !isDeletedView && item.checkable)
                         Checkbox(
                           visualDensity: VisualDensity.standard,
-                          activeColor: Colors.green,
+                          activeColor: Theme.of(context).colorScheme.primary,
                           value: item.checked,
                           onChanged: noInternet
                               ? null
@@ -949,7 +957,10 @@ class ItemWidget extends StatelessWidget {
                   ),
                 ),
               ],
-              if (item.gradeGroupSubmissions?.isNotEmpty == true) ...[
+              if (!isHistory &&
+                  !isDeletedView &&
+                  item.gradeGroupSubmissions?.isNotEmpty == true &&
+                  onOpenAttachment != null) ...[
                 const Divider(),
                 Align(
                   alignment: Alignment.centerLeft,
@@ -976,7 +987,7 @@ class ItemWidget extends StatelessWidget {
         index: index!,
         key: ValueKey(index),
         controller: controller!,
-        highlightColor: Colors.grey.withOpacity(0.5),
+        highlightColor: Colors.grey.withValues(alpha: 0.5),
         child: child,
       );
     }

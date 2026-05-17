@@ -1,4 +1,5 @@
 // Copyright (C) 2021 Michael Debertol
+// Copyright (C) 2026 Johannes Feichter
 //
 // This file is part of digitales_register.
 //
@@ -15,25 +16,21 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
-import 'package:dr/actions/app_actions.dart';
-import 'package:dr/app_state.dart';
+import 'package:dr/providers/login_provider.dart';
 import 'package:dr/ui/pass_reset.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_built_redux/flutter_built_redux.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class PassResetContainer extends StatelessWidget {
+class PassResetContainer extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
-    return StoreConnection<AppState, AppActions, ResetPassState>(
-      connect: (AppState appState) => appState.loginState.resetPassState,
-      builder: (context, state, actions) {
-        return PassReset(
-          message: state.message,
-          failure: state.failure,
-          resetPass: actions.loginActions.resetPass.call,
-          onClose: actions.load.call,
-        );
-      },
+  Widget build(BuildContext context, WidgetRef ref) {
+    final resetPass = ref.watch(loginProvider.select((s) => s.resetPassState));
+    final notifier = ref.read(loginProvider.notifier);
+    return PassReset(
+      message: resetPass.message,
+      failure: resetPass.failure,
+      resetPass: notifier.resetPass,
+      onClose: notifier.loadApp,
     );
   }
 }
