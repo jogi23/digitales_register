@@ -23,10 +23,9 @@ import 'dart:convert';
 import 'package:dr/app_state.dart';
 import 'package:dr/main.dart';
 import 'package:dr/middleware/middleware.dart';
-import 'package:dr/providers/provider_container.dart' as pc;
 import 'package:dr/providers/login_provider.dart' hide LoginState;
+import 'package:dr/providers/provider_container.dart' as pc;
 import 'package:dr/providers/settings_provider.dart';
-import 'package:dr/serializers.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -35,6 +34,12 @@ import 'package:quiver/testing/src/async/fake_async.dart';
 import 'test_utils.dart';
 
 const serverUrl = "null/v2/api/auth/login";
+
+bool _isFullState(String? raw) {
+  if (raw == null) return false;
+  final decoded = json.decode(raw) as Map<String, dynamic>;
+  return decoded['v'] == 2 && decoded.containsKey('state');
+}
 
 class StorageHelper {
   Future<bool> exists(String user) async {
@@ -119,15 +124,12 @@ void main() {
       await storageHelper.exists(username),
       true,
     );
-    expect(
-        serializers.deserialize(
-            json.decode((await storageHelper.read(username))!) as Object),
-        const TypeMatcher<AppState>());
+    expect(_isFullState(await storageHelper.read(username)), true);
   });
   test('state is not saved when data saving is disabled', () async {
     const username = "test_username2";
     final container = _makeContainer(
-      settings: SettingsState((b) => b.noDataSaving = true),
+      settings: SettingsState(noDataSaving: true),
     );
     addTearDown(container.dispose);
     container.read(loginProvider.notifier).setLoggedIn(username: username);
@@ -139,16 +141,13 @@ void main() {
       true,
     );
 
-    expect(
-        serializers.deserialize(
-            json.decode((await storageHelper.read(username))!) as Object),
-        const TypeMatcher<SettingsState>());
+    expect(_isFullState(await storageHelper.read(username)), false);
   });
   test('state is deleted on logout when state saving is disabled', () async {
     navigatorKey = GlobalKey();
     const username = "test_username3";
     final container = _makeContainer(
-      settings: SettingsState((b) => b.deleteDataOnLogout = true),
+      settings: SettingsState(deleteDataOnLogout: true),
     );
     addTearDown(container.dispose);
     container.read(loginProvider.notifier).setLoggedIn(username: username);
@@ -161,17 +160,11 @@ void main() {
       true,
     );
 
-    expect(
-        serializers.deserialize(
-            json.decode((await storageHelper.read(username))!) as Object),
-        const TypeMatcher<AppState>());
+    expect(_isFullState(await storageHelper.read(username)), true);
     deletedData = true;
     await saveStateImmediately();
 
-    expect(
-        serializers.deserialize(
-            json.decode((await storageHelper.read(username))!) as Object),
-        const TypeMatcher<SettingsState>());
+    expect(_isFullState(await storageHelper.read(username)), false);
   });
   test('state is deleted/saved when the setting is switched', () async {
     const username = "test_username4";
@@ -189,42 +182,27 @@ void main() {
       true,
     );
 
-    expect(
-        serializers.deserialize(
-            json.decode((await storageHelper.read(username))!) as Object),
-        const TypeMatcher<AppState>());
+    expect(_isFullState(await storageHelper.read(username)), true);
 
     container.read(settingsProvider.notifier).setSaveNoData(true);
     await Future<void>.value();
 
-    expect(
-        serializers.deserialize(
-            json.decode((await storageHelper.read(username))!) as Object),
-        const TypeMatcher<SettingsState>());
+    expect(_isFullState(await storageHelper.read(username)), false);
 
     container.read(settingsProvider.notifier).setSaveNoData(false);
     await Future<void>.value();
 
-    expect(
-        serializers.deserialize(
-            json.decode((await storageHelper.read(username))!) as Object),
-        const TypeMatcher<AppState>());
+    expect(_isFullState(await storageHelper.read(username)), true);
 
     container.read(settingsProvider.notifier).setSaveNoData(true);
     await Future<void>.value();
 
-    expect(
-        serializers.deserialize(
-            json.decode((await storageHelper.read(username))!) as Object),
-        const TypeMatcher<SettingsState>());
+    expect(_isFullState(await storageHelper.read(username)), false);
 
     container.read(settingsProvider.notifier).setSaveNoData(false);
     await Future<void>.value();
 
-    expect(
-        serializers.deserialize(
-            json.decode((await storageHelper.read(username))!) as Object),
-        const TypeMatcher<AppState>());
+    expect(_isFullState(await storageHelper.read(username)), true);
   });
 
   test('Default map is ordered', () {

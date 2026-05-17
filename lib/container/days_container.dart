@@ -131,7 +131,7 @@ abstract class DaysViewModel
           ..showNotifications = showNotifications
           ..colorBorders = settings.dashboardColorBorders
           ..colorTestsInRed = settings.dashboardColorTestsInRed
-          ..subjectThemes = settings.subjectThemes.toBuilder(),
+          ..subjectThemes = MapBuilder(settings.subjectThemes),
       );
 }
 

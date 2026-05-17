@@ -35,7 +35,7 @@ class ChartLegendEntryContainer extends ConsumerWidget {
       name: subjectName,
       setThickness: (thickness) => ref
           .read(settingsProvider.notifier)
-          .setSubjectTheme(MapEntry(subjectName, theme.rebuild((b) => b..thick = thickness))),
+          .setSubjectTheme(MapEntry(subjectName, theme.copyWith(thick: thickness))),
     );
   }
 }

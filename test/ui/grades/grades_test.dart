@@ -47,12 +47,14 @@ class _TestSettingsNotifier extends SettingsNotifier {
   SettingsState build() => initial;
 }
 
-Widget _wrapWithScope(Widget child, AppState appState) => ProviderScope(
+Widget _wrapWithScope(Widget child, AppState appState,
+        [SettingsState? settings]) =>
+    ProviderScope(
       overrides: [
         gradesProvider.overrideWith(
             () => _TestGradesNotifier(appState.gradesState)),
         settingsProvider.overrideWith(
-            () => _TestSettingsNotifier(appState.settingsState)),
+            () => _TestSettingsNotifier(settings ?? SettingsState())),
       ],
       child: child,
     );
@@ -183,23 +185,16 @@ AppState _getGradesState({bool loading = false}) {
           ],
         )
         ..semester = Semester.first.toBuilder();
-      b.settingsState.subjectThemes = MapBuilder(
-        {
-          "Fach1": SubjectTheme(
-            (b) => b
-              ..color = Colors.red.value
-              ..thick = 5,
-          ),
-          "Fach2": SubjectTheme(
-            (b) => b
-              ..color = Colors.green.value
-              ..thick = 4,
-          ),
-        },
-      );
     },
   );
 }
+
+SettingsState get _gradesSettings => SettingsState(
+      subjectThemes: {
+        "Fach1": SubjectTheme(color: Colors.red.value, thick: 5),
+        "Fach2": SubjectTheme(color: Colors.green.value, thick: 4),
+      },
+    );
 
 void main() {
   testGoldens('grades page loading when empty', (tester) async {
@@ -210,6 +205,7 @@ void main() {
         theme: ThemeData(primarySwatch: Colors.deepOrange),
       ),
       appState,
+      _gradesSettings,
     );
     await tester.pumpWidget(widget);
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
@@ -227,6 +223,7 @@ void main() {
         theme: ThemeData(primarySwatch: Colors.deepOrange),
       ),
       appState,
+      _gradesSettings,
     );
     await tester.pumpWidget(widget);
     expect(find.byType(CircularProgressIndicator), findsNothing);
@@ -246,6 +243,7 @@ void main() {
         theme: ThemeData(primarySwatch: Colors.deepOrange),
       ),
       appState,
+      _gradesSettings,
     );
     await tester.pumpWidget(widget);
     expect(find.text("Dritte Schularbeit"), findsNothing);
@@ -276,6 +274,7 @@ void main() {
         theme: ThemeData(primarySwatch: Colors.deepOrange),
       ),
       appState,
+      _gradesSettings,
     );
     await tester.pumpWidget(widget);
     await tester.tap(find.text("Fach1"));

@@ -59,7 +59,7 @@ typedef SetBoolCallback = void Function(bool byType);
 
 class SortedGradesViewModel {
   final BuiltList<Subject> subjects;
-  final BuiltList<String> ignoredSubjectsForAverage;
+  final List<String> ignoredSubjectsForAverage;
   final Semester semester;
   final bool sortByType;
   final bool? showCancelled;

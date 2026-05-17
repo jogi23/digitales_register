@@ -16,7 +16,6 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
-import 'package:built_collection/built_collection.dart';
 import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/ui/grades_chart_legend.dart';
 import 'package:flutter/material.dart';
@@ -26,7 +25,7 @@ class ChartLegendContainer extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final subjects =
-        ref.watch(settingsProvider).subjectThemes.keys.toBuiltList();
+        ref.watch(settingsProvider).subjectThemes.keys.toList();
     return ChartLegend(vm: subjects);
   }
 }

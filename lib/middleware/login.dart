@@ -181,41 +181,36 @@ Future<void> _doLoggedIn({
     final state = await _readFromStorage(key);
     if (state != null) {
       try {
-        final serializedState =
-            serializers.deserialize(json.decode(state) as Object);
-        if (serializedState is SettingsState) {
-          final restoredSettings = serializedState.rebuild(
-            (b) => b.noPasswordSaving = currentSettings.noPasswordSaving,
-          );
+        final decoded = json.decode(state);
+        if (decoded is Map && decoded['v'] == 2) {
+          final restoredSettings =
+              SettingsState.fromJson(decoded['settings'] as Map<dynamic, dynamic>)
+                  .copyWith(noPasswordSaving: currentSettings.noPasswordSaving);
           providerContainer.read(settingsProvider.notifier).load(restoredSettings);
-        } else if (serializedState is AppState) {
-          final restoredSettings = serializedState.settingsState.rebuild(
-            (b) => b.noPasswordSaving = currentSettings.noPasswordSaving,
-          );
-          providerContainer.read(settingsProvider.notifier).load(restoredSettings);
-          providerContainer
-              .read(gradesProvider.notifier)
-              .restore(serializedState.gradesState);
-          providerContainer
-              .read(absencesProvider.notifier)
-              .restore(serializedState.absencesState);
-          providerContainer
-              .read(calendarProvider.notifier)
-              .restore(serializedState.calendarState);
-          providerContainer
-              .read(messagesProvider.notifier)
-              .restore(serializedState.messagesState);
-          providerContainer
-              .read(profileProvider.notifier)
-              .restore(serializedState.profileState);
-          providerContainer.read(notificationsProvider.notifier).restore(
-                NotificationsState(
-                  notifications: serializedState.notificationState.notifications
-                          ?.toList() ??
-                      [],
-                  lastFetched: serializedState.notificationState.lastFetched,
-                ),
-              );
+          if (decoded.containsKey('state')) {
+            final appState = serializers.deserialize(decoded['state'] as Object);
+            if (appState is AppState) {
+              _restoreProvidersFromAppState(appState);
+            }
+          }
+        } else if (decoded is List && decoded.isNotEmpty) {
+          if (decoded[0] == 'SettingsState') {
+            final restoredSettings = _parseSettingsFromLegacyList(decoded)
+                .copyWith(noPasswordSaving: currentSettings.noPasswordSaving);
+            providerContainer.read(settingsProvider.notifier).load(restoredSettings);
+          } else if (decoded[0] == 'AppState') {
+            final legacySettings = _extractSettingsFromLegacyAppState(decoded);
+            if (legacySettings != null) {
+              providerContainer.read(settingsProvider.notifier).load(
+                    legacySettings.copyWith(
+                        noPasswordSaving: currentSettings.noPasswordSaving),
+                  );
+            }
+            final appState = serializers.deserialize(decoded as Object);
+            if (appState is AppState) {
+              _restoreProvidersFromAppState(appState);
+            }
+          }
         }
         await _doSaveNoPass(
           providerContainer.read(settingsProvider).noPasswordSaving,
@@ -403,6 +398,108 @@ Future<void> _doSelectAccount(int index) async {
   providerContainer.read(loginProvider.notifier).logout(hard: true);
   _resetAllProviders();
   await _doLoad();
+}
+
+void _restoreProvidersFromAppState(AppState appState) {
+  providerContainer.read(gradesProvider.notifier).restore(appState.gradesState);
+  providerContainer
+      .read(absencesProvider.notifier)
+      .restore(appState.absencesState);
+  providerContainer
+      .read(calendarProvider.notifier)
+      .restore(appState.calendarState);
+  providerContainer
+      .read(messagesProvider.notifier)
+      .restore(appState.messagesState);
+  providerContainer
+      .read(profileProvider.notifier)
+      .restore(appState.profileState);
+  providerContainer.read(notificationsProvider.notifier).restore(
+        NotificationsState(
+          notifications:
+              appState.notificationState.notifications?.toList() ?? [],
+          lastFetched: appState.notificationState.lastFetched,
+        ),
+      );
+}
+
+// Converts old built_value BuiltMap alternating-list encoding to Map<K, V>.
+Map<String, String> _legacyListToStringMap(List<dynamic> list) {
+  final map = <String, String>{};
+  for (int i = 0; i + 1 < list.length; i += 2) {
+    map[list[i] as String] = list[i + 1] as String;
+  }
+  return map;
+}
+
+Map<String, SubjectTheme> _legacyListToSubjectThemeMap(List<dynamic> list) {
+  final map = <String, SubjectTheme>{};
+  for (int i = 0; i + 1 < list.length; i += 2) {
+    final key = list[i] as String;
+    final themeList = list[i + 1] as List<dynamic>;
+    final fields = <String, dynamic>{};
+    for (int j = 1; j + 1 < themeList.length; j += 2) {
+      fields[themeList[j] as String] = themeList[j + 1];
+    }
+    map[key] = SubjectTheme(
+      thick: fields['thick'] as int? ?? 0,
+      color: fields['color'] as int? ?? 0,
+    );
+  }
+  return map;
+}
+
+SettingsState _parseSettingsFromLegacyList(List<dynamic> list) {
+  // list = ['SettingsState', 'field1', val1, 'field2', val2, ...]
+  final fields = <String, dynamic>{};
+  for (int i = 1; i + 1 < list.length; i += 2) {
+    fields[list[i] as String] = list[i + 1];
+  }
+  final rawNicks = fields['subjectNicks'];
+  final rawThemes = fields['subjectThemes'];
+  final rawIgnore = fields['ignoreForGradesAverage'];
+  return SettingsState(
+    noPasswordSaving: fields['noPasswordSaving'] as bool? ?? false,
+    noDataSaving: fields['noDataSaving'] as bool? ?? false,
+    askWhenDelete: fields['askWhenDelete'] as bool? ?? true,
+    deleteDataOnLogout: fields['deleteDataOnLogout'] as bool? ?? false,
+    showCancelled: fields['showCancelled'] as bool? ?? false,
+    typeSorted: fields['typeSorted'] as bool? ?? false,
+    showGradesDiagram: fields['showGradesDiagram'] as bool? ?? true,
+    showAllSubjectsAverage: fields['showAllSubjectsAverage'] as bool? ?? false,
+    ignoreForGradesAverage: rawIgnore != null
+        ? (rawIgnore as List<dynamic>).cast<String>()
+        : [],
+    dashboardMarkNewOrChangedEntries:
+        fields['dashboardMarkNewOrChangedEntries'] as bool? ?? true,
+    dashboardDeduplicateEntries:
+        fields['dashboardDeduplicateEntries'] as bool? ?? true,
+    dashboardColorBorders: fields['dashboardColorBorders'] as bool? ?? true,
+    dashboardColorTestsInRed:
+        fields['dashboardColorTestsInRed'] as bool? ?? true,
+    showCalendarNicksBar: fields['showCalendarNicksBar'] as bool? ?? true,
+    calendarColorBackground: fields['calendarColorBackground'] as bool? ?? false,
+    drawerFullyExpanded: fields['drawerFullyExpanded'] as bool? ?? false,
+    subjectNicks: rawNicks != null
+        ? _legacyListToStringMap(rawNicks as List<dynamic>)
+        : null,
+    subjectThemes: rawThemes != null
+        ? _legacyListToSubjectThemeMap(rawThemes as List<dynamic>)
+        : {},
+  );
+}
+
+SettingsState? _extractSettingsFromLegacyAppState(List<dynamic> list) {
+  // list = ['AppState', 'field1', val1, 'settingsState', [...], ...]
+  for (int i = 1; i + 1 < list.length; i += 2) {
+    if (list[i] == 'settingsState') {
+      final raw = list[i + 1];
+      if (raw is List && raw.isNotEmpty && raw[0] == 'SettingsState') {
+        return _parseSettingsFromLegacyList(raw);
+      }
+    }
+  }
+  return null;
 }
 
 void _showUserTypeNotSupported(String url) {

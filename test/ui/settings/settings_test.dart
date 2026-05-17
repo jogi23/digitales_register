@@ -76,7 +76,7 @@ void main() {
     (tester) async {
       final container = await _pumpSettingsPage(
         tester,
-        settings: SettingsState((b) => b.scrollToGrades = true),
+        settings: SettingsState(scrollToGrades: true),
       );
       addTearDown(container.dispose);
 
@@ -93,7 +93,7 @@ void main() {
       (tester) async {
         final container = await _pumpSettingsPage(
           tester,
-          settings: SettingsState((b) => b.scrollToSubjectNicks = true),
+          settings: SettingsState(scrollToSubjectNicks: true),
         );
         addTearDown(container.dispose);
 
@@ -170,13 +170,7 @@ void main() {
       (tester) async {
         final container = await _pumpSettingsPage(
           tester,
-          settings: SettingsState(
-            (b) => b.subjectNicks = MapBuilder(
-              {
-                "Fach1": "f1",
-              },
-            ),
-          ),
+          settings: SettingsState(subjectNicks: {"Fach1": "f1"}),
         );
         addTearDown(container.dispose);
         await tester.scrollUntilVisible(
@@ -221,13 +215,7 @@ void main() {
       (tester) async {
         final container = await _pumpSettingsPage(
           tester,
-          settings: SettingsState(
-            (b) => b.subjectNicks = MapBuilder(
-              {
-                "Fach1": "f1",
-              },
-            ),
-          ),
+          settings: SettingsState(subjectNicks: {"Fach1": "f1"}),
         );
         addTearDown(container.dispose);
         await tester.scrollUntilVisible(
@@ -360,9 +348,7 @@ void main() {
       (tester) async {
         final container = await _pumpSettingsPage(
           tester,
-          settings: SettingsState(
-            (b) => b.ignoreForGradesAverage = ListBuilder(<String>["Fach1"]),
-          ),
+          settings: SettingsState(ignoreForGradesAverage: ["Fach1"]),
         );
         addTearDown(container.dispose);
         await tester.scrollUntilVisible(

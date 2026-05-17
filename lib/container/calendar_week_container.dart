@@ -16,7 +16,6 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
-import 'package:built_collection/built_collection.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/data.dart';
 import 'package:dr/providers/calendar_provider.dart';
@@ -41,28 +40,27 @@ class CalendarWeekContainer extends ConsumerWidget {
     final noInternet = ref.watch(noInternetProvider);
     final settings = ref.watch(settingsProvider);
     final vm = CalendarWeekViewModel(
-      days: BuiltList(calendarState.daysForWeek(monday)),
-      subjectNicks: BuiltMap(
-        settings.subjectNicks.toMap().map(
-          (key, value) => MapEntry(key.toLowerCase(), value),
-        ),
+      days: calendarState.daysForWeek(monday).toList(),
+      subjectNicks: Map.fromEntries(
+        settings.subjectNicks.entries
+            .map((e) => MapEntry(e.key.toLowerCase(), e.value)),
       ),
       noInternet: noInternet,
       selection: calendarState.selection,
       colorBackground: settings.calendarColorBackground,
-      subjectThemes: BuiltMap(settings.subjectThemes.toMap()),
+      subjectThemes: Map.of(settings.subjectThemes),
     );
     return CalendarWeek(vm: vm, key: key);
   }
 }
 
 class CalendarWeekViewModel {
-  final BuiltList<CalendarDay> days;
-  final BuiltMap<String, String> subjectNicks;
+  final List<CalendarDay> days;
+  final Map<String, String> subjectNicks;
   final bool noInternet;
   final CalendarSelection? selection;
   final bool colorBackground;
-  final BuiltMap<String, SubjectTheme> subjectThemes;
+  final Map<String, SubjectTheme> subjectThemes;
 
   CalendarWeekViewModel({
     required this.days,

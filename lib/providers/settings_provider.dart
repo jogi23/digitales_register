@@ -15,7 +15,6 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
-import 'package:built_collection/built_collection.dart';
 import 'package:dr/app_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -30,78 +29,75 @@ class SettingsNotifier extends Notifier<SettingsState> {
 
   /// Restores settings from persisted storage (called by middleware on login).
   void load(SettingsState settings) {
-    state = settings.rebuild(
-      (b) => b
-        ..scrollToSubjectNicks = false
-        ..scrollToGrades = false,
-    );
+    state = settings.copyWith(scrollToSubjectNicks: false, scrollToGrades: false);
   }
 
   // ─── Persistence / auth settings ─────────────────────────────────────────
 
   void setSaveNoPass(bool value) =>
-      state = state.rebuild((b) => b..noPasswordSaving = value);
+      state = state.copyWith(noPasswordSaving: value);
 
   void setSaveNoData(bool value) {
-    state = state.rebuild((b) => b..noDataSaving = value);
+    state = state.copyWith(noDataSaving: value);
     onSaveState?.call();
   }
 
   void setAskWhenDelete(bool value) =>
-      state = state.rebuild((b) => b..askWhenDelete = value);
+      state = state.copyWith(askWhenDelete: value);
 
   void setDeleteDataOnLogout(bool value) =>
-      state = state.rebuild((b) => b..deleteDataOnLogout = value);
+      state = state.copyWith(deleteDataOnLogout: value);
 
   // ─── Grades settings ──────────────────────────────────────────────────────
 
   void setShowCancelledGrades(bool value) =>
-      state = state.rebuild((b) => b..showCancelled = value);
+      state = state.copyWith(showCancelled: value);
 
   void setGradesTypeSorted(bool value) =>
-      state = state.rebuild((b) => b..typeSorted = value);
+      state = state.copyWith(typeSorted: value);
 
   void setShowGradesDiagram(bool value) =>
-      state = state.rebuild((b) => b..showGradesDiagram = value);
+      state = state.copyWith(showGradesDiagram: value);
 
   void setShowAllSubjectsAverage(bool value) =>
-      state = state.rebuild((b) => b..showAllSubjectsAverage = value);
+      state = state.copyWith(showAllSubjectsAverage: value);
 
-  void setIgnoreForGradesAverage(BuiltList<String> subjects) =>
-      state = state.rebuild((b) => b.ignoreForGradesAverage.replace(subjects));
+  void setIgnoreForGradesAverage(List<String> subjects) =>
+      state = state.copyWith(ignoreForGradesAverage: List.of(subjects));
 
   // ─── Dashboard settings ───────────────────────────────────────────────────
 
   void setMarkNewOrChanged(bool value) =>
-      state = state.rebuild((b) => b..dashboardMarkNewOrChangedEntries = value);
+      state = state.copyWith(dashboardMarkNewOrChangedEntries: value);
 
   void setDeduplicate(bool value) =>
-      state = state.rebuild((b) => b..dashboardDeduplicateEntries = value);
+      state = state.copyWith(dashboardDeduplicateEntries: value);
 
   void setDashboardColorBorders(bool value) =>
-      state = state.rebuild((b) => b..dashboardColorBorders = value);
+      state = state.copyWith(dashboardColorBorders: value);
 
   void setDashboardColorTestsInRed(bool value) =>
-      state = state.rebuild((b) => b..dashboardColorTestsInRed = value);
+      state = state.copyWith(dashboardColorTestsInRed: value);
 
   // ─── Calendar settings ────────────────────────────────────────────────────
 
   void setShowCalendarNicksBar(bool value) =>
-      state = state.rebuild((b) => b..showCalendarNicksBar = value);
+      state = state.copyWith(showCalendarNicksBar: value);
 
   void setCalendarColorBackground(bool value) =>
-      state = state.rebuild((b) => b..calendarColorBackground = value);
+      state = state.copyWith(calendarColorBackground: value);
 
   // ─── Appearance / UI settings ─────────────────────────────────────────────
 
   void setDrawerFullyExpanded(bool value) =>
-      state = state.rebuild((b) => b..drawerFullyExpanded = value);
+      state = state.copyWith(drawerFullyExpanded: value);
 
-  void setSubjectNicks(BuiltMap<String, String> nicks) =>
-      state = state.rebuild((b) => b.subjectNicks.replace(nicks));
+  void setSubjectNicks(Map<String, String> nicks) =>
+      state = state.copyWith(subjectNicks: Map.of(nicks));
 
   void setSubjectTheme(MapEntry<String, SubjectTheme> entry) =>
-      state = state.rebuild((b) => b.subjectThemes[entry.key] = entry.value);
+      state = state.copyWith(
+          subjectThemes: {...state.subjectThemes, entry.key: entry.value});
 
   /// Ensures every subject in [subjects] has a [SubjectTheme]. New subjects are
   /// assigned an unused color automatically.
@@ -111,45 +107,31 @@ class SettingsNotifier extends Notifier<SettingsState> {
         subjects.where((s) => !existing.containsKey(s)).toList();
     if (newSubjects.isEmpty) return;
 
-    state = state.rebuild((b) {
-      for (final subject in newSubjects) {
-        final usedColors =
-            b.subjectThemes.build().values.map((t) => t.color).toSet();
-        final color = _colors.firstWhere(
+    final updated = Map.of(state.subjectThemes);
+    for (final subject in newSubjects) {
+      final usedColors = updated.values.map((t) => t.color).toSet();
+      final color = _colors.firstWhere(
+        (c) => !usedColors.contains(c.value),
+        orElse: () => _similarColors.firstWhere(
           (c) => !usedColors.contains(c.value),
-          orElse: () => _similarColors.firstWhere(
-            (c) => !usedColors.contains(c.value),
-            orElse: () => (List.of(Colors.primaries)..shuffle()).first,
-          ),
-        );
-        b.subjectThemes[subject] = SubjectTheme(
-          (t) => t
-            ..thick = _defaultThick
-            ..color = color.value,
-        );
-      }
-    });
+          orElse: () => (List.of(Colors.primaries)..shuffle()).first,
+        ),
+      );
+      updated[subject] = SubjectTheme(thick: _defaultThick, color: color.value);
+    }
+    state = state.copyWith(subjectThemes: updated);
   }
 
   // ─── Routing-triggered ephemeral scroll state ─────────────────────────────
 
-  void scrollToSubjectNicksSection() => state = state.rebuild(
-        (b) => b
-          ..scrollToSubjectNicks = true
-          ..scrollToGrades = false,
-      );
+  void scrollToSubjectNicksSection() => state =
+      state.copyWith(scrollToSubjectNicks: true, scrollToGrades: false);
 
-  void scrollToGradesSection() => state = state.rebuild(
-        (b) => b
-          ..scrollToGrades = true
-          ..scrollToSubjectNicks = false,
-      );
+  void scrollToGradesSection() =>
+      state = state.copyWith(scrollToGrades: true, scrollToSubjectNicks: false);
 
-  void resetScroll() => state = state.rebuild(
-        (b) => b
-          ..scrollToSubjectNicks = false
-          ..scrollToGrades = false,
-      );
+  void resetScroll() =>
+      state = state.copyWith(scrollToSubjectNicks: false, scrollToGrades: false);
 }
 
 final settingsProvider =

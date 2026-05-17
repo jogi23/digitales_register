@@ -240,15 +240,13 @@ Future<void> _doSaveState({bool immediately = false}) async {
       _saveUnderway = false;
       String toSave;
       if (!settings.noDataSaving && !deletedData) {
-        toSave = json.encode(
-          serializers.serialize(
-            state.rebuild((b) => b.settingsState.replace(settings)),
-          ),
-        );
+        toSave = json.encode({
+          'v': 2,
+          'state': serializers.serialize(state),
+          'settings': settings.toJson(),
+        });
       } else {
-        toSave = json.encode(
-          serializers.serialize(settings),
-        );
+        toSave = json.encode({'v': 2, 'settings': settings.toJson()});
       }
       if (_lastSave == toSave && _lastUsernameSaved == user) return;
       _lastSave = toSave;

@@ -17,7 +17,6 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:badges/badges.dart' as badge;
-import 'package:built_collection/built_collection.dart';
 import 'package:deleteable_tile/deleteable_tile.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/container/days_container.dart';
@@ -229,7 +228,7 @@ class _DaysWidgetState extends State<DaysWidget> {
       onOpenAttachment: widget.onOpenAttachment,
       colorBorders: widget.vm.colorBorders,
       colorTestsInRed: widget.vm.colorTestsInRed,
-      subjectThemes: widget.vm.subjectThemes,
+      subjectThemes: widget.vm.subjectThemes.toMap(),
       showLastFetched: showLastFetched,
     );
   }
@@ -467,7 +466,7 @@ class DayWidget extends StatelessWidget {
   final VoidCallback setDoNotAskWhenDeleteCallback;
   final AttachmentCallback onOpenAttachment;
   final bool colorBorders, colorTestsInRed;
-  final BuiltMap<String, SubjectTheme> subjectThemes;
+  final Map<String, SubjectTheme> subjectThemes;
 
   final Day day;
 
@@ -668,7 +667,7 @@ class ItemWidget extends StatelessWidget {
       colorBorder,
       colorTestsInRed;
   final AttachmentCallback? onOpenAttachment;
-  final BuiltMap<String, SubjectTheme> subjectThemes;
+  final Map<String, SubjectTheme> subjectThemes;
 
   final AutoScrollController? controller;
   final int? index;

@@ -119,12 +119,8 @@ Future<void> main() async {
         settingsProvider.overrideWith(
           () => _TestSettingsNotifier(
             SettingsState(
-              (b) {
-                b.showCalendarNicksBar = nicksBarEnabled;
-                if (!hasSubjctWithoutNick) {
-                  b.subjectNicks = MapBuilder(<String, String>{"Fach1": "F"});
-                }
-              },
+              showCalendarNicksBar: nicksBarEnabled,
+              subjectNicks: !hasSubjctWithoutNick ? {"Fach1": "F"} : null,
             ),
           ),
         ),

@@ -32,7 +32,7 @@ class CalendarContainer extends ConsumerWidget {
     final noInternet = ref.watch(noInternetProvider);
     final settings = ref.watch(settingsProvider);
     final currentDays = calendarState.currentDays;
-    final subjectNicks = settings.subjectNicks.toMap();
+    final subjectNicks = settings.subjectNicks;
     return Calendar(
       vm: CalendarViewModel(
         first: currentDays.isEmpty ? null : currentDays.first.date,

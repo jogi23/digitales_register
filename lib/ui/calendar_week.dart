@@ -16,7 +16,6 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
-import 'package:built_collection/built_collection.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/container/calendar_week_container.dart';
 import 'package:dr/data.dart';
@@ -82,13 +81,13 @@ class CalendarWeek extends StatelessWidget {
 }
 
 class _HoursChunk extends StatelessWidget {
-  final BuiltMap<String, String> subjectNicks;
+  final Map<String, String> subjectNicks;
   final List<CalendarHour> hours;
   final CalendarDay day;
   final int? selectedHour;
   final bool isSelected;
   final bool colorBackground;
-  final BuiltMap<String, SubjectTheme> subjectThemes;
+  final Map<String, SubjectTheme> subjectThemes;
 
   const _HoursChunk({
     required this.subjectNicks,
@@ -162,11 +161,11 @@ class _HoursChunk extends StatelessWidget {
 class CalendarDayWidget extends StatelessWidget {
   final int max;
   final CalendarDay calendarDay;
-  final BuiltMap<String, String> subjectNicks;
+  final Map<String, String> subjectNicks;
   final bool isSelected;
   final int? selectedHour;
   final bool colorBackground;
-  final BuiltMap<String, SubjectTheme> subjectThemes;
+  final Map<String, SubjectTheme> subjectThemes;
 
   const CalendarDayWidget({
     super.key,
@@ -256,7 +255,7 @@ class CalendarDayWidget extends StatelessWidget {
 class HourWidget extends ConsumerWidget {
   final CalendarHour hour;
   final CalendarDay day;
-  final BuiltMap<String, String> subjectNicks;
+  final Map<String, String> subjectNicks;
   final bool isSelected;
   final Color backgroundColor;
   final Color selectedBackgroundColor;

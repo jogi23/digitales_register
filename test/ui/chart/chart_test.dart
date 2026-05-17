@@ -48,12 +48,14 @@ class _TestSettingsNotifier extends SettingsNotifier {
   SettingsState build() => initial;
 }
 
-Widget _wrapWithScope(Widget child, AppState appState) => ProviderScope(
+Widget _wrapWithScope(Widget child, AppState appState,
+        [SettingsState? settings]) =>
+    ProviderScope(
       overrides: [
         gradesProvider.overrideWith(
             () => _TestGradesNotifier(appState.gradesState)),
         settingsProvider.overrideWith(
-            () => _TestSettingsNotifier(appState.settingsState)),
+            () => _TestSettingsNotifier(settings ?? SettingsState())),
       ],
       child: child,
     );
@@ -123,23 +125,16 @@ AppState get _gradesState {
           ],
         )
         ..semester = Semester.first.toBuilder();
-      b.settingsState.subjectThemes = MapBuilder(
-        {
-          "Fach1": SubjectTheme(
-            (b) => b
-              ..color = Colors.red.value
-              ..thick = 5,
-          ),
-          "Fach2": SubjectTheme(
-            (b) => b
-              ..color = Colors.green.value
-              ..thick = 4,
-          ),
-        },
-      );
     },
   );
 }
+
+SettingsState get _gradesSettings => SettingsState(
+      subjectThemes: {
+        "Fach1": SubjectTheme(color: Colors.red.value, thick: 5),
+        "Fach2": SubjectTheme(color: Colors.green.value, thick: 4),
+      },
+    );
 
 void main() {
   testGoldens(
@@ -166,6 +161,7 @@ void main() {
           ),
         ),
         appState,
+        _gradesSettings,
       );
 
       await tester.pumpWidget(widget);
@@ -229,6 +225,7 @@ void main() {
           ),
         ),
         appState,
+        _gradesSettings,
       );
 
       await tester.pumpWidget(widget);
@@ -269,6 +266,7 @@ void main() {
           ),
         ),
         appState,
+        _gradesSettings,
       );
 
       await tester.pumpWidget(widget);

@@ -41,7 +41,7 @@ class CalendarCardContainer extends ConsumerWidget {
     final noInternet = ref.watch(noInternetProvider);
     final hour = calendarState.days[day]!.hours[hourIndex];
     final theme =
-      ref.watch(settingsProvider).subjectThemes[hour.subject] ?? SubjectTheme();
+      ref.watch(settingsProvider).subjectThemes[hour.subject] ?? const SubjectTheme();
     return CalendarCard(
       hour: hour,
       theme: theme,

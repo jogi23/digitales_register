@@ -49,7 +49,7 @@ void main() {
       final c = _makeContainer();
       const customColor = 0xFF123456;
       c.read(settingsProvider.notifier).setSubjectTheme(
-        MapEntry('Mathe', SubjectTheme((t) => t..thick = 5..color = customColor)),
+        MapEntry('Mathe', SubjectTheme(thick: 5, color: customColor)),
       );
       c.read(settingsProvider.notifier).updateSubjectThemes(['Mathe', 'Deutsch']);
       final themes = c.read(settingsProvider).subjectThemes;
@@ -96,9 +96,7 @@ void main() {
     test('load restores settings and clears scroll flags', () {
       final c = _makeContainer();
       c.read(settingsProvider.notifier).scrollToGradesSection();
-      final saved = c.read(settingsProvider).rebuild(
-        (b) => b..noPasswordSaving = true,
-      );
+      final saved = c.read(settingsProvider).copyWith(noPasswordSaving: true);
       c.read(settingsProvider.notifier).load(saved);
       final s = c.read(settingsProvider);
       expect(s.noPasswordSaving, true);

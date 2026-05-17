@@ -408,7 +408,7 @@ Future<void> main() async {
       overrides: [
         settingsProvider.overrideWith(
           () => _TestSettingsNotifier(
-            SettingsState((b) => b.drawerFullyExpanded = false),
+            SettingsState(drawerFullyExpanded: false),
           ),
         ),
       ],
@@ -682,14 +682,11 @@ Future<void> main() async {
         settingsProvider.overrideWith(
           () => _TestSettingsNotifier(
             SettingsState(
-              (b) => b
-                ..dashboardColorBorders = true
-                ..subjectThemes = MapBuilder<String, SubjectTheme>({
-                  'Mathematik': SubjectTheme(
-                      (b) => b..thick = 2..color = Colors.blue.value),
-                  'Deutsch': SubjectTheme(
-                      (b) => b..thick = 2..color = Colors.green.value),
-                }),
+              dashboardColorBorders: true,
+              subjectThemes: {
+                'Mathematik': SubjectTheme(thick: 2, color: Colors.blue.value),
+                'Deutsch': SubjectTheme(thick: 2, color: Colors.green.value),
+              },
             ),
           ),
         ),

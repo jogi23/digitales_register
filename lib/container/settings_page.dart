@@ -16,7 +16,6 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
-import 'package:built_collection/built_collection.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/providers/all_subjects_provider.dart';
 import 'package:dr/providers/login_provider.dart';
@@ -52,15 +51,14 @@ class SettingsPageContainer extends ConsumerWidget {
       onSetNoDataSaving: notifier.setSaveNoData,
       onSetAskWhenDelete: notifier.setAskWhenDelete,
       onSetDeleteDataOnLogout: notifier.setDeleteDataOnLogout,
-      onSetSubjectNicks: (map) => notifier.setSubjectNicks(BuiltMap(map)),
+      onSetSubjectNicks: notifier.setSubjectNicks,
       onSetShowCalendarEditNicksBar: notifier.setShowCalendarNicksBar,
       onSetShowGradesDiagram: notifier.setShowGradesDiagram,
       onSetShowAllSubjectsAverage: notifier.setShowAllSubjectsAverage,
       onSetDashboardMarkNewOrChangedEntries: notifier.setMarkNewOrChanged,
       onSetDashboardDeduplicateEntries: notifier.setDeduplicate,
       onShowProfile: ref.read(appRouterProvider).showProfile,
-      onSetIgnoreForGradesAverage: (list) =>
-          notifier.setIgnoreForGradesAverage(BuiltList(list)),
+      onSetIgnoreForGradesAverage: notifier.setIgnoreForGradesAverage,
       onSetDashboardColorBorders: notifier.setDashboardColorBorders,
       onSetCalenderColorBackground: notifier.setCalendarColorBackground,
       onSetDashboardColorTestsInRed: notifier.setDashboardColorTestsInRed,
@@ -90,7 +88,7 @@ class SettingsViewModel {
   final bool demoMode;
   final List<String> allSubjects;
   final List<String> ignoreForGradesAverage;
-  final BuiltMap<String, SubjectTheme> subjectThemes;
+  final Map<String, SubjectTheme> subjectThemes;
 
   const SettingsViewModel({
     required this.noPassSaving,
@@ -121,7 +119,7 @@ class SettingsViewModel {
         noDataSaving: s.noDataSaving,
         askWhenDelete: s.askWhenDelete,
         deleteDataOnLogout: s.deleteDataOnLogout,
-        subjectNicks: s.subjectNicks.toMap(),
+        subjectNicks: s.subjectNicks,
         showSubjectNicks: s.scrollToSubjectNicks,
         showGradesSettings: s.scrollToGrades,
         showCalendarEditNicksBar: s.showCalendarNicksBar,
@@ -133,8 +131,8 @@ class SettingsViewModel {
         calendarColorBackground: s.calendarColorBackground,
         dashboardColorTestsInRed: s.dashboardColorTestsInRed,
         allSubjects: allSubjects,
-        ignoreForGradesAverage: s.ignoreForGradesAverage.toList(),
-        subjectThemes: s.subjectThemes,
+        ignoreForGradesAverage: s.ignoreForGradesAverage,
+        subjectThemes: Map.of(s.subjectThemes),
         demoMode: isDemo,
       );
 }

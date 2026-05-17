@@ -89,7 +89,7 @@ class GradesPageViewModel {
 String calculateAllSubjectsAverage(
   BuiltList<Subject> subjects,
   Semester semester,
-  BuiltList<String> ignoreForGradesAverage,
+  List<String> ignoreForGradesAverage,
 ) {
   var sum = 0;
   var n = 0;

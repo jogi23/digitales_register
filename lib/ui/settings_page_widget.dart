@@ -260,9 +260,7 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
                       widget.onSetSubjectTheme(
                         MapEntry(
                           theme.key,
-                          theme.value.rebuild(
-                            (b) => b.color = color.value,
-                          ),
+                          theme.value.copyWith(color: color.value),
                         ),
                       );
                     }
