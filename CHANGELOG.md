@@ -1,4 +1,10 @@
 
+## 1.1.0
+
+### Interne Änderungen
+- State-Management vollständig auf Riverpod umgestellt (Redux entfernt)
+- Einstellungen und Fach-Themes intern vereinfacht (built_value teilweise entfernt)
+
 ## 1.0.2
 
 ### Änderungen
