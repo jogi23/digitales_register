@@ -155,7 +155,8 @@ class MessagesNotifier extends Notifier<MessagesState> {
     return MessagesState(
       (b) => b
         ..messages = ListBuilder<Message>(messages)
-        ..lastFetched = UtcDateTime.now(),
+        ..lastFetched = UtcDateTime.now()
+        ..showMessage = state.showMessage,
     );
   }
 
