@@ -605,7 +605,8 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
                 alignment: Alignment.centerLeft,
                 child: TextButton(
                   onPressed: () {
-                    final navigator = Navigator.of(context);
+                    final navigator =
+                        Navigator.of(context, rootNavigator: true);
                     navigator.pop();
                     navigator.push(
                       MaterialPageRoute(
