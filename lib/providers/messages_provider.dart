@@ -15,6 +15,8 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'dart:async';
+
 import 'package:built_collection/built_collection.dart';
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:dr/app_state.dart';
@@ -69,7 +71,26 @@ class MessagesNotifier extends Notifier<MessagesState> {
     await openFile(file.uniqueName);
   }
 
-  void markAsRead(int messageId) {
+  Future<void> markAllAsRead() async {
+    final unread = state.messages.where((m) => m.timeRead == null).toList();
+    if (unread.isEmpty) return;
+    state = state.rebuild(
+      (b) => b.messages.map(
+        (m) => m.timeRead == null ? m.rebuild((b) => b..timeRead = now) : m,
+      ),
+    );
+    for (final m in unread) {
+      await ref
+          .read(notificationsProvider.notifier)
+          .markMessageAsRead(m.id);
+      unawaited(wrapper.send(
+        "api/message/markAsRead",
+        args: <String, dynamic>{"messageId": m.id},
+      ));
+    }
+  }
+
+  Future<void> markAsRead(int messageId) async {
     state = state.rebuild((b) {
       if (messageId == b.showMessage) {
         b.showMessage = null;
@@ -80,11 +101,11 @@ class MessagesNotifier extends Notifier<MessagesState> {
             b.messages[index].rebuild((b) => b..timeRead = now);
       }
     });
-    ref.read(notificationsProvider.notifier).markMessageAsRead(messageId);
-    wrapper.send(
+    await ref.read(notificationsProvider.notifier).markMessageAsRead(messageId);
+    unawaited(wrapper.send(
       "api/message/markAsRead",
       args: <String, dynamic>{"messageId": messageId},
-    );
+    ));
   }
 
   void _markDownloading(MessageAttachmentFile file) {
@@ -139,19 +160,24 @@ class MessagesNotifier extends Notifier<MessagesState> {
   }
 
   Message _parseMessage(Map json, MessagesState currentState) {
+    final id = getInt(json["id"]);
+    final oldMessage = currentState.messages.firstWhereOrNull(
+      (m) => m.id == id,
+    );
+    // Preserve optimistic local read: if the server hasn't caught up yet
+    // (timeRead still null) but we already marked it locally, keep the
+    // local timestamp so the message doesn't flash back to "neu".
+    final timeRead = json["timeRead"] != null
+        ? UtcDateTime.parse(getString(json["timeRead"])!)
+        : oldMessage?.timeRead;
     final message = MessageBuilder()
       ..subject = getString(json["subject"])
       ..text = getString(json["text"])
       ..timeSent = UtcDateTime.parse(getString(json["timeSent"])!)
-      ..timeRead = json["timeRead"] != null
-          ? UtcDateTime.parse(getString(json["timeRead"])!)
-          : null
+      ..timeRead = timeRead
       ..recipientString = getString(json["recipientString"])
       ..fromName = getString(json["fromName"])
-      ..id = getInt(json["id"]);
-    final oldMessage = currentState.messages.firstWhereOrNull(
-      (m) => m.id == message.id,
-    );
+      ..id = id;
     final attachments = ListBuilder<MessageAttachmentFile>();
     for (final attachmentJson
         in getList(json["submissions"]) ?? <dynamic>[]) {

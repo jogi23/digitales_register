@@ -35,7 +35,7 @@ void main() {
     });
 
     test('add returns UtcDateTime', () {
-      final dt = UtcDateTime(2021, 1, 1);
+      final dt = UtcDateTime(2021);
       final result = dt.add(const Duration(days: 1));
       expect(result, isA<UtcDateTime>());
       expect(result.isUtc, true);
@@ -63,7 +63,7 @@ void main() {
     });
 
     test('makeUtc converts DateTime to UtcDateTime', () {
-      final local = DateTime(2021, 4, 1, 9, 0);
+      final local = DateTime(2021, 4, 1, 9);
       final utc = UtcDateTime.makeUtc(local);
       expect(utc, isA<UtcDateTime>());
       expect(utc.isUtc, true);

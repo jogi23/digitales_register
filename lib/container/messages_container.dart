@@ -30,10 +30,16 @@ class MessagesPageContainer extends ConsumerWidget {
     return MessagesPage(
       state: messagesState,
       noInternet: noInternet,
+      hasUnread: messagesState.messages.any((m) => m.timeRead == null),
       onOpenFile: (file) =>
           ref.read(messagesProvider.notifier).openMessageFile(file),
       onMarkAsRead: (message) =>
           ref.read(messagesProvider.notifier).markAsRead(message.id),
+      onMarkAllAsRead: () =>
+          ref.read(messagesProvider.notifier).markAllAsRead(),
+      onRefresh: () => noInternet
+          ? ref.read(noInternetProvider.notifier).refresh()
+          : ref.read(messagesProvider.notifier).load(),
     );
   }
 }

@@ -395,6 +395,7 @@ Future<void> _doSelectAccount(int index) async {
   login["pass"] = selected["pass"];
   login["url"] = selected["url"];
   await secureStorage.write(key: "login", value: json.encode(login));
+  await saveStateImmediately();
   providerContainer.read(loginProvider.notifier).logout(hard: true);
   _resetAllProviders();
   await _doLoad();

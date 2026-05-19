@@ -1,4 +1,13 @@
 
+## 1.1.1
+
+### Fehlerbehebungen
+- Mitteilungen: Gelesene Mitteilungen wurden nach Neustart, Screen-Wechsel und Account-Wechsel wieder als „neu" angezeigt — behoben
+
+### Neue Funktionen
+- Mitteilungen: Schaltfläche „Alle als gelesen markieren" in der AppBar
+- Mitteilungen: Zum Aktualisieren nach unten wischen; bei fehlender Internetverbindung wird ein Verbindungsversuch gestartet
+
 ## 1.1.0
 
 ### Interne Änderungen
