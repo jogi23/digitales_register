@@ -112,9 +112,10 @@ class _SidebarPageState extends State<SidebarPage> {
         selectedTextColor: Colors.limeAccent,
         textStyle: const TextStyle(fontSize: 15, fontStyle: FontStyle.italic),
         titleStyle: const TextStyle(
-            fontSize: 20,
-            fontStyle: FontStyle.italic,
-            fontWeight: FontWeight.bold),
+          fontSize: 20,
+          fontStyle: FontStyle.italic,
+          fontWeight: FontWeight.bold,
+        ),
         toggleTitleStyle:
             const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         titleTooltip: 'John Smith',

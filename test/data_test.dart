@@ -62,8 +62,6 @@ void main() {
         subtitle: 'Kapitel 3',
       );
       final gradeGroupEntry = _hw(
-        id: 1,
-        type: HomeworkType.gradeGroup,
         label: 'Schularbeit 1',
         subtitle: 'Kapitel 3',
       );
@@ -78,8 +76,6 @@ void main() {
         subtitle: 'Kapitel 3',
       );
       final gradeGroupEntry = _hw(
-        id: 1,
-        type: HomeworkType.gradeGroup,
         label: 'Schularbeit 1',
         subtitle: 'Kapitel 3',
       );
@@ -88,14 +84,10 @@ void main() {
 
     test('identical but subtitle is prefix of other → true', () {
       final amended = _hw(
-        id: 1,
-        type: HomeworkType.gradeGroup,
         label: 'L1',
         subtitle: 'Kapitel 3 - Zusatzaufgaben',
       );
       final original = _hw(
-        id: 1,
-        type: HomeworkType.gradeGroup,
         label: 'L1',
         subtitle: 'Kapitel 3',
       );
@@ -103,7 +95,7 @@ void main() {
     });
 
     test('completely different entries → false', () {
-      final hw1 = _hw(id: 1, title: 'Mathe', subtitle: 'A', label: 'X');
+      final hw1 = _hw(title: 'Mathe', subtitle: 'A', label: 'X');
       final hw2 = _hw(id: 2, title: 'Deutsch', subtitle: 'B', label: 'Y');
       expect(hw1.isSuccessorOf(hw2), false);
     });
@@ -111,12 +103,10 @@ void main() {
     test('gradeGroup does not replace grade → false', () {
       final gradeGroupEntry = _hw(
         id: 2,
-        type: HomeworkType.gradeGroup,
         label: 'SA1',
         subtitle: 'Sub',
       );
       final gradeEntry = _hw(
-        id: 1,
         type: HomeworkType.grade,
         label: 'SA1',
         subtitle: 'Sub',

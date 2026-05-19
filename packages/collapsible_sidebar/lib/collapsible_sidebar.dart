@@ -1,4 +1,3 @@
-
 import 'dart:math' as math show pi;
 
 import 'package:collapsible_sidebar/collapsible_sidebar/collapsible_container.dart';
@@ -231,7 +230,7 @@ class _CollapsibleSidebarState extends State<CollapsibleSidebar>
                   endIndent: 5,
                 ),
                 _toggleButton,
-              ]
+              ],
             ],
           ),
         ),

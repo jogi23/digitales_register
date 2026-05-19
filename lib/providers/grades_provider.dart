@@ -71,9 +71,7 @@ class GradesNotifier extends Notifier<GradesState> {
     if (ref.read(noInternetProvider)) return;
     state = state.rebuild((b) => b..loading = true);
     _doForSemester(
-      semester == Semester.all
-          ? [Semester.first, Semester.second]
-          : [semester],
+      semester == Semester.all ? [Semester.first, Semester.second] : [semester],
       (s) async {
         final dynamic data = await wrapper.send(
           _subjects,
@@ -91,9 +89,7 @@ class GradesNotifier extends Notifier<GradesState> {
   Future<void> loadDetails(Subject subject, Semester semester) async {
     if (ref.read(noInternetProvider)) return;
     _doForSemester(
-      semester == Semester.all
-          ? [Semester.first, Semester.second]
-          : [semester],
+      semester == Semester.all ? [Semester.first, Semester.second] : [semester],
       (s) async {
         dynamic data = await wrapper.send(
           _subjectsDetail,
@@ -151,17 +147,17 @@ class GradesNotifier extends Notifier<GradesState> {
                         (dynamic g) =>
                             tryParse(getMap(g)!, _parseGrade).rebuild(
                           (d) => d
-                            ..cancelledDescription =
-                                sb.grades[semester]?.firstWhereOrNull(
-                              (gd) => gd.id == d.id,
-                            )?.cancelledDescription,
+                            ..cancelledDescription = sb.grades[semester]
+                                ?.firstWhereOrNull(
+                                  (gd) => gd.id == d.id,
+                                )
+                                ?.cancelledDescription,
                         ),
                       ),
                     )
                     ..observations[semester] = BuiltList(
                       getList(mapData["observations"])!.map<Observation>(
-                        (dynamic o) =>
-                            tryParse(getMap(o)!, _parseObservation),
+                        (dynamic o) => tryParse(getMap(o)!, _parseObservation),
                       ),
                     )
                     ..lastFetchedDetailed[semester] = UtcDateTime.now(),
@@ -178,9 +174,8 @@ class GradesNotifier extends Notifier<GradesState> {
                   (sb) => sb
                     ..grades[semester] = sb.grades[semester]!.rebuild(
                       (gb) => gb.map(
-                        (g) => g == grade
-                            ? _addCancelledDescription(g, data)
-                            : g,
+                        (g) =>
+                            g == grade ? _addCancelledDescription(g, data) : g,
                       ),
                     ),
                 )
@@ -314,16 +309,13 @@ Competence _parseCompetence(Map data) {
     ..grade = double.parse(getString(data["grade"])!).toInt());
 }
 
-typedef _SemesterChangeCallback = Future<void> Function(Semester semester);
-typedef _AsyncVoidCallback = Future<void> Function();
-
 class _SemesterLock {
   Semester? current;
   int usersOfCurrent = 0;
-  final _SemesterChangeCallback semesterChangeCallback;
+  final Future<void> Function(Semester) semesterChangeCallback;
   _SemesterLock(this.semesterChangeCallback);
   final _mutex = Mutex();
-  Map<Semester, List<_AsyncVoidCallback>> waitlist = {};
+  Map<Semester, List<Future<void> Function()>> waitlist = {};
 
   Future<void> synchronized(
       Semester semester, Future<void> Function() f) async {
