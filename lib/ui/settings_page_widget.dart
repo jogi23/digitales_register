@@ -594,7 +594,7 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
             icon: const Icon(Icons.info_outline),
             applicationIcon: SizedBox(
               width: 100,
-              child: Image.asset("assets/transparent.png"),
+              child: Image.asset("assets/index.png"),
             ),
             applicationLegalese:
                 "Copyright Johannes Feichter 2026\n\t\tMichael Debertol und Simon Wachtler 2019-2022",
