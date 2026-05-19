@@ -34,56 +34,83 @@ import 'package:responsive_scaffold/responsive_scaffold.dart';
 class MessagesPage extends StatelessWidget {
   final MessagesState? state;
   final bool noInternet;
+  final bool hasUnread;
   final void Function(MessageAttachmentFile message) onOpenFile;
   final void Function(Message message) onMarkAsRead;
+  final VoidCallback onMarkAllAsRead;
+  final Future<void> Function() onRefresh;
 
   const MessagesPage({
     super.key,
     required this.state,
     required this.noInternet,
+    required this.hasUnread,
     required this.onOpenFile,
     required this.onMarkAsRead,
+    required this.onMarkAllAsRead,
+    required this.onRefresh,
   });
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const ResponsiveAppBar(
-        title: Text("Mitteilungen"),
+      appBar: ResponsiveAppBar(
+        title: const Text("Mitteilungen"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.done_all),
+            tooltip: "Alle als gelesen markieren",
+            onPressed: hasUnread ? onMarkAllAsRead : null,
+          ),
+        ],
       ),
       body: state == null
           ? noInternet
-              ? const NoInternet()
-              : const Center(child: CircularProgressIndicator())
-          : LastFetchedOverlay(
-              lastFetched: state!.lastFetched,
-              noInternet: noInternet,
-              child: Stack(
-                children: <Widget>[
-                  AnimatedLinearProgressIndicator(
-                    show: state!.showMessage != null &&
-                        !state!.messages.any((m) => m.id == state!.showMessage),
-                  ),
-                  if (state!.messages.isEmpty)
-                    Center(
-                      child: Text(
-                        "Noch keine Mitteilungen",
-                        style: Theme.of(context).textTheme.headlineMedium,
-                        textAlign: TextAlign.center,
-                      ),
+              ? RefreshIndicator(
+                  onRefresh: onRefresh,
+                  child: const SingleChildScrollView(
+                    physics: AlwaysScrollableScrollPhysics(),
+                    child: SizedBox(
+                      height: 400,
+                      child: NoInternet(),
                     ),
-                  ListView.builder(
-                    itemCount: state!.messages.length,
-                    itemBuilder: (context, i) {
-                      return MessageWidget(
-                        message: state!.messages[i],
-                        onOpenFile: onOpenFile,
-                        onMarkAsRead: onMarkAsRead,
-                        noInternet: noInternet,
-                        expand: state!.messages[i].id == state!.showMessage,
-                      );
-                    },
                   ),
-                ],
+                )
+              : const Center(child: CircularProgressIndicator())
+          : RefreshIndicator(
+              onRefresh: onRefresh,
+              child: LastFetchedOverlay(
+                lastFetched: state!.lastFetched,
+                noInternet: noInternet,
+                child: Stack(
+                  children: <Widget>[
+                    AnimatedLinearProgressIndicator(
+                      show: state!.showMessage != null &&
+                          !state!.messages
+                              .any((m) => m.id == state!.showMessage),
+                    ),
+                    if (state!.messages.isEmpty)
+                      Center(
+                        child: Text(
+                          "Noch keine Mitteilungen",
+                          style: Theme.of(context).textTheme.headlineMedium,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ListView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      itemCount: state!.messages.length,
+                      itemBuilder: (context, i) {
+                        return MessageWidget(
+                          message: state!.messages[i],
+                          onOpenFile: onOpenFile,
+                          onMarkAsRead: onMarkAsRead,
+                          noInternet: noInternet,
+                          expand: state!.messages[i].id == state!.showMessage,
+                        );
+                      },
+                    ),
+                  ],
+                ),
               ),
             ),
     );
