@@ -22,6 +22,7 @@ import 'package:deleteable_tile/deleteable_tile.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/container/settings_page.dart';
 import 'package:dr/ui/autocomplete_options.dart';
+import 'package:dr/ui/changelog_page.dart';
 import 'package:dr/ui/dialog.dart';
 import 'package:dr/ui/donations.dart';
 import 'package:dr/ui/network_protocol_page.dart';
@@ -600,6 +601,28 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
             applicationName: "Digitales Register Südtirol",
             applicationVersion: appVersion,
             aboutBoxChildren: [
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton(
+                  onPressed: () {
+                    final navigator = Navigator.of(context);
+                    navigator.pop();
+                    navigator.push(
+                      MaterialPageRoute(
+                        builder: (_) => const ChangelogPage(),
+                      ),
+                    );
+                  },
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text("What's new"),
+                      SizedBox(width: 8),
+                      Icon(Icons.new_releases_outlined),
+                    ],
+                  ),
+                ),
+              ),
               const Text("Ein Client für das Digitale Register."),
               Text.rich(
                 TextSpan(children: [
