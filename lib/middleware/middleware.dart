@@ -226,7 +226,11 @@ Future<void> _doLoad() async {
 Future<void> _doSaveState({bool immediately = false}) async {
   final loginState = providerContainer.read(loginProvider);
   if (loginState.loggedIn && loginState.username != null) {
-    _stateToSave = AppState();
+    _stateToSave = AppState(
+      (b) => b
+        ..messagesState =
+            providerContainer.read(messagesProvider).toBuilder(),
+    );
     if (_saveUnderway && !immediately) return;
     _saveUnderway = true;
 

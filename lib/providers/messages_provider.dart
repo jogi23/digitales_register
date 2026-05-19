@@ -160,19 +160,24 @@ class MessagesNotifier extends Notifier<MessagesState> {
   }
 
   Message _parseMessage(Map json, MessagesState currentState) {
+    final id = getInt(json["id"]);
+    final oldMessage = currentState.messages.firstWhereOrNull(
+      (m) => m.id == id,
+    );
+    // Preserve optimistic local read: if the server hasn't caught up yet
+    // (timeRead still null) but we already marked it locally, keep the
+    // local timestamp so the message doesn't flash back to "neu".
+    final timeRead = json["timeRead"] != null
+        ? UtcDateTime.parse(getString(json["timeRead"])!)
+        : oldMessage?.timeRead;
     final message = MessageBuilder()
       ..subject = getString(json["subject"])
       ..text = getString(json["text"])
       ..timeSent = UtcDateTime.parse(getString(json["timeSent"])!)
-      ..timeRead = json["timeRead"] != null
-          ? UtcDateTime.parse(getString(json["timeRead"])!)
-          : null
+      ..timeRead = timeRead
       ..recipientString = getString(json["recipientString"])
       ..fromName = getString(json["fromName"])
-      ..id = getInt(json["id"]);
-    final oldMessage = currentState.messages.firstWhereOrNull(
-      (m) => m.id == message.id,
-    );
+      ..id = id;
     final attachments = ListBuilder<MessageAttachmentFile>();
     for (final attachmentJson
         in getList(json["submissions"]) ?? <dynamic>[]) {
