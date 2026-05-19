@@ -178,9 +178,9 @@ class NotificationWidget extends StatelessWidget {
               else
                 IconButton(
                   icon: const Icon(
-                    Icons.exit_to_app,
+                    Icons.open_in_new,
                   ),
-                  tooltip: "Zu Mitteilungen wechseln",
+                  tooltip: "Mitteilung öffnen",
                   onPressed: () => goToMessage(notification.objectId!),
                 )
             ],

@@ -226,10 +226,10 @@ Future<void> main() async {
     await tester.pump(const Duration(milliseconds: 100));
     // weeks are animating, so there are two weeks that show a progress indicator
     expect(find.byType(CircularProgressIndicator), findsNWidgets(3));
-    expect(find.text("Aktuelle Woche"), findsNothing);
+    expect(tester.widget<TextButton>(find.widgetWithText(TextButton, "Aktuelle Woche")).onPressed, isNull);
     await tester.pump(const Duration(milliseconds: 100));
     expect(find.byType(CircularProgressIndicator), findsNWidgets(2));
-    expect(find.text("Aktuelle Woche"), findsNothing);
+    expect(tester.widget<TextButton>(find.widgetWithText(TextButton, "Aktuelle Woche")).onPressed, isNull);
   });
 
   testWidgets("tapping the bar opens settings", (WidgetTester tester) async {

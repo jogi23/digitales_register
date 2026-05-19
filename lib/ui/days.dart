@@ -379,10 +379,6 @@ class _DaysWidgetState extends State<DaysWidget> {
         actions: <Widget>[
           if (widget.vm.noInternet)
             TextButton(
-              style: TextButton.styleFrom(
-                foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-              ),
               onPressed: widget.refreshNoInternet,
               child: const Row(
                 children: [

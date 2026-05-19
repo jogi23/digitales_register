@@ -237,7 +237,7 @@ class ResponsiveScaffoldState<T> extends State<ResponsiveScaffold<T>>
                           currentSelected,
                           false,
                         ),
-                        drawerEdgeDragWidth: 20.0,
+                        drawerEdgeDragWidth: MediaQuery.of(context).size.width,
                         body: _Body<T>(
                           navKey: navigatorKey,
                           navObserver: _PopObserver(_wentHome),
