@@ -203,23 +203,24 @@ class _CalendarState extends ConsumerState<Calendar> with TickerProviderStateMix
                   appBar: ResponsiveAppBar(
                     title: const Text("Kalender"),
                     actions: <Widget>[
-                      if (toMonday(now) != widget.vm.currentMonday)
-                        TextButton(
-                          style: TextButton.styleFrom(
-                            foregroundColor:
-                                Theme.of(context).colorScheme.onPrimary,
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                          ),
-                          onPressed: () {
-                            final date = toMonday(now);
-                            _controller.animateToPage(pageOf(date),
-                                curve: _animatePageCurve,
-                                duration: _animatePageDuration);
-                          },
-                          child: const Text(
-                            "Aktuelle Woche",
-                          ),
+                      TextButton(
+                        onPressed: toMonday(now) == widget.vm.currentMonday
+                            ? null
+                            : () {
+                                final date = toMonday(now);
+                                _controller.animateToPage(pageOf(date),
+                                    curve: _animatePageCurve,
+                                    duration: _animatePageDuration);
+                              },
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text("Aktuelle Woche"),
+                            SizedBox(width: 8),
+                            Icon(Icons.today),
+                          ],
                         ),
+                      ),
                     ],
                   ),
                   body: Column(
