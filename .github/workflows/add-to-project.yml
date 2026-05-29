@@ -8,7 +8,9 @@ jobs:
   add-to-project:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/add-to-project@v0.5.0
-        with:
-          project-url: https://github.com/users/jogi23/projects/1
-          github-token: ${{ secrets.ADD_TO_PROJECT_TOKEN }}
+      - name: Add issue to project
+        env:
+          GH_TOKEN: ${{ secrets.ADD_TO_PROJECT_TOKEN }}
+          ISSUE_URL: ${{ github.event.issue.html_url }}
+        run: |
+          gh project item-add 1 --owner jogi23 --url "$ISSUE_URL"
