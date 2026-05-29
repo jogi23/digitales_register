@@ -13,4 +13,4 @@ jobs:
           GH_TOKEN: ${{ secrets.ADD_TO_PROJECT_TOKEN }}
           ISSUE_URL: ${{ github.event.issue.html_url }}
         run: |
-          gh project item-add 1 --owner "@me" --url "$ISSUE_URL"
+          gh project item-add 3 --owner "@me" --url "$ISSUE_URL"
