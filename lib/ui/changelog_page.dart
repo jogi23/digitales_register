@@ -15,9 +15,28 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:http/http.dart' as http;
+
+Future<String> _fetchChangelog() async {
+  final response = await http.get(
+    Uri.parse(
+        'https://api.github.com/repos/jogi23/digitales_register/releases'),
+    headers: {'Accept': 'application/vnd.github+json'},
+  );
+  if (response.statusCode != 200) {
+    throw Exception('Failed to load releases: ${response.statusCode}');
+  }
+  final releases = jsonDecode(response.body) as List<dynamic>;
+  return releases.map((r) {
+    final version = (r['tag_name'] as String).replaceFirst('v', '');
+    final body = (r['body'] as String? ?? '').trim();
+    return '## $version\n\n$body';
+  }).join('\n\n');
+}
 
 class ChangelogPage extends StatelessWidget {
   const ChangelogPage({super.key});
@@ -27,8 +46,11 @@ class ChangelogPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text("What's new")),
       body: FutureBuilder<String>(
-        future: rootBundle.loadString('CHANGELOG.md'),
+        future: _fetchChangelog(),
         builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return const Center(child: Text('Keine Verbindung'));
+          }
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
           }
