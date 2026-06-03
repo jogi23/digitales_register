@@ -69,7 +69,7 @@ dependencies:
       ref: 7d9c079b9b07e2eac5f1d25a08b40e7f0c5c6cf0
       path: uni_links/
   url_launcher: ^6.3.1
-  flutter_markdown: ^0.7.7+1
+  flutter_markdown_plus: ^1.0.6
 
 dependency_overrides:
   file: ^6.1.4
