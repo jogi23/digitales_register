@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Copyright 2021 Michael Debertol <michael.debertol@gmail.com> -->
+<!-- TODO: Datei vor Linux-Store-Release (z.B. Flathub) überarbeiten:
+     - App-ID, developer_name, update_contact anpassen (Fork-Infos)
+     - Releases aktualisieren
+     - Screenshots ersetzen (URLs zeigen noch auf miDeb-Repo)
+     - launchable desktop-id prüfen
+-->
 <component type="desktop-application">
   <id>io.github.mideb.digitales_register</id>
   <metadata_license>CC0-1.0</metadata_license>

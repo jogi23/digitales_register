@@ -147,9 +147,9 @@ flutter:
   # see https://flutter.io/custom-fonts/#from-packages
 
 msix_config:
-  display_name: Digitales Register Südtirol
-  publisher_display_name: Michael Debertol
-  identity_name: 2097MichaelDebertol.DigitalesRegister
+  display_name: DigiReg ST
+  publisher_display_name: Johannes Feichter
+  identity_name: 2097JohannesFeichter.DigiRegST # todo: check/fid
   publisher: CN=2508760A-808B-4829-867A-4DB53593750E
   msix_version: 1.0.1.0
   logo_path: assets/4.0x/transparent.png

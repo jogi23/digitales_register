@@ -24,7 +24,6 @@ import 'package:dr/container/settings_page.dart';
 import 'package:dr/ui/autocomplete_options.dart';
 import 'package:dr/ui/changelog_page.dart';
 import 'package:dr/ui/dialog.dart';
-import 'package:dr/ui/donations.dart';
 import 'package:dr/ui/network_protocol_page.dart';
 import 'package:dr/util.dart';
 import 'package:dynamic_theme/dynamic_theme.dart';
@@ -554,17 +553,6 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
               );
             },
           ),
-          if (false)
-            ListTile(
-              leading: const Icon(Icons.monetization_on),
-              title: const Text(
-                "Unterstütze uns jetzt!",
-              ),
-              onTap: () {
-                Navigator.of(context).push(
-                    MaterialPageRoute<void>(builder: (context) => Donate()));
-              },
-            ),
           ListTile(
             leading: const Icon(Icons.feedback),
             title: const Text("Feedback geben"),
@@ -573,10 +561,9 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
               await launchUrl(
                 Uri(
                   scheme: 'mailto',
-                  path: 'joe.fei23@gmail.com',
+                  path: 'hallo@wertwerk.io',
                   queryParameters: {
-                    'subject':
-                        'Feedback Digitales Register Südtirol $appVersion',
+                    'subject': 'Feedback DigiReg ST $appVersion',
                   },
                 ),
               );
@@ -597,8 +584,8 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
               child: Image.asset("assets/index.png"),
             ),
             applicationLegalese:
-                "Copyright Johannes Feichter 2026\n\t\tMichael Debertol und Simon Wachtler 2019-2022",
-            applicationName: "Digitales Register Südtirol",
+                "Copyright Johannes Feichter 2026\n          Michael Debertol und Simon Wachtler 2019-2022",
+            applicationName: "DigiReg ST",
             applicationVersion: appVersion,
             aboutBoxChildren: [
               Align(
@@ -635,8 +622,7 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
                     recognizer: TapGestureRecognizer()
                       ..onTap = () {
                         launchUrl(
-                          Uri.parse(
-                              "https://blog.debertol.com"), // todo: fix url+create website
+                          Uri.parse("https://wertwerk.io"),
                           mode: LaunchMode.externalApplication,
                         );
                       },

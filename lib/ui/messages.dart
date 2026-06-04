@@ -139,19 +139,36 @@ class MessageWidget extends StatefulWidget {
 
 class _MessageWidgetState extends State<MessageWidget> {
   late final bool initiallyExpanded;
+  final ExpansibleController _controller = ExpansibleController();
+
   @override
   void initState() {
-    initiallyExpanded = widget.expand;
     super.initState();
+    initiallyExpanded = widget.expand;
+    if (initiallyExpanded) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) { if (mounted) widget.onMarkAsRead(widget.message); },
+      );
+    }
+  }
+
+  @override
+  void didUpdateWidget(MessageWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.expand && !oldWidget.expand) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _controller.expand();
+        widget.onMarkAsRead(widget.message);
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (initiallyExpanded) {
-      widget.onMarkAsRead(widget.message);
-    }
     final textTheme = Theme.of(context).textTheme;
     return ExpansionTile(
+      controller: _controller,
       initiallyExpanded: initiallyExpanded,
       onExpansionChanged: (expanded) {
         if (expanded && widget.message.isNew) {
@@ -166,7 +183,7 @@ class _MessageWidgetState extends State<MessageWidget> {
               style: textTheme.titleMedium,
             ),
           ),
-          if (widget.message.isNew || initiallyExpanded)
+          if (widget.message.isNew)
             badge.Badge(
               badgeStyle: badge.BadgeStyle(
                 shape: badge.BadgeShape.square,
