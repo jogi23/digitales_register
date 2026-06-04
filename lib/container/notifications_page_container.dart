@@ -34,7 +34,10 @@ class NotificationPageContainer extends ConsumerWidget {
       noInternet: noInternet,
       deleteNotification: notifier.delete,
       deleteAllNotifications: notifier.deleteAll,
-      goToMessage: ref.read(appRouterProvider).showMessage,
+      goToMessage: (id) {
+        ref.read(notificationsProvider.notifier).markMessageAsRead(id);
+        ref.read(appRouterProvider).showMessage(id);
+      },
       lastFetched: state.lastFetched,
     );
   }
