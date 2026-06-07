@@ -33,6 +33,7 @@ import 'package:dr/providers/login_provider.dart';
 import 'package:dr/providers/provider_container.dart';
 import 'package:dr/ui/grade_calculator.dart';
 import 'package:dr/ui/grades_chart_page.dart';
+import 'package:dr/ui/splash_overlay.dart';
 import 'package:dr/util.dart';
 import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:flutter/material.dart';
@@ -206,6 +207,9 @@ class RegisterApp extends StatelessWidget {
                 throw Exception("Unknown Route ${pathElements[1]}");
             }
           },
+          builder: (context, child) => Stack(
+            children: [child!, const SplashOverlay()],
+          ),
           theme: theme,
           debugShowCheckedModeBanner: false,
         ),

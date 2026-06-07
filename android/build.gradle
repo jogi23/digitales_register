@@ -8,11 +8,10 @@ allprojects {
         if (it.hasProperty('android') && !it.android.hasProperty('namespace')) {
             def manifestFile = it.android.sourceSets.main.manifest.srcFile
             if (manifestFile != null && manifestFile.exists()) {
-                def xmlSlurper = new groovy.xml.XmlSlurper()
-                def manifest = xmlSlurper.parse(manifestFile)
-                def packageAttr = manifest['@package']
-                if (packageAttr && !packageAttr.toString().isEmpty()) {
-                    it.android.namespace = packageAttr.toString()
+                def content = manifestFile.text
+                def matcher = content =~ /package="([^"]+)"/
+                if (matcher.find()) {
+                    it.android.namespace = matcher.group(1)
                 }
             }
         }

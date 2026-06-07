@@ -1,4 +1,4 @@
-package it.digitalesregisterapp.digitales_register
+package io.wertwerk.digitalesregister.digitales_register
 
 import io.flutter.embedding.android.FlutterActivity
 
