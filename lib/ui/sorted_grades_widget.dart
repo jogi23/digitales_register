@@ -342,7 +342,7 @@ class CompetenceWidget extends StatelessWidget {
           ),
           Row(
             children: List.generate(
-              5,
+              6,
               (n) => Star(
                 filled: n < competence.grade,
               ),

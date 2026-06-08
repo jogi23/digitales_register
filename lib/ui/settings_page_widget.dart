@@ -16,8 +16,6 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
-import 'dart:io';
-
 import 'package:deleteable_tile/deleteable_tile.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/container/settings_page.dart';
@@ -52,7 +50,6 @@ class SettingsPageWidget extends StatefulWidget {
   final OnSettingChanged<bool> onSetDashboardDeduplicateEntries;
   final OnSettingChanged<bool> onSetDarkMode;
   final OnSettingChanged<bool> onSetFollowDeviceDarkMode;
-  final OnSettingChanged<bool> onSetPlatformOverride;
   final OnSettingChanged<bool> onSetDashboardColorBorders;
   final OnSettingChanged<bool> onSetCalenderColorBackground;
   final OnSettingChanged<bool> onSetDashboardColorTestsInRed;
@@ -76,7 +73,6 @@ class SettingsPageWidget extends StatefulWidget {
     required this.onSetDarkMode,
     required this.onSetSubjectNicks,
     required this.vm,
-    required this.onSetPlatformOverride,
     required this.onSetFollowDeviceDarkMode,
     required this.onShowProfile,
     required this.onSetIgnoreForGradesAverage,
@@ -530,16 +526,6 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
               ),
             ),
           ),
-          if (Platform.isAndroid)
-            SwitchListTile.adaptive(
-              title: const Text("iOS Mode"),
-              subtitle: const Text(
-                  "Imitiere das Aussehen einer iOS-App (ein bisschen)"),
-              onChanged: (bool value) {
-                widget.onSetPlatformOverride(value);
-              },
-              value: DynamicTheme.of(context)!.platformOverride,
-            ),
           ListTile(
             title: const Text("Netzwerkprotokoll"),
             onTap: () {
@@ -678,7 +664,24 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
                     );
                   },
                 ),
-              )
+              ),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: InkWell(
+                  child: Text(
+                    "Datenschutzerklärung",
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary),
+                  ),
+                  onTap: () {
+                    launchUrl(
+                      Uri.parse(
+                          "https://wertwerk.io/datenschutz/digiregst"),
+                      mode: LaunchMode.externalApplication,
+                    );
+                  },
+                ),
+              ),
             ],
             child: const Text("Über diese App"),
           ),

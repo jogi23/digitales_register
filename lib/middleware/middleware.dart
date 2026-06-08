@@ -21,6 +21,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:built_collection/built_collection.dart';
 import 'package:dio/dio.dart' as dio;
 import 'package:dr/app_state.dart';
 import 'package:dr/main.dart' hide scaffoldMessengerKey, showSnackBar;
@@ -226,10 +227,20 @@ Future<void> _doLoad() async {
 Future<void> _doSaveState({bool immediately = false}) async {
   final loginState = providerContainer.read(loginProvider);
   if (loginState.loggedIn && loginState.username != null) {
+    final notifState = providerContainer.read(notificationsProvider);
     _stateToSave = AppState(
       (b) => b
-        ..messagesState =
-            providerContainer.read(messagesProvider).toBuilder(),
+        ..messagesState = providerContainer.read(messagesProvider).toBuilder()
+        ..gradesState = providerContainer.read(gradesProvider).toBuilder()
+        ..calendarState = providerContainer.read(calendarProvider).toBuilder()
+        ..absencesState = providerContainer.read(absencesProvider).toBuilder()
+        ..profileState = providerContainer.read(profileProvider).toBuilder()
+        ..notificationState = NotificationState(
+          (b) => b
+            ..notifications =
+                BuiltList.of(notifState.notifications).toBuilder()
+            ..lastFetched = notifState.lastFetched,
+        ).toBuilder(),
     );
     if (_saveUnderway && !immediately) return;
     _saveUnderway = true;

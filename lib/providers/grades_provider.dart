@@ -306,7 +306,7 @@ GradeDetail _addCancelledDescription(GradeDetail grade, dynamic data) {
 Competence _parseCompetence(Map data) {
   return Competence((b) => b
     ..typeName = getString(data["typeName"])
-    ..grade = double.parse(getString(data["grade"])!).toInt());
+    ..grade = (double.tryParse(getString(data["grade"]) ?? "") ?? 0).toInt());
 }
 
 class _SemesterLock {
