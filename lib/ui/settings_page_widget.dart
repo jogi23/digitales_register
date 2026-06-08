@@ -678,7 +678,24 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
                     );
                   },
                 ),
-              )
+              ),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: InkWell(
+                  child: Text(
+                    "Datenschutzerklärung",
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary),
+                  ),
+                  onTap: () {
+                    launchUrl(
+                      Uri.parse(
+                          "https://wertwerk.io/datenschutz/digiregst"),
+                      mode: LaunchMode.externalApplication,
+                    );
+                  },
+                ),
+              ),
             ],
             child: const Text("Über diese App"),
           ),
