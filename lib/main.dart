@@ -121,16 +121,11 @@ class RegisterApp extends StatelessWidget {
     return Listener(
       onPointerDown: (_) => wrapper.interaction(),
       child: DynamicTheme(
-        data: (brightness, overridePlatform, seedColor) {
-          TargetPlatform? platform;
-          if (overridePlatform && Platform.isAndroid) {
-            platform = TargetPlatform.iOS;
-          }
+        data: (brightness, _, seedColor) {
           return ThemeData(
             useMaterial3: true,
             colorSchemeSeed: seedColor,
             brightness: brightness,
-            platform: platform,
           );
         },
         themedWidgetBuilder: (context, theme) => MaterialApp(

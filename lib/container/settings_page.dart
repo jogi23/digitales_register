@@ -44,9 +44,6 @@ class SettingsPageContainer extends ConsumerWidget {
       onSetFollowDeviceDarkMode: (dm) {
         DynamicTheme.of(context)!.setFollowDevice(dm);
       },
-      onSetPlatformOverride: (o) {
-        DynamicTheme.of(context)!.setPlatformOverride(o);
-      },
       onSetNoPassSaving: notifier.setSaveNoPass,
       onSetNoDataSaving: notifier.setSaveNoData,
       onSetAskWhenDelete: notifier.setAskWhenDelete,
