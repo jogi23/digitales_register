@@ -31,11 +31,13 @@ class SplashScreen extends StatelessWidget {
     return Stack(
       children: [
         child,
-        IgnorePointer(
-          child: AnimatedOpacity(
-            opacity: splash ? 1 : 0,
-            duration: const Duration(milliseconds: 250),
-            child: _SplashWidget(),
+        Positioned.fill(
+          child: IgnorePointer(
+            child: AnimatedOpacity(
+              opacity: splash ? 1 : 0,
+              duration: const Duration(milliseconds: 250),
+              child: _SplashWidget(),
+            ),
           ),
         ),
       ],
