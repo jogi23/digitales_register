@@ -1,4 +1,4 @@
-// Copyright (C) 2021 Michael Debertol
+﻿// Copyright (C) 2021 Michael Debertol
 // Copyright (C) 2026 Johannes Feichter
 //
 // This file is part of digitales_register.
@@ -570,7 +570,7 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
               child: Image.asset("assets/index.png"),
             ),
             applicationLegalese:
-                "Copyright Johannes Feichter 2026\n          Michael Debertol und Simon Wachtler 2019-2022",
+                "Copyright Johannes Feichter 2026\n                 Michael Debertol und Simon Wachtler 2019-2022",
             applicationName: "DigiReg ST",
             applicationVersion: appVersion,
             aboutBoxChildren: [
@@ -597,7 +597,24 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
                   ),
                 ),
               ),
-              const Text("Ein Client für das Digitale Register."),
+              Text.rich(
+                TextSpan(children: [
+                  const TextSpan(text: "Ein Client für das "),
+                  TextSpan(
+                    text: "Digitale Register",
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary),
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () {
+                        launchUrl(
+                          Uri.parse("https://www.digitalesregister.it/"),
+                          mode: LaunchMode.externalApplication,
+                        );
+                      },
+                  ),
+                  const TextSpan(text: "."),
+                ]),
+              ),
               Text.rich(
                 TextSpan(children: [
                   const TextSpan(text: "Entwickelt von "),
@@ -670,13 +687,12 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
                 child: InkWell(
                   child: Text(
                     "Datenschutzerklärung",
-                    style: TextStyle(
-                        color: Theme.of(context).colorScheme.primary),
+                    style:
+                        TextStyle(color: Theme.of(context).colorScheme.primary),
                   ),
                   onTap: () {
                     launchUrl(
-                      Uri.parse(
-                          "https://wertwerk.io/datenschutz/digiregst"),
+                      Uri.parse("https://wertwerk.io/datenschutz/digiregst"),
                       mode: LaunchMode.externalApplication,
                     );
                   },
