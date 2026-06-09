@@ -280,6 +280,6 @@ void main() {
     await tester.tap(find.text("Fach1"));
     await tester.pumpAndSettle();
     expect(find.byIcon(Icons.star), findsNWidgets(3));
-    expect(find.byIcon(Icons.star_border), findsNWidgets(2));
+    expect(find.byIcon(Icons.star_border), findsNWidgets(3));
   });
 }
