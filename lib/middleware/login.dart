@@ -144,7 +144,7 @@ Future<void> _doLogin(
     }
     if (fromStorage) {
       if (!noInternet) {
-        showSnackBar(wrapper.error ?? "Verbindung fehlgeschlagen");
+        showSnackBar("Verbindung fehlgeschlagen");
       }
       return;
     }
