@@ -203,7 +203,7 @@ class RegisterApp extends StatelessWidget {
             }
           },
           builder: (context, child) => Stack(
-            children: [child!, const SplashOverlay()],
+            children: [child!, const Positioned.fill(child: SplashOverlay())],
           ),
           theme: theme,
           debugShowCheckedModeBanner: false,
