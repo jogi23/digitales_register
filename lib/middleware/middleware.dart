@@ -234,6 +234,7 @@ Future<void> _doSaveState({bool immediately = false}) async {
         ..gradesState = providerContainer.read(gradesProvider).toBuilder()
         ..calendarState = providerContainer.read(calendarProvider).toBuilder()
         ..absencesState = providerContainer.read(absencesProvider).toBuilder()
+        ..dashboardState = providerContainer.read(dashboardProvider).toBuilder()
         ..profileState = providerContainer.read(profileProvider).toBuilder()
         ..notificationState = NotificationState(
           (b) => b

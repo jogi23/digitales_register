@@ -410,6 +410,9 @@ void _restoreProvidersFromAppState(AppState appState) {
       .read(messagesProvider.notifier)
       .restore(appState.messagesState);
   providerContainer
+      .read(dashboardProvider.notifier)
+      .restore(appState.dashboardState);
+  providerContainer
       .read(profileProvider.notifier)
       .restore(appState.profileState);
   providerContainer.read(notificationsProvider.notifier).restore(
