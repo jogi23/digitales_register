@@ -90,7 +90,6 @@ Future<void> _doLogin(
       username: user,
       fromStorage: true,
       offlineOnly: true,
-      keepShowingLoadingIndicator: true,
     );
     offlineLogin = true;
   }
@@ -142,14 +141,12 @@ Future<void> _doLogin(
     final noInternet = wrapper.noInternet;
     if (noInternet) {
       providerContainer.read(noInternetProvider.notifier).setNoInternet(true);
-      if (fromStorage) {
-        await _doLoggedIn(
-          username: user,
-          fromStorage: true,
-          offlineOnly: true,
-        );
-        return;
+    }
+    if (fromStorage) {
+      if (!noInternet) {
+        showSnackBar(wrapper.error ?? "Verbindung fehlgeschlagen");
       }
+      return;
     }
     providerContainer.read(loginProvider.notifier).setLoginFailed(
       cause: wrapper.error ?? "Unknown error",
