@@ -17,6 +17,7 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:dr/providers/certificate_provider.dart';
+import 'package:dr/ui/account_avatar_button.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/ui/last_fetched_overlay.dart';
 import 'package:dr/ui/no_internet.dart';
@@ -33,7 +34,10 @@ class Certificate extends ConsumerWidget {
     final certState = ref.watch(certificateProvider);
     final noInternet = ref.watch(noInternetProvider);
     return Scaffold(
-      appBar: const ResponsiveAppBar(title: Text("Zeugnis")),
+      appBar: const ResponsiveAppBar(
+        title: Text("Zeugnis"),
+        actions: [AccountAvatarButton()],
+      ),
       body: certState.html == null
           ? Center(
               child: noInternet

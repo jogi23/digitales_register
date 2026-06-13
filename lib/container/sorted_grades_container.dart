@@ -50,6 +50,8 @@ class SortedGradesContainer extends ConsumerWidget {
       viewSubjectDetail: (s) => ref
           .read(gradesProvider.notifier)
           .loadDetails(s, gradesState.semester),
+      pendingSubjectId: gradesState.pendingSubjectId,
+      clearPendingSubject: ref.read(gradesProvider.notifier).clearPendingSubject,
     );
   }
 }

@@ -95,6 +95,11 @@ class AppRouter {
         .load(_ref.read(gradesProvider).semester));
   }
 
+  void showGradeDetail(int objectId) {
+    showGrades();
+    unawaited(_ref.read(gradesProvider.notifier).requestSubjectDetail(objectId));
+  }
+
   void showAbsences() {
     scaffoldKey!.currentState!
         .selectContentWidget(const AbsencesPageContainer(), Pages.absences);

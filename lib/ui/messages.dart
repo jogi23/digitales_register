@@ -20,6 +20,7 @@ import 'dart:convert';
 
 import 'package:badges/badges.dart' as badge;
 import 'package:dr/app_state.dart';
+import 'package:dr/ui/account_avatar_button.dart';
 import 'package:dr/data.dart';
 import 'package:dr/ui/animated_linear_progress_indicator.dart';
 import 'package:dr/ui/last_fetched_overlay.dart';
@@ -61,6 +62,7 @@ class MessagesPage extends StatelessWidget {
             tooltip: "Alle als gelesen markieren",
             onPressed: hasUnread ? onMarkAllAsRead : null,
           ),
+          const AccountAvatarButton(),
         ],
       ),
       body: state == null

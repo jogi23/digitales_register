@@ -60,6 +60,13 @@ class PassResetState {
       );
 }
 
+class OtherAccount {
+  final String username;
+  final String url;
+
+  const OtherAccount({required this.username, required this.url});
+}
+
 class LoginState {
   final bool loggedIn;
   final bool loading;
@@ -68,7 +75,7 @@ class LoginState {
   final String? url;
   final bool changePassword;
   final bool mustChangePassword;
-  final List<String> otherAccounts;
+  final List<OtherAccount> otherAccounts;
   final PassResetState resetPassState;
 
   const LoginState({
@@ -91,7 +98,7 @@ class LoginState {
     Object? url = _s,
     bool? changePassword,
     bool? mustChangePassword,
-    List<String>? otherAccounts,
+    List<OtherAccount>? otherAccounts,
     PassResetState? resetPassState,
   }) =>
       LoginState(
@@ -191,7 +198,7 @@ class LoginNotifier extends Notifier<LoginState> {
     }
   }
 
-  void setOtherAccounts(List<String> accounts) =>
+  void setOtherAccounts(List<OtherAccount> accounts) =>
       state = state.copyWith(otherAccounts: accounts);
 
   void updatePassResetState(PassResetState resetPassState) =>

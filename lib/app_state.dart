@@ -203,6 +203,9 @@ abstract class GradesState implements Built<GradesState, GradesStateBuilder> {
   @BuiltValueField(serialize: false)
   Semester? get serverSemester;
 
+  @BuiltValueField(serialize: false)
+  int? get pendingSubjectId;
+
   static Serializer<GradesState> get serializer => _$gradesStateSerializer;
 
   factory GradesState([Function(GradesStateBuilder b)? updates]) =

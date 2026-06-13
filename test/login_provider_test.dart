@@ -114,9 +114,13 @@ void main() {
     test('hard logout preserves otherAccounts', () {
       final c = _makeContainer();
       c.read(loginProvider.notifier).setLoggedIn(username: 'alice');
-      c.read(loginProvider.notifier).setOtherAccounts(['bob', 'carol']);
+      c.read(loginProvider.notifier).setOtherAccounts([
+        OtherAccount(username: 'bob', url: 'https://example.com'),
+        OtherAccount(username: 'carol', url: 'https://example.com'),
+      ]);
       c.read(loginProvider.notifier).logout(hard: true);
-      expect(c.read(loginProvider).otherAccounts, ['bob', 'carol']);
+      final accounts = c.read(loginProvider).otherAccounts;
+      expect(accounts.map((a) => a.username).toList(), ['bob', 'carol']);
     });
   });
 

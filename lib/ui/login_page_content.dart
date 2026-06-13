@@ -430,7 +430,7 @@ class _LoginPageContentState extends State<LoginPageContent> {
                             index < widget.vm.otherAccounts.length;
                             index++)
                           ListTile(
-                            title: Text(widget.vm.otherAccounts[index]),
+                            title: Text(widget.vm.otherAccounts[index].username),
                             onTap: () => widget.onSelectAccount(index),
                           ),
                       ],

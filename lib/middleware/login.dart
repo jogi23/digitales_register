@@ -394,6 +394,7 @@ Future<void> _doSelectAccount(int index) async {
   await secureStorage.write(key: "login", value: json.encode(login));
   await saveStateImmediately();
   providerContainer.read(loginProvider.notifier).logout(hard: true);
+  providerContainer.read(loginProvider.notifier).setLoggingIn();
   _resetAllProviders();
   await _doLoad();
 }

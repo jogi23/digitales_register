@@ -22,6 +22,7 @@ import 'package:dr/app_state.dart';
 import 'package:dr/container/days_container.dart';
 import 'package:dr/container/homework_filter_container.dart';
 import 'package:dr/container/notification_icon_container.dart';
+import 'package:dr/ui/account_avatar_button.dart';
 import 'package:dr/container/sidebar_container.dart';
 import 'package:dr/data.dart';
 import 'package:dr/main.dart';
@@ -389,6 +390,7 @@ class _DaysWidgetState extends State<DaysWidget> {
               ),
             ),
           if (widget.vm.showNotifications) NotificationIconContainer(),
+          const AccountAvatarButton(),
         ],
       ),
       drawerBuilder: (widgetSelected, goHome, currentSelected, tabletMode) {

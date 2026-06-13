@@ -33,6 +33,8 @@ class SortedGradesWidget extends StatelessWidget {
   final ViewSubjectDetailCallback viewSubjectDetail;
   final SetBoolCallback sortByTypeCallback, showCancelledCallback;
   final VoidCallback showGradeCalculator;
+  final int? pendingSubjectId;
+  final VoidCallback? clearPendingSubject;
 
   const SortedGradesWidget({
     super.key,
@@ -41,6 +43,8 @@ class SortedGradesWidget extends StatelessWidget {
     required this.sortByTypeCallback,
     required this.showCancelledCallback,
     required this.showGradeCalculator,
+    this.pendingSubjectId,
+    this.clearPendingSubject,
   });
   @override
   Widget build(BuildContext context) {
@@ -71,6 +75,8 @@ class SortedGradesWidget extends StatelessWidget {
             ignoredForAverage: vm.ignoredSubjectsForAverage.any(
               (element) => element.toLowerCase() == s.name.toLowerCase(),
             ),
+            pendingSubjectId: pendingSubjectId,
+            clearPendingSubject: clearPendingSubject,
           ),
         if (vm.subjects.any(
           (s) => vm.ignoredSubjectsForAverage.any(
@@ -106,6 +112,8 @@ class SubjectWidget extends StatefulWidget {
   final Subject subject;
   final Semester semester;
   final VoidCallback viewSubjectDetail;
+  final int? pendingSubjectId;
+  final VoidCallback? clearPendingSubject;
 
   const SubjectWidget(
       {super.key,
@@ -115,7 +123,9 @@ class SubjectWidget extends StatefulWidget {
       required this.showCancelled,
       required this.semester,
       required this.noInternet,
-      required this.ignoredForAverage});
+      required this.ignoredForAverage,
+      this.pendingSubjectId,
+      this.clearPendingSubject});
 
   @override
   _SubjectWidgetState createState() => _SubjectWidgetState();
@@ -123,9 +133,19 @@ class SubjectWidget extends StatefulWidget {
 
 class _SubjectWidgetState extends State<SubjectWidget> {
   bool closed = true;
+  final _controller = ExpansibleController();
+
   @override
   void didUpdateWidget(SubjectWidget oldWidget) {
     if (oldWidget.semester != widget.semester) closed = true;
+    if (widget.pendingSubjectId != null && widget.pendingSubjectId == widget.subject.id) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          if (closed) _controller.expand();
+          widget.clearPendingSubject?.call();
+        }
+      });
+    }
     super.didUpdateWidget(oldWidget);
   }
 
@@ -153,6 +173,7 @@ class _SubjectWidgetState extends State<SubjectWidget> {
     return AbsorbPointer(
       absorbing: widget.noInternet && entries == null,
       child: ExpansionTile(
+        controller: _controller,
         key: ValueKey(widget.subject.id),
         title: Text.rich(
           TextSpan(

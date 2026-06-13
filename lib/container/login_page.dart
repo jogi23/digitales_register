@@ -65,7 +65,7 @@ class LoginPageViewModel {
   final String? url;
   final bool loading, safeMode, noInternet, changePass, mustChangePass;
   final Map<String, String> servers;
-  final List<String> otherAccounts;
+  final List<OtherAccount> otherAccounts;
 
   const LoginPageViewModel({
     required this.error,

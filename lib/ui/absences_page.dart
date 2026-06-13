@@ -17,6 +17,7 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:dr/app_state.dart';
+import 'package:dr/ui/account_avatar_button.dart';
 import 'package:dr/container/absence_group_container.dart';
 import 'package:dr/data.dart';
 import 'package:dr/ui/absence.dart';
@@ -39,6 +40,7 @@ class AbsencesPage extends StatelessWidget {
     return Scaffold(
       appBar: const ResponsiveAppBar(
         title: Text("Absenzen"),
+        actions: [AccountAvatarButton()],
       ),
       body: LastFetchedOverlay(
         lastFetched: state.lastFetched,

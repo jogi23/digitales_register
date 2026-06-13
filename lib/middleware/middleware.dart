@@ -203,11 +203,15 @@ Future<void> _doLoad() async {
   final user = getString(login["user"]);
   final pass = getString(login["pass"]);
   final url = getString(login["url"]);
-  final List<String> otherAccounts = List.from(
-    (login["otherAccounts"] as List?)
-            ?.map<String>((dynamic login) => login["user"] as String) ??
-        <String>[],
-  );
+  final List<OtherAccount> otherAccounts = [
+    for (final dynamic entry
+        in (login["otherAccounts"] as List?) ?? const [])
+      if (getString(entry["user"]) != null && getString(entry["url"]) != null)
+        OtherAccount(
+          username: getString(entry["user"])!,
+          url: getString(entry["url"])!,
+        ),
+  ];
   providerContainer.read(loginProvider.notifier).setOtherAccounts(otherAccounts);
   final currentLogin = providerContainer.read(loginProvider);
   if ((currentLogin.url != null && currentLogin.url != url) ||
