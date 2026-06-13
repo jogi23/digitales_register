@@ -38,6 +38,9 @@ class NotificationPageContainer extends ConsumerWidget {
         ref.read(notificationsProvider.notifier).markMessageAsRead(id);
         ref.read(appRouterProvider).showMessage(id);
       },
+      goToGrade: (id) {
+        ref.read(appRouterProvider).showGradeDetail(id);
+      },
       lastFetched: state.lastFetched,
     );
   }

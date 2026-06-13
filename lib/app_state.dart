@@ -48,6 +48,7 @@ abstract class AppState implements Built<AppState, AppStateBuilder> {
   ProfileState get profileState;
   CalendarState get calendarState;
   MessagesState get messagesState;
+  DashboardState get dashboardState;
 
   @BuiltValueField(serialize: false)
   NetworkProtocolState get networkProtocolState;
@@ -68,6 +69,7 @@ factory AppState([Function(AppStateBuilder b)? updates]) = _$AppState;
       ..calendarState = CalendarStateBuilder()
       ..absencesState = AbsencesStateBuilder()
       ..messagesState = MessagesStateBuilder()
+      ..dashboardState = DashboardStateBuilder()
       ..profileState = ProfileStateBuilder()
       ..networkProtocolState = NetworkProtocolStateBuilder()
       ..noInternet = false;
@@ -102,6 +104,8 @@ abstract class DashboardState
   BuiltList<HomeworkType>? get blacklist;
 
   BuiltList<Day>? get allDays;
+
+  static Serializer<DashboardState> get serializer => _$dashboardStateSerializer;
 
   factory DashboardState([Function(DashboardStateBuilder b)? updates]) =
       _$DashboardState;
@@ -198,6 +202,9 @@ abstract class GradesState implements Built<GradesState, GradesStateBuilder> {
 
   @BuiltValueField(serialize: false)
   Semester? get serverSemester;
+
+  @BuiltValueField(serialize: false)
+  int? get pendingSubjectId;
 
   static Serializer<GradesState> get serializer => _$gradesStateSerializer;
 

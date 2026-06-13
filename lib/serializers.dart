@@ -27,6 +27,11 @@ part 'serializers.g.dart';
 
 @SerializersFor([
   AppState,
+  DashboardState,
+  Day,
+  Homework,
+  HomeworkType,
+  GradeGroupSubmission,
   // needed due to https://github.com/google/built_value.dart/issues/124
   GradeAll,
   GradeDetail,
@@ -35,6 +40,15 @@ part 'serializers.g.dart';
 ])
 final Serializers serializers = (_$serializers.toBuilder()
       ..add(DateTimeSerializer())
+      ..addBuilderFactory(const FullType(BuiltList, [FullType(Day)]),
+          () => ListBuilder<Day>())
+      ..addBuilderFactory(const FullType(BuiltList, [FullType(Homework)]),
+          () => ListBuilder<Homework>())
+      ..addBuilderFactory(const FullType(BuiltList, [FullType(HomeworkType)]),
+          () => ListBuilder<HomeworkType>())
+      ..addBuilderFactory(
+          const FullType(BuiltList, [FullType(GradeGroupSubmission)]),
+          () => ListBuilder<GradeGroupSubmission>())
       // needed due to https://github.com/google/built_value.dart/issues/124
       ..addBuilderFactory(const FullType(BuiltList, [FullType(GradeAll)]),
           () => ListBuilder<GradeAll>())

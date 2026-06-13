@@ -416,23 +416,13 @@ class ResponsiveAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     final tabletMode = _InheritedTabletMode.of(context)?.tabletMode ?? false;
     final homePage = _InheritedHomePage.of(context);
-    final canPop = ModalRoute.of(context)?.canPop ?? false;
-
     Widget? leading;
     if (!tabletMode) {
-      if (canPop) {
-        leading = IconButton(
-          icon: const Icon(Icons.home),
-          tooltip: 'Merkheft',
-          onPressed: homePage?.goHome,
-        );
-      } else {
-        leading = IconButton(
-          icon: const Icon(Icons.menu),
-          tooltip: 'Menü öffnen',
-          onPressed: homePage?.openDrawer,
-        );
-      }
+      leading = IconButton(
+        icon: const Icon(Icons.menu),
+        tooltip: 'Menü öffnen',
+        onPressed: homePage?.openDrawer,
+      );
     }
 
     return AppBar(

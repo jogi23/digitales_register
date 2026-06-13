@@ -7,7 +7,7 @@ description: A new Flutter project.
 # Both the version and the builder number may be overridden in flutter
 # build by specifying --build-name and --build-number, respectively.
 # Read more about versioning at semver.org.
-version: 1.1.4+7
+version: 1.1.5+13
 
 publish_to: none
 
@@ -70,6 +70,7 @@ dependencies:
       path: uni_links/
   url_launcher: ^6.3.1
   flutter_markdown_plus: ^1.0.6
+  image_picker: ^1.2.2
 
 dependency_overrides:
   file: ^6.1.4

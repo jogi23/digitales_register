@@ -41,6 +41,9 @@ class DashboardNotifier extends Notifier<DashboardState> {
     state = DashboardState();
   }
 
+  void restore(DashboardState saved) =>
+      state = saved.rebuild((b) => b..loading = false);
+
   Future<void> load(bool future) async {
     if (ref.read(noInternetProvider)) return;
     state = state.rebuild((b) => b

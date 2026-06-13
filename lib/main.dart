@@ -29,6 +29,7 @@ import 'package:dr/container/request_pass_reset_container.dart';
 import 'package:dr/container/settings_page.dart';
 import 'package:dr/desktop.dart';
 import 'package:dr/middleware/middleware.dart';
+import 'package:dr/providers/account_profile_provider.dart';
 import 'package:dr/providers/login_provider.dart';
 import 'package:dr/providers/provider_container.dart';
 import 'package:dr/ui/grade_calculator.dart';
@@ -85,6 +86,7 @@ Future<void> _runApp() async {
   secureStorage = getFlutterSecureStorage();
   providerContainer = ProviderContainer();
   wireLoginDispatchers(providerContainer.read(loginProvider.notifier));
+  unawaited(providerContainer.read(accountProfileProvider.notifier).load());
   runApp(SentryWidget(
     child: UncontrolledProviderScope(
       container: providerContainer,
@@ -203,7 +205,7 @@ class RegisterApp extends StatelessWidget {
             }
           },
           builder: (context, child) => Stack(
-            children: [child!, const SplashOverlay()],
+            children: [child!, const Positioned.fill(child: SplashOverlay())],
           ),
           theme: theme,
           debugShowCheckedModeBanner: false,

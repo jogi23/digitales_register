@@ -29,6 +29,7 @@ class NotificationPage extends StatelessWidget {
   final List<Notification> notifications;
   final SingleArgumentVoidCallback<Notification> deleteNotification;
   final SingleArgumentVoidCallback<int> goToMessage;
+  final SingleArgumentVoidCallback<int>? goToGrade;
   final VoidCallback deleteAllNotifications;
   final bool noInternet;
   final UtcDateTime? lastFetched;
@@ -41,6 +42,7 @@ class NotificationPage extends StatelessWidget {
     required this.noInternet,
     required this.goToMessage,
     required this.lastFetched,
+    this.goToGrade,
   });
   @override
   Widget build(BuildContext context) {
@@ -89,6 +91,7 @@ class NotificationPage extends StatelessWidget {
                       onDelete: deleteNotification,
                       noInternet: noInternet,
                       goToMessage: goToMessage,
+                      goToGrade: goToGrade,
                       isLast: notifications.length == 1,
                     );
                   },
@@ -104,6 +107,7 @@ class NotificationWidget extends StatelessWidget {
   final bool? noInternet;
   final SingleArgumentVoidCallback<Notification> onDelete;
   final SingleArgumentVoidCallback<int> goToMessage;
+  final SingleArgumentVoidCallback<int>? goToGrade;
   final bool isLast;
 
   const NotificationWidget({
@@ -113,6 +117,7 @@ class NotificationWidget extends StatelessWidget {
     required this.noInternet,
     required this.goToMessage,
     required this.isLast,
+    this.goToGrade,
   });
   @override
   Widget build(BuildContext context) {
@@ -162,11 +167,21 @@ class NotificationWidget extends StatelessWidget {
                   ],
                 ),
               ),
-              if (notification.type != "message")
+              if (notification.type == "message")
                 IconButton(
-                  icon: const Icon(
-                    Icons.done,
-                  ),
+                  icon: const Icon(Icons.open_in_new),
+                  tooltip: "Mitteilung öffnen",
+                  onPressed: () => goToMessage(notification.objectId!),
+                )
+              else if (notification.objectId != null && goToGrade != null)
+                IconButton(
+                  icon: const Icon(Icons.open_in_new),
+                  tooltip: "Bewertung öffnen",
+                  onPressed: () => goToGrade!(notification.objectId!),
+                )
+              else
+                IconButton(
+                  icon: const Icon(Icons.done),
                   tooltip: "Gelesen",
                   onPressed: noInternet!
                       ? null
@@ -174,14 +189,6 @@ class NotificationWidget extends StatelessWidget {
                           await delete();
                           onDelete(notification);
                         },
-                )
-              else
-                IconButton(
-                  icon: const Icon(
-                    Icons.open_in_new,
-                  ),
-                  tooltip: "Mitteilung öffnen",
-                  onPressed: () => goToMessage(notification.objectId!),
                 )
             ],
           ),

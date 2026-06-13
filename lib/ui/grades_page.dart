@@ -17,6 +17,7 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:dr/app_state.dart';
+import 'package:dr/ui/account_avatar_button.dart';
 import 'package:dr/container/grades_chart_container.dart';
 import 'package:dr/container/grades_page_container.dart';
 import 'package:dr/container/sorted_grades_container.dart';
@@ -62,6 +63,7 @@ class GradesPage extends StatelessWidget {
               },
             ),
           ),
+          const AccountAvatarButton(),
         ],
       ),
       body: !vm.hasData && vm.noInternet

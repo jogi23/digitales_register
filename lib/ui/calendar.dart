@@ -17,6 +17,7 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:dr/app_state.dart';
+import 'package:dr/ui/account_avatar_button.dart';
 import 'package:dr/container/calendar_detail_container.dart';
 import 'package:dr/container/calendar_week_container.dart';
 import 'package:dr/providers/calendar_provider.dart';
@@ -221,6 +222,7 @@ class _CalendarState extends ConsumerState<Calendar> with TickerProviderStateMix
                           ],
                         ),
                       ),
+                      const AccountAvatarButton(),
                     ],
                   ),
                   body: Column(

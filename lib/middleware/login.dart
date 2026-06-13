@@ -90,7 +90,6 @@ Future<void> _doLogin(
       username: user,
       fromStorage: true,
       offlineOnly: true,
-      keepShowingLoadingIndicator: true,
     );
     offlineLogin = true;
   }
@@ -142,14 +141,12 @@ Future<void> _doLogin(
     final noInternet = wrapper.noInternet;
     if (noInternet) {
       providerContainer.read(noInternetProvider.notifier).setNoInternet(true);
-      if (fromStorage) {
-        await _doLoggedIn(
-          username: user,
-          fromStorage: true,
-          offlineOnly: true,
-        );
-        return;
+    }
+    if (fromStorage) {
+      if (!noInternet) {
+        showSnackBar("Verbindung fehlgeschlagen");
       }
+      return;
     }
     providerContainer.read(loginProvider.notifier).setLoginFailed(
       cause: wrapper.error ?? "Unknown error",
@@ -397,6 +394,7 @@ Future<void> _doSelectAccount(int index) async {
   await secureStorage.write(key: "login", value: json.encode(login));
   await saveStateImmediately();
   providerContainer.read(loginProvider.notifier).logout(hard: true);
+  providerContainer.read(loginProvider.notifier).setLoggingIn();
   _resetAllProviders();
   await _doLoad();
 }
@@ -412,6 +410,9 @@ void _restoreProvidersFromAppState(AppState appState) {
   providerContainer
       .read(messagesProvider.notifier)
       .restore(appState.messagesState);
+  providerContainer
+      .read(dashboardProvider.notifier)
+      .restore(appState.dashboardState);
   providerContainer
       .read(profileProvider.notifier)
       .restore(appState.profileState);

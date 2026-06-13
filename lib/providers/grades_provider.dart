@@ -67,6 +67,21 @@ class GradesNotifier extends Notifier<GradesState> {
     state = state.rebuild((b) => b..serverSemester = null);
   }
 
+  void clearPendingSubject() =>
+      state = state.rebuild((b) => b..pendingSubjectId = null);
+
+  Future<void> requestSubjectDetail(int objectId) async {
+    var subject = state.subjects.firstWhereOrNull((s) => s.id == objectId);
+    if (subject == null && !ref.read(noInternetProvider)) {
+      await load(state.semester);
+      subject = state.subjects.firstWhereOrNull((s) => s.id == objectId);
+    }
+    if (subject != null) {
+      state = state.rebuild((b) => b..pendingSubjectId = objectId);
+      await loadDetails(subject, state.semester);
+    }
+  }
+
   Future<void> load(Semester semester) async {
     if (ref.read(noInternetProvider)) return;
     state = state.rebuild((b) => b..loading = true);

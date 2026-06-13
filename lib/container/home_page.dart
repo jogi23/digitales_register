@@ -24,7 +24,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class HomePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final loggedIn = ref.watch(loginProvider.select((s) => s.loggedIn));
-    return HomePageContent(splash: !loggedIn);
+    final login = ref.watch(loginProvider.select((s) => (s.loggedIn, s.loading)));
+    return HomePageContent(splash: !login.$1 && !login.$2);
   }
 }

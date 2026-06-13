@@ -21,14 +21,13 @@ import 'package:dr/main.dart';
 import 'package:dr/middleware/middleware.dart';
 import 'package:flutter/material.dart';
 
-typedef SelectAccountCallback = void Function(int index);
-
 class Sidebar extends StatelessWidget {
   const Sidebar({
     super.key,
     required this.drawerExpanded,
     required this.onDrawerExpansionChange,
     required this.username,
+    required this.alias,
     required this.userIcon,
     required this.tabletMode,
     required this.goHome,
@@ -40,10 +39,6 @@ class Sidebar extends StatelessWidget {
     required this.showMessages,
     required this.showSettings,
     required this.logout,
-    required this.otherAccounts,
-    required this.selectAccount,
-    required this.addAccount,
-    required this.passwordSavingEnabled,
   });
 
   final DrawerCallback onDrawerExpansionChange;
@@ -54,13 +49,10 @@ class Sidebar extends StatelessWidget {
       showCertificate,
       showMessages,
       showSettings,
-      logout,
-      addAccount;
-  final bool tabletMode, drawerExpanded, passwordSavingEnabled;
+      logout;
+  final bool tabletMode, drawerExpanded;
   final Pages currentSelected;
-  final String? username, userIcon;
-  final List<String> otherAccounts;
-  final SelectAccountCallback selectAccount;
+  final String? username, alias, userIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -74,41 +66,8 @@ class Sidebar extends StatelessWidget {
       borderRadius: 0,
       minWidth: 70,
       screenPadding: 0,
-      title: DropdownButtonHideUnderline(
-        child: DropdownButton(
-          isExpanded: true,
-          value: 0,
-          items: [
-            for (var index = 0; index < otherAccounts.length + 2; index++)
-              DropdownMenuItem(
-                value: index,
-                child: Text(
-                  index == 0
-                      ? (username ?? "?")
-                      : index <= otherAccounts.length
-                          ? otherAccounts[index - 1]
-                          : passwordSavingEnabled
-                              ? "Account hinzufügen"
-                              : "Account wechseln",
-                ),
-              ),
-          ],
-          onChanged: (int? value) {
-            if (value == 0) {
-              // selected the current account that is already selected
-              // no-op
-            } else {
-              scaffoldKey?.currentState?.closeDrawerIfOpen();
-              if (value == otherAccounts.length + 1) {
-                addAccount();
-              } else {
-                selectAccount(value! - 1);
-              }
-            }
-          },
-        ),
-      ),
-      titleTooltip: username ?? "?",
+      title: Text(alias ?? username ?? "?"),
+      titleTooltip: alias ?? username ?? "?",
       toggleTooltipCollapsed: "Ausklappen",
       toggleTooltipExpanded: "Einklappen",
       toggleTitle: const SizedBox(),
