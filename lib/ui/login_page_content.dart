@@ -233,12 +233,11 @@ class _LoginPageContentState extends State<LoginPageContent> {
                         ),
                         onPressed: () async {
                           await launchUrl(
-                            Uri.https(
-                              "docs.google.com",
-                              "forms/d/e/1FAIpQLSe3BLgrC74kUiAnCGSfZ_P0HYXw0yPl3OWVatNTJv8Yh3ZN0A/viewform?usp=sf_link",
-                              <String, String>{
-                                "usp": "pp_url",
-                                "entry.1581750442": appVersion,
+                            Uri(
+                              scheme: 'mailto',
+                              path: 'hallo@wertwerk.io',
+                              queryParameters: {
+                                'subject': 'Feedback DigiReg ST $appVersion',
                               },
                             ),
                           );
@@ -430,7 +429,8 @@ class _LoginPageContentState extends State<LoginPageContent> {
                             index < widget.vm.otherAccounts.length;
                             index++)
                           ListTile(
-                            title: Text(widget.vm.otherAccounts[index].username),
+                            title:
+                                Text(widget.vm.otherAccounts[index].username),
                             onTap: () => widget.onSelectAccount(index),
                           ),
                       ],
