@@ -96,8 +96,10 @@ class AppRouter {
   }
 
   void showGradeDetail(int objectId) {
+    navigatorKey!.currentState!.pop();
     showGrades();
-    unawaited(_ref.read(gradesProvider.notifier).requestSubjectDetail(objectId));
+    unawaited(
+        _ref.read(gradesProvider.notifier).requestSubjectDetail(objectId));
   }
 
   void showAbsences() {

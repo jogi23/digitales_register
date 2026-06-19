@@ -34,7 +34,9 @@ class SortedGradesWidget extends StatelessWidget {
   final SetBoolCallback sortByTypeCallback, showCancelledCallback;
   final VoidCallback showGradeCalculator;
   final int? pendingSubjectId;
+  final int? pendingGradeId;
   final VoidCallback? clearPendingSubject;
+  final VoidCallback? clearPendingGrade;
 
   const SortedGradesWidget({
     super.key,
@@ -44,7 +46,9 @@ class SortedGradesWidget extends StatelessWidget {
     required this.showCancelledCallback,
     required this.showGradeCalculator,
     this.pendingSubjectId,
+    this.pendingGradeId,
     this.clearPendingSubject,
+    this.clearPendingGrade,
   });
   @override
   Widget build(BuildContext context) {
@@ -76,7 +80,9 @@ class SortedGradesWidget extends StatelessWidget {
               (element) => element.toLowerCase() == s.name.toLowerCase(),
             ),
             pendingSubjectId: pendingSubjectId,
+            pendingGradeId: pendingGradeId,
             clearPendingSubject: clearPendingSubject,
+            clearPendingGrade: clearPendingGrade,
           ),
         if (vm.subjects.any(
           (s) => vm.ignoredSubjectsForAverage.any(
@@ -113,7 +119,9 @@ class SubjectWidget extends StatefulWidget {
   final Semester semester;
   final VoidCallback viewSubjectDetail;
   final int? pendingSubjectId;
+  final int? pendingGradeId;
   final VoidCallback? clearPendingSubject;
+  final VoidCallback? clearPendingGrade;
 
   const SubjectWidget(
       {super.key,
@@ -125,7 +133,9 @@ class SubjectWidget extends StatefulWidget {
       required this.noInternet,
       required this.ignoredForAverage,
       this.pendingSubjectId,
-      this.clearPendingSubject});
+      this.pendingGradeId,
+      this.clearPendingSubject,
+      this.clearPendingGrade});
 
   @override
   _SubjectWidgetState createState() => _SubjectWidgetState();
@@ -134,6 +144,20 @@ class SubjectWidget extends StatefulWidget {
 class _SubjectWidgetState extends State<SubjectWidget> {
   bool closed = true;
   final _controller = ExpansibleController();
+
+  Widget _buildDetailEntry(DetailEntry entry) {
+    if (entry is! GradeDetail) {
+      return ObservationWidget(observation: entry as Observation);
+    }
+    final child = GradeWidget(grade: entry);
+    if (widget.pendingGradeId == entry.id) {
+      return PendingGradeTarget(
+        onVisible: widget.clearPendingGrade,
+        child: child,
+      );
+    }
+    return child;
+  }
 
   @override
   void didUpdateWidget(SubjectWidget oldWidget) {
@@ -247,19 +271,15 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                                       .where((g) =>
                                           widget.showCancelled || !g.cancelled)
                                       .toList(),
+                                  pendingGradeId: widget.pendingGradeId,
+                                  clearPendingGrade: widget.clearPendingGrade,
                                 ),
                               )
                         else
                           ...entries
                               .where(
                                   (g) => widget.showCancelled || !g.cancelled)
-                              .map(
-                                (g) => g is GradeDetail
-                                    ? GradeWidget(grade: g)
-                                    : ObservationWidget(
-                                        observation: g as Observation,
-                                      ),
-                              )
+                              .map(_buildDetailEntry)
                       ],
                     )
                   : AnimatedLinearProgressIndicator(show: !widget.noInternet),
@@ -388,15 +408,26 @@ class Star extends StatelessWidget {
 class GradeTypeWidget extends StatelessWidget {
   final String typeName;
   final List<DetailEntry> entries;
+  final int? pendingGradeId;
+  final VoidCallback? clearPendingGrade;
 
   const GradeTypeWidget(
-      {super.key, required this.typeName, required this.entries});
+      {super.key,
+      required this.typeName,
+      required this.entries,
+      this.pendingGradeId,
+      this.clearPendingGrade});
   @override
   Widget build(BuildContext context) {
     final displayGrades = entries
         .map(
           (g) => g is GradeDetail
-              ? GradeWidget(grade: g)
+              ? (pendingGradeId == g.id
+                  ? PendingGradeTarget(
+                      onVisible: clearPendingGrade,
+                      child: GradeWidget(grade: g),
+                    )
+                  : GradeWidget(grade: g))
               : ObservationWidget(
                   observation: g as Observation,
                 ),
@@ -410,4 +441,47 @@ class GradeTypeWidget extends StatelessWidget {
             children: displayGrades,
           );
   }
+}
+
+class PendingGradeTarget extends StatefulWidget {
+  final Widget child;
+  final VoidCallback? onVisible;
+
+  const PendingGradeTarget({
+    super.key,
+    required this.child,
+    this.onVisible,
+  });
+
+  @override
+  State<PendingGradeTarget> createState() => _PendingGradeTargetState();
+}
+
+class _PendingGradeTargetState extends State<PendingGradeTarget> {
+  bool _handled = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _scheduleScroll();
+  }
+
+  @override
+  void didUpdateWidget(covariant PendingGradeTarget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _scheduleScroll();
+  }
+
+  void _scheduleScroll() {
+    if (_handled) return;
+    _handled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      await Scrollable.ensureVisible(context, alignment: 0.3);
+      widget.onVisible?.call();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }
