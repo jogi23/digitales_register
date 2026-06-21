@@ -38,6 +38,7 @@ class GradesNotifier extends Notifier<GradesState> {
   late final _lock = _SemesterLock((s) async {
     await wrapper.send("?semesterWechsel=${s.n}");
   });
+  final Set<int> _detailsLoadingSubjectIds = {};
 
   @override
   GradesState build() => GradesState();
@@ -99,7 +100,8 @@ class GradesNotifier extends Notifier<GradesState> {
 
   Future<Subject?> _findSubjectForGradeId(int gradeId) async {
     final loadedSubject = state.subjects.firstWhereOrNull(
-      (subject) => subject
+      (subject) =>
+          subject
               .detailEntries(state.semester)
               ?.whereType<GradeDetail>()
               .any((grade) => grade.id == gradeId) ==
@@ -164,6 +166,27 @@ class GradesNotifier extends Notifier<GradesState> {
         }
       },
     );
+  }
+
+  Future<void> ensureDetailDataForSubjects(
+    Iterable<Subject> subjects,
+    Semester semester,
+  ) async {
+    if (ref.read(noInternetProvider)) return;
+    for (final subject in subjects) {
+      final subjectId = subject.id;
+      if (subjectId == null ||
+          subject.hasDetailData(semester) ||
+          _detailsLoadingSubjectIds.contains(subjectId)) {
+        continue;
+      }
+      _detailsLoadingSubjectIds.add(subjectId);
+      try {
+        await loadDetails(subject, semester);
+      } finally {
+        _detailsLoadingSubjectIds.remove(subjectId);
+      }
+    }
   }
 
   Future<void> loadCancelledDescription(

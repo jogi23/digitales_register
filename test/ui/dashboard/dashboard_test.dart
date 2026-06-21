@@ -25,6 +25,7 @@ import 'package:dr/data.dart';
 import 'package:dr/main.dart';
 import 'package:dr/middleware/middleware.dart';
 import 'package:dr/providers/dashboard_provider.dart';
+import 'package:dr/providers/grades_provider.dart';
 import 'package:dr/providers/login_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/providers/provider_container.dart' as pc;
@@ -48,6 +49,20 @@ class _TestDashboardNotifier extends DashboardNotifier {
   final DashboardState _initialState;
   @override
   DashboardState build() => _initialState;
+}
+
+class _TestGradesNotifier extends GradesNotifier {
+  _TestGradesNotifier(this._initialState);
+  final GradesState _initialState;
+
+  @override
+  GradesState build() => _initialState;
+
+  @override
+  Future<void> load(Semester semester) async {}
+
+  @override
+  Future<void> loadDetails(Subject subject, Semester semester) async {}
 }
 
 class _TestSettingsNotifier extends SettingsNotifier {
@@ -340,6 +355,262 @@ Future<void> main() async {
     await tester.pumpAndSettle();
     await expectLater(
         find.byType(DaysWidget), matchesGoldenFile("multiple_entries.png"));
+  });
+
+  testWidgets('grade entries without numeric values show competence stars',
+      (WidgetTester tester) async {
+    wrapper = MockWrapper();
+    when(
+      () => wrapper.send(
+        'api/student/entry/getGrade',
+        args: {'gradeId': 42},
+      ),
+    ).thenAnswer(
+      (_) async => {
+        'competences': [
+          {
+            'typeName': 'Schreiben: Sätze schreiben',
+            'grade': '5',
+          }
+        ],
+      },
+    );
+
+    final widget = ProviderScope(
+      overrides: [
+        dashboardProvider.overrideWith(
+          () => _TestDashboardNotifier(
+            DashboardState(
+              (b) => b
+                ..future = false
+                ..allDays = ListBuilder(
+                  <Day>[
+                    Day(
+                      (b) => b
+                        ..date = UtcDateTime(2026, 6, 4)
+                        ..deletedHomework = ListBuilder()
+                        ..homework = ListBuilder(<Homework>[
+                          Homework(
+                            (b) => b
+                              ..checkable = false
+                              ..checked = false
+                              ..deleteable = false
+                              ..deleted = false
+                              ..firstSeen = UtcDateTime(2026, 6, 4)
+                              ..gradeFormatted = 'keine Note eingetragen'
+                              ..id = 42
+                              ..isChanged = false
+                              ..isNew = false
+                              ..label = 'Deutsch'
+                              ..title = 'Bewertung'
+                              ..subtitle = 'Schüttelsätze'
+                              ..type = HomeworkType.grade,
+                          ),
+                        ])
+                        ..lastRequested = UtcDateTime.now(),
+                    ),
+                  ],
+                ),
+            ),
+          ),
+        ),
+        gradesProvider.overrideWith(
+          () => _TestGradesNotifier(
+            GradesState(
+              (b) => b
+                ..semester = Semester.second.toBuilder()
+                ..subjects = ListBuilder(),
+            ),
+          ),
+        ),
+      ],
+      child: MaterialApp(home: DaysContainer()),
+    );
+
+    await tester.pumpWidget(widget);
+    await tester.pumpAndSettle();
+
+    expect(find.text('keine Note eingetragen'), findsNothing);
+    expect(find.byIcon(Icons.star), findsNWidgets(5));
+    expect(find.byIcon(Icons.star_border), findsOneWidget);
+  });
+
+  testWidgets('grade entries with numeric values keep showing formatted grades',
+      (WidgetTester tester) async {
+    final widget = ProviderScope(
+      overrides: [
+        dashboardProvider.overrideWith(
+          () => _TestDashboardNotifier(
+            DashboardState(
+              (b) => b
+                ..future = false
+                ..allDays = ListBuilder(
+                  <Day>[
+                    Day(
+                      (b) => b
+                        ..date = UtcDateTime(2026, 6, 4)
+                        ..deletedHomework = ListBuilder()
+                        ..homework = ListBuilder(<Homework>[
+                          Homework(
+                            (b) => b
+                              ..checkable = false
+                              ..checked = false
+                              ..deleteable = false
+                              ..deleted = false
+                              ..firstSeen = UtcDateTime(2026, 6, 4)
+                              ..grade = '7.50'
+                              ..gradeFormatted = '7/8'
+                              ..id = 77
+                              ..isChanged = false
+                              ..isNew = false
+                              ..label = 'Deutsch'
+                              ..title = 'Bewertung'
+                              ..subtitle = 'Hörübung'
+                              ..type = HomeworkType.grade,
+                          ),
+                        ])
+                        ..lastRequested = UtcDateTime.now(),
+                    ),
+                  ],
+                ),
+            ),
+          ),
+        ),
+        gradesProvider.overrideWith(
+          () => _TestGradesNotifier(
+            GradesState(
+              (b) => b
+                ..semester = Semester.second.toBuilder()
+                ..subjects = ListBuilder(),
+            ),
+          ),
+        ),
+      ],
+      child: MaterialApp(home: DaysContainer()),
+    );
+
+    await tester.pumpWidget(widget);
+    await tester.pumpAndSettle();
+
+    expect(find.text('7/8'), findsOneWidget);
+    expect(find.text('keine Note eingetragen'), findsNothing);
+    expect(find.byIcon(Icons.star), findsNothing);
+    expect(find.byIcon(Icons.star_border), findsNothing);
+  });
+
+  testWidgets('dashboard grades can match grade details without using homework id',
+      (WidgetTester tester) async {
+    final homework = Homework(
+      (b) => b
+        ..checkable = false
+        ..checked = false
+        ..deleteable = false
+        ..deleted = false
+        ..firstSeen = UtcDateTime(2026, 5, 22)
+        ..gradeFormatted = 'keine Note eingetragen'
+        ..id = 9999
+        ..isChanged = false
+        ..isNew = false
+        ..label = 'KuTE'
+        ..title = 'Bewertung'
+        ..subtitle = 'Von der Bleistiftzeichnung zum Ölkreidebild'
+        ..type = HomeworkType.grade,
+    );
+
+    final container = ProviderContainer(
+      overrides: [
+        dashboardProvider.overrideWith(
+          () => _TestDashboardNotifier(
+            DashboardState(
+              (b) => b
+                ..future = false
+                ..allDays = ListBuilder(
+                  <Day>[
+                    Day(
+                      (b) => b
+                        ..date = UtcDateTime(2026, 5, 22)
+                        ..deletedHomework = ListBuilder()
+                        ..homework = ListBuilder(<Homework>[homework])
+                        ..lastRequested = UtcDateTime.now(),
+                    ),
+                  ],
+                ),
+            ),
+          ),
+        ),
+        gradesProvider.overrideWith(
+          () => _TestGradesNotifier(
+            GradesState(
+              (b) => b
+                ..semester = Semester.second.toBuilder()
+                ..subjects = ListBuilder([
+                  Subject(
+                    (b) => b
+                      ..id = 17
+                      ..name = 'KuTE'
+                      ..gradesAll = MapBuilder()
+                      ..observations = MapBuilder({
+                        Semester.second: BuiltList<Observation>([]),
+                      })
+                      ..grades = MapBuilder({
+                        Semester.second: BuiltList<GradeDetail>([
+                          GradeDetail(
+                            (b) => b
+                              ..id = 42
+                              ..name =
+                                  'Von der Bleistiftzeichnung zum Ölkreidebild'
+                              ..created =
+                                  'Von Viktoria Ritsch am 25.05.2026 eingetragen'
+                              ..date = UtcDateTime(2026, 5, 22)
+                              ..type = 'Praktisches Arbeiten / Üben'
+                              ..weightPercentage = 100
+                              ..cancelled = false
+                              ..competences = ListBuilder([
+                                Competence(
+                                  (b) => b
+                                    ..typeName = 'Technik: Bastelmaterial'
+                                    ..grade = 5,
+                                ),
+                                Competence(
+                                  (b) => b
+                                    ..typeName =
+                                        'Gestalten: Gestalterische Sorgfalt'
+                                    ..grade = 5,
+                                ),
+                              ]),
+                          ),
+                        ]),
+                      }),
+                  ),
+                ]),
+            ),
+          ),
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(home: DaysContainer()),
+      ),
+    );
+    await container.read(dashboardGradeCompetencesProvider.notifier).ensureLoaded([
+          DashboardGradeTarget(
+            homework: homework,
+            dayDate: UtcDateTime(2026, 5, 22),
+          ),
+        ]);
+    expect(
+      container.read(dashboardGradeCompetencesProvider)[9999]?.length,
+      2,
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('keine Note eingetragen'), findsNothing);
+    expect(find.byIcon(Icons.star), findsNWidgets(10));
+    expect(find.byIcon(Icons.star_border), findsNWidgets(2));
   });
 
   testGoldens('dark mode', (WidgetTester tester) async {

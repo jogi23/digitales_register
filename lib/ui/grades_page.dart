@@ -21,6 +21,7 @@ import 'package:dr/ui/account_avatar_button.dart';
 import 'package:dr/container/grades_chart_container.dart';
 import 'package:dr/container/grades_page_container.dart';
 import 'package:dr/container/sorted_grades_container.dart';
+import 'package:dr/data.dart';
 import 'package:dr/ui/animated_linear_progress_indicator.dart';
 import 'package:dr/ui/last_fetched_overlay.dart';
 import 'package:dr/ui/no_internet.dart';
@@ -89,7 +90,11 @@ class GradesPage extends StatelessWidget {
                             ListTile(
                               title: Row(
                                 children: [
-                                  const Text("Notendurchschnitt"),
+                                  Text(
+                                    vm.gradingMode == GradingMode.stars
+                                        ? "Sternedurchschnitt"
+                                        : "Notendurchschnitt",
+                                  ),
                                   IconButton(
                                     icon: const Icon(Icons.settings),
                                     onPressed: showGradesSettings,

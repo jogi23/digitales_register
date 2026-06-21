@@ -16,6 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'package:built_collection/built_collection.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/data.dart';
 import 'package:dr/providers/grades_provider.dart';
@@ -35,8 +36,37 @@ class GradesChartContainer extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final gradesState = ref.watch(gradesProvider);
     final settings = ref.watch(settingsProvider);
+    final gradingMode = detectGradingMode(
+      gradesState.subjects,
+      gradesState.semester,
+    );
 
     SubjectGrades getKey(Subject subject) {
+      if (gradingMode == GradingMode.stars) {
+        final grades = subject
+                .detailEntries(gradesState.semester)
+                ?.whereType<GradeDetail>()
+                .where((grade) => !grade.cancelled && grade.competences.isNotEmpty)
+                .toList() ??
+            [];
+        return SubjectGrades(
+          {
+            for (final grade in grades)
+              grade.date: GradeChartPoint(
+                value: grade.competences
+                        .map((c) => c.grade)
+                        .reduce((a, b) => a + b) /
+                    grade.competences.length,
+                type: grade.type,
+                mode: GradingMode.stars,
+                competences: grade.competences,
+              ),
+          },
+          subject.name,
+          GradingMode.stars,
+        );
+      }
+
       final grades = gradesState.semester == Semester.all
           ? (subject.gradesAll.values.fold<List<GradeAll>>(
                   <GradeAll>[], (a, b) => <GradeAll>[...a, ...b])
@@ -46,9 +76,15 @@ class GradesChartContainer extends ConsumerWidget {
       return SubjectGrades(
         {
           for (final grade in grades)
-            grade.date: (grade.grade!, grade.type),
+            grade.date: GradeChartPoint(
+              value: grade.grade! / 100,
+              type: grade.type,
+              mode: GradingMode.numeric,
+              numericGrade: grade.grade,
+            ),
         },
         subject.name,
+        GradingMode.numeric,
       );
     }
 
@@ -64,15 +100,33 @@ class GradesChartContainer extends ConsumerWidget {
 
     return GradesChart(
       graphs: graphs,
+      gradingMode: gradingMode,
       isFullscreen: isFullscreen,
       goFullscreen: ref.read(appRouterProvider).showGradesChart,
     );
   }
 }
 
-class SubjectGrades {
-  final Map<UtcDateTime, (int, String)> grades;
-  final String name;
+class GradeChartPoint {
+  final double value;
+  final String type;
+  final GradingMode mode;
+  final int? numericGrade;
+  final BuiltList<Competence>? competences;
 
-  SubjectGrades(this.grades, this.name);
+  const GradeChartPoint({
+    required this.value,
+    required this.type,
+    required this.mode,
+    this.numericGrade,
+    this.competences,
+  });
+}
+
+class SubjectGrades {
+  final Map<UtcDateTime, GradeChartPoint> grades;
+  final String name;
+  final GradingMode mode;
+
+  SubjectGrades(this.grades, this.name, this.mode);
 }

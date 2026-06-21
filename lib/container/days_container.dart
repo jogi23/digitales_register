@@ -37,6 +37,7 @@ class DaysContainer extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dashboard = ref.watch(dashboardProvider);
+    final gradeCompetences = ref.watch(dashboardGradeCompetencesProvider);
     final noInternet = ref.watch(noInternetProvider);
     final settings = ref.watch(settingsProvider);
     final loginLoading = ref.watch(loginProvider.select((s) => s.loading));
@@ -87,6 +88,10 @@ class DaysContainer extends ConsumerWidget {
       markAllAsSeenCallback: notifier.markAllAsSeen,
       refreshNoInternet: ref.read(loginProvider.notifier).refreshNoInternet,
       onOpenAttachment: notifier.openAttachment,
+      gradeCompetences: gradeCompetences,
+      loadGradeCompetences: (targets) => ref
+          .read(dashboardGradeCompetencesProvider.notifier)
+          .ensureLoaded(targets),
     );
   }
 }

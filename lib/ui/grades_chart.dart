@@ -22,6 +22,7 @@ import 'package:dr/app_state.dart';
 import 'package:dr/container/grades_chart_container.dart';
 import 'package:dr/data.dart';
 import 'package:dr/utc_date_time.dart';
+import 'package:dr/util.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -35,9 +36,10 @@ class _Selection {
 class GradesChart extends StatelessWidget {
   final VoidCallback? goFullscreen;
   final bool isFullscreen;
+  final GradingMode gradingMode;
   final List<
           charts
-              .Series<MapEntry<UtcDateTime, (int, String)>, UtcDateTime>>
+              .Series<MapEntry<UtcDateTime, GradeChartPoint>, UtcDateTime>>
       grades;
 
   final ValueNotifier<(UtcDateTime, BuiltList<_Selection>)?> selection =
@@ -46,23 +48,24 @@ class GradesChart extends StatelessWidget {
   GradesChart({
     super.key,
     required Map<SubjectGrades, SubjectTheme> graphs,
+    required this.gradingMode,
     this.goFullscreen,
     required this.isFullscreen,
   }) : grades = convert(graphs);
 
   static List<
           charts
-              .Series<MapEntry<UtcDateTime, (int, String)>, UtcDateTime>>
+              .Series<MapEntry<UtcDateTime, GradeChartPoint>, UtcDateTime>>
       convert(Map<SubjectGrades, SubjectTheme> data) {
     return data.entries.where((entry) => entry.value.thick != 0).map(
       (entry) {
         final s = entry.key;
         final strokeWidth = entry.value.thick;
         final color = Color(entry.value.color);
-        return charts.Series<MapEntry<UtcDateTime, (int, String)>,
+        return charts.Series<MapEntry<UtcDateTime, GradeChartPoint>,
             UtcDateTime>(
           domainFn: (grade, _) => grade.key,
-          measureFn: (grade, _) => grade.value.$1 / 100,
+          measureFn: (grade, _) => grade.value.value,
           data: s.grades.entries.toList(),
           strokeWidthPxFn: (_, __) => strokeWidth,
           id: s.name,
@@ -186,15 +189,15 @@ class GradesChart extends StatelessWidget {
                   changedListener: (model) {
                     UtcDateTime? allDate;
                     final selections = model.selectedDatum.map((datum) {
-                      final grade = datum.datum.value.$1 as int;
-                      final type = datum.datum.value.$2 as String;
-                      final subject = datum.series.displayName;
+                      final point = datum.datum.value as GradeChartPoint;
+                      final subject = datum.series.displayName ?? '';
                       final color = datum.series.colorFn!(0)!;
                       final date = datum.datum.key as UtcDateTime;
                       assert(allDate == null || allDate == date);
                       allDate = date;
+                      final text = formatChartSelectionText(subject, point);
                       return _Selection(
-                        "$subject – $type: ${formatGradeFromInt(grade)}",
+                        text,
                         Color.fromARGB(
                           color.a,
                           color.r,
@@ -215,17 +218,26 @@ class GradesChart extends StatelessWidget {
                 )
               ],
               primaryMeasureAxis: charts.NumericAxisSpec(
-                tickProviderSpec: const charts.StaticNumericTickProviderSpec(
-                  [
-                    charts.TickSpec(3),
-                    charts.TickSpec(4),
-                    charts.TickSpec(5),
-                    charts.TickSpec(6),
-                    charts.TickSpec(7),
-                    charts.TickSpec(8),
-                    charts.TickSpec(9),
-                    charts.TickSpec(10),
-                  ],
+                tickProviderSpec: charts.StaticNumericTickProviderSpec(
+                  gradingMode == GradingMode.stars
+                      ? const [
+                          charts.TickSpec(1),
+                          charts.TickSpec(2),
+                          charts.TickSpec(3),
+                          charts.TickSpec(4),
+                          charts.TickSpec(5),
+                          charts.TickSpec(6),
+                        ]
+                      : const [
+                          charts.TickSpec(3),
+                          charts.TickSpec(4),
+                          charts.TickSpec(5),
+                          charts.TickSpec(6),
+                          charts.TickSpec(7),
+                          charts.TickSpec(8),
+                          charts.TickSpec(9),
+                          charts.TickSpec(10),
+                        ],
                 ),
                 renderSpec: charts.GridlineRendererSpec(
                   labelStyle: charts.TextStyleSpec(
@@ -289,6 +301,21 @@ class GradesChart extends StatelessWidget {
       ),
     );
   }
+}
+
+String formatStarValue(double value) => '${gradeAverageFormat.format(value)}/6★';
+
+String formatChartSelectionText(String subject, GradeChartPoint point) {
+  if (point.mode == GradingMode.numeric) {
+    return "$subject – ${point.type}: ${formatGradeFromInt(point.numericGrade)}";
+  }
+  return [
+    "$subject – ${point.type}: ${formatStarValue(point.value)}",
+    if (point.competences?.isNotEmpty == true)
+      ...point.competences!.map(
+        (c) => "${c.typeName}: ${c.grade}★",
+      ),
+  ].join("\n");
 }
 
 class SelectionWidget extends StatelessWidget {

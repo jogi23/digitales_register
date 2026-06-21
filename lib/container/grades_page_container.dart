@@ -16,6 +16,8 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'dart:async';
+
 import 'package:built_collection/built_collection.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/data.dart';
@@ -38,6 +40,31 @@ class GradesPageContainer extends ConsumerWidget {
     final gradesState = ref.watch(gradesProvider);
     final settings = ref.watch(settingsProvider);
     final noInternet = ref.watch(noInternetProvider);
+    final gradingMode = detectGradingMode(
+      gradesState.subjects,
+      gradesState.semester,
+    );
+    final shouldPrefetchStarDetails =
+        !gradesState.loading &&
+        !gradesState.subjects.any((subject) => subject.hasNumericGrades(gradesState.semester)) &&
+        gradesState.subjects.any(
+          (subject) =>
+              subject.basicGrades(gradesState.semester)?.isNotEmpty == true &&
+              !subject.hasDetailData(gradesState.semester),
+        );
+    if (shouldPrefetchStarDetails) {
+      unawaited(
+        ref.read(gradesProvider.notifier).ensureDetailDataForSubjects(
+              gradesState.subjects.where(
+                (subject) =>
+                    subject.basicGrades(gradesState.semester)?.isNotEmpty ==
+                        true &&
+                    !subject.hasDetailData(gradesState.semester),
+              ),
+              gradesState.semester,
+            ),
+      );
+    }
     return GradesPage(
       vm: GradesPageViewModel(
         showSemester: gradesState.semester,
@@ -46,7 +73,9 @@ class GradesPageContainer extends ConsumerWidget {
           gradesState.subjects,
           gradesState.semester,
           settings.ignoreForGradesAverage,
+          gradingMode,
         ),
+        gradingMode: gradingMode,
         hasData: gradesState.subjects.any(
           (s) => gradesState.semester != Semester.all
               ? s.gradesAll.containsKey(gradesState.semester)
@@ -67,6 +96,7 @@ class GradesPageContainer extends ConsumerWidget {
 class GradesPageViewModel {
   final Semester showSemester;
   final String allSubjectsAverage;
+  final GradingMode gradingMode;
   final String? lastFetchedMessage;
   final bool loading;
   final bool showGradesDiagram;
@@ -77,6 +107,7 @@ class GradesPageViewModel {
   const GradesPageViewModel({
     required this.showSemester,
     required this.allSubjectsAverage,
+    required this.gradingMode,
     required this.lastFetchedMessage,
     required this.loading,
     required this.showGradesDiagram,
@@ -90,7 +121,27 @@ String calculateAllSubjectsAverage(
   BuiltList<Subject> subjects,
   Semester semester,
   List<String> ignoreForGradesAverage,
+  GradingMode gradingMode,
 ) {
+  if (gradingMode == GradingMode.stars) {
+    var sum = 0.0;
+    var n = 0;
+    for (final subject in subjects) {
+      final average = subject.starAverage(semester);
+      if (average != null &&
+          !ignoreForGradesAverage.any(
+            (element) => element.toLowerCase() == subject.name.toLowerCase(),
+          )) {
+        sum += average;
+        n++;
+      }
+    }
+    if (n == 0) {
+      return "/";
+    }
+    return "${gradeAverageFormat.format(sum / n)}/6";
+  }
+
   var sum = 0;
   var n = 0;
   for (final subject in subjects) {

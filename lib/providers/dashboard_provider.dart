@@ -15,6 +15,8 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'dart:convert';
+
 import 'package:built_collection/built_collection.dart';
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:dr/app_state.dart';
@@ -23,6 +25,7 @@ import 'package:dr/middleware/middleware.dart'
     show canOpenFile, downloadFile, openFile, wrapper;
 import 'package:dr/providers/dashboard_error_provider.dart';
 import 'package:dr/providers/dashboard_parser.dart';
+import 'package:dr/providers/grades_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/utc_date_time.dart';
@@ -31,10 +34,19 @@ import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+class DashboardGradeTarget {
+  final Homework homework;
+  final UtcDateTime dayDate;
+
+  const DashboardGradeTarget({
+    required this.homework,
+    required this.dayDate,
+  });
+}
+
 class DashboardNotifier extends Notifier<DashboardState> {
   @override
   DashboardState build() => DashboardState();
-
   /// Clears all dashboard data. Call this before loading data for a different
   /// account so that stale entries are not shown as deleted.
   void reset() {
@@ -442,3 +454,128 @@ class DashboardNotifier extends Notifier<DashboardState> {
 
 final dashboardProvider =
     NotifierProvider<DashboardNotifier, DashboardState>(DashboardNotifier.new);
+
+class DashboardGradeCompetencesNotifier
+    extends Notifier<Map<int, BuiltList<Competence>>> {
+  final Set<int> _loading = {};
+
+  @override
+  Map<int, BuiltList<Competence>> build() => {};
+
+  Future<void> ensureLoaded(Iterable<DashboardGradeTarget> targets) async {
+    if (ref.read(noInternetProvider)) return;
+    final missingTargets = targets
+        .where(
+          (target) =>
+              target.homework.type == HomeworkType.grade &&
+              target.homework.grade == null &&
+              !state.containsKey(target.homework.id) &&
+              !_loading.contains(target.homework.id),
+        )
+        .toList(growable: false);
+
+    for (final target in missingTargets) {
+      final gradeId = target.homework.id;
+      _loading.add(gradeId);
+      try {
+        final loadedCompetences =
+                await _findFromGradesState(target) ??
+            await _loadFromGradeIdFallback(target.homework.id);
+        state = {
+          ...state,
+          gradeId: loadedCompetences,
+        };
+      } catch (_) {
+        state = {
+          ...state,
+          gradeId: BuiltList<Competence>(),
+        };
+      } finally {
+        _loading.remove(gradeId);
+      }
+    }
+  }
+
+  Future<BuiltList<Competence>?> _findFromGradesState(
+      DashboardGradeTarget target) async {
+    final homework = target.homework;
+    var gradesState = ref.read(gradesProvider);
+    final gradesNotifier = ref.read(gradesProvider.notifier);
+
+    if (gradesState.subjects.isEmpty) {
+      await gradesNotifier.load(gradesState.semester);
+      gradesState = ref.read(gradesProvider);
+    }
+
+    var subject = gradesState.subjects.firstWhereOrNull(
+      (s) => s.name.toLowerCase() == (homework.label ?? '').toLowerCase(),
+    );
+    if (subject == null) return null;
+
+    if (subject.detailEntries(gradesState.semester) == null) {
+      await gradesNotifier.loadDetails(subject, gradesState.semester);
+      gradesState = ref.read(gradesProvider);
+      subject = gradesState.subjects.firstWhereOrNull(
+        (s) => s.id == subject!.id,
+      );
+      if (subject == null) return null;
+    }
+
+    final matchingGrade = subject
+        .detailEntries(gradesState.semester)
+        ?.whereType<GradeDetail>()
+        .firstWhereOrNull(
+          (grade) =>
+              _toDate(grade.date) == _toDate(target.dayDate) &&
+              _stringsMatch(grade.name, homework.subtitle),
+        );
+
+    final competences = matchingGrade?.competences;
+    if (competences == null || competences.isEmpty) {
+      return null;
+    }
+    return competences;
+  }
+
+  Future<BuiltList<Competence>> _loadFromGradeIdFallback(int gradeId) async {
+    dynamic data = await wrapper.send(
+      'api/student/entry/getGrade',
+      args: {'gradeId': gradeId},
+    );
+    if (data is String) data = json.decode(data);
+    return _parseDashboardGradeCompetences(data);
+  }
+
+  bool _stringsMatch(String a, String b) =>
+      a.toLowerCase().contains(b.toLowerCase()) ||
+      b.toLowerCase().contains(a.toLowerCase());
+
+    UtcDateTime _toDate(UtcDateTime dateTime) =>
+      UtcDateTime(dateTime.year, dateTime.month, dateTime.day);
+}
+
+BuiltList<Competence> _parseDashboardGradeCompetences(dynamic data) {
+  final competences = getList(getMap(data)?['competences']);
+  if (competences == null) {
+    return BuiltList<Competence>();
+  }
+  return BuiltList<Competence>(
+    competences.map<Competence>(
+      (dynamic c) => tryParse(getMap(c)!, _parseDashboardCompetence),
+    ),
+  );
+}
+
+Competence _parseDashboardCompetence(Map data) {
+  return Competence(
+    (b) => b
+      ..typeName = getString(data['typeName'])
+      ..grade = (double.tryParse(getString(data['grade']) ?? '') ?? 0).toInt(),
+  );
+}
+
+final dashboardGradeCompetencesProvider =
+    NotifierProvider<DashboardGradeCompetencesNotifier,
+        Map<int, BuiltList<Competence>>>(
+  DashboardGradeCompetencesNotifier.new,
+);

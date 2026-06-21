@@ -162,7 +162,8 @@ class _SubjectWidgetState extends State<SubjectWidget> {
   @override
   void didUpdateWidget(SubjectWidget oldWidget) {
     if (oldWidget.semester != widget.semester) closed = true;
-    if (widget.pendingSubjectId != null && widget.pendingSubjectId == widget.subject.id) {
+    if (widget.pendingSubjectId != null &&
+        widget.pendingSubjectId == widget.subject.id) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           if (closed) _controller.expand();
@@ -217,7 +218,10 @@ class _SubjectWidgetState extends State<SubjectWidget> {
             text: 'Ø ',
             children: <TextSpan>[
               TextSpan(
-                text: widget.subject.averageFormatted(widget.semester),
+                text: detectGradingMode([widget.subject], widget.semester) ==
+                        GradingMode.stars
+                    ? widget.subject.starAverageFormatted(widget.semester)
+                    : widget.subject.averageFormatted(widget.semester),
               ),
             ],
           ),
