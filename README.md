@@ -16,9 +16,9 @@ Vielen Dank für die tolle Arbeit.
 | Plattform | Link |
 |---|---|
 | Android | _in Kürze verfügbar_ |
-| iOS | _in Kürze verfügbar_ |
+| iOS | _fraglich_ |
 | Windows | _in Kürze verfügbar_ |
-| macOS | _in Kürze verfügbar_ |
+| macOS | _fraglich_ |
 
 ---
 
