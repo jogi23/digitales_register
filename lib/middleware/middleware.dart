@@ -175,7 +175,7 @@ Future<void> saveStateImmediately() => _doSaveState(immediately: true);
 @visibleForTesting
 Future<void> triggerDeferredSaveState() => _doSaveState();
 
-Future<void> _doLoad() async {
+Future<void> _doLoad({bool forceAutoLogin = false}) async {
   // By resetting the wrapper we clear all cookies.
   // However we don't want to reset the wrapper in tests
   if (wrapper is! Mock) {
@@ -222,12 +222,12 @@ Future<void> _doLoad() async {
     await _doDeletePass();
     providerContainer.read(appRouterProvider).showLogin();
   } else {
-    if (user != null && pass != null && otherAccounts.isEmpty) {
-      // Exactly 1 saved account → auto-login silently.
+    if (user != null && pass != null && (otherAccounts.isEmpty || forceAutoLogin)) {
+      // 1 account, or called after an explicit account-selection → auto-login.
       await _doLogin(user, pass, url ?? "", fromStorage: true);
     } else {
       // 0 accounts → show login form.
-      // 2+ accounts → show login form; LoginPage auto-opens account-selection sheet.
+      // 2+ accounts at cold start → show login form; LoginPage auto-opens account-selection sheet.
       providerContainer.read(appRouterProvider).showLogin();
     }
   }

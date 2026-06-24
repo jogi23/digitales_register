@@ -408,7 +408,7 @@ Future<void> _doSelectAccount(int index) async {
   providerContainer.read(loginProvider.notifier).logout(hard: true);
   providerContainer.read(loginProvider.notifier).setLoggingIn();
   _resetAllProviders();
-  await _doLoad();
+  await _doLoad(forceAutoLogin: true);
 }
 
 void _restoreProvidersFromAppState(AppState appState) {
