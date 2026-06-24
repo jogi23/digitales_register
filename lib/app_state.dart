@@ -29,7 +29,7 @@ part 'app_state.g.dart';
 
 bool isDemoUser({required String? url, required String? username}) {
   return username == "demo-user-6540" &&
-      url == "https://vinzentinum.digitalesregister.it";
+      url == "https://wertwerk-demo.digitalesregister.it";
 }
 
 abstract class AppState implements Built<AppState, AppStateBuilder> {
