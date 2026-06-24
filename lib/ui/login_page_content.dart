@@ -18,6 +18,7 @@
 
 import 'package:collection/collection.dart';
 import 'package:dr/container/login_page.dart';
+import 'package:dr/providers/login_provider.dart';
 import 'package:dr/ui/animated_linear_progress_indicator.dart';
 import 'package:dr/ui/autocomplete_options.dart';
 import 'package:dr/util.dart';
@@ -40,6 +41,7 @@ class LoginPageContent extends StatefulWidget {
   final VoidCallback onReload;
   final void Function(String url) onRequestPassReset;
   final void Function(int index) onSelectAccount;
+  final VoidCallback onLoginCurrentAccount;
 
   const LoginPageContent({
     super.key,
@@ -50,6 +52,7 @@ class LoginPageContent extends StatefulWidget {
     required this.onChangePass,
     required this.onRequestPassReset,
     required this.onSelectAccount,
+    required this.onLoginCurrentAccount,
   });
 
   @override
@@ -57,6 +60,8 @@ class LoginPageContent extends StatefulWidget {
 }
 
 class _LoginPageContentState extends State<LoginPageContent> {
+  bool _startupSheetShown = false;
+
   late final _usernameController = TextEditingController(),
       _passwordController = TextEditingController(),
       _newPassword1Controller = TextEditingController(),
@@ -103,7 +108,37 @@ class _LoginPageContentState extends State<LoginPageContent> {
         // We manually check hasFocus
       });
     });
+    if (widget.vm.otherAccounts.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && !_startupSheetShown) {
+          _startupSheetShown = true;
+          _showStartupAccountSheet();
+        }
+      });
+    }
     super.initState();
+  }
+
+  void _showStartupAccountSheet() {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      isDismissible: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (_) => _StartupAccountSheet(
+        currentUsername: widget.vm.username,
+        currentUrl: widget.vm.url,
+        otherAccounts: widget.vm.otherAccounts,
+        onSelectCurrent: widget.onLoginCurrentAccount,
+        onSelectOther: widget.onSelectAccount,
+        canAddAccount: !widget.vm.safeMode,
+        onAddAccount: () {
+          // Close sheet and leave login form open for manual entry
+        },
+      ),
+    );
   }
 
   @override
@@ -240,12 +275,13 @@ class _LoginPageContentState extends State<LoginPageContent> {
                       }),
                     ),
                     Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         TextButton(
                           style: TextButton.styleFrom(
                             foregroundColor: Colors.grey,
                             padding:
-                                const EdgeInsets.symmetric(horizontal: 32),
+                                const EdgeInsets.symmetric(horizontal: 16),
                           ),
                           onPressed: () async {
                             await launchUrl(
@@ -265,7 +301,7 @@ class _LoginPageContentState extends State<LoginPageContent> {
                             style: TextButton.styleFrom(
                               foregroundColor: Colors.grey,
                               padding:
-                                  const EdgeInsets.symmetric(horizontal: 8),
+                                  const EdgeInsets.symmetric(horizontal: 16),
                             ),
                             onPressed: () {
                               setState(() {
@@ -502,6 +538,139 @@ class _LoginPageContentState extends State<LoginPageContent> {
           ],
         ),
       ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Startup account selection sheet (shown when 2+ accounts exist at startup)
+// ---------------------------------------------------------------------------
+
+class _StartupAccountSheet extends StatelessWidget {
+  final String? currentUsername;
+  final String? currentUrl;
+  final List<OtherAccount> otherAccounts;
+  final VoidCallback onSelectCurrent;
+  final void Function(int index) onSelectOther;
+  final bool canAddAccount;
+  final VoidCallback onAddAccount;
+
+  const _StartupAccountSheet({
+    required this.currentUsername,
+    required this.currentUrl,
+    required this.otherAccounts,
+    required this.onSelectCurrent,
+    required this.onSelectOther,
+    required this.canAddAccount,
+    required this.onAddAccount,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).dividerColor,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Konto wählen',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 8),
+              if (currentUsername != null)
+                _AccountTile(
+                  username: currentUsername!,
+                  url: currentUrl,
+                  onTap: () {
+                    Navigator.pop(context);
+                    onSelectCurrent();
+                  },
+                ),
+              for (var i = 0; i < otherAccounts.length; i++)
+                _AccountTile(
+                  username: otherAccounts[i].username,
+                  url: otherAccounts[i].url,
+                  onTap: () {
+                    Navigator.pop(context);
+                    onSelectOther(i);
+                  },
+                ),
+              const Divider(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: canAddAccount
+                      ? () {
+                          Navigator.pop(context);
+                          onAddAccount();
+                        }
+                      : null,
+                  icon: const Icon(Icons.person_add_outlined),
+                  label: Text(
+                    canAddAccount
+                        ? 'Anderes Konto hinzufügen'
+                        : 'Konto hinzufügen (Passwort-Speicherung deaktiviert)',
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AccountTile extends StatelessWidget {
+  final String username;
+  final String? url;
+  final VoidCallback onTap;
+
+  const _AccountTile({
+    required this.username,
+    required this.url,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final host = url != null ? Uri.tryParse(url!)?.host : null;
+    final initials = username.trim().isEmpty
+        ? '?'
+        : username.trim().substring(0, username.trim().length.clamp(0, 2)).toUpperCase();
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: CircleAvatar(
+        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+        child: Text(
+          initials,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.onPrimaryContainer,
+          ),
+        ),
+      ),
+      title: Text(username),
+      subtitle: host != null ? Text(host) : null,
+      onTap: onTap,
     );
   }
 }

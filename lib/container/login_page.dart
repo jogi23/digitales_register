@@ -58,6 +58,7 @@ class LoginPage extends ConsumerWidget {
       onReload: notifier.loadApp,
       onRequestPassReset: notifier.showRequestPassReset,
       onSelectAccount: notifier.selectAccount,
+      onLoginCurrentAccount: notifier.loginCurrentFromStorage,
     );
   }
 }

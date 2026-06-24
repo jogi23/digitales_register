@@ -83,6 +83,8 @@ void wireLoginDispatchers(LoginNotifier notifier) {
     changePass: (user, oldPass, newPass, url) =>
         unawaited(_doChangePass(user, oldPass, newPass, url)),
     saveNoPass: (value) => unawaited(_doSaveNoPass(value)),
+    loginCurrentFromStorage: () =>
+        unawaited(_withErrorHandling(_doLoginCurrentFromStorage)),
     resetPass: (newPass) => unawaited(_doResetPass(newPass)),
     requestPassReset: (user, email) =>
         unawaited(_doRequestPassReset(user, email)),
@@ -220,9 +222,12 @@ Future<void> _doLoad() async {
     await _doDeletePass();
     providerContainer.read(appRouterProvider).showLogin();
   } else {
-    if (user != null && pass != null) {
+    if (user != null && pass != null && otherAccounts.isEmpty) {
+      // Exactly 1 saved account → auto-login silently.
       await _doLogin(user, pass, url ?? "", fromStorage: true);
     } else {
+      // 0 accounts → show login form.
+      // 2+ accounts → show login form; LoginPage auto-opens account-selection sheet.
       providerContainer.read(appRouterProvider).showLogin();
     }
   }
