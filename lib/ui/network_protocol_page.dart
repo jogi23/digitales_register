@@ -28,6 +28,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 class NetworkProtocolPage extends ConsumerWidget {
   const NetworkProtocolPage({super.key});
@@ -75,19 +76,21 @@ Future<void> _exportProtocol(List<NetworkProtocolItem> items) async {
   final jsonString = const JsonEncoder.withIndent("  ").convert(export);
 
   try {
-    if (Platform.isAndroid) {
-      await Clipboard.setData(ClipboardData(text: jsonString));
-      showSnackBar("${items.length} Antworten in die Zwischenablage kopiert");
-      return;
-    }
-
     final timestamp = DateTime.now()
         .toIso8601String()
         .replaceAll(":", "-")
         .replaceAll(".", "-");
-    final dir = await getApplicationDocumentsDirectory();
+    final dir = await getTemporaryDirectory();
     final file = File("${dir.path}/dr_network_capture_$timestamp.json");
     await file.writeAsString(jsonString);
+
+    if (Platform.isAndroid) {
+      await Share.shareXFiles(
+        [XFile(file.path, mimeType: 'application/json')],
+        subject: 'DigiReg Netzwerk-Capture',
+      );
+      return;
+    }
 
     final navContext = navigatorKey?.currentContext;
     if (navContext == null) return;
