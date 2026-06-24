@@ -123,7 +123,7 @@ class SessionManager {
     bool isRetryAfterUnexpectedLogout = false,
   }) async {
     if (_authService.demoMode) {
-      return getDemoResponse(url, args);
+      return await getDemoResponse(url, args);
     }
     assert(!url.startsWith("/"));
 
