@@ -37,9 +37,7 @@ class GradesChart extends StatelessWidget {
   final VoidCallback? goFullscreen;
   final bool isFullscreen;
   final GradingMode gradingMode;
-  final List<
-          charts
-              .Series<MapEntry<UtcDateTime, GradeChartPoint>, UtcDateTime>>
+  final List<charts.Series<MapEntry<UtcDateTime, GradeChartPoint>, UtcDateTime>>
       grades;
 
   final ValueNotifier<(UtcDateTime, BuiltList<_Selection>)?> selection =
@@ -54,8 +52,7 @@ class GradesChart extends StatelessWidget {
   }) : grades = convert(graphs);
 
   static List<
-          charts
-              .Series<MapEntry<UtcDateTime, GradeChartPoint>, UtcDateTime>>
+          charts.Series<MapEntry<UtcDateTime, GradeChartPoint>, UtcDateTime>>
       convert(Map<SubjectGrades, SubjectTheme> data) {
     return data.entries.where((entry) => entry.value.thick != 0).map(
       (entry) {
@@ -303,7 +300,8 @@ class GradesChart extends StatelessWidget {
   }
 }
 
-String formatStarValue(double value) => '${gradeAverageFormat.format(value)}/6★';
+String formatStarValue(double value) =>
+    '${gradeAverageFormat.format(value)}/6★';
 
 String formatChartSelectionText(String subject, GradeChartPoint point) {
   if (point.mode == GradingMode.numeric) {

@@ -65,7 +65,7 @@ class DaysWidget extends StatefulWidget {
   final VoidCallback refreshNoInternet;
   final AttachmentCallback onOpenAttachment;
   final Map<int, BuiltList<Competence>> gradeCompetences;
-    final Future<void> Function(Iterable<DashboardGradeTarget> targets)
+  final Future<void> Function(Iterable<DashboardGradeTarget> targets)
       loadGradeCompetences;
 
   const DaysWidget({
@@ -813,7 +813,7 @@ class ItemWidget extends StatelessWidget {
   Color? _getCardColor() {
     if (colorBorder &&
         item.label != null &&
-        subjectThemes.containsKey(item.label!)) {
+        subjectThemes.containsKey(item.label)) {
       return Color(subjectThemes[item.label]!.color).withOpacity(0.15);
     }
     return null;

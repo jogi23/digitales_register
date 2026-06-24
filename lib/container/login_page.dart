@@ -25,12 +25,18 @@ import 'package:dr/ui/login_page_content.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+final schoolsProvider = FutureProvider<Map<String, String>>(
+  (ref) => loadSchools(),
+);
+
 class LoginPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final login = ref.watch(loginProvider);
     final noInternet = ref.watch(noInternetProvider);
-    final safeMode = ref.watch(settingsProvider.select((s) => s.noPasswordSaving));
+    final safeMode =
+        ref.watch(settingsProvider.select((s) => s.noPasswordSaving));
+    final schools = ref.watch(schoolsProvider).value ?? const {};
     final notifier = ref.read(loginProvider.notifier);
     return LoginPageContent(
       vm: LoginPageViewModel(

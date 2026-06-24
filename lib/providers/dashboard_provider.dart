@@ -47,6 +47,7 @@ class DashboardGradeTarget {
 class DashboardNotifier extends Notifier<DashboardState> {
   @override
   DashboardState build() => DashboardState();
+
   /// Clears all dashboard data. Call this before loading data for a different
   /// account so that stale entries are not shown as deleted.
   void reset() {
@@ -70,8 +71,8 @@ class DashboardNotifier extends Notifier<DashboardState> {
       return;
     }
     final settings = ref.read(settingsProvider);
-    _applyLoaded(
-        data, future, settings.dashboardMarkNewOrChangedEntries, settings.dashboardDeduplicateEntries);
+    _applyLoaded(data, future, settings.dashboardMarkNewOrChangedEntries,
+        settings.dashboardDeduplicateEntries);
   }
 
   Future<void> refresh() async {
@@ -265,8 +266,8 @@ class DashboardNotifier extends Notifier<DashboardState> {
     final List<Homework> newHomework = newDay.homework.toList();
     for (final oldHw in oldDay.homework.toList()) {
       final newHw = newHomework.firstWhereOrNull(
-                (d) => d.id == oldHw.id,
-              ) ??
+            (d) => d.id == oldHw.id,
+          ) ??
           newHomework.firstWhereOrNull(
             (d) => d.isSuccessorOf(oldHw),
           );
@@ -298,11 +299,10 @@ class DashboardNotifier extends Notifier<DashboardState> {
           ..previousVersion = oldHw.previousVersion?.toBuilder();
         mergedHw.gradeGroupSubmissions.map(
           (ggs) => ggs.rebuild(
-            (ggs) =>
-                ggs.fileAvailable = oldHw.gradeGroupSubmissions?.any(
-                      (oldGgs) => oldGgs.file == ggs.file,
-                    ) ??
-                    false,
+            (ggs) => ggs.fileAvailable = oldHw.gradeGroupSubmissions?.any(
+                  (oldGgs) => oldGgs.file == ggs.file,
+                ) ??
+                false,
           ),
         );
         b.homework[b.homework.build().indexOf(oldHw)] = mergedHw.build();
@@ -323,8 +323,8 @@ class DashboardNotifier extends Notifier<DashboardState> {
   ) {
     for (final newHw in newHomework) {
       final deletedHw = oldDay.deletedHomework.firstWhereOrNull(
-                (d) => d.id == newHw.id,
-              ) ??
+            (d) => d.id == newHw.id,
+          ) ??
           oldDay.deletedHomework.firstWhereOrNull(
             (d) => d.isSuccessorOf(newHw),
           );
@@ -478,8 +478,7 @@ class DashboardGradeCompetencesNotifier
       final gradeId = target.homework.id;
       _loading.add(gradeId);
       try {
-        final loadedCompetences =
-                await _findFromGradesState(target) ??
+        final loadedCompetences = await _findFromGradesState(target) ??
             await _loadFromGradeIdFallback(target.homework.id);
         state = {
           ...state,
@@ -550,7 +549,7 @@ class DashboardGradeCompetencesNotifier
       a.toLowerCase().contains(b.toLowerCase()) ||
       b.toLowerCase().contains(a.toLowerCase());
 
-    UtcDateTime _toDate(UtcDateTime dateTime) =>
+  UtcDateTime _toDate(UtcDateTime dateTime) =>
       UtcDateTime(dateTime.year, dateTime.month, dateTime.day);
 }
 
@@ -574,8 +573,7 @@ Competence _parseDashboardCompetence(Map data) {
   );
 }
 
-final dashboardGradeCompetencesProvider =
-    NotifierProvider<DashboardGradeCompetencesNotifier,
-        Map<int, BuiltList<Competence>>>(
+final dashboardGradeCompetencesProvider = NotifierProvider<
+    DashboardGradeCompetencesNotifier, Map<int, BuiltList<Competence>>>(
   DashboardGradeCompetencesNotifier.new,
 );

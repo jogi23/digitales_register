@@ -41,7 +41,8 @@ class DaysContainer extends ConsumerWidget {
     final noInternet = ref.watch(noInternetProvider);
     final settings = ref.watch(settingsProvider);
     final loginLoading = ref.watch(loginProvider.select((s) => s.loading));
-    final showNotifications = ref.watch(notificationsProvider.select((s) => s.notifications.isNotEmpty));
+    final showNotifications = ref
+        .watch(notificationsProvider.select((s) => s.notifications.isNotEmpty));
     ref.listen<String?>(dashboardErrorProvider, (_, error) {
       if (error != null) {
         showSnackBar(error);
@@ -55,8 +56,7 @@ class DaysContainer extends ConsumerWidget {
             .map(
               (day) => day.rebuild(
                 (b) => b
-                  ..deletedHomework
-                      .where((hw) => !isBlacklisted(hw, blacklist))
+                  ..deletedHomework.where((hw) => !isBlacklisted(hw, blacklist))
                   ..homework.where((hw) => !isBlacklisted(hw, blacklist)),
               ),
             )

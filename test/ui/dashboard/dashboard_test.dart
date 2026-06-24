@@ -342,8 +342,8 @@ Future<void> main() async {
       ],
       child: MaterialApp(
         home: DaysContainer(),
-        theme: ThemeData(
-            primarySwatch: Colors.teal, brightness: Brightness.dark),
+        theme:
+            ThemeData(primarySwatch: Colors.teal, brightness: Brightness.dark),
       ),
     );
     await tester.pumpWidget(widget);
@@ -498,7 +498,8 @@ Future<void> main() async {
     expect(find.byIcon(Icons.star_border), findsNothing);
   });
 
-  testWidgets('dashboard grades can match grade details without using homework id',
+  testWidgets(
+      'dashboard grades can match grade details without using homework id',
       (WidgetTester tester) async {
     final homework = Homework(
       (b) => b
@@ -596,12 +597,14 @@ Future<void> main() async {
         child: MaterialApp(home: DaysContainer()),
       ),
     );
-    await container.read(dashboardGradeCompetencesProvider.notifier).ensureLoaded([
-          DashboardGradeTarget(
-            homework: homework,
-            dayDate: UtcDateTime(2026, 5, 22),
-          ),
-        ]);
+    await container
+        .read(dashboardGradeCompetencesProvider.notifier)
+        .ensureLoaded([
+      DashboardGradeTarget(
+        homework: homework,
+        dayDate: UtcDateTime(2026, 5, 22),
+      ),
+    ]);
     expect(
       container.read(dashboardGradeCompetencesProvider)[9999]?.length,
       2,
@@ -636,8 +639,8 @@ Future<void> main() async {
       ],
       child: MaterialApp(
         home: DaysContainer(),
-        theme: ThemeData(
-            primarySwatch: Colors.teal, brightness: Brightness.dark),
+        theme:
+            ThemeData(primarySwatch: Colors.teal, brightness: Brightness.dark),
       ),
     );
     await tester.pumpWidget(widget);
@@ -658,8 +661,8 @@ Future<void> main() async {
       ],
       child: MaterialApp(
         home: DaysContainer(),
-        theme: ThemeData(
-            primarySwatch: Colors.teal, brightness: Brightness.dark),
+        theme:
+            ThemeData(primarySwatch: Colors.teal, brightness: Brightness.dark),
       ),
     );
     await tester.pumpWidget(widget);
@@ -685,8 +688,8 @@ Future<void> main() async {
       ],
       child: MaterialApp(
         home: DaysContainer(),
-        theme: ThemeData(
-            primarySwatch: Colors.teal, brightness: Brightness.dark),
+        theme:
+            ThemeData(primarySwatch: Colors.teal, brightness: Brightness.dark),
       ),
     );
     await tester.pumpWidget(widget);
@@ -969,8 +972,7 @@ Future<void> main() async {
     );
     await tester.pumpWidget(widget);
     await tester.pumpAndSettle();
-    await expectLater(
-        find.byType(DaysWidget),
+    await expectLater(find.byType(DaysWidget),
         matchesGoldenFile("colored_background_enabled.png"));
   });
 
@@ -1020,8 +1022,7 @@ Future<void> main() async {
     );
     await tester.pumpWidget(widget);
     await tester.pumpAndSettle();
-    await expectLater(
-        find.byType(DaysWidget),
+    await expectLater(find.byType(DaysWidget),
         matchesGoldenFile("colored_background_disabled.png"));
   });
 

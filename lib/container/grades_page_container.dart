@@ -44,9 +44,9 @@ class GradesPageContainer extends ConsumerWidget {
       gradesState.subjects,
       gradesState.semester,
     );
-    final shouldPrefetchStarDetails =
-        !gradesState.loading &&
-        !gradesState.subjects.any((subject) => subject.hasNumericGrades(gradesState.semester)) &&
+    final shouldPrefetchStarDetails = !gradesState.loading &&
+        !gradesState.subjects
+            .any((subject) => subject.hasNumericGrades(gradesState.semester)) &&
         gradesState.subjects.any(
           (subject) =>
               subject.basicGrades(gradesState.semester)?.isNotEmpty == true &&

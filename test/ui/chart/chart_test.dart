@@ -54,8 +54,8 @@ Widget _wrapWithScope(Widget child, AppState appState,
         [SettingsState? settings]) =>
     ProviderScope(
       overrides: [
-        gradesProvider.overrideWith(
-            () => _TestGradesNotifier(appState.gradesState)),
+        gradesProvider
+            .overrideWith(() => _TestGradesNotifier(appState.gradesState)),
         settingsProvider.overrideWith(
             () => _TestSettingsNotifier(settings ?? SettingsState())),
       ],

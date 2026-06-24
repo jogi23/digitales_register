@@ -46,7 +46,8 @@ class GradesChartContainer extends ConsumerWidget {
         final grades = subject
                 .detailEntries(gradesState.semester)
                 ?.whereType<GradeDetail>()
-                .where((grade) => !grade.cancelled && grade.competences.isNotEmpty)
+                .where(
+                    (grade) => !grade.cancelled && grade.competences.isNotEmpty)
                 .toList() ??
             [];
         return SubjectGrades(
@@ -69,8 +70,8 @@ class GradesChartContainer extends ConsumerWidget {
 
       final grades = gradesState.semester == Semester.all
           ? (subject.gradesAll.values.fold<List<GradeAll>>(
-                  <GradeAll>[], (a, b) => <GradeAll>[...a, ...b])
-              ..sort((GradeAll a, GradeAll b) => a.date.compareTo(b.date)))
+              <GradeAll>[], (a, b) => <GradeAll>[...a, ...b])
+            ..sort((GradeAll a, GradeAll b) => a.date.compareTo(b.date)))
           : subject.gradesAll[gradesState.semester]?.toList() ?? [];
       grades.removeWhere((grade) => grade.cancelled || grade.grade == null);
       return SubjectGrades(
