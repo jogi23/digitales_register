@@ -533,7 +533,7 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
                 context,
                 MaterialPageRoute<void>(
                   builder: (context) {
-                    return NetworkProtocolPage();
+                    return const NetworkProtocolPage();
                   },
                 ),
               );
