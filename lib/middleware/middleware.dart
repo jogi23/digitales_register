@@ -227,7 +227,14 @@ Future<void> _doLoad({bool forceAutoLogin = false}) async {
       await _doLogin(user, pass, url ?? "", fromStorage: true);
     } else {
       // 0 accounts → show login form.
-      // 2+ accounts at cold start → show login form; LoginPage auto-opens account-selection sheet.
+      // 2+ accounts at cold start → set current account info so the startup
+      // sheet can show it, then show login form.
+      if (user != null) {
+        providerContainer.read(loginProvider.notifier).setUsername(user);
+      }
+      if (url != null) {
+        providerContainer.read(loginProvider.notifier).setUrl(fixupUrl(url));
+      }
       providerContainer.read(appRouterProvider).showLogin();
     }
   }
