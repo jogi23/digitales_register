@@ -23,6 +23,7 @@ import 'package:dr/main.dart';
 import 'package:dr/middleware/middleware.dart';
 import 'package:dr/providers/notifications_provider.dart';
 import 'package:dr/providers/provider_container.dart' as pc;
+import 'package:dr/services/app_router.dart';
 import 'package:dr/ui/notifications_page.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/wrapper.dart';
@@ -33,6 +34,8 @@ import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockWrapper extends Mock implements Wrapper {}
+
+class MockAppRouter extends Mock implements AppRouter {}
 
 class _TestNotificationsNotifier extends NotificationsNotifier {
   _TestNotificationsNotifier(this._initialState);
@@ -333,5 +336,57 @@ void main() {
       container.read(notificationsProvider).notifications,
       isEmpty,
     );
+  });
+
+  testWidgets('opening grade notification marks it as read',
+      (WidgetTester tester) async {
+    wrapper = MockWrapper();
+    final appRouter = MockAppRouter();
+
+    final notification = Notification(
+      (b) => b
+        ..id = 4
+        ..title = "Neue Bewertung"
+        ..timeSent = UtcDateTime(2021, 3, 12)
+        ..objectId = 17
+        ..type = "grade",
+    );
+
+    when(
+      () => wrapper.send(
+        "api/notification/markAsRead",
+        args: {"id": 4},
+      ),
+    ).thenAnswer((_) async => "");
+    when(() => appRouter.showGradeDetail(17)).thenReturn(null);
+
+    final container = ProviderContainer(
+      overrides: [
+        notificationsProvider.overrideWith(
+          () => _TestNotificationsNotifier(
+            NotificationsState(notifications: [notification]),
+          ),
+        ),
+        appRouterProvider.overrideWith((ref) => appRouter),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(
+          home: NotificationPageContainer(),
+          theme: ThemeData(primarySwatch: Colors.deepOrange),
+        ),
+      ),
+    );
+
+    expect(find.text("Neue Bewertung"), findsOneWidget);
+    await tester.tap(find.byTooltip("Bewertung öffnen"));
+    await tester.pumpAndSettle();
+
+    verify(() => appRouter.showGradeDetail(17)).called(1);
+    expect(container.read(notificationsProvider).notifications, isEmpty);
   });
 }

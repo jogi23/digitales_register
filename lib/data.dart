@@ -254,6 +254,12 @@ abstract class Notification
   int? get objectId;
 }
 
+enum GradingMode {
+  numeric,
+  stars,
+  unknown,
+}
+
 abstract class Subject implements Built<Subject, SubjectBuilder> {
   factory Subject([void Function(SubjectBuilder)? updates]) = _$Subject;
   Subject._();
@@ -301,6 +307,27 @@ abstract class Subject implements Built<Subject, SubjectBuilder> {
     ]..sort((a, b) => -a.date.compareTo(b.date));
   }
 
+  bool hasDetailData(Semester semester) {
+    if (semester == Semester.all) {
+      return [Semester.first, Semester.second]
+          .every((s) => grades[s] != null && observations[s] != null);
+    }
+    return grades[semester] != null && observations[semester] != null;
+  }
+
+  bool hasNumericGrades(Semester semester) {
+    return basicGrades(semester)
+            ?.any((grade) => !grade.cancelled && grade.grade != null) ==
+        true;
+  }
+
+  bool hasCompetenceGrades(Semester semester) {
+    return detailEntries(semester)
+            ?.whereType<GradeDetail>()
+            .any((grade) => !grade.cancelled && grade.competences.isNotEmpty) ==
+        true;
+  }
+
   int? average(Semester semester) {
     final grades = basicGrades(semester);
     if (grades == null) return null;
@@ -315,6 +342,23 @@ abstract class Subject implements Built<Subject, SubjectBuilder> {
     return (sum / n).round();
   }
 
+  double? starAverage(Semester semester) {
+    final entries = detailEntries(semester)?.whereType<GradeDetail>().toList();
+    if (entries == null) return null;
+    var sum = 0.0;
+    var n = 0;
+    for (final grade in entries) {
+      if (grade.cancelled || grade.competences.isEmpty) continue;
+      final gradeStars =
+          grade.competences.map((c) => c.grade).reduce((a, b) => a + b) /
+              grade.competences.length;
+      sum += gradeStars * grade.weightPercentage;
+      n += grade.weightPercentage;
+    }
+    if (n == 0) return null;
+    return sum / n;
+  }
+
   String averageFormatted(Semester semester) {
     final avg = average(semester);
     if (avg != null) {
@@ -322,6 +366,14 @@ abstract class Subject implements Built<Subject, SubjectBuilder> {
     } else {
       return "/";
     }
+  }
+
+  String starAverageFormatted(Semester semester) {
+    final avg = starAverage(semester);
+    if (avg == null) {
+      return "/";
+    }
+    return "${gradeAverageFormat.format(avg)}/6";
   }
 
   static Map<String, List<DetailEntry>> sortByType(List<DetailEntry> entries) {
@@ -346,6 +398,21 @@ abstract class Subject implements Built<Subject, SubjectBuilder> {
     }
     return m;
   }
+}
+
+GradingMode detectGradingMode(Iterable<Subject> subjects, Semester semester) {
+  final subjectList = subjects.toList();
+  final hasNumericGrades =
+      subjectList.any((subject) => subject.hasNumericGrades(semester));
+  if (hasNumericGrades) {
+    return GradingMode.numeric;
+  }
+  final hasStarGrades =
+      subjectList.any((subject) => subject.hasCompetenceGrades(semester));
+  if (hasStarGrades) {
+    return GradingMode.stars;
+  }
+  return GradingMode.unknown;
 }
 
 abstract class _Entry {

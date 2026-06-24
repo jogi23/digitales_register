@@ -19,9 +19,11 @@
 import 'package:built_collection/built_collection.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/container/grades_chart_container.dart';
+import 'package:dr/container/grades_page_container.dart';
 import 'package:dr/data.dart';
 import 'package:dr/providers/grades_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
+import 'package:dr/ui/grades_chart.dart';
 import 'package:dr/ui/grades_chart_page.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:flutter/material.dart';
@@ -52,8 +54,8 @@ Widget _wrapWithScope(Widget child, AppState appState,
         [SettingsState? settings]) =>
     ProviderScope(
       overrides: [
-        gradesProvider.overrideWith(
-            () => _TestGradesNotifier(appState.gradesState)),
+        gradesProvider
+            .overrideWith(() => _TestGradesNotifier(appState.gradesState)),
         settingsProvider.overrideWith(
             () => _TestSettingsNotifier(settings ?? SettingsState())),
       ],
@@ -121,6 +123,63 @@ AppState get _gradesState {
                   },
                 )
                 ..observations = MapBuilder(),
+            ),
+          ],
+        )
+        ..semester = Semester.first.toBuilder();
+    },
+  );
+}
+
+AppState get _starGradesState {
+  return AppState(
+    (b) {
+      b.gradesState
+        ..subjects = ListBuilder(
+          <Subject>[
+            Subject(
+              (b) => b
+                ..name = "KuTE"
+                ..gradesAll = MapBuilder({
+                  Semester.first: [
+                    GradeAll(
+                      (b) => b
+                        ..weightPercentage = 100
+                        ..cancelled = false
+                        ..date = UtcDateTime(2021, 1, 4)
+                        ..type = "Praktisches Arbeiten / Üben",
+                    ),
+                  ].toBuiltList(),
+                })
+                ..grades = MapBuilder({
+                  Semester.first: [
+                    GradeDetail(
+                      (b) => b
+                        ..id = 1
+                        ..name = "Von der Bleistiftzeichnung zum Ölkreidebild"
+                        ..created = "created"
+                        ..date = UtcDateTime(2021, 1, 4)
+                        ..type = "Praktisches Arbeiten / Üben"
+                        ..weightPercentage = 100
+                        ..cancelled = false
+                        ..competences = ListBuilder([
+                          Competence(
+                            (b) => b
+                              ..typeName = "Technik: Bastelmaterial"
+                              ..grade = 5,
+                          ),
+                          Competence(
+                            (b) => b
+                              ..typeName = "Gestalten: Gestalterische Sorgfalt"
+                              ..grade = 6,
+                          ),
+                        ]),
+                    ),
+                  ].toBuiltList(),
+                })
+                ..observations = MapBuilder({
+                  Semester.first: <Observation>[].toBuiltList(),
+                }),
             ),
           ],
         )
@@ -294,4 +353,44 @@ void main() {
       expect(find.text("4. Januar"), findsNothing);
     },
   );
+
+  test('star all-subjects average is formatted out of 6', () {
+    final subjects = _starGradesState.gradesState.subjects;
+    expect(
+      calculateAllSubjectsAverage(
+        subjects,
+        Semester.first,
+        const [],
+        GradingMode.stars,
+      ),
+      '5,5/6',
+    );
+  });
+
+  test('star chart selection text shows star values and competence lines', () {
+    final text = formatChartSelectionText(
+      'KuTE',
+      GradeChartPoint(
+        value: 5.5,
+        type: 'Praktisches Arbeiten / Üben',
+        mode: GradingMode.stars,
+        competences: BuiltList([
+          Competence(
+            (b) => b
+              ..typeName = 'Technik: Bastelmaterial'
+              ..grade = 5,
+          ),
+          Competence(
+            (b) => b
+              ..typeName = 'Gestalten: Gestalterische Sorgfalt'
+              ..grade = 6,
+          ),
+        ]),
+      ),
+    );
+
+    expect(text, contains('KuTE – Praktisches Arbeiten / Üben: 5,5/6★'));
+    expect(text, contains('Technik: Bastelmaterial: 5★'));
+    expect(text, contains('Gestalten: Gestalterische Sorgfalt: 6★'));
+  });
 }

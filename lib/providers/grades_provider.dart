@@ -38,6 +38,7 @@ class GradesNotifier extends Notifier<GradesState> {
   late final _lock = _SemesterLock((s) async {
     await wrapper.send("?semesterWechsel=${s.n}");
   });
+  final Set<int> _detailsLoadingSubjectIds = {};
 
   @override
   GradesState build() => GradesState();
@@ -70,16 +71,57 @@ class GradesNotifier extends Notifier<GradesState> {
   void clearPendingSubject() =>
       state = state.rebuild((b) => b..pendingSubjectId = null);
 
+  void clearPendingGrade() =>
+      ref.read(pendingGradeIdProvider.notifier).state = null;
+
   Future<void> requestSubjectDetail(int objectId) async {
-    var subject = state.subjects.firstWhereOrNull((s) => s.id == objectId);
-    if (subject == null && !ref.read(noInternetProvider)) {
-      await load(state.semester);
-      subject = state.subjects.firstWhereOrNull((s) => s.id == objectId);
+    ref.read(pendingGradeIdProvider.notifier).state = null;
+    var subject = await _findSubjectById(objectId);
+    if (subject == null) {
+      subject = await _findSubjectForGradeId(objectId);
+      if (subject != null) {
+        ref.read(pendingGradeIdProvider.notifier).state = objectId;
+      }
     }
     if (subject != null) {
-      state = state.rebuild((b) => b..pendingSubjectId = objectId);
+      state = state.rebuild((b) => b..pendingSubjectId = subject!.id);
       await loadDetails(subject, state.semester);
     }
+  }
+
+  Future<Subject?> _findSubjectById(int subjectId) async {
+    var subject = state.subjects.firstWhereOrNull((s) => s.id == subjectId);
+    if (subject == null && !ref.read(noInternetProvider)) {
+      await load(state.semester);
+      subject = state.subjects.firstWhereOrNull((s) => s.id == subjectId);
+    }
+    return subject;
+  }
+
+  Future<Subject?> _findSubjectForGradeId(int gradeId) async {
+    final loadedSubject = state.subjects.firstWhereOrNull(
+      (subject) =>
+          subject
+              .detailEntries(state.semester)
+              ?.whereType<GradeDetail>()
+              .any((grade) => grade.id == gradeId) ==
+          true,
+    );
+    if (loadedSubject != null) {
+      return loadedSubject;
+    }
+    if (ref.read(noInternetProvider)) {
+      return null;
+    }
+    dynamic data = await wrapper.send(
+      _grade,
+      args: {"gradeId": gradeId},
+    );
+    if (data == null) return null;
+    if (data is String) data = json.decode(data);
+    final subjectId = getInt(getMap(data)?["subjectId"]);
+    if (subjectId == null) return null;
+    return _findSubjectById(subjectId);
   }
 
   Future<void> load(Semester semester) async {
@@ -124,6 +166,27 @@ class GradesNotifier extends Notifier<GradesState> {
         }
       },
     );
+  }
+
+  Future<void> ensureDetailDataForSubjects(
+    Iterable<Subject> subjects,
+    Semester semester,
+  ) async {
+    if (ref.read(noInternetProvider)) return;
+    for (final subject in subjects) {
+      final subjectId = subject.id;
+      if (subjectId == null ||
+          subject.hasDetailData(semester) ||
+          _detailsLoadingSubjectIds.contains(subjectId)) {
+        continue;
+      }
+      _detailsLoadingSubjectIds.add(subjectId);
+      try {
+        await loadDetails(subject, semester);
+      } finally {
+        _detailsLoadingSubjectIds.remove(subjectId);
+      }
+    }
   }
 
   Future<void> loadCancelledDescription(
@@ -368,3 +431,5 @@ class _SemesterLock {
 
 final gradesProvider =
     NotifierProvider<GradesNotifier, GradesState>(GradesNotifier.new);
+
+final pendingGradeIdProvider = StateProvider<int?>((ref) => null);

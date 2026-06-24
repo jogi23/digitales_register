@@ -37,10 +37,12 @@ class DaysContainer extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dashboard = ref.watch(dashboardProvider);
+    final gradeCompetences = ref.watch(dashboardGradeCompetencesProvider);
     final noInternet = ref.watch(noInternetProvider);
     final settings = ref.watch(settingsProvider);
     final loginLoading = ref.watch(loginProvider.select((s) => s.loading));
-    final showNotifications = ref.watch(notificationsProvider.select((s) => s.notifications.isNotEmpty));
+    final showNotifications = ref
+        .watch(notificationsProvider.select((s) => s.notifications.isNotEmpty));
     ref.listen<String?>(dashboardErrorProvider, (_, error) {
       if (error != null) {
         showSnackBar(error);
@@ -54,8 +56,7 @@ class DaysContainer extends ConsumerWidget {
             .map(
               (day) => day.rebuild(
                 (b) => b
-                  ..deletedHomework
-                      .where((hw) => !isBlacklisted(hw, blacklist))
+                  ..deletedHomework.where((hw) => !isBlacklisted(hw, blacklist))
                   ..homework.where((hw) => !isBlacklisted(hw, blacklist)),
               ),
             )
@@ -87,6 +88,10 @@ class DaysContainer extends ConsumerWidget {
       markAllAsSeenCallback: notifier.markAllAsSeen,
       refreshNoInternet: ref.read(loginProvider.notifier).refreshNoInternet,
       onOpenAttachment: notifier.openAttachment,
+      gradeCompetences: gradeCompetences,
+      loadGradeCompetences: (targets) => ref
+          .read(dashboardGradeCompetencesProvider.notifier)
+          .ensureLoaded(targets),
     );
   }
 }

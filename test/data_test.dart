@@ -1,5 +1,8 @@
 // Copyright (C) 2026 Johannes Feichter
+import 'package:built_collection/built_collection.dart';
+import 'package:dr/app_state.dart' show Semester;
 import 'package:dr/data.dart';
+import 'package:dr/utc_date_time.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Homework _hw({
@@ -16,6 +19,28 @@ Homework _hw({
     ..label = label
     ..type = type
     ..checked = false);
+}
+
+Subject _subject({
+  String name = 'Fach',
+  List<GradeAll>? basicGrades,
+  List<GradeDetail>? detailGrades,
+}) {
+  return Subject(
+    (b) => b
+      ..name = name
+      ..gradesAll = MapBuilder({
+        if (basicGrades != null)
+          Semester.first: BuiltList<GradeAll>(basicGrades),
+      })
+      ..grades = MapBuilder({
+        if (detailGrades != null)
+          Semester.first: BuiltList<GradeDetail>(detailGrades),
+      })
+      ..observations = MapBuilder({
+        Semester.first: BuiltList<Observation>([]),
+      }),
+  );
 }
 
 void main() {
@@ -113,6 +138,91 @@ void main() {
       );
       // gradeGroup replacing grade is not a successor pattern
       expect(gradeGroupEntry.isSuccessorOf(gradeEntry), false);
+    });
+  });
+
+  group('grading mode helpers', () {
+    test('detectGradingMode returns numeric for numeric grades', () {
+      final subject = _subject(
+        basicGrades: [
+          GradeAll(
+            (b) => b
+              ..cancelled = false
+              ..date = UtcDateTime(2026, 1, 2)
+              ..grade = 750
+              ..type = 'Test'
+              ..weightPercentage = 100,
+          ),
+        ],
+      );
+
+      expect(detectGradingMode([subject], Semester.first), GradingMode.numeric);
+    });
+
+    test('detectGradingMode returns stars for competence-only grades', () {
+      final subject = _subject(
+        detailGrades: [
+          GradeDetail(
+            (b) => b
+              ..id = 1
+              ..name = 'Sterne'
+              ..created = 'created'
+              ..date = UtcDateTime(2026, 1, 2)
+              ..type = 'Üben'
+              ..weightPercentage = 100
+              ..cancelled = false
+              ..competences = ListBuilder([
+                Competence((b) => b
+                  ..typeName = 'A'
+                  ..grade = 5),
+              ]),
+          ),
+        ],
+      );
+
+      expect(detectGradingMode([subject], Semester.first), GradingMode.stars);
+    });
+
+    test('starAverageFormatted returns weighted star average out of 6', () {
+      final subject = _subject(
+        detailGrades: [
+          GradeDetail(
+            (b) => b
+              ..id = 1
+              ..name = 'Sterne 1'
+              ..created = 'created'
+              ..date = UtcDateTime(2026, 1, 2)
+              ..type = 'Üben'
+              ..weightPercentage = 100
+              ..cancelled = false
+              ..competences = ListBuilder([
+                Competence((b) => b
+                  ..typeName = 'A'
+                  ..grade = 5),
+                Competence((b) => b
+                  ..typeName = 'B'
+                  ..grade = 5),
+              ]),
+          ),
+          GradeDetail(
+            (b) => b
+              ..id = 2
+              ..name = 'Sterne 2'
+              ..created = 'created'
+              ..date = UtcDateTime(2026, 1, 3)
+              ..type = 'Üben'
+              ..weightPercentage = 100
+              ..cancelled = false
+              ..competences = ListBuilder([
+                Competence((b) => b
+                  ..typeName = 'A'
+                  ..grade = 6),
+              ]),
+          ),
+        ],
+      );
+
+      expect(subject.starAverageFormatted(Semester.first), '5,5/6');
     });
   });
 }

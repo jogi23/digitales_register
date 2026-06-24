@@ -16,7 +16,10 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'dart:async';
+
 import 'package:badges/badges.dart' as badge;
+import 'package:built_collection/built_collection.dart';
 import 'package:deleteable_tile/deleteable_tile.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/container/days_container.dart';
@@ -27,6 +30,7 @@ import 'package:dr/container/sidebar_container.dart';
 import 'package:dr/data.dart';
 import 'package:dr/main.dart';
 import 'package:dr/middleware/middleware.dart';
+import 'package:dr/providers/dashboard_provider.dart';
 import 'package:dr/ui/animated_linear_progress_indicator.dart';
 import 'package:dr/ui/dialog.dart';
 import 'package:dr/ui/last_fetched_overlay.dart';
@@ -60,6 +64,9 @@ class DaysWidget extends StatefulWidget {
   final VoidCallback refresh;
   final VoidCallback refreshNoInternet;
   final AttachmentCallback onOpenAttachment;
+  final Map<int, BuiltList<Competence>> gradeCompetences;
+  final Future<void> Function(Iterable<DashboardGradeTarget> targets)
+      loadGradeCompetences;
 
   const DaysWidget({
     super.key,
@@ -75,6 +82,8 @@ class DaysWidget extends StatefulWidget {
     required this.refresh,
     required this.refreshNoInternet,
     required this.onOpenAttachment,
+    required this.gradeCompetences,
+    required this.loadGradeCompetences,
   });
   @override
   _DaysWidgetState createState() => _DaysWidgetState();
@@ -173,6 +182,28 @@ class _DaysWidgetState extends State<DaysWidget> {
     }
   }
 
+  void _ensureGradeCompetences() {
+    final missingGradeHomeworks = widget.vm.days
+        .expand(
+          (day) => day.homework
+              .where(
+                (hw) =>
+                    hw.type == HomeworkType.grade &&
+                    hw.grade == null &&
+                    !widget.gradeCompetences.containsKey(hw.id),
+              )
+              .map(
+                (hw) => DashboardGradeTarget(
+                  homework: hw,
+                  dayDate: day.date,
+                ),
+              ),
+        )
+        .toList(growable: false);
+    if (missingGradeHomeworks.isEmpty) return;
+    unawaited(widget.loadGradeCompetences(missingGradeHomeworks));
+  }
+
   @override
   void initState() {
     updateValues();
@@ -181,6 +212,7 @@ class _DaysWidgetState extends State<DaysWidget> {
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       update();
+      _ensureGradeCompetences();
       _afterFirstFrame = true;
       setState(() {});
     });
@@ -191,6 +223,7 @@ class _DaysWidgetState extends State<DaysWidget> {
   void didUpdateWidget(DaysWidget oldWidget) {
     updateValues();
     update();
+    _ensureGradeCompetences();
 
     super.didUpdateWidget(oldWidget);
   }
@@ -231,6 +264,7 @@ class _DaysWidgetState extends State<DaysWidget> {
       colorTestsInRed: widget.vm.colorTestsInRed,
       subjectThemes: widget.vm.subjectThemes.toMap(),
       showLastFetched: showLastFetched,
+      gradeCompetences: widget.gradeCompetences, // Added line
     );
   }
 
@@ -465,6 +499,7 @@ class DayWidget extends StatelessWidget {
   final AttachmentCallback onOpenAttachment;
   final bool colorBorders, colorTestsInRed;
   final Map<String, SubjectTheme> subjectThemes;
+  final Map<int, BuiltList<Competence>> gradeCompetences;
 
   final Day day;
 
@@ -487,6 +522,7 @@ class DayWidget extends StatelessWidget {
     required this.colorBorders,
     required this.subjectThemes,
     required this.colorTestsInRed,
+    required this.gradeCompetences,
     required this.showLastFetched,
   });
 
@@ -646,6 +682,8 @@ class DayWidget extends StatelessWidget {
             subjectThemes: subjectThemes,
             colorBorder: colorBorders,
             colorTestsInRed: colorTestsInRed,
+            gradeCompetences: gradeCompetences[hw.id],
+            gradeCompetencesLoaded: gradeCompetences.containsKey(hw.id),
           ),
       ],
     );
@@ -666,6 +704,8 @@ class ItemWidget extends StatelessWidget {
       colorTestsInRed;
   final AttachmentCallback? onOpenAttachment;
   final Map<String, SubjectTheme> subjectThemes;
+  final BuiltList<Competence>? gradeCompetences;
+  final bool gradeCompetencesLoaded;
 
   final AutoScrollController? controller;
   final int? index;
@@ -687,6 +727,8 @@ class ItemWidget extends StatelessWidget {
     required this.colorBorder,
     required this.subjectThemes,
     required this.colorTestsInRed,
+    this.gradeCompetences,
+    this.gradeCompetencesLoaded = false,
   });
 
   Future<(bool, bool)> _showConfirmDelete(BuildContext context) async {
@@ -771,10 +813,44 @@ class ItemWidget extends StatelessWidget {
   Color? _getCardColor() {
     if (colorBorder &&
         item.label != null &&
-        subjectThemes.containsKey(item.label!)) {
+        subjectThemes.containsKey(item.label)) {
       return Color(subjectThemes[item.label]!.color).withOpacity(0.15);
     }
     return null;
+  }
+
+  Widget _buildGradeIndicator(BuildContext context) {
+    final style = TextStyle(
+      color: Theme.of(context).colorScheme.primary,
+      fontSize: 30,
+    );
+    if (item.grade != null) {
+      return Text(item.gradeFormatted!, style: style);
+    }
+    if (gradeCompetences?.isNotEmpty == true) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          for (final competence in gradeCompetences!)
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: List.generate(
+                6,
+                (n) => Icon(
+                  n < competence.grade ? Icons.star : Icons.star_border,
+                  color: Theme.of(context).colorScheme.primary,
+                  size: 24,
+                ),
+              ),
+            ),
+        ],
+      );
+    }
+    if (!gradeCompetencesLoaded) {
+      return const SizedBox(height: 32, width: 32);
+    }
+    return Text(item.gradeFormatted!, style: style);
   }
 
   @override
@@ -923,12 +999,7 @@ class ItemWidget extends StatelessWidget {
                       if (item.type == HomeworkType.grade)
                         Padding(
                           padding: const EdgeInsets.only(right: 8.0),
-                          child: Text(
-                            item.gradeFormatted!,
-                            style: TextStyle(
-                                color: Theme.of(context).colorScheme.primary,
-                                fontSize: 30),
-                          ),
+                          child: _buildGradeIndicator(context),
                         )
                       else if (!isHistory && !isDeletedView && item.checkable)
                         Checkbox(

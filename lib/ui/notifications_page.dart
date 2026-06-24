@@ -29,7 +29,7 @@ class NotificationPage extends StatelessWidget {
   final List<Notification> notifications;
   final SingleArgumentVoidCallback<Notification> deleteNotification;
   final SingleArgumentVoidCallback<int> goToMessage;
-  final SingleArgumentVoidCallback<int>? goToGrade;
+  final SingleArgumentVoidCallback<Notification>? goToGrade;
   final VoidCallback deleteAllNotifications;
   final bool noInternet;
   final UtcDateTime? lastFetched;
@@ -107,7 +107,7 @@ class NotificationWidget extends StatelessWidget {
   final bool? noInternet;
   final SingleArgumentVoidCallback<Notification> onDelete;
   final SingleArgumentVoidCallback<int> goToMessage;
-  final SingleArgumentVoidCallback<int>? goToGrade;
+  final SingleArgumentVoidCallback<Notification>? goToGrade;
   final bool isLast;
 
   const NotificationWidget({
@@ -177,7 +177,7 @@ class NotificationWidget extends StatelessWidget {
                 IconButton(
                   icon: const Icon(Icons.open_in_new),
                   tooltip: "Bewertung öffnen",
-                  onPressed: () => goToGrade!(notification.objectId!),
+                  onPressed: () => goToGrade!(notification),
                 )
               else
                 IconButton(

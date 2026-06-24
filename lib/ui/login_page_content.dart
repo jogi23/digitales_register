@@ -73,6 +73,20 @@ class _LoginPageContentState extends State<LoginPageContent> {
   late bool safeMode;
   bool newPasswordsMatch = true;
   (String, String?)? selectedPresetServer;
+
+  void _syncSelectedSchoolFromUrl() {
+    if (widget.vm.url == null) return;
+    final school = widget.vm.servers.entries.firstWhereOrNull(
+      (entry) => Uri.parse(entry.value).host == Uri.parse(widget.vm.url!).host,
+    );
+    if (school != null) {
+      selectedPresetServer = (school.key, school.value);
+      _schoolController.text = school.key;
+    } else if (selectedPresetServer == null) {
+      _schoolController.text = "Andere Schule";
+    }
+  }
+
   @override
   void initState() {
     safeMode = widget.vm.safeMode;
@@ -81,16 +95,7 @@ class _LoginPageContentState extends State<LoginPageContent> {
     }
     if (widget.vm.url != null) {
       _urlController.text = widget.vm.url!;
-      final school = widget.vm.servers.entries.firstWhereOrNull(
-        (entry) =>
-            Uri.parse(entry.value).host == Uri.parse(widget.vm.url!).host,
-      );
-      if (school != null) {
-        selectedPresetServer = (school.key, school.value);
-        _schoolController.text = school.key;
-      } else {
-        _schoolController.text = "Andere Schule";
-      }
+      _syncSelectedSchoolFromUrl();
     }
     _schoolFocusNode.addListener(() {
       setState(() {
@@ -98,6 +103,15 @@ class _LoginPageContentState extends State<LoginPageContent> {
       });
     });
     super.initState();
+  }
+
+  @override
+  void didUpdateWidget(covariant LoginPageContent oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.vm.url != widget.vm.url ||
+        oldWidget.vm.servers.length != widget.vm.servers.length) {
+      _syncSelectedSchoolFromUrl();
+    }
   }
 
   String get url => selectedPresetServer?.$2 ?? _urlController.text;
@@ -233,12 +247,11 @@ class _LoginPageContentState extends State<LoginPageContent> {
                         ),
                         onPressed: () async {
                           await launchUrl(
-                            Uri.https(
-                              "docs.google.com",
-                              "forms/d/e/1FAIpQLSe3BLgrC74kUiAnCGSfZ_P0HYXw0yPl3OWVatNTJv8Yh3ZN0A/viewform?usp=sf_link",
-                              <String, String>{
-                                "usp": "pp_url",
-                                "entry.1581750442": appVersion,
+                            Uri(
+                              scheme: 'mailto',
+                              path: 'hallo@wertwerk.io',
+                              queryParameters: {
+                                'subject': 'Feedback DigiReg ST $appVersion',
                               },
                             ),
                           );
@@ -430,7 +443,8 @@ class _LoginPageContentState extends State<LoginPageContent> {
                             index < widget.vm.otherAccounts.length;
                             index++)
                           ListTile(
-                            title: Text(widget.vm.otherAccounts[index].username),
+                            title:
+                                Text(widget.vm.otherAccounts[index].username),
                             onTap: () => widget.onSelectAccount(index),
                           ),
                       ],

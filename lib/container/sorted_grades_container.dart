@@ -31,6 +31,7 @@ class SortedGradesContainer extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final gradesState = ref.watch(gradesProvider);
+    final pendingGradeId = ref.watch(pendingGradeIdProvider);
     final settings = ref.watch(settingsProvider);
     final noInternet = ref.watch(noInternetProvider);
     return SortedGradesWidget(
@@ -51,7 +52,10 @@ class SortedGradesContainer extends ConsumerWidget {
           .read(gradesProvider.notifier)
           .loadDetails(s, gradesState.semester),
       pendingSubjectId: gradesState.pendingSubjectId,
-      clearPendingSubject: ref.read(gradesProvider.notifier).clearPendingSubject,
+      clearPendingSubject:
+          ref.read(gradesProvider.notifier).clearPendingSubject,
+      pendingGradeId: pendingGradeId,
+      clearPendingGrade: ref.read(gradesProvider.notifier).clearPendingGrade,
     );
   }
 }
