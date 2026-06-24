@@ -253,23 +253,23 @@ class _CertificateViewState extends State<_CertificateView> {
     final theme = Theme.of(context);
     final style =
         theme.textTheme.labelMedium!.copyWith(fontWeight: FontWeight.bold);
+    final border =
+        Border(left: BorderSide(color: theme.dividerColor, width: 0.5));
 
     return Container(
       color: theme.colorScheme.surfaceContainerHighest,
-      child: IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SizedBox(
-              width: labelWidth,
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                child: Text('Fach', style: style),
-              ),
+      child: Row(
+        children: [
+          SizedBox(
+            width: labelWidth,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+              child: Text('Fach', style: style),
             ),
-            VerticalDivider(width: 1, color: theme.dividerColor),
-            Expanded(
+          ),
+          Expanded(
+            child: DecoratedBox(
+              decoration: BoxDecoration(border: border),
               child: _data.semesterCount <= 1
                   ? Padding(
                       padding: const EdgeInsets.symmetric(
@@ -299,8 +299,8 @@ class _CertificateViewState extends State<_CertificateView> {
                       ),
                     ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -358,29 +358,31 @@ class _CertificateViewState extends State<_CertificateView> {
     Color? bgColor,
   ) {
     final theme = Theme.of(context);
+    final border =
+        Border(left: BorderSide(color: theme.dividerColor, width: 0.5));
 
+    // CrossAxisAlignment.start lets label and grade area each grow to their
+    // natural height. The surrounding Container fills with bgColor at that
+    // combined height. No IntrinsicHeight needed — Expanded works normally.
     return Container(
       color: bgColor,
-      child: IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Fixed label column
-            SizedBox(
-              width: labelWidth,
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                child: Text(
-                  row.label,
-                  style: theme.textTheme.bodyMedium,
-                  softWrap: true,
-                ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: labelWidth,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+              child: Text(
+                row.label,
+                style: theme.textTheme.bodyMedium,
+                softWrap: true,
               ),
             ),
-            VerticalDivider(width: 1, color: theme.dividerColor),
-            // Grade area — single column fills Expanded, two columns scroll horizontally
-            Expanded(
+          ),
+          Expanded(
+            child: DecoratedBox(
+              decoration: BoxDecoration(border: border),
               child: _data.semesterCount <= 1
                   ? _buildCell(
                       context,
@@ -406,8 +408,8 @@ class _CertificateViewState extends State<_CertificateView> {
                       ),
                     ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
