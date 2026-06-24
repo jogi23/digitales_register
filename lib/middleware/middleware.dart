@@ -35,6 +35,7 @@ import 'package:dr/providers/dashboard_provider.dart';
 import 'package:dr/providers/grades_provider.dart';
 import 'package:dr/providers/login_provider.dart';
 import 'package:dr/providers/messages_provider.dart';
+import 'package:dr/providers/account_profile_provider.dart';
 import 'package:dr/providers/network_protocol_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/providers/notifications_provider.dart';
@@ -186,6 +187,9 @@ Future<void> _doLoad({bool forceAutoLogin = false}) async {
   providerContainer.read(settingsProvider.notifier).onSaveState =
       () => unawaited(_doSaveState(immediately: true));
   if (!providerContainer.read(noInternetProvider)) _popAll();
+  // Load profile photos/aliases from SharedPreferences so the startup account
+  // sheet can show them before any network login takes place.
+  await providerContainer.read(accountProfileProvider.notifier).load();
   dynamic login;
   try {
     login = json.decode(await secureStorage.read(key: "login") ?? "{}");

@@ -22,7 +22,9 @@ import 'package:dr/container/settings_page.dart';
 import 'package:dr/ui/autocomplete_options.dart';
 import 'package:dr/ui/changelog_page.dart';
 import 'package:dr/ui/dialog.dart';
+import 'package:dr/ui/debug_log_page.dart';
 import 'package:dr/ui/network_protocol_page.dart';
+import 'package:flutter/foundation.dart';
 import 'package:dr/util.dart';
 import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:flutter/gestures.dart';
@@ -539,6 +541,18 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
               );
             },
           ),
+          if (kDebugMode)
+            ListTile(
+              title: const Text("Debug-Log"),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute<void>(
+                    builder: (context) => const DebugLogPage(),
+                  ),
+                );
+              },
+            ),
           ListTile(
             leading: const Icon(Icons.feedback),
             title: const Text("Feedback geben"),

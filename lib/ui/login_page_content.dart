@@ -16,14 +16,18 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'dart:io';
+
 import 'package:collection/collection.dart';
 import 'package:dr/container/login_page.dart';
+import 'package:dr/providers/account_profile_provider.dart';
 import 'package:dr/providers/login_provider.dart';
 import 'package:dr/ui/animated_linear_progress_indicator.dart';
 import 'package:dr/ui/autocomplete_options.dart';
 import 'package:dr/util.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import 'package:fuzzy/fuzzy.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -639,7 +643,7 @@ class _StartupAccountSheet extends StatelessWidget {
   }
 }
 
-class _AccountTile extends StatelessWidget {
+class _AccountTile extends ConsumerWidget {
   final String username;
   final String? url;
   final VoidCallback onTap;
@@ -651,14 +655,36 @@ class _AccountTile extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final host = url != null ? Uri.tryParse(url!)?.host : null;
-    final initials = username.trim().isEmpty
-        ? '?'
-        : username.trim().substring(0, username.trim().length.clamp(0, 3)).toUpperCase();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final profile = url != null
+        ? (ref.watch(accountProfileProvider)[accountProfileKey(username, url!)] ??
+            const AccountProfile())
+        : const AccountProfile();
+
+    final display = profile.alias ?? username;
+    final initialsSource = display.trim().isEmpty ? '?' : display.trim();
+    final initials =
+        initialsSource.substring(0, initialsSource.length.clamp(0, 3)).toUpperCase();
+
+    Widget avatar = _initialsAvatar(context, initials);
+    if (profile.photoPath != null) {
+      final file = File(profile.photoPath!);
+      if (file.existsSync()) {
+        avatar = CircleAvatar(backgroundImage: FileImage(file));
+      }
+    }
+
     return ListTile(
       contentPadding: EdgeInsets.zero,
-      leading: CircleAvatar(
+      leading: avatar,
+      title: Text(display),
+      subtitle: display != username ? Text(username) : null,
+      onTap: onTap,
+    );
+  }
+
+  CircleAvatar _initialsAvatar(BuildContext context, String initials) =>
+      CircleAvatar(
         backgroundColor: Theme.of(context).colorScheme.primaryContainer,
         child: Text(
           initials,
@@ -667,10 +693,5 @@ class _AccountTile extends StatelessWidget {
             color: Theme.of(context).colorScheme.onPrimaryContainer,
           ),
         ),
-      ),
-      title: Text(username),
-      subtitle: host != null ? Text(host) : null,
-      onTap: onTap,
-    );
-  }
+      );
 }

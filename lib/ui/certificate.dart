@@ -49,20 +49,14 @@ class Certificate extends ConsumerWidget {
               noInternet: noInternet,
               child: LayoutBuilder(
                 builder: (context, constraints) => SingleChildScrollView(
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: ConstrainedBox(
-                        // Ensure HtmlWidget has at least screen-width so percentage-
-                        // based table column widths (25 %, 36 %, …) resolve correctly.
-                        // If content is wider (e.g. long Verhalten text), horizontal
-                        // scroll kicks in automatically.
-                        constraints: BoxConstraints(
-                          minWidth: constraints.maxWidth - 16,
-                        ),
-                        child: HtmlWidget(certState.html!),
-                      ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: SizedBox(
+                      // Exact bounded width so HtmlWidget can resolve percentage-based
+                      // table column widths (25 %, 36 %, …). ConstrainedBox(minWidth)
+                      // leaves maxWidth = ∞ from the ScrollView, which collapses cells.
+                      width: constraints.maxWidth - 16,
+                      child: HtmlWidget(certState.html!),
                     ),
                   ),
                 ),

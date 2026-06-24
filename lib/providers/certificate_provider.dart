@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'package:dr/debug_log.dart';
 import 'package:dr/middleware/middleware.dart' show wrapper;
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/utc_date_time.dart';
@@ -44,9 +45,19 @@ class CertificateNotifier extends Notifier<CertificateState> {
     final dynamic response =
         await wrapper.send("student/certificate", method: "GET");
     if (response is String) {
+      debugLog(
+        'Zeugnis',
+        'HTML geladen (${response.length} Bytes)',
+        data: response,
+      );
       state = state.copyWith(
         html: response,
         lastFetched: UtcDateTime.now(),
+      );
+    } else {
+      debugLog(
+        'Zeugnis',
+        'Unerwartete Antwort: ${response.runtimeType} — $response',
       );
     }
   }
