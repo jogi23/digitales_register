@@ -30,6 +30,13 @@ Future<void> _doSaveNoPass(bool value) async {
 
 Future<void> _doSavePass() async {
   if (wrapper.user == null || wrapper.pass == null || wrapper.safeMode) return;
+  final rawOthers = await _readStoredOtherAccounts();
+  // Remove any otherAccount entry that matches the account being saved as
+  // current — prevents duplicates when a user re-logs-in with an existing account.
+  final others = (rawOthers as List?)
+      ?.where((dynamic a) =>
+          !(a['user'] == wrapper.user && a['url'] == wrapper.url))
+      .toList();
   await secureStorage.write(
     key: "login",
     value: json.encode(
@@ -37,7 +44,7 @@ Future<void> _doSavePass() async {
         "user": wrapper.user,
         "pass": wrapper.pass,
         "url": wrapper.url,
-        "otherAccounts": await _readStoredOtherAccounts(),
+        "otherAccounts": others,
       },
     ),
   );

@@ -352,11 +352,15 @@ Future<void> _doAddAccount() async {
     if (login["user"] != null &&
         login["pass"] != null &&
         login["url"] != null) {
-      otherAccounts.insert(0, <String, Object?>{
-        "user": login["user"],
-        "pass": login["pass"],
-        "url": login["url"],
-      });
+      final alreadySaved = otherAccounts.any((dynamic a) =>
+          a['user'] == login['user'] && a['url'] == login['url']);
+      if (!alreadySaved) {
+        otherAccounts.insert(0, <String, Object?>{
+          "user": login["user"],
+          "pass": login["pass"],
+          "url": login["url"],
+        });
+      }
     }
     await secureStorage.write(
       key: "login",
