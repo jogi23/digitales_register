@@ -83,14 +83,11 @@ Future<void> _exportProtocol(List<NetworkProtocolItem> items) async {
     final file = File("${dir.path}/dr_network_capture_$timestamp.json");
     await file.writeAsString(jsonString);
 
-    final messengerState = scaffoldMessengerKey?.currentState;
-    if (messengerState == null) return;
-    // Uses the app-wide messenger key's context, which is valid for the app's
-    // lifetime — safe to use after the file-write async gap.
-    final dialogContext = messengerState.context;
+    final navContext = navigatorKey?.currentContext;
+    if (navContext == null) return;
     await showDialog<void>(
       // ignore: use_build_context_synchronously
-      context: dialogContext,
+      context: navContext,
       builder: (context) => AlertDialog(
         title: const Text("Export abgeschlossen"),
         content: SelectableText(
