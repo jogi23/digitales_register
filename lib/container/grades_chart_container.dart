@@ -43,13 +43,14 @@ class GradesChartContainer extends ConsumerWidget {
 
     SubjectGrades getKey(Subject subject) {
       if (gradingMode == GradingMode.stars) {
-        final grades = subject
-                .detailEntries(gradesState.semester)
-                ?.whereType<GradeDetail>()
-                .where(
-                    (grade) => !grade.cancelled && grade.competences.isNotEmpty)
-                .toList() ??
-            [];
+        final grades = (subject
+                    .detailEntries(gradesState.semester)
+                    ?.whereType<GradeDetail>()
+                    .where((grade) =>
+                        !grade.cancelled && grade.competences.isNotEmpty)
+                    .toList() ??
+                [])
+          ..sort((a, b) => a.date.compareTo(b.date));
         return SubjectGrades(
           {
             for (final grade in grades)
@@ -72,7 +73,8 @@ class GradesChartContainer extends ConsumerWidget {
           ? (subject.gradesAll.values.fold<List<GradeAll>>(
               <GradeAll>[], (a, b) => <GradeAll>[...a, ...b])
             ..sort((GradeAll a, GradeAll b) => a.date.compareTo(b.date)))
-          : subject.gradesAll[gradesState.semester]?.toList() ?? [];
+          : (subject.gradesAll[gradesState.semester]?.toList() ?? [])
+            ..sort((GradeAll a, GradeAll b) => a.date.compareTo(b.date));
       grades.removeWhere((grade) => grade.cancelled || grade.grade == null);
       return SubjectGrades(
         {

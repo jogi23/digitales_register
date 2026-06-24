@@ -655,7 +655,7 @@ class _AccountTile extends StatelessWidget {
     final host = url != null ? Uri.tryParse(url!)?.host : null;
     final initials = username.trim().isEmpty
         ? '?'
-        : username.trim().substring(0, username.trim().length.clamp(0, 2)).toUpperCase();
+        : username.trim().substring(0, username.trim().length.clamp(0, 3)).toUpperCase();
     return ListTile(
       contentPadding: EdgeInsets.zero,
       leading: CircleAvatar(
