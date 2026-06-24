@@ -48,9 +48,12 @@ class Certificate extends ConsumerWidget {
               lastFetched: certState.lastFetched,
               noInternet: noInternet,
               child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: HtmlWidget(certState.html!),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: HtmlWidget(certState.html!),
+                  ),
                 ),
               ),
             ),
