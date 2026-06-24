@@ -75,12 +75,18 @@ Future<void> _exportProtocol(List<NetworkProtocolItem> items) async {
   final jsonString = const JsonEncoder.withIndent("  ").convert(export);
 
   try {
-    final dir = await getApplicationDocumentsDirectory();
     final timestamp = DateTime.now()
         .toIso8601String()
         .replaceAll(":", "-")
         .replaceAll(".", "-");
-    final file = File("${dir.path}/dr_network_capture_$timestamp.json");
+    final String dirPath;
+    if (Platform.isAndroid) {
+      dirPath = '/storage/emulated/0/backup/digiregst';
+    } else {
+      dirPath = (await getApplicationDocumentsDirectory()).path;
+    }
+    await Directory(dirPath).create(recursive: true);
+    final file = File("$dirPath/dr_network_capture_$timestamp.json");
     await file.writeAsString(jsonString);
 
     final navContext = navigatorKey?.currentContext;
