@@ -21,6 +21,7 @@ import 'package:dr/container/login_page.dart';
 import 'package:dr/ui/animated_linear_progress_indicator.dart';
 import 'package:dr/ui/autocomplete_options.dart';
 import 'package:dr/util.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fuzzy/fuzzy.dart';
@@ -238,26 +239,52 @@ class _LoginPageContentState extends State<LoginPageContent> {
                         );
                       }),
                     ),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: TextButton(
-                        style: TextButton.styleFrom(
-                          foregroundColor: Colors.grey,
-                          padding: const EdgeInsets.symmetric(horizontal: 32),
+                    Row(
+                      children: [
+                        TextButton(
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.grey,
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 32),
+                          ),
+                          onPressed: () async {
+                            await launchUrl(
+                              Uri(
+                                scheme: 'mailto',
+                                path: 'hallo@wertwerk.io',
+                                queryParameters: {
+                                  'subject': 'Feedback DigiReg ST $appVersion',
+                                },
+                              ),
+                            );
+                          },
+                          child: const Text("Feedback?"),
                         ),
-                        onPressed: () async {
-                          await launchUrl(
-                            Uri(
-                              scheme: 'mailto',
-                              path: 'hallo@wertwerk.io',
-                              queryParameters: {
-                                'subject': 'Feedback DigiReg ST $appVersion',
-                              },
+                        if (kDebugMode)
+                          TextButton(
+                            style: TextButton.styleFrom(
+                              foregroundColor: Colors.grey,
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8),
                             ),
-                          );
-                        },
-                        child: const Text("Feedback?"),
-                      ),
+                            onPressed: () {
+                              setState(() {
+                                selectedPresetServer = null;
+                                _schoolController.text = 'Andere Schule';
+                                _urlController.text =
+                                    'https://wertwerk-demo.digitalesregister.it';
+                                _usernameController.text = 'demo-user-6540';
+                                _passwordController.text = 'demo';
+                              });
+                              widget.onLogin(
+                                'demo-user-6540',
+                                'demo',
+                                'https://wertwerk-demo.digitalesregister.it',
+                              );
+                            },
+                            child: const Text("Demo"),
+                          ),
+                      ],
                     ),
                   ],
                   Padding(
