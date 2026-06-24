@@ -69,6 +69,12 @@ class _CellData {
   bool get isEmpty => grade == null && description == null;
 }
 
+class _Section {
+  final String? header;
+  final List<_CertRow> rows;
+  const _Section({required this.header, required this.rows});
+}
+
 // ─── HTML parser ─────────────────────────────────────────────────────────────
 
 _CertData _parseHtml(String html) {
@@ -84,11 +90,9 @@ _CertData _parseHtml(String html) {
 
     if (ths.isNotEmpty && tds.isEmpty) {
       if (ths.length == 1 && ths[0].attributes.containsKey('colspan')) {
-        // Section header (colspan="5") or empty spacer row
         final text = ths[0].text.trim();
         if (text.isNotEmpty) rows.add(_CertRow.section(text));
       } else {
-        // Column header row: Fach | 1. Semester | (spacer) | 2. Semester | (spacer)
         for (final th in ths) {
           final text = th.text.trim();
           if (text.isNotEmpty) semHeaders.add(text);
@@ -99,14 +103,12 @@ _CertData _parseHtml(String html) {
       if (label.isEmpty) continue;
 
       final cells = <_CellData>[];
-      // Odd indices 1, 3, … are grade columns; even indices 2, 4, … are 1 %-spacers.
       for (int i = 1; i < tds.length; i += 2) {
         final td = tds[i];
         final gradeSpan = td.querySelector('span.green');
         if (gradeSpan != null) {
           final grade = gradeSpan.text.trim();
           final full = td.text.trim();
-          // Format: "grade · description" — U+00B7 MIDDLE DOT
           final sep = full.indexOf(' · ');
           final desc = sep != -1 ? full.substring(sep + 3).trim() : null;
           cells.add(_CellData(grade: grade, description: desc));
@@ -121,7 +123,6 @@ _CertData _parseHtml(String html) {
 
   return _CertData(
     title: title,
-    // First semHeader is "Fach" (label column) — drop it
     semesterHeaders: semHeaders.length > 1 ? semHeaders.sublist(1) : semHeaders,
     rows: rows,
   );
@@ -158,274 +159,152 @@ class Certificate extends ConsumerWidget {
 
 // ─── Certificate view ─────────────────────────────────────────────────────────
 
-class _CertificateView extends StatefulWidget {
+class _CertificateView extends StatelessWidget {
   final String html;
   const _CertificateView({required this.html});
 
   @override
-  State<_CertificateView> createState() => _CertificateViewState();
-}
-
-class _CertificateViewState extends State<_CertificateView> {
-  late _CertData _data;
-  // One controller for the sticky header + one per data row (null for section headers).
-  // All are kept in sync so horizontal scrolling moves all grade columns together.
-  late final ScrollController _headerCtrl;
-  late final List<ScrollController?> _rowCtrls;
-  bool _syncing = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _data = _parseHtml(widget.html);
-    _headerCtrl = _makeCtrl();
-    _rowCtrls =
-        _data.rows.map((r) => r.isSectionHeader ? null : _makeCtrl()).toList();
-  }
-
-  ScrollController _makeCtrl() {
-    final c = ScrollController();
-    c.addListener(() => _onScroll(c));
-    return c;
-  }
-
-  // Propagates a scroll offset change to every other grade-area ScrollView.
-  void _onScroll(ScrollController source) {
-    if (_syncing) return;
-    _syncing = true;
-    final offset = source.offset;
-    void sync(ScrollController? c) {
-      if (c != null && c != source && c.hasClients && c.offset != offset) {
-        c.jumpTo(offset);
-      }
-    }
-
-    sync(_headerCtrl);
-    for (final c in _rowCtrls) sync(c);
-    _syncing = false;
-  }
-
-  @override
-  void dispose() {
-    _headerCtrl.dispose();
-    for (final c in _rowCtrls) c?.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final data = _parseHtml(html);
+    final theme = Theme.of(context);
+
     return LayoutBuilder(
       builder: (context, constraints) {
         final screenWidth = constraints.maxWidth;
-        final labelWidth = _computeLabelWidth(context, screenWidth);
-        // Each semester column fills the remaining screen space; with two columns
-        // the grade area is 2 × gradeColWidth → horizontal scroll reveals column 2.
-        final gradeColWidth = screenWidth - labelWidth;
+        final labelWidth = _computeLabelWidth(context, data.rows, screenWidth);
+
+        final altColor =
+            theme.colorScheme.surfaceContainerHighest.withOpacity(0.4);
+        final headerBg = theme.colorScheme.surfaceContainerHighest;
+        final gradeColor = theme.brightness == Brightness.dark
+            ? Colors.green.shade400
+            : Colors.green.shade700;
+
+        // Label column is fixed; semester columns share remaining space equally.
+        // Table handles row-height synchronisation natively — no IntrinsicHeight
+        // or manual scroll sync needed.
+        final columnWidths = <int, TableColumnWidth>{
+          0: FixedColumnWidth(labelWidth),
+          for (int i = 1; i <= data.semesterCount; i++)
+            i: const FlexColumnWidth(1.0),
+        };
+
+        final border = TableBorder.all(
+          color: theme.dividerColor,
+          width: 0.5,
+        );
+
+        final sections = _splitSections(data.rows);
+        final content = <Widget>[
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 16, 12, 12),
+            child: Text(
+              data.title,
+              style: theme.textTheme.headlineSmall
+                  ?.copyWith(fontWeight: FontWeight.bold),
+            ),
+          ),
+        ];
+
+        for (int s = 0; s < sections.length; s++) {
+          final section = sections[s];
+
+          if (section.header != null) {
+            content.add(
+              Container(
+                width: double.infinity,
+                color: headerBg,
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 12, vertical: 10),
+                child: Text(
+                  section.header!,
+                  style: theme.textTheme.titleSmall
+                      ?.copyWith(fontWeight: FontWeight.bold),
+                ),
+              ),
+            );
+          }
+
+          if (section.rows.isEmpty) continue;
+
+          final tableRows = <TableRow>[];
+
+          // Column headers only in the first section's table.
+          if (s == 0) {
+            tableRows.add(TableRow(
+              decoration: BoxDecoration(color: headerBg),
+              children: [
+                _headerCell(context, 'Fach'),
+                for (final h in data.semesterHeaders)
+                  _headerCell(context, h),
+              ],
+            ));
+          }
+
+          for (int i = 0; i < section.rows.length; i++) {
+            final row = section.rows[i];
+            tableRows.add(TableRow(
+              decoration: i.isEven
+                  ? BoxDecoration(color: altColor)
+                  : null,
+              children: [
+                _labelCell(context, row.label),
+                for (int c = 0; c < data.semesterCount; c++)
+                  _gradeCell(
+                    context,
+                    c < row.cells.length
+                        ? row.cells[c]
+                        : const _CellData(),
+                    gradeColor,
+                  ),
+              ],
+            ));
+          }
+
+          content.add(Table(
+            columnWidths: columnWidths,
+            border: border,
+            defaultVerticalAlignment: TableCellVerticalAlignment.top,
+            children: tableRows,
+          ));
+        }
 
         return SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildTitle(context),
-              _buildHeader(context, labelWidth, gradeColWidth),
-              const Divider(height: 1, thickness: 1),
-              ..._buildRows(context, labelWidth, gradeColWidth),
-            ],
+            children: content,
           ),
         );
       },
     );
   }
 
-  Widget _buildTitle(BuildContext context) => Padding(
-        padding: const EdgeInsets.fromLTRB(12, 16, 12, 12),
-        child: Text(
-          _data.title,
-          style: Theme.of(context)
-              .textTheme
-              .headlineSmall
-              ?.copyWith(fontWeight: FontWeight.bold),
-        ),
-      );
-
-  Widget _buildHeader(
-      BuildContext context, double labelWidth, double gradeColWidth) {
-    final theme = Theme.of(context);
-    final style =
-        theme.textTheme.labelMedium!.copyWith(fontWeight: FontWeight.bold);
-    final border =
-        Border(left: BorderSide(color: theme.dividerColor, width: 0.5));
-
-    return Container(
-      color: theme.colorScheme.surfaceContainerHighest,
-      child: Row(
-        children: [
-          SizedBox(
-            width: labelWidth,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-              child: Text('Fach', style: style),
-            ),
-          ),
-          Expanded(
-            child: DecoratedBox(
-              decoration: BoxDecoration(border: border),
-              child: _data.semesterCount <= 1
-                  ? Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 8),
-                      child: Text(
-                        _data.semesterHeaders.isEmpty
-                            ? ''
-                            : _data.semesterHeaders.first,
-                        style: style,
-                      ),
-                    )
-                  : SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      controller: _headerCtrl,
-                      child: Row(
-                        children: [
-                          for (final h in _data.semesterHeaders)
-                            SizedBox(
-                              width: gradeColWidth,
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 8),
-                                child: Text(h, style: style),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-            ),
-          ),
-        ],
-      ),
+  static Widget _headerCell(BuildContext context, String text) {
+    final style = Theme.of(context)
+        .textTheme
+        .labelMedium
+        ?.copyWith(fontWeight: FontWeight.bold);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      child: Text(text, style: style),
     );
   }
 
-  List<Widget> _buildRows(
-      BuildContext context, double labelWidth, double gradeColWidth) {
-    final theme = Theme.of(context);
-    final altColor =
-        theme.colorScheme.surfaceContainerHighest.withOpacity(0.35);
-
-    final widgets = <Widget>[];
-    int dataIdx = 0;
-
-    for (int i = 0; i < _data.rows.length; i++) {
-      final row = _data.rows[i];
-      if (row.isSectionHeader) {
-        widgets.add(_buildSectionHeader(context, row.label));
-        dataIdx = 0;
-      } else {
-        widgets.add(_buildDataRow(
-          context,
-          row,
-          _rowCtrls[i],
-          labelWidth,
-          gradeColWidth,
-          dataIdx.isEven ? altColor : null,
-        ));
-        dataIdx++;
-      }
-    }
-
-    return widgets;
-  }
-
-  Widget _buildSectionHeader(BuildContext context, String text) {
-    final theme = Theme.of(context);
-    return Container(
-      width: double.infinity,
-      color: theme.colorScheme.surfaceContainerHighest,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+  static Widget _labelCell(BuildContext context, String label) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       child: Text(
-        text,
-        style:
-            theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+        label,
+        style: Theme.of(context).textTheme.bodyMedium,
+        softWrap: true,
       ),
     );
   }
 
-  Widget _buildDataRow(
-    BuildContext context,
-    _CertRow row,
-    ScrollController? ctrl,
-    double labelWidth,
-    double gradeColWidth,
-    Color? bgColor,
-  ) {
+  static Widget _gradeCell(
+      BuildContext context, _CellData cell, Color gradeColor) {
+    if (cell.isEmpty) return const SizedBox.shrink();
     final theme = Theme.of(context);
-    final border =
-        Border(left: BorderSide(color: theme.dividerColor, width: 0.5));
-
-    // CrossAxisAlignment.start lets label and grade area each grow to their
-    // natural height. The surrounding Container fills with bgColor at that
-    // combined height. No IntrinsicHeight needed — Expanded works normally.
-    return Container(
-      color: bgColor,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: labelWidth,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-              child: Text(
-                row.label,
-                style: theme.textTheme.bodyMedium,
-                softWrap: true,
-              ),
-            ),
-          ),
-          Expanded(
-            child: DecoratedBox(
-              decoration: BoxDecoration(border: border),
-              child: _data.semesterCount <= 1
-                  ? _buildCell(
-                      context,
-                      row.cells.isNotEmpty ? row.cells[0] : const _CellData(),
-                    )
-                  : SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      controller: ctrl,
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          for (int i = 0; i < _data.semesterCount; i++)
-                            SizedBox(
-                              width: gradeColWidth,
-                              child: _buildCell(
-                                context,
-                                i < row.cells.length
-                                    ? row.cells[i]
-                                    : const _CellData(),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCell(BuildContext context, _CellData cell) {
-    if (cell.isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-        child: SizedBox.shrink(),
-      );
-    }
-
-    final gradeColor = Theme.of(context).brightness == Brightness.dark
-        ? Colors.green.shade400
-        : Colors.green.shade700;
-
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       child: Column(
@@ -435,14 +314,15 @@ class _CertificateViewState extends State<_CertificateView> {
           if (cell.grade != null)
             Text(
               cell.grade!,
-              style: TextStyle(color: gradeColor, fontWeight: FontWeight.w500),
+              style: TextStyle(
+                  color: gradeColor, fontWeight: FontWeight.w500),
             ),
           if (cell.description != null)
             Padding(
               padding: EdgeInsets.only(top: cell.grade != null ? 4 : 0),
               child: Text(
                 cell.description!,
-                style: Theme.of(context).textTheme.bodySmall,
+                style: theme.textTheme.bodySmall,
                 softWrap: true,
               ),
             ),
@@ -451,18 +331,36 @@ class _CertificateViewState extends State<_CertificateView> {
     );
   }
 
-  // Measures the widest label text and caps it at 1/3 of the available screen width.
-  double _computeLabelWidth(BuildContext context, double screenWidth) {
+  static List<_Section> _splitSections(List<_CertRow> rows) {
+    final sections = <_Section>[];
+    String? currentHeader;
+    List<_CertRow> currentRows = [];
+
+    for (final row in rows) {
+      if (row.isSectionHeader) {
+        sections.add(_Section(header: currentHeader, rows: List.of(currentRows)));
+        currentHeader = row.label;
+        currentRows = [];
+      } else {
+        currentRows.add(row);
+      }
+    }
+    sections.add(_Section(header: currentHeader, rows: List.of(currentRows)));
+    return sections;
+  }
+
+  static double _computeLabelWidth(
+      BuildContext context, List<_CertRow> rows, double screenWidth) {
     final style = Theme.of(context).textTheme.bodyMedium;
     double maxW = 0;
     final tp = TextPainter(textDirection: TextDirection.ltr);
-    for (final row in _data.rows) {
+    for (final row in rows) {
       if (row.isSectionHeader) continue;
       tp.text = TextSpan(text: row.label, style: style);
       tp.layout(maxWidth: double.infinity);
       if (tp.width > maxW) maxW = tp.width;
     }
     tp.dispose();
-    return (maxW + 16).clamp(60.0, screenWidth / 3); // +16 for 8 dp padding each side
+    return (maxW + 16).clamp(60.0, screenWidth / 3);
   }
 }
