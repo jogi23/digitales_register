@@ -337,6 +337,200 @@ const obsSub = <int, String>{
   61173: '– zählt fehlerfrei bis 30; – zählt flexibel weiter; – zählt rückwärts von 10 sicher',
 };
 
+// ── Certificate: new Fachnoten (subject → [1.Semester, 2.Semester]) ──────────
+const _certFachnoten = <String, List<String>>{
+  'Bewegung und Sport': ['gut', 'sehr gut'],
+  'Deutsch': ['ausgezeichnet', 'sehr gut'],
+  'Italienisch': ['sehr gut', 'gut'],
+  'KuTE': ['gut', 'ausgezeichnet'],
+  'Mathematik': ['sehr gut', 'ausgezeichnet'],
+  'Musik': ['ausgezeichnet', 'sehr gut'],
+  'NatGeGeo': ['sehr gut', 'gut'],
+  'Religion': ['gut', 'sehr gut'],
+  'Verhalten': ['ausgezeichnet', 'sehr gut'],
+  'WS Weihnachtswerkstatt': ['gut', ''],
+};
+
+// ── Certificate: new Verhalten texts ─────────────────────────────────────────
+const _verhText1 =
+    'du bist mit viel Energie und Freude in das Schuljahr gestartet und hast '
+    'schnell neue Freundschaften geschlossen. Im Unterricht meldest du dich '
+    'regelmäßig und bringst überlegte Beiträge ein. Schriftliche Aufgaben '
+    'erledigst du sorgfältig und mit sichtbarer Ausdauer. Manchmal fällt es '
+    'dir noch schwer, die nötige Ruhe zu finden, wenn es um konzentriertes '
+    'Einzelarbeiten geht – das gelingt dir aber bereits besser. Behalte deine '
+    'Freude am Lernen und dein offenes Wesen, das schätzen wir sehr.';
+
+const _verhText2 =
+    'das zweite Schulhalbjahr zeigt, wie sehr du gewachsen bist – nicht nur '
+    'im Wissen, sondern auch in deiner Persönlichkeit. Du übernimmst gerne '
+    'Verantwortung, hilfst anderen spontan und bist ein geschätztes Mitglied '
+    'unserer Klasse. Deine Neugier und deine Bereitschaft, Neues auszuprobieren, '
+    'machen dich zu einem besonderen Lernenden. Beim selbstständigen Arbeiten '
+    'zeigst du mehr Ausdauer als zu Beginn des Jahres. Wir freuen uns auf '
+    'alles, was du im nächsten Schuljahr noch entdecken wirst.\n'
+    'Deine Lehrerinnen';
+
+// ── Certificate: competence rows [oldLabel, newLabel, sem1Stars, sem2Stars] ──
+const _certCompetences = <List<Object>>[
+  [
+    'verhält sich höflich und respektvoll',
+    'zeigt Respekt und Wertschätzung im Umgang mit anderen',
+    3,
+    4,
+  ],
+  [
+    'hält sich an die Schulordnung',
+    'kennt die Schulregeln und hält sie zuverlässig ein',
+    4,
+    4,
+  ],
+  [
+    'reagiert bei Konflikten angemessen',
+    'geht mit Konflikten besonnen und lösungsorientiert um',
+    3,
+    3,
+  ],
+  [
+    'beteiligt sich aktiv und interessiert am Unterricht',
+    'bringt sich engagiert und aufmerksam in den Unterricht ein',
+    4,
+    4,
+  ],
+  [
+    'arbeitet sauber, fleißig und übersichtlich',
+    'arbeitet geordnet, sorgfältig und mit gutem Überblick',
+    3,
+    4,
+  ],
+  [
+    'arbeitet zielführend und ausdauernd, zeigt ein angemessenes Arbeitstempo',
+    'bleibt bei der Arbeit fokussiert und hält ein angemessenes Tempo',
+    3,
+    3,
+  ],
+  [
+    'kann sich im Mündlichen klar und verständlich ausdrücken',
+    'drückt sich mündlich klar und für andere verständlich aus',
+    4,
+    4,
+  ],
+  [
+    'versteht schriftliche sowie mündliche Arbeitsaufträge und setzt sie um',
+    'versteht Aufgaben – schriftlich wie mündlich – und setzt sie um',
+    3,
+    4,
+  ],
+  [
+    'erledigt Hausaufgaben zuverlässig und termingerecht',
+    'gibt Hausaufgaben vollständig und pünktlich ab',
+    4,
+    3,
+  ],
+  [
+    'erfasst neue Lerninhalte und kann sie wiedergeben',
+    'nimmt neue Lerninhalte rasch auf und gibt sie treffend wieder',
+    3,
+    4,
+  ],
+  ['kann Gelerntes anwenden', 'wendet Erlerntes auf neue Situationen an', 4, 3],
+  [
+    'erkennt Zusammenhänge',
+    'erkennt Verbindungen zwischen verschiedenen Themen',
+    3,
+    4,
+  ],
+  ['Arbeitsverhalten', 'Arbeitsverhalten', 3, 4],
+  ['Lernverhalten', 'Lernverhalten', 4, 4],
+];
+
+// ── Certificate HTML patcher ──────────────────────────────────────────────────
+String _patchCertificate(String html) {
+  var h = html;
+  const tdV = '<td class="padding-cell" style="vertical-align: top;">';
+  const tdP = '<td class="padding-cell">';
+
+  // 1. Fachnoten rows (except Verhalten – handled below)
+  for (final entry in _certFachnoten.entries) {
+    final subject = entry.key;
+    if (subject == 'Verhalten') continue;
+    final g1 = entry.value[0];
+    final g2 = entry.value[1];
+    final subjectEsc = RegExp.escape(subject);
+
+    if (subject == 'WS Weihnachtswerkstatt') {
+      // Only 1 semester grade; 2nd <td> is empty
+      final p = RegExp(
+        '<tr>$tdV$subjectEsc</td>'
+        "<td[^>]*><span class='green'>[^<]*</span></td>"
+        '<td></td>'
+        '<td[^>]*></td>'
+        '<td></td></tr>',
+      );
+      h = h.replaceFirst(
+        p,
+        "<tr>${tdV}$subject</td>"
+        "${tdV}<span class='green'>$g1</span></td>"
+        '<td></td>${tdV}</td><td></td></tr>',
+      );
+    } else {
+      final p = RegExp(
+        '<tr>$tdV$subjectEsc</td>'
+        "<td[^>]*><span class='green'>[^<]*</span></td>"
+        '<td></td>'
+        "<td[^>]*><span class='green'>[^<]*</span></td>"
+        '<td></td></tr>',
+      );
+      h = h.replaceFirst(
+        p,
+        "<tr>${tdV}$subject</td>"
+        "${tdV}<span class='green'>$g1</span></td>"
+        '<td></td>'
+        "${tdV}<span class='green'>$g2</span></td>"
+        '<td></td></tr>',
+      );
+    }
+  }
+
+  // 2. Verhalten row (contains long free-text blocks)
+  final verhG1 = _certFachnoten['Verhalten']![0];
+  final verhG2 = _certFachnoten['Verhalten']![1];
+  final verhPattern = RegExp(
+    r'<tr><td class="padding-cell" style="vertical-align: top;">Verhalten</td>.*?</tr>',
+    dotAll: true,
+  );
+  final newVerhRow = "<tr>${tdV}Verhalten</td>"
+      "${tdV}<span class='green'>$verhG1</span> &middot; Lieber Max,\n$_verhText1 </td>"
+      '<td></td>'
+      "${tdV}<span class='green'>$verhG2</span> &middot; Lieber Max,\n$_verhText2\n</td>"
+      '<td></td></tr>';
+  h = h.replaceFirst(verhPattern, newVerhRow);
+
+  // 3. Sterne competence rows
+  for (final comp in _certCompetences) {
+    final oldLabel = comp[0] as String;
+    final newLabel = comp[1] as String;
+    final sem1 = comp[2] as int;
+    final sem2 = comp[3] as int;
+    final p = RegExp(
+      '<tr>$tdP${RegExp.escape(oldLabel)}</td>'
+      r'<td class="padding-cell">\d von 4 Sterne</td>'
+      r'<td></td>'
+      r'<td class="padding-cell">\d von 4 Sterne</td>'
+      r'<td></td></tr>',
+    );
+    h = h.replaceFirst(
+      p,
+      '<tr>$tdP$newLabel</td>'
+          '${tdP}$sem1 von 4 Sterne</td>'
+          '<td></td>'
+          '${tdP}$sem2 von 4 Sterne</td>'
+          '<td></td></tr>',
+    );
+  }
+  return h;
+}
+
 // ── Absence reason replacements by absence-group date ────────────────────────
 // Only groups with a non-empty existing reason are updated.
 const absReason = <String, String>{
@@ -1013,7 +1207,7 @@ void main() {
     lcTextById.addAll(_buildLessonContents(subject, sorted));
   });
 
-  int cntGrade = 0, cntDetail = 0, cntDash = 0, cntMsg = 0, cntAbs = 0, cntCal = 0;
+  int cntGrade = 0, cntDetail = 0, cntDash = 0, cntMsg = 0, cntAbs = 0, cntCal = 0, cntCert = 0;
 
   for (final item in data) {
     final addr = item['address'] as String;
@@ -1064,6 +1258,14 @@ void main() {
             }
             cntAbs++;
           }
+        }
+      }
+    } else if (addr.contains('student/certificate')) {
+      if (resp is String) {
+        final patched = _patchCertificate(resp);
+        if (patched != resp) {
+          item['response'] = patched;
+          cntCert++;
         }
       }
     } else if (addr.contains('getMyMessages')) {
@@ -1158,5 +1360,5 @@ void main() {
 
   print('Done. getGrade: $cntGrade | subject_detail: $cntDetail | '
       'dashboard items: $cntDash | messages: $cntMsg | absences: $cntAbs | '
-      'calendar entries: $cntCal');
+      'calendar entries: $cntCal | certificate: $cntCert');
 }
