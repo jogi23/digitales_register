@@ -28,7 +28,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
 
-import '../../parse_test.dart';
+import '../../fixtures/api_fixtures.dart';
 
 class _TestAbsencesNotifier extends AbsencesNotifier {
   _TestAbsencesNotifier(this._initialState);
@@ -60,8 +60,13 @@ Widget _buildTestWidget({required AbsencesState initialState}) {
 }
 
 void main() {
+  setUpAll(() async {
+    await loadFixtures();
+  });
+
   testGoldens('simple absences', (WidgetTester tester) async {
-    final parsedState = parseAbsencesFromJson(absencesJson);
+    final parsedState = parseAbsencesFromJson(
+        fixtureFor('api/student/dashboard/absences'));
 
     final widget = _buildTestWidget(initialState: parsedState);
     await tester.pumpWidget(widget);

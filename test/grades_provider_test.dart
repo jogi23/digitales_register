@@ -17,6 +17,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
+import 'fixtures/api_fixtures.dart';
+
+// Subject ID 85 = Mathematik; grade ID 93810 belongs to subject 85.
+// Both exist in assets/demo/capture.json.
+const _subjectId = 85;
+const _gradeId = 93810;
+
 class MockWrapper extends Mock implements Wrapper {}
 
 Subject _subject({required int id, required String name}) {
@@ -30,29 +37,13 @@ Subject _subject({required int id, required String name}) {
   );
 }
 
-Map<String, dynamic> _subjectDetailResponse({required int gradeId}) {
-  return {
-    "grades": [
-      {
-        "id": gradeId,
-        "grade": "9.00",
-        "weight": 100,
-        "typeName": "Test",
-        "name": "Kapiteltest",
-        "description": "",
-        "date": "2022-10-11",
-        "cancelled": 0,
-        "created": "Von Test am 17.10.2022 eingetragen",
-        "competences": [],
-      }
-    ],
-    "observations": [],
-  };
-}
-
 void main() {
   late MockWrapper mockWrapper;
   late ProviderContainer container;
+
+  setUpAll(() async {
+    await loadFixtures();
+  });
 
   setUp(() {
     mockWrapper = MockWrapper();
@@ -70,6 +61,9 @@ void main() {
     when(
       () => mockWrapper.send('?semesterWechsel=1'),
     ).thenAnswer((_) async => null);
+    // Returns only the subject under test so that the background
+    // ensureDetailDataForSubjects call triggered by _applyLoaded doesn't spawn
+    // open futures that outlive the ProviderContainer.
     when(
       () => mockWrapper.send(
         'api/student/all_subjects',
@@ -79,7 +73,7 @@ void main() {
       (_) async => {
         'subjects': [
           {
-            'subject': {'id': 17, 'name': 'Mathematik'},
+            'subject': {'id': _subjectId, 'name': 'Mathematik'},
             'grades': [],
           }
         ],
@@ -99,7 +93,7 @@ void main() {
         (b) => b
           ..semester = Semester.first.toBuilder()
           ..subjects = ListBuilder([
-            _subject(id: 17, name: 'Mathematik'),
+            _subject(id: _subjectId, name: 'Mathematik'),
           ]),
       ),
     );
@@ -109,11 +103,16 @@ void main() {
         'api/student/subject_detail',
         args: any(named: 'args'),
       ),
-    ).thenAnswer((_) async => _subjectDetailResponse(gradeId: 1202));
+    ).thenAnswer(
+      (_) async => fixtureFor(
+        'api/student/subject_detail',
+        params: {'subjectId': _subjectId},
+      ),
+    );
 
-    await notifier.requestSubjectDetail(17);
+    await notifier.requestSubjectDetail(_subjectId);
 
-    expect(container.read(gradesProvider).pendingSubjectId, 17);
+    expect(container.read(gradesProvider).pendingSubjectId, _subjectId);
     expect(container.read(pendingGradeIdProvider), isNull);
   });
 
@@ -125,7 +124,7 @@ void main() {
         (b) => b
           ..semester = Semester.first.toBuilder()
           ..subjects = ListBuilder([
-            _subject(id: 17, name: 'Mathematik'),
+            _subject(id: _subjectId, name: 'Mathematik'),
           ]),
       ),
     );
@@ -135,20 +134,27 @@ void main() {
         'api/student/entry/getGrade',
         args: any(named: 'args'),
       ),
-    ).thenAnswer((_) async => {
-          'subjectId': 17,
-          'cancelledDescription': null,
-        });
+    ).thenAnswer(
+      (_) async => fixtureFor(
+        'api/student/entry/getGrade',
+        params: {'gradeId': _gradeId},
+      ),
+    );
     when(
       () => mockWrapper.send(
         'api/student/subject_detail',
         args: any(named: 'args'),
       ),
-    ).thenAnswer((_) async => _subjectDetailResponse(gradeId: 1202));
+    ).thenAnswer(
+      (_) async => fixtureFor(
+        'api/student/subject_detail',
+        params: {'subjectId': _subjectId},
+      ),
+    );
 
-    await notifier.requestSubjectDetail(1202);
+    await notifier.requestSubjectDetail(_gradeId);
 
-    expect(container.read(gradesProvider).pendingSubjectId, 17);
-    expect(container.read(pendingGradeIdProvider), 1202);
+    expect(container.read(gradesProvider).pendingSubjectId, _subjectId);
+    expect(container.read(pendingGradeIdProvider), _gradeId);
   });
 }

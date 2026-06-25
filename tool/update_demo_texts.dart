@@ -6,29 +6,87 @@ import 'dart:io';
 
 // ── Grade descriptions by gradeId ────────────────────────────────────────────
 const gDesc = <int, String>{
-  13278: 'Max stellt seinen Lösungsweg klar und nachvollziehbar vor. Er hört anderen aufmerksam zu und bringt eigene Ideen ein.',
-  42098: 'Die Fingerbilder werden sicher und schnell erkannt. Max nennt die Anzahl direkt, ohne einzeln zu zählen.',
-  39256: 'Max arbeitet mit Freude und Ausdauer an den Bastelarbeiten. Die Ergebnisse sind kreativ und sorgfältig ausgeführt.',
-  98696: 'Max setzt sich offen mit dem Thema auseinander und bringt persönliche Gedanken ein.',
-  81482: 'Sehr präzise und geduldige Faltarbeit. Die Knicke sitzen exakt und das Ergebnis ist ordentlich.',
-  21395: 'Additionsaufgaben mit +0 und +1 werden sicher und selbstständig gelöst.',
-  87397: 'Max löst die 10er-Minusaufgaben zuverlässig. Die Strategie ist gut eingeübt.',
-  65302: 'Vergleichszeichen werden korrekt eingesetzt. Max erkennt Zahlenbeziehungen sicher.',
-  14165: 'Einfache Subtraktionsaufgaben werden konzentriert und methodisch bearbeitet.',
-  13905: 'Das Konzept der Kraft der 5 ist verstanden. Erste Aufgaben werden sicher gelöst.',
-  22280: 'Sorgfältige Faltarbeit. Anweisungen werden Schritt für Schritt umgesetzt.',
-  38657: 'Geometrische Körper werden richtig erkannt, benannt und nach Merkmalen sortiert.',
-  40495: 'Max zählt sicher vorwärts und rückwärts. Das flexible Weiterzählen von beliebigen Zahlen gelingt zuverlässig.',
-  76237: 'Das Forschungsprojekt ist liebevoll gestaltet. Max präsentiert sein Thema mit Begeisterung und gutem Fachwissen.',
-  88907: 'Additionsaufgaben wurden selbstständig und korrekt bearbeitet. Max arbeitet konzentriert.',
-  13478: 'Max nimmt engagiert am Sportunterricht teil. Er hält die Regeln ein und unterstützt die Gruppe.',
-  83563: 'Die Lesehausaufgabe wurde zuverlässig erledigt. Max liest zunehmend flüssiger.',
-  36062: 'Auch die zweite Seite wurde vollständig bearbeitet. Wörter werden sicher und korrekt gelesen.',
-  46421: 'Das Heft ist vollständig und sorgfältig geführt. Einträge sind klar und übersichtlich gestaltet.',
-  54597: 'Max gibt die Geschichte anschaulich wieder und erfasst die zentrale Botschaft gut.',
-  32431: 'Max meldet sich regelmäßig und beteiligt sich aktiv an Unterrichtsgesprächen. Seine Beiträge sind treffend.',
-  33416: 'Gute Mitarbeit. Max hört aufmerksam zu und bringt passende Gedanken ein.',
-  65392: 'Das Forschungsprojekt ist ansprechend gestaltet und gut recherchiert. Max präsentiert sein Thema souverän.',
+  // ── Religion (subject 86) ──
+  46421: 'Hinter jedem Türchen steckt ein eigener Gedanke – das zeigt echte Auseinandersetzung mit dem Thema Advent.',
+  54597: 'Das Gleichnis wird flüssig wiedergegeben und der Kern klar getroffen: Helfen ohne Bedingungen.',
+  32431: 'Die sieben Schöpfungstage werden in richtiger Reihenfolge benannt und mit eigenen Naturbeobachtungen verknüpft.',
+  33416: 'Text und Melodie des Lieds sind gut verankert. Max singt mit sicherer Intonation und deutlicher Aussprache.',
+  // ── NatGeGeo (subject 97) ──
+  65392: 'Der Steckbrief ist klar gegliedert, vollständig und zeigt treffende Informationen. Die Zeichnung ist erkennbar.',
+  76237: 'Das Pflanzentagebuch dokumentiert den Wachstumsverlauf sorgfältig. Skizzen sind aussagekräftig, Beobachtungen gut formuliert.',
+  59015: 'Das Tagebuch wurde über zwei Wochen konsequent geführt. Temperaturen und Symbole stimmen; Zusammenhänge werden treffend erkannt.',
+  57819: 'Das Experiment wird sorgfältig durchgeführt und vollständig protokolliert. Max leitet eine verständliche Erklärung ab.',
+  44993: 'Alle drei Pflanzen sind korrekt abgebildet und benannt. Max hat spontan einen eigenen Fund aus dem Garten mitgebracht.',
+  80010: 'Max erklärt das Prinzip der Seife klar in eigenen Worten und führt das Experiment korrekt durch.',
+  44718: 'Monate und Jahreszeiten werden in richtiger Reihenfolge geordnet. Typische Merkmale werden korrekt zugeordnet.',
+  48469: 'Volle Stunden werden sicher erkannt. Max zeigt seinen Tagesablauf anhand der Uhr – flüssig und verständlich.',
+  // ── Musik (subject 90) ──
+  48427: 'Das Rhythmusstück wird mit Körperspannung und gutem Puls vorgeführt. Koordination stimmt über die gesamte Länge.',
+  75435: "Max beschreibt Klang und Stimmung treffend: 'Das klingt wie ein fliegender Vogel.' Sehr genaue Beobachtung.",
+  88504: 'Alle drei Lieder werden textlich sicher und mit Freude vorgetragen. Intonation und Melodieführung sind sehr gut.',
+  // ── Mathematik (subject 85) ──
+  54118: 'Subtraktionsaufgaben bis 20 werden mit sicherer Strategie gelöst. Auch Aufgaben über den Zehner gelingen fast fehlerlos.',
+  38657: 'Alle vier Körper werden sicher erkannt und benannt. Ecken, Kanten und Flächen werden treffend beschrieben.',
+  16006: 'Additionsaufgaben bis 20 werden flüssig und weitgehend korrekt bearbeitet. Strategien sind gut verinnerlicht.',
+  93320: 'Gemischte Aufgaben werden größtenteils korrekt gelöst. Das Überqueren des Zehners klappt zunehmend sicher.',
+  13278: 'Max erklärt seine Strategie klar und nachvollziehbar. Er nimmt Rückmeldungen auf und fragt gezielt nach.',
+  93886: 'Subtraktionen bis 10 werden schnell und fehlerfrei abgerufen. Keine Hilfsmittel mehr notwendig.',
+  87397: 'Abzüge vom Zehner werden zuverlässig und ohne Zählen gelöst. Die Strategie ist gut automatisiert.',
+  14165: 'Aufgaben mit –0 und –1 werden sofort richtig beantwortet. Max erklärt die Regel klar und verständlich.',
+  46048: 'Alle Additionsstrategien werden sicher abgerufen. Max erklärt seinen Weg klar; schwierige Paare kommen mit kurzem Überlegen.',
+  28131: "Die Strategie 'Kraft der 5' ist gut verstanden. Max zeigt am Rechenrahmen anschaulich, wie er Fünfergruppen nutzt.",
+  42953: 'Max zählt von 20 rückwärts flüssig und fehlerfrei. Die Übertragung auf Subtraktionsaufgaben gelingt gut.',
+  79352: 'Alle Verdopplungen bis 10+10 werden automatisiert abgerufen. Auch 8+8 und 9+9 kommen ohne Zögern.',
+  44973: 'Max versteht Addition als Zusammenfassen von Mengen und stellt Aufgaben mit Material und Zeichnung korrekt dar.',
+  75612: 'Alle geprüften Bereiche werden sicher und vollständig beherrscht. Sehr gute Leistung am Ende des ersten Semesters.',
+  89818: 'Zahlenpaare zur 10 werden blitzschnell und sicher erkannt. Die Aufgaben sind vollständig automatisiert.',
+  80697: 'Additionsaufgaben bis 10 werden sicher und ohne Hilfsmittel abgerufen. Gutes Tempo, richtige Ergebnisse.',
+  21395: '+0 und +1 werden sofort und korrekt beantwortet. Das Verständnis der Rechenregeln ist klar vorhanden.',
+  // ── KuTE (subject 89) ──
+  38221: 'Die Monotypie zeigt klare Strukturen und mutige Farbkombinationen. Max überträgt den Abzug konzentriert und präzise.',
+  30379: 'Das Weben ist gleichmäßig, das Muster hält gut. Max arbeitet ruhig und mit sichtbarer Ausdauer.',
+  20328: 'Der Scherenschnitt ist präzise ausgeführt; Konturen sind scharf und die Symmetrie gut eingehalten.',
+  58520: 'Die Dose ist kreativ und sorgfältig dekoriert. Max setzt Materialien gezielt ein und hält die Technik gut ein.',
+  24371: 'Das Tier ist dreidimensional und erkennbar modelliert. Proportionen und Oberflächengestaltung sind ausdrucksstark.',
+  88104: 'Kreise und Linien sind bewusst gesetzt; die Farbwahl ist mutig und ausgewogen. Ein ausdrucksstarkes Bild.',
+  44522: 'Verschiedene Materialien werden gezielt eingesetzt. Druckbilder sind klar erkennbar; Farben sorgfältig aufgetragen.',
+  // ── Italiano (subject 94) ──
+  42087: 'Alle Farben werden auf Italienisch sicher und korrekt ausgesprochen. Max reagiert auf farbige Gegenstände spontan.',
+  // ── Deutsch (subject 84) ──
+  10851: 'Die Wörter werden in die richtige Satzreihenfolge gebracht und klar aufgeschrieben. Satzstruktur ist gut verstanden.',
+  44671: 'Die Abschrift ist vollständig, leserlich und weitgehend fehlerfrei. Buchstabenform und Abstände stimmen gut.',
+  80284: 'Der Satz passt treffend zum Bild. Groß- und Kleinschreibung sowie Satzzeichen sind korrekt gesetzt.',
+  82357: 'Detailfragen zur Geschichte werden treffend und vollständig beantwortet. Max hört konzentriert zu.',
+  85674: 'Jj wird in Silben und Wörtern sicher erkannt und korrekt gelesen. Das Leseblatt wird flüssig vorgetragen.',
+  19116: 'Alle angesagten Buchstaben und Wörter werden korrekt und leserlich aufgeschrieben.',
+  46434: 'Die Übungen sind vollständig, sauber und weitgehend fehlerfrei. Buchstabenform ist altersgerecht gut.',
+  52504: 'Alle Buchstaben und Lernwörter werden fehlerfrei aufgeschrieben. Max hört aufmerksam zu und schreibt klar.',
+  51347: 'ch wird in verschiedenen Positionen sicher erkannt und korrekt gelesen. Gutes Tempo beim Vorlesen.',
+  37869: 'Pp wird in Silben und Wörtern sicher erkannt. Vorlesen deutlich und ohne Stocken.',
+  25014: 'Silben und Wörter mit Ff werden korrekt erlesen. Klares, flüssiges Vorlesen.',
+  80539: 'Die Lesehausaufgabe wird regelmäßig und sorgfältig erledigt. Lesefluss verbessert sich sichtbar.',
+  30032: 'Anweisungen werden korrekt und vollständig ausgeführt. Max hört aufmerksam zu und handelt sofort.',
+  31174: 'Alle angesagten Buchstaben und Wörter werden korrekt und leserlich aufgeschrieben.',
+  84364: 'Die Lesehausaufgabe wird mit Engagement erledigt. Ausdruck und Lesefluss haben sich deutlich verbessert.',
+  // ── Sport (subject 87) ──
+  70217: 'An Geräten bewegt sich Max sicher und mit Freude. Rollen, Klettern und Balancieren werden koordiniert ausgeführt.',
+  39871: 'Max hält Regeln ein und spielt fair. Im Staffellauf zeigt er gutes Tempo und saubere Übergaben.',
+  56566: 'Konstant engagiertes Verhalten im Sportunterricht. Aufgaben werden zügig aufgenommen und mit Begeisterung ausgeführt.',
+  76784: 'Max übernimmt im Team Verantwortung. Beim Hindernislauf hat er spontan einem Mitschüler geholfen.',
+  30730: 'Passen, Fangen und Prellen gelingen mit wachsender Sicherheit. Ballgefühl und Koordination entwickeln sich stetig.',
+  // ── Weitere Bewertungen (aus entry/getGrade) ──
+  42098: 'Fingerbilder werden schnell erkannt; Max nennt die Anzahl direkt ohne Abzählen.',
+  39256: 'Das Werk ist kreativ und sorgfältig ausgeführt; hohes Engagement beim Arbeiten sichtbar.',
+  98696: 'Offene Auseinandersetzung mit dem Thema; persönliche Gedanken klar und verständlich formuliert.',
+  81482: 'Präzise Faltarbeit; alle Knicke sitzen exakt und das Ergebnis ist ordentlich.',
+  65302: 'Vergleichszeichen werden korrekt eingesetzt; Zahlenbeziehungen sicher erkannt.',
+  13905: 'Das Mengenbild der 5 ist gut verankert; Aufgaben werden sicher und zügig gelöst.',
+  22280: 'Geometrische Formen werden sauber geschnitten und korrekt benannt.',
+  40495: 'Vorgänger, Nachfolger und Zahlenvergleich gelingen sicher und flüssig.',
+  88907: 'Additionsaufgaben werden selbstständig und korrekt bearbeitet; gutes Arbeitstempo.',
+  13478: 'Aktive Teilnahme am Sportunterricht; Regeln werden eingehalten, andere respektvoll behandelt.',
+  83563: 'Buchstaben und Silben werden korrekt gelesen; gutes Tempo beim Vorlesen.',
+  36062: 'Wörter werden sicher und vollständig erlesen; Textverständnis ist vorhanden.',
 };
 
 // ── Competence descriptions by "gradeId|typeName" ────────────────────────────
@@ -49,240 +107,856 @@ const cDesc = <String, String>{
   '65392|Auseinandersetzung mit einem persönlichen Thema': 'Gute Grundlagen sind vorhanden; diese werden weiter ausgebaut.',
 };
 
+// ── Grade name overrides by gradeId (subject_detail + getGrade) ──────────────
+const gName = <int, String>{
+  // ── Religion ──
+  46421: 'Adventkalender: Gestalten und Nachdenken',
+  54597: 'Gleichnis vom barmherzigen Samariter',
+  32431: 'Schöpfungserzählung: Sieben Tage nacherzählen',
+  33416: 'Gottesdienst: Lied gemeinsam einstudieren',
+  // ── NatGeGeo ──
+  65392: 'Steckbrief: Mein Lieblingstier vorstellen',
+  76237: 'Pflanzenwachstum: Kresse-Tagebuch führen',
+  59015: 'Wettertagebuch: Zwei Wochen beobachten',
+  57819: 'Schwimmen und Sinken: Experiment und Protokoll',
+  44993: 'Frühblüher-Plakat: Schneeglöckchen, Krokus, Tulpe',
+  80010: 'Hände waschen: Experiment zur Seifenwirkung',
+  44718: 'Monate und Jahreszeiten ordnen und benennen',
+  48469: 'Uhr lesen: volle und halbe Stunden erkennen',
+  // ── Musik ──
+  48427: "Bodypercussion: Rhythmusstück 'Boom cha'",
+  75435: "Vivaldi: 'Der Frühling' – Musik beschreiben",
+  88504: 'Faschingslieder: Drei Stücke einstudieren',
+  // ── Mathematik ──
+  54118: 'Lernkontrolle: Subtrahieren bis 20',
+  38657: 'Geometrische Körper erkennen und benennen',
+  16006: 'Lernkontrolle: Addieren bis 20',
+  93320: 'Minus-Training: Gemischte Aufgaben bis 20',
+  13278: 'Mathekonferenz: Lösungsweg vorstellen',
+  93886: 'Subtraktion bis 10: Kärtchenabfrage',
+  87397: 'Abzug vom Zehner: 10er-Minusaufgaben',
+  14165: 'Aufgaben mit –0 und –1: Strategie kennen',
+  46048: '1+1-Kärtchen: Additionsstrategien festigen',
+  28131: 'Kraft der 5: Additionsstrategien kennenlernen',
+  42953: 'Rückwärts zählen von 20 bis 0',
+  79352: 'Verdopplungsaufgaben bis 10+10 auswendig',
+  44973: 'Addition als Mengenzusammenfassen verstehen',
+  75612: 'Lernstandserhebung: Was ich alles kann',
+  89818: 'Ergänze auf 10: Zahlenpaare kennen',
+  80697: 'Handaufgaben: Addieren bis 10',
+  21395: '+0 und +1: Einfachstes Addieren',
+  // ── KuTE ──
+  38221: 'Druckgrafik: Monotypie mit Acrylfarbe',
+  30379: 'Fadenweberei: Papierweben am Rahmen',
+  20328: 'Scherenschnitt und Collagebild',
+  58520: 'Alltagsobjekte gestalten: Dosen dekorieren',
+  24371: 'Plastizieren: Tier aus Salzteig',
+  88104: 'Malen nach Kandinsky: Kreise und Quadrate',
+  44522: 'Naturmaterialien drucken: Blatt, Rinde, Kork',
+  // ── Italiano ──
+  42087: 'I colori: Farben auf Italienisch benennen',
+  // ── Deutsch ──
+  10851: 'Schüttelsatz in richtige Reihenfolge bringen',
+  44671: 'Abschrift: Text sauber und vollständig abschreiben',
+  80284: 'Satzschreiben: Einen Satz zum Bild erfinden',
+  82357: 'Zuhören: Geschichte verstehen und antworten',
+  85674: 'Buchstabe Jj: Lesen auf Silben- und Wortebene',
+  19116: 'Ansage: Kk, Pp, ch, Ww, Gg, Vv, Jj',
+  46434: 'Heftübung: Buchstaben sauber nachspuren',
+  52504: 'Ansage: Ei, Au, Hh, Ff, Bb, Ll',
+  51347: 'Buchstabe ch: Erkennen und Lesen',
+  37869: 'Buchstabe Pp: Lesezettel vorlesen',
+  25014: 'Buchstabe Ff: Lesezettel vorlesen',
+  80539: 'Lesehausaufgabe: Lesepass Stufe 3',
+  30032: 'Zuhören: Anweisungen verstehen und ausführen',
+  31174: 'Ansage: Rr, Tt, Nn, Ee, Dd',
+  84364: 'Lesehausaufgabe: Lesepass Stufe 5',
+  // ── Sport ──
+  70217: 'Geräteturnen: Rollen, Balancieren, Klettern',
+  39871: 'Spielturnen: Treibball, Staffel, Fangen',
+  56566: 'Bewegungsbeobachtung: April/Mai',
+  76784: 'Kooperationsspiele: Gemeinsam Aufgaben lösen',
+  30730: 'Ballkontrolle: Prellen, Passen, Fangen',
+  // ── Weitere Bewertungen (aus entry/getGrade) ──
+  42098: 'Fingerbilder: Mengen schnell erfassen',
+  39256: 'Kreative Ausführung: Werkbeurteilung',
+  98696: 'Mündliche Beteiligung am Unterrichtsgespräch',
+  81482: 'Faltarbeit nach geometrischer Anleitung',
+  65302: 'Zahlen vergleichen: Zeichen <, >, =',
+  13905: 'Kraft der 5: Mengenstruktur erkennen',
+  22280: 'Falten und Schneiden: Geometrische Figuren',
+  40495: 'Zahlenreihe: Vorwärts, rückwärts, Vergleich',
+  88907: 'Additionsaufgaben selbstständig bearbeiten',
+  13478: 'Sportbeobachtung: Mitarbeit und Regelverhalten',
+  83563: 'Lesecheck: Buchstaben und Silben',
+  36062: 'Lesen: Wörter und kurze Texte erfassen',
+};
+
+// ── Extra grade titles only present as dashboard "grade" items ────────────────
+// (gradeIds NOT covered by gName above, used for the Merkheft/Dashboard subtitle)
+const gradeDashExtra = <int, String>{
+  // Deutsch
+  23947: 'Lesehausaufgabe: Lesezettel zum Mm',
+  25860: 'Lesehausaufgabe: Lesezettel zum Ss',
+  38864: 'Lesehausaufgabe: Lesezettel zum Tt',
+  53309: 'Nikolausgedicht auswendig vortragen',
+  69177: 'Lesehausaufgabe: Wörter mit Rr lesen',
+  71213: 'Lesehausaufgabe: Leseblatt Seite 1',
+  77391: 'Ansage: Mm, Ii, Aa, Oo, Ss, Uu',
+  // NatGeGeo
+  22899: 'Lagebegriffe: links/rechts, oben/unten',
+  58944: 'Tiere im Winter: Überwinterung',
+  71953: 'Verkehrserziehung: sicher unterwegs',
+  // Religion
+  19305: 'Heftführung: Religionsheft',
+  84847: 'Das Kreuzzeichen kennenlernen',
+  // KuTE
+  24322: 'Selbstporträt für den Einband',
+  26483: 'Herbstbild: Der Fuchs',
+  42591: 'Heft-Einbände gestalten',
+  87128: 'Weihnachtsgeschenk basteln',
+  97684: 'Schattenbilder gestalten',
+  98039: 'Winterbild: Schneekugel',
+  // Mathematik
+  10942: 'Zahlen zerlegen an der Zahlenreihe',
+  22704: 'Lernkontrolle: Würfelbilder und Strichlisten',
+  26828: 'Zahlen zerlegen bis 10',
+  56438: 'Orientierung im Zahlenraum 10',
+  63354: 'Wendekärtchen: mündliche Überprüfung',
+  93810: 'Orientierung in der Zahlenreihe bis 20',
+  96474: 'Addition im Zahlenraum 10: Zerlegen',
+  // Bewegung und Sport
+  42493: 'Sportbeobachtung: November/Dezember',
+  44741: 'Geräteübungen mit Kleinmaterial',
+  // Musik
+  17100: 'Rhythmen mit Orff-Instrumenten',
+  95180: 'Lieder singen: Jahreszeiten',
+};
+
 // ── Observation notes (subject_detail) by observationId ─────────────────────
 const obsNote = <int, String>{
+  // Religion (subject 86)
   31417: 'Mündliche Mitarbeit März/April:\n'
-      'Max beteiligt sich regelmäßig am Unterrichtsgespräch. Er formuliert seine Gedanken klar und hört anderen aufmerksam zu.\n'
-      'Die Hausaufgaben werden zuverlässig erledigt und vollständig mitgebracht.\n'
-      'Im Umgang mit Lernmaterialien zeigt Max Sorgfalt. Das Heft ist ordentlich geführt.',
-  66155: 'Sprechstunde mit dem Vater von Max.\n'
-      'Besprochen wurde die Entwicklung im Unterricht sowie die bisherigen Leistungen. Max macht gute Fortschritte, besonders im mündlichen Bereich.\n'
-      'Vereinbart: Übungsroutinen zu Hause beibehalten und auf vollständige Hefteinträge achten.',
-  76542: 'Mündliche Mitarbeit Januar/Februar:\n'
-      'Max nimmt regelmäßig am Unterrichtsgespräch teil. Er meldet sich häufig und bringt gute Beiträge ein.\n'
-      'Auch bei anspruchsvolleren Aufgaben gibt Max nicht auf. Er arbeitet ausdauernd und konzentriert.\n'
-      'Das Arbeitstempo ist gut; Max schließt Aufgaben meist pünktlich ab.',
-  95909: 'Max geht respektvoll mit allen Mitschülerinnen und Mitschülern um. Er akzeptiert unterschiedliche Meinungen und sucht gemeinsam nach Lösungen.\n'
-      'In der Klasse verhält sich Max rücksichtsvoll. Er achtet auf die Bedürfnisse anderer und bietet Hilfe an.\n'
-      'Auch in schwierigen Situationen zeigt Max gute Selbstkontrolle. Konflikte werden ruhig und sachlich gelöst.',
+      'Beim Thema Ostertraditionen hat Max einen Brauch aus seinem Familienumfeld eingebracht – eine unbekannte Variante, die die ganze Klasse überraschte.\n'
+      'Er hört anderen aufmerksam zu und meldet sich mit gezielten Fragen.\n'
+      'Hausaufgaben werden vollständig und ordentlich mitgebracht.',
+  66155: 'Gesprächsnotiz Elternkontakt (14.04.2026):\n'
+      'Der Vater von Max rief an, um nach der Erstkommunionvorbereitung zu fragen.\n'
+      'Er berichtete, dass Max zu Hause Lieder aus dem Religionsunterricht singt und Fragen zu Bibeltexten stellt.\n'
+      'Vereinbart: Gebet für den Schulgottesdienst am 28. Mai gemeinsam einüben.',
+  76542: 'Beobachtung Januar/Februar:\n'
+      "Bei der Erarbeitung des Gleichnisses vom verlorenen Sohn hat Max eine unerwartete Parallele gezogen: 'Das ist wie wenn jemand lange böse war und dann trotzdem wieder gemocht wird.'\n"
+      'Diese Eigeninterpretation zeigt reifes Denken und echtes Verständnis.\n'
+      'Mündliche Mitarbeit konstant gut.',
+  // NatGeGeo (subject 97)
+  95909: 'Sozialverhalten Schuljahr 2025/26:\n'
+      'In der Klasse ist Max eine verlässliche Stütze im sozialen Gefüge.\n'
+      'Als zwei Kinder beim Kooperationsspiel in Streit gerieten, griff er ein und schlug einen Kompromiss vor – ohne Aufforderung.\n'
+      'Auf dem Pausenhof sucht er regelmäßig Kontakt zu Neulingen und Einzelgängern.',
+  // Mathematik (subject 85)
+  65333: 'Beobachtung 11.11.2025:\n'
+      'Beim Freiarbeitsblock hat Max entdeckt, dass er Punkte schneller zählen kann, wenn er sie in Fünfergruppen anordnet.\n'
+      'Er hat diese Idee spontan entwickelt, an die Tafel gezeichnet und der Klasse erklärt.\n'
+      'Solche Momente selbstentdeckten Lernens sind selten und wertvoll.',
+  59009: 'Arbeitsverhalten September/Oktober:\n'
+      'Max gibt bei schwierigen Aufgaben nicht schnell auf – er versucht zunächst, den letzten Schritt zu wiederholen.\n'
+      'Das Arbeitstempo ist gleichmäßig gut; die meisten Aufgaben werden im Zeitrahmen erledigt.\n'
+      'Ziffern in der Heftführung sind klar und leserlich; Seiten ordentlich gestaltet.',
+  // Italiano (subject 94)
+  92397: 'Beobachtung Italiano:\n'
+      "Beim Rollenspiel 'al mercato' hat Max spontan Sätze gebildet, die über den eingeübten Dialog hinausgingen.\n"
+      'Er verwendete Farben und Mengenangaben selbstständig und korrekt.\n'
+      'Wortschatz zu Schulmaterialien und Farben ist gut gefestigt.',
+  86484: 'Elternkontakt (18.03.2026):\n'
+      'Der Vater von Max berichtete, dass Max zu Hause manchmal Sätze auf Italienisch einbaut und Lieder aus dem Unterricht singt.\n'
+      'Vereinbart: kurze tägliche Übungen mit der Sprach-App; Interesse am Fach ist vorhanden.\n'
+      'Nächstes Gespräch: Sprechstunde im Mai.',
+  91959: 'Beobachtung KuTE / Italiano:\n'
+      'Max hat beim Basteln von Vokabelkärtchen für Italiano deutlich mehr Zeit investiert als vorgesehen.\n'
+      'Er illustrierte die Kärtchen freiwillig, überarbeitete sie einmal und präsentierte das Ergebnis der Klasse.\n'
+      'Diese Ausdauer und Sorgfalt bei kreativen Aufgaben ist bemerkenswert.',
+  // Deutsch (subject 84)
+  19358: 'Lernberatung 12.02.2026:\n'
+      'Stärken: Buchstaben sicher erkennen; flüssiges Lesen auf Silbenebene; Heftführung ordentlich und vollständig.\n'
+      'Förderbereich: selbstständiges Satzschreiben weiter üben; Nomen mit Großschreibung im Fließtext festigen.\n'
+      'Vereinbarung: täglich 10 Minuten Lesen; schwierige Wörter mit Kärtchen wiederholen.',
+  84341: "Beobachtung 07.01.2026:\n"
+      "Max hat beim Üben des Buchstabens 'd' selbst bemerkt, dass er ihn manchmal mit 'b' verwechselt.\n"
+      "Er entwickelte ein eigenes Merkbild ('d wie Dach') und zeichnete es freiwillig an die Tafel.\n"
+      'Diese Fähigkeit zur Selbstreflexion ist für sein Alter bemerkenswert.',
+  86622: 'Wichtige Info für Eltern:\n'
+      'Bitte bis Montag, 15. April, mitgeben:\n'
+      '– Unterschriebenes Ausflugformular (Bibliotheksbesuch, 22. April)\n'
+      '– Fahrtbeitrag 2,00 € im beschrifteten Kuvert',
+  94012: 'Elternkontakt (07.04.2026):\n'
+      'Die Mutter berichtete, dass Max zu Hause freiwillig liest und Bücher aus der Schulbibliothek mit nach Hause nimmt.\n'
+      'Besprochen: welche Bücher für sein Niveau am besten passen.\n'
+      "Vereinbart: Bücher der Stufe 'Lesepass 3' ausleihen; Themen Dinosaurier und Tiere bevorzugen.",
+  52487: 'Arbeitsverhalten Jänner/Februar:\n'
+      'Max arbeitet mit erkennbarer Freude am Lernstoff und fragt gezielt nach, wenn er etwas nicht versteht.\n'
+      'Er gibt erst auf, wenn eine Aufgabe wirklich fertig ist.\n'
+      'Die Handschrift hat sich deutlich verbessert: Buchstaben klar geformt, Zeilen werden gut eingehalten.',
 };
 
 // ── Dashboard observation subtitles by observationId ─────────────────────────
 const obsSub = <int, String>{
-  92397: 'Max comprende i contenuti proposti e li applica con sicurezza. Partecipa volent...',
-  19358: 'Oggi mi sono impegnato a lavorare con attenzione e sono riuscito a finire tutto...',
-  31417: 'Mündliche Mitarbeit März/April: Max beteiligt sich regelmäßig am Unterrichtsge...',
-  84341: 'Max hatte heute einen schwierigen Tag. Die Konzentration fiel schwer, weshalb e...',
-  95909: 'Max, heute hast du etwas Schönes gezeigt: Du hast einem Mitschüler geholfen, oh...',
-  86622: 'Bitte Klebstoff nachkaufen.',
-  66155: 'Sprechstunde mit dem Vater von Max. Entwicklung im Unterricht und Leistungen be...',
-  86484: "Colloquio con il padre di Max. Si è parlato degli aspetti sociali e dell'impegno...",
-  65333: 'Max, es könnte helfen, die Hausaufgaben gleichmäßig auf die Woche zu verteilen....',
-  94012: 'Sprechstunde mit den Eltern von Max. Aktuelle Lernentwicklung und Sozialverhalt...',
-  76542: 'Mündliche Mitarbeit Januar/Februar: Max nimmt regelmäßig am Unterrichtsgesprä...',
-  91959: 'Max collabora in modo attivo durante le lezioni. Dimostra interesse e partecipaz...',
-  59009: 'Max, in letzter Zeit läuft es richtig gut! Du freust dich selbst über deine Fort...',
-  52487: 'Max arbeitet sehr konzentriert und in einem angemessenen Arbeitstempo. Er erledi...',
-  72296: 'Max, heute war ein schwieriger Tag. Du hast wenig geschafft und dich kaum konzen...',
-  65461: 'Max arbeitet am besten, wenn er klare Aufgaben bekommt und den Ablauf kennt. Unt...',
-  37760: 'Kinderrat: Es gelingt dir gut, an Kreisgesprächen teilzunehmen. Du bringst dein...',
-  80686: 'Lieber Max, übe weiterhin das Eines-mehr und Eines-weniger, besonders mit dem +1...',
-  67422: 'Mathematik: Hefteinträge zu den Ziffern bitte bis Montag fertig beenden.',
-  55082: 'Max mostra interesse e partecipa con entusiasmo alle attività della lezione.',
-  39451: 'Mündliche Mitarbeit November/Dezember: Max meldet sich regelmäßig und bringt gut...',
-  18392: 'Heftführung: Deine Einträge sind vollständig und ordentlich gestaltet. Weiter so...',
-  54313: 'Du zeigst Interesse an kreativen Aufgaben und arbeitest je nach Thema mit großem...',
-  12757: 'Max, du beobachtest die Natur genau und stellst gute Fragen. Dein Interesse an n...',
-  85525: 'Ich bemühe mich, ordentlich zu arbeiten und meine Aufgaben sorgfältig zu erledigen.',
-  66498: 'Sprechstunde mit dem Vater von Max. Sozial-, Lern- und Arbeitsverhalten besprochen.',
-  54473: 'September/Oktober: Max bringt sich gerne in den Unterricht ein und hält die Rege...',
-  35112: 'Mündliche Mitarbeit September/Oktober: Max beteiligt sich an mündlichen Aktivitä...',
-  34931: 'Max bemüht sich beim Arbeiten konzentriert zu bleiben, gelingt dies aber nicht im...',
-  80292: 'September/Oktober: Max beteiligt sich aktiv am mündlichen Unterricht und meldet s...',
-  68800: 'Kann alle geübten Laute sicher benennen. Sehr gut! Weiter so!',
-  63269: 'Kann alle geübten Laute den Bildern richtig zuordnen. Weiterhin fleißig üben!',
-  62565: 'Kann alle geübten Laute mit Bildern verbinden: ä, ö, ü, Au, Ei, Eu.',
-  10282: 'Kann alle geübten Laute mit Bildern verbinden: A, E, I, O, U. Täglich weiterüben!',
-  61173: '- zählt fehlerfrei bis 30; - zählt flexibel weiter; - zählt sicher rückwärts von...',
+  92397: 'Beim Rollenspiel bildet Max spontan Sätze auf Ital. – weit über den eingeübten Dialog hinaus.',
+  19358: 'Lernberatung Feb.: Lesen auf Silbenebene gut; Fokus auf Satzschreiben und Nomen-Großschreibung.',
+  31417: 'Mrz./Apr.: Max bringt unbekannte Osterbrauche ein – aufmerksam und fragend im Unterrichtsgesp...',
+  84341: "Max entdeckt b/d-Verwechslung selbst und zeichnet Merkbild 'd wie Dach' für die Klasse.",
+  95909: 'Kooperationsspiel: Max schlichtet Streit spontan und schlägt Kompromiss vor – ohne Aufforderung.',
+  86622: 'Bis 15.4.: Ausflugformular unterschrieben und 2,00 € Fahrtbeitrag mitgeben.',
+  66155: 'Apr.-Kontakt: Vater berichtet – Max singt Religionslieder zu Hause; Gebet für Gottesdienst einüben.',
+  86484: 'Mrz.-Kontakt: Max baut Ital.-Sätze zu Hause ein; tägliche App-Übungen vereinbart.',
+  65333: '11.11.: Max entdeckt Fünfergruppen-Strategie eigenständig und erklärt sie der Klasse.',
+  94012: 'Apr.-Kontakt: Max liest freiwillig; Themen Dinosaurier/Tiere für Bibliotheksauswahl empfohlen.',
+  76542: 'Jan./Feb.: Max interpretiert Gleichnis eigenständig – reifes Denken und echtes Verständnis.',
+  91959: 'Max illustriert Vokabelkärtchen freiwillig, überarbeitet sie und präsentiert sie der Klasse.',
+  59009: 'Sep./Okt.: Ausdauernd bei schwierigen Aufgaben; Heftführung ordentlich; Ziffern klar.',
+  52487: 'Jan./Feb.: Fragt gezielt nach; gibt nicht auf; Handschrift deutlich verbessert.',
+  72296: 'Heute war ein schwieriger Tag – morgen starten wir frisch neu. Du schaffst das, Max!',
+  65461: 'Max arbeitet am zuverlässigsten, wenn Aufgaben klar formuliert und der Ablauf vorhersehbar sind.',
+  37760: 'Kinderrat: Deine Beiträge im Kreisgespräch sind durchdacht und werden von allen gehört.',
+  80686: 'Übe weiter +1/–1 an der Zahlenreihe – du bist schon fast am Ziel!',
+  67422: 'Hefteinträge zu den Ziffern bitte bis Montag vollständig beenden.',
+  55082: 'Max mostra entusiasmo nelle attività in italiano e impara velocemente.',
+  39451: 'Nov./Dez.: Max meldet sich regelmäßig und bringt treffende Beiträge.',
+  18392: 'Heft vollständig und ordentlich – Einträge klar strukturiert und sorgfältig.',
+  54313: 'Kreative Aufgaben: Max arbeitet mit viel Energie und Eigeninitiative.',
+  12757: 'Max, deine Naturbeobachtungen sind treffend – du fragst genau das Richtige!',
+  85525: 'Ich bemühe mich, ordentlich zu arbeiten und Aufgaben sorgfältig zu erledigen.',
+  66498: 'Sprechstunde: Lernentwicklung positiv; gemeinsam an Schreibtempo arbeiten vereinbart.',
+  54473: 'Sep./Okt.: Max bringt sich aktiv ein und hält die Klassenregeln zuverlässig ein.',
+  35112: 'Sep./Okt.: Mündliche Beteiligung gut; treffende Beiträge; selbstständiges Arbeiten.',
+  34931: 'Max bemüht sich, konzentriert zu bleiben – bei langen Phasen fällt das manchmal noch schwer.',
+  80292: 'Sep./Okt.: Meldet sich aktiv; konstruktive Beiträge; gute Fortschritte im Unterrichtsverhalten.',
+  68800: 'Alle geübten Laute sicher benennen – ausgezeichnet! Weiter so fleißig!',
+  63269: 'Alle geübten Laute den Bildern richtig zuordnen. Prima! Täglich weiterüben.',
+  62565: 'ä, ö, ü, Au, Ei, Eu – alle Laute mit Bildern verbunden. Sehr gut!',
+  10282: 'A, E, I, O, U – alle Laute erkannt und Bildern zugeordnet. Täglich weiterüben!',
+  61173: '– zählt fehlerfrei bis 30; – zählt flexibel weiter; – zählt rückwärts von 10 sicher',
 };
 
-// ── Dashboard homework (gradeGroup) subtitles by gradeGroupId ────────────────
-const hwSub = <int, String>{
-  // Mathematik (38)
-  95181: 'Addieren und Subtrahieren bis 20 üben – Arbeitsblatt fertigstellen.',
-  64987: 'Flex & Flo Seite 24–25 bearbeiten.',
-  38893: '5 Rechengeschichten aufschreiben und lösen.',
-  57052: 'Tauschaufgaben: a + b = b + a – Beispiele aufschreiben.',
-  89131: 'Zahlen bis 20 ordnen, Vorgänger und Nachfolger aufschreiben.',
-  26361: 'Verdoppelungsaufgaben bis 20 auswendig lernen.',
-  69429: 'Halbierungsaufgaben üben – Arbeitsblatt beenden.',
-  89840: 'Geometrische Formen zeichnen und beschriften.',
-  38785: 'Minusaufgaben mit dem Zwanziger-Rechenrahmen üben.',
-  99733: 'Zahlenstrahl bis 20 beschriften und Aufgaben einzeichnen.',
-  45093: 'Einer und Zehner darstellen: Stäbchen zeichnen.',
-  61856: 'Rechenaufgaben im Zahlenraum bis 20 – Heftseite fertigstellen.',
-  70142: 'Addieren und Subtrahieren bis 20 üben – Arbeitsblatt fertigstellen.',
-  42325: 'Flex & Flo Seite 24–25 bearbeiten.',
-  44438: '5 Rechengeschichten aufschreiben und lösen.',
-  74686: 'Tauschaufgaben: a + b = b + a – Beispiele aufschreiben.',
-  60432: 'Zahlen bis 20 ordnen, Vorgänger und Nachfolger aufschreiben.',
-  71348: 'Verdoppelungsaufgaben bis 20 auswendig lernen.',
-  99353: 'Halbierungsaufgaben üben – Arbeitsblatt beenden.',
-  69470: 'Geometrische Formen zeichnen und beschriften.',
-  74042: 'Minusaufgaben mit dem Zwanziger-Rechenrahmen üben.',
-  57576: 'Zahlenstrahl bis 20 beschriften und Aufgaben einzeichnen.',
-  50306: 'Einer und Zehner darstellen: Stäbchen zeichnen.',
-  19071: 'Rechenaufgaben im Zahlenraum bis 20 – Heftseite fertigstellen.',
-  89507: 'Addieren und Subtrahieren bis 20 üben – Arbeitsblatt fertigstellen.',
-  82603: 'Flex & Flo Seite 24–25 bearbeiten.',
-  92719: '5 Rechengeschichten aufschreiben und lösen.',
-  40007: 'Tauschaufgaben: a + b = b + a – Beispiele aufschreiben.',
-  18834: 'Zahlen bis 20 ordnen, Vorgänger und Nachfolger aufschreiben.',
-  27342: 'Verdoppelungsaufgaben bis 20 auswendig lernen.',
-  22363: 'Halbierungsaufgaben üben – Arbeitsblatt beenden.',
-  63883: 'Geometrische Formen zeichnen und beschriften.',
-  95649: 'Minusaufgaben mit dem Zwanziger-Rechenrahmen üben.',
-  65296: 'Zahlenstrahl bis 20 beschriften und Aufgaben einzeichnen.',
-  68082: 'Einer und Zehner darstellen: Stäbchen zeichnen.',
-  95477: 'Rechenaufgaben im Zahlenraum bis 20 – Heftseite fertigstellen.',
-  38016: 'Addieren und Subtrahieren bis 20 üben – Arbeitsblatt fertigstellen.',
-  65444: 'Flex & Flo Seite 24–25 bearbeiten.',
-  // Italienisch (18)
-  81426: 'Ripetere i colori e i numeri fino a 10.',
-  30926: 'Ascoltare e ripetere il dialogo a pagina 38.',
-  22156: 'Completare le frasi sul quaderno italiano.',
-  91070: 'Imparare le parole nuove della settimana.',
-  20458: 'Colorare e incollare le immagini sul quaderno.',
-  70589: 'Leggere la filastrocca e imparare a memoria.',
-  40021: 'Ripetere i colori e i numeri fino a 10.',
-  51245: 'Ascoltare e ripetere il dialogo a pagina 38.',
-  30033: 'Completare le frasi sul quaderno italiano.',
-  82512: 'Imparare le parole nuove della settimana.',
-  54587: 'Colorare e incollare le immagini sul quaderno.',
-  49117: 'Leggere la filastrocca e imparare a memoria.',
-  24662: 'Ripetere i colori e i numeri fino a 10.',
-  21226: 'Ascoltare e ripetere il dialogo a pagina 38.',
-  82063: 'Completare le frasi sul quaderno italiano.',
-  14117: 'Imparare le parole nuove della settimana.',
-  41850: 'Colorare e incollare le immagini sul quaderno.',
-  34050: 'Leggere la filastrocca e imparare a memoria.',
-  // Deutsch (89)
-  68878: 'Wörter mit Sch schreiben üben.',
-  87236: 'Lesehausaufgabe: Text im Leseheft zweimal vorlesen.',
-  46463: 'Hefteintrag zum Buchstaben beenden.',
-  23396: 'Buchstaben mit Tinte nachspuren, Wörter abschreiben.',
-  15695: 'Lernwörter der Woche 3× aufschreiben.',
-  59615: 'Satzdiktat einüben.',
-  57400: 'Fehler aus dem Diktat verbessern.',
-  96673: '3 Sätze zum Bild aufschreiben.',
-  47930: 'Silben klatschen und unterstreichen – Arbeitsblatt fertigstellen.',
-  59823: 'Schreibung von ie und ei üben.',
-  31319: 'Lesekarte einpacken.',
-  37460: 'Anton-App: Übungen abschließen.',
-  97841: 'Diktatwörter 5× aufschreiben und vorlesen.',
-  99593: 'Nomen aufschreiben und Artikel dazuschreiben.',
-  93227: 'Wörter nach dem Abc ordnen.',
-  59735: 'Brief fertigschreiben.',
-  45382: 'Buchstaben Ch: Hefteintrag und Arbeitsblatt beenden.',
-  83000: 'Verben aus dem Text heraussuchen und aufschreiben.',
-  17331: 'Sätze aus Wörtern zusammensetzen und aufschreiben.',
-  14207: 'Leseübung: Lesepass bis Stufe 4.',
-  62581: 'Wörter mit Sch schreiben üben.',
-  18675: 'Lesehausaufgabe: Text im Leseheft zweimal vorlesen.',
-  37653: 'Hefteintrag zum Buchstaben beenden.',
-  94259: 'Buchstaben mit Tinte nachspuren, Wörter abschreiben.',
-  28726: 'Lernwörter der Woche 3× aufschreiben.',
-  28301: 'Satzdiktat einüben.',
-  83579: 'Fehler aus dem Diktat verbessern.',
-  80644: '3 Sätze zum Bild aufschreiben.',
-  62350: 'Silben klatschen und unterstreichen – Arbeitsblatt fertigstellen.',
-  38746: 'Schreibung von ie und ei üben.',
-  21915: 'Lesekarte einpacken.',
-  16175: 'Anton-App: Übungen abschließen.',
-  30969: 'Diktatwörter 5× aufschreiben und vorlesen.',
-  99192: 'Nomen aufschreiben und Artikel dazuschreiben.',
-  88172: 'Wörter nach dem Abc ordnen.',
-  18326: 'Brief fertigschreiben.',
-  60019: 'Buchstaben Ch: Hefteintrag und Arbeitsblatt beenden.',
-  11504: 'Verben aus dem Text heraussuchen und aufschreiben.',
-  99166: 'Sätze aus Wörtern zusammensetzen und aufschreiben.',
-  80381: 'Leseübung: Lesepass bis Stufe 4.',
-  24621: 'Wörter mit Sch schreiben üben.',
-  66985: 'Lesehausaufgabe: Text im Leseheft zweimal vorlesen.',
-  10425: 'Hefteintrag zum Buchstaben beenden.',
-  93748: 'Buchstaben mit Tinte nachspuren, Wörter abschreiben.',
-  76540: 'Lernwörter der Woche 3× aufschreiben.',
-  36071: 'Satzdiktat einüben.',
-  79514: 'Fehler aus dem Diktat verbessern.',
-  10074: '3 Sätze zum Bild aufschreiben.',
-  12552: 'Silben klatschen und unterstreichen – Arbeitsblatt fertigstellen.',
-  41385: 'Schreibung von ie und ei üben.',
-  17592: 'Lesekarte einpacken.',
-  73699: 'Anton-App: Übungen abschließen.',
-  79822: 'Diktatwörter 5× aufschreiben und vorlesen.',
-  31643: 'Nomen aufschreiben und Artikel dazuschreiben.',
-  79163: 'Wörter nach dem Abc ordnen.',
-  77839: 'Brief fertigschreiben.',
-  87110: 'Buchstaben Ch: Hefteintrag und Arbeitsblatt beenden.',
-  40161: 'Verben aus dem Text heraussuchen und aufschreiben.',
-  17716: 'Sätze aus Wörtern zusammensetzen und aufschreiben.',
-  19287: 'Leseübung: Lesepass bis Stufe 4.',
-  41195: 'Wörter mit Sch schreiben üben.',
-  46500: 'Lesehausaufgabe: Text im Leseheft zweimal vorlesen.',
-  73624: 'Hefteintrag zum Buchstaben beenden.',
-  38080: 'Buchstaben mit Tinte nachspuren, Wörter abschreiben.',
-  80678: 'Lernwörter der Woche 3× aufschreiben.',
-  34957: 'Satzdiktat einüben.',
-  96374: 'Fehler aus dem Diktat verbessern.',
-  65519: '3 Sätze zum Bild aufschreiben.',
-  98259: 'Silben klatschen und unterstreichen – Arbeitsblatt fertigstellen.',
-  17944: 'Schreibung von ie und ei üben.',
-  62772: 'Lesekarte einpacken.',
-  28373: 'Anton-App: Übungen abschließen.',
-  46509: 'Diktatwörter 5× aufschreiben und vorlesen.',
-  70637: 'Nomen aufschreiben und Artikel dazuschreiben.',
-  42742: 'Wörter nach dem Abc ordnen.',
-  19880: 'Brief fertigschreiben.',
-  22833: 'Buchstaben Ch: Hefteintrag und Arbeitsblatt beenden.',
-  16630: 'Verben aus dem Text heraussuchen und aufschreiben.',
-  80855: 'Sätze aus Wörtern zusammensetzen und aufschreiben.',
-  11934: 'Leseübung: Lesepass bis Stufe 4.',
-  40982: 'Wörter mit Sch schreiben üben.',
-  73653: 'Lesehausaufgabe: Text im Leseheft zweimal vorlesen.',
-  73092: 'Hefteintrag zum Buchstaben beenden.',
-  31579: 'Buchstaben mit Tinte nachspuren, Wörter abschreiben.',
-  59672: 'Lernwörter der Woche 3× aufschreiben.',
-  69638: 'Satzdiktat einüben.',
-  47388: 'Fehler aus dem Diktat verbessern.',
-  82845: '3 Sätze zum Bild aufschreiben.',
-  13: 'Silben klatschen und unterstreichen – Arbeitsblatt fertigstellen.',
-  // NatGeGeo (5)
-  55082: 'Hefteintrag zum Thema Tiere im Winter fertigstellen.',
-  36365: 'Sachtext zweimal lesen und Schlüsselwörter unterstreichen.',
-  62296: 'Zeichnung zum Thema Jahreszeiten fertigstellen.',
-  31798: '3 Eigenschaften des Wassers aufschreiben.',
-  17685: 'Steckbrief zum Lieblingstier ausfüllen.',
-  // Religion (8)
-  35203: 'Bibelgeschichte nochmals lesen und Bild dazu zeichnen.',
-  94939: 'Lied für den Gottesdienst einüben.',
-  57447: 'Arbeitsblatt zum Thema Advent fertigstellen.',
-  20322: 'Bild zum Gleichnis malen.',
-  50857: '3 Dinge aufschreiben, für die du dankbar bist.',
-  71993: 'Kreuzworträtsel zu biblischen Begriffen lösen.',
-  22224: 'Bibelgeschichte nochmals lesen und Bild dazu zeichnen.',
-  96752: 'Lied für den Gottesdienst einüben.',
-  // Musik (5)
-  23238: 'Lied der Woche zu Hause zweimal singen.',
-  41571: 'Rhythmusübung klatschen – Takt 3× üben.',
-  94696: 'Notenzeilen zeichnen und Noten beschriften.',
-  82132: 'Musikrätsel auf dem Arbeitsblatt lösen.',
-  44760: 'Lied für die Aufführung einüben.',
+// ── Absence reason replacements by absence-group date ────────────────────────
+// Only groups with a non-empty existing reason are updated.
+const absReason = <String, String>{
+  '2026-02-05': 'Scharlach (ärztlich bestätigt)',
+  '2026-01-21': 'Zahnarzttermin (kieferorthopädisch)',
+  '2025-12-18': 'Windpocken',
+  '2025-12-16': 'Windpocken (Karenzzeit)',
+  '2025-11-19': 'Vorsorgeuntersuchung U9 beim Kinderarzt',
+  '2025-10-22': 'Schulimpfung Hepatitis A',
 };
+
+// ── Message subject replacements by messageId ────────────────────────────────
+const msgSubjects = <int, String>{
+  31241: 'Projektwoche "Natur und Wasser": 12.–16. Mai',
+  42768: 'Unterrichtsausfall am Mittwoch, 3. Juni',
+  16839: 'Lernberatungsgespräch – Terminvereinbarung',
+  72991: 'Bitte bis Freitag: Foto für Schülerausweis',
+  82684: 'Sportfest am Dienstag, 29. April',
+  77621: 'Ausflug Naturpark: Freitag, 11. April',
+  26341: 'Schuljahresabschlussfeier: Freitag, 27. Juni, 10 Uhr',
+  47363: 'Elternabend: Donnerstag, 6. November, 19:30 Uhr',
+  20993: 'Berichtigung: Buchcheck am Montag, nicht Freitag',
+  31012: 'Buchcheck: Schulbücher auf Vollständigkeit prüfen',
+  45755: 'Oktober-Brief: Erste Wochen in der 1A',
+  77286: 'Halbjahreszeugnis: Ausgabe am 30. Jänner',
+  34050: 'Kleider-Tauschbörse für Grundschüler',
+  22021: 'Gesunde Jause: Bitte keine Süßigkeiten',
+  39102: 'Herzlich willkommen in der 1A!',
+};
+
+// ── Message body texts by messageId (plain text; stored as Quill delta JSON) ─
+const msgTexts = <int, String>{
+  31241: 'Liebe Eltern und Erziehungsberechtigte,\n\n'
+      'vom 12. bis 16. Mai findet unsere Projektwoche "Natur und Wasser" statt.\n\n'
+      'Die Kinder erkunden an drei Tagen das Bachbett in der Nähe der Schule und führen einfache '
+      'Wasserexperimente durch. Am Freitag werden die Ergebnisse im Klassenzimmer ausgestellt.\n\n'
+      'Bitte geben Sie Ihrem Kind mit:\n'
+      '– Gummistiefel oder alte Schuhe\n'
+      '– Wechselkleidung\n'
+      '– Trinkflasche\n\n'
+      'Wir freuen uns auf eine spannende Woche!\n\n'
+      'Testfrau Christine\n',
+  42768: 'Sehr geehrte Eltern und Erziehungsberechtigte,\n\n'
+      'am Mittwoch, dem 3. Juni, findet eine schulinterne Lehrerkonferenz statt.\n\n'
+      'Der Unterricht endet an diesem Tag um 11:30 Uhr. Bitte sorgen Sie dafür, dass Ihr Kind '
+      'zu dieser Zeit abgeholt werden kann oder den Heimweg sicher alleine schafft.\n\n'
+      'Die Nachmittagsbetreuung entfällt an diesem Tag.\n\n'
+      'Vielen Dank für Ihr Verständnis.\n\n'
+      'Leiter Demo\n',
+  16839: 'Liebe Eltern und Erziehungsberechtigte,\n\n'
+      'im Rahmen der halbjährlichen Lernberatung lade ich Sie zu einem Gespräch über den '
+      'Lernstand Ihres Kindes ein.\n\n'
+      'Freie Termine:\n'
+      '– Dienstag, 18. Februar, 15:00–17:30 Uhr\n'
+      '– Mittwoch, 19. Februar, 14:30–17:00 Uhr\n\n'
+      'Bitte tragen Sie sich über das digitale Register für einen Termin ein. Ein Gespräch '
+      'dauert jeweils 15 Minuten.\n\n'
+      'Ich freue mich auf den Austausch!\n\n'
+      'Musterfrau Anna\n',
+  72991: 'Liebe Eltern,\n\n'
+      'bitte geben Sie Ihrem Kind bis Freitag, 14. März, ein aktuelles Passfoto mit in die Schule.\n\n'
+      'Das Foto wird für den neuen Schülerausweis benötigt, der ab dem kommenden Schuljahr gilt.\n\n'
+      'Größe: 3,5 × 4,5 cm. Bitte den Namen auf der Rückseite vermerken.\n\n'
+      'Alternativ: Foto als JPEG per E-Mail ans Schulsekretariat schicken.\n\n'
+      'Vielen Dank!\n'
+      'Testfrau Christine\n',
+  82684: 'Liebe Eltern und Erziehungsberechtigte,\n\n'
+      'am Dienstag, dem 29. April, findet das Schulsportfest statt.\n\n'
+      'Die Kinder nehmen an verschiedenen Stationen teil: Weitsprung, Staffellauf, '
+      'Balancierparcours, Ballzielwerfen. Im Vordergrund steht das gemeinsame Bewegen – '
+      'eine Siegerehrung gibt es nicht.\n\n'
+      'Bitte geben Sie mit:\n'
+      '– Sportkleidung, die schmutzig werden darf\n'
+      '– Sonnencreme (aufgetragen von zu Hause)\n'
+      '– Trinkflasche\n\n'
+      'Zuschauer sind von 10:00–12:00 Uhr herzlich willkommen!\n\n'
+      'Testfrau Christine\n',
+  77621: 'Liebe Eltern,\n\n'
+      'am Freitag, dem 11. April, unternimmt die Klasse 1A einen Ausflug in den Naturpark.\n\n'
+      'Wir erkunden einen Naturlehrpfad und lernen einheimische Tiere und Pflanzen kennen. '
+      'Eine Waldpädagogin begleitet uns.\n\n'
+      'Bitte mitbringen:\n'
+      '– Festes Schuhwerk und wetterfeste Jacke\n'
+      '– Jause und Trinkflasche\n'
+      '– Unterschriebene Einverständniserklärung + 3,00 € im Kuvert\n\n'
+      'Abfahrt: 8:15 Uhr pünktlich! Rückkehr: ca. 13:30 Uhr\n\n'
+      'Testfrau Christine\n',
+  26341: 'Liebe Eltern und Erziehungsberechtigte,\n\n'
+      'wir laden Sie herzlich zur Schuljahresabschlussfeier der Klasse 1A ein!\n\n'
+      'Termin: Freitag, 27. Juni, 10:00 Uhr\n'
+      'Ort: Schulaula, Erdgeschoss\n\n'
+      'Die Kinder präsentieren Lieder, ein kleines Theaterstück und selbst gestaltete Werke.\n\n'
+      'Im Anschluss gibt es einen kleinen Umtrunk im Schulhof.\n\n'
+      'Mit herzlichen Grüßen\n'
+      'Testfrau Christine\n',
+  47363: 'Sehr geehrte Eltern und Erziehungsberechtigte,\n\n'
+      'wir laden Sie herzlich zum Elternabend der Klasse 1A ein.\n\n'
+      'Termin: Donnerstag, 6. November, 19:30 Uhr\n'
+      'Ort: Klassenzimmer 1A, 1. Obergeschoss\n\n'
+      'Themen:\n'
+      '– Klassenelternrat wählen\n'
+      '– Lehrplan und Jahresplanung\n'
+      '– Hausaufgaben und Unterstützung zu Hause\n'
+      '– Ausflüge und geplante Vorhaben\n\n'
+      'Wir freuen uns auf einen guten Austausch!\n\n'
+      'Testfrau Christine\n',
+  20993: 'Liebe Eltern,\n\n'
+      'in meiner gestrigen Mitteilung zum Buchcheck hat sich ein Fehler eingeschlichen.\n\n'
+      'Der Buchcheck findet am MONTAG, 17. März, statt – nicht am Freitag wie angegeben.\n\n'
+      'Entschuldigung für die Verwirrung!\n\n'
+      'Testfrau Christine\n',
+  31012: 'Liebe Eltern,\n\n'
+      'bitte überprüfen Sie gemeinsam mit Ihrem Kind die Schulmaterialien.\n\n'
+      'Kontrollieren Sie:\n'
+      '– Alle Schulbücher und Hefte vorhanden und beschriftet?\n'
+      '– Fehlen Seiten oder sind Bücher stark beschädigt?\n'
+      '– Federmäppchen vollständig?\n\n'
+      'Beschädigte Bücher können um 5,00 € Selbstbehalt beim Schulsekretariat nachbestellt werden.\n\n'
+      'Vielen Dank!\n'
+      'Testfrau Christine\n',
+  45755: 'Liebe Eltern und Erziehungsberechtigte,\n\n'
+      'sechs Wochen Schule liegen hinter uns – Zeit für einen kurzen Rückblick.\n\n'
+      'Die Klasse hat sich gut zusammengefunden; alle Kinder kennen bereits den Tagesablauf.\n\n'
+      'Lernstand:\n'
+      '– Lesen: Buchstaben bis zum L eingeführt\n'
+      '– Schreiben: erste Lernwörter geübt\n'
+      '– Mathematik: Zahlen bis 10, erste Additionsaufgaben\n\n'
+      'Bitte beachten:\n'
+      '– Schulmäppchen täglich kontrollieren\n'
+      '– Lesekarte täglich mitbringen\n'
+      '– Hausaufgaben unterschreiben\n\n'
+      'Herzliche Grüße\n'
+      'Testfrau Christine\n',
+  77286: 'Liebe Eltern und Erziehungsberechtigte,\n\n'
+      'das erste Schulhalbjahr neigt sich dem Ende.\n\n'
+      'Die Halbjahreszeugnisse werden am Donnerstag, 30. Jänner, ausgeteilt. '
+      'Bitte stellen Sie sicher, dass Ihr Kind an diesem Tag anwesend ist.\n\n'
+      'Das Zeugnis enthält Leistungsberichte in allen Fächern sowie Einschätzungen '
+      'zu Lern- und Sozialverhalten.\n\n'
+      'Bei Fragen vereinbaren Sie bitte einen Gesprächstermin.\n\n'
+      'Mit herzlichen Grüßen\n'
+      'Testfrau Christine\n',
+  34050: 'Liebe Eltern,\n\n'
+      'unsere Schule organisiert eine Kleider-Tauschbörse für Grundschüler!\n\n'
+      'So funktioniert\'s:\n'
+      '– Gut erhaltene Kleidung (Größe 110–134) bis Mittwoch, 19. März, ins Sekretariat bringen\n'
+      '– Am Freitag, 21. März, dürfen alle Familien stöbern und mitnehmen\n\n'
+      'Erlöse aus nicht abgeholten Stücken gehen an die Schulbücherei.\n\n'
+      'Testfrau Christine\n',
+  22021: 'Liebe Eltern,\n\n'
+      'bitte geben Sie Ihrem Kind eine gesunde Jause mit.\n\n'
+      'Bitte KEIN:\n'
+      '– Schokolade, Gummibärchen, Chips\n'
+      '– Süßgetränke oder gesüßte Fruchtsäfte\n\n'
+      'Gute Alternativen:\n'
+      '– Brot mit Käse oder Aufschnitt, Obst, Gemüsesticks\n'
+      '– Wasser oder ungesüßter Tee\n\n'
+      'Eine gesunde Jause stärkt Konzentration und tut Körper und Umwelt gut.\n\n'
+      'Vielen Dank!\n'
+      'Testfrau Christine\n',
+  39102: 'Liebe Eltern und Erziehungsberechtigte,\n\n'
+      'herzlich willkommen in der 1A – wir freuen uns sehr, Ihr Kind bei uns begrüßen zu dürfen!\n\n'
+      'Wichtigste Infos:\n'
+      '– Unterrichtszeiten: Mo–Fr, 8:00–12:50 Uhr (Mi bis 12:05 Uhr)\n'
+      '– Pause: 10:00–10:20 Uhr im Schulhof\n'
+      '– Hausaufgaben: täglich; bitte bis zum nächsten Tag erledigen\n\n'
+      'Bitte ab Montag mitbringen:\n'
+      '– Alle Schulmaterialien laut Materialliste (liegt bei)\n'
+      '– Turnbeutel mit Hallenschuhen\n'
+      '– Trinkflasche (bitte beschriften!)\n\n'
+      'Bei Fragen: Ich bin täglich von 7:45–8:00 Uhr erreichbar.\n\n'
+      'Auf ein schönes gemeinsames Schuljahr!\n\n'
+      'Testfrau Christine\n',
+};
+
+// ── Homework (gradeGroup) text generators per subject ────────────────────────
+// The dashboard repeats only a handful of homework strings across ~163 entries.
+// To make every Merkheft entry distinct we interleave several activity families
+// per subject and assign the generated unique texts to the sorted gradeGroup ids.
+
+/// Interleaves [families] round-by-round (family 0 round 0, family 1 round 0, …)
+/// and returns the first [need] entries. Throws if pools are too small or a
+/// duplicate is produced.
+List<String> _interleave(List<List<String>> families, int need) {
+  final res = <String>[];
+  for (var round = 0; res.length < need; round++) {
+    for (final fam in families) {
+      if (round < fam.length) {
+        res.add(fam[round]);
+        if (res.length == need) break;
+      }
+    }
+    if (round > 200) {
+      throw StateError('homework pools too small: have ${res.length}, need $need');
+    }
+  }
+  if (res.toSet().length != res.length) {
+    throw StateError('duplicate homework text generated');
+  }
+  return res;
+}
+
+final List<List<String>> _germanFamilies = <List<String>>[
+  [
+    for (final l in ['Mm', 'Ll', 'Oo', 'Tt', 'Nn', 'Rr', 'Hh', 'Kk'])
+      'Buchstabe $l: Hefteintrag und Schwungübung fertigstellen.'
+  ],
+  [
+    for (final s in [
+      'und, ist, das',
+      'wir, ihr, sie',
+      'Mama, Oma, Opa',
+      'Hund, Katze, Maus',
+      'rot, blau, grün',
+      'Tür, Uhr, Ohr',
+      'Tag, Nacht, Zeit',
+      'ich, du, er'
+    ])
+      'Lernwörter üben: $s – jedes Wort 3× schreiben.'
+  ],
+  [for (var i = 0; i < 8; i++) 'Lesepass Stufe ${i + 1}: den Text laut und deutlich vorlesen.'],
+  [
+    for (final t in [
+      'Silben lesen',
+      'erste Wörter',
+      'Reimwörter',
+      'Anlaute hören',
+      'Gegensätze',
+      'Selbstlaute',
+      'Mitlaute',
+      'Wortarten'
+    ])
+      'Anton-App: Übungen zum Thema „$t" abschließen.'
+  ],
+  [
+    for (final w in [
+      'To-ma-te',
+      'Ba-na-ne',
+      'Scho-ko-la-de',
+      'E-le-fant',
+      'Som-mer-tag',
+      'Win-ter-zeit',
+      'Ka-rot-te',
+      'Pa-pa-gei'
+    ])
+      'Silbenbögen zeichnen und klatschen: $w.'
+  ],
+  [
+    for (final r in ['Haus', 'Maus', 'Baum', 'Katze', 'Hand', 'Licht', 'Stein', 'Wald'])
+      'Drei Reimwörter zu „$r" finden und aufschreiben.'
+  ],
+  [
+    for (final s in [
+      'Oma, Ofen, Obst',
+      'Lampe, Leiter, Lupe',
+      'Tisch, Tasche, Turm',
+      'Nase, Nest, Nuss',
+      'Rose, Ratte, Rad',
+      'Sonne, Salat, Suppe',
+      'Igel, Insel, Iglu',
+      'Esel, Eis, Ente'
+    ])
+      'Diktatwörter üben: $s.'
+  ],
+  [
+    for (final b in [
+      'auf dem Spielplatz',
+      'im Garten',
+      'beim Einkaufen',
+      'im Schnee',
+      'am Bauernhof',
+      'im Schwimmbad',
+      'auf dem Markt',
+      'beim Picknick'
+    ])
+      'Drei Sätze zum Bild „$b" schreiben.'
+  ],
+  [
+    for (final s in [
+      'Ball, Apfel, Schule',
+      'Blume, Auto, Haus',
+      'Buch, Tisch, Stuhl',
+      'Hund, Vogel, Fisch',
+      'Brot, Milch, Käse',
+      'Sonne, Mond, Stern',
+      'Wald, Berg, See',
+      'Hose, Jacke, Schuh'
+    ])
+      'Nomen mit Artikel aufschreiben: $s.'
+  ],
+  [
+    for (final s in [
+      'Affe, Ball, Cola, Dose',
+      'Ente, Fisch, Gans, Hut',
+      'Igel, Jacke, Kuh, Lampe',
+      'Maus, Nest, Ofen, Pilz',
+      'Rose, Sonne, Tür, Uhu',
+      'Vogel, Wal, Zaun, Ast',
+      'Birne, Clown, Dach, Esel',
+      'Gabel, Hase, Kerze, Lupe'
+    ])
+      'Wörter nach dem ABC ordnen: $s.'
+  ],
+  [for (var i = 0; i < 8; i++) 'Leseheft Seite ${8 + i * 2}: zweimal laut vorlesen.'],
+  [
+    for (final t in [
+      'Das Wetter',
+      'Mein Haustier',
+      'Der Herbst',
+      'Meine Familie',
+      'Die große Pause',
+      'Mein Frühstück',
+      'Mein Wochenende',
+      'Der Schulweg'
+    ])
+      'Abschreibübung „$t": sauber ins Heft übertragen.'
+  ],
+  [
+    for (final g in ['Sch sch', 'ei', 'au', 'ch', 'ie', 'eu', 'pf', 'st'])
+      'Wörter mit „$g" sammeln und aufschreiben.'
+  ],
+];
+
+final List<List<String>> _mathFamilies = <List<String>>[
+  [for (var i = 0; i < 6; i++) 'Plusaufgaben bis 20: Arbeitsblatt ${i + 1} rechnen.'],
+  [for (var i = 0; i < 6; i++) 'Minusaufgaben bis 20: Heftseite ${12 + i} bearbeiten.'],
+  [
+    for (final s in ['1 und 9', '2 und 8', '3 und 7', '4 und 6', '5 und 5', 'gemischt'])
+      'Verliebte Zahlen üben: $s.'
+  ],
+  [
+    for (final t in [
+      'Vorgänger eintragen',
+      'Nachfolger eintragen',
+      'rückwärts schreiben',
+      'Lücken füllen',
+      'in Zweierschritten zählen',
+      'Nachbarzahlen finden'
+    ])
+      'Zahlenreihe bis 20: $t.'
+  ],
+  [
+    for (final t in [
+      'bis 10',
+      'bis 14',
+      'bis 18',
+      'bis 20',
+      'gemischt',
+      'mit Zahlenmauer'
+    ])
+      'Verdoppeln und Halbieren $t üben.'
+  ],
+  [
+    for (final t in [
+      'Äpfel im Korb',
+      'Murmeln in der Dose',
+      'Kinder im Bus',
+      'Blumen im Beet',
+      'Kekse auf dem Teller',
+      'Stifte im Mäppchen'
+    ])
+      'Sachaufgabe lösen: $t.'
+  ],
+  [for (var i = 0; i < 6; i++) 'Flex & Flo Seite ${20 + i * 4}–${21 + i * 4} bearbeiten.'],
+  [
+    for (final t in [
+      'Formen nachzeichnen',
+      'Muster fortsetzen',
+      'Würfel zählen',
+      'Symmetrie ergänzen',
+      'Körper benennen',
+      'Bauplan nachbauen'
+    ])
+      'Geometrie: $t.'
+  ],
+];
+
+final List<List<String>> _italianFamilies = <List<String>>[
+  [
+    for (final s in ['rosso e blu', 'giallo e verde', 'bianco e nero', 'arancione e viola'])
+      'Ripassare i colori: $s.'
+  ],
+  [
+    for (final s in ['fino a 10', 'fino a 15', 'fino a 20', 'a ritroso da 10'])
+      'Contare $s in italiano.'
+  ],
+  [
+    for (final s in ['la scuola', 'la famiglia', 'gli animali', 'i giorni della settimana'])
+      'Imparare le parole: $s.'
+  ],
+  [
+    for (final s in ['a pagina 12', 'a pagina 24', 'a pagina 36', 'a pagina 40'])
+      'Ascoltare e ripetere il dialogo $s.'
+  ],
+  [for (var i = 1; i <= 4; i++) 'Completare le frasi sul quaderno: esercizio $i.'],
+  [
+    for (final s in ['dei colori', 'dei numeri', 'degli animali', 'delle stagioni'])
+      'Leggere e memorizzare la filastrocca $s.'
+  ],
+];
+
+const _natGeGeoHw = <String>[
+  'Steckbrief zum Lieblingstier ausfüllen und ein Bild dazu zeichnen.',
+  'Drei Eigenschaften des Wassers aufschreiben.',
+  'Sachtext „Tiere im Wald" zweimal lesen und Schlüsselwörter markieren.',
+  'Hefteintrag „Tiere im Winter" mit Zeichnung fertigstellen.',
+  'Das Wetter drei Tage lang beobachten und Symbole eintragen.',
+  'Frühblüher im Garten suchen und benennen.',
+  'Die vier Jahreszeiten in die richtige Reihenfolge bringen.',
+  'Ein gesundes Frühstück auf dem Teller-Arbeitsblatt zusammenstellen.',
+  'Blätter verschiedener Bäume sammeln und einkleben.',
+  'Den Tagesablauf mit Bildern der Uhr darstellen.',
+  'Drei heimische Vögel benennen und anmalen.',
+  'Müll richtig trennen: Bilder den Tonnen zuordnen.',
+];
+
+const _religionHw = <String>[
+  'Ein Bild zum Gleichnis vom verlorenen Schaf malen.',
+  'Die Geschichte der Arche Noah nacherzählen.',
+  'Drei Dinge aufschreiben, für die du dankbar bist.',
+  'Arbeitsblatt zum Thema Schöpfung fertigstellen.',
+  'Kreuzworträtsel zu biblischen Begriffen lösen.',
+  'Das Lied „Lass uns miteinander" für den Gottesdienst üben.',
+  'Ein kurzes Dankgebet aufschreiben oder malen.',
+  'Ein Adventkalender-Türchen gestalten und beschriften.',
+  'Eine Kerze für den Friedensgruß verzieren.',
+  'Das Kreuzzeichen üben und ins Heft zeichnen.',
+  'Eine Geschichte von Sankt Martin nacherzählen.',
+  'Ein Bild der Heiligen Familie ausmalen.',
+];
+
+const _musikHw = <String>[
+  'Das Lied der Woche „Es tönen die Lieder" zweimal singen.',
+  'Eine Rhythmusübung im 4/4-Takt dreimal klatschen.',
+  'Notenzeilen zeichnen und die Noten beschriften.',
+  'Das Musikrätsel auf dem Arbeitsblatt lösen.',
+  'Das Bewegungslied für die Aufführung einüben.',
+  'Hohe und tiefe Töne hören und unterscheiden.',
+  'Ein Faschingslied auswendig lernen.',
+  'Mit Körperinstrumenten einen Rhythmus erfinden.',
+  'Lieblingslied aussuchen und der Klasse vorstellen.',
+  'Den Takt zu einem Lied mitklatschen.',
+  'Laute und leise Töne mit Symbolen aufschreiben.',
+  'Ein einfaches Lied auf dem Glockenspiel üben.',
+];
+
+/// Returns a unique homework text per id for the given subject [label].
+Map<int, String> _buildHomework(String label, List<int> sortedIds) {
+  final n = sortedIds.length;
+  List<String> texts;
+  switch (label) {
+    case 'Mathematik':
+      texts = _interleave(_mathFamilies, n);
+      break;
+    case 'Italienisch':
+      texts = _interleave(_italianFamilies, n);
+      break;
+    case 'Deutsch':
+      texts = _interleave(_germanFamilies, n);
+      break;
+    case 'NatGeGeo':
+      texts = _natGeGeoHw.take(n).toList();
+      break;
+    case 'Religion':
+      texts = _religionHw.take(n).toList();
+      break;
+    case 'Musik':
+      texts = _musikHw.take(n).toList();
+      break;
+    default:
+      return {};
+  }
+  if (texts.length < n) {
+    throw StateError('not enough homework texts for $label: ${texts.length}/$n');
+  }
+  return {for (var i = 0; i < n; i++) sortedIds[i]: texts[i]};
+}
+
+// ── Calendar lesson-content text generators per subject ──────────────────────
+// The captured calendar holds ~492 real classroom log entries (lessonContents)
+// with personal/typo-laden teacher input. We replace each with a clean, generic,
+// subject-appropriate lesson-log line. Each entry is "<Prefix> <Topic>." and the
+// (prefix, topic) pairs are unique, so every generated text is distinct.
+
+const _logPrefixes = <String>[
+  'Wir üben:', 'Stationenarbeit:', 'Einführung:', 'Wiederholung:',
+  'Vertiefung:', 'Partnerarbeit:', 'Arbeitsheft-Übungen:', 'Tafelbild und Beispiele:',
+  'Freiarbeit:', 'Lernspiel:', 'Hefteintrag:', 'Wochenrückblick:'
+];
+
+const _deTopics = <String>[
+  'die Buchstabeneinführung Mm', 'die Buchstabeneinführung Ss', 'Lautanalyse und Anlaute',
+  'das Silbenlesen', 'das Schreiben erster Wörter', 'die Lernwörter der Woche',
+  'das Lesetraining mit dem Leseblatt', 'die Arbeit im Buchstabenheft', 'Reimwörter und Lautspiele',
+  'das Lesen und Schreiben von Sätzen', 'die Anlauttabelle', 'das Bilderbuch der Woche'
+];
+const _maTopics = <String>[
+  'Plusaufgaben bis 20', 'Minusaufgaben bis 20', 'das Verdoppeln und Halbieren',
+  'die verliebten Zahlen', 'die Zahlzerlegungen', 'die Zahlenreihe bis 20',
+  'die Nachbarzahlen', 'geometrische Formen', 'geometrische Körper',
+  'Sachaufgaben', 'Mengen und Anzahlen', 'das Rechnen am Zwanzigerfeld'
+];
+const _ngTopics = <String>[
+  'die Jahreszeiten', 'der Herbst und seine Früchte', 'die Tiere im Winter',
+  'die Orientierung links und rechts', 'die Frühblüher', 'die Wetterbeobachtung',
+  'die gesunde Ernährung', 'der Tag- und Nachtwechsel'
+];
+const _reTopics = <String>[
+  'die Schöpfungsgeschichte', 'Erntedank und Dankbarkeit', 'Geschichten aus der Bibel',
+  'das Kirchenjahr', 'die Adventszeit', 'Jesus und seine Freunde',
+  'das Miteinander in der Gemeinschaft', 'die Feste im Jahreskreis'
+];
+const _spTopics = <String>[
+  'das Geräteturnen', 'Lauf- und Fangspiele', 'Ballspiele und Koordination',
+  'eine Bewegungslandschaft', 'Kooperationsspiele', 'Gleichgewicht und Balancieren',
+  'rhythmische Bewegung', 'Staffelspiele'
+];
+const _kuTopics = <String>[
+  'das Malen mit Wasserfarben', 'eine Collage', 'das Arbeiten mit Ölkreiden',
+  'das Plastizieren mit Knete', 'Drucktechniken', 'ein Jahreszeitenbild',
+  'Faltarbeiten', 'ein gebasteltes Geschenk'
+];
+const _muTopics = <String>[
+  'Lieder der Jahreszeit', 'Rhythmusübungen', 'Bodypercussion',
+  'das Kennenlernen von Instrumenten', 'Bewegungslieder', 'hohe und tiefe Töne',
+  'das Anhören eines Musikstücks', 'Faschingslieder'
+];
+const _itPrefixes = <String>[
+  'Ripasso:', 'Esercizi:', 'Gioco linguistico:', 'Ascolto e ripetizione:',
+  'Lettura:', 'Canzone:', 'Lavoro a coppie:', 'Quaderno:'
+];
+const _itTopics = <String>[
+  'i colori', 'i numeri fino a 20', 'gli oggetti scolastici', 'gli animali',
+  'la famiglia', 'i saluti', 'una filastrocca', 'i giorni della settimana'
+];
+const _wsLog = <String>[
+  'Wir basteln weihnachtliche Geschenke und Dekorationen.',
+  'Wir gestalten Weihnachtskarten und kleine Tonarbeiten.',
+  'Wir verzieren Kerzenhalter für den Adventstisch.',
+  'Wir fertigen Fensterbilder zum Thema Winter.',
+];
+
+/// Builds [need] unique "<prefix> <topic>." lines (prefix outer, topic inner).
+List<String> _logTexts(List<String> prefixes, List<String> topics, int need) {
+  final res = <String>[];
+  final t = topics.length;
+  final cap = prefixes.length * topics.length;
+  for (var i = 0; i < cap && res.length < need; i++) {
+    res.add('${prefixes[i ~/ t]} ${topics[i % t]}.');
+  }
+  if (res.length < need) {
+    throw StateError('lesson-content pool too small: need $need, have $cap');
+  }
+  return res;
+}
+
+/// Returns a unique lesson-content text per id for the given [subject].
+Map<int, String> _buildLessonContents(String subject, List<int> sortedIds) {
+  final n = sortedIds.length;
+  if (n == 0) return {};
+  if (subject == 'Vormittagspause') {
+    return {for (final id in sortedIds) id: 'Pausenaufsicht'};
+  }
+  List<String> texts;
+  switch (subject) {
+    case 'Deutsch':
+      texts = _logTexts(_logPrefixes, _deTopics, n);
+      break;
+    case 'Mathematik':
+      texts = _logTexts(_logPrefixes, _maTopics, n);
+      break;
+    case 'NatGeGeo':
+      texts = _logTexts(_logPrefixes, _ngTopics, n);
+      break;
+    case 'Religion':
+      texts = _logTexts(_logPrefixes, _reTopics, n);
+      break;
+    case 'Bewegung und Sport':
+      texts = _logTexts(_logPrefixes, _spTopics, n);
+      break;
+    case 'KuTE':
+      texts = _logTexts(_logPrefixes, _kuTopics, n);
+      break;
+    case 'Musik':
+      texts = _logTexts(_logPrefixes, _muTopics, n);
+      break;
+    case 'Italienisch':
+      texts = _logTexts(_itPrefixes, _itTopics, n);
+      break;
+    case 'WS Weihnachtswerkstatt':
+      texts = _wsLog.take(n).toList();
+      break;
+    default:
+      return {};
+  }
+  return {for (var i = 0; i < n; i++) sortedIds[i]: texts[i]};
+}
+
+/// Recursively visits every lesson object (`isLesson == 1`) in a calendar
+/// response tree and invokes [fn] on it.
+void _forEachLesson(dynamic node, void Function(Map<String, dynamic> lesson) fn) {
+  if (node is Map) {
+    if (node['isLesson'] == 1 && node['lesson'] is Map) {
+      fn((node['lesson'] as Map).cast<String, dynamic>());
+    }
+    for (final v in node.values) {
+      _forEachLesson(v, fn);
+    }
+  } else if (node is List) {
+    for (final v in node) {
+      _forEachLesson(v, fn);
+    }
+  }
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 
 void updateGrade(Map<String, dynamic> g) {
   final id = g['id'] as int;
+  if (gName.containsKey(id)) g['name'] = gName[id];
   if (gDesc.containsKey(id)) g['description'] = gDesc[id];
   for (final c in (g['competences'] as List? ?? [])) {
     final key = '$id|${c['typeName']}';
@@ -295,7 +969,51 @@ void main() {
   final raw = file.readAsStringSync();
   final data = jsonDecode(raw) as List<dynamic>;
 
-  int cntGrade = 0, cntDetail = 0, cntDash = 0;
+  // ── Pre-pass: collect homework ids (dashboard + calendar exams) per subject
+  // and lesson-content ids per subject so generated texts can be assigned
+  // deterministically by sorted id. ──────────────────────────────────────────
+  final hwIdsByLabel = <String, Set<int>>{};
+  final lcIdsBySubject = <String, Set<int>>{};
+  for (final item in data) {
+    final addr = item['address'] as String;
+    final resp = item['response'];
+    if (addr.contains('dashboard/dashboard') && resp is List) {
+      for (final day in resp) {
+        for (final di in (day['items'] as List? ?? [])) {
+          if (di['type'] == 'gradeGroup') {
+            final label = (di['label'] ?? '').toString();
+            hwIdsByLabel.putIfAbsent(label, () => <int>{}).add(di['id'] as int);
+          }
+        }
+      }
+    } else if (addr.contains('calendar/student')) {
+      _forEachLesson(resp, (lesson) {
+        final subj = lesson['subject'];
+        final sname = subj is Map ? (subj['name'] ?? '').toString() : '';
+        for (final lc in (lesson['lessonContents'] as List? ?? [])) {
+          lcIdsBySubject.putIfAbsent(sname, () => <int>{}).add(lc['id'] as int);
+        }
+        for (final he in [
+          ...(lesson['homeworkExams'] as List? ?? []),
+          ...(lesson['homeworkExamsOther'] as List? ?? [])
+        ]) {
+          hwIdsByLabel.putIfAbsent(sname, () => <int>{}).add(he['id'] as int);
+        }
+      });
+    }
+  }
+  final hwTextById = <int, String>{};
+  hwIdsByLabel.forEach((label, ids) {
+    final sorted = ids.toList()..sort();
+    hwTextById.addAll(_buildHomework(label, sorted));
+  });
+  final lcTextById = <int, String>{};
+  lcIdsBySubject.forEach((subject, ids) {
+    final sorted = ids.toList()..sort();
+    lcTextById.addAll(_buildLessonContents(subject, sorted));
+  });
+
+  int cntGrade = 0, cntDetail = 0, cntDash = 0, cntMsg = 0, cntAbs = 0, cntCal = 0;
 
   for (final item in data) {
     final addr = item['address'] as String;
@@ -306,7 +1024,7 @@ void main() {
       final id = r['id'] as int;
       final hasCompUpdate = (r['competences'] as List? ?? [])
           .any((c) => cDesc.containsKey('$id|${(c as Map)['typeName']}'));
-      if (gDesc.containsKey(id) || hasCompUpdate) {
+      if (gDesc.containsKey(id) || gName.containsKey(id) || hasCompUpdate) {
         updateGrade(r);
         cntGrade++;
       }
@@ -331,26 +1049,93 @@ void main() {
           cntDetail++;
         }
       }
+    } else if (addr.contains('dashboard/absences')) {
+      if (resp is Map) {
+        for (final ab in (resp['absences'] as List? ?? [])) {
+          final date = ab['date'] as String;
+          final cur = ab['reason'];
+          if (absReason.containsKey(date) && cur != null && cur.toString().isNotEmpty) {
+            final newR = absReason[date]!;
+            ab['reason'] = newR;
+            for (final item in (ab['group'] as List? ?? [])) {
+              if (item['reason'] != null && item['reason'].toString().isNotEmpty) {
+                item['reason'] = newR;
+              }
+            }
+            cntAbs++;
+          }
+        }
+      }
+    } else if (addr.contains('getMyMessages')) {
+      if (resp is List) {
+        for (final msg in resp) {
+          final m = msg as Map<String, dynamic>;
+          final id = m['id'] as int;
+          bool changed = false;
+          if (msgSubjects.containsKey(id)) {
+            m['subject'] = msgSubjects[id];
+            changed = true;
+          }
+          if (msgTexts.containsKey(id)) {
+            m['text'] = jsonEncode({
+              'ops': [
+                {'insert': msgTexts[id]}
+              ]
+            });
+            changed = true;
+          }
+          if (changed) cntMsg++;
+        }
+      }
     } else if (addr.contains('dashboard/dashboard')) {
       if (resp is List) {
         for (final day in resp) {
           for (final di in (day['items'] as List? ?? [])) {
-            if (di['type'] == 'observation') {
-              final id = di['id'] as int;
-              if (obsSub.containsKey(id)) {
-                di['subtitle'] = obsSub[id];
-                cntDash++;
-              }
-            } else if (di['type'] == 'gradeGroup') {
-              final id = di['id'] as int;
-              if (hwSub.containsKey(id)) {
-                di['subtitle'] = hwSub[id];
-                cntDash++;
-              }
+            final id = di['id'] as int;
+            switch (di['type']) {
+              case 'observation':
+                if (obsSub.containsKey(id)) {
+                  di['subtitle'] = obsSub[id];
+                  cntDash++;
+                }
+                break;
+              case 'gradeGroup':
+                if (hwTextById.containsKey(id)) {
+                  di['subtitle'] = hwTextById[id];
+                  cntDash++;
+                }
+                break;
+              case 'grade':
+                final sub = gName[id] ?? gradeDashExtra[id];
+                if (sub != null) {
+                  di['subtitle'] = sub;
+                  cntDash++;
+                }
+                break;
             }
           }
         }
       }
+    } else if (addr.contains('calendar/student')) {
+      _forEachLesson(resp, (lesson) {
+        for (final lc in (lesson['lessonContents'] as List? ?? [])) {
+          final id = lc['id'] as int;
+          if (lcTextById.containsKey(id)) {
+            lc['name'] = lcTextById[id];
+            cntCal++;
+          }
+        }
+        for (final he in [
+          ...(lesson['homeworkExams'] as List? ?? []),
+          ...(lesson['homeworkExamsOther'] as List? ?? [])
+        ]) {
+          final id = he['id'] as int;
+          if (hwTextById.containsKey(id)) {
+            he['name'] = hwTextById[id];
+            cntCal++;
+          }
+        }
+      });
     }
   }
 
@@ -371,5 +1156,7 @@ void main() {
   // The original capture.json uses CRLF line endings; preserve them.
   file.writeAsStringSync(unescaped.replaceAll('\n', '\r\n'));
 
-  print('Done. getGrade: $cntGrade | subject_detail: $cntDetail | dashboard obs: $cntDash');
+  print('Done. getGrade: $cntGrade | subject_detail: $cntDetail | '
+      'dashboard items: $cntDash | messages: $cntMsg | absences: $cntAbs | '
+      'calendar entries: $cntCal');
 }
