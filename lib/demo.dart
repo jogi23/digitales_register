@@ -29,15 +29,39 @@ Future<void>? _loadFuture;
 
 Future<void> _ensureLoaded() => _loadFuture ??= _load();
 
+int _demoUserId = 0;
+
 Future<void> _load() async {
   final raw = await rootBundle.loadString('assets/demo/capture.json');
   final list = json.decode(raw) as List<dynamic>;
   _capture = list.cast<Map<String, dynamic>>();
+  _demoUserId = _parseUserId();
+}
+
+int _parseUserId() {
+  for (final item in _capture) {
+    final resp = item['response'];
+    if (resp is! String) continue;
+    const needle = 'currentUserId=';
+    final idx = resp.indexOf(needle);
+    if (idx < 0) continue;
+    final after = resp.substring(idx + needle.length);
+    final semi = after.indexOf(';');
+    if (semi < 0) continue;
+    final id = int.tryParse(after.substring(0, semi).trim());
+    if (id != null) return id;
+  }
+  return 0;
 }
 
 // ---------------------------------------------------------------------------
 // Public API (called by SessionManager.send when demoMode == true)
 // ---------------------------------------------------------------------------
+
+Future<int> getDemoUserId() async {
+  await _ensureLoaded();
+  return _demoUserId;
+}
 
 Future<dynamic> getDemoResponse(String url, dynamic args) async {
   await _ensureLoaded();

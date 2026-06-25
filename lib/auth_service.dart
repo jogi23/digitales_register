@@ -21,6 +21,7 @@ import 'dart:developer';
 import 'package:dr/api_client.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/config_parser.dart';
+import 'package:dr/demo.dart' show getDemoUserId;
 import 'package:dr/main.dart';
 import 'package:dr/ui/dialog.dart';
 import 'package:dr/util.dart';
@@ -76,6 +77,7 @@ class AuthService {
       _loggedIn = Future.value(true);
       this.user = user;
       this.pass = pass;
+      final demoUserId = await getDemoUserId();
       config = Config(
         (b) => b
           ..autoLogoutSeconds = 300
@@ -84,7 +86,7 @@ class AuthService {
           ..imgSource =
               "https://vinzentinum.digitalesregister.it/v2/theme/icons/profile_empty.png"
           ..isStudentOrParent = true
-          ..userId = 0,
+          ..userId = demoUserId,
       );
       onSessionStarted?.call(config);
       configLoaded?.call();
