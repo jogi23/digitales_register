@@ -531,6 +531,33 @@ String _patchCertificate(String html) {
   return h;
 }
 
+// ── Attachment originalName replacements (real filenames → fictional) ─────────
+const _attachNames = <String, String>{
+  'Flex und Flo (bau) S. 36 und 37.png': 'Rechenwelt_Heft_S36-37.png',
+  'Elternbrief zu den Nachbaraufgaben.pdf': 'Elternbrief_Mathematik.pdf',
+  'Alltagsmathematik.pdf': 'Mathematik_Arbeitsblatt.pdf',
+  'Liebe Eltern.docx': 'Elternbrief.docx',
+};
+
+/// Recursively walks [node] and replaces any [originalName] values found in
+/// [_attachNames] with their anonymized equivalents.
+int _anonymizeAttachNames(dynamic node) {
+  var count = 0;
+  if (node is Map) {
+    if (node.containsKey('originalName')) {
+      final cur = node['originalName'] as String?;
+      if (cur != null && _attachNames.containsKey(cur)) {
+        node['originalName'] = _attachNames[cur]!;
+        count++;
+      }
+    }
+    for (final v in node.values) count += _anonymizeAttachNames(v);
+  } else if (node is List) {
+    for (final v in node) count += _anonymizeAttachNames(v);
+  }
+  return count;
+}
+
 // ── Absence reason replacements by absence-group date ────────────────────────
 // Only groups with a non-empty existing reason are updated.
 const absReason = <String, String>{
@@ -894,7 +921,7 @@ final List<List<String>> _mathFamilies = <List<String>>[
     ])
       'Sachaufgabe lösen: $t.'
   ],
-  [for (var i = 0; i < 6; i++) 'Flex & Flo Seite ${20 + i * 4}–${21 + i * 4} bearbeiten.'],
+  [for (var i = 0; i < 6; i++) 'Rechenwelt Heft Seite ${20 + i * 4}–${21 + i * 4} bearbeiten.'],
   [
     for (final t in [
       'Formen nachzeichnen',
@@ -1270,6 +1297,7 @@ void main() {
       }
     } else if (addr.contains('getMyMessages')) {
       if (resp is List) {
+        cntMsg += _anonymizeAttachNames(resp);
         for (final msg in resp) {
           final m = msg as Map<String, dynamic>;
           final id = m['id'] as int;
@@ -1319,6 +1347,7 @@ void main() {
         }
       }
     } else if (addr.contains('calendar/student')) {
+      cntCal += _anonymizeAttachNames(resp);
       _forEachLesson(resp, (lesson) {
         for (final lc in (lesson['lessonContents'] as List? ?? [])) {
           final id = lc['id'] as int;
