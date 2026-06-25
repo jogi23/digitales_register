@@ -71,6 +71,7 @@ class Wrapper {
   Config get config => _auth.config;
   String? get error => _auth.error;
   Future<bool> get loggedIn => _auth.loggedIn;
+  bool get demoMode => _auth.demoMode;
 
   // ── Session state ─────────────────────────────────────────────────────────
 

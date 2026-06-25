@@ -49,6 +49,7 @@ import 'package:dr/ui/snack_bar.dart';
 import 'package:dr/util.dart';
 import 'package:dr/wrapper.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:open_file/open_file.dart';
@@ -469,11 +470,18 @@ Future<bool> downloadFile(
   String fileName,
   Map<String, dynamic> parameters,
 ) async {
-  await wrapper.ensureLoggedIn();
-
   final saveFile = File(
     "${await _getAttachmentDownloadDirectory()}/$fileName",
   );
+
+  if (wrapper.demoMode) {
+    if (saveFile.existsSync()) return true;
+    final bytes = await rootBundle.load('assets/demo/demo_attachment.pdf');
+    await saveFile.writeAsBytes(bytes.buffer.asUint8List(), flush: true);
+    return true;
+  }
+
+  await wrapper.ensureLoggedIn();
   var success = true;
   if (saveFile.existsSync()) {
     final shouldOverwrite = await askShouldOverwriteFile(fileName);
