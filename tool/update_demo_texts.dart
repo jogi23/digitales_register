@@ -161,15 +161,15 @@ const gName = <int, String>{
   80284: 'Satzschreiben: Einen Satz zum Bild erfinden',
   82357: 'Zuhören: Geschichte verstehen und antworten',
   85674: 'Buchstabe Jj: Lesen auf Silben- und Wortebene',
-  19116: 'Ansage: Kk, Pp, ch, Ww, Gg, Vv, Jj',
+  19116: 'Buchstabendiktat: Mitlaute und Lernwörter',
   46434: 'Heftübung: Buchstaben sauber nachspuren',
-  52504: 'Ansage: Ei, Au, Hh, Ff, Bb, Ll',
+  52504: 'Buchstabendiktat: Vokale und Anlaute',
   51347: 'Buchstabe ch: Erkennen und Lesen',
   37869: 'Buchstabe Pp: Lesezettel vorlesen',
   25014: 'Buchstabe Ff: Lesezettel vorlesen',
   80539: 'Lesehausaufgabe: Lesepass Stufe 3',
   30032: 'Zuhören: Anweisungen verstehen und ausführen',
-  31174: 'Ansage: Rr, Tt, Nn, Ee, Dd',
+  31174: 'Buchstabendiktat: Grundlaute und einfache Sätze',
   84364: 'Lesehausaufgabe: Lesepass Stufe 5',
   // ── Sport ──
   70217: 'Geräteturnen: Rollen, Balancieren, Klettern',
@@ -177,6 +177,8 @@ const gName = <int, String>{
   56566: 'Bewegungsbeobachtung: April/Mai',
   76784: 'Kooperationsspiele: Gemeinsam Aufgaben lösen',
   30730: 'Ballkontrolle: Prellen, Passen, Fangen',
+  // ── Mathematik (nur subject_detail, nicht in getGrade) ──
+  93810: 'Zahlen ordnen und vergleichen',
   // ── Weitere Bewertungen (aus entry/getGrade) ──
   42098: 'Fingerbilder: Mengen schnell erfassen',
   39256: 'Kreative Ausführung: Werkbeurteilung',
