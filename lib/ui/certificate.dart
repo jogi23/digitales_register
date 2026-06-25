@@ -176,9 +176,7 @@ class _CertificateView extends StatelessWidget {
         final altColor =
             theme.colorScheme.surfaceContainerHighest.withOpacity(0.4);
         final headerBg = theme.colorScheme.surfaceContainerHighest;
-        final gradeColor = theme.brightness == Brightness.dark
-            ? Colors.green.shade400
-            : Colors.green.shade700;
+        final gradeColor = theme.colorScheme.primary;
 
         // Label column is fixed; semester columns share remaining space equally.
         // Table handles row-height synchronisation natively — no IntrinsicHeight
