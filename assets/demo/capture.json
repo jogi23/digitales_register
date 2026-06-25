@@ -26,7 +26,7 @@
         {
           "typeId": 1267,
           "typeName": "Zahl: Orientierung im Zahlenraum 12",
-          "description": "Die Kompetenz wird sicher und selbstständig angewendet.",
+          "description": "Zahlen bis 12 werden sicher erkannt und der Reihe nach geordnet.",
           "grade": "5.00",
           "number": 1
         }
@@ -49,7 +49,7 @@
       "typeId": 5,
       "typeName": "h Praktisches Arbeiten / Üben",
       "name": "Mathekonferenz",
-      "description": "Max zeigt Freude am Lernen und löst die Aufgaben mit wachsender Sicherheit.",
+      "description": "Max stellt seinen Lösungsweg klar und nachvollziehbar vor. Er hört anderen aufmerksam zu und bringt eigene Ideen ein.",
       "date": "2026-05-08",
       "cancelled": 0,
       "cancelledDescription": null,
@@ -109,7 +109,7 @@
       "typeId": 1,
       "typeName": "g Mündliche Prüfung",
       "name": "Fingerbilder erkennen",
-      "description": "Die Aufgaben wurden mit Sorgfalt erledigt. Die grundlegenden Konzepte sind gut verstanden.",
+      "description": "Die Fingerbilder werden sicher und schnell erkannt. Max nennt die Anzahl direkt, ohne einzeln zu zählen.",
       "date": "2025-10-17",
       "cancelled": 0,
       "cancelledDescription": null,
@@ -139,7 +139,7 @@
       "typeId": 5,
       "typeName": "h Praktisches Arbeiten / Üben",
       "name": "Herstellen unterschiedlicher Bastelarbeiten",
-      "description": "Sorgfältige und genaue Arbeit. Max ist auf einem sehr guten Weg.",
+      "description": "Max arbeitet mit Freude und Ausdauer an den Bastelarbeiten. Die Ergebnisse sind kreativ und sorgfältig ausgeführt.",
       "date": "2025-12-22",
       "cancelled": 0,
       "cancelledDescription": null,
@@ -154,7 +154,7 @@
         {
           "typeId": 493,
           "typeName": "Kreative Gestaltung",
-          "description": "Sehr gute Beherrschung der geforderten Kompetenzen.",
+          "description": "Kreative Ideen werden eigenständig umgesetzt und ansprechend präsentiert.",
           "grade": "5.00",
           "number": 1
         }
@@ -177,7 +177,7 @@
       "typeId": 5,
       "typeName": "h Praktisches Arbeiten / Üben",
       "name": "Einzigartigkeit",
-      "description": "Max arbeitet selbstständig und zeigt ein gutes Verständnis der Thematik.",
+      "description": "Max setzt sich offen mit dem Thema auseinander und bringt persönliche Gedanken ein.",
       "date": "2026-01-19",
       "cancelled": 0,
       "cancelledDescription": null,
@@ -192,7 +192,7 @@
         {
           "typeId": 1362,
           "typeName": "Einzigartigkeit",
-          "description": "Die Kompetenz ist gut entwickelt und wird flüssig eingesetzt.",
+          "description": "Das Thema wurde mit Offenheit und persönlichem Engagement erarbeitet.",
           "grade": "6.00",
           "number": 1
         }
@@ -215,7 +215,7 @@
       "typeId": 5,
       "typeName": "h Praktisches Arbeiten / Üben",
       "name": "Geometrie: genaues und sorgfältiges Falten",
-      "description": "Max zeigt eine sehr gute Leistung und arbeitet stets konzentriert und zielstrebig.",
+      "description": "Sehr präzise und geduldige Faltarbeit. Die Knicke sitzen exakt und das Ergebnis ist ordentlich.",
       "date": "2026-01-20",
       "cancelled": 0,
       "cancelledDescription": null,
@@ -230,7 +230,7 @@
         {
           "typeId": 1470,
           "typeName": "Geometrie",
-          "description": "Gute Grundlagen sind vorhanden, die weiter ausgebaut werden sollten.",
+          "description": "Geometrische Formen werden korrekt erkannt und präzise dargestellt.",
           "grade": "4.00",
           "number": 1
         }
@@ -253,7 +253,7 @@
       "typeId": 1,
       "typeName": "g Mündliche Prüfung",
       "name": "Einfache Additionsaufgaben (+0,+1)",
-      "description": "Die Grundlagen sind sicher beherrscht. Weiterführende Inhalte können problemlos erarbeitet werden. Die Aufgaben wurden mit Sorgfalt erledigt. Die grundlegenden Konzepte sind gut verstanden.",
+      "description": "Additionsaufgaben mit +0 und +1 werden sicher und selbstständig gelöst.",
       "date": "2026-02-02",
       "cancelled": 0,
       "cancelledDescription": null,
@@ -283,7 +283,7 @@
       "typeId": 1,
       "typeName": "g Mündliche Prüfung",
       "name": "10- Aufgaben",
-      "description": "Max arbeitet konzentriert und bringt gute Vorkenntnisse mit.",
+      "description": "Max löst die 10er-Minusaufgaben zuverlässig. Die Strategie ist gut eingeübt.",
       "date": "2026-04-22",
       "cancelled": 0,
       "cancelledDescription": null,
@@ -313,7 +313,7 @@
       "typeId": 5,
       "typeName": "h Praktisches Arbeiten / Üben",
       "name": "ist größer (>), ist kleiner (<), ist gleich (=)",
-      "description": "Die Aufgaben wurden mit Sorgfalt erledigt. Die grundlegenden Konzepte sind gut verstanden. Max zeigt eine sehr gute Leistung und arbeitet stets konzentriert und zielstrebig. Max bringt großes Engagement mit und erzielt damit sehr gute Ergebnisse.",
+      "description": "Vergleichszeichen werden korrekt eingesetzt. Max erkennt Zahlenbeziehungen sicher.",
       "date": "2025-11-26",
       "cancelled": 0,
       "cancelledDescription": null,
@@ -343,7 +343,7 @@
       "typeId": 2,
       "typeName": "f Schriftliche Lernzielkontrolle",
       "name": "Babyaufgaben Minus",
-      "description": "Die Grundlagen sind sicher beherrscht. Weiterführende Inhalte können problemlos erarbeitet werden. Gut gemacht! Die bearbeiteten Aufgaben zeigen ein solides Grundverständnis. Max bringt großes Engagement mit und erzielt damit sehr gute Ergebnisse.",
+      "description": "Einfache Subtraktionsaufgaben werden konzentriert und methodisch bearbeitet.",
       "date": "2026-04-15",
       "cancelled": 0,
       "cancelledDescription": null,
@@ -373,7 +373,7 @@
       "typeId": 56,
       "typeName": "i Heft- / Mappenübung",
       "name": "Kraft der 5 (erste Aufgaben)",
-      "description": "Max arbeitet konzentriert und bringt gute Vorkenntnisse mit. Max zeigt ein hohes Maß an Eigenverantwortung und Lernbereitschaft.",
+      "description": "Das Konzept der Kraft der 5 ist verstanden. Erste Aufgaben werden sicher gelöst.",
       "date": "2025-11-21",
       "cancelled": 0,
       "cancelledDescription": null,
@@ -403,7 +403,7 @@
       "typeId": 5,
       "typeName": "h Praktisches Arbeiten / Üben",
       "name": "Geometrie: Falten",
-      "description": "Max arbeitet selbstständig und zeigt ein gutes Verständnis der Thematik. Max bringt großes Engagement mit und erzielt damit sehr gute Ergebnisse.",
+      "description": "Sorgfältige Faltarbeit. Anweisungen werden Schritt für Schritt umgesetzt.",
       "date": "2025-12-16",
       "cancelled": 0,
       "cancelledDescription": null,
@@ -433,7 +433,7 @@
       "typeId": 56,
       "typeName": "i Heft- / Mappenübung",
       "name": "Geometrische Körper",
-      "description": "Gute Leistung mit Potential zur weiteren Verbesserung. Mit regelmäßigem Üben wird es noch besser. Max arbeitet selbstständig und zeigt ein gutes Verständnis der Thematik.",
+      "description": "Geometrische Körper werden richtig erkannt, benannt und nach Merkmalen sortiert.",
       "date": "2026-05-20",
       "cancelled": 0,
       "cancelledDescription": null,
@@ -463,7 +463,7 @@
       "typeId": 1,
       "typeName": "g Mündliche Prüfung",
       "name": "Zählen: vorwärtszählen bis mind. 20; flexibles Weiterzählen...",
-      "description": "Die Aufgaben wurden korrekt und vollständig gelöst. Eine erfreuliche Leistung. Max hat die Lerninhalte gut verstanden und kann sie sicher anwenden. Gute Leistung mit Potential zur weiteren Verbesserung. Mit regelmäßigem Üben wird es noch besser.",
+      "description": "Max zählt sicher vorwärts und rückwärts. Das flexible Weiterzählen von beliebigen Zahlen gelingt zuverlässig.",
       "date": "2025-10-09",
       "cancelled": 0,
       "cancelledDescription": null,
@@ -478,7 +478,7 @@
         {
           "typeId": 352,
           "typeName": "Zahl: zählen, vergleichen und ordnen",
-          "description": "Die Kompetenz ist gut entwickelt und wird flüssig eingesetzt.",
+          "description": "Zahlenreihen werden sicher beherrscht und zuverlässig angewendet.",
           "grade": "6.00",
           "number": 1
         }
@@ -501,7 +501,7 @@
       "typeId": 56,
       "typeName": "i Heft- / Mappenübung",
       "name": "Mein persönliches Thema (Plakat, ForscherInnenheft, Lapbook,...",
-      "description": "Ausgezeichnete Arbeit! Die gestellten Anforderungen wurden sehr gut erfüllt. Gute Leistung mit Potential zur weiteren Verbesserung. Mit regelmäßigem Üben wird es noch besser. Max zeigt eine sehr gute Leistung und arbeitet stets konzentriert und zielstrebig.",
+      "description": "Das Forschungsprojekt ist liebevoll gestaltet. Max präsentiert sein Thema mit Begeisterung und gutem Fachwissen.",
       "date": "2026-06-03",
       "cancelled": 1,
       "cancelledDescription": "Am 04.06.2026 von Anna Musterfrau mit einem anderen Eintrag ersetzt",
@@ -516,7 +516,7 @@
         {
           "typeId": 1942,
           "typeName": "Auseinandersetzung mit einem persönlichen Thema",
-          "description": "Max wendet die erlernten Strategien zuverlässig an.",
+          "description": "Das Thema wurde selbstständig erarbeitet und anschaulich aufbereitet.",
           "grade": "6.00",
           "number": 2
         }
@@ -539,7 +539,7 @@
       "typeId": 1,
       "typeName": "g Mündliche Prüfung",
       "name": "Einfache Additionsaufgaben (+0,+1)",
-      "description": "Die Aufgaben wurden korrekt und vollständig gelöst. Eine erfreuliche Leistung. Solide Leistung mit einigen kleinen Ungenauigkeiten. Insgesamt sehr zufriedenstellend. Max beteiligt sich aktiv am Unterricht und zeigt ein erfreuliches Engagement.",
+      "description": "Additionsaufgaben wurden selbstständig und korrekt bearbeitet. Max arbeitet konzentriert.",
       "date": "2026-01-29",
       "cancelled": 0,
       "cancelledDescription": null,
@@ -569,7 +569,7 @@
       "typeId": 5,
       "typeName": "h Praktisches Arbeiten / Üben",
       "name": "Mitarbeit (September/Oktober)",
-      "description": "Ausgezeichnete Arbeit! Die gestellten Anforderungen wurden sehr gut erfüllt.",
+      "description": "Max nimmt engagiert am Sportunterricht teil. Er hält die Regeln ein und unterstützt die Gruppe.",
       "date": "2025-11-09",
       "cancelled": 0,
       "cancelledDescription": null,
@@ -584,7 +584,7 @@
         {
           "typeId": 29,
           "typeName": "Bewegungs- und Sportspiele: Sportspielen teil",
-          "description": "Max zeigt ein solides Verständnis der geforderten Inhalte.",
+          "description": "Spielregeln werden eingehalten; das Spiel wird kooperativ mitgestaltet.",
           "grade": "6.00",
           "number": 1
         }
@@ -607,7 +607,7 @@
       "typeId": 1,
       "typeName": "g Mündliche Prüfung",
       "name": "Lesehausaufgabe",
-      "description": "Sehr gutes Ergebnis! Max hat die Lerninhalte sicher verinnerlicht. Max bringt großes Engagement mit und erzielt damit sehr gute Ergebnisse. Die Aufgaben wurden mit Sorgfalt erledigt. Die grundlegenden Konzepte sind gut verstanden.",
+      "description": "Die Lesehausaufgabe wurde zuverlässig erledigt. Max liest zunehmend flüssiger.",
       "date": "2025-12-01",
       "cancelled": 0,
       "cancelledDescription": null,
@@ -622,7 +622,7 @@
         {
           "typeId": 161,
           "typeName": "Lesen: die Buchstaben erkennen und richtig lesen",
-          "description": "Max zeigt ein solides Verständnis der geforderten Inhalte.",
+          "description": "Buchstaben werden sicher erkannt und korrekt gelesen.",
           "grade": "6.00",
           "number": 1
         }
@@ -645,7 +645,7 @@
       "typeId": 1,
       "typeName": "g Mündliche Prüfung",
       "name": "Lesehausaufgabe (zweite Seite)  Wenn bei der 1.Lesehausaufga...",
-      "description": "Die Aufgaben werden sorgfältig und vollständig bearbeitet. Weiter so!",
+      "description": "Auch die zweite Seite wurde vollständig bearbeitet. Wörter werden sicher und korrekt gelesen.",
       "date": "2025-11-24",
       "cancelled": 0,
       "cancelledDescription": null,
@@ -660,7 +660,7 @@
         {
           "typeId": 178,
           "typeName": "Lesen: Wörter lesen und verstehen",
-          "description": "Mit etwas mehr Übung wird Max diese Kompetenz noch sicherer beherrschen.",
+          "description": "Wörter werden korrekt gelesen und der Inhalt wird gut verstanden.",
           "grade": "6.00",
           "number": 1
         }
@@ -1416,7 +1416,7 @@
             "id": 92397,
             "type": "observation",
             "title": "Beobachtung",
-            "subtitle": "Max comprende i contenuti proposti e li applica correttamente, impegnandosi con...",
+            "subtitle": "Max comprende i contenuti proposti e li applica con sicurezza. Partecipa volent...",
             "label": "Italienisch"
           },
           {
@@ -2043,7 +2043,7 @@
             "id": 19358,
             "type": "observation",
             "title": "Beobachtung",
-            "subtitle": "Ich bemühe mich, so konzentriert wie möglich zu arbeiten – vor allem, wenn ich m...",
+            "subtitle": "Oggi mi sono impegnato a lavorare con attenzione e sono riuscito a finire tutto...",
             "label": "Deutsch"
           },
           {
@@ -2167,7 +2167,7 @@
             "id": 31417,
             "type": "observation",
             "title": "Beobachtung",
-            "subtitle": "Mündliche Mitarbeit März/April:\nMax beteiligt sich im mündlichen Unterricht stet...",
+            "subtitle": "Mündliche Mitarbeit März/April: Max beteiligt sich regelmäßig am Unterrichtsge...",
             "label": "Religion"
           },
           {
@@ -2611,7 +2611,7 @@
             "id": 84341,
             "type": "observation",
             "title": "Beobachtung",
-            "subtitle": "Max konnte sich heute nicht so gut auf seine Arbeit konzentrieren und ist somit...",
+            "subtitle": "Max hatte heute einen schwierigen Tag. Die Konzentration fiel schwer, weshalb e...",
             "label": "Deutsch"
           }
         ],
@@ -2684,7 +2684,7 @@
             "id": 95909,
             "type": "observation",
             "title": "Beobachtung",
-            "subtitle": "Max, du hast uns heute in der Klasse einen ganz magischen Moment geschenkt. Du h...",
+            "subtitle": "Max, heute hast du etwas Schönes gezeigt: Du hast einem Mitschüler geholfen, oh...",
             "label": "NatGeGeo"
           }
         ],
@@ -3026,21 +3026,21 @@
             "id": 86622,
             "type": "observation",
             "title": "Beobachtung",
-            "subtitle": "Bitte Pritt nachkaufen.",
+            "subtitle": "Bitte Klebstoff nachkaufen.",
             "label": "Deutsch"
           },
           {
             "id": 66155,
             "type": "observation",
             "title": "Beobachtung",
-            "subtitle": "Sprechstunde mit dem Vater von Max. Es wird über das Sozial-, Lern- und Arbeitsv...",
+            "subtitle": "Sprechstunde mit dem Vater von Max. Entwicklung im Unterricht und Leistungen be...",
             "label": "Religion"
           },
           {
             "id": 86484,
             "type": "observation",
             "title": "Beobachtung",
-            "subtitle": "Colloquio con il padre di Max. Durante l’incontro sono stati condivisi gli aspet...",
+            "subtitle": "Colloquio con il padre di Max. Si è parlato degli aspetti sociali e dell'impegno...",
             "label": "Italienisch"
           }
         ],
@@ -3383,7 +3383,7 @@
             "id": 65333,
             "type": "observation",
             "title": "Beobachtung",
-            "subtitle": "Max, vielleicht wäre es eine Idee die Hausaufgaben ein bisschen auf die Woche au...",
+            "subtitle": "Max, es könnte helfen, die Hausaufgaben gleichmäßig auf die Woche zu verteilen....",
             "label": "Mathematik"
           },
           {
@@ -3765,7 +3765,7 @@
             "id": 94012,
             "type": "observation",
             "title": "Beobachtung",
-            "subtitle": "Sprechstunde mit den Eltern von Max. Es wird über das Sozial-, Lern- und Arbeits...",
+            "subtitle": "Sprechstunde mit den Eltern von Max. Aktuelle Lernentwicklung und Sozialverhalt...",
             "label": "Deutsch"
           }
         ],
@@ -4005,7 +4005,7 @@
             "id": 76542,
             "type": "observation",
             "title": "Beobachtung",
-            "subtitle": "Mündliche Mitarbeit Januar/Februar: \nMax nimmt regelmäßig am Unterrichtsgespräch...",
+            "subtitle": "Mündliche Mitarbeit Januar/Februar: Max nimmt regelmäßig am Unterrichtsgesprä...",
             "label": "Religion"
           }
         ],
@@ -4033,7 +4033,7 @@
             "id": 91959,
             "type": "observation",
             "title": "Beobachtung",
-            "subtitle": "Max collabora in modo attivo , dimostrando interesse e partecipazione alla lezio...",
+            "subtitle": "Max collabora in modo attivo durante le lezioni. Dimostra interesse e partecipaz...",
             "label": "Italienisch"
           },
           {
@@ -4199,7 +4199,7 @@
             "id": 59009,
             "type": "observation",
             "title": "Beobachtung",
-            "subtitle": "Max, es läuft gerade richtig gut und du freust dich selbst wirklich sehr über de...",
+            "subtitle": "Max, in letzter Zeit läuft es richtig gut! Du freust dich selbst über deine Fort...",
             "label": "Mathematik"
           }
         ],
@@ -4341,7 +4341,7 @@
             "id": 52487,
             "type": "observation",
             "title": "Beobachtung",
-            "subtitle": "Max arbeitet sehr konzentriert, ausdauernd und in einem angemessenen Arbeitstemp...",
+            "subtitle": "Max arbeitet sehr konzentriert und in einem angemessenen Arbeitstempo. Er erledi...",
             "label": "Deutsch"
           },
           {
@@ -4840,7 +4840,7 @@
             "id": 72296,
             "type": "observation",
             "title": "Beobachtung",
-            "subtitle": "Max, es gibt solche Tage, wie heute, an denen du kaum etwas schaffst. Dann schre...",
+            "subtitle": "Max, heute war ein schwieriger Tag. Du hast wenig geschafft und dich kaum konzen...",
             "label": "Mathematik"
           },
           {
@@ -5019,21 +5019,21 @@
             "id": 65461,
             "type": "observation",
             "title": "Beobachtung",
-            "subtitle": "Wenn eine Lehrperson neben Max steht arbeitet Max. Sobald sich die Lehrperson en...",
+            "subtitle": "Max arbeitet am besten, wenn er klare Aufgaben bekommt und den Ablauf kennt. Unt...",
             "label": "Deutsch"
           },
           {
             "id": 37760,
             "type": "observation",
             "title": "Beobachtung",
-            "subtitle": "Kinderrat: Es gelingt dir recht gut, an Kreisgesprächen teilzunehmen. Du bemühst...",
+            "subtitle": "Kinderrat: Es gelingt dir gut, an Kreisgesprächen teilzunehmen. Du bringst dein...",
             "label": "NatGeGeo"
           },
           {
             "id": 80686,
             "type": "observation",
             "title": "Beobachtung",
-            "subtitle": "Lieber Max, übe fest das \"eines mehr und eins weniger\", vor allem mit +1 Sprechw...",
+            "subtitle": "Lieber Max, übe weiterhin das Eines-mehr und Eines-weniger, besonders mit dem +1...",
             "label": "Mathematik"
           }
         ],
@@ -5197,14 +5197,14 @@
             "id": 67422,
             "type": "observation",
             "title": "Beobachtung",
-            "subtitle": "Hausaufgabe Mathematik: Hefteinträge zu den Ziffern beenden bis Montag, 12.01.20...",
+            "subtitle": "Mathematik: Hefteinträge zu den Ziffern bitte bis Montag fertig beenden.",
             "label": "Mathematik"
           },
           {
             "id": 55082,
             "type": "observation",
             "title": "Beobachtung",
-            "subtitle": "Max mostra interesse e partecipazione.",
+            "subtitle": "Max mostra interesse e partecipa con entusiasmo alle attività della lezione.",
             "label": "Italienisch"
           },
           {
@@ -5349,28 +5349,28 @@
             "id": 39451,
             "type": "observation",
             "title": "Beobachtung",
-            "subtitle": "Mündliche Mitarbeit November/Dezember:\nMax beteiligt sich regelmäßig am Unterric...",
+            "subtitle": "Mündliche Mitarbeit November/Dezember: Max meldet sich regelmäßig und bringt gut...",
             "label": "Religion"
           },
           {
             "id": 18392,
             "type": "observation",
             "title": "Beobachtung",
-            "subtitle": "Heftführung:\nMax, deine Hefteinträge sind vollständig und passend zum Thema. Du...",
+            "subtitle": "Heftführung: Deine Einträge sind vollständig und ordentlich gestaltet. Weiter so...",
             "label": "Religion"
           },
           {
             "id": 54313,
             "type": "observation",
             "title": "Beobachtung",
-            "subtitle": "Du zeigst Interesse an Kunst und Technik und arbeitest je nach Thema mit hohem E...",
+            "subtitle": "Du zeigst Interesse an kreativen Aufgaben und arbeitest je nach Thema mit großem...",
             "label": "KuTE"
           },
           {
             "id": 12757,
             "type": "observation",
             "title": "Beobachtung",
-            "subtitle": "Max, du zeigst großes Interesse an naturwissenschaftlichen Themen. Du hörst aufm...",
+            "subtitle": "Max, du beobachtest die Natur genau und stellst gute Fragen. Dein Interesse an n...",
             "label": "NatGeGeo"
           },
           {
@@ -6013,7 +6013,7 @@
             "id": 85525,
             "type": "observation",
             "title": "Beobachtung",
-            "subtitle": "Ich bemühe mich weiterhin, sauber zu arbeiten und mich mehr auf meine Aufgaben z...",
+            "subtitle": "Ich bemühe mich, ordentlich zu arbeiten und meine Aufgaben sorgfältig zu erledigen.",
             "label": "Mathematik"
           }
         ],
@@ -6292,7 +6292,7 @@
             "id": 66498,
             "type": "observation",
             "title": "Beobachtung",
-            "subtitle": "Sprechstunde mit dem Vater von Max. Es wird über das Sozial-, Lern- und Arbeitsv...",
+            "subtitle": "Sprechstunde mit dem Vater von Max. Sozial-, Lern- und Arbeitsverhalten besprochen.",
             "label": "Deutsch"
           }
         ],
@@ -6635,7 +6635,7 @@
             "id": 54473,
             "type": "observation",
             "title": "Beobachtung",
-            "subtitle": "September/Oktober: Max, du bringst dich gerne in den Unterricht ein und haltest...",
+            "subtitle": "September/Oktober: Max bringt sich gerne in den Unterricht ein und hält die Rege...",
             "label": "Mathematik"
           }
         ],
@@ -6715,7 +6715,7 @@
             "id": 35112,
             "type": "observation",
             "title": "Beobachtung",
-            "subtitle": "Mündliche Mitarbeit September/Oktober: \nMax beteiligt sich an mündlichen Aktivit...",
+            "subtitle": "Mündliche Mitarbeit September/Oktober: Max beteiligt sich an mündlichen Aktivitä...",
             "label": "Religion"
           }
         ],
@@ -6727,7 +6727,7 @@
             "id": 34931,
             "type": "observation",
             "title": "Beobachtung",
-            "subtitle": "Max bemüht sich beim Arbeiten konzentriert zu bleiben, schafft dies aber manchma...",
+            "subtitle": "Max bemüht sich beim Arbeiten konzentriert zu bleiben, gelingt dies aber nicht im...",
             "label": "Deutsch"
           }
         ],
@@ -6739,7 +6739,7 @@
             "id": 80292,
             "type": "observation",
             "title": "Beobachtung",
-            "subtitle": "September/Oktober: Max beteiligt sich meist aktiv am mündlichen Unterricht und m...",
+            "subtitle": "September/Oktober: Max beteiligt sich aktiv am mündlichen Unterricht und meldet s...",
             "label": "Deutsch"
           }
         ],
@@ -6751,7 +6751,7 @@
             "id": 68800,
             "type": "observation",
             "title": "Beobachtung",
-            "subtitle": "Kann alle geübten Laute. Bravo, weiter so!",
+            "subtitle": "Kann alle geübten Laute sicher benennen. Sehr gut! Weiter so!",
             "label": "Deutsch"
           },
           {
@@ -7288,7 +7288,7 @@
             "id": 63269,
             "type": "observation",
             "title": "Beobachtung",
-            "subtitle": "Kann alle geübten Laute mit den Bildern verbinden. Super! Weiterhin fleißig üben...",
+            "subtitle": "Kann alle geübten Laute den Bildern richtig zuordnen. Weiterhin fleißig üben!",
             "label": "Deutsch"
           },
           {
@@ -7377,7 +7377,7 @@
             "id": 62565,
             "type": "observation",
             "title": "Beobachtung",
-            "subtitle": "Kann alle geübten Laute mit den Bildern verbinden: Ä, Ö, Ü, Au, Ei, Eu",
+            "subtitle": "Kann alle geübten Laute mit Bildern verbinden: ä, ö, ü, Au, Ei, Eu.",
             "label": "Deutsch"
           },
           {
@@ -7474,14 +7474,14 @@
             "id": 10282,
             "type": "observation",
             "title": "Beobachtung",
-            "subtitle": "Kann alle geübten Laute mit den Bildern verbinden: A, E, I, O, U\nWeiterhin tägli...",
+            "subtitle": "Kann alle geübten Laute mit Bildern verbinden: A, E, I, O, U. Täglich weiterüben!",
             "label": "Deutsch"
           },
           {
             "id": 61173,
             "type": "observation",
             "title": "Beobachtung",
-            "subtitle": "- zählt fehlerfrei bis zur 30\n- zählt flexibel von einer Zahl weiter\n- zählt feh...",
+            "subtitle": "- zählt fehlerfrei bis 30; - zählt flexibel weiter; - zählt sicher rückwärts von...",
             "label": "Mathematik"
           },
           {
@@ -64520,7 +64520,7 @@
       "studentId": 20500,
       "subjectId": 86
     },
-    "response": "{\"grades\": [{\"id\": 46421, \"grade\": null, \"weight\": 100, \"typeId\": 56, \"typeName\": \"i Heft- / Mappenübung\", \"name\": \"Heftführung\", \"description\": \"Max arbeitet selbstständig und zeigt ein gutes Verständnis der Thematik. Die Aufgaben werden sorgfältig und vollständig bearbeitet. Weiter so! Max hat die Lerninhalte gut verstanden und kann sie sicher anwenden.\", \"date\": \"2026-06-02\", \"cancelled\": 0, \"created\": \"Von Petra Übungsfrau am 02.06.2026 eingetragen\", \"subjectId\": 86, \"classId\": 13495, \"studentId\": 24592, \"createdTimeStamp\": \"2026-06-02 11:05:19\", \"cancelledTimeStamp\": null, \"competences\": [{\"typeId\": 64381, \"typeName\": \"Heftführung\", \"description\": \"Max wendet die erlernten Strategien zuverlässig an.\", \"grade\": \"5.00\"}]}, {\"id\": 54597, \"grade\": null, \"weight\": 100, \"typeId\": 56, \"typeName\": \"i Heft- / Mappenübung\", \"name\": \"Daniel in der Löwengrube\", \"description\": \"Ausgezeichnete Arbeit! Die gestellten Anforderungen wurden sehr gut erfüllt. Max arbeitet konzentriert und bringt gute Vorkenntnisse mit.\", \"date\": \"2026-06-02\", \"cancelled\": 0, \"created\": \"Von Petra Übungsfrau am 02.06.2026 eingetragen\", \"subjectId\": 86, \"classId\": 13495, \"studentId\": 24592, \"createdTimeStamp\": \"2026-06-02 11:03:30\", \"cancelledTimeStamp\": null, \"competences\": [{\"typeId\": 16980, \"typeName\": \"Daniel in der Löwengrube\", \"description\": \"Ausgezeichnete Leistung in diesem Bereich.\", \"grade\": \"4.00\"}]}, {\"id\": 32431, \"grade\": null, \"weight\": 100, \"typeId\": 5, \"typeName\": \"h Praktisches Arbeiten / Üben\", \"name\": \"Mündliche Mitarbeit März/April\", \"description\": \"Die Grundlagen sind sicher beherrscht. Weiterführende Inhalte können problemlos erarbeitet werden. Gut gemacht! Die bearbeiteten Aufgaben zeigen ein solides Grundverständnis. Sorgfältige und genaue Arbeit. Max ist auf einem sehr guten Weg.\", \"date\": \"2026-04-30\", \"cancelled\": 0, \"created\": \"Von Petra Übungsfrau am 04.05.2026 eingetragen\", \"subjectId\": 86, \"classId\": 13495, \"studentId\": 24592, \"createdTimeStamp\": \"2026-05-04 08:43:53\", \"cancelledTimeStamp\": null, \"competences\": [{\"typeId\": 61964, \"typeName\": \"Mündliche Mitarbeit\", \"description\": \"Max zeigt ein solides Verständnis der geforderten Inhalte.\", \"grade\": \"5.00\"}]}, {\"id\": 33416, \"grade\": null, \"weight\": 100, \"typeId\": 5, \"typeName\": \"h Praktisches Arbeiten / Üben\", \"name\": \"Mündliche Mitarbeit Januar/Februar\", \"description\": \"Max arbeitet konzentriert und bringt gute Vorkenntnisse mit.\", \"date\": \"2026-02-27\", \"cancelled\": 0, \"created\": \"Von Petra Übungsfrau am 14.04.2026 eingetragen\", \"subjectId\": 86, \"classId\": 13495, \"studentId\": 24592, \"createdTimeStamp\": \"2026-04-14 16:04:15\", \"cancelledTimeStamp\": null, \"competences\": [{\"typeId\": 61964, \"typeName\": \"Mündliche Mitarbeit\", \"description\": \"Max zeigt ein solides Verständnis der geforderten Inhalte.\", \"grade\": \"5.00\"}]}], \"absences\": [{\"minutes\": 50, \"minutes_begin\": 0, \"minutes_end\": 0, \"justified\": 2, \"note\": \"\", \"date\": \"2026-02-04\", \"hour\": 6}], \"observations\": [{\"id\": 31417, \"note\": \"Max zeigt ein hohes Maß an Ausdauer und Geduld bei der Bearbeitung von Aufgaben. Er gibt nicht auf, wenn eine Aufgabe herausfordernd ist.\\nIm mündlichen Ausdruck zeigt Max eine klare und verständliche Sprachkompetenz. Er formuliert seine Gedanken präzise und strukturiert.\\nIm praktischen Arbeiten zeigt Max große Geschicklichkeit und Kreativität. Er setzt seine Ideen eigenständig um und präsentiert seine Ergebnisse mit Stolz.\\nIm mündlichen Ausdruck zeigt Max eine klare und verständliche Sprachkompetenz. Er formuliert seine Gedanken präzise und strukturiert.\\nMax zeigt Freude am Lernen und ist neugierig auf neue Themen und Herausforderungen. Diese positive Einstellung wirkt motivierend auf die ganze Klasse.\\nMax geht mit Fehlern konstruktiv um. Er betrachtet sie als Lernchance und arbeitet aktiv daran, sich zu verbessern.\\nMax beteiligt sich regelmäßig am Unterrichtsgeschehen und meldet sich häufig zu Wort. Seine Beiträge sind meist treffend und bereichern die Klasse.\\nMax zeigt Freude am Lernen und ist neugierig auf neue Themen und Herausforderungen. Diese positive Einstellung wirkt motivierend auf die ganze Klasse.\", \"date\": \"2026-04-30\", \"typeId\": 20, \"typeName\": \"0 1 Arbeitsverhalten (Einsatz, Fleiß, Interesse, Mitarbeit)\", \"cancelled\": 0, \"created\": \"Von Petra Übungsfrau am 04.05.2026 eingetragen\", \"subjectId\": 86, \"classId\": 13495, \"studentId\": 24592, \"hidden\": 0, \"teacherId\": 47353}, {\"id\": 66155, \"note\": \"In Gruppenarbeiten übernimmt Max häufig eine aktive Rolle und trägt konstruktiv zu gemeinsamen Lösungen bei.\\nDie Zusammenarbeit mit anderen Schülerinnen und Schülern gestaltet Max sehr positiv. Er unterstützt seine Mitschüler und trägt zu einer guten Klassenatmosphäre bei.\\nDie schriftlichen Arbeiten von Max sind ordentlich und sorgfältig. Auf Fehler wird er aufmerksam und verbessert diese gewissenhaft.\", \"date\": \"2026-03-30\", \"typeId\": 5, \"typeName\": \"6 Aussprachen und Sprechstunden\", \"cancelled\": 0, \"created\": \"Von Petra Übungsfrau am 30.03.2026 eingetragen\", \"subjectId\": 86, \"classId\": 13495, \"studentId\": 24592, \"hidden\": 0, \"teacherId\": 47353}, {\"id\": 76542, \"note\": \"Max bringt eine positive Lernhaltung mit in den Unterricht. Er zeigt echtes Interesse an den behandelten Themen und stellt gute Fragen.\\nIm mündlichen Ausdruck zeigt Max eine klare und verständliche Sprachkompetenz. Er formuliert seine Gedanken präzise und strukturiert.\\nDie Zusammenarbeit mit anderen Schülerinnen und Schülern gestaltet Max sehr positiv. Er unterstützt seine Mitschüler und trägt zu einer guten Klassenatmosphäre bei.\", \"date\": \"2026-02-27\", \"typeId\": 20, \"typeName\": \"0 1 Arbeitsverhalten (Einsatz, Fleiß, Interesse, Mitarbeit)\", \"cancelled\": 0, \"created\": \"Von Petra Übungsfrau am 23.03.2026 eingetragen\", \"subjectId\": 86, \"classId\": 13495, \"studentId\": 24592, \"hidden\": 0, \"teacherId\": 47353}], \"averageSemester\": 0, \"averageYear\": 0, \"showGrades\": 2, \"showGradesStudentView\": 2, \"isClassHasNoGrades\": true, \"countCompetences\": 4, \"countDescriptions\": 0, \"countObservations\": 3}"
+    "response": "{\"grades\":[{\"id\":46421,\"grade\":null,\"weight\":100,\"typeId\":56,\"typeName\":\"i Heft- / Mappenübung\",\"name\":\"Heftführung\",\"description\":\"Das Heft ist vollständig und sorgfältig geführt. Einträge sind klar und übersichtlich gestaltet.\",\"date\":\"2026-06-02\",\"cancelled\":0,\"created\":\"Von Petra Übungsfrau am 02.06.2026 eingetragen\",\"subjectId\":86,\"classId\":13495,\"studentId\":24592,\"createdTimeStamp\":\"2026-06-02 11:05:19\",\"cancelledTimeStamp\":null,\"competences\":[{\"typeId\":64381,\"typeName\":\"Heftführung\",\"description\":\"Hefteinträge sind vollständig, sauber und gut gestaltet.\",\"grade\":\"5.00\"}]},{\"id\":54597,\"grade\":null,\"weight\":100,\"typeId\":56,\"typeName\":\"i Heft- / Mappenübung\",\"name\":\"Daniel in der Löwengrube\",\"description\":\"Max gibt die Geschichte anschaulich wieder und erfasst die zentrale Botschaft gut.\",\"date\":\"2026-06-02\",\"cancelled\":0,\"created\":\"Von Petra Übungsfrau am 02.06.2026 eingetragen\",\"subjectId\":86,\"classId\":13495,\"studentId\":24592,\"createdTimeStamp\":\"2026-06-02 11:03:30\",\"cancelledTimeStamp\":null,\"competences\":[{\"typeId\":16980,\"typeName\":\"Daniel in der Löwengrube\",\"description\":\"Die Botschaft der Geschichte wurde erkannt und verständlich wiedergegeben.\",\"grade\":\"4.00\"}]},{\"id\":32431,\"grade\":null,\"weight\":100,\"typeId\":5,\"typeName\":\"h Praktisches Arbeiten / Üben\",\"name\":\"Mündliche Mitarbeit März/April\",\"description\":\"Max meldet sich regelmäßig und beteiligt sich aktiv an Unterrichtsgesprächen. Seine Beiträge sind treffend.\",\"date\":\"2026-04-30\",\"cancelled\":0,\"created\":\"Von Petra Übungsfrau am 04.05.2026 eingetragen\",\"subjectId\":86,\"classId\":13495,\"studentId\":24592,\"createdTimeStamp\":\"2026-05-04 08:43:53\",\"cancelledTimeStamp\":null,\"competences\":[{\"typeId\":61964,\"typeName\":\"Mündliche Mitarbeit\",\"description\":\"Regelmäßige und wertvolle Beteiligung am Unterrichtsgespräch.\",\"grade\":\"5.00\"}]},{\"id\":33416,\"grade\":null,\"weight\":100,\"typeId\":5,\"typeName\":\"h Praktisches Arbeiten / Üben\",\"name\":\"Mündliche Mitarbeit Januar/Februar\",\"description\":\"Gute Mitarbeit. Max hört aufmerksam zu und bringt passende Gedanken ein.\",\"date\":\"2026-02-27\",\"cancelled\":0,\"created\":\"Von Petra Übungsfrau am 14.04.2026 eingetragen\",\"subjectId\":86,\"classId\":13495,\"studentId\":24592,\"createdTimeStamp\":\"2026-04-14 16:04:15\",\"cancelledTimeStamp\":null,\"competences\":[{\"typeId\":61964,\"typeName\":\"Mündliche Mitarbeit\",\"description\":\"Beiträge sind passend und zeigen ein gutes Verständnis der Themen.\",\"grade\":\"5.00\"}]}],\"absences\":[{\"minutes\":50,\"minutes_begin\":0,\"minutes_end\":0,\"justified\":2,\"note\":\"\",\"date\":\"2026-02-04\",\"hour\":6}],\"observations\":[{\"id\":31417,\"note\":\"Mündliche Mitarbeit März/April:\\nMax beteiligt sich regelmäßig am Unterrichtsgespräch. Er formuliert seine Gedanken klar und hört anderen aufmerksam zu.\\nDie Hausaufgaben werden zuverlässig erledigt und vollständig mitgebracht.\\nIm Umgang mit Lernmaterialien zeigt Max Sorgfalt. Das Heft ist ordentlich geführt.\",\"date\":\"2026-04-30\",\"typeId\":20,\"typeName\":\"0 1 Arbeitsverhalten (Einsatz, Fleiß, Interesse, Mitarbeit)\",\"cancelled\":0,\"created\":\"Von Petra Übungsfrau am 04.05.2026 eingetragen\",\"subjectId\":86,\"classId\":13495,\"studentId\":24592,\"hidden\":0,\"teacherId\":47353},{\"id\":66155,\"note\":\"Sprechstunde mit dem Vater von Max.\\nBesprochen wurde die Entwicklung im Unterricht sowie die bisherigen Leistungen. Max macht gute Fortschritte, besonders im mündlichen Bereich.\\nVereinbart: Übungsroutinen zu Hause beibehalten und auf vollständige Hefteinträge achten.\",\"date\":\"2026-03-30\",\"typeId\":5,\"typeName\":\"6 Aussprachen und Sprechstunden\",\"cancelled\":0,\"created\":\"Von Petra Übungsfrau am 30.03.2026 eingetragen\",\"subjectId\":86,\"classId\":13495,\"studentId\":24592,\"hidden\":0,\"teacherId\":47353},{\"id\":76542,\"note\":\"Mündliche Mitarbeit Januar/Februar:\\nMax nimmt regelmäßig am Unterrichtsgespräch teil. Er meldet sich häufig und bringt gute Beiträge ein.\\nAuch bei anspruchsvolleren Aufgaben gibt Max nicht auf. Er arbeitet ausdauernd und konzentriert.\\nDas Arbeitstempo ist gut; Max schließt Aufgaben meist pünktlich ab.\",\"date\":\"2026-02-27\",\"typeId\":20,\"typeName\":\"0 1 Arbeitsverhalten (Einsatz, Fleiß, Interesse, Mitarbeit)\",\"cancelled\":0,\"created\":\"Von Petra Übungsfrau am 23.03.2026 eingetragen\",\"subjectId\":86,\"classId\":13495,\"studentId\":24592,\"hidden\":0,\"teacherId\":47353}],\"averageSemester\":0,\"averageYear\":0,\"showGrades\":2,\"showGradesStudentView\":2,\"isClassHasNoGrades\":true,\"countCompetences\":4,\"countDescriptions\":0,\"countObservations\":3}"
   },
   {
     "address": "https://wertwerk-demo.digitalesregister.it/v2/api/student/subject_detail",
@@ -64528,7 +64528,7 @@
       "studentId": 20500,
       "subjectId": 97
     },
-    "response": "{\"grades\": [{\"id\": 65392, \"grade\": null, \"weight\": 100, \"typeId\": 56, \"typeName\": \"i Heft- / Mappenübung\", \"name\": \"Mein persönliches Thema (Plakat, ForscherInnenheft, Lapbook, Themenbox)\", \"description\": \"Die Aufgaben werden sorgfältig und vollständig bearbeitet. Weiter so!\", \"date\": \"2026-06-03\", \"cancelled\": 0, \"created\": \"Von Anna Musterfrau am 04.06.2026 eingetragen\", \"subjectId\": 97, \"classId\": 13495, \"studentId\": 24592, \"createdTimeStamp\": \"2026-06-04 12:22:00\", \"cancelledTimeStamp\": null, \"competences\": [{\"typeId\": 75799, \"typeName\": \"Auseinandersetzung mit einem persönlichen Thema\", \"description\": \"Gute Grundlagen sind vorhanden, die weiter ausgebaut werden sollten.\", \"grade\": \"6.00\"}]}, {\"id\": 76237, \"grade\": null, \"weight\": 100, \"typeId\": 56, \"typeName\": \"i Heft- / Mappenübung\", \"name\": \"Mein persönliches Thema (Plakat, ForscherInnenheft, Lapbook, Themenbox)\", \"description\": \"Ausgezeichnete Arbeit! Die gestellten Anforderungen wurden sehr gut erfüllt. Gute Leistung mit Potential zur weiteren Verbesserung. Mit regelmäßigem Üben wird es noch besser. Max zeigt eine sehr gute Leistung und arbeitet stets konzentriert und zielstrebig.\", \"date\": \"2026-06-03\", \"cancelled\": 1, \"created\": \"Von Anna Musterfrau am 03.06.2026 eingetragen\", \"subjectId\": 97, \"classId\": 13495, \"studentId\": 24592, \"createdTimeStamp\": \"2026-06-03 21:40:48\", \"cancelledTimeStamp\": \"2026-06-04 12:16:25\", \"competences\": [{\"typeId\": 75799, \"typeName\": \"Auseinandersetzung mit einem persönlichen Thema\", \"description\": \"Gute Grundlagen sind vorhanden, die weiter ausgebaut werden sollten.\", \"grade\": \"6.00\"}]}, {\"id\": 59015, \"grade\": null, \"weight\": 100, \"typeId\": 56, \"typeName\": \"i Heft- / Mappenübung\", \"name\": \"Mein persönliches Thema (Plakat, ForscherInnenheft, Lapbook, Themenbox)\", \"description\": \"Max zeigt Freude am Lernen und löst die Aufgaben mit wachsender Sicherheit.\", \"date\": \"2026-06-03\", \"cancelled\": 1, \"created\": \"Von Anna Musterfrau am 03.06.2026 eingetragen\", \"subjectId\": 97, \"classId\": 13495, \"studentId\": 24592, \"createdTimeStamp\": \"2026-06-03 10:51:04\", \"cancelledTimeStamp\": \"2026-06-03 21:35:21\", \"competences\": [{\"typeId\": 40903, \"typeName\": \"Pflanze, Tier und Mensch: Merkmale von Lebewesen\", \"description\": \"Grundlegende Fertigkeiten sind vorhanden und werden zunehmend sicherer.\", \"grade\": \"6.00\"}, {\"typeId\": 75799, \"typeName\": \"Auseinandersetzung mit einem persönlichen Thema\", \"description\": \"Gute Grundlagen sind vorhanden, die weiter ausgebaut werden sollten.\", \"grade\": \"6.00\"}]}, {\"id\": 57819, \"grade\": null, \"weight\": 100, \"typeId\": 5, \"typeName\": \"h Praktisches Arbeiten / Üben\", \"name\": \"Experimente: Welche Gegenstände sinken und welche schwimmen?\", \"description\": \"Die Aufgaben werden sorgfältig und vollständig bearbeitet. Weiter so!\", \"date\": \"2026-05-11\", \"cancelled\": 0, \"created\": \"Von Anna Musterfrau am 25.05.2026 eingetragen\", \"subjectId\": 97, \"classId\": 13495, \"studentId\": 24592, \"createdTimeStamp\": \"2026-05-25 17:57:53\", \"cancelledTimeStamp\": null, \"competences\": [{\"typeId\": 86, \"typeName\": \"Experimentieren: Alltagserscheinungen\", \"description\": \"Max zeigt ein solides Verständnis der geforderten Inhalte.\", \"grade\": \"6.00\"}, {\"typeId\": 88, \"typeName\": \"Experimentieren: Austausch Arbeitsgruppe nutzen\", \"description\": \"Die Kompetenz wird sicher und selbstständig angewendet.\", \"grade\": \"6.00\"}, {\"typeId\": 97, \"typeName\": \"Experimentieren: Verhaltens- und Sicherheitsregeln \", \"description\": \"Die Kompetenz ist gut entwickelt und wird flüssig eingesetzt.\", \"grade\": \"6.00\"}]}, {\"id\": 44993, \"grade\": null, \"weight\": 100, \"typeId\": 5, \"typeName\": \"h Praktisches Arbeiten / Üben\", \"name\": \"Frühblüher (Mein 1. Plakat oder Forscherheft)\", \"description\": \"Gut gemacht! Die bearbeiteten Aufgaben zeigen ein solides Grundverständnis. Max bringt großes Engagement mit und erzielt damit sehr gute Ergebnisse.\", \"date\": \"2026-05-06\", \"cancelled\": 0, \"created\": \"Von Anna Musterfrau am 07.05.2026 eingetragen\", \"subjectId\": 97, \"classId\": 13495, \"studentId\": 24592, \"createdTimeStamp\": \"2026-05-07 17:07:12\", \"cancelledTimeStamp\": null, \"competences\": [{\"typeId\": 60615, \"typeName\": \"Plakate/Forscherheft anfertigen\", \"description\": \"Sehr gute Beherrschung der geforderten Kompetenzen.\", \"grade\": \"5.00\"}, {\"typeId\": 20696, \"typeName\": \"Pflanze, Tier und Mensch: Merkmale von Lebewesen\", \"description\": \"Grundlegende Fertigkeiten sind vorhanden und werden zunehmend sicherer.\", \"grade\": \"6.00\"}]}, {\"id\": 80010, \"grade\": null, \"weight\": 100, \"typeId\": 5, \"typeName\": \"h Praktisches Arbeiten / Üben\", \"name\": \"Experiment: Warum wasche ich meine Hände mit Seife?\", \"description\": \"Max hat die Lerninhalte gut verstanden und kann sie sicher anwenden. Gut gemacht! Die bearbeiteten Aufgaben zeigen ein solides Grundverständnis. Max bringt großes Engagement mit und erzielt damit sehr gute Ergebnisse.\", \"date\": \"2026-04-30\", \"cancelled\": 0, \"created\": \"Von Anna Musterfrau am 04.05.2026 eingetragen\", \"subjectId\": 97, \"classId\": 13495, \"studentId\": 24592, \"createdTimeStamp\": \"2026-05-04 13:01:14\", \"cancelledTimeStamp\": null, \"competences\": [{\"typeId\": 86, \"typeName\": \"Experimentieren: Alltagserscheinungen\", \"description\": \"Max zeigt ein solides Verständnis der geforderten Inhalte.\", \"grade\": \"6.00\"}, {\"typeId\": 90, \"typeName\": \"Experimentieren: Austausch Arbeitsgruppe nutzen (Wissen)\", \"description\": \"Sehr gute Beherrschung der geforderten Kompetenzen.\", \"grade\": \"6.00\"}]}, {\"id\": 44718, \"grade\": null, \"weight\": 100, \"typeId\": 1, \"typeName\": \"g Mündliche Prüfung\", \"name\": \"Die vier Jahreszeiten und die 12 Monate; richtige Reihenfolge und Monate passend zur Jahreszeit\", \"description\": \"Max arbeitet konzentriert und bringt gute Vorkenntnisse mit. Die Aufgaben wurden mit Sorgfalt erledigt. Die grundlegenden Konzepte sind gut verstanden. Gute Leistung mit Potential zur weiteren Verbesserung. Mit regelmäßigem Üben wird es noch besser.\", \"date\": \"2026-04-09\", \"cancelled\": 0, \"created\": \"Von Anna Musterfrau am 09.04.2026 eingetragen\", \"subjectId\": 97, \"classId\": 13495, \"studentId\": 24592, \"createdTimeStamp\": \"2026-04-09 17:01:44\", \"cancelledTimeStamp\": null, \"competences\": [{\"typeId\": 59140, \"typeName\": \"Orientierung im Kalenderjahr\", \"description\": \"Die Kompetenz wird sicher und selbstständig angewendet.\", \"grade\": \"6.00\"}]}, {\"id\": 48469, \"grade\": null, \"weight\": 100, \"typeId\": 1, \"typeName\": \"g Mündliche Prüfung\", \"name\": \"- Ich kann ... erklären wie Tag und Nacht entstehen; ... die Wochentage und ihre Reihenfolge; ... Morgen, Vormittag, Mittag, Nachmittag und Abend; ... \\\"gestern war, heute, morgen\\\" richtig anwenden.\", \"description\": \"Max arbeitet konzentriert und bringt gute Vorkenntnisse mit. Max arbeitet selbstständig und zeigt ein gutes Verständnis der Thematik. Max bringt großes Engagement mit und erzielt damit sehr gute Ergebnisse.\", \"date\": \"2026-03-04\", \"cancelled\": 0, \"created\": \"Von Anna Musterfrau am 08.03.2026 eingetragen\", \"subjectId\": 97, \"classId\": 13495, \"studentId\": 24592, \"createdTimeStamp\": \"2026-03-08 20:24:44\", \"cancelledTimeStamp\": null, \"competences\": [{\"typeId\": 39430, \"typeName\": \"Zeitbewusstsein: Tagesablauf\", \"description\": \"Sehr gute Beherrschung der geforderten Kompetenzen.\", \"grade\": \"6.00\"}, {\"typeId\": 13694, \"typeName\": \"Zeitbewusstsein: Tagesablauf\", \"description\": \"Die Kompetenz ist gut entwickelt und wird flüssig eingesetzt.\", \"grade\": \"6.00\"}, {\"typeId\": 51770, \"typeName\": \"Zeitbewusstsein: Wochentage\", \"description\": \"Max zeigt ein solides Verständnis der geforderten Inhalte.\", \"grade\": \"6.00\"}]}], \"absences\": [{\"minutes\": 50, \"minutes_begin\": 0, \"minutes_end\": 0, \"justified\": 2, \"note\": \"\", \"date\": \"2026-02-05\", \"hour\": 7}, {\"minutes\": 50, \"minutes_begin\": 0, \"minutes_end\": 0, \"justified\": 2, \"note\": \"\", \"date\": \"2026-02-04\", \"hour\": 5}], \"observations\": [{\"id\": 95909, \"note\": \"Max zeigt ein ausgeprägtes Verantwortungsbewusstsein. Er erledigt seine Hausaufgaben zuverlässig und ist stets gut auf den Unterricht vorbereitet.\\nMax beteiligt sich regelmäßig am Unterrichtsgeschehen und meldet sich häufig zu Wort. Seine Beiträge sind meist treffend und bereichern die Klasse.\\nDie Arbeitsgeschwindigkeit von Max ist gut. Er schließt Aufgaben meist pünktlich ab und nutzt Restzeiten sinnvoll.\\nIm Bereich des eigenverantwortlichen Arbeitens zeigt Max große Stärken. Er organisiert seine Aufgaben selbstständig und arbeitet konzentriert.\\nIn Gruppenarbeiten übernimmt Max häufig eine aktive Rolle und trägt konstruktiv zu gemeinsamen Lösungen bei.\\nMax beteiligt sich regelmäßig am Unterrichtsgeschehen und meldet sich häufig zu Wort. Seine Beiträge sind meist treffend und bereichern die Klasse.\\nMax zeigt ein hohes Maß an Ausdauer und Geduld bei der Bearbeitung von Aufgaben. Er gibt nicht auf, wenn eine Aufgabe herausfordernd ist.\\nMax zeigt Freude am Lernen und ist neugierig auf neue Themen und Herausforderungen. Diese positive Einstellung wirkt motivierend auf die ganze Klasse.\", \"date\": \"2026-04-15\", \"typeId\": 9, \"typeName\": \"0 3 Sozialverhalten (Verhalten zur Schul- und Klassengemeinschaft)\", \"cancelled\": 0, \"created\": \"Von Anna Musterfrau am 15.04.2026 eingetragen\", \"subjectId\": 97, \"classId\": 13495, \"studentId\": 24592, \"hidden\": 0, \"teacherId\": 51441}], \"averageSemester\": 0, \"averageYear\": 0, \"showGrades\": 2, \"showGradesStudentView\": 2, \"isClassHasNoGrades\": true, \"countCompetences\": 12, \"countDescriptions\": 3, \"countObservations\": 1}"
+    "response": "{\"grades\":[{\"id\":65392,\"grade\":null,\"weight\":100,\"typeId\":56,\"typeName\":\"i Heft- / Mappenübung\",\"name\":\"Mein persönliches Thema (Plakat, ForscherInnenheft, Lapbook, Themenbox)\",\"description\":\"Das Forschungsprojekt ist ansprechend gestaltet und gut recherchiert. Max präsentiert sein Thema souverän.\",\"date\":\"2026-06-03\",\"cancelled\":0,\"created\":\"Von Anna Musterfrau am 04.06.2026 eingetragen\",\"subjectId\":97,\"classId\":13495,\"studentId\":24592,\"createdTimeStamp\":\"2026-06-04 12:22:00\",\"cancelledTimeStamp\":null,\"competences\":[{\"typeId\":75799,\"typeName\":\"Auseinandersetzung mit einem persönlichen Thema\",\"description\":\"Gute Grundlagen sind vorhanden; diese werden weiter ausgebaut.\",\"grade\":\"6.00\"}]},{\"id\":76237,\"grade\":null,\"weight\":100,\"typeId\":56,\"typeName\":\"i Heft- / Mappenübung\",\"name\":\"Mein persönliches Thema (Plakat, ForscherInnenheft, Lapbook, Themenbox)\",\"description\":\"Das Forschungsprojekt ist liebevoll gestaltet. Max präsentiert sein Thema mit Begeisterung und gutem Fachwissen.\",\"date\":\"2026-06-03\",\"cancelled\":1,\"created\":\"Von Anna Musterfrau am 03.06.2026 eingetragen\",\"subjectId\":97,\"classId\":13495,\"studentId\":24592,\"createdTimeStamp\":\"2026-06-03 21:40:48\",\"cancelledTimeStamp\":\"2026-06-04 12:16:25\",\"competences\":[{\"typeId\":75799,\"typeName\":\"Auseinandersetzung mit einem persönlichen Thema\",\"description\":\"Das Thema wurde selbstständig erarbeitet und anschaulich aufbereitet.\",\"grade\":\"6.00\"}]},{\"id\":59015,\"grade\":null,\"weight\":100,\"typeId\":56,\"typeName\":\"i Heft- / Mappenübung\",\"name\":\"Mein persönliches Thema (Plakat, ForscherInnenheft, Lapbook, Themenbox)\",\"description\":\"Max zeigt Freude am Lernen und löst die Aufgaben mit wachsender Sicherheit.\",\"date\":\"2026-06-03\",\"cancelled\":1,\"created\":\"Von Anna Musterfrau am 03.06.2026 eingetragen\",\"subjectId\":97,\"classId\":13495,\"studentId\":24592,\"createdTimeStamp\":\"2026-06-03 10:51:04\",\"cancelledTimeStamp\":\"2026-06-03 21:35:21\",\"competences\":[{\"typeId\":40903,\"typeName\":\"Pflanze, Tier und Mensch: Merkmale von Lebewesen\",\"description\":\"Grundlegende Fertigkeiten sind vorhanden und werden zunehmend sicherer.\",\"grade\":\"6.00\"},{\"typeId\":75799,\"typeName\":\"Auseinandersetzung mit einem persönlichen Thema\",\"description\":\"Gute Grundlagen sind vorhanden, die weiter ausgebaut werden sollten.\",\"grade\":\"6.00\"}]},{\"id\":57819,\"grade\":null,\"weight\":100,\"typeId\":5,\"typeName\":\"h Praktisches Arbeiten / Üben\",\"name\":\"Experimente: Welche Gegenstände sinken und welche schwimmen?\",\"description\":\"Die Aufgaben werden sorgfältig und vollständig bearbeitet. Weiter so!\",\"date\":\"2026-05-11\",\"cancelled\":0,\"created\":\"Von Anna Musterfrau am 25.05.2026 eingetragen\",\"subjectId\":97,\"classId\":13495,\"studentId\":24592,\"createdTimeStamp\":\"2026-05-25 17:57:53\",\"cancelledTimeStamp\":null,\"competences\":[{\"typeId\":86,\"typeName\":\"Experimentieren: Alltagserscheinungen\",\"description\":\"Max zeigt ein solides Verständnis der geforderten Inhalte.\",\"grade\":\"6.00\"},{\"typeId\":88,\"typeName\":\"Experimentieren: Austausch Arbeitsgruppe nutzen\",\"description\":\"Die Kompetenz wird sicher und selbstständig angewendet.\",\"grade\":\"6.00\"},{\"typeId\":97,\"typeName\":\"Experimentieren: Verhaltens- und Sicherheitsregeln \",\"description\":\"Die Kompetenz ist gut entwickelt und wird flüssig eingesetzt.\",\"grade\":\"6.00\"}]},{\"id\":44993,\"grade\":null,\"weight\":100,\"typeId\":5,\"typeName\":\"h Praktisches Arbeiten / Üben\",\"name\":\"Frühblüher (Mein 1. Plakat oder Forscherheft)\",\"description\":\"Gut gemacht! Die bearbeiteten Aufgaben zeigen ein solides Grundverständnis. Max bringt großes Engagement mit und erzielt damit sehr gute Ergebnisse.\",\"date\":\"2026-05-06\",\"cancelled\":0,\"created\":\"Von Anna Musterfrau am 07.05.2026 eingetragen\",\"subjectId\":97,\"classId\":13495,\"studentId\":24592,\"createdTimeStamp\":\"2026-05-07 17:07:12\",\"cancelledTimeStamp\":null,\"competences\":[{\"typeId\":60615,\"typeName\":\"Plakate/Forscherheft anfertigen\",\"description\":\"Sehr gute Beherrschung der geforderten Kompetenzen.\",\"grade\":\"5.00\"},{\"typeId\":20696,\"typeName\":\"Pflanze, Tier und Mensch: Merkmale von Lebewesen\",\"description\":\"Grundlegende Fertigkeiten sind vorhanden und werden zunehmend sicherer.\",\"grade\":\"6.00\"}]},{\"id\":80010,\"grade\":null,\"weight\":100,\"typeId\":5,\"typeName\":\"h Praktisches Arbeiten / Üben\",\"name\":\"Experiment: Warum wasche ich meine Hände mit Seife?\",\"description\":\"Max hat die Lerninhalte gut verstanden und kann sie sicher anwenden. Gut gemacht! Die bearbeiteten Aufgaben zeigen ein solides Grundverständnis. Max bringt großes Engagement mit und erzielt damit sehr gute Ergebnisse.\",\"date\":\"2026-04-30\",\"cancelled\":0,\"created\":\"Von Anna Musterfrau am 04.05.2026 eingetragen\",\"subjectId\":97,\"classId\":13495,\"studentId\":24592,\"createdTimeStamp\":\"2026-05-04 13:01:14\",\"cancelledTimeStamp\":null,\"competences\":[{\"typeId\":86,\"typeName\":\"Experimentieren: Alltagserscheinungen\",\"description\":\"Max zeigt ein solides Verständnis der geforderten Inhalte.\",\"grade\":\"6.00\"},{\"typeId\":90,\"typeName\":\"Experimentieren: Austausch Arbeitsgruppe nutzen (Wissen)\",\"description\":\"Sehr gute Beherrschung der geforderten Kompetenzen.\",\"grade\":\"6.00\"}]},{\"id\":44718,\"grade\":null,\"weight\":100,\"typeId\":1,\"typeName\":\"g Mündliche Prüfung\",\"name\":\"Die vier Jahreszeiten und die 12 Monate; richtige Reihenfolge und Monate passend zur Jahreszeit\",\"description\":\"Max arbeitet konzentriert und bringt gute Vorkenntnisse mit. Die Aufgaben wurden mit Sorgfalt erledigt. Die grundlegenden Konzepte sind gut verstanden. Gute Leistung mit Potential zur weiteren Verbesserung. Mit regelmäßigem Üben wird es noch besser.\",\"date\":\"2026-04-09\",\"cancelled\":0,\"created\":\"Von Anna Musterfrau am 09.04.2026 eingetragen\",\"subjectId\":97,\"classId\":13495,\"studentId\":24592,\"createdTimeStamp\":\"2026-04-09 17:01:44\",\"cancelledTimeStamp\":null,\"competences\":[{\"typeId\":59140,\"typeName\":\"Orientierung im Kalenderjahr\",\"description\":\"Die Kompetenz wird sicher und selbstständig angewendet.\",\"grade\":\"6.00\"}]},{\"id\":48469,\"grade\":null,\"weight\":100,\"typeId\":1,\"typeName\":\"g Mündliche Prüfung\",\"name\":\"- Ich kann ... erklären wie Tag und Nacht entstehen; ... die Wochentage und ihre Reihenfolge; ... Morgen, Vormittag, Mittag, Nachmittag und Abend; ... \\\"gestern war, heute, morgen\\\" richtig anwenden.\",\"description\":\"Max arbeitet konzentriert und bringt gute Vorkenntnisse mit. Max arbeitet selbstständig und zeigt ein gutes Verständnis der Thematik. Max bringt großes Engagement mit und erzielt damit sehr gute Ergebnisse.\",\"date\":\"2026-03-04\",\"cancelled\":0,\"created\":\"Von Anna Musterfrau am 08.03.2026 eingetragen\",\"subjectId\":97,\"classId\":13495,\"studentId\":24592,\"createdTimeStamp\":\"2026-03-08 20:24:44\",\"cancelledTimeStamp\":null,\"competences\":[{\"typeId\":39430,\"typeName\":\"Zeitbewusstsein: Tagesablauf\",\"description\":\"Sehr gute Beherrschung der geforderten Kompetenzen.\",\"grade\":\"6.00\"},{\"typeId\":13694,\"typeName\":\"Zeitbewusstsein: Tagesablauf\",\"description\":\"Die Kompetenz ist gut entwickelt und wird flüssig eingesetzt.\",\"grade\":\"6.00\"},{\"typeId\":51770,\"typeName\":\"Zeitbewusstsein: Wochentage\",\"description\":\"Max zeigt ein solides Verständnis der geforderten Inhalte.\",\"grade\":\"6.00\"}]}],\"absences\":[{\"minutes\":50,\"minutes_begin\":0,\"minutes_end\":0,\"justified\":2,\"note\":\"\",\"date\":\"2026-02-05\",\"hour\":7},{\"minutes\":50,\"minutes_begin\":0,\"minutes_end\":0,\"justified\":2,\"note\":\"\",\"date\":\"2026-02-04\",\"hour\":5}],\"observations\":[{\"id\":95909,\"note\":\"Max geht respektvoll mit allen Mitschülerinnen und Mitschülern um. Er akzeptiert unterschiedliche Meinungen und sucht gemeinsam nach Lösungen.\\nIn der Klasse verhält sich Max rücksichtsvoll. Er achtet auf die Bedürfnisse anderer und bietet Hilfe an.\\nAuch in schwierigen Situationen zeigt Max gute Selbstkontrolle. Konflikte werden ruhig und sachlich gelöst.\",\"date\":\"2026-04-15\",\"typeId\":9,\"typeName\":\"0 3 Sozialverhalten (Verhalten zur Schul- und Klassengemeinschaft)\",\"cancelled\":0,\"created\":\"Von Anna Musterfrau am 15.04.2026 eingetragen\",\"subjectId\":97,\"classId\":13495,\"studentId\":24592,\"hidden\":0,\"teacherId\":51441}],\"averageSemester\":0,\"averageYear\":0,\"showGrades\":2,\"showGradesStudentView\":2,\"isClassHasNoGrades\":true,\"countCompetences\":12,\"countDescriptions\":3,\"countObservations\":1}"
   },
   {
     "address": "https://wertwerk-demo.digitalesregister.it/v2/api/student/subject_detail",
@@ -64544,7 +64544,7 @@
       "studentId": 20500,
       "subjectId": 85
     },
-    "response": "{\"grades\": [{\"id\": 54118, \"grade\": null, \"weight\": 100, \"typeId\": 5, \"typeName\": \"h Praktisches Arbeiten / Üben\", \"name\": \"Lernstand Subtraktion Ende 1. Klasse\", \"description\": \"Solide Leistung mit einigen kleinen Ungenauigkeiten. Insgesamt sehr zufriedenstellend. Die Aufgaben wurden mit Sorgfalt erledigt. Die grundlegenden Konzepte sind gut verstanden. Die Aufgaben werden sorgfältig und vollständig bearbeitet. Weiter so!\", \"date\": \"2026-05-29\", \"cancelled\": 0, \"created\": \"Von Anna Musterfrau am 31.05.2026 eingetragen\", \"subjectId\": 85, \"classId\": 13495, \"studentId\": 24592, \"createdTimeStamp\": \"2026-05-31 21:16:49\", \"cancelledTimeStamp\": null, \"competences\": [{\"typeId\": 29142, \"typeName\": \"Subtraktion im ZR 10\", \"description\": \"Gute Grundlagen sind vorhanden, die weiter ausgebaut werden sollten.\", \"grade\": \"6.00\"}, {\"typeId\": 28035, \"typeName\": \"Subtraktion im ZR 20\", \"description\": \"Die Kompetenz wird sicher und selbstständig angewendet.\", \"grade\": \"6.00\"}, {\"typeId\": 15020, \"typeName\": \"Subtraktion im ZR 20\", \"description\": \"Die Kompetenz ist gut entwickelt und wird flüssig eingesetzt.\", \"grade\": \"5.00\"}]}, {\"id\": 38657, \"grade\": null, \"weight\": 100, \"typeId\": 56, \"typeName\": \"i Heft- / Mappenübung\", \"name\": \"Geometrische Körper\", \"description\": \"Gute Leistung mit Potential zur weiteren Verbesserung. Mit regelmäßigem Üben wird es noch besser. Max arbeitet selbstständig und zeigt ein gutes Verständnis der Thematik.\", \"date\": \"2026-05-20\", \"cancelled\": 0, \"created\": \"Von Anna Musterfrau am 28.05.2026 eingetragen\", \"subjectId\": 85, \"classId\": 13495, \"studentId\": 24592, \"createdTimeStamp\": \"2026-05-28 19:33:57\", \"cancelledTimeStamp\": null, \"competences\": []}, {\"id\": 16006, \"grade\": null, \"weight\": 100, \"typeId\": 5, \"typeName\": \"h Praktisches Arbeiten / Üben\", \"name\": \"Lernstand Addition Ende 1. Klasse\", \"description\": \"Die Leistung entspricht den Erwartungen. Mit mehr Übung kann Max noch bessere Ergebnisse erzielen. Die Aufgaben wurden mit Sorgfalt erledigt. Die grundlegenden Konzepte sind gut verstanden.\", \"date\": \"2026-05-19\", \"cancelled\": 0, \"created\": \"Von Anna Musterfrau am 28.05.2026 eingetragen\", \"subjectId\": 85, \"classId\": 13495, \"studentId\": 24592, \"createdTimeStamp\": \"2026-05-28 18:50:58\", \"cancelledTimeStamp\": null, \"competences\": [{\"typeId\": 47601, \"typeName\": \"Addition im ZR 10\", \"description\": \"Grundlegende Fertigkeiten sind vorhanden und werden zunehmend sicherer.\", \"grade\": \"6.00\"}, {\"typeId\": 71925, \"typeName\": \"Addition im ZR 20\", \"description\": \"Diese Kompetenz wird von Max souverän und eigenständig eingesetzt.\", \"grade\": \"6.00\"}, {\"typeId\": 28191, \"typeName\": \"Addition im Zahlenraum 20\", \"description\": \"Max wendet die erlernten Strategien zuverlässig an.\", \"grade\": \"5.00\"}]}, {\"id\": 93320, \"grade\": null, \"weight\": 100, \"typeId\": 5, \"typeName\": \"h Praktisches Arbeiten / Üben\", \"name\": \"Minusaufgaben gemischt (Beobachtungen Ende April-Anfang Mai)\", \"description\": \"Max arbeitet konzentriert und bringt gute Vorkenntnisse mit.\", \"date\": \"2026-05-11\", \"cancelled\": 0, \"created\": \"Von Anna Musterfrau am 11.05.2026 eingetragen\", \"subjectId\": 85, \"classId\": 13495, \"studentId\": 24592, \"createdTimeStamp\": \"2026-05-11 19:39:34\", \"cancelledTimeStamp\": null, \"competences\": [{\"typeId\": 71487, \"typeName\": \"Subtraktion ZR 20\", \"description\": \"Max wendet die erlernten Strategien zuverlässig an.\", \"grade\": \"5.00\"}]}, {\"id\": 13278, \"grade\": null, \"weight\": 100, \"typeId\": 5, \"typeName\": \"h Praktisches Arbeiten / Üben\", \"name\": \"Mathekonferenz\", \"description\": \"Max zeigt Freude am Lernen und löst die Aufgaben mit wachsender Sicherheit.\", \"date\": \"2026-05-08\", \"cancelled\": 0, \"created\": \"Von Anna Musterfrau am 11.05.2026 eingetragen\", \"subjectId\": 85, \"classId\": 13495, \"studentId\": 24592, \"createdTimeStamp\": \"2026-05-11 12:44:04\", \"cancelledTimeStamp\": null, \"competences\": []}, {\"id\": 93886, \"grade\": null, \"weight\": 100, \"typeId\": 2, \"typeName\": \"f Schriftliche Lernzielkontrolle\", \"name\": \"Minus-Aufgaben\", \"description\": \"Max zeigt ein hohes Maß an Eigenverantwortung und Lernbereitschaft.\", \"date\": \"2026-04-29\", \"cancelled\": 0, \"created\": \"Von Anna Musterfrau am 04.05.2026 eingetragen\", \"subjectId\": 85, \"classId\": 13495, \"studentId\": 24592, \"createdTimeStamp\": \"2026-05-04 13:27:55\", \"cancelledTimeStamp\": null, \"competences\": [{\"typeId\": 71487, \"typeName\": \"Subtraktion ZR 20\", \"description\": \"Max wendet die erlernten Strategien zuverlässig an.\", \"grade\": \"6.00\"}]}, {\"id\": 87397, \"grade\": null, \"weight\": 100, \"typeId\": 1, \"typeName\": \"g Mündliche Prüfung\", \"name\": \"10- Aufgaben\", \"description\": \"Max arbeitet konzentriert und bringt gute Vorkenntnisse mit.\", \"date\": \"2026-04-22\", \"cancelled\": 0, \"created\": \"Von Anna Musterfrau am 26.04.2026 eingetragen\", \"subjectId\": 85, \"classId\": 13495, \"studentId\": 24592, \"createdTimeStamp\": \"2026-04-26 19:38:00\", \"cancelledTimeStamp\": null, \"competences\": []}, {\"id\": 14165, \"grade\": null, \"weight\": 100, \"typeId\": 2, \"typeName\": \"f Schriftliche Lernzielkontrolle\", \"name\": \"Babyaufgaben Minus\", \"description\": \"Die Grundlagen sind sicher beherrscht. Weiterführende Inhalte können problemlos erarbeitet werden. Gut gemacht! Die bearbeiteten Aufgaben zeigen ein solides Grundverständnis. Max bringt großes Engagement mit und erzielt damit sehr gute Ergebnisse.\", \"date\": \"2026-04-15\", \"cancelled\": 0, \"created\": \"Von Anna Musterfrau am 15.04.2026 eingetragen\", \"subjectId\": 85, \"classId\": 13495, \"studentId\": 24592, \"createdTimeStamp\": \"2026-04-15 17:54:50\", \"cancelledTimeStamp\": null, \"competences\": []}, {\"id\": 46048, \"grade\": null, \"weight\": 100, \"typeId\": 1, \"typeName\": \"g Mündliche Prüfung\", \"name\": \"Mündliches Abfragen der 1+1 Karten (Verstehen und anwenden von Strategien)\", \"description\": \"\", \"date\": \"2026-04-09\", \"cancelled\": 0, \"created\": \"Von Anna Musterfrau am 09.04.2026 eingetragen\", \"subjectId\": 85, \"classId\": 13495, \"studentId\": 24592, \"createdTimeStamp\": \"2026-04-09 17:13:21\", \"cancelledTimeStamp\": null, \"competences\": []}, {\"id\": 28131, \"grade\": null, \"weight\": 100, \"typeId\": 2, \"typeName\": \"f Schriftliche Lernzielkontrolle\", \"name\": \"Addieren - Grundlagen für Strategien\", \"description\": \"Max zeigt ein hohes Maß an Eigenverantwortung und Lernbereitschaft.\", \"date\": \"2026-03-24\", \"cancelled\": 0, \"created\": \"Von Anna Musterfrau am 24.03.2026 eingetragen\", \"subjectId\": 85, \"classId\": 13495, \"studentId\": 24592, \"createdTimeStamp\": \"2026-03-24 15:11:57\", \"cancelledTimeStamp\": null, \"competences\": [{\"typeId\": 68799, \"typeName\": \"Addieren: Grundlagen für Strategien\", \"description\": \"Grundlegende Fertigkeiten sind vorhanden und werden zunehmend sicherer.\", \"grade\": \"5.00\"}, {\"typeId\": 90654, \"typeName\": \"Addieren: Grundlagen für Strategien\", \"description\": \"Die Kompetenz wird sicher und selbstständig angewendet.\", \"grade\": \"5.00\"}, {\"typeId\": 65519, \"typeName\": \"Addieren: Grundlagen für Strategien\", \"description\": \"Diese Kompetenz wird von Max souverän und eigenständig eingesetzt.\", \"grade\": \"5.00\"}, {\"typeId\": 10688, \"typeName\": \"Addieren: Grundlagen für Strategien\", \"description\": \"Max wendet die erlernten Strategien zuverlässig an.\", \"grade\": \"5.00\"}, {\"typeId\": 20384, \"typeName\": \"Addieren: Grundlagen für Strategien\", \"description\": \"Grundlegende Fertigkeiten sind vorhanden und werden zunehmend sicherer.\", \"grade\": \"5.00\"}]}, {\"id\": 42953, \"grade\": null, \"weight\": 100, \"typeId\": 1, \"typeName\": \"g Mündliche Prüfung\", \"name\": \"Rückwärtszählen von 20\", \"description\": \"Ausgezeichnete Arbeit! Die gestellten Anforderungen wurden sehr gut erfüllt. Solide Leistung mit einigen kleinen Ungenauigkeiten. Insgesamt sehr zufriedenstellend. Die Aufgaben wurden korrekt und vollständig gelöst. Eine erfreuliche Leistung.\", \"date\": \"2026-03-12\", \"cancelled\": 0, \"created\": \"Von Anna Musterfrau am 13.03.2026 eingetragen\", \"subjectId\": 85, \"classId\": 13495, \"studentId\": 24592, \"createdTimeStamp\": \"2026-03-13 19:35:46\", \"cancelledTimeStamp\": null, \"competences\": []}, {\"id\": 79352, \"grade\": null, \"weight\": 100, \"typeId\": 1, \"typeName\": \"g Mündliche Prüfung\", \"name\": \"Verdoppelungen (gelbe Kärtchen)\", \"description\": \"Die Grundlagen sind sicher beherrscht. Weiterführende Inhalte können problemlos erarbeitet werden. Die Leistung entspricht den Erwartungen. Mit mehr Übung kann Max noch bessere Ergebnisse erzielen. Max hat die Lerninhalte gut verstanden und kann sie sicher anwenden.\", \"date\": \"2026-03-12\", \"cancelled\": 0, \"created\": \"Von Anna Musterfrau am 13.03.2026 eingetragen\", \"subjectId\": 85, \"classId\": 13495, \"studentId\": 24592, \"createdTimeStamp\": \"2026-03-13 19:33:35\", \"cancelledTimeStamp\": null, \"competences\": []}, {\"id\": 44973, \"grade\": null, \"weight\": 100, \"typeId\": 2, \"typeName\": \"f Schriftliche Lernzielkontrolle\", \"name\": \"Addition verstehen\", \"description\": \"Max beteiligt sich aktiv am Unterricht und zeigt ein erfreuliches Engagement. Max zeigt Freude am Lernen und löst die Aufgaben mit wachsender Sicherheit.\", \"date\": \"2026-03-06\", \"cancelled\": 0, \"created\": \"Von Anna Musterfrau am 13.03.2026 eingetragen\", \"subjectId\": 85, \"classId\": 13495, \"studentId\": 24592, \"createdTimeStamp\": \"2026-03-13 19:54:55\", \"cancelledTimeStamp\": null, \"competences\": [{\"typeId\": 12490, \"typeName\": \"Addition\", \"description\": \"Diese Kompetenz wird von Max souverän und eigenständig eingesetzt.\", \"grade\": \"5.00\"}, {\"typeId\": 43544, \"typeName\": \"Addition\", \"description\": \"Mit etwas mehr Übung wird Max diese Kompetenz noch sicherer beherrschen.\", \"grade\": \"5.00\"}]}, {\"id\": 75612, \"grade\": null, \"weight\": 100, \"typeId\": 2, \"typeName\": \"f Schriftliche Lernzielkontrolle\", \"name\": \"Ich zeige was ich kann! (Babyaufgaben, Handaufgaben, Verliebte Zahlen, 10+ Aufgaben)\", \"description\": \"Max zeigt eine sehr gute Leistung und arbeitet stets konzentriert und zielstrebig.\", \"date\": \"2026-02-27\", \"cancelled\": 0, \"created\": \"Von Anna Musterfrau am 02.03.2026 eingetragen\", \"subjectId\": 85, \"classId\": 13495, \"studentId\": 24592, \"createdTimeStamp\": \"2026-03-02 19:40:40\", \"cancelledTimeStamp\": null, \"competences\": [{\"typeId\": 38266, \"typeName\": \"Addition im ZR 10\", \"description\": \"Grundlegende Fertigkeiten sind vorhanden und werden zunehmend sicherer.\", \"grade\": \"6.00\"}]}, {\"id\": 89818, \"grade\": null, \"weight\": 100, \"typeId\": 1, \"typeName\": \"g Mündliche Prüfung\", \"name\": \"10+ Aufgaben (grüne Kärtchen)\", \"description\": \"\", \"date\": \"2026-02-25\", \"cancelled\": 0, \"created\": \"Von Anna Musterfrau am 25.02.2026 eingetragen\", \"subjectId\": 85, \"classId\": 13495, \"studentId\": 24592, \"createdTimeStamp\": \"2026-02-25 19:19:45\", \"cancelledTimeStamp\": null, \"competences\": [{\"typeId\": 29597, \"typeName\": \"Addition im ZR 20\", \"description\": \"Diese Kompetenz wird von Max souverän und eigenständig eingesetzt.\", \"grade\": \"6.00\"}]}, {\"id\": 80697, \"grade\": null, \"weight\": 100, \"typeId\": 1, \"typeName\": \"g Mündliche Prüfung\", \"name\": \"Handaufgaben bis 10 (blaue Kärtchen)\", \"description\": \"Max bringt großes Engagement mit und erzielt damit sehr gute Ergebnisse.\", \"date\": \"2026-02-13\", \"cancelled\": 0, \"created\": \"Von Anna Musterfrau am 19.02.2026 eingetragen\", \"subjectId\": 85, \"classId\": 13495, \"studentId\": 24592, \"createdTimeStamp\": \"2026-02-19 12:11:36\", \"cancelledTimeStamp\": null, \"competences\": [{\"typeId\": 81932, \"typeName\": \"Addition im ZR 10\", \"description\": \"Ausgezeichnete Leistung in diesem Bereich.\", \"grade\": \"5.00\"}]}, {\"id\": 21395, \"grade\": null, \"weight\": 100, \"typeId\": 1, \"typeName\": \"g Mündliche Prüfung\", \"name\": \"Einfache Additionsaufgaben (+0,+1)\", \"description\": \"Die Grundlagen sind sicher beherrscht. Weiterführende Inhalte können problemlos erarbeitet werden. Die Aufgaben wurden mit Sorgfalt erledigt. Die grundlegenden Konzepte sind gut verstanden.\", \"date\": \"2026-02-02\", \"cancelled\": 0, \"created\": \"Von Anna Musterfrau am 05.02.2026 eingetragen\", \"subjectId\": 85, \"classId\": 13495, \"studentId\": 24592, \"createdTimeStamp\": \"2026-02-05 18:01:41\", \"cancelledTimeStamp\": null, \"competences\": []}], \"absences\": [{\"minutes\": 50, \"minutes_begin\": 0, \"minutes_end\": 0, \"justified\": 2, \"note\": \"\", \"date\": \"2026-02-05\", \"hour\": 3}, {\"minutes\": 50, \"minutes_begin\": 0, \"minutes_end\": 0, \"justified\": 2, \"note\": \"\", \"date\": \"2026-02-05\", \"hour\": 5}, {\"minutes\": 50, \"minutes_begin\": 0, \"minutes_end\": 0, \"justified\": 2, \"note\": \"\", \"date\": \"2026-02-04\", \"hour\": 1}, {\"minutes\": 50, \"minutes_begin\": 0, \"minutes_end\": 0, \"justified\": 2, \"note\": \"\", \"date\": \"2026-02-04\", \"hour\": 2}], \"observations\": [{\"id\": 65333, \"note\": \"Max zeigt Freude am Lernen und ist neugierig auf neue Themen und Herausforderungen. Diese positive Einstellung wirkt motivierend auf die ganze Klasse.\\nDie schriftlichen Arbeiten von Max sind ordentlich und sorgfältig. Auf Fehler wird er aufmerksam und verbessert diese gewissenhaft.\", \"date\": \"2026-03-18\", \"typeId\": 1, \"typeName\": \"8 weiteres\", \"cancelled\": 0, \"created\": \"Von Anna Musterfrau am 18.03.2026 eingetragen\", \"subjectId\": 85, \"classId\": 13495, \"studentId\": 24592, \"hidden\": 0, \"teacherId\": 51441}, {\"id\": 59009, \"note\": \"Max zeigt Freude am Lernen und ist neugierig auf neue Themen und Herausforderungen. Diese positive Einstellung wirkt motivierend auf die ganze Klasse.\\nIm Bereich des eigenverantwortlichen Arbeitens zeigt Max große Stärken. Er organisiert seine Aufgaben selbstständig und arbeitet konzentriert.\\nMax zeigt eine hohe Bereitschaft zur Mitarbeit und engagiert sich bei allen schulischen Aktivitäten mit großer Begeisterung.\\nMax zeigt Freude am Lernen und ist neugierig auf neue Themen und Herausforderungen. Diese positive Einstellung wirkt motivierend auf die ganze Klasse.\", \"date\": \"2026-02-19\", \"typeId\": 20, \"typeName\": \"0 1 Arbeitsverhalten (Einsatz, Fleiß, Interesse, Mitarbeit)\", \"cancelled\": 0, \"created\": \"Von Anna Musterfrau am 19.02.2026 eingetragen\", \"subjectId\": 85, \"classId\": 13495, \"studentId\": 24592, \"hidden\": 0, \"teacherId\": 51441}], \"averageSemester\": 0, \"averageYear\": 0, \"showGrades\": 2, \"showGradesStudentView\": 2, \"isClassHasNoGrades\": true, \"countCompetences\": 18, \"countDescriptions\": 12, \"countObservations\": 2}"
+    "response": "{\"grades\":[{\"id\":54118,\"grade\":null,\"weight\":100,\"typeId\":5,\"typeName\":\"h Praktisches Arbeiten / Üben\",\"name\":\"Lernstand Subtraktion Ende 1. Klasse\",\"description\":\"Solide Leistung mit einigen kleinen Ungenauigkeiten. Insgesamt sehr zufriedenstellend. Die Aufgaben wurden mit Sorgfalt erledigt. Die grundlegenden Konzepte sind gut verstanden. Die Aufgaben werden sorgfältig und vollständig bearbeitet. Weiter so!\",\"date\":\"2026-05-29\",\"cancelled\":0,\"created\":\"Von Anna Musterfrau am 31.05.2026 eingetragen\",\"subjectId\":85,\"classId\":13495,\"studentId\":24592,\"createdTimeStamp\":\"2026-05-31 21:16:49\",\"cancelledTimeStamp\":null,\"competences\":[{\"typeId\":29142,\"typeName\":\"Subtraktion im ZR 10\",\"description\":\"Gute Grundlagen sind vorhanden, die weiter ausgebaut werden sollten.\",\"grade\":\"6.00\"},{\"typeId\":28035,\"typeName\":\"Subtraktion im ZR 20\",\"description\":\"Die Kompetenz wird sicher und selbstständig angewendet.\",\"grade\":\"6.00\"},{\"typeId\":15020,\"typeName\":\"Subtraktion im ZR 20\",\"description\":\"Die Kompetenz ist gut entwickelt und wird flüssig eingesetzt.\",\"grade\":\"5.00\"}]},{\"id\":38657,\"grade\":null,\"weight\":100,\"typeId\":56,\"typeName\":\"i Heft- / Mappenübung\",\"name\":\"Geometrische Körper\",\"description\":\"Geometrische Körper werden richtig erkannt, benannt und nach Merkmalen sortiert.\",\"date\":\"2026-05-20\",\"cancelled\":0,\"created\":\"Von Anna Musterfrau am 28.05.2026 eingetragen\",\"subjectId\":85,\"classId\":13495,\"studentId\":24592,\"createdTimeStamp\":\"2026-05-28 19:33:57\",\"cancelledTimeStamp\":null,\"competences\":[]},{\"id\":16006,\"grade\":null,\"weight\":100,\"typeId\":5,\"typeName\":\"h Praktisches Arbeiten / Üben\",\"name\":\"Lernstand Addition Ende 1. Klasse\",\"description\":\"Die Leistung entspricht den Erwartungen. Mit mehr Übung kann Max noch bessere Ergebnisse erzielen. Die Aufgaben wurden mit Sorgfalt erledigt. Die grundlegenden Konzepte sind gut verstanden.\",\"date\":\"2026-05-19\",\"cancelled\":0,\"created\":\"Von Anna Musterfrau am 28.05.2026 eingetragen\",\"subjectId\":85,\"classId\":13495,\"studentId\":24592,\"createdTimeStamp\":\"2026-05-28 18:50:58\",\"cancelledTimeStamp\":null,\"competences\":[{\"typeId\":47601,\"typeName\":\"Addition im ZR 10\",\"description\":\"Grundlegende Fertigkeiten sind vorhanden und werden zunehmend sicherer.\",\"grade\":\"6.00\"},{\"typeId\":71925,\"typeName\":\"Addition im ZR 20\",\"description\":\"Diese Kompetenz wird von Max souverän und eigenständig eingesetzt.\",\"grade\":\"6.00\"},{\"typeId\":28191,\"typeName\":\"Addition im Zahlenraum 20\",\"description\":\"Max wendet die erlernten Strategien zuverlässig an.\",\"grade\":\"5.00\"}]},{\"id\":93320,\"grade\":null,\"weight\":100,\"typeId\":5,\"typeName\":\"h Praktisches Arbeiten / Üben\",\"name\":\"Minusaufgaben gemischt (Beobachtungen Ende April-Anfang Mai)\",\"description\":\"Max arbeitet konzentriert und bringt gute Vorkenntnisse mit.\",\"date\":\"2026-05-11\",\"cancelled\":0,\"created\":\"Von Anna Musterfrau am 11.05.2026 eingetragen\",\"subjectId\":85,\"classId\":13495,\"studentId\":24592,\"createdTimeStamp\":\"2026-05-11 19:39:34\",\"cancelledTimeStamp\":null,\"competences\":[{\"typeId\":71487,\"typeName\":\"Subtraktion ZR 20\",\"description\":\"Max wendet die erlernten Strategien zuverlässig an.\",\"grade\":\"5.00\"}]},{\"id\":13278,\"grade\":null,\"weight\":100,\"typeId\":5,\"typeName\":\"h Praktisches Arbeiten / Üben\",\"name\":\"Mathekonferenz\",\"description\":\"Max stellt seinen Lösungsweg klar und nachvollziehbar vor. Er hört anderen aufmerksam zu und bringt eigene Ideen ein.\",\"date\":\"2026-05-08\",\"cancelled\":0,\"created\":\"Von Anna Musterfrau am 11.05.2026 eingetragen\",\"subjectId\":85,\"classId\":13495,\"studentId\":24592,\"createdTimeStamp\":\"2026-05-11 12:44:04\",\"cancelledTimeStamp\":null,\"competences\":[]},{\"id\":93886,\"grade\":null,\"weight\":100,\"typeId\":2,\"typeName\":\"f Schriftliche Lernzielkontrolle\",\"name\":\"Minus-Aufgaben\",\"description\":\"Max zeigt ein hohes Maß an Eigenverantwortung und Lernbereitschaft.\",\"date\":\"2026-04-29\",\"cancelled\":0,\"created\":\"Von Anna Musterfrau am 04.05.2026 eingetragen\",\"subjectId\":85,\"classId\":13495,\"studentId\":24592,\"createdTimeStamp\":\"2026-05-04 13:27:55\",\"cancelledTimeStamp\":null,\"competences\":[{\"typeId\":71487,\"typeName\":\"Subtraktion ZR 20\",\"description\":\"Max wendet die erlernten Strategien zuverlässig an.\",\"grade\":\"6.00\"}]},{\"id\":87397,\"grade\":null,\"weight\":100,\"typeId\":1,\"typeName\":\"g Mündliche Prüfung\",\"name\":\"10- Aufgaben\",\"description\":\"Max löst die 10er-Minusaufgaben zuverlässig. Die Strategie ist gut eingeübt.\",\"date\":\"2026-04-22\",\"cancelled\":0,\"created\":\"Von Anna Musterfrau am 26.04.2026 eingetragen\",\"subjectId\":85,\"classId\":13495,\"studentId\":24592,\"createdTimeStamp\":\"2026-04-26 19:38:00\",\"cancelledTimeStamp\":null,\"competences\":[]},{\"id\":14165,\"grade\":null,\"weight\":100,\"typeId\":2,\"typeName\":\"f Schriftliche Lernzielkontrolle\",\"name\":\"Babyaufgaben Minus\",\"description\":\"Einfache Subtraktionsaufgaben werden konzentriert und methodisch bearbeitet.\",\"date\":\"2026-04-15\",\"cancelled\":0,\"created\":\"Von Anna Musterfrau am 15.04.2026 eingetragen\",\"subjectId\":85,\"classId\":13495,\"studentId\":24592,\"createdTimeStamp\":\"2026-04-15 17:54:50\",\"cancelledTimeStamp\":null,\"competences\":[]},{\"id\":46048,\"grade\":null,\"weight\":100,\"typeId\":1,\"typeName\":\"g Mündliche Prüfung\",\"name\":\"Mündliches Abfragen der 1+1 Karten (Verstehen und anwenden von Strategien)\",\"description\":\"\",\"date\":\"2026-04-09\",\"cancelled\":0,\"created\":\"Von Anna Musterfrau am 09.04.2026 eingetragen\",\"subjectId\":85,\"classId\":13495,\"studentId\":24592,\"createdTimeStamp\":\"2026-04-09 17:13:21\",\"cancelledTimeStamp\":null,\"competences\":[]},{\"id\":28131,\"grade\":null,\"weight\":100,\"typeId\":2,\"typeName\":\"f Schriftliche Lernzielkontrolle\",\"name\":\"Addieren - Grundlagen für Strategien\",\"description\":\"Max zeigt ein hohes Maß an Eigenverantwortung und Lernbereitschaft.\",\"date\":\"2026-03-24\",\"cancelled\":0,\"created\":\"Von Anna Musterfrau am 24.03.2026 eingetragen\",\"subjectId\":85,\"classId\":13495,\"studentId\":24592,\"createdTimeStamp\":\"2026-03-24 15:11:57\",\"cancelledTimeStamp\":null,\"competences\":[{\"typeId\":68799,\"typeName\":\"Addieren: Grundlagen für Strategien\",\"description\":\"Grundlegende Fertigkeiten sind vorhanden und werden zunehmend sicherer.\",\"grade\":\"5.00\"},{\"typeId\":90654,\"typeName\":\"Addieren: Grundlagen für Strategien\",\"description\":\"Die Kompetenz wird sicher und selbstständig angewendet.\",\"grade\":\"5.00\"},{\"typeId\":65519,\"typeName\":\"Addieren: Grundlagen für Strategien\",\"description\":\"Diese Kompetenz wird von Max souverän und eigenständig eingesetzt.\",\"grade\":\"5.00\"},{\"typeId\":10688,\"typeName\":\"Addieren: Grundlagen für Strategien\",\"description\":\"Max wendet die erlernten Strategien zuverlässig an.\",\"grade\":\"5.00\"},{\"typeId\":20384,\"typeName\":\"Addieren: Grundlagen für Strategien\",\"description\":\"Grundlegende Fertigkeiten sind vorhanden und werden zunehmend sicherer.\",\"grade\":\"5.00\"}]},{\"id\":42953,\"grade\":null,\"weight\":100,\"typeId\":1,\"typeName\":\"g Mündliche Prüfung\",\"name\":\"Rückwärtszählen von 20\",\"description\":\"Ausgezeichnete Arbeit! Die gestellten Anforderungen wurden sehr gut erfüllt. Solide Leistung mit einigen kleinen Ungenauigkeiten. Insgesamt sehr zufriedenstellend. Die Aufgaben wurden korrekt und vollständig gelöst. Eine erfreuliche Leistung.\",\"date\":\"2026-03-12\",\"cancelled\":0,\"created\":\"Von Anna Musterfrau am 13.03.2026 eingetragen\",\"subjectId\":85,\"classId\":13495,\"studentId\":24592,\"createdTimeStamp\":\"2026-03-13 19:35:46\",\"cancelledTimeStamp\":null,\"competences\":[]},{\"id\":79352,\"grade\":null,\"weight\":100,\"typeId\":1,\"typeName\":\"g Mündliche Prüfung\",\"name\":\"Verdoppelungen (gelbe Kärtchen)\",\"description\":\"Die Grundlagen sind sicher beherrscht. Weiterführende Inhalte können problemlos erarbeitet werden. Die Leistung entspricht den Erwartungen. Mit mehr Übung kann Max noch bessere Ergebnisse erzielen. Max hat die Lerninhalte gut verstanden und kann sie sicher anwenden.\",\"date\":\"2026-03-12\",\"cancelled\":0,\"created\":\"Von Anna Musterfrau am 13.03.2026 eingetragen\",\"subjectId\":85,\"classId\":13495,\"studentId\":24592,\"createdTimeStamp\":\"2026-03-13 19:33:35\",\"cancelledTimeStamp\":null,\"competences\":[]},{\"id\":44973,\"grade\":null,\"weight\":100,\"typeId\":2,\"typeName\":\"f Schriftliche Lernzielkontrolle\",\"name\":\"Addition verstehen\",\"description\":\"Max beteiligt sich aktiv am Unterricht und zeigt ein erfreuliches Engagement. Max zeigt Freude am Lernen und löst die Aufgaben mit wachsender Sicherheit.\",\"date\":\"2026-03-06\",\"cancelled\":0,\"created\":\"Von Anna Musterfrau am 13.03.2026 eingetragen\",\"subjectId\":85,\"classId\":13495,\"studentId\":24592,\"createdTimeStamp\":\"2026-03-13 19:54:55\",\"cancelledTimeStamp\":null,\"competences\":[{\"typeId\":12490,\"typeName\":\"Addition\",\"description\":\"Diese Kompetenz wird von Max souverän und eigenständig eingesetzt.\",\"grade\":\"5.00\"},{\"typeId\":43544,\"typeName\":\"Addition\",\"description\":\"Mit etwas mehr Übung wird Max diese Kompetenz noch sicherer beherrschen.\",\"grade\":\"5.00\"}]},{\"id\":75612,\"grade\":null,\"weight\":100,\"typeId\":2,\"typeName\":\"f Schriftliche Lernzielkontrolle\",\"name\":\"Ich zeige was ich kann! (Babyaufgaben, Handaufgaben, Verliebte Zahlen, 10+ Aufgaben)\",\"description\":\"Max zeigt eine sehr gute Leistung und arbeitet stets konzentriert und zielstrebig.\",\"date\":\"2026-02-27\",\"cancelled\":0,\"created\":\"Von Anna Musterfrau am 02.03.2026 eingetragen\",\"subjectId\":85,\"classId\":13495,\"studentId\":24592,\"createdTimeStamp\":\"2026-03-02 19:40:40\",\"cancelledTimeStamp\":null,\"competences\":[{\"typeId\":38266,\"typeName\":\"Addition im ZR 10\",\"description\":\"Grundlegende Fertigkeiten sind vorhanden und werden zunehmend sicherer.\",\"grade\":\"6.00\"}]},{\"id\":89818,\"grade\":null,\"weight\":100,\"typeId\":1,\"typeName\":\"g Mündliche Prüfung\",\"name\":\"10+ Aufgaben (grüne Kärtchen)\",\"description\":\"\",\"date\":\"2026-02-25\",\"cancelled\":0,\"created\":\"Von Anna Musterfrau am 25.02.2026 eingetragen\",\"subjectId\":85,\"classId\":13495,\"studentId\":24592,\"createdTimeStamp\":\"2026-02-25 19:19:45\",\"cancelledTimeStamp\":null,\"competences\":[{\"typeId\":29597,\"typeName\":\"Addition im ZR 20\",\"description\":\"Diese Kompetenz wird von Max souverän und eigenständig eingesetzt.\",\"grade\":\"6.00\"}]},{\"id\":80697,\"grade\":null,\"weight\":100,\"typeId\":1,\"typeName\":\"g Mündliche Prüfung\",\"name\":\"Handaufgaben bis 10 (blaue Kärtchen)\",\"description\":\"Max bringt großes Engagement mit und erzielt damit sehr gute Ergebnisse.\",\"date\":\"2026-02-13\",\"cancelled\":0,\"created\":\"Von Anna Musterfrau am 19.02.2026 eingetragen\",\"subjectId\":85,\"classId\":13495,\"studentId\":24592,\"createdTimeStamp\":\"2026-02-19 12:11:36\",\"cancelledTimeStamp\":null,\"competences\":[{\"typeId\":81932,\"typeName\":\"Addition im ZR 10\",\"description\":\"Ausgezeichnete Leistung in diesem Bereich.\",\"grade\":\"5.00\"}]},{\"id\":21395,\"grade\":null,\"weight\":100,\"typeId\":1,\"typeName\":\"g Mündliche Prüfung\",\"name\":\"Einfache Additionsaufgaben (+0,+1)\",\"description\":\"Additionsaufgaben mit +0 und +1 werden sicher und selbstständig gelöst.\",\"date\":\"2026-02-02\",\"cancelled\":0,\"created\":\"Von Anna Musterfrau am 05.02.2026 eingetragen\",\"subjectId\":85,\"classId\":13495,\"studentId\":24592,\"createdTimeStamp\":\"2026-02-05 18:01:41\",\"cancelledTimeStamp\":null,\"competences\":[]}],\"absences\":[{\"minutes\":50,\"minutes_begin\":0,\"minutes_end\":0,\"justified\":2,\"note\":\"\",\"date\":\"2026-02-05\",\"hour\":3},{\"minutes\":50,\"minutes_begin\":0,\"minutes_end\":0,\"justified\":2,\"note\":\"\",\"date\":\"2026-02-05\",\"hour\":5},{\"minutes\":50,\"minutes_begin\":0,\"minutes_end\":0,\"justified\":2,\"note\":\"\",\"date\":\"2026-02-04\",\"hour\":1},{\"minutes\":50,\"minutes_begin\":0,\"minutes_end\":0,\"justified\":2,\"note\":\"\",\"date\":\"2026-02-04\",\"hour\":2}],\"observations\":[{\"id\":65333,\"note\":\"Max zeigt Freude am Lernen und ist neugierig auf neue Themen und Herausforderungen. Diese positive Einstellung wirkt motivierend auf die ganze Klasse.\\nDie schriftlichen Arbeiten von Max sind ordentlich und sorgfältig. Auf Fehler wird er aufmerksam und verbessert diese gewissenhaft.\",\"date\":\"2026-03-18\",\"typeId\":1,\"typeName\":\"8 weiteres\",\"cancelled\":0,\"created\":\"Von Anna Musterfrau am 18.03.2026 eingetragen\",\"subjectId\":85,\"classId\":13495,\"studentId\":24592,\"hidden\":0,\"teacherId\":51441},{\"id\":59009,\"note\":\"Max zeigt Freude am Lernen und ist neugierig auf neue Themen und Herausforderungen. Diese positive Einstellung wirkt motivierend auf die ganze Klasse.\\nIm Bereich des eigenverantwortlichen Arbeitens zeigt Max große Stärken. Er organisiert seine Aufgaben selbstständig und arbeitet konzentriert.\\nMax zeigt eine hohe Bereitschaft zur Mitarbeit und engagiert sich bei allen schulischen Aktivitäten mit großer Begeisterung.\\nMax zeigt Freude am Lernen und ist neugierig auf neue Themen und Herausforderungen. Diese positive Einstellung wirkt motivierend auf die ganze Klasse.\",\"date\":\"2026-02-19\",\"typeId\":20,\"typeName\":\"0 1 Arbeitsverhalten (Einsatz, Fleiß, Interesse, Mitarbeit)\",\"cancelled\":0,\"created\":\"Von Anna Musterfrau am 19.02.2026 eingetragen\",\"subjectId\":85,\"classId\":13495,\"studentId\":24592,\"hidden\":0,\"teacherId\":51441}],\"averageSemester\":0,\"averageYear\":0,\"showGrades\":2,\"showGradesStudentView\":2,\"isClassHasNoGrades\":true,\"countCompetences\":18,\"countDescriptions\":12,\"countObservations\":2}"
   },
   {
     "address": "https://wertwerk-demo.digitalesregister.it/v2/api/student/subject_detail",
