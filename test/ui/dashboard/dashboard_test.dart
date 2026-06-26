@@ -19,11 +19,13 @@
 import 'dart:core';
 
 import 'package:built_collection/built_collection.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:dr/app_state.dart' hide LoginState;
 import 'package:dr/container/days_container.dart';
 import 'package:dr/data.dart';
 import 'package:dr/main.dart';
 import 'package:dr/middleware/middleware.dart';
+import 'package:dr/providers/dashboard_parser.dart';
 import 'package:dr/providers/dashboard_provider.dart';
 import 'package:dr/providers/grades_provider.dart';
 import 'package:dr/providers/login_provider.dart';
@@ -34,6 +36,7 @@ import 'package:dr/ui/days.dart';
 import 'package:dr/ui/no_internet.dart';
 import 'package:dr/ui/sidebar.dart';
 import 'package:dr/utc_date_time.dart';
+import 'package:dr/util.dart';
 import 'package:dr/wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -41,6 +44,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:mocktail/mocktail.dart';
+
+import '../../fixtures/api_fixtures.dart';
 
 class MockWrapper extends Mock implements Wrapper {}
 
@@ -96,7 +101,28 @@ class _TestNoInternetNotifier extends NoInternetNotifier {
   void setNoInternet(bool value) => state = value;
 }
 
+// Demo state parsed in setUpAll from assets/demo/capture.json (2026-05-11).
+late DashboardState _demoDashboardState;
+
 Future<void> main() async {
+  setUpAll(() async {
+    await initializeDateFormatting('de');
+    await loadFixtures();
+    final raw =
+        fixtureFor('api/student/dashboard/dashboard', params: {'viewFuture': false})
+            as List;
+    // Keep only 2026-05-11 so the test widget shows exactly one day.
+    final day1105 =
+        raw.where((dynamic d) => (d as Map)['date'] == '2026-05-11').toList();
+    final days =
+        parseDays(day1105, deduplicate: false).whereType<Day>().toList();
+    _demoDashboardState = DashboardState(
+      (b) => b
+        ..allDays = ListBuilder(days)
+        ..future = false,
+    );
+  });
+
   testGoldens('Open drawer in phone mode', (WidgetTester tester) async {
     ScaffoldState getScaffoldState() {
       return tester.state(find.byType(Scaffold).at(0));
@@ -397,7 +423,7 @@ Future<void> main() async {
                               ..deleteable = false
                               ..deleted = false
                               ..firstSeen = UtcDateTime(2026, 6, 4)
-                              ..gradeFormatted = 'keine Note eingetragen'
+                              ..gradeFormatted = 'ohne Note'
                               ..id = 42
                               ..isChanged = false
                               ..isNew = false
@@ -430,7 +456,7 @@ Future<void> main() async {
     await tester.pumpWidget(widget);
     await tester.pumpAndSettle();
 
-    expect(find.text('keine Note eingetragen'), findsNothing);
+    expect(find.text('ohne Note'), findsNothing);
     expect(find.byIcon(Icons.star), findsNWidgets(5));
     expect(find.byIcon(Icons.star_border), findsOneWidget);
   });
@@ -493,7 +519,7 @@ Future<void> main() async {
     await tester.pumpAndSettle();
 
     expect(find.text('7/8'), findsOneWidget);
-    expect(find.text('keine Note eingetragen'), findsNothing);
+    expect(find.text('ohne Note'), findsNothing);
     expect(find.byIcon(Icons.star), findsNothing);
     expect(find.byIcon(Icons.star_border), findsNothing);
   });
@@ -508,7 +534,7 @@ Future<void> main() async {
         ..deleteable = false
         ..deleted = false
         ..firstSeen = UtcDateTime(2026, 5, 22)
-        ..gradeFormatted = 'keine Note eingetragen'
+        ..gradeFormatted = 'ohne Note'
         ..id = 9999
         ..isChanged = false
         ..isNew = false
@@ -611,7 +637,7 @@ Future<void> main() async {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('keine Note eingetragen'), findsNothing);
+    expect(find.text('ohne Note'), findsNothing);
     expect(find.byIcon(Icons.star), findsNWidgets(10));
     expect(find.byIcon(Icons.star_border), findsNWidgets(2));
   });
@@ -1095,5 +1121,145 @@ Future<void> main() async {
     container.read(noInternetProvider.notifier).setNoInternet(true);
     await tester.pumpAndSettle();
     expect(tester.widget<Checkbox>(find.byType(Checkbox)).onChanged, isNull);
+  });
+
+  group('demo data 2026-05-11', () {
+    // 2026-05-11 must be in the past so day.future == dashboard.future (both false).
+    setUp(() => mockNow = UtcDateTime(2026, 5, 12));
+    tearDown(() => mockNow = null);
+
+    Widget buildDemo() => ProviderScope(
+          overrides: [
+            dashboardProvider.overrideWith(
+              () => _TestDashboardNotifier(_demoDashboardState),
+            ),
+            noInternetProvider.overrideWith(_TestNoInternetNotifier.new),
+            // Prevent the real GradesNotifier from calling wrapper.send()
+            // via DashboardGradeCompetencesNotifier._findFromGradesState.
+            gradesProvider.overrideWith(
+              () => _TestGradesNotifier(GradesState()),
+            ),
+          ],
+          child: MaterialApp(
+            home: DaysContainer(),
+            theme: ThemeData(primarySwatch: Colors.deepOrange),
+          ),
+        );
+
+    testWidgets('shows two Bewertung entries', (tester) async {
+      await tester.pumpWidget(buildDemo());
+      await tester.pump();
+      expect(find.text('Bewertung'), findsNWidgets(2));
+    });
+
+    testWidgets('shows Hausaufgabe entry', (tester) async {
+      await tester.pumpWidget(buildDemo());
+      await tester.pump();
+      expect(find.text('Hausaufgabe'), findsOneWidget);
+    });
+
+    testWidgets('shows Lesepass subtitle', (tester) async {
+      await tester.pumpWidget(buildDemo());
+      await tester.pump();
+      expect(find.textContaining('Lesepass Stufe 3'), findsOneWidget);
+    });
+
+    testWidgets('shows grade subtitle Minus-Training', (tester) async {
+      await tester.pumpWidget(buildDemo());
+      await tester.pump();
+      expect(find.textContaining('Minus-Training'), findsOneWidget);
+    });
+
+    testGoldens('demo day golden', (tester) async {
+      await tester.pumpWidget(buildDemo());
+      await tester.pump(const Duration(milliseconds: 500));
+      await expectLater(
+        find.byType(DaysWidget),
+        matchesGoldenFile('demo_day.png'),
+      );
+    });
+  });
+
+  group('ItemWidget: grade ohne Note', () {
+    // Builds an ItemWidget directly with gradeCompetencesLoaded=true and
+    // empty competences, which is the state that triggers the "ohne Note" path.
+    Widget buildItem({double screenWidth = 390}) {
+      final homework = Homework(
+        (b) => b
+          ..id = 1
+          ..type = HomeworkType.grade
+          ..title = 'Bewertung'
+          ..subtitle = 'Geometrische Körper erkennen und benennen'
+          ..label = 'Mathematik'
+          ..gradeFormatted = 'ohne Note'
+          ..checked = false
+          // Older than 1 s so Deleteable skips the slide-in animation.
+          ..firstSeen = UtcDateTime(2026, 1, 1),
+      );
+      return MaterialApp(
+        theme: ThemeData(primarySwatch: Colors.deepOrange),
+        home: Scaffold(
+          body: SizedBox(
+            width: screenWidth,
+            child: ItemWidget(
+              item: homework,
+              // isHistory=true skips AutoScrollTag (which needs a controller).
+              isHistory: true,
+              isCurrent: false,
+              gradeCompetences: BuiltList<Competence>(),
+              gradeCompetencesLoaded: true,
+              askWhenDelete: false,
+              noInternet: false,
+              colorBorder: false,
+              subjectThemes: const {},
+              colorTestsInRed: false,
+            ),
+          ),
+        ),
+      );
+    }
+
+    testWidgets('shows "ohne Note" text', (tester) async {
+      await tester.pumpWidget(buildItem());
+      await tester.pump();
+      expect(find.text('ohne Note'), findsOneWidget);
+    });
+
+    testWidgets('does not show grade stars or numeric grade', (tester) async {
+      await tester.pumpWidget(buildItem());
+      await tester.pump();
+      expect(find.byIcon(Icons.star), findsNothing);
+      expect(find.byIcon(Icons.star_border), findsNothing);
+    });
+
+    testWidgets('title and subtitle are fully visible (no overflow)',
+        (tester) async {
+      await tester.pumpWidget(buildItem());
+      await tester.pump();
+      // Ensure the card title and subtitle are still rendered.
+      expect(find.text('Bewertung'), findsOneWidget);
+      expect(
+        find.textContaining('Geometrische Körper'),
+        findsOneWidget,
+      );
+      // No overflow errors.
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('text stays within bounds on narrow screen', (tester) async {
+      await tester.pumpWidget(buildItem(screenWidth: 320));
+      await tester.pump();
+      expect(find.text('ohne Note'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testGoldens('ohne Note golden', (tester) async {
+      await tester.pumpWidget(buildItem());
+      await tester.pump();
+      await expectLater(
+        find.byType(ItemWidget),
+        matchesGoldenFile('ohne_note.png'),
+      );
+    });
   });
 }

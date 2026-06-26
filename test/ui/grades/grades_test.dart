@@ -29,6 +29,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
 
+import '../../fixtures/api_fixtures.dart';
+
 class _TestGradesNotifier extends GradesNotifier {
   final GradesState initial;
   _TestGradesNotifier(this.initial);
@@ -196,7 +198,100 @@ SettingsState get _gradesSettings => SettingsState(
       },
     );
 
+// ---------------------------------------------------------------------------
+// Demo data: Deutsch (id=84) grades from KW 2026-05-11 built from fixture data.
+// All grades have grade=null (competence-based school), 1 competence each.
+// ---------------------------------------------------------------------------
+
+GradeDetail _deutschGrade({
+  required int id,
+  required UtcDateTime date,
+  required String name,
+  required String typeName,
+  required String created,
+  required String competenceTypeName,
+  required int competenceGrade,
+  String? description,
+}) =>
+    GradeDetail(
+      (b) => b
+        ..id = id
+        ..date = date
+        ..name = name
+        ..weightPercentage = 100
+        ..cancelled = false
+        ..type = typeName
+        ..created = created
+        ..description = description
+        ..competences = ListBuilder([
+          Competence(
+            (b) => b
+              ..typeName = competenceTypeName
+              ..grade = competenceGrade,
+          ),
+        ]),
+    );
+
+late GradesState _demoGradesState;
+
 void main() {
+  setUpAll(() async {
+    await loadFixtures();
+    // Three Deutsch grades from the 2026-05-11 week (from subject_detail id=84).
+    final grades = [
+      _deutschGrade(
+        id: 46434,
+        date: UtcDateTime(2026, 5, 13),
+        name: 'Heftübung: Buchstaben sauber nachspuren',
+        typeName: 'h Praktisches Arbeiten / Üben',
+        created: 'Von Christine Testfrau am 14.05.2026 eingetragen',
+        competenceTypeName: 'Schreiben: Sätze schreiben',
+        competenceGrade: 5,
+        description:
+            'Die Übungen sind vollständig, sauber und weitgehend fehlerfrei.',
+      ),
+      _deutschGrade(
+        id: 19116,
+        date: UtcDateTime(2026, 5, 19),
+        name: 'Buchstabendiktat: Mitlaute und Lernwörter',
+        typeName: 'f Schriftliche Lernzielkontrolle',
+        created: 'Von Christine Testfrau am 21.05.2026 eingetragen',
+        competenceTypeName: 'Schreiben: geübte Wörter richtig schreiben',
+        competenceGrade: 5,
+      ),
+      _deutschGrade(
+        id: 85674,
+        date: UtcDateTime(2026, 5, 20),
+        name: 'Buchstabe Jj: Lesen auf Silben- und Wortebene',
+        typeName: 'g Mündliche Prüfung',
+        created: 'Von Christine Testfrau am 21.05.2026 eingetragen',
+        competenceTypeName: 'Lesefertigkeit',
+        competenceGrade: 6,
+      ),
+    ];
+    _demoGradesState = GradesState(
+      (b) => b
+        ..loading = false
+        ..subjects = ListBuilder([
+          Subject(
+            (b) => b
+              ..id = 84
+              ..name = 'Deutsch'
+              ..gradesAll = MapBuilder({
+                Semester.first: <GradeAll>[].toBuiltList(),
+              })
+              ..grades = MapBuilder({
+                Semester.first: grades.toBuiltList(),
+              })
+              ..observations = MapBuilder({
+                Semester.first: <Observation>[].toBuiltList(),
+              }),
+          ),
+        ])
+        ..semester = Semester.first.toBuilder(),
+    );
+  });
+
   testGoldens('grades page loading when empty', (tester) async {
     final appState = AppState((b) => b.gradesState.loading = true);
     final widget = _wrapWithScope(
@@ -281,5 +376,88 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byIcon(Icons.star), findsNWidgets(3));
     expect(find.byIcon(Icons.star_border), findsNWidgets(3));
+  });
+
+  group('demo data Deutsch KW 2026-05-11', () {
+    Widget buildDemo() => _wrapWithScope(
+          MaterialApp(
+            home: const GradesPageContainer(),
+            theme: ThemeData(primarySwatch: Colors.deepOrange),
+          ),
+          AppState((b) => b.gradesState.replace(_demoGradesState)),
+        );
+
+    testWidgets('shows subject Deutsch in overview', (tester) async {
+      await tester.pumpWidget(buildDemo());
+      await tester.pump();
+      expect(find.text('Deutsch'), findsOneWidget);
+    });
+
+    testWidgets('grades hidden before expanding', (tester) async {
+      await tester.pumpWidget(buildDemo());
+      await tester.pump();
+      expect(find.textContaining('Buchstaben sauber nachspuren'), findsNothing);
+    });
+
+    testWidgets('shows grade names after expanding Deutsch', (tester) async {
+      await tester.pumpWidget(buildDemo());
+      await tester.tap(find.text('Deutsch'));
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining('Buchstaben sauber nachspuren'),
+        findsOneWidget,
+      );
+      expect(
+        find.textContaining('Buchstabendiktat: Mitlaute'),
+        findsOneWidget,
+      );
+      expect(
+        find.textContaining('Buchstabe Jj'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('shows typeName in grade subtitle', (tester) async {
+      await tester.pumpWidget(buildDemo());
+      await tester.tap(find.text('Deutsch'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('Praktisches Arbeiten'), findsOneWidget);
+    });
+
+    testWidgets('shows competence stars after expanding', (tester) async {
+      await tester.pumpWidget(buildDemo());
+      await tester.tap(find.text('Deutsch'));
+      await tester.pumpAndSettle();
+      // 3 grades: 5+5+6 filled stars, 1+1+0 empty stars = 16 filled, 2 empty
+      expect(find.byIcon(Icons.star), findsNWidgets(16));
+      expect(find.byIcon(Icons.star_border), findsNWidgets(2));
+    });
+
+    testWidgets('shows competence type name', (tester) async {
+      await tester.pumpWidget(buildDemo());
+      await tester.tap(find.text('Deutsch'));
+      await tester.pumpAndSettle();
+      expect(find.text('Schreiben: Sätze schreiben'), findsOneWidget);
+      expect(find.text('Lesefertigkeit'), findsOneWidget);
+    });
+
+    testGoldens('demo overview golden', (tester) async {
+      await tester.pumpWidget(buildDemo());
+      await tester.pump();
+      await expectLater(
+        find.byType(GradesPageContainer),
+        matchesGoldenFile('demo_overview.png'),
+      );
+    });
+
+    testGoldens('demo expanded Deutsch golden', (tester) async {
+      await tester.pumpWidget(buildDemo());
+      await tester.tap(find.text('Deutsch'));
+      await tester.pumpAndSettle();
+      await expectLater(
+        find.byType(GradesPageContainer),
+        matchesGoldenFile('demo_expanded.png'),
+      );
+    });
   });
 }

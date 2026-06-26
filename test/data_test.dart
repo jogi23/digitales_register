@@ -45,8 +45,8 @@ Subject _subject({
 
 void main() {
   group('formatGradeFromString', () {
-    test('null returns keine Note eingetragen', () {
-      expect(formatGradeFromString(null), 'keine Note eingetragen');
+    test('null returns ohne Note', () {
+      expect(formatGradeFromString(null), 'ohne Note');
     });
 
     test('"7.00" formats to "7"', () {

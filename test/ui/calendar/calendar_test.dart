@@ -36,6 +36,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
 
+import '../../fixtures/api_fixtures.dart';
+
 class _TestCalendarNotifier extends CalendarNotifier {
   final CalendarState initialState;
   _TestCalendarNotifier(this.initialState);
@@ -104,7 +106,29 @@ CalendarState _buildCalendarState({
   );
 }
 
+// Demo state parsed in setUpAll from assets/demo/capture.json (KW 2026-05-11).
+late CalendarState _demoState;
+
 Future<void> main() async {
+  setUpAll(() async {
+    await loadFixtures();
+    await loadAppFonts();
+    // Use a temporary container to access parseLoaded (visibleForTesting).
+    final container = ProviderContainer();
+    final notifier = container.read(calendarProvider.notifier);
+    final raw = fixtureFor(
+      'api/calendar/student',
+      params: {'startDate': '2026-05-11'},
+    ) as Map<String, dynamic>;
+    final days = notifier.parseLoaded(raw);
+    container.dispose();
+    _demoState = CalendarState(
+      (b) => b
+        ..currentMonday = UtcDateTime(2026, 5, 11)
+        ..days = MapBuilder(days),
+    );
+  });
+
   Widget getCalendar(
       {required bool nicksBarEnabled, required bool hasSubjctWithoutNick}) {
     navigatorKey = GlobalKey();
@@ -258,5 +282,80 @@ Future<void> main() async {
       findsOneWidget,
     );
     expect(find.text("Fach1"), findsOneWidget);
+  });
+
+  group('demo data KW 2026-05-11', () {
+    Widget getDemoCalendar() {
+      navigatorKey = GlobalKey();
+      final container = ProviderContainer(
+        overrides: [
+          calendarProvider.overrideWith(
+            () => _TestCalendarNotifier(_demoState),
+          ),
+          noInternetProvider.overrideWith(NoInternetNotifier.new),
+          settingsProvider.overrideWith(
+            () => _TestSettingsNotifier(SettingsState(subjectNicks: {})),
+          ),
+        ],
+      );
+      pc.providerContainer = container;
+      return UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(
+          navigatorKey: navigatorKey,
+          home: CalendarContainer(),
+          theme: ThemeData(primarySwatch: Colors.deepOrange),
+          localizationsDelegates: const [
+            GlobalCupertinoLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: const [Locale("de")],
+        ),
+      );
+    }
+
+    testWidgets('shows all 5 weekday headers', (tester) async {
+      await tester.pumpWidget(getDemoCalendar());
+      await tester.pump();
+      expect(find.text('Mo'), findsOneWidget);
+      expect(find.text('Di'), findsOneWidget);
+      expect(find.text('Mi'), findsOneWidget);
+      expect(find.text('Do'), findsOneWidget);
+      expect(find.text('Fr'), findsOneWidget);
+    });
+
+    testWidgets('shows date 11.05 for Monday', (tester) async {
+      await tester.pumpWidget(getDemoCalendar());
+      await tester.pump();
+      expect(find.text('11.05'), findsOneWidget);
+    });
+
+    testWidgets('shows subject Deutsch', (tester) async {
+      await tester.pumpWidget(getDemoCalendar());
+      await tester.pump();
+      expect(find.text('Deutsch'), findsWidgets);
+    });
+
+    testWidgets('shows subject Mathematik', (tester) async {
+      await tester.pumpWidget(getDemoCalendar());
+      await tester.pump();
+      expect(find.text('Mathematik'), findsWidgets);
+    });
+
+    testWidgets('shows teacher name Testfrau', (tester) async {
+      await tester.pumpWidget(getDemoCalendar());
+      await tester.pump();
+      expect(find.text('Testfrau'), findsWidgets);
+    });
+
+    testGoldens('demo week view golden', (tester) async {
+      await tester.pumpWidget(getDemoCalendar());
+      await tester.pump();
+      await expectLater(
+        find.byType(CalendarContainer),
+        matchesGoldenFile('demo_week.png'),
+      );
+    });
   });
 }
