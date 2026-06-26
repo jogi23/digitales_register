@@ -27,23 +27,43 @@ class SplashOverlay extends StatefulWidget {
 }
 
 class _SplashOverlayState extends State<SplashOverlay>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-  late final Animation<double> _opacity;
+    with TickerProviderStateMixin {
+  late final AnimationController _fadeOutController;
+  late final AnimationController _textController;
+  late final Animation<double> _textOpacity;
+  late final Animation<Offset> _textSlide;
   bool _visible = true;
 
-  static const _displayDuration = Duration(milliseconds: 2200);
-  static const _fadeDuration = Duration(milliseconds: 500);
+  static const _textDelay = Duration(milliseconds: 600);
+  static const _textFadeDuration = Duration(milliseconds: 2000);
+  static const _displayDuration = Duration(milliseconds: 3200);
+  static const _fadeOutDuration = Duration(milliseconds: 500);
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: _fadeDuration);
-    _opacity = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
+
+    _fadeOutController =
+        AnimationController(vsync: this, duration: _fadeOutDuration);
+
+    _textController =
+        AnimationController(vsync: this, duration: _textFadeDuration);
+    _textOpacity = CurvedAnimation(
+      parent: _textController,
+      curve: Curves.easeIn,
+    );
+    _textSlide = Tween<Offset>(
+      begin: const Offset(0, 0.6),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _textController, curve: Curves.easeOut));
+
+    Future.delayed(_textDelay, () {
+      if (mounted) _textController.forward();
+    });
 
     Future.delayed(_displayDuration, () {
       if (!mounted) return;
-      _controller.forward().whenComplete(() {
+      _fadeOutController.forward().whenComplete(() {
         if (mounted) setState(() => _visible = false);
       });
     });
@@ -51,54 +71,67 @@ class _SplashOverlayState extends State<SplashOverlay>
 
   @override
   void dispose() {
-    _controller.dispose();
+    _fadeOutController.dispose();
+    _textController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!_visible || Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+    if (!_visible ||
+        Platform.isWindows ||
+        Platform.isLinux ||
+        Platform.isMacOS) {
       return const SizedBox.shrink();
     }
     return FadeTransition(
-      opacity: ReverseAnimation(_opacity),
-      child: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF3a9488),
-              Color(0xFF1e5c56),
-            ],
-          ),
-        ),
-        child: SafeArea(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ClipOval(
-                child: Image.asset(
-                  'assets/icon_foreground.png',
-                  width: 200,
-                  height: 200,
-                  fit: BoxFit.cover,
+      opacity: ReverseAnimation(
+        CurvedAnimation(parent: _fadeOutController, curve: Curves.easeOut),
+      ),
+      child: ColoredBox(
+        color: Colors.black,
+        child: Stack(
+          children: [
+            // Logo zentriert; 1.13× Zoom clippt den äußeren Teal-Rand weg.
+            Center(
+              child: SizedBox(
+                width: 200,
+                height: 200,
+                child: ClipOval(
+                  child: Transform.scale(
+                    scale: 1.13,
+                    child: const Image(
+                      image: AssetImage('assets/icon_foreground.png'),
+                      width: 200,
+                      height: 200,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
                 ),
               ),
-              const SizedBox(height: 32),
-              const Text(
-                'DigiReg ST',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Color(0xFFE8C87A),
-                  fontSize: 26,
-                  fontWeight: FontWeight.w300,
-                  letterSpacing: 0.5,
-                  height: 1.4,
+            ),
+            // Text blendet sich langsam unterhalb des Logos ein.
+            Align(
+              alignment: const Alignment(0, 0.5),
+              child: SlideTransition(
+                position: _textSlide,
+                child: FadeTransition(
+                  opacity: _textOpacity,
+                  child: const Text(
+                    'DigiReg ST',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Color(0xFFE8C87A),
+                      fontSize: 31,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.5,
+                      decoration: TextDecoration.none,
+                    ),
+                  ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
