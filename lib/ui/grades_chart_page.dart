@@ -29,16 +29,21 @@ class GradesChartPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text("Notendiagramm"),
       ),
-      body: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          const Expanded(
-            child: GradesChartContainer(
-              isFullscreen: true,
+      body: SafeArea(
+        top: false,
+        left: false,
+        right: false,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            const Expanded(
+              child: GradesChartContainer(
+                isFullscreen: true,
+              ),
             ),
-          ),
-          ChartLegendContainer(),
-        ],
+            ChartLegendContainer(),
+          ],
+        ),
       ),
     );
   }

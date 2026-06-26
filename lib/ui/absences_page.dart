@@ -77,7 +77,10 @@ class AbsencesBody extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
               )
-            : ListView(children: <Widget>[
+            : ListView(
+                padding: EdgeInsets.only(
+                    bottom: MediaQuery.of(context).viewPadding.bottom),
+                children: <Widget>[
                 AbsencesStatisticWidget(
                   stat: state.statistic!,
                 ),

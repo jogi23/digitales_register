@@ -317,6 +317,8 @@ class _DaysWidgetState extends State<DaysWidget> {
         child: ListView.builder(
           physics: const AlwaysScrollableScrollPhysics(),
           controller: controller,
+          padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewPadding.bottom),
           // Times two for the divider, minus one because there's no divider after the last item.
           // The first item is the DashboardHeader, the last one a SizedBox (a spacer).
           itemCount: (widget.vm.days.length * 2 - 1) + 2,

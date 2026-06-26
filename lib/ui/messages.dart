@@ -100,6 +100,8 @@ class MessagesPage extends StatelessWidget {
                       ),
                     ListView.builder(
                       physics: const AlwaysScrollableScrollPhysics(),
+                      padding: EdgeInsets.only(
+                          bottom: MediaQuery.of(context).viewPadding.bottom),
                       itemCount: state!.messages.length,
                       itemBuilder: (context, i) {
                         final altColor = Theme.of(context)

@@ -406,30 +406,36 @@ class EditNickBar extends StatelessWidget {
               color: Theme.of(context).scaffoldBackgroundColor,
             ),
             child: Material(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: TextButton(
-                        onPressed: onShowEditNicks,
-                        child: const Row(
-                          children: [
-                            Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 8),
-                              child: Text("Kürzel bearbeiten"),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          child: TextButton(
+                            onPressed: onShowEditNicks,
+                            child: const Row(
+                              children: [
+                                Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 8),
+                                  child: Text("Kürzel bearbeiten"),
+                                ),
+                                Spacer(),
+                              ],
                             ),
-                            Spacer(),
-                          ],
+                          ),
                         ),
                       ),
-                    ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: onClose,
+                      ),
+                    ],
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: onClose,
-                  ),
+                  SizedBox(height: MediaQuery.of(context).viewPadding.bottom),
                 ],
               ),
             ),

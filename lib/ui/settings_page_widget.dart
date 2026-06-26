@@ -157,6 +157,8 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
       ),
       body: ListView(
         controller: controller,
+        padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewPadding.bottom),
         children: <Widget>[
           if (!widget.vm.demoMode) ...[
             const SizedBox(height: 8),
