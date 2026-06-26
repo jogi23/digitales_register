@@ -173,7 +173,7 @@ abstract class Homework implements Built<Homework, HomeworkBuilder> {
 }
 
 String formatGradeFromString(String? grade) {
-  if (grade == null) return "keine Note eingetragen";
+  if (grade == null) return "ohne Note";
   final List<String> split = grade.split(".");
   assert(split.length == 2);
   final int mainGrade = int.parse(split[0]);

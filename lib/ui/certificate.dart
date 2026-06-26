@@ -174,7 +174,7 @@ class _CertificateView extends StatelessWidget {
         final labelWidth = _computeLabelWidth(context, data.rows, screenWidth);
 
         final altColor =
-            theme.colorScheme.surfaceContainerHighest.withOpacity(0.4);
+            theme.colorScheme.surfaceContainerHighest.withOpacity(0.75);
         final headerBg = theme.colorScheme.surfaceContainerHighest;
         final gradeColor = theme.colorScheme.primary;
 

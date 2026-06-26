@@ -850,7 +850,25 @@ class ItemWidget extends StatelessWidget {
     if (!gradeCompetencesLoaded) {
       return const SizedBox(height: 32, width: 32);
     }
-    return Text(item.gradeFormatted!, style: style);
+    // No numeric grade and no competences: show "ohne Note" constrained to the
+    // same width as a star-row (6 × 24dp = 144dp) so the right column never
+    // pushes the card content out of view.
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 148),
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Text(
+          item.gradeFormatted!,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.primary,
+            fontWeight: FontWeight.bold,
+            fontStyle: FontStyle.italic,
+            fontSize: 18,
+          ),
+        ),
+      ),
+    );
   }
 
   @override

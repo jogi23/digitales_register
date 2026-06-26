@@ -105,7 +105,7 @@ class MessagesPage extends StatelessWidget {
                         final altColor = Theme.of(context)
                             .colorScheme
                             .surfaceContainerHighest
-                            .withOpacity(0.4);
+                            .withOpacity(0.75);
                         return MessageWidget(
                           message: state!.messages[i],
                           onOpenFile: onOpenFile,
@@ -191,7 +191,9 @@ class _MessageWidgetState extends State<MessageWidget> {
           Expanded(
             child: Text(
               widget.message.subject,
-              style: textTheme.titleMedium,
+              style: textTheme.titleMedium?.copyWith(
+                color: Theme.of(context).colorScheme.primary,
+              ),
             ),
           ),
           if (widget.message.isNew)

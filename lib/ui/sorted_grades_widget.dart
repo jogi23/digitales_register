@@ -198,7 +198,7 @@ class _SubjectWidgetState extends State<SubjectWidget> {
     final entries = widget.subject.detailEntries(widget.semester);
     final theme = Theme.of(context);
     final altColor =
-        theme.colorScheme.surfaceContainerHighest.withOpacity(0.4);
+        theme.colorScheme.surfaceContainerHighest.withOpacity(0.75);
     return AbsorbPointer(
       absorbing: widget.noInternet && entries == null,
       child: ExpansionTile(
@@ -313,10 +313,9 @@ class GradeWidget extends StatelessWidget {
   const GradeWidget({super.key, required this.grade, this.tileColor});
   @override
   Widget build(BuildContext context) {
-    return Column(
+    final column = Column(
       children: <Widget>[
         ListTile(
-          tileColor: tileColor,
           title: Text(
             grade.name,
             style: grade.cancelled ? lineThrough : null,
@@ -358,6 +357,10 @@ class GradeWidget extends StatelessWidget {
             ),
       ],
     );
+    if (tileColor != null) {
+      return ColoredBox(color: tileColor!, child: column);
+    }
+    return column;
   }
 }
 
@@ -386,8 +389,11 @@ class CompetenceWidget extends StatelessWidget {
   final Competence competence;
   final bool cancelled;
 
-  const CompetenceWidget(
-      {super.key, required this.competence, required this.cancelled});
+  const CompetenceWidget({
+    super.key,
+    required this.competence,
+    required this.cancelled,
+  });
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -438,7 +444,7 @@ class GradeTypeWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final altColor =
-        theme.colorScheme.surfaceContainerHighest.withOpacity(0.4);
+        theme.colorScheme.surfaceContainerHighest.withOpacity(0.75);
     final displayGrades = entries
         .indexed
         .map(
