@@ -42,6 +42,8 @@ class _ChangeEmailState extends State<ChangeEmail> {
         child: Center(
           child: ListView(
             shrinkWrap: true,
+            padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewPadding.bottom),
             children: <Widget>[
               TextField(
                 obscureText: true,

@@ -90,6 +90,8 @@ class _DebugLogPageState extends State<DebugLogPage> {
       body: entries.isEmpty
           ? const Center(child: Text('Keine Einträge'))
           : ListView.separated(
+              padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).viewPadding.bottom),
               itemCount: entries.length,
               separatorBuilder: (_, __) => const Divider(height: 1),
               itemBuilder: (context, i) => _EntryTile(entry: entries[i]),

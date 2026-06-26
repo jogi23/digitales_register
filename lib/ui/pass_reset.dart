@@ -63,6 +63,8 @@ class _PassResetState extends State<PassReset> {
             child: AutofillGroup(
               child: ListView(
                 shrinkWrap: true,
+                padding: EdgeInsets.only(
+                    bottom: MediaQuery.of(context).viewPadding.bottom),
                 children: <Widget>[
                   Container(
                     decoration: BoxDecoration(

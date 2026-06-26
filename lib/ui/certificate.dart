@@ -268,6 +268,8 @@ class _CertificateView extends StatelessWidget {
         }
 
         return SingleChildScrollView(
+          padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewPadding.bottom),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: content,
