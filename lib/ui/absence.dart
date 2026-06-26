@@ -23,152 +23,126 @@ import 'package:intl/intl.dart';
 
 class AbsenceGroupWidget extends StatelessWidget {
   final AbsencesViewModel vm;
+  final Color? tileColor;
 
-  const AbsenceGroupWidget({super.key, required this.vm});
+  const AbsenceGroupWidget({super.key, required this.vm, this.tileColor});
+
   @override
   Widget build(BuildContext context) {
-    const divider = Row(
-      children: [
-        Spacer(),
-        Flexible(
-          flex: 48,
-          child: Divider(
-            height: 8,
-          ),
-        ),
-        Spacer(),
-      ],
-    );
+    final theme = Theme.of(context);
+    final isApproved = vm.justified == AbsenceJustified.justified ||
+        vm.justified == AbsenceJustified.forSchool;
+    final isRejected = vm.justified == AbsenceJustified.notJustified;
 
-    return Card(
-      shape: RoundedRectangleBorder(
-        side: vm.justified == AbsenceJustified.notYetJustified ||
-                vm.justified == AbsenceJustified.notJustified
-            ? BorderSide(color: Theme.of(context).colorScheme.error)
-            : BorderSide(
-                color: Theme.of(context).colorScheme.primary, width: 0),
-        borderRadius: BorderRadius.circular(16),
+    final IconData iconData;
+    final Color iconColor;
+    if (isApproved) {
+      iconData = Icons.check_circle;
+      iconColor = Colors.green.shade600;
+    } else if (isRejected) {
+      iconData = Icons.cancel;
+      iconColor = theme.colorScheme.error;
+    } else {
+      iconData = Icons.radio_button_unchecked;
+      iconColor = theme.colorScheme.onSurfaceVariant;
+    }
+
+    final title =
+        vm.duration.isEmpty ? vm.fromTo : '${vm.fromTo} · ${vm.duration}';
+
+    final subtitleParts = <String>[
+      if (vm.reason?.isNotEmpty == true) vm.reason!,
+      if (vm.note?.isNotEmpty == true) vm.note!,
+    ];
+
+    return ListTile(
+      tileColor: tileColor,
+      leading: Icon(iconData, color: iconColor),
+      title: Text(
+        title,
+        style: TextStyle(color: theme.colorScheme.primary),
       ),
-      color: Colors.transparent,
-      elevation: 0,
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: <Widget>[
-            if (vm.reason != null) ...[
-              Text(vm.reason!),
-              divider,
-            ],
-            if (vm.note != null) ...[
-              Text(vm.note!),
-              divider,
-            ],
-            Text(
-              vm.fromTo,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            Text(
-              vm.duration,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            divider,
-            Text(
-              vm.justifiedString,
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
+      subtitle: subtitleParts.isNotEmpty
+          ? Text(subtitleParts.join(' · '))
+          : null,
     );
   }
 }
 
 class FutureAbsenceWidget extends StatelessWidget {
   final FutureAbsence absence;
+  final Color? tileColor;
+
   const FutureAbsenceWidget({
     super.key,
     required this.absence,
+    this.tileColor,
   });
 
   @override
   Widget build(BuildContext context) {
-    var fromTo = "";
+    final theme = Theme.of(context);
+
+    var fromTo = '';
     if (absence.startDate == absence.endDate) {
-      fromTo +=
-          "${DateFormat("EE d.M.yyyy", "de").format(absence.startDate)}, ";
+      fromTo += '${DateFormat("EE d.M.yyyy", "de").format(absence.startDate)}, ';
       if (absence.startHour == absence.endHour) {
-        fromTo += "${absence.startHour}. h";
+        fromTo += '${absence.startHour}. h';
       } else {
-        fromTo += "${absence.startHour}. - ${absence.endHour}. h";
+        fromTo += '${absence.startHour}. - ${absence.endHour}. h';
       }
     } else {
       fromTo +=
-          "${DateFormat("EE d.M.yyyy", "de").format(absence.startDate)} ${absence.startHour}. h - ${DateFormat("EE d.M.yyyy", "de").format(absence.endDate)} ${absence.endHour}. h ";
+          '${DateFormat("EE d.M.yyyy", "de").format(absence.startDate)} ${absence.startHour}. h'
+          ' - ${DateFormat("EE d.M.yyyy", "de").format(absence.endDate)} ${absence.endHour}. h';
     }
 
-    String justifiedString;
+    final isApproved = absence.justified == AbsenceJustified.justified ||
+        absence.justified == AbsenceJustified.forSchool;
+    final isRejected = absence.justified == AbsenceJustified.notJustified;
+
+    final IconData iconData;
+    final Color iconColor;
+    if (isApproved) {
+      iconData = Icons.check_circle;
+      iconColor = Colors.green.shade600;
+    } else if (isRejected) {
+      iconData = Icons.cancel;
+      iconColor = theme.colorScheme.error;
+    } else {
+      iconData = Icons.radio_button_unchecked;
+      iconColor = theme.colorScheme.onSurfaceVariant;
+    }
+
+    final String justifiedString;
     switch (absence.justified) {
       case AbsenceJustified.justified:
-        justifiedString = "Entschuldigt";
+        justifiedString = 'Entschuldigt';
       case AbsenceJustified.forSchool:
-        justifiedString = "Im Auftrag der Schule (entschuldigt)";
+        justifiedString = 'Im Auftrag der Schule (entschuldigt)';
       case AbsenceJustified.notJustified:
-        justifiedString = "Nicht entschuldigt";
+        justifiedString = 'Nicht entschuldigt';
       default:
-        justifiedString = "Noch nicht entschuldigt";
+        justifiedString = 'Noch nicht entschuldigt';
     }
 
-    const divider = Row(
-      children: [
-        Spacer(),
-        Flexible(
-          flex: 48,
-          child: Divider(
-            height: 8,
-          ),
-        ),
-        Spacer(),
-      ],
-    );
+    final subtitleParts = <String>[
+      if (absence.reason?.isNotEmpty == true) absence.reason!,
+      if (absence.note?.isNotEmpty == true) absence.note!,
+      if (absence.reasonTimestamp != null && absence.reasonSignature != null)
+        '${DateFormat("EE d.M.yyyy \'um\' HH:mm", "de").format(absence.reasonTimestamp!)} als „${absence.reasonSignature}” eingetragen',
+    ];
 
-    return Card(
-      shape: RoundedRectangleBorder(
-        side: absence.justified == AbsenceJustified.notYetJustified ||
-                absence.justified == AbsenceJustified.notJustified
-            ? BorderSide(color: Theme.of(context).colorScheme.error)
-            : BorderSide(
-                color: Theme.of(context).colorScheme.primary, width: 0),
-        borderRadius: BorderRadius.circular(16),
+    return ListTile(
+      tileColor: tileColor,
+      leading: Icon(iconData, color: iconColor),
+      title: Text(
+        fromTo,
+        style: TextStyle(color: theme.colorScheme.primary),
       ),
-      color: Colors.transparent,
-      elevation: 0,
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: <Widget>[
-            if (absence.note != null) ...[
-              Text(absence.note!),
-              divider,
-            ],
-            if (absence.reason != null) ...[
-              Text(absence.reason!),
-              divider,
-            ],
-            Text(
-              fromTo,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            divider,
-            if (absence.reasonTimestamp != null &&
-                absence.reasonSignature != null)
-              Text(
-                "${DateFormat("EE d.M.yyyy 'um' HH:mm", "de").format(absence.reasonTimestamp!)} als „${absence.reasonSignature}“ eingetragen",
-              ),
-            divider,
-            Text(justifiedString),
-          ],
-        ),
-      ),
+      subtitle: subtitleParts.isNotEmpty
+          ? Text(subtitleParts.join('\n'))
+          : null,
     );
   }
 }
