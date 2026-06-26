@@ -123,6 +123,7 @@ class LoginNotifier extends Notifier<LoginState> {
   void Function(String user, String oldPass, String newPass, String url)? _changePassDispatch;
   void Function(bool)? _saveNoPassDispatch;
   void Function()? _loadDispatch;
+  void Function()? _loginCurrentFromStorageDispatch;
   void Function(String url)? _showRequestPassResetDispatch;
   void Function(String newPass)? _resetPassDispatch;
   void Function(String user, String email)? _requestPassResetDispatch;
@@ -137,6 +138,7 @@ class LoginNotifier extends Notifier<LoginState> {
     required void Function(String user, String oldPass, String newPass, String url) changePass,
     required void Function(bool) saveNoPass,
     required void Function() load,
+    required void Function() loginCurrentFromStorage,
     required void Function(String url) showRequestPassReset,
     required void Function(String newPass) resetPass,
     required void Function(String user, String email) requestPassReset,
@@ -148,6 +150,7 @@ class LoginNotifier extends Notifier<LoginState> {
     _changePassDispatch = changePass;
     _saveNoPassDispatch = saveNoPass;
     _loadDispatch = load;
+    _loginCurrentFromStorageDispatch = loginCurrentFromStorage;
     _showRequestPassResetDispatch = showRequestPassReset;
     _resetPassDispatch = resetPass;
     _requestPassResetDispatch = requestPassReset;
@@ -208,6 +211,7 @@ class LoginNotifier extends Notifier<LoginState> {
 
   void addAccount() => _addAccountDispatch?.call();
   void selectAccount(int index) => _selectAccountDispatch?.call(index);
+  void loginCurrentFromStorage() => _loginCurrentFromStorageDispatch?.call();
   void requestLogout({required bool hard, bool forced = false}) =>
       _logoutDispatch?.call(hard: hard, forced: forced);
   void login(String user, String pass, String url) =>

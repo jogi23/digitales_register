@@ -100,14 +100,21 @@ class MessagesPage extends StatelessWidget {
                       ),
                     ListView.builder(
                       physics: const AlwaysScrollableScrollPhysics(),
+                      padding: EdgeInsets.only(
+                          bottom: MediaQuery.of(context).viewPadding.bottom),
                       itemCount: state!.messages.length,
                       itemBuilder: (context, i) {
+                        final altColor = Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerHighest
+                            .withOpacity(0.75);
                         return MessageWidget(
                           message: state!.messages[i],
                           onOpenFile: onOpenFile,
                           onMarkAsRead: onMarkAsRead,
                           noInternet: noInternet,
                           expand: state!.messages[i].id == state!.showMessage,
+                          tileColor: i.isOdd ? altColor : null,
                         );
                       },
                     ),
@@ -125,6 +132,7 @@ class MessageWidget extends StatefulWidget {
   final void Function(Message message) onMarkAsRead;
   final bool noInternet;
   final bool expand;
+  final Color? tileColor;
 
   const MessageWidget({
     super.key,
@@ -133,6 +141,7 @@ class MessageWidget extends StatefulWidget {
     required this.noInternet,
     required this.onMarkAsRead,
     required this.expand,
+    this.tileColor,
   });
 
   @override
@@ -172,6 +181,8 @@ class _MessageWidgetState extends State<MessageWidget> {
     return ExpansionTile(
       controller: _controller,
       initiallyExpanded: initiallyExpanded,
+      backgroundColor: widget.tileColor,
+      collapsedBackgroundColor: widget.tileColor,
       onExpansionChanged: (expanded) {
         if (expanded && widget.message.isNew) {
           widget.onMarkAsRead(widget.message);
@@ -182,7 +193,9 @@ class _MessageWidgetState extends State<MessageWidget> {
           Expanded(
             child: Text(
               widget.message.subject,
-              style: textTheme.titleMedium,
+              style: textTheme.titleMedium?.copyWith(
+                color: Theme.of(context).colorScheme.primary,
+              ),
             ),
           ),
           if (widget.message.isNew)

@@ -499,7 +499,11 @@ class _ImportGradesState extends State<_ImportGrades> {
       appBar: AppBar(
         title: const Text("Noten importieren"),
       ),
-      body: Column(
+      body: SafeArea(
+        top: false,
+        left: false,
+        right: false,
+        child: Column(
         children: [
           DropdownButton<Subject>(
             items: [
@@ -580,6 +584,7 @@ class _ImportGradesState extends State<_ImportGrades> {
               ),
             ),
         ],
+        ),
       ),
     );
   }

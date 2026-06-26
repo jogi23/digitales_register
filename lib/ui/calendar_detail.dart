@@ -347,6 +347,8 @@ class _CalendarDetailState extends State<CalendarDetail> {
   Widget build(BuildContext context) {
     return ScrollablePositionedList.builder(
       itemScrollController: itemScrollController,
+      padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewPadding.bottom),
       itemCount: widget.day.hours.length,
       itemBuilder: (context, index) {
         return Padding(

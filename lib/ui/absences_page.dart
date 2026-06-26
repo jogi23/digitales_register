@@ -63,6 +63,11 @@ class AbsencesBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final altColor = Theme.of(context)
+        .colorScheme
+        .surfaceContainerHighest
+        .withOpacity(0.75);
+
     return state.statistic != null
         ? state.absences.isEmpty && state.futureAbsences.isEmpty
             ? Center(
@@ -72,7 +77,10 @@ class AbsencesBody extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
               )
-            : ListView(children: <Widget>[
+            : ListView(
+                padding: EdgeInsets.only(
+                    bottom: MediaQuery.of(context).viewPadding.bottom),
+                children: <Widget>[
                 AbsencesStatisticWidget(
                   stat: state.statistic!,
                 ),
@@ -85,8 +93,11 @@ class AbsencesBody extends StatelessWidget {
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                   ),
-                for (final futureAbsence in state.futureAbsences)
-                  FutureAbsenceWidget(absence: futureAbsence),
+                for (var i = 0; i < state.futureAbsences.length; i++)
+                  FutureAbsenceWidget(
+                    absence: state.futureAbsences[i],
+                    tileColor: i.isEven ? altColor : null,
+                  ),
                 if (state.absences.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.all(8.0).copyWith(top: 16),
@@ -99,6 +110,7 @@ class AbsencesBody extends StatelessWidget {
                   state.absences.length,
                   (n) => AbsenceGroupContainer(
                     group: state.absences.length - n - 1,
+                    tileColor: n.isEven ? altColor : null,
                   ),
                 ),
               ])

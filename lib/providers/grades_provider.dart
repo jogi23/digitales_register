@@ -212,6 +212,10 @@ class GradesNotifier extends Notifier<GradesState> {
     ref.read(settingsProvider.notifier).updateSubjectThemes(
           state.subjects.map((s) => s.name).toList(),
         );
+    // Pre-fetch all subject details in the background so averages are visible
+    // immediately without expanding a subject first. Detail data is included in
+    // the persisted app state, so averages are also instant on the next cold start.
+    unawaited(ensureDetailDataForSubjects(state.subjects, semester));
   }
 
   void _applyDetailsLoaded(dynamic data, Semester semester, Subject subject) {

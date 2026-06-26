@@ -38,6 +38,7 @@ void main() {
           onChangePass: (_, __, ___, ____) {},
           onRequestPassReset: (_) {},
           onSelectAccount: (_) {},
+          onLoginCurrentAccount: () {},
         ),
       ),
     );
@@ -59,6 +60,7 @@ void main() {
           onChangePass: (_, __, ___, ____) {},
           onRequestPassReset: (_) {},
           onSelectAccount: (_) {},
+          onLoginCurrentAccount: () {},
         ),
       ),
     );

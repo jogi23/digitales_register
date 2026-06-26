@@ -79,6 +79,8 @@ class GradesPage extends StatelessWidget {
                     RawLastFetchedOverlay(
                       message: vm.lastFetchedMessage,
                       child: ListView(
+                        padding: EdgeInsets.only(
+                            bottom: MediaQuery.of(context).viewPadding.bottom),
                         children: <Widget>[
                           if (vm.showGradesDiagram)
                             const SizedBox(

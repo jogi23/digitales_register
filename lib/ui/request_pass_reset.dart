@@ -50,6 +50,8 @@ class _RequestPassResetState extends State<RequestPassReset> {
           child: AutofillGroup(
             child: ListView(
               shrinkWrap: true,
+              padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).viewPadding.bottom),
               children: <Widget>[
                 TextField(
                   autofillHints: const [AutofillHints.username],

@@ -145,11 +145,12 @@ class _SubjectWidgetState extends State<SubjectWidget> {
   bool closed = true;
   final _controller = ExpansibleController();
 
-  Widget _buildDetailEntry(DetailEntry entry) {
+  Widget _buildDetailEntry(DetailEntry entry, {Color? tileColor}) {
     if (entry is! GradeDetail) {
-      return ObservationWidget(observation: entry as Observation);
+      return ObservationWidget(
+          observation: entry as Observation, tileColor: tileColor);
     }
-    final child = GradeWidget(grade: entry);
+    final child = GradeWidget(grade: entry, tileColor: tileColor);
     if (widget.pendingGradeId == entry.id) {
       return PendingGradeTarget(
         onVisible: widget.clearPendingGrade,
@@ -195,6 +196,9 @@ class _SubjectWidgetState extends State<SubjectWidget> {
   @override
   Widget build(BuildContext context) {
     final entries = widget.subject.detailEntries(widget.semester);
+    final theme = Theme.of(context);
+    final altColor =
+        theme.colorScheme.surfaceContainerHighest.withOpacity(0.75);
     return AbsorbPointer(
       absorbing: widget.noInternet && entries == null,
       child: ExpansionTile(
@@ -203,6 +207,7 @@ class _SubjectWidgetState extends State<SubjectWidget> {
         title: Text.rich(
           TextSpan(
             text: widget.subject.name,
+            style: TextStyle(color: theme.colorScheme.primary),
             children: [
               if (widget.ignoredForAverage)
                 const TextSpan(
@@ -280,10 +285,14 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                                 ),
                               )
                         else
-                          ...entries
+                          for (final (i, entry) in entries
                               .where(
                                   (g) => widget.showCancelled || !g.cancelled)
-                              .map(_buildDetailEntry)
+                              .indexed)
+                            _buildDetailEntry(
+                              entry,
+                              tileColor: i.isOdd ? altColor : null,
+                            )
                       ],
                     )
                   : AnimatedLinearProgressIndicator(show: !widget.noInternet),
@@ -299,11 +308,12 @@ const lineThrough = TextStyle(decoration: TextDecoration.lineThrough);
 
 class GradeWidget extends StatelessWidget {
   final GradeDetail grade;
+  final Color? tileColor;
 
-  const GradeWidget({super.key, required this.grade});
+  const GradeWidget({super.key, required this.grade, this.tileColor});
   @override
   Widget build(BuildContext context) {
-    return Column(
+    final column = Column(
       children: <Widget>[
         ListTile(
           title: Text(
@@ -347,16 +357,22 @@ class GradeWidget extends StatelessWidget {
             ),
       ],
     );
+    if (tileColor != null) {
+      return ColoredBox(color: tileColor!, child: column);
+    }
+    return column;
   }
 }
 
 class ObservationWidget extends StatelessWidget {
   final Observation observation;
+  final Color? tileColor;
 
-  const ObservationWidget({super.key, required this.observation});
+  const ObservationWidget({super.key, required this.observation, this.tileColor});
   @override
   Widget build(BuildContext context) {
     return ListTile(
+      tileColor: tileColor,
       title: Text(
         observation.typeName,
         style: observation.cancelled ? lineThrough : null,
@@ -373,8 +389,11 @@ class CompetenceWidget extends StatelessWidget {
   final Competence competence;
   final bool cancelled;
 
-  const CompetenceWidget(
-      {super.key, required this.competence, required this.cancelled});
+  const CompetenceWidget({
+    super.key,
+    required this.competence,
+    required this.cancelled,
+  });
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -423,24 +442,36 @@ class GradeTypeWidget extends StatelessWidget {
       this.clearPendingGrade});
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final altColor =
+        theme.colorScheme.surfaceContainerHighest.withOpacity(0.75);
     final displayGrades = entries
+        .indexed
         .map(
-          (g) => g is GradeDetail
-              ? (pendingGradeId == g.id
-                  ? PendingGradeTarget(
-                      onVisible: clearPendingGrade,
-                      child: GradeWidget(grade: g),
-                    )
-                  : GradeWidget(grade: g))
-              : ObservationWidget(
-                  observation: g as Observation,
-                ),
+          ((int, DetailEntry) pair) {
+            final (i, g) = pair;
+            final bgColor = i.isOdd ? altColor : null;
+            return g is GradeDetail
+                ? (pendingGradeId == g.id
+                    ? PendingGradeTarget(
+                        onVisible: clearPendingGrade,
+                        child: GradeWidget(grade: g, tileColor: bgColor),
+                      )
+                    : GradeWidget(grade: g, tileColor: bgColor))
+                : ObservationWidget(
+                    observation: g as Observation,
+                    tileColor: bgColor,
+                  );
+          },
         )
         .toList();
     return displayGrades.isEmpty
         ? const SizedBox()
         : ExpansionTile(
-            title: Text(typeName),
+            title: Text(
+              typeName,
+              style: TextStyle(color: theme.colorScheme.primary),
+            ),
             initiallyExpanded: true,
             children: displayGrades,
           );

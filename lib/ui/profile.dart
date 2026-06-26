@@ -50,6 +50,8 @@ class Profile extends StatelessWidget {
                   : const CircularProgressIndicator(),
             )
           : ListView(
+              padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).viewPadding.bottom),
               children: <Widget>[
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 16),

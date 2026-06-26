@@ -7,7 +7,7 @@ description: A new Flutter project.
 # Both the version and the builder number may be overridden in flutter
 # build by specifying --build-name and --build-number, respectively.
 # Read more about versioning at semver.org.
-version: 1.1.5+17
+version: 1.1.6+18
 
 publish_to: none
 
@@ -71,6 +71,7 @@ dependencies:
   url_launcher: ^6.3.1
   flutter_markdown_plus: ^1.0.6
   image_picker: ^1.2.2
+  share_plus: ^10.1.4
 
 dependency_overrides:
   file: ^6.1.4
@@ -122,6 +123,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/
+    - assets/demo/
   #  - images/a_dot_ham.jpeg
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.io/assets-and-images/#resolution-aware.

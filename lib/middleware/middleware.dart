@@ -35,6 +35,7 @@ import 'package:dr/providers/dashboard_provider.dart';
 import 'package:dr/providers/grades_provider.dart';
 import 'package:dr/providers/login_provider.dart';
 import 'package:dr/providers/messages_provider.dart';
+import 'package:dr/providers/account_profile_provider.dart';
 import 'package:dr/providers/network_protocol_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/providers/notifications_provider.dart';
@@ -48,6 +49,7 @@ import 'package:dr/ui/snack_bar.dart';
 import 'package:dr/util.dart';
 import 'package:dr/wrapper.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:open_file/open_file.dart';
@@ -83,6 +85,8 @@ void wireLoginDispatchers(LoginNotifier notifier) {
     changePass: (user, oldPass, newPass, url) =>
         unawaited(_doChangePass(user, oldPass, newPass, url)),
     saveNoPass: (value) => unawaited(_doSaveNoPass(value)),
+    loginCurrentFromStorage: () =>
+        unawaited(_withErrorHandling(_doLoginCurrentFromStorage)),
     resetPass: (newPass) => unawaited(_doResetPass(newPass)),
     requestPassReset: (user, email) =>
         unawaited(_doRequestPassReset(user, email)),
@@ -173,7 +177,7 @@ Future<void> saveStateImmediately() => _doSaveState(immediately: true);
 @visibleForTesting
 Future<void> triggerDeferredSaveState() => _doSaveState();
 
-Future<void> _doLoad() async {
+Future<void> _doLoad({bool forceAutoLogin = false}) async {
   // By resetting the wrapper we clear all cookies.
   // However we don't want to reset the wrapper in tests
   if (wrapper is! Mock) {
@@ -184,6 +188,9 @@ Future<void> _doLoad() async {
   providerContainer.read(settingsProvider.notifier).onSaveState =
       () => unawaited(_doSaveState(immediately: true));
   if (!providerContainer.read(noInternetProvider)) _popAll();
+  // Load profile photos/aliases from SharedPreferences so the startup account
+  // sheet can show them before any network login takes place.
+  await providerContainer.read(accountProfileProvider.notifier).load();
   dynamic login;
   try {
     login = json.decode(await secureStorage.read(key: "login") ?? "{}");
@@ -220,9 +227,19 @@ Future<void> _doLoad() async {
     await _doDeletePass();
     providerContainer.read(appRouterProvider).showLogin();
   } else {
-    if (user != null && pass != null) {
+    if (user != null && pass != null && (otherAccounts.isEmpty || forceAutoLogin)) {
+      // 1 account, or called after an explicit account-selection → auto-login.
       await _doLogin(user, pass, url ?? "", fromStorage: true);
     } else {
+      // 0 accounts → show login form.
+      // 2+ accounts at cold start → set current account info so the startup
+      // sheet can show it, then show login form.
+      if (user != null) {
+        providerContainer.read(loginProvider.notifier).setUsername(user);
+      }
+      if (url != null) {
+        providerContainer.read(loginProvider.notifier).setUrl(fixupUrl(url));
+      }
       providerContainer.read(appRouterProvider).showLogin();
     }
   }
@@ -453,11 +470,18 @@ Future<bool> downloadFile(
   String fileName,
   Map<String, dynamic> parameters,
 ) async {
-  await wrapper.ensureLoggedIn();
-
   final saveFile = File(
     "${await _getAttachmentDownloadDirectory()}/$fileName",
   );
+
+  if (wrapper.demoMode) {
+    if (saveFile.existsSync()) return true;
+    final bytes = await rootBundle.load('assets/demo/demo_attachment.pdf');
+    await saveFile.writeAsBytes(bytes.buffer.asUint8List(), flush: true);
+    return true;
+  }
+
+  await wrapper.ensureLoggedIn();
   var success = true;
   if (saveFile.existsSync()) {
     final shouldOverwrite = await askShouldOverwriteFile(fileName);

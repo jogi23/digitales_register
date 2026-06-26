@@ -21,6 +21,7 @@ import 'dart:developer';
 import 'package:dr/api_client.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/config_parser.dart';
+import 'package:dr/demo.dart' as demo;
 import 'package:dr/main.dart';
 import 'package:dr/ui/dialog.dart';
 import 'package:dr/util.dart';
@@ -34,8 +35,10 @@ typedef AddNetworkProtocolItem = void Function(NetworkProtocolItem item);
 /// go through [SessionManager.send].
 class AuthService {
   final ApiClient _apiClient;
+  final Future<int> Function() _getDemoUserId;
 
-  AuthService(this._apiClient);
+  AuthService(this._apiClient, {Future<int> Function()? getDemoUserId})
+      : _getDemoUserId = getDemoUserId ?? demo.getDemoUserId;
 
   String? user, pass;
   bool demoMode = false;
@@ -76,6 +79,7 @@ class AuthService {
       _loggedIn = Future.value(true);
       this.user = user;
       this.pass = pass;
+      final demoUserId = await _getDemoUserId();
       config = Config(
         (b) => b
           ..autoLogoutSeconds = 300
@@ -84,7 +88,7 @@ class AuthService {
           ..imgSource =
               "https://vinzentinum.digitalesregister.it/v2/theme/icons/profile_empty.png"
           ..isStudentOrParent = true
-          ..userId = 0,
+          ..userId = demoUserId,
       );
       onSessionStarted?.call(config);
       configLoaded?.call();

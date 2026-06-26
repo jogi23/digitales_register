@@ -16,12 +16,18 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'dart:io';
+
 import 'package:collection/collection.dart';
 import 'package:dr/container/login_page.dart';
+import 'package:dr/providers/account_profile_provider.dart';
+import 'package:dr/providers/login_provider.dart';
 import 'package:dr/ui/animated_linear_progress_indicator.dart';
 import 'package:dr/ui/autocomplete_options.dart';
 import 'package:dr/util.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import 'package:fuzzy/fuzzy.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -39,6 +45,7 @@ class LoginPageContent extends StatefulWidget {
   final VoidCallback onReload;
   final void Function(String url) onRequestPassReset;
   final void Function(int index) onSelectAccount;
+  final VoidCallback onLoginCurrentAccount;
 
   const LoginPageContent({
     super.key,
@@ -49,6 +56,7 @@ class LoginPageContent extends StatefulWidget {
     required this.onChangePass,
     required this.onRequestPassReset,
     required this.onSelectAccount,
+    required this.onLoginCurrentAccount,
   });
 
   @override
@@ -56,6 +64,8 @@ class LoginPageContent extends StatefulWidget {
 }
 
 class _LoginPageContentState extends State<LoginPageContent> {
+  bool _startupSheetShown = false;
+
   late final _usernameController = TextEditingController(),
       _passwordController = TextEditingController(),
       _newPassword1Controller = TextEditingController(),
@@ -102,7 +112,37 @@ class _LoginPageContentState extends State<LoginPageContent> {
         // We manually check hasFocus
       });
     });
+    if (widget.vm.otherAccounts.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && !_startupSheetShown) {
+          _startupSheetShown = true;
+          _showStartupAccountSheet();
+        }
+      });
+    }
     super.initState();
+  }
+
+  void _showStartupAccountSheet() {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      isDismissible: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (_) => _StartupAccountSheet(
+        currentUsername: widget.vm.username,
+        currentUrl: widget.vm.url,
+        otherAccounts: widget.vm.otherAccounts,
+        onSelectCurrent: widget.onLoginCurrentAccount,
+        onSelectOther: widget.onSelectAccount,
+        canAddAccount: !widget.vm.safeMode,
+        onAddAccount: () {
+          // Close sheet and leave login form open for manual entry
+        },
+      ),
+    );
   }
 
   @override
@@ -238,26 +278,53 @@ class _LoginPageContentState extends State<LoginPageContent> {
                         );
                       }),
                     ),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: TextButton(
-                        style: TextButton.styleFrom(
-                          foregroundColor: Colors.grey,
-                          padding: const EdgeInsets.symmetric(horizontal: 32),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        TextButton(
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.grey,
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 16),
+                          ),
+                          onPressed: () async {
+                            await launchUrl(
+                              Uri(
+                                scheme: 'mailto',
+                                path: 'hallo@wertwerk.io',
+                                queryParameters: {
+                                  'subject': 'Feedback DigiReg ST $appVersion',
+                                },
+                              ),
+                            );
+                          },
+                          child: const Text("Feedback?"),
                         ),
-                        onPressed: () async {
-                          await launchUrl(
-                            Uri(
-                              scheme: 'mailto',
-                              path: 'hallo@wertwerk.io',
-                              queryParameters: {
-                                'subject': 'Feedback DigiReg ST $appVersion',
-                              },
+                        if (kDebugMode)
+                          TextButton(
+                            style: TextButton.styleFrom(
+                              foregroundColor: Colors.grey,
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 16),
                             ),
-                          );
-                        },
-                        child: const Text("Feedback?"),
-                      ),
+                            onPressed: () {
+                              setState(() {
+                                selectedPresetServer = null;
+                                _schoolController.text = 'Andere Schule';
+                                _urlController.text =
+                                    'https://wertwerk-demo.digitalesregister.it';
+                                _usernameController.text = 'demo-user-6540';
+                                _passwordController.text = 'demo';
+                              });
+                              widget.onLogin(
+                                'demo-user-6540',
+                                'demo',
+                                'https://wertwerk-demo.digitalesregister.it',
+                              );
+                            },
+                            child: const Text("Demo"),
+                          ),
+                      ],
                     ),
                   ],
                   Padding(
@@ -477,4 +544,154 @@ class _LoginPageContentState extends State<LoginPageContent> {
       ),
     );
   }
+}
+
+// ---------------------------------------------------------------------------
+// Startup account selection sheet (shown when 2+ accounts exist at startup)
+// ---------------------------------------------------------------------------
+
+class _StartupAccountSheet extends StatelessWidget {
+  final String? currentUsername;
+  final String? currentUrl;
+  final List<OtherAccount> otherAccounts;
+  final VoidCallback onSelectCurrent;
+  final void Function(int index) onSelectOther;
+  final bool canAddAccount;
+  final VoidCallback onAddAccount;
+
+  const _StartupAccountSheet({
+    required this.currentUsername,
+    required this.currentUrl,
+    required this.otherAccounts,
+    required this.onSelectCurrent,
+    required this.onSelectOther,
+    required this.canAddAccount,
+    required this.onAddAccount,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).dividerColor,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Konto wählen',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 8),
+              if (currentUsername != null)
+                _AccountTile(
+                  username: currentUsername!,
+                  url: currentUrl,
+                  onTap: () {
+                    Navigator.pop(context);
+                    onSelectCurrent();
+                  },
+                ),
+              for (var i = 0; i < otherAccounts.length; i++)
+                _AccountTile(
+                  username: otherAccounts[i].username,
+                  url: otherAccounts[i].url,
+                  onTap: () {
+                    Navigator.pop(context);
+                    onSelectOther(i);
+                  },
+                ),
+              const Divider(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: canAddAccount
+                      ? () {
+                          Navigator.pop(context);
+                          onAddAccount();
+                        }
+                      : null,
+                  icon: const Icon(Icons.person_add_outlined),
+                  label: Text(
+                    canAddAccount
+                        ? 'Anderes Konto hinzufügen'
+                        : 'Konto hinzufügen (Passwort-Speicherung deaktiviert)',
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AccountTile extends ConsumerWidget {
+  final String username;
+  final String? url;
+  final VoidCallback onTap;
+
+  const _AccountTile({
+    required this.username,
+    required this.url,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final profile = url != null
+        ? (ref.watch(accountProfileProvider)[accountProfileKey(username, url!)] ??
+            const AccountProfile())
+        : const AccountProfile();
+
+    final display = profile.alias ?? username;
+    final initialsSource = display.trim().isEmpty ? '?' : display.trim();
+    final initials =
+        initialsSource.substring(0, initialsSource.length.clamp(0, 3)).toUpperCase();
+
+    Widget avatar = _initialsAvatar(context, initials);
+    if (profile.photoPath != null) {
+      final file = File(profile.photoPath!);
+      if (file.existsSync()) {
+        avatar = CircleAvatar(backgroundImage: FileImage(file));
+      }
+    }
+
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: avatar,
+      title: Text(display),
+      subtitle: display != username ? Text(username) : null,
+      onTap: onTap,
+    );
+  }
+
+  CircleAvatar _initialsAvatar(BuildContext context, String initials) =>
+      CircleAvatar(
+        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+        child: Text(
+          initials,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.onPrimaryContainer,
+          ),
+        ),
+      );
 }

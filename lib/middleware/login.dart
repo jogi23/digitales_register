@@ -352,11 +352,15 @@ Future<void> _doAddAccount() async {
     if (login["user"] != null &&
         login["pass"] != null &&
         login["url"] != null) {
-      otherAccounts.insert(0, <String, Object?>{
-        "user": login["user"],
-        "pass": login["pass"],
-        "url": login["url"],
-      });
+      final alreadySaved = otherAccounts.any((dynamic a) =>
+          a['user'] == login['user'] && a['url'] == login['url']);
+      if (!alreadySaved) {
+        otherAccounts.insert(0, <String, Object?>{
+          "user": login["user"],
+          "pass": login["pass"],
+          "url": login["url"],
+        });
+      }
     }
     await secureStorage.write(
       key: "login",
@@ -371,6 +375,18 @@ Future<void> _doAddAccount() async {
   providerContainer.read(loginProvider.notifier).logout(hard: true);
   _resetAllProviders();
   await _doLoad();
+}
+
+Future<void> _doLoginCurrentFromStorage() async {
+  final raw = await secureStorage.read(key: "login");
+  if (raw == null) return;
+  final dynamic parsed = json.decode(raw);
+  final user = getString(parsed["user"]);
+  final pass = getString(parsed["pass"]);
+  final url = getString(parsed["url"]);
+  if (user != null && pass != null) {
+    await _doLogin(user, pass, url ?? "", fromStorage: true);
+  }
 }
 
 Future<void> _doSelectAccount(int index) async {
@@ -396,7 +412,7 @@ Future<void> _doSelectAccount(int index) async {
   providerContainer.read(loginProvider.notifier).logout(hard: true);
   providerContainer.read(loginProvider.notifier).setLoggingIn();
   _resetAllProviders();
-  await _doLoad();
+  await _doLoad(forceAutoLogin: true);
 }
 
 void _restoreProvidersFromAppState(AppState appState) {

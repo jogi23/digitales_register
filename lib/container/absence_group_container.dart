@@ -25,10 +25,12 @@ import 'package:intl/intl.dart';
 
 class AbsenceGroupContainer extends ConsumerWidget {
   final int group;
+  final Color? tileColor;
 
   const AbsenceGroupContainer({
     super.key,
     required this.group,
+    this.tileColor,
   });
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -71,6 +73,7 @@ class AbsenceGroupContainer extends ConsumerWidget {
         justifiedString = "Noch nicht entschuldigt";
     }
     return AbsenceGroupWidget(
+      tileColor: tileColor,
       vm: AbsencesViewModel(
         fromTo,
         duration,

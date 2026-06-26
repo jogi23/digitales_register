@@ -32,8 +32,10 @@ void main() {
       late AuthService sut;
 
       setUp(() {
-        // Real ApiClient — url stays null so no HTTP request is ever triggered.
-        sut = AuthService(ApiClient());
+        sut = AuthService(
+          ApiClient(),
+          getDemoUserId: () async => 0,
+        );
       });
 
       test('sets demoMode=true and loggedIn=true', () async {
@@ -41,7 +43,7 @@ void main() {
           'demo-user-6540',
           'anything',
           null,
-          'https://vinzentinum.digitalesregister.it',
+          'https://wertwerk-demo.digitalesregister.it',
           logout: () {},
           configLoaded: () {},
           relogin: () {},
@@ -57,7 +59,7 @@ void main() {
           'demo-user-6540',
           'anything',
           null,
-          'https://vinzentinum.digitalesregister.it',
+          'https://wertwerk-demo.digitalesregister.it',
           logout: () {},
           configLoaded: () {},
           relogin: () {},
@@ -78,7 +80,7 @@ void main() {
           'demo-user-6540',
           'anything',
           null,
-          'https://vinzentinum.digitalesregister.it',
+          'https://wertwerk-demo.digitalesregister.it',
           logout: () {},
           configLoaded: () {},
           relogin: () {},
@@ -96,7 +98,7 @@ void main() {
           'demo-user-6540',
           'anything',
           null,
-          'https://vinzentinum.digitalesregister.it',
+          'https://wertwerk-demo.digitalesregister.it',
           logout: () {},
           configLoaded: () => called = true,
           relogin: () {},
@@ -111,7 +113,7 @@ void main() {
           'demo-user-6540',
           'myPassword',
           null,
-          'https://vinzentinum.digitalesregister.it',
+          'https://wertwerk-demo.digitalesregister.it',
           logout: () {},
           configLoaded: () {},
           relogin: () {},
