@@ -27,6 +27,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 import '../../fixtures/api_fixtures.dart';
 
@@ -59,9 +60,16 @@ Widget _buildTestWidget({required AbsencesState initialState}) {
   );
 }
 
+late AbsencesState _demoAbsencesState;
+
 void main() {
   setUpAll(() async {
+    await initializeDateFormatting('de');
     await loadFixtures();
+
+    // Die Fixture enthält bereits einen notJustified- und notYetJustified-Eintrag.
+    _demoAbsencesState = parseAbsencesFromJson(
+        fixtureFor('api/student/dashboard/absences'));
   });
 
   testGoldens('simple absences', (WidgetTester tester) async {
@@ -91,5 +99,40 @@ void main() {
       find.byType(AbsencesPageContainer),
       matchesGoldenFile("no_absences.png"),
     );
+  });
+
+  group('demo data Absenzen', () {
+    testWidgets('shows cancel icon for rejected entry', (tester) async {
+      await tester.pumpWidget(_buildTestWidget(initialState: _demoAbsencesState));
+      await tester.pumpAndSettle();
+      expect(find.byIcon(Icons.cancel), findsOneWidget);
+    });
+
+    testWidgets('shows pending icon for not-yet-justified entry', (tester) async {
+      await tester.pumpWidget(_buildTestWidget(initialState: _demoAbsencesState));
+      await tester.pumpAndSettle();
+      expect(find.byIcon(Icons.radio_button_unchecked), findsOneWidget);
+    });
+
+    testWidgets('shows reason text for rejected entry', (tester) async {
+      await tester.pumpWidget(_buildTestWidget(initialState: _demoAbsencesState));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('Eishockey Training'), findsOneWidget);
+    });
+
+    testWidgets('shows reason text for pending entry', (tester) async {
+      await tester.pumpWidget(_buildTestWidget(initialState: _demoAbsencesState));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('Hockey Turnier'), findsOneWidget);
+    });
+
+    testGoldens('demo absences golden', (tester) async {
+      await tester.pumpWidget(_buildTestWidget(initialState: _demoAbsencesState));
+      await tester.pumpAndSettle();
+      await expectLater(
+        find.byType(AbsencesPageContainer),
+        matchesGoldenFile('demo_absences.png'),
+      );
+    });
   });
 }
