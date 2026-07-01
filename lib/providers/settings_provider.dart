@@ -16,20 +16,15 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:dr/app_state.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class SettingsNotifier extends Notifier<SettingsState> {
-  /// Called after [setSaveNoData] to trigger an immediate storage write.
-  /// Wired by middleware._load once the Redux store is available.
-  void Function()? onSaveState;
-
   @override
   SettingsState build() => SettingsState();
 
   /// Restores settings from persisted storage (called by middleware on login).
   void load(SettingsState settings) {
-    state = settings.copyWith(scrollToSubjectNicks: false, scrollToGrades: false);
+    state = settings.copyWith(scrollToGrades: false);
   }
 
   // ─── Persistence / auth settings ─────────────────────────────────────────
@@ -37,16 +32,8 @@ class SettingsNotifier extends Notifier<SettingsState> {
   void setSaveNoPass(bool value) =>
       state = state.copyWith(noPasswordSaving: value);
 
-  void setSaveNoData(bool value) {
-    state = state.copyWith(noDataSaving: value);
-    onSaveState?.call();
-  }
-
   void setAskWhenDelete(bool value) =>
       state = state.copyWith(askWhenDelete: value);
-
-  void setDeleteDataOnLogout(bool value) =>
-      state = state.copyWith(deleteDataOnLogout: value);
 
   // ─── Grades settings ──────────────────────────────────────────────────────
 
@@ -92,62 +79,12 @@ class SettingsNotifier extends Notifier<SettingsState> {
   void setDrawerFullyExpanded(bool value) =>
       state = state.copyWith(drawerFullyExpanded: value);
 
-  void setSubjectNicks(Map<String, String> nicks) =>
-      state = state.copyWith(subjectNicks: Map.of(nicks));
-
-  void setSubjectTheme(MapEntry<String, SubjectTheme> entry) =>
-      state = state.copyWith(
-          subjectThemes: {...state.subjectThemes, entry.key: entry.value});
-
-  /// Ensures every subject in [subjects] has a [SubjectTheme]. New subjects are
-  /// assigned an unused color automatically.
-  void updateSubjectThemes(List<String> subjects) {
-    final existing = state.subjectThemes;
-    final newSubjects =
-        subjects.where((s) => !existing.containsKey(s)).toList();
-    if (newSubjects.isEmpty) return;
-
-    final updated = Map.of(state.subjectThemes);
-    for (final subject in newSubjects) {
-      final usedColors = updated.values.map((t) => t.color).toSet();
-      final color = _colors.firstWhere(
-        (c) => !usedColors.contains(c.value),
-        orElse: () => _similarColors.firstWhere(
-          (c) => !usedColors.contains(c.value),
-          orElse: () => (List.of(Colors.primaries)..shuffle()).first,
-        ),
-      );
-      updated[subject] = SubjectTheme(thick: _defaultThick, color: color.value);
-    }
-    state = state.copyWith(subjectThemes: updated);
-  }
-
   // ─── Routing-triggered ephemeral scroll state ─────────────────────────────
 
-  void scrollToSubjectNicksSection() => state =
-      state.copyWith(scrollToSubjectNicks: true, scrollToGrades: false);
+  void scrollToGradesSection() => state = state.copyWith(scrollToGrades: true);
 
-  void scrollToGradesSection() =>
-      state = state.copyWith(scrollToGrades: true, scrollToSubjectNicks: false);
-
-  void resetScroll() =>
-      state = state.copyWith(scrollToSubjectNicks: false, scrollToGrades: false);
+  void resetScroll() => state = state.copyWith(scrollToGrades: false);
 }
 
 final settingsProvider =
     NotifierProvider<SettingsNotifier, SettingsState>(SettingsNotifier.new);
-
-
-// ─── Color palette helpers (same logic as former settings reducer) ───────────
-
-final _colors = List.of(Colors.primaries)
-  ..removeWhere((c) => _similarColors.contains(c));
-
-final _similarColors = [
-  Colors.lime,
-  Colors.lightBlue,
-  Colors.cyan,
-  Colors.amber,
-];
-
-const _defaultThick = 2;

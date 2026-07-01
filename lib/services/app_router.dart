@@ -141,8 +141,10 @@ class AppRouter {
   }
 
   void showEditCalendarSubjectNicks() {
-    _ref.read(settingsProvider.notifier).scrollToSubjectNicksSection();
-    unawaited(navigatorKey!.currentState!.pushNamed("/settings"));
+    unawaited(
+      navigatorKey!.currentState!
+          .pushNamed("/subjectAppearance", arguments: true),
+    );
   }
 }
 

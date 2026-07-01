@@ -242,11 +242,11 @@ void main() {
 
     test('SettingsState serializes and deserializes via toJson/fromJson', () {
       final settings =
-          SettingsState(noDataSaving: true, noPasswordSaving: false);
+          SettingsState(typeSorted: true, noPasswordSaving: false);
       final encoded = json.encode(settings.toJson());
       final decoded = SettingsState.fromJson(
           json.decode(encoded) as Map<dynamic, dynamic>);
-      expect(decoded.noDataSaving, isTrue);
+      expect(decoded.typeSorted, isTrue);
       expect(decoded.noPasswordSaving, isFalse);
     });
   });

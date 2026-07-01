@@ -35,6 +35,7 @@ import 'package:dr/providers/provider_container.dart';
 import 'package:dr/ui/grade_calculator.dart';
 import 'package:dr/ui/grades_chart_page.dart';
 import 'package:dr/ui/splash_overlay.dart';
+import 'package:dr/ui/subject_appearance_page.dart';
 import 'package:dr/util.dart';
 import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:flutter/material.dart';
@@ -198,6 +199,14 @@ class RegisterApp extends StatelessWidget {
                 return MaterialPageRoute<void>(
                   settings: settings,
                   builder: (_) => SettingsPageContainer(),
+                  fullscreenDialog: true,
+                );
+              case "subjectAppearance":
+                return MaterialPageRoute<void>(
+                  settings: settings,
+                  builder: (_) => SubjectAppearancePage(
+                    autoEditMissingNick: settings.arguments as bool? ?? false,
+                  ),
                   fullscreenDialog: true,
                 );
               default:

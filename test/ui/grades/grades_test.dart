@@ -22,6 +22,7 @@ import 'package:dr/container/grades_page_container.dart';
 import 'package:dr/data.dart';
 import 'package:dr/providers/grades_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
+import 'package:dr/providers/subject_appearance_provider.dart';
 import 'package:dr/ui/sorted_grades_widget.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:flutter/material.dart';
@@ -49,14 +50,26 @@ class _TestSettingsNotifier extends SettingsNotifier {
   SettingsState build() => initial;
 }
 
+class _TestSubjectAppearanceNotifier extends SubjectAppearanceNotifier {
+  final SubjectAppearanceState initial;
+  _TestSubjectAppearanceNotifier(this.initial);
+  @override
+  SubjectAppearanceState build() => initial;
+}
+
 Widget _wrapWithScope(Widget child, AppState appState,
-        [SettingsState? settings]) =>
+        [SubjectAppearanceState? subjectAppearance]) =>
     ProviderScope(
       overrides: [
         gradesProvider.overrideWith(
             () => _TestGradesNotifier(appState.gradesState)),
         settingsProvider.overrideWith(
-            () => _TestSettingsNotifier(settings ?? SettingsState())),
+            () => _TestSettingsNotifier(SettingsState())),
+        subjectAppearanceProvider.overrideWith(
+          () => _TestSubjectAppearanceNotifier(
+            subjectAppearance ?? const SubjectAppearanceState(),
+          ),
+        ),
       ],
       child: child,
     );
@@ -191,10 +204,10 @@ AppState _getGradesState({bool loading = false}) {
   );
 }
 
-SettingsState get _gradesSettings => SettingsState(
-      subjectThemes: {
-        "Fach1": SubjectTheme(color: Colors.red.value, thick: 5),
-        "Fach2": SubjectTheme(color: Colors.green.value, thick: 4),
+SubjectAppearanceState get _gradesSettings => SubjectAppearanceState(
+      themes: {
+        "fach1": SubjectTheme(color: Colors.red.value, thick: 5),
+        "fach2": SubjectTheme(color: Colors.green.value, thick: 4),
       },
     );
 

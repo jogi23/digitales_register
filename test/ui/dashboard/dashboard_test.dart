@@ -32,6 +32,7 @@ import 'package:dr/providers/login_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/providers/provider_container.dart' as pc;
 import 'package:dr/providers/settings_provider.dart';
+import 'package:dr/providers/subject_appearance_provider.dart';
 import 'package:dr/ui/days.dart';
 import 'package:dr/ui/no_internet.dart';
 import 'package:dr/ui/sidebar.dart';
@@ -77,6 +78,15 @@ class _TestSettingsNotifier extends SettingsNotifier {
 
   @override
   SettingsState build() => initial;
+}
+
+class _TestSubjectAppearanceNotifier extends SubjectAppearanceNotifier {
+  final SubjectAppearanceState initial;
+
+  _TestSubjectAppearanceNotifier(this.initial);
+
+  @override
+  SubjectAppearanceState build() => initial;
 }
 
 class _TestLoginNotifier extends LoginNotifier {
@@ -698,6 +708,13 @@ Future<void> main() async {
     expect(find.byTooltip("Absenzen"), findsOneWidget);
     expect(find.byTooltip("Kalender"), findsOneWidget);
     expect(find.byTooltip("Einstellungen"), findsOneWidget);
+    // The sidebar is scrollable and grew with the "Hilfe & Feedback" and
+    // "Über diese App" items, so "Abmelden" needs scrolling into view first.
+    await tester.scrollUntilVisible(
+      find.byTooltip("Abmelden"),
+      500,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.byTooltip("Abmelden"), findsOneWidget);
     expect(find.byTooltip("Einklappen"), findsOneWidget);
     expect(find.byTooltip("Ausklappen"), findsNothing);
@@ -981,11 +998,15 @@ Future<void> main() async {
         ),
         settingsProvider.overrideWith(
           () => _TestSettingsNotifier(
-            SettingsState(
-              dashboardColorBorders: true,
-              subjectThemes: {
-                'Mathematik': SubjectTheme(thick: 2, color: Colors.blue.value),
-                'Deutsch': SubjectTheme(thick: 2, color: Colors.green.value),
+            SettingsState(dashboardColorBorders: true),
+          ),
+        ),
+        subjectAppearanceProvider.overrideWith(
+          () => _TestSubjectAppearanceNotifier(
+            SubjectAppearanceState(
+              themes: {
+                'mathematik': SubjectTheme(thick: 2, color: Colors.blue.value),
+                'deutsch': SubjectTheme(thick: 2, color: Colors.green.value),
               },
             ),
           ),

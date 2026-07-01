@@ -20,7 +20,7 @@ import 'package:built_collection/built_collection.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/data.dart';
 import 'package:dr/providers/grades_provider.dart';
-import 'package:dr/providers/settings_provider.dart';
+import 'package:dr/providers/subject_appearance_provider.dart';
 import 'package:dr/services/app_router.dart';
 import 'package:dr/ui/grades_chart.dart';
 import 'package:dr/utc_date_time.dart';
@@ -35,7 +35,7 @@ class GradesChartContainer extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final gradesState = ref.watch(gradesProvider);
-    final settings = ref.watch(settingsProvider);
+    final subjectAppearance = ref.watch(subjectAppearanceProvider);
     final gradingMode = detectGradingMode(
       gradesState.subjects,
       gradesState.semester,
@@ -92,12 +92,13 @@ class GradesChartContainer extends ConsumerWidget {
     }
 
     SubjectTheme getValue(Subject subject) {
-      return settings.subjectThemes[subject.name]!;
+      return subjectAppearance.themeFor(subject.name);
     }
 
     final graphs = {
       for (final subject in gradesState.subjects)
-        if (settings.subjectThemes.containsKey(subject.name))
+        if (subjectAppearance.themes
+            .containsKey(normalizeSubject(subject.name)))
           getKey(subject): getValue(subject)
     };
 

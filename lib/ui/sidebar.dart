@@ -19,6 +19,8 @@
 import 'package:collapsible_sidebar/collapsible_sidebar.dart';
 import 'package:dr/main.dart';
 import 'package:dr/middleware/middleware.dart';
+import 'package:dr/ui/app_about_dialog.dart';
+import 'package:dr/ui/help_feedback_page.dart';
 import 'package:flutter/material.dart';
 
 class Sidebar extends StatelessWidget {
@@ -124,6 +126,21 @@ class Sidebar extends StatelessWidget {
           icon: Icons.settings,
           isSelected: currentSelected == Pages.settings,
           onPressed: showSettings,
+        ),
+        CollapsibleItem(
+          hasDivider: true,
+          text: "Hilfe und Feedback",
+          icon: Icons.help,
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => const HelpFeedbackPage(),
+            ),
+          ),
+        ),
+        CollapsibleItem(
+          text: "Über diese App",
+          icon: Icons.info_outline,
+          onPressed: () => showAppAboutDialog(context),
         ),
         CollapsibleItem(
           hasDivider: true,

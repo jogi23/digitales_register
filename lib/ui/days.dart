@@ -25,6 +25,7 @@ import 'package:dr/app_state.dart';
 import 'package:dr/container/days_container.dart';
 import 'package:dr/container/homework_filter_container.dart';
 import 'package:dr/container/notification_icon_container.dart';
+import 'package:dr/providers/subject_appearance_provider.dart';
 import 'package:dr/ui/account_avatar_button.dart';
 import 'package:dr/container/sidebar_container.dart';
 import 'package:dr/data.dart';
@@ -813,10 +814,11 @@ class ItemWidget extends StatelessWidget {
   }
 
   Color? _getCardColor() {
-    if (colorBorder &&
-        item.label != null &&
-        subjectThemes.containsKey(item.label)) {
-      return Color(subjectThemes[item.label]!.color).withOpacity(0.15);
+    if (colorBorder && item.label != null) {
+      final key = normalizeSubject(item.label!);
+      if (subjectThemes.containsKey(key)) {
+        return Color(subjectThemes[key]!.color).withOpacity(0.15);
+      }
     }
     return null;
   }
