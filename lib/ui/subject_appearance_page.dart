@@ -15,6 +15,8 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'dart:async';
+
 import 'package:dr/app_state.dart';
 import 'package:dr/providers/all_subjects_provider.dart';
 import 'package:dr/providers/subject_appearance_provider.dart';
@@ -45,6 +47,16 @@ class _SubjectAppearancePageState
   @override
   void initState() {
     super.initState();
+    // Subjects that only ever appeared in the calendar or dashboard homework
+    // (never in grades) may not have gone through ensureThemesFor yet, which
+    // leaves them with the default transparent color. Self-heal here so this
+    // screen always shows a color for every subject it lists.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      unawaited(ref
+          .read(subjectAppearanceProvider.notifier)
+          .ensureThemesFor(ref.read(allSubjectsProvider)));
+    });
     if (widget.autoEditMissingNick) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;

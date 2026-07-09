@@ -83,8 +83,12 @@ class AppRouter {
     scaffoldKey!.currentState!
         .selectContentWidget(CalendarContainer(), Pages.calendar);
     _ref.read(calendarProvider.notifier).clearSelection();
-    _ref.read(calendarProvider.notifier).setCurrentMonday(toMonday(now));
-    unawaited(_ref.read(calendarProvider.notifier).load(toMonday(now)));
+    // Keep whatever week the user was last looking at instead of always
+    // jumping back to the current one; only default to today the very first
+    // time the calendar is opened in this session.
+    final monday = _ref.read(calendarProvider).currentMonday ?? toMonday(now);
+    _ref.read(calendarProvider.notifier).setCurrentMonday(monday);
+    unawaited(_ref.read(calendarProvider.notifier).load(monday));
   }
 
   void showGrades() {

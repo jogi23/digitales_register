@@ -20,6 +20,7 @@ import 'package:dr/app_state.dart';
 import 'package:dr/container/calendar_week_container.dart';
 import 'package:dr/data.dart';
 import 'package:dr/providers/calendar_provider.dart';
+import 'package:dr/providers/subject_appearance_provider.dart';
 import 'package:dr/ui/last_fetched_overlay.dart';
 import 'package:dr/ui/no_internet.dart';
 import 'package:dr/utc_date_time.dart';
@@ -101,6 +102,7 @@ class _HoursChunk extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Stack(
       children: <Widget>[
         Card(
@@ -134,14 +136,20 @@ class _HoursChunk extends StatelessWidget {
                       day: day,
                       isSelected: selectedHour == hours[n ~/ 2].fromHour,
                       backgroundColor: colorBackground &&
-                              subjectThemes.containsKey(hours[n ~/ 2].subject)
-                          ? Color(subjectThemes[hours[n ~/ 2].subject]!.color)
-                              .withOpacity(0.25)
+                              subjectThemes.containsKey(
+                                  normalizeSubject(hours[n ~/ 2].subject))
+                          ? Color(subjectThemes[
+                                      normalizeSubject(hours[n ~/ 2].subject)]!
+                                  .color)
+                              .withOpacity(isDark ? 0.4 : 0.25)
                           : Colors.transparent,
                       selectedBackgroundColor: colorBackground &&
-                              subjectThemes.containsKey(hours[n ~/ 2].subject)
-                          ? Color(subjectThemes[hours[n ~/ 2].subject]!.color)
-                              .withOpacity(0.5)
+                              subjectThemes.containsKey(
+                                  normalizeSubject(hours[n ~/ 2].subject))
+                          ? Color(subjectThemes[
+                                      normalizeSubject(hours[n ~/ 2].subject)]!
+                                  .color)
+                              .withOpacity(isDark ? 0.65 : 0.5)
                           : Theme.of(context)
                               .colorScheme
                               .secondary
