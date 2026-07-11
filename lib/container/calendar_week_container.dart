@@ -21,6 +21,7 @@ import 'package:dr/data.dart';
 import 'package:dr/providers/calendar_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
+import 'package:dr/providers/subject_appearance_provider.dart';
 import 'package:dr/ui/calendar_week.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:flutter/material.dart';
@@ -39,16 +40,14 @@ class CalendarWeekContainer extends ConsumerWidget {
     final calendarState = ref.watch(calendarProvider);
     final noInternet = ref.watch(noInternetProvider);
     final settings = ref.watch(settingsProvider);
+    final subjectAppearance = ref.watch(subjectAppearanceProvider);
     final vm = CalendarWeekViewModel(
       days: calendarState.daysForWeek(monday).toList(),
-      subjectNicks: Map.fromEntries(
-        settings.subjectNicks.entries
-            .map((e) => MapEntry(e.key.toLowerCase(), e.value)),
-      ),
+      subjectNicks: subjectAppearance.nicks,
       noInternet: noInternet,
       selection: calendarState.selection,
       colorBackground: settings.calendarColorBackground,
-      subjectThemes: Map.of(settings.subjectThemes),
+      subjectThemes: subjectAppearance.themes,
     );
     return CalendarWeek(vm: vm, key: key);
   }

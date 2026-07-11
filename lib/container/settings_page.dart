@@ -45,11 +45,7 @@ class SettingsPageContainer extends ConsumerWidget {
         DynamicTheme.of(context)!.setFollowDevice(dm);
       },
       onSetNoPassSaving: notifier.setSaveNoPass,
-      onSetNoDataSaving: notifier.setSaveNoData,
       onSetAskWhenDelete: notifier.setAskWhenDelete,
-      onSetDeleteDataOnLogout: notifier.setDeleteDataOnLogout,
-      onSetSubjectNicks: notifier.setSubjectNicks,
-      onSetShowCalendarEditNicksBar: notifier.setShowCalendarNicksBar,
       onSetShowGradesDiagram: notifier.setShowGradesDiagram,
       onSetShowAllSubjectsAverage: notifier.setShowAllSubjectsAverage,
       onSetDashboardMarkNewOrChangedEntries: notifier.setMarkNewOrChanged,
@@ -59,7 +55,6 @@ class SettingsPageContainer extends ConsumerWidget {
       onSetDashboardColorBorders: notifier.setDashboardColorBorders,
       onSetCalenderColorBackground: notifier.setCalendarColorBackground,
       onSetDashboardColorTestsInRed: notifier.setDashboardColorTestsInRed,
-      onSetSubjectTheme: notifier.setSubjectTheme,
     );
   }
 }
@@ -67,17 +62,12 @@ class SettingsPageContainer extends ConsumerWidget {
 typedef OnSettingChanged<T> = void Function(T newValue);
 
 class SettingsViewModel {
-  final Map<String, String> subjectNicks;
   final bool noPassSaving;
-  final bool noDataSaving;
   final bool askWhenDelete;
-  final bool deleteDataOnLogout;
-  final bool showCalendarEditNicksBar;
   final bool showGradesDiagram;
   final bool showAllSubjectsAverage;
   final bool dashboardMarkNewOrChangedEntries;
   final bool dashboardDeduplicateEntries;
-  final bool showSubjectNicks;
   final bool showGradesSettings;
   final bool dashboardColorBorders;
   final bool calendarColorBackground;
@@ -85,17 +75,11 @@ class SettingsViewModel {
   final bool demoMode;
   final List<String> allSubjects;
   final List<String> ignoreForGradesAverage;
-  final Map<String, SubjectTheme> subjectThemes;
 
   const SettingsViewModel({
     required this.noPassSaving,
-    required this.noDataSaving,
     required this.askWhenDelete,
-    required this.deleteDataOnLogout,
-    required this.subjectNicks,
-    required this.showSubjectNicks,
     required this.showGradesSettings,
-    required this.showCalendarEditNicksBar,
     required this.showGradesDiagram,
     required this.showAllSubjectsAverage,
     required this.dashboardMarkNewOrChangedEntries,
@@ -105,7 +89,6 @@ class SettingsViewModel {
     required this.dashboardColorTestsInRed,
     required this.allSubjects,
     required this.ignoreForGradesAverage,
-    required this.subjectThemes,
     required this.demoMode,
   });
 
@@ -113,13 +96,8 @@ class SettingsViewModel {
           SettingsState s, List<String> allSubjects, bool isDemo) =>
       SettingsViewModel(
         noPassSaving: s.noPasswordSaving,
-        noDataSaving: s.noDataSaving,
         askWhenDelete: s.askWhenDelete,
-        deleteDataOnLogout: s.deleteDataOnLogout,
-        subjectNicks: s.subjectNicks,
-        showSubjectNicks: s.scrollToSubjectNicks,
         showGradesSettings: s.scrollToGrades,
-        showCalendarEditNicksBar: s.showCalendarNicksBar,
         showGradesDiagram: s.showGradesDiagram,
         showAllSubjectsAverage: s.showAllSubjectsAverage,
         dashboardMarkNewOrChangedEntries: s.dashboardMarkNewOrChangedEntries,
@@ -129,7 +107,6 @@ class SettingsViewModel {
         dashboardColorTestsInRed: s.dashboardColorTestsInRed,
         allSubjects: allSubjects,
         ignoreForGradesAverage: s.ignoreForGradesAverage,
-        subjectThemes: Map.of(s.subjectThemes),
         demoMode: isDemo,
       );
 }

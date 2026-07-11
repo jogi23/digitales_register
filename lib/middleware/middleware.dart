@@ -42,6 +42,7 @@ import 'package:dr/providers/notifications_provider.dart';
 import 'package:dr/providers/profile_provider.dart';
 import 'package:dr/providers/provider_container.dart';
 import 'package:dr/providers/settings_provider.dart';
+import 'package:dr/providers/subject_appearance_provider.dart';
 import 'package:dr/serializers.dart';
 import 'package:dr/services/app_router.dart';
 import 'package:dr/ui/dialog.dart';
@@ -185,12 +186,12 @@ Future<void> _doLoad({bool forceAutoLogin = false}) async {
       ..onNoInternet = (bool v) =>
           providerContainer.read(noInternetProvider.notifier).setNoInternet(v);
   }
-  providerContainer.read(settingsProvider.notifier).onSaveState =
-      () => unawaited(_doSaveState(immediately: true));
   if (!providerContainer.read(noInternetProvider)) _popAll();
-  // Load profile photos/aliases from SharedPreferences so the startup account
-  // sheet can show them before any network login takes place.
+  // Load profile photos/aliases, and subject nicknames/colors (app-wide,
+  // independent of any one account) from SharedPreferences so they're
+  // available before any network login takes place.
   await providerContainer.read(accountProfileProvider.notifier).load();
+  await providerContainer.read(subjectAppearanceProvider.notifier).load();
   dynamic login;
   try {
     login = json.decode(await secureStorage.read(key: "login") ?? "{}");
@@ -276,7 +277,7 @@ Future<void> _doSaveState({bool immediately = false}) async {
       );
       _saveUnderway = false;
       String toSave;
-      if (!settings.noDataSaving && !deletedData) {
+      if (!deletedData) {
         toSave = json.encode({
           'v': 2,
           'state': serializers.serialize(state),

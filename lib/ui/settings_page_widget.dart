@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2021 Michael Debertol
+// Copyright (C) 2021 Michael Debertol
 // Copyright (C) 2026 Johannes Feichter
 //
 // This file is part of digitales_register.
@@ -17,19 +17,15 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:deleteable_tile/deleteable_tile.dart';
-import 'package:dr/app_state.dart';
 import 'package:dr/container/settings_page.dart';
 import 'package:dr/ui/autocomplete_options.dart';
-import 'package:dr/ui/changelog_page.dart';
 import 'package:dr/ui/dialog.dart';
 import 'package:dr/ui/debug_log_page.dart';
 import 'package:dr/ui/network_protocol_page.dart';
+import 'package:dr/ui/subject_appearance_page.dart';
 import 'package:flutter/foundation.dart';
-import 'package:dr/util.dart';
 import 'package:dynamic_theme/dynamic_theme.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:responsive_scaffold/responsive_scaffold.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -42,10 +38,7 @@ enum _Theme {
 
 class SettingsPageWidget extends StatefulWidget {
   final OnSettingChanged<bool> onSetNoPassSaving;
-  final OnSettingChanged<bool> onSetNoDataSaving;
   final OnSettingChanged<bool> onSetAskWhenDelete;
-  final OnSettingChanged<bool> onSetDeleteDataOnLogout;
-  final OnSettingChanged<bool> onSetShowCalendarEditNicksBar;
   final OnSettingChanged<bool> onSetShowGradesDiagram;
   final OnSettingChanged<bool> onSetShowAllSubjectsAverage;
   final OnSettingChanged<bool> onSetDashboardMarkNewOrChangedEntries;
@@ -55,8 +48,6 @@ class SettingsPageWidget extends StatefulWidget {
   final OnSettingChanged<bool> onSetDashboardColorBorders;
   final OnSettingChanged<bool> onSetCalenderColorBackground;
   final OnSettingChanged<bool> onSetDashboardColorTestsInRed;
-  final OnSettingChanged<MapEntry<String, SubjectTheme>> onSetSubjectTheme;
-  final OnSettingChanged<Map<String, String>> onSetSubjectNicks;
   final OnSettingChanged<List<String>> onSetIgnoreForGradesAverage;
   final VoidCallback onShowProfile;
   final SettingsViewModel vm;
@@ -64,23 +55,18 @@ class SettingsPageWidget extends StatefulWidget {
   const SettingsPageWidget({
     super.key,
     required this.onSetNoPassSaving,
-    required this.onSetNoDataSaving,
     required this.onSetAskWhenDelete,
-    required this.onSetDeleteDataOnLogout,
-    required this.onSetShowCalendarEditNicksBar,
     required this.onSetShowGradesDiagram,
     required this.onSetShowAllSubjectsAverage,
     required this.onSetDashboardMarkNewOrChangedEntries,
     required this.onSetDashboardDeduplicateEntries,
     required this.onSetDarkMode,
-    required this.onSetSubjectNicks,
     required this.vm,
     required this.onSetFollowDeviceDarkMode,
     required this.onShowProfile,
     required this.onSetIgnoreForGradesAverage,
     required this.onSetDashboardColorBorders,
     required this.onSetCalenderColorBackground,
-    required this.onSetSubjectTheme,
     required this.onSetDashboardColorTestsInRed,
   });
 
@@ -91,30 +77,12 @@ class SettingsPageWidget extends StatefulWidget {
 class _SettingsPageWidgetState extends State<SettingsPageWidget> {
   final controller = AutoScrollController(suggestedRowHeight: 250);
 
-  List<String> get subjectsWithoutNick => widget.vm.allSubjects
-      .where((element) => !widget.vm.subjectNicks.keys.contains(element))
-      .toList();
   List<String> get notYetIgnoredForAverageSubjects => widget.vm.allSubjects
       .where((element) => !widget.vm.ignoreForGradesAverage.contains(element))
       .toList();
 
   @override
   void initState() {
-    if (widget.vm.showSubjectNicks) {
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        await controller.scrollToIndex(4,
-            preferPosition: AutoScrollPosition.begin);
-        if (!mounted) return;
-        final newValue =
-            await showEditSubjectNick(context, "", "", subjectsWithoutNick);
-        if (newValue != null) {
-          widget.onSetSubjectNicks(
-            Map.fromEntries(
-                widget.vm.subjectNicks.entries.toList()..insert(0, newValue)),
-          );
-        }
-      });
-    }
     if (widget.vm.showGradesSettings) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         controller.scrollToIndex(3, preferPosition: AutoScrollPosition.begin);
@@ -140,12 +108,6 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.vm.showSubjectNicks) {
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        await controller.scrollToIndex(4,
-            preferPosition: AutoScrollPosition.begin);
-      });
-    }
     final currentTheme = DynamicTheme.of(context)!.followDevice
         ? _Theme.followDevice
         : DynamicTheme.of(context)!.customBrightness == Brightness.dark
@@ -191,23 +153,6 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
             },
             value: !widget.vm.noPassSaving,
           ),
-          SwitchListTile.adaptive(
-            title: const Text("Daten lokal speichern"),
-            subtitle: const Text('Sehen, wann etwas eingetragen wurde'),
-            onChanged: (bool value) {
-              widget.onSetNoDataSaving(!value);
-            },
-            value: !widget.vm.noDataSaving,
-          ),
-          SwitchListTile.adaptive(
-            title: const Text("Daten beim Ausloggen löschen"),
-            onChanged: !widget.vm.noPassSaving && !widget.vm.noDataSaving
-                ? (bool value) {
-                    widget.onSetDeleteDataOnLogout(value);
-                  }
-                : null,
-            value: widget.vm.deleteDataOnLogout,
-          ),
           const Divider(),
           AutoScrollTag(
             controller: controller,
@@ -244,39 +189,17 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
             endIndent: 15,
             height: 0,
           ),
-          ExpansionTile(
-            title: const Text("Fächerfarben"),
-            children: [
-              for (final theme in widget.vm.subjectThemes.entries)
-                ListTile(
-                  onTap: () async {
-                    final Color? color = await showDialog(
-                      context: context,
-                      builder: (context) => _ColorPicker(
-                        initialColor: Color(theme.value.color),
-                      ),
-                    );
-                    if (color != null) {
-                      widget.onSetSubjectTheme(
-                        MapEntry(
-                          theme.key,
-                          theme.value.copyWith(color: color.value),
-                        ),
-                      );
-                    }
-                  },
-                  title: Text(theme.key),
-                  trailing: Container(
-                    width: 50,
-                    height: 20,
-                    decoration: BoxDecoration(
-                      color: Color(theme.value.color),
-                      //  border: Border.all(),
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                  ),
+          ListTile(
+            title: const Text("Fächer Kürzel und Farben"),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute<void>(
+                  builder: (context) => const SubjectAppearancePage(),
                 ),
-            ],
+              );
+            },
           ),
           SwitchListTile.adaptive(
             title: const Text(
@@ -430,101 +353,6 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
             key: const ObjectKey(4),
             child: ListTile(
               title: Text(
-                "Kalender",
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-            ),
-          ),
-          ExpansionTile(
-            initiallyExpanded: widget.vm.showSubjectNicks,
-            title: const Text("Fächerkürzel"),
-            children: List.generate(
-              widget.vm.subjectNicks.length + 1,
-              (i) {
-                if (i == 0) {
-                  return ListTile(
-                    trailing: IconButton(
-                      icon: const Icon(Icons.add),
-                      onPressed: () async {
-                        final newValue = await showEditSubjectNick(
-                          context,
-                          "",
-                          "",
-                          subjectsWithoutNick,
-                        );
-                        if (newValue != null) {
-                          widget.onSetSubjectNicks(
-                            Map.fromEntries(
-                                widget.vm.subjectNicks.entries.toList()
-                                  ..insert(0, newValue)),
-                          );
-                        }
-                      },
-                    ),
-                  );
-                }
-                final idx = i - 1;
-                final key = widget.vm.subjectNicks.entries.toList()[idx].key;
-                final value = widget.vm.subjectNicks[key];
-                return Deleteable(
-                  key: ValueKey(key),
-                  builder: (context, delete) => ListTile(
-                    title: Text(key),
-                    subtitle: Text(value!),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        IconButton(
-                          icon: const Icon(Icons.delete),
-                          onPressed: () async {
-                            await delete();
-                            widget.onSetSubjectNicks(
-                              Map.of(widget.vm.subjectNicks)..remove(key),
-                            );
-                          },
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.edit),
-                          onPressed: () async {
-                            final newValue = await showEditSubjectNick(
-                              context,
-                              key,
-                              value,
-                              subjectsWithoutNick..add(key),
-                            );
-                            if (newValue != null) {
-                              widget.onSetSubjectNicks(
-                                Map.fromEntries(
-                                  List.of(widget.vm.subjectNicks.entries)
-                                    ..[idx] = newValue,
-                                ),
-                              );
-                            }
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-          SwitchListTile.adaptive(
-            title: const Text("Hinweis zum Bearbeiten von Kürzeln"),
-            subtitle: const Text(
-                "Wird angezeigt, wenn für ein Fach kein Kürzel vorhanden ist"),
-            onChanged: (bool value) {
-              widget.onSetShowCalendarEditNicksBar(value);
-            },
-            value: widget.vm.showCalendarEditNicksBar,
-          ),
-          const Divider(),
-          AutoScrollTag(
-            controller: controller,
-            index: 5,
-            key: const ObjectKey(5),
-            child: ListTile(
-              title: Text(
                 "Erweitert",
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
@@ -556,22 +384,6 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
               },
             ),
           ListTile(
-            leading: const Icon(Icons.feedback),
-            title: const Text("Feedback geben"),
-            trailing: const Icon(Icons.open_in_new),
-            onTap: () async {
-              await launchUrl(
-                Uri(
-                  scheme: 'mailto',
-                  path: 'hallo@wertwerk.io',
-                  queryParameters: {
-                    'subject': 'Feedback DigiReg ST $appVersion',
-                  },
-                ),
-              );
-            },
-          ),
-          ListTile(
             leading: const Icon(Icons.code),
             trailing: const Icon(Icons.open_in_new),
             title: const Text("Zum Quellcode"),
@@ -579,306 +391,8 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
               Uri.parse("https://github.com/jogi23/digitales_register"),
             ),
           ),
-          AboutListTile(
-            icon: const Icon(Icons.info_outline),
-            applicationIcon: SizedBox(
-              width: 100,
-              child: Image.asset("assets/index.png"),
-            ),
-            applicationLegalese:
-                "Copyright Johannes Feichter 2026\n                 Michael Debertol und Simon Wachtler 2019-2022",
-            applicationName: "DigiReg ST",
-            applicationVersion: appVersion,
-            aboutBoxChildren: [
-              Align(
-                alignment: Alignment.centerLeft,
-                child: TextButton(
-                  onPressed: () {
-                    final navigator =
-                        Navigator.of(context, rootNavigator: true);
-                    navigator.pop();
-                    navigator.push(
-                      MaterialPageRoute(
-                        builder: (_) => const ChangelogPage(),
-                      ),
-                    );
-                  },
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text("What's new"),
-                      SizedBox(width: 8),
-                      Icon(Icons.new_releases_outlined),
-                    ],
-                  ),
-                ),
-              ),
-              Text.rich(
-                TextSpan(children: [
-                  const TextSpan(text: "Ein Client für das "),
-                  TextSpan(
-                    text: "Digitale Register",
-                    style: TextStyle(
-                        color: Theme.of(context).colorScheme.primary),
-                    recognizer: TapGestureRecognizer()
-                      ..onTap = () {
-                        launchUrl(
-                          Uri.parse("https://www.digitalesregister.it/"),
-                          mode: LaunchMode.externalApplication,
-                        );
-                      },
-                  ),
-                  const TextSpan(text: "."),
-                ]),
-              ),
-              Text.rich(
-                TextSpan(children: [
-                  const TextSpan(text: "Entwickelt von "),
-                  TextSpan(
-                    text: "Johannes Feichter",
-                    style:
-                        TextStyle(color: Theme.of(context).colorScheme.primary),
-                    recognizer: TapGestureRecognizer()
-                      ..onTap = () {
-                        launchUrl(
-                          Uri.parse("https://wertwerk.io"),
-                          mode: LaunchMode.externalApplication,
-                        );
-                      },
-                  ),
-                  const TextSpan(text: ", "),
-                  TextSpan(
-                    text: "Michael Debertol",
-                    style:
-                        TextStyle(color: Theme.of(context).colorScheme.primary),
-                    recognizer: TapGestureRecognizer()
-                      ..onTap = () {
-                        launchUrl(
-                          Uri.parse("https://blog.debertol.com"),
-                          mode: LaunchMode.externalApplication,
-                        );
-                      },
-                  ),
-                  const TextSpan(text: " and "),
-                  TextSpan(
-                    text: "Simon Wachtler",
-                    style:
-                        TextStyle(color: Theme.of(context).colorScheme.primary),
-                    recognizer: TapGestureRecognizer()
-                      ..onTap = () {
-                        launchUrl(
-                          Uri.parse(
-                              "https://www.evvvolution.com/team/simon-wachtler"),
-                          mode: LaunchMode.externalApplication,
-                        );
-                      },
-                  ),
-                ]),
-              ),
-              const SizedBox(
-                height: 8,
-              ),
-              const Text(
-                "This is free software, and you are welcome to redistribute it under certain conditions.\n"
-                "This program comes with ABSOLUTELY NO WARRANTY.",
-              ),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: InkWell(
-                  child: Text(
-                    "See the GNU General Public License for more details.",
-                    style:
-                        TextStyle(color: Theme.of(context).colorScheme.primary),
-                  ),
-                  onTap: () {
-                    launchUrl(
-                      Uri.parse("https://www.gnu.org/licenses/gpl-3.0.html"),
-                      mode: LaunchMode.externalApplication,
-                    );
-                  },
-                ),
-              ),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: InkWell(
-                  child: Text(
-                    "Datenschutzerklärung",
-                    style:
-                        TextStyle(color: Theme.of(context).colorScheme.primary),
-                  ),
-                  onTap: () {
-                    launchUrl(
-                      Uri.parse("https://wertwerk.io/datenschutz/digiregst"),
-                      mode: LaunchMode.externalApplication,
-                    );
-                  },
-                ),
-              ),
-            ],
-            child: const Text("Über diese App"),
-          ),
         ],
       ),
-    );
-  }
-
-  Future<MapEntry<String, String>?> showEditSubjectNick(BuildContext context,
-      String key, String? value, List<String> suggestions) async {
-    return showDialog(
-      context: context,
-      builder: (context) => EditSubjectsNicks(
-        subjectName: key,
-        subjectNick: value,
-        suggestions: suggestions,
-      ),
-    );
-  }
-}
-
-class EditSubjectsNicks extends StatefulWidget {
-  final String? subjectName;
-  final String? subjectNick;
-  final List<String>? suggestions;
-
-  const EditSubjectsNicks(
-      {super.key, this.subjectName, this.subjectNick, this.suggestions});
-  @override
-  _EditSubjectsNicksState createState() => _EditSubjectsNicksState();
-}
-
-class _EditSubjectsNicksState extends State<EditSubjectsNicks> {
-  late TextEditingController nickController;
-  late TextEditingController subjectNameController;
-  late FocusNode nickFocusNode, nameFocusNode;
-  late bool forNewNick;
-
-  @override
-  void initState() {
-    forNewNick = widget.subjectName!.isEmpty;
-    nickController = TextEditingController(text: widget.subjectNick);
-    subjectNameController = TextEditingController(text: widget.subjectName)
-      ..addListener(
-        () {
-          setState(() {});
-        },
-      );
-    nickFocusNode = FocusNode();
-    nameFocusNode = FocusNode();
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    nickController.dispose();
-    subjectNameController.dispose();
-    nickFocusNode.dispose();
-    nameFocusNode.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return InfoDialog(
-      title: Text("Kürzel ${forNewNick ? "hinzufügen" : "bearbeiten"}"),
-      content: Row(
-        children: [
-          const Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text("Fach"),
-              SizedBox(
-                height: 27,
-              ),
-              Text("Kürzel"),
-            ],
-          ),
-          const SizedBox(
-            width: 16,
-          ),
-          Expanded(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                RawAutocomplete<String>(
-                  focusNode: nameFocusNode,
-                  textEditingController: subjectNameController,
-                  optionsBuilder: (textEditingValue) {
-                    return widget.suggestions!.where((suggestion) => suggestion
-                        .toLowerCase()
-                        .contains(textEditingValue.text.toLowerCase()));
-                  },
-                  optionsViewBuilder: (context, onSelected, options) {
-                    return AutocompleteOptions(
-                      displayStringForOption:
-                          RawAutocomplete.defaultStringForOption,
-                      onSelected: onSelected,
-                      options: options,
-                      maxOptionsHeight: 200,
-                      // We can't use a LayoutBuilder to get the size inside an AlertDialog,
-                      // so we hardcode it here.
-                      // TODO: Remove once https://github.com/flutter/flutter/issues/78746 is fixed.
-                      width: 170,
-                    );
-                  },
-                  fieldViewBuilder: (context, textEditingController, focusNode,
-                      onFieldSubmitted) {
-                    return TextFormField(
-                      controller: textEditingController,
-                      focusNode: focusNode,
-                      onFieldSubmitted: (String value) {
-                        onFieldSubmitted();
-                      },
-                      autofocus: subjectNameController.text.isEmpty,
-                    );
-                  },
-                  onSelected: (_) {
-                    nameFocusNode.unfocus();
-                  },
-                ),
-                TextField(
-                  controller: nickController,
-                  textCapitalization: TextCapitalization.sentences,
-                  onChanged: (_) => setState(() {}),
-                  focusNode: nickFocusNode,
-                  onSubmitted: (_) {
-                    if (subjectNameController.text != "" &&
-                        nickController.text != "") {
-                      Navigator.of(context).pop(
-                        MapEntry(
-                          subjectNameController.text,
-                          nickController.text,
-                        ),
-                      );
-                    }
-                  },
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-      actions: <Widget>[
-        TextButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          child: const Text("Abbrechen"),
-        ),
-        ElevatedButton(
-          onPressed:
-              subjectNameController.text != "" && nickController.text != ""
-                  ? () {
-                      Navigator.of(context).pop(
-                        MapEntry(
-                          subjectNameController.text,
-                          nickController.text,
-                        ),
-                      );
-                    }
-                  : null,
-          child: const Text("Fertig"),
-        ),
-      ],
     );
   }
 }
@@ -1042,56 +556,6 @@ class _SeedColorPicker extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _ColorPicker extends StatefulWidget {
-  final Color? initialColor;
-
-  const _ColorPicker({this.initialColor});
-  @override
-  _ColorPickerState createState() => _ColorPickerState();
-}
-
-class _ColorPickerState extends State<_ColorPicker> {
-  Color? color;
-  @override
-  void initState() {
-    color = widget.initialColor;
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return InfoDialog(
-      title: const Text("Farbe auswählen"),
-      content: SingleChildScrollView(
-        child: MaterialPicker(
-          pickerColor: color!,
-          onColorChanged: (pickedColor) {
-            setState(() {
-              color = pickedColor;
-            });
-          },
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          child: const Text("Abbrechen"),
-        ),
-        ElevatedButton(
-          onPressed: color != widget.initialColor
-              ? () {
-                  Navigator.pop(context, color);
-                }
-              : null,
-          child: const Text("Auswählen"),
-        ),
-      ],
     );
   }
 }

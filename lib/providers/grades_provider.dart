@@ -24,7 +24,7 @@ import 'package:dr/app_state.dart';
 import 'package:dr/data.dart';
 import 'package:dr/middleware/middleware.dart' show wrapper;
 import 'package:dr/providers/no_internet_provider.dart';
-import 'package:dr/providers/settings_provider.dart';
+import 'package:dr/providers/subject_appearance_provider.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -209,9 +209,11 @@ class GradesNotifier extends Notifier<GradesState> {
         ..serverSemester = semester.toBuilder()
         ..loading = false;
     });
-    ref.read(settingsProvider.notifier).updateSubjectThemes(
-          state.subjects.map((s) => s.name).toList(),
-        );
+    unawaited(
+      ref.read(subjectAppearanceProvider.notifier).ensureThemesFor(
+            state.subjects.map((s) => s.name).toList(),
+          ),
+    );
     // Pre-fetch all subject details in the background so averages are visible
     // immediately without expanding a subject first. Detail data is included in
     // the persisted app state, so averages are also instant on the next cold start.

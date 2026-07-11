@@ -19,14 +19,15 @@
 import 'package:built_collection/built_collection.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/container/calendar_container.dart';
-import 'package:dr/container/settings_page.dart';
 import 'package:dr/data.dart';
 import 'package:dr/main.dart';
 import 'package:dr/providers/calendar_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/providers/provider_container.dart' as pc;
 import 'package:dr/providers/settings_provider.dart';
+import 'package:dr/providers/subject_appearance_provider.dart';
 import 'package:dr/ui/dialog.dart';
+import 'package:dr/ui/subject_appearance_page.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
 import 'package:dynamic_theme/dynamic_theme.dart';
@@ -52,6 +53,14 @@ class _TestSettingsNotifier extends SettingsNotifier {
 
   @override
   SettingsState build() => initial;
+}
+
+class _TestSubjectAppearanceNotifier extends SubjectAppearanceNotifier {
+  final SubjectAppearanceState initial;
+  _TestSubjectAppearanceNotifier(this.initial);
+
+  @override
+  SubjectAppearanceState build() => initial;
 }
 
 CalendarState _buildCalendarState({
@@ -142,9 +151,13 @@ Future<void> main() async {
         noInternetProvider.overrideWith(NoInternetNotifier.new),
         settingsProvider.overrideWith(
           () => _TestSettingsNotifier(
-            SettingsState(
-              showCalendarNicksBar: nicksBarEnabled,
-              subjectNicks: !hasSubjctWithoutNick ? {"Fach1": "F"} : null,
+            SettingsState(showCalendarNicksBar: nicksBarEnabled),
+          ),
+        ),
+        subjectAppearanceProvider.overrideWith(
+          () => _TestSubjectAppearanceNotifier(
+            SubjectAppearanceState(
+              nicks: !hasSubjctWithoutNick ? {"fach1": "F"} : {},
             ),
           ),
         ),
@@ -166,10 +179,12 @@ Future<void> main() async {
           Locale("de"),
         ],
         onGenerateRoute: (settings) {
-          assert(settings.name == "/settings");
+          assert(settings.name == "/subjectAppearance");
           return MaterialPageRoute<void>(
             fullscreenDialog: true,
-            builder: (context) => SettingsPageContainer(),
+            builder: (context) => SubjectAppearancePage(
+              autoEditMissingNick: settings.arguments as bool? ?? false,
+            ),
           );
         },
       ),
@@ -272,16 +287,16 @@ Future<void> main() async {
     );
     await tester.tap(find.textContaining("Kürzel"));
     await tester.pumpAndSettle();
-    // a dialog should be opened
+    // the subject appearance screen opens with the missing-nick dialog
+    expect(find.byType(SubjectAppearancePage), findsOneWidget);
     expect(find.byType(InfoDialog), findsOneWidget);
     expect(
       find.descendant(
         of: find.byType(InfoDialog),
-        matching: find.text("Kürzel hinzufügen"),
+        matching: find.text("Kürzel für Fach1"),
       ),
       findsOneWidget,
     );
-    expect(find.text("Fach1"), findsOneWidget);
   });
 
   group('demo data KW 2026-05-11', () {
@@ -293,8 +308,10 @@ Future<void> main() async {
             () => _TestCalendarNotifier(_demoState),
           ),
           noInternetProvider.overrideWith(NoInternetNotifier.new),
-          settingsProvider.overrideWith(
-            () => _TestSettingsNotifier(SettingsState(subjectNicks: {})),
+          subjectAppearanceProvider.overrideWith(
+            () => _TestSubjectAppearanceNotifier(
+              const SubjectAppearanceState(),
+            ),
           ),
         ],
       );

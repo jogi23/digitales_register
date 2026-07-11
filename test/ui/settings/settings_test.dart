@@ -22,6 +22,7 @@ import 'package:dr/container/settings_page.dart';
 import 'package:dr/providers/provider_container.dart' as pc;
 import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/ui/dialog.dart';
+import 'package:dr/ui/subject_appearance_page.dart';
 import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -71,6 +72,16 @@ Future<ProviderContainer> _pumpSettingsPage(
 }
 
 void main() {
+  testWidgets(
+    'does not show items moved to the hamburger menu',
+    (tester) async {
+      final container = await _pumpSettingsPage(tester);
+      addTearDown(container.dispose);
+      expect(find.text('Feedback geben'), findsNothing);
+      expect(find.text('Über diese App'), findsNothing);
+    },
+  );
+
   testGoldens(
     'scrolls to grades settings',
     (tester) async {
@@ -87,224 +98,22 @@ void main() {
     },
   );
 
-  group("subject nicks", () {
-    testWidgets(
-      'scrolls to subject nicks and adds one directly',
-      (tester) async {
-        final container = await _pumpSettingsPage(
-          tester,
-          settings: SettingsState(scrollToSubjectNicks: true),
-        );
-        addTearDown(container.dispose);
-
-        // a dialog should be opened
-        expect(find.byType(InfoDialog), findsOneWidget);
-        expect(
-          find.descendant(
-            of: find.byType(InfoDialog),
-            matching: find.text("Kürzel hinzufügen"),
-          ),
-          findsOneWidget,
-        );
-        // text box should already be focused
-        tester.testTextInput.enterText("Fach1");
-        expect(find.byType(TextField), findsNWidgets(2));
-        await tester.enterText(
-          find.descendant(
-            of: find.byType(InfoDialog),
-            matching: find.byType(TextField).last,
-          ),
-          "F1",
-        );
-        await tester.pumpAndSettle();
-        await tester.tap(find.text("Fertig"));
-        expect(container.read(settingsProvider).subjectNicks["Fach1"], "F1");
-      },
-    );
-    testWidgets(
-      'adds a subject nick',
-      (tester) async {
-        final container = await _pumpSettingsPage(tester);
-        addTearDown(container.dispose);
-        await tester.scrollUntilVisible(
-          find.text("Fächerkürzel"),
-          200,
-        );
-        await tester.tap(find.text("Fächerkürzel"));
-        await tester.pumpAndSettle();
-        await tester.tap(
-          find.descendant(
-            of: find.ancestor(
-                of: find.text("Fächerkürzel"),
-                matching: find.byType(ExpansionTile)),
-            matching: find.byIcon(Icons.add),
-          ),
-        );
-        await tester.pumpAndSettle();
-
-        // a dialog should be opened
-        expect(find.byType(InfoDialog), findsOneWidget);
-        expect(
-          find.descendant(
-            of: find.byType(InfoDialog),
-            matching: find.text("Kürzel hinzufügen"),
-          ),
-          findsOneWidget,
-        );
-        // text box should already be focused
-        tester.testTextInput.enterText("Fach1");
-        expect(find.byType(TextField), findsNWidgets(2));
-        await tester.enterText(
-            find.descendant(
-              of: find.byType(InfoDialog),
-              matching: find.byType(TextField).last,
-            ),
-            "F1");
-        await tester.pumpAndSettle();
-        await tester.tap(find.text("Fertig"));
-        expect(container.read(settingsProvider).subjectNicks["Fach1"], "F1");
-      },
-    );
-    testWidgets(
-      'removes a subject nick',
-      (tester) async {
-        final container = await _pumpSettingsPage(
-          tester,
-          settings: SettingsState(subjectNicks: {"Fach1": "f1"}),
-        );
-        addTearDown(container.dispose);
-        await tester.scrollUntilVisible(
-          find.text("Fächerkürzel"),
-          200,
-        );
-        await tester.tap(find.text("Fächerkürzel"));
-        await tester.pumpAndSettle();
-        final nickTile = find.ancestor(
-          of: find.text("Fach1"),
-          matching: find.byType(ListTile),
-        );
-        expect(nickTile, findsOneWidget);
-        expect(
-          find.descendant(
-            of: nickTile,
-            matching: find.text("Fach1"),
-          ),
-          findsOneWidget,
-        );
-        expect(
-          find.descendant(
-            of: nickTile,
-            matching: find.text(
-              "f1",
-            ),
-          ),
-          findsOneWidget,
-        );
-        await tester.tap(
-          find.descendant(
-            of: nickTile,
-            matching: find.byIcon(Icons.delete),
-          ),
-        );
-        await tester.pumpAndSettle();
-        expect(container.read(settingsProvider).subjectNicks["Fach1"], null);
-      },
-    );
-    testWidgets(
-      'edits a subject nick',
-      (tester) async {
-        final container = await _pumpSettingsPage(
-          tester,
-          settings: SettingsState(subjectNicks: {"Fach1": "f1"}),
-        );
-        addTearDown(container.dispose);
-        await tester.scrollUntilVisible(
-          find.text("Fächerkürzel"),
-          200,
-        );
-        await tester.tap(find.text("Fächerkürzel"));
-        await tester.pumpAndSettle();
-        final nickTile = find.ancestor(
-          of: find.text("Fach1"),
-          matching: find.byType(ListTile),
-        );
-        expect(nickTile, findsOneWidget);
-        expect(
-          find.descendant(
-            of: nickTile,
-            matching: find.text("Fach1"),
-          ),
-          findsOneWidget,
-        );
-        expect(
-          find.descendant(
-            of: nickTile,
-            matching: find.text(
-              "f1",
-            ),
-          ),
-          findsOneWidget,
-        );
-        await tester.tap(
-          find.descendant(
-            of: nickTile,
-            matching: find.byIcon(Icons.edit),
-          ),
-        );
-        await tester.pumpAndSettle();
-        final dialog = find.byType(InfoDialog);
-        expect(dialog, findsOneWidget);
-
-        expect(
-          find.descendant(of: dialog, matching: find.text("Fach")),
-          findsOneWidget,
-        );
-        expect(
-          find.descendant(of: dialog, matching: find.text("Fach1")),
-          findsOneWidget,
-        );
-        expect(
-          find.descendant(of: dialog, matching: find.text("Kürzel")),
-          findsOneWidget,
-        );
-        expect(
-          find.descendant(of: dialog, matching: find.text("f1")),
-          findsOneWidget,
-        );
-
-        // Deleting the nick should disable the save button
-
-        await tester.enterText(find.text("f1"), "");
-
-        await tester.pumpAndSettle();
-
-        expect(
-          tester
-              .widget<ElevatedButton>(
-                find.descendant(
-                  of: dialog,
-                  matching: find.byType(
-                    ElevatedButton,
-                  ),
-                ),
-              )
-              .enabled,
-          isFalse,
-        );
-
-        await tester.enterText(find.text(""), "new_nick");
-        await tester.pumpAndSettle();
-
-        await tester.tap(find.text("Fertig"));
-
-        await tester.pumpAndSettle();
-        expect(
-          container.read(settingsProvider).subjectNicks["Fach1"],
-          "new_nick",
-        );
-      },
-    );
-  });
+  testWidgets(
+    'opens the subject appearance screen from "Aussehen"',
+    (tester) async {
+      final container = await _pumpSettingsPage(tester);
+      addTearDown(container.dispose);
+      await tester.dragUntilVisible(
+        find.text("Fächer Kürzel und Farben"),
+        find.byType(Scrollable).first,
+        const Offset(0, -300),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text("Fächer Kürzel und Farben"));
+      await tester.pumpAndSettle();
+      expect(find.byType(SubjectAppearancePage), findsOneWidget);
+    },
+  );
 
   group("grades average ignore-list", () {
     testWidgets(

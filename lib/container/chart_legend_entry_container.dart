@@ -16,7 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
-import 'package:dr/providers/settings_provider.dart';
+import 'package:dr/providers/subject_appearance_provider.dart';
 import 'package:dr/ui/grades_chart_legend_entry.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -28,14 +28,17 @@ class ChartLegendEntryContainer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = ref.watch(settingsProvider).subjectThemes[subjectName];
-    if (theme == null) return const SizedBox.shrink();
+    final appearance = ref.watch(subjectAppearanceProvider);
+    if (!appearance.themes.containsKey(normalizeSubject(subjectName))) {
+      return const SizedBox.shrink();
+    }
+    final theme = appearance.themeFor(subjectName);
     return GradesChartLegendEntry(
       config: theme,
       name: subjectName,
       setThickness: (thickness) => ref
-          .read(settingsProvider.notifier)
-          .setSubjectTheme(MapEntry(subjectName, theme.copyWith(thick: thickness))),
+          .read(subjectAppearanceProvider.notifier)
+          .setTheme(subjectName, theme.copyWith(thick: thickness)),
     );
   }
 }

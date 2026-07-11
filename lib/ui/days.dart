@@ -25,6 +25,7 @@ import 'package:dr/app_state.dart';
 import 'package:dr/container/days_container.dart';
 import 'package:dr/container/homework_filter_container.dart';
 import 'package:dr/container/notification_icon_container.dart';
+import 'package:dr/providers/subject_appearance_provider.dart';
 import 'package:dr/ui/account_avatar_button.dart';
 import 'package:dr/container/sidebar_container.dart';
 import 'package:dr/data.dart';
@@ -221,11 +222,62 @@ class _DaysWidgetState extends State<DaysWidget> {
 
   @override
   void didUpdateWidget(DaysWidget oldWidget) {
+    // A background refresh (e.g. returning to this tab) rebuilds the day
+    // list, which can shift item positions and make the scroll offset land
+    // on a different day than before. Remember which day was on top and
+    // restore it once the new data is laid out, so refreshes don't visually
+    // reset the view back to today.
+    final anchorDate = _currentTopDayDate(oldWidget.vm.days);
     updateValues();
     update();
     _ensureGradeCompetences();
+    if (anchorDate != null) {
+      final newIndex = _dayStartIndexForDate(anchorDate);
+      if (newIndex != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted || !controller.hasClients) return;
+          unawaited(controller.scrollToIndex(
+            newIndex,
+            duration: const Duration(milliseconds: 1),
+            preferPosition: AutoScrollPosition.begin,
+          ));
+        });
+      }
+    }
 
     super.didUpdateWidget(oldWidget);
+  }
+
+  /// Finds the day currently scrolled to the top of the viewport, using the
+  /// day-start indices from before this update.
+  UtcDateTime? _currentTopDayDate(BuiltList<Day> oldDays) {
+    if (!controller.hasClients) return null;
+    int? bestDayIndex;
+    double? bestRelativeOffset;
+    for (final entry in _dayStartIndices.entries) {
+      final ctx = controller.tagMap[entry.value]?.context;
+      if (ctx == null) continue;
+      final renderBox = ctx.findRenderObject() as RenderBox?;
+      if (renderBox == null || !renderBox.attached) continue;
+      final viewport = RenderAbstractViewport.of(renderBox);
+      final relativeOffset =
+          viewport.getOffsetToReveal(renderBox, 0).offset - controller.offset;
+      // Only consider days whose header has already scrolled to (or past)
+      // the top; among those, the closest one to the top is the one in view.
+      if (relativeOffset <= 24 &&
+          (bestRelativeOffset == null || relativeOffset > bestRelativeOffset)) {
+        bestRelativeOffset = relativeOffset;
+        bestDayIndex = entry.key;
+      }
+    }
+    if (bestDayIndex == null || bestDayIndex >= oldDays.length) return null;
+    return oldDays[bestDayIndex].date;
+  }
+
+  int? _dayStartIndexForDate(UtcDateTime date) {
+    final dayIndex = widget.vm.days.indexWhere((d) => d.date == date);
+    if (dayIndex == -1) return null;
+    return _dayStartIndices[dayIndex];
   }
 
   Widget getItem(
@@ -812,11 +864,14 @@ class ItemWidget extends StatelessWidget {
     return (Colors.grey, 0);
   }
 
-  Color? _getCardColor() {
-    if (colorBorder &&
-        item.label != null &&
-        subjectThemes.containsKey(item.label)) {
-      return Color(subjectThemes[item.label]!.color).withOpacity(0.15);
+  Color? _getCardColor(BuildContext context) {
+    if (colorBorder && item.label != null) {
+      final key = normalizeSubject(item.label!);
+      if (subjectThemes.containsKey(key)) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        return Color(subjectThemes[key]!.color)
+            .withOpacity(isDark ? 0.35 : 0.15);
+      }
     }
     return null;
   }
@@ -889,7 +944,7 @@ class ItemWidget extends StatelessWidget {
           ),
           borderRadius: BorderRadius.circular(16),
         ),
-        color: _getCardColor(),
+        color: _getCardColor(context),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Column(

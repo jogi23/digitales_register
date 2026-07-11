@@ -260,31 +260,12 @@ abstract class Semester implements Built<Semester, SemesterBuilder> {
   Semester._();
 }
 
-const _defaultSubjectNicks = <String, String>{
-  "Deutsch": "Deu",
-  "Mathematik": "Mat",
-  "Latein": "Lat",
-  "Religion": "Rel",
-  "Englisch": "Eng",
-  "Naturwissenschaften": "Nat",
-  "Geschichte": "Gesch",
-  "Italienisch": "Ita",
-  "Bewegung und Sport": "Sport",
-  "Recht und Wirtschaft": "Rw",
-  "Griechisch": "Gr",
-  "FÜ": "Fü",
-};
-
 class SettingsState {
   SettingsState({
     this.noPasswordSaving = false,
-    this.noDataSaving = false,
     this.typeSorted = false,
     this.askWhenDelete = false,
     this.showCancelled = false,
-    this.deleteDataOnLogout = false,
-    Map<String, String>? subjectNicks,
-    this.scrollToSubjectNicks = false,
     this.scrollToGrades = false,
     this.showCalendarNicksBar = true,
     this.showGradesDiagram = true,
@@ -294,26 +275,19 @@ class SettingsState {
     this.dashboardColorBorders = false,
     this.calendarColorBackground = false,
     this.dashboardColorTestsInRed = true,
-    Map<String, SubjectTheme>? subjectThemes,
     List<String>? ignoreForGradesAverage,
     this.drawerFullyExpanded = true,
-  })  : subjectNicks = subjectNicks ?? Map.of(_defaultSubjectNicks),
-        subjectThemes = subjectThemes ?? {},
-        ignoreForGradesAverage = ignoreForGradesAverage ?? [];
+  }) : ignoreForGradesAverage = ignoreForGradesAverage ?? [];
 
   final bool noPasswordSaving;
-  final bool noDataSaving;
 
   /// true = sort grades inside subjects by type;
   /// false = sort grades inside subjects by date
   final bool typeSorted;
   final bool askWhenDelete;
   final bool showCancelled;
-  final bool deleteDataOnLogout;
-  final Map<String, String> subjectNicks;
 
   // Not serialized — ephemeral UI state for the settings page
-  final bool scrollToSubjectNicks;
   final bool scrollToGrades;
 
   final bool showCalendarNicksBar;
@@ -324,7 +298,6 @@ class SettingsState {
   final bool dashboardColorBorders;
   final bool calendarColorBackground;
   final bool dashboardColorTestsInRed;
-  final Map<String, SubjectTheme> subjectThemes;
   final List<String> ignoreForGradesAverage;
 
   // Whether to fully expand the drawer if in tablet mode
@@ -332,13 +305,9 @@ class SettingsState {
 
   SettingsState copyWith({
     bool? noPasswordSaving,
-    bool? noDataSaving,
     bool? typeSorted,
     bool? askWhenDelete,
     bool? showCancelled,
-    bool? deleteDataOnLogout,
-    Map<String, String>? subjectNicks,
-    bool? scrollToSubjectNicks,
     bool? scrollToGrades,
     bool? showCalendarNicksBar,
     bool? showGradesDiagram,
@@ -348,19 +317,14 @@ class SettingsState {
     bool? dashboardColorBorders,
     bool? calendarColorBackground,
     bool? dashboardColorTestsInRed,
-    Map<String, SubjectTheme>? subjectThemes,
     List<String>? ignoreForGradesAverage,
     bool? drawerFullyExpanded,
   }) =>
       SettingsState(
         noPasswordSaving: noPasswordSaving ?? this.noPasswordSaving,
-        noDataSaving: noDataSaving ?? this.noDataSaving,
         typeSorted: typeSorted ?? this.typeSorted,
         askWhenDelete: askWhenDelete ?? this.askWhenDelete,
         showCancelled: showCancelled ?? this.showCancelled,
-        deleteDataOnLogout: deleteDataOnLogout ?? this.deleteDataOnLogout,
-        subjectNicks: subjectNicks ?? Map.of(this.subjectNicks),
-        scrollToSubjectNicks: scrollToSubjectNicks ?? this.scrollToSubjectNicks,
         scrollToGrades: scrollToGrades ?? this.scrollToGrades,
         showCalendarNicksBar: showCalendarNicksBar ?? this.showCalendarNicksBar,
         showGradesDiagram: showGradesDiagram ?? this.showGradesDiagram,
@@ -376,7 +340,6 @@ class SettingsState {
             calendarColorBackground ?? this.calendarColorBackground,
         dashboardColorTestsInRed:
             dashboardColorTestsInRed ?? this.dashboardColorTestsInRed,
-        subjectThemes: subjectThemes ?? Map.of(this.subjectThemes),
         ignoreForGradesAverage:
             ignoreForGradesAverage ?? List.of(this.ignoreForGradesAverage),
         drawerFullyExpanded: drawerFullyExpanded ?? this.drawerFullyExpanded,
@@ -384,12 +347,9 @@ class SettingsState {
 
   Map<String, dynamic> toJson() => {
         'noPasswordSaving': noPasswordSaving,
-        'noDataSaving': noDataSaving,
         'typeSorted': typeSorted,
         'askWhenDelete': askWhenDelete,
         'showCancelled': showCancelled,
-        'deleteDataOnLogout': deleteDataOnLogout,
-        'subjectNicks': subjectNicks,
         'showCalendarNicksBar': showCalendarNicksBar,
         'showGradesDiagram': showGradesDiagram,
         'showAllSubjectsAverage': showAllSubjectsAverage,
@@ -398,22 +358,15 @@ class SettingsState {
         'dashboardColorBorders': dashboardColorBorders,
         'calendarColorBackground': calendarColorBackground,
         'dashboardColorTestsInRed': dashboardColorTestsInRed,
-        'subjectThemes': {
-          for (final e in subjectThemes.entries) e.key: e.value.toJson(),
-        },
         'ignoreForGradesAverage': ignoreForGradesAverage,
         'drawerFullyExpanded': drawerFullyExpanded,
       };
 
   factory SettingsState.fromJson(Map<dynamic, dynamic> json) => SettingsState(
         noPasswordSaving: json['noPasswordSaving'] as bool? ?? false,
-        noDataSaving: json['noDataSaving'] as bool? ?? false,
         typeSorted: json['typeSorted'] as bool? ?? false,
         askWhenDelete: json['askWhenDelete'] as bool? ?? false,
         showCancelled: json['showCancelled'] as bool? ?? false,
-        deleteDataOnLogout: json['deleteDataOnLogout'] as bool? ?? false,
-        subjectNicks:
-            (json['subjectNicks'] as Map<dynamic, dynamic>?)?.cast<String, String>(),
         showCalendarNicksBar: json['showCalendarNicksBar'] as bool? ?? true,
         showGradesDiagram: json['showGradesDiagram'] as bool? ?? true,
         showAllSubjectsAverage: json['showAllSubjectsAverage'] as bool? ?? true,
@@ -426,20 +379,12 @@ class SettingsState {
             json['calendarColorBackground'] as bool? ?? false,
         dashboardColorTestsInRed:
             json['dashboardColorTestsInRed'] as bool? ?? true,
-        subjectThemes: {
-          for (final e
-              in (json['subjectThemes'] as Map<dynamic, dynamic>? ?? {}).entries)
-            e.key as String:
-                SubjectTheme.fromJson(e.value as Map<dynamic, dynamic>),
-        },
         ignoreForGradesAverage:
             (json['ignoreForGradesAverage'] as List<dynamic>?)
                 ?.cast<String>(),
         drawerFullyExpanded: json['drawerFullyExpanded'] as bool? ?? true,
       );
 
-  static const _mapEq = MapEquality<String, String>();
-  static const _themeMapEq = MapEquality<String, SubjectTheme>();
   static const _listEq = ListEquality<String>();
 
   @override
@@ -447,13 +392,9 @@ class SettingsState {
     if (identical(other, this)) return true;
     return other is SettingsState &&
         other.noPasswordSaving == noPasswordSaving &&
-        other.noDataSaving == noDataSaving &&
         other.typeSorted == typeSorted &&
         other.askWhenDelete == askWhenDelete &&
         other.showCancelled == showCancelled &&
-        other.deleteDataOnLogout == deleteDataOnLogout &&
-        _mapEq.equals(other.subjectNicks, subjectNicks) &&
-        other.scrollToSubjectNicks == scrollToSubjectNicks &&
         other.scrollToGrades == scrollToGrades &&
         other.showCalendarNicksBar == showCalendarNicksBar &&
         other.showGradesDiagram == showGradesDiagram &&
@@ -464,7 +405,6 @@ class SettingsState {
         other.dashboardColorBorders == dashboardColorBorders &&
         other.calendarColorBackground == calendarColorBackground &&
         other.dashboardColorTestsInRed == dashboardColorTestsInRed &&
-        _themeMapEq.equals(other.subjectThemes, subjectThemes) &&
         _listEq.equals(other.ignoreForGradesAverage, ignoreForGradesAverage) &&
         other.drawerFullyExpanded == drawerFullyExpanded;
   }
@@ -472,13 +412,9 @@ class SettingsState {
   @override
   int get hashCode => Object.hashAll([
         noPasswordSaving,
-        noDataSaving,
         typeSorted,
         askWhenDelete,
         showCancelled,
-        deleteDataOnLogout,
-        ...subjectNicks.entries.map((e) => Object.hash(e.key, e.value)),
-        scrollToSubjectNicks,
         scrollToGrades,
         showCalendarNicksBar,
         showGradesDiagram,
@@ -488,7 +424,6 @@ class SettingsState {
         dashboardColorBorders,
         calendarColorBackground,
         dashboardColorTestsInRed,
-        ...subjectThemes.entries.map((e) => Object.hash(e.key, e.value)),
         ...ignoreForGradesAverage,
         drawerFullyExpanded,
       ]);

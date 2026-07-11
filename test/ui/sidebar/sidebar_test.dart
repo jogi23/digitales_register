@@ -17,6 +17,7 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:dr/pages.dart';
+import 'package:dr/ui/help_feedback_page.dart';
 import 'package:dr/ui/sidebar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -79,6 +80,16 @@ void main() {
     expect(find.text('Mitteilungen'), findsOneWidget);
     expect(find.text('Zeugnis'), findsOneWidget);
     expect(find.text('Einstellungen'), findsOneWidget);
+    expect(find.text('Hilfe und Feedback'), findsOneWidget);
+    expect(find.text('Über diese App'), findsOneWidget);
+    // The sidebar list is scrollable and doesn't build off-screen items
+    // eagerly, so the last item needs scrolling into view first.
+    await tester.scrollUntilVisible(
+      find.text('Abmelden'),
+      500,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
     expect(find.text('Abmelden'), findsOneWidget);
   });
 
@@ -147,9 +158,38 @@ void main() {
       expect(called, isTrue);
     });
 
+    testWidgets('shows about dialog when Über diese App tapped',
+        (tester) async {
+      await tester.pumpWidget(_build());
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Über diese App'));
+      await tester.pumpAndSettle();
+      expect(find.byType(AboutDialog), findsOneWidget);
+    });
+
+    testWidgets(
+        'opens help & feedback page when Hilfe und Feedback tapped',
+        (tester) async {
+      await tester.pumpWidget(_build());
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Hilfe und Feedback'));
+      await tester.pumpAndSettle();
+      expect(find.byType(HelpFeedbackPage), findsOneWidget);
+      expect(find.text('Email schreiben'), findsOneWidget);
+      expect(find.text('FAQ'), findsOneWidget);
+      expect(find.text('Feature/Idee vorschlagen'), findsOneWidget);
+      expect(find.text('Bug/Fehler melden'), findsOneWidget);
+    });
+
     testWidgets('logout fires', (tester) async {
       var called = false;
       await tester.pumpWidget(_build(onLogout: () => called = true));
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.text('Abmelden'),
+        500,
+        scrollable: find.byType(Scrollable).first,
+      );
       await tester.pumpAndSettle();
       await tester.tap(find.text('Abmelden'));
       await tester.pump();

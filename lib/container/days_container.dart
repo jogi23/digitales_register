@@ -27,6 +27,7 @@ import 'package:dr/providers/login_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/providers/notifications_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
+import 'package:dr/providers/subject_appearance_provider.dart';
 import 'package:dr/ui/days.dart';
 import 'package:flutter/material.dart' hide Builder;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -40,6 +41,7 @@ class DaysContainer extends ConsumerWidget {
     final gradeCompetences = ref.watch(dashboardGradeCompetencesProvider);
     final noInternet = ref.watch(noInternetProvider);
     final settings = ref.watch(settingsProvider);
+    final subjectThemes = ref.watch(subjectAppearanceProvider).themes;
     final loginLoading = ref.watch(loginProvider.select((s) => s.loading));
     final showNotifications = ref
         .watch(notificationsProvider.select((s) => s.notifications.isNotEmpty));
@@ -69,6 +71,7 @@ class DaysContainer extends ConsumerWidget {
       loginLoading,
       showNotifications,
       settings,
+      subjectThemes,
       unorderedDays,
       blacklist,
     );
@@ -120,6 +123,7 @@ abstract class DaysViewModel
     bool loginLoading,
     bool showNotifications,
     SettingsState settings,
+    Map<String, SubjectTheme> subjectThemes,
     List<Day> unorderedDays,
     BuiltList<HomeworkType> blacklist,
   ) =>
@@ -136,7 +140,7 @@ abstract class DaysViewModel
           ..showNotifications = showNotifications
           ..colorBorders = settings.dashboardColorBorders
           ..colorTestsInRed = settings.dashboardColorTestsInRed
-          ..subjectThemes = MapBuilder(settings.subjectThemes),
+          ..subjectThemes = MapBuilder(subjectThemes),
       );
 }
 

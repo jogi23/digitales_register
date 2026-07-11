@@ -65,11 +65,11 @@ class _TestSettingsNotifier extends SettingsNotifier {
   SettingsState build() => initial;
 }
 
-ProviderContainer _makeContainer({SettingsState? settings}) {
+ProviderContainer _makeContainer() {
   final container = ProviderContainer(
     overrides: [
       settingsProvider.overrideWith(
-        () => _TestSettingsNotifier(settings ?? SettingsState()),
+        () => _TestSettingsNotifier(SettingsState()),
       ),
     ],
   );
@@ -126,29 +126,10 @@ void main() {
     );
     expect(_isFullState(await storageHelper.read(username)), true);
   });
-  test('state is not saved when data saving is disabled', () async {
-    const username = "test_username2";
-    final container = _makeContainer(
-      settings: SettingsState(noDataSaving: true),
-    );
-    addTearDown(container.dispose);
-    container.read(loginProvider.notifier).setLoggedIn(username: username);
-
-    await saveStateImmediately();
-
-    expect(
-      await storageHelper.exists(username),
-      true,
-    );
-
-    expect(_isFullState(await storageHelper.read(username)), false);
-  });
-  test('state is deleted on logout when state saving is disabled', () async {
+  test('state is deleted after a hard logout', () async {
     navigatorKey = GlobalKey();
     const username = "test_username3";
-    final container = _makeContainer(
-      settings: SettingsState(deleteDataOnLogout: true),
-    );
+    final container = _makeContainer();
     addTearDown(container.dispose);
     container.read(loginProvider.notifier).setLoggedIn(username: username);
 
@@ -161,48 +142,11 @@ void main() {
     );
 
     expect(_isFullState(await storageHelper.read(username)), true);
+    // a hard logout always wipes the cached state, regardless of any setting
     deletedData = true;
     await saveStateImmediately();
 
     expect(_isFullState(await storageHelper.read(username)), false);
-  });
-  test('state is deleted/saved when the setting is switched', () async {
-    const username = "test_username4";
-    final container = _makeContainer();
-    addTearDown(container.dispose);
-    container.read(loginProvider.notifier).setLoggedIn(username: username);
-    container.read(settingsProvider.notifier).onSaveState =
-        () => unawaited(saveStateImmediately());
-
-    await saveStateImmediately();
-
-    // the state should be saved immediately
-    expect(
-      await storageHelper.exists(username),
-      true,
-    );
-
-    expect(_isFullState(await storageHelper.read(username)), true);
-
-    container.read(settingsProvider.notifier).setSaveNoData(true);
-    await Future<void>.value();
-
-    expect(_isFullState(await storageHelper.read(username)), false);
-
-    container.read(settingsProvider.notifier).setSaveNoData(false);
-    await Future<void>.value();
-
-    expect(_isFullState(await storageHelper.read(username)), true);
-
-    container.read(settingsProvider.notifier).setSaveNoData(true);
-    await Future<void>.value();
-
-    expect(_isFullState(await storageHelper.read(username)), false);
-
-    container.read(settingsProvider.notifier).setSaveNoData(false);
-    await Future<void>.value();
-
-    expect(_isFullState(await storageHelper.read(username)), true);
   });
 
   test('Default map is ordered', () {

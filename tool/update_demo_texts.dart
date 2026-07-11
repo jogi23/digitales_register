@@ -350,7 +350,7 @@ const _certFachnoten = <String, List<String>>{
   'NatGeGeo': ['sehr gut', 'gut'],
   'Religion': ['gut', 'sehr gut'],
   'Verhalten': ['ausgezeichnet', 'sehr gut'],
-  'WS Weihnachtswerkstatt': ['gut', ''],
+  'Latein': ['gut', ''],
 };
 
 // ── Certificate: new Verhalten texts ─────────────────────────────────────────
@@ -460,7 +460,7 @@ String _patchCertificate(String html) {
     final g2 = entry.value[1];
     final subjectEsc = RegExp.escape(subject);
 
-    if (subject == 'WS Weihnachtswerkstatt') {
+    if (subject == 'Latein') {
       // Only 1 semester grade; 2nd <td> is empty
       final p = RegExp(
         '<tr>$tdV$subjectEsc</td>'
@@ -1149,7 +1149,7 @@ Map<int, String> _buildLessonContents(String subject, List<int> sortedIds) {
     case 'Italienisch':
       texts = _logTexts(_itPrefixes, _itTopics, n);
       break;
-    case 'WS Weihnachtswerkstatt':
+    case 'Latein':
       texts = _wsLog.take(n).toList();
       break;
     default:

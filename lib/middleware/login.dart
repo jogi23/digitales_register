@@ -46,7 +46,7 @@ Future<void> _doLogout({required bool hard, bool forced = false}) async {
       ),
     );
   }
-  if (providerContainer.read(settingsProvider).deleteDataOnLogout && hard) {
+  if (hard) {
     deletedData = true;
     await _doSaveState(immediately: true);
   }
@@ -231,9 +231,11 @@ Future<void> _doLoggedIn({
   if (!offlineOnly) {
     await providerContainer.read(dashboardProvider.notifier).load(true);
     await providerContainer.read(notificationsProvider.notifier).load();
-    providerContainer
-        .read(settingsProvider.notifier)
-        .updateSubjectThemes(providerContainer.read(allSubjectsProvider));
+    unawaited(
+      providerContainer
+          .read(subjectAppearanceProvider.notifier)
+          .ensureThemesFor(providerContainer.read(allSubjectsProvider)),
+    );
   }
 
   unawaited(_doSaveState(immediately: true));
@@ -441,46 +443,16 @@ void _restoreProvidersFromAppState(AppState appState) {
       );
 }
 
-// Converts old built_value BuiltMap alternating-list encoding to Map<K, V>.
-Map<String, String> _legacyListToStringMap(List<dynamic> list) {
-  final map = <String, String>{};
-  for (int i = 0; i + 1 < list.length; i += 2) {
-    map[list[i] as String] = list[i + 1] as String;
-  }
-  return map;
-}
-
-Map<String, SubjectTheme> _legacyListToSubjectThemeMap(List<dynamic> list) {
-  final map = <String, SubjectTheme>{};
-  for (int i = 0; i + 1 < list.length; i += 2) {
-    final key = list[i] as String;
-    final themeList = list[i + 1] as List<dynamic>;
-    final fields = <String, dynamic>{};
-    for (int j = 1; j + 1 < themeList.length; j += 2) {
-      fields[themeList[j] as String] = themeList[j + 1];
-    }
-    map[key] = SubjectTheme(
-      thick: fields['thick'] as int? ?? 0,
-      color: fields['color'] as int? ?? 0,
-    );
-  }
-  return map;
-}
-
 SettingsState _parseSettingsFromLegacyList(List<dynamic> list) {
   // list = ['SettingsState', 'field1', val1, 'field2', val2, ...]
   final fields = <String, dynamic>{};
   for (int i = 1; i + 1 < list.length; i += 2) {
     fields[list[i] as String] = list[i + 1];
   }
-  final rawNicks = fields['subjectNicks'];
-  final rawThemes = fields['subjectThemes'];
   final rawIgnore = fields['ignoreForGradesAverage'];
   return SettingsState(
     noPasswordSaving: fields['noPasswordSaving'] as bool? ?? false,
-    noDataSaving: fields['noDataSaving'] as bool? ?? false,
     askWhenDelete: fields['askWhenDelete'] as bool? ?? true,
-    deleteDataOnLogout: fields['deleteDataOnLogout'] as bool? ?? false,
     showCancelled: fields['showCancelled'] as bool? ?? false,
     typeSorted: fields['typeSorted'] as bool? ?? false,
     showGradesDiagram: fields['showGradesDiagram'] as bool? ?? true,
@@ -498,12 +470,6 @@ SettingsState _parseSettingsFromLegacyList(List<dynamic> list) {
     showCalendarNicksBar: fields['showCalendarNicksBar'] as bool? ?? true,
     calendarColorBackground: fields['calendarColorBackground'] as bool? ?? false,
     drawerFullyExpanded: fields['drawerFullyExpanded'] as bool? ?? false,
-    subjectNicks: rawNicks != null
-        ? _legacyListToStringMap(rawNicks as List<dynamic>)
-        : null,
-    subjectThemes: rawThemes != null
-        ? _legacyListToSubjectThemeMap(rawThemes as List<dynamic>)
-        : {},
   );
 }
 
