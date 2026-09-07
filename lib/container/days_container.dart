@@ -79,6 +79,7 @@ class DaysContainer extends ConsumerWidget {
     return DaysWidget(
       vm: vm,
       onSwitchFuture: notifier.switchFuture,
+      loadBothDirections: notifier.loadBothDirections,
       refresh: notifier.refresh,
       addReminderCallback: (day, msg) => notifier.addReminder(day.date, msg),
       removeReminderCallback: (hw, day) => notifier.deleteHomework(hw),

@@ -138,6 +138,7 @@ class _DashboardCalendarState extends State<DashboardCalendar> {
         _MonthGrid(
           month: _month,
           byDate: byDate,
+          loaded: _loadedRange(byDate.keys),
           pick: _pick,
           onPickDay: _pickDay,
           onPickWeek: _pickWeek,
@@ -146,6 +147,14 @@ class _DashboardCalendarState extends State<DashboardCalendar> {
         Expanded(child: _detail(context, byDate)),
       ],
     );
+  }
+
+  /// First and last day the dashboard actually holds. The server answers for
+  /// a limited span, and days outside it are unknown — not free.
+  static (DateTime, DateTime)? _loadedRange(Iterable<DateTime> dates) {
+    if (dates.isEmpty) return null;
+    final sorted = dates.toList()..sort();
+    return (sorted.first, sorted.last);
   }
 
   Widget _detail(BuildContext context, Map<DateTime, Day> byDate) {
@@ -231,6 +240,9 @@ class _MonthHeader extends StatelessWidget {
 class _MonthGrid extends StatelessWidget {
   final DateTime month;
   final Map<DateTime, Day> byDate;
+
+  /// The span the dashboard has data for, null when it has none at all.
+  final (DateTime, DateTime)? loaded;
   final _Pick? pick;
   final void Function(DateTime date) onPickDay;
   final void Function(DateTime monday) onPickWeek;
@@ -238,6 +250,7 @@ class _MonthGrid extends StatelessWidget {
   const _MonthGrid({
     required this.month,
     required this.byDate,
+    required this.loaded,
     required this.pick,
     required this.onPickDay,
     required this.onPickWeek,
@@ -323,8 +336,11 @@ class _MonthGrid extends StatelessWidget {
       _WeekPick() => current.covers(date),
       null => false,
     };
+    final range = loaded;
     return _DayCell(
       dayOfMonth: date.day,
+      isKnown:
+          range != null && !date.isBefore(range.$1) && !date.isAfter(range.$2),
       hasEntries: day?.homework.isNotEmpty ?? false,
       hasWarning: day?.homework.any((h) => h.warning) ?? false,
       isToday: date == today,
@@ -368,6 +384,9 @@ class _WeekCell extends StatelessWidget {
 
 class _DayCell extends StatelessWidget {
   final int dayOfMonth;
+
+  /// Whether the dashboard covers this day at all.
+  final bool isKnown;
   final bool hasEntries;
   final bool hasWarning;
   final bool isToday;
@@ -376,6 +395,7 @@ class _DayCell extends StatelessWidget {
 
   const _DayCell({
     required this.dayOfMonth,
+    required this.isKnown,
     required this.hasEntries,
     required this.hasWarning,
     required this.isToday,
@@ -406,7 +426,13 @@ class _DayCell extends StatelessWidget {
               child: Text(
                 "$dayOfMonth",
                 style: TextStyle(
-                  color: isSelected ? scheme.onPrimary : null,
+                  // Days the dashboard never loaded are faded: no dot there
+                  // means "unknown", not "nothing to do".
+                  color: isSelected
+                      ? scheme.onPrimary
+                      : isKnown
+                          ? null
+                          : scheme.onSurfaceVariant.withValues(alpha: 0.4),
                   fontWeight: isToday ? FontWeight.bold : null,
                 ),
               ),

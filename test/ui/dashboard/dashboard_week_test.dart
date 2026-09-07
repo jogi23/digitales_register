@@ -44,6 +44,14 @@ class _TestDashboardNotifier extends DashboardNotifier {
 
   @override
   DashboardState build() => _initialState;
+
+  // The calendar views fetch past and future on their own; in tests that
+  // would hit the network and leave the progress bar animating forever.
+  @override
+  Future<void> load(bool future) async {}
+
+  @override
+  Future<void> loadBothDirections() async {}
 }
 
 class _TestCalendarNotifier extends CalendarNotifier {

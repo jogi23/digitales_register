@@ -79,6 +79,19 @@ class DashboardNotifier extends Notifier<DashboardState> {
     await load(state.future);
   }
 
+  /// Fetches past and future entries.
+  ///
+  /// The server only knows "everything before" or "everything after", while
+  /// the month and week views navigate freely — with one direction loaded,
+  /// the other looks like it holds nothing. Loaded days are merged, so both
+  /// end up in the state; the wanted direction goes last so [DashboardState
+  /// .future] keeps pointing at it.
+  Future<void> loadBothDirections() async {
+    final wanted = state.future;
+    await load(!wanted);
+    await load(wanted);
+  }
+
   Future<void> switchFuture() async {
     await load(!state.future);
   }

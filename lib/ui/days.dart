@@ -62,6 +62,9 @@ class DaysWidget extends StatefulWidget {
   final AddReminderCallback addReminderCallback;
   final RemoveReminderCallback removeReminderCallback;
   final VoidCallback onSwitchFuture;
+
+  /// Fetches past and future at once, for the month and week views.
+  final VoidCallback loadBothDirections;
   final ToggleDoneCallback toggleDoneCallback;
   final VoidCallback setDoNotAskWhenDeleteCallback;
   final VoidCallback refresh;
@@ -80,6 +83,7 @@ class DaysWidget extends StatefulWidget {
     required this.removeReminderCallback,
     required this.markAllAsSeenCallback,
     required this.onSwitchFuture,
+    required this.loadBothDirections,
     required this.toggleDoneCallback,
     required this.setDoNotAskWhenDeleteCallback,
     required this.refresh,
@@ -216,6 +220,11 @@ class _DaysWidgetState extends State<DaysWidget> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       update();
       _ensureGradeCompetences();
+      // The month and week views navigate freely, so they need past and
+      // future; with one direction the other looks empty.
+      if (widget.vm.viewMode != DashboardViewMode.list) {
+        widget.loadBothDirections();
+      }
       _afterFirstFrame = true;
       setState(() {});
     });
@@ -387,13 +396,9 @@ class _DaysWidgetState extends State<DaysWidget> {
         lastFetched: lastFetched,
         child: widget.vm.viewMode != DashboardViewMode.list
             ? Column(
-                children: <Widget>[
-                  DashboardHeader(
-                    future: widget.vm.future,
-                    onSwitchFuture: widget.onSwitchFuture,
-                  ),
-                  Expanded(child: _calendarBody()),
-                ],
+                // No past/future switch here: both directions are loaded,
+                // and these views navigate by month and week instead.
+                children: <Widget>[Expanded(child: _calendarBody())],
               )
             : ListView.builder(
           physics: const AlwaysScrollableScrollPhysics(),

@@ -38,6 +38,16 @@ class _TestDashboardNotifier extends DashboardNotifier {
 
   @override
   DashboardState build() => _initialState;
+
+  // The calendar views fetch past and future on their own; in tests that
+  // would hit the network and leave the progress bar animating forever.
+  @override
+  Future<void> load(bool future) async {}
+
+  @override
+  Future<void> loadBothDirections() async => bothDirectionsCalls++;
+
+  int bothDirectionsCalls = 0;
 }
 
 /// The dashboard pulls grade competences, which would hit the network.
@@ -86,13 +96,16 @@ Future<void> main() async {
     );
   });
 
+  late _TestDashboardNotifier notifier;
+
   Widget dashboard({
     required bool calendarView,
     Brightness brightness = Brightness.light,
   }) {
+    notifier = _TestDashboardNotifier(_mayState);
     return ProviderScope(
       overrides: [
-        dashboardProvider.overrideWith(() => _TestDashboardNotifier(_mayState)),
+        dashboardProvider.overrideWith(() => notifier),
         gradesProvider.overrideWith(() => _TestGradesNotifier(GradesState())),
         settingsProvider.overrideWith(
           () => _TestSettingsNotifier(
@@ -145,6 +158,63 @@ Future<void> main() async {
       await tester.pumpAndSettle();
       expect(find.byType(DashboardCalendar), findsNothing);
       expect(find.text('Mai 2026'), findsNothing);
+    });
+  });
+
+  group('loading both directions', () {
+    testWidgets('the month view fetches past and future', (tester) async {
+      // The server only knows "before" or "after"; with one direction the
+      // other half of the calendar would look empty.
+      await pumpCalendar(tester);
+      expect(notifier.bothDirectionsCalls, 1);
+    });
+
+    testWidgets('the list view does not', (tester) async {
+      await tester.pumpWidget(dashboard(calendarView: false));
+      await tester.pumpAndSettle();
+      expect(notifier.bothDirectionsCalls, 0);
+    });
+
+    testWidgets('the past/future switch is hidden in the month view',
+        (tester) async {
+      await pumpCalendar(tester);
+      expect(find.text('Zukunft'), findsNothing);
+      expect(find.text('Vergangenheit'), findsNothing);
+    });
+
+    testWidgets('the list view keeps the switch', (tester) async {
+      await tester.pumpWidget(dashboard(calendarView: false));
+      await tester.pumpAndSettle();
+      expect(
+        find.text('Zukunft').evaluate().isNotEmpty ||
+            find.text('Vergangenheit').evaluate().isNotEmpty,
+        isTrue,
+      );
+    });
+  });
+
+  group('days outside the loaded span', () {
+    /// The colour the day number is drawn in.
+    Color? colourOfDay(WidgetTester tester, String dayOfMonth) => tester
+        .widget<Text>(find.text(dayOfMonth).first)
+        .style
+        ?.color;
+
+    testWidgets('are faded, so no dot does not read as "nothing to do"',
+        (tester) async {
+      await pumpCalendar(tester);
+      // Only May is loaded, so July is unknown territory.
+      await tester.tap(find.byTooltip('Nächster Monat'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Nächster Monat'));
+      await tester.pumpAndSettle();
+      expect(find.text('Juli 2026'), findsOneWidget);
+      expect(colourOfDay(tester, '15'), isNotNull);
+    });
+
+    testWidgets('loaded days keep the normal colour', (tester) async {
+      await pumpCalendar(tester);
+      expect(colourOfDay(tester, '15'), isNull);
     });
   });
 
