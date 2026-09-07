@@ -93,16 +93,6 @@ class _DashboardCalendarState extends State<DashboardCalendar> {
     _pick = _DayPick(dateOnly(DateTime.now()));
   }
 
-  @override
-  void didUpdateWidget(DashboardCalendar oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    // Switching between past and future replaces the days entirely. Without
-    // this the calendar would keep showing a month that now has nothing.
-    if (widget.days != oldWidget.days && !_hasDaysIn(_month)) {
-      setState(() => _month = _startingMonth());
-    }
-  }
-
   /// The month of today when today is loaded, otherwise the month of the first
   /// loaded day: the dashboard shows either past or future, not both.
   DateTime _startingMonth() {
@@ -115,9 +105,6 @@ class _DashboardCalendarState extends State<DashboardCalendar> {
   }
 
   static DateTime _monthOf(DateTime date) => DateTime(date.year, date.month);
-
-  bool _hasDaysIn(DateTime month) => widget.days
-      .any((d) => d.date.year == month.year && d.date.month == month.month);
 
   void _changeMonth(int delta) => setState(() {
         _month = DateTime(_month.year, _month.month + delta);

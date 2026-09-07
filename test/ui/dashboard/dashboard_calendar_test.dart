@@ -24,6 +24,7 @@ import 'package:dr/providers/dashboard_provider.dart';
 import 'package:dr/providers/grades_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/ui/dashboard_calendar.dart';
+import 'package:dr/utc_date_time.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -45,7 +46,17 @@ class _TestDashboardNotifier extends DashboardNotifier {
   Future<void> load(bool future) async {}
 
   @override
-  Future<void> loadBothDirections() async => bothDirectionsCalls++;
+  Future<void> loadBothDirections() async {
+    bothDirectionsCalls++;
+    // Answers with the same days, as the server does for a span it has
+    // nothing for — but the rebuild is real, and that rebuild is what used
+    // to throw the calendar back to its starting month.
+    state = state.rebuild(
+      (b) => b.allDays.map(
+        (day) => day.rebuild((b) => b..lastRequested = UtcDateTime(2026, 9, 7)),
+      ),
+    );
+  }
 
   int bothDirectionsCalls = 0;
 }
@@ -241,6 +252,21 @@ Future<void> main() async {
       await tapDay(tester, '15');
       await tapDay(tester, '15');
       expect(notifier.bothDirectionsCalls, after);
+    });
+
+    testWidgets('the view stays on the month one navigated to', (tester) async {
+      // Fetching changes the days, which used to send the calendar back to
+      // its starting month — right out from under the tap.
+      await pumpCalendar(tester);
+      await tester.tap(find.byTooltip('Nächster Monat'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Nächster Monat'));
+      await tester.pumpAndSettle();
+      expect(find.text('Juli 2026'), findsOneWidget);
+
+      await tapDay(tester, '15');
+      expect(find.text('Juli 2026'), findsOneWidget);
+      expect(find.text('Mai 2026'), findsNothing);
     });
 
     testWidgets('picking a loaded day asks for nothing', (tester) async {
