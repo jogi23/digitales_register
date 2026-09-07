@@ -83,8 +83,12 @@ class _DashboardWeekContainerState
     }
   }
 
-  void _changeWeek(int weeks) {
-    setState(() => _monday = _monday.add(Duration(days: 7 * weeks)));
+  void _changeWeek(int weeks) =>
+      _goTo(_monday.add(Duration(days: 7 * weeks)));
+
+  void _goTo(UtcDateTime monday) {
+    if (monday == _monday) return;
+    setState(() => _monday = monday);
     _ensureLoaded();
     _ensureThemes();
   }
@@ -131,6 +135,8 @@ class _DashboardWeekContainerState
           monday: _monday,
           onPrevious: () => _changeWeek(-1),
           onNext: () => _changeWeek(1),
+          onToday: () => _goTo(toMonday(Day.dateToday())),
+          isCurrentWeek: _monday == toMonday(Day.dateToday()),
         ),
         Expanded(
           child: CalendarWeek(
@@ -157,11 +163,15 @@ class _WeekHeader extends StatelessWidget {
   final UtcDateTime monday;
   final VoidCallback onPrevious;
   final VoidCallback onNext;
+  final VoidCallback onToday;
+  final bool isCurrentWeek;
 
   const _WeekHeader({
     required this.monday,
     required this.onPrevious,
     required this.onNext,
+    required this.onToday,
+    required this.isCurrentWeek,
   });
 
   @override
@@ -180,10 +190,22 @@ class _WeekHeader extends StatelessWidget {
           "${format.format(monday)} - ${format.format(friday)}",
           style: Theme.of(context).textTheme.titleMedium,
         ),
-        IconButton(
-          icon: const Icon(Icons.chevron_right),
-          tooltip: "Nächste Woche",
-          onPressed: onNext,
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            // Like the calendar page, only tighter: the header has no room
+            // for a labelled button. Disabled while already there.
+            IconButton(
+              icon: const Icon(Icons.today),
+              tooltip: "Aktuelle Woche",
+              onPressed: isCurrentWeek ? null : onToday,
+            ),
+            IconButton(
+              icon: const Icon(Icons.chevron_right),
+              tooltip: "Nächste Woche",
+              onPressed: onNext,
+            ),
+          ],
         ),
       ],
     );

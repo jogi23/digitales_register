@@ -29,6 +29,7 @@ import 'package:dr/providers/subject_appearance_provider.dart';
 import 'package:dr/ui/calendar_week.dart';
 import 'package:dr/ui/days.dart';
 import 'package:dr/utc_date_time.dart';
+import 'package:dr/util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -336,6 +337,35 @@ Future<void> main() async {
       await pumpWeek(tester);
       expect(tintOnMonday(tester, 'Religion'), isNull);
       expect(tintOnMonday(tester, 'Vormittagspause'), isNull);
+    });
+  });
+
+  group('jumping back to the current week', () {
+    // Pinned so "current" is the week the fixtures cover.
+    setUp(() => mockNow = _monday);
+    tearDown(() => mockNow = null);
+
+    testWidgets('the button is disabled while already there', (tester) async {
+      await pumpWeek(tester);
+      final button = tester.widget<IconButton>(
+        find.ancestor(
+          of: find.byIcon(Icons.today),
+          matching: find.byType(IconButton),
+        ),
+      );
+      expect(button.onPressed, isNull);
+    });
+
+    testWidgets('after paging away it returns to the current week',
+        (tester) async {
+      await pumpWeek(tester);
+      await tester.tap(find.byTooltip('Nächste Woche'));
+      await tester.pump();
+      expect(find.text('18.05.26 - 22.05.26'), findsOneWidget);
+
+      await tester.tap(find.byTooltip('Aktuelle Woche'));
+      await tester.pump();
+      expect(find.text('11.05.26 - 15.05.26'), findsOneWidget);
     });
   });
 
