@@ -507,10 +507,19 @@ abstract class CalendarState
     implements Built<CalendarState, CalendarStateBuilder> {
   BuiltMap<UtcDateTime, CalendarDay> get days;
 
+  /// Weeks being fetched right now, by their Monday.
+  ///
+  /// Without this an empty week is indistinguishable from one still loading,
+  /// and a week that genuinely has no lessons would spin forever.
+  @BuiltValueField(serialize: false)
+  BuiltSet<UtcDateTime> get loadingWeeks;
+
   @BuiltValueField(serialize: false)
   UtcDateTime? get currentMonday;
   @BuiltValueField(serialize: false)
   CalendarSelection? get selection;
+
+  bool isLoadingWeek(UtcDateTime monday) => loadingWeeks.contains(monday);
 
   Iterable<CalendarDay> get currentDays {
     return daysForWeek(currentMonday!);
@@ -529,7 +538,9 @@ abstract class CalendarState
   CalendarState._();
   static Serializer<CalendarState> get serializer => _$calendarStateSerializer;
   static void _initializeBuilder(CalendarStateBuilder builder) {
-    builder.days = MapBuilder<UtcDateTime, CalendarDay>();
+    builder
+      ..days = MapBuilder<UtcDateTime, CalendarDay>()
+      ..loadingWeeks = SetBuilder<UtcDateTime>();
   }
 }
 

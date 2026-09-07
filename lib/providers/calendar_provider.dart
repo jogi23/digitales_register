@@ -40,14 +40,20 @@ class CalendarNotifier extends Notifier<CalendarState> {
 
   Future<void> load(UtcDateTime monday) async {
     if (ref.read(noInternetProvider)) return;
-    final dynamic data = await wrapper.send(
-      "api/calendar/student",
-      args: {"startDate": DateFormat("yyyy-MM-dd").format(monday)},
-    );
-    if (data != null) {
-      state = state.rebuild(
-        (b) => b.days.addAll(_parseLoaded(data as Map<String, dynamic>)),
+    state = state.rebuild((b) => b.loadingWeeks.add(monday));
+    try {
+      final dynamic data = await wrapper.send(
+        "api/calendar/student",
+        args: {"startDate": DateFormat("yyyy-MM-dd").format(monday)},
       );
+      if (data != null) {
+        state = state.rebuild(
+          (b) => b.days.addAll(_parseLoaded(data as Map<String, dynamic>)),
+        );
+      }
+    } finally {
+      // Also on failure: a week stuck in "loading" would spin forever.
+      state = state.rebuild((b) => b.loadingWeeks.remove(monday));
     }
   }
 

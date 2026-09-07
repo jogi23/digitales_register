@@ -48,9 +48,11 @@ class CalendarWeek extends StatelessWidget {
     return vm.days.isEmpty
         ? vm.noInternet
             ? const NoInternet()
-            : const Center(
-                child: CircularProgressIndicator(),
-              )
+            // An empty week is not the same as one still loading: without the
+            // distinction a week that simply has no lessons spins forever.
+            : vm.loading
+                ? const Center(child: CircularProgressIndicator())
+                : const _NoLessons()
         : LastFetchedOverlay(
             lastFetched: vm.days.first.lastFetched,
             noInternet: vm.noInternet,
@@ -153,6 +155,26 @@ class _TimeAxis extends StatelessWidget {
         Text(_format.format(time.from), style: style),
         if (showsEnd) Text(_format.format(time.to), style: style),
       ],
+    );
+  }
+}
+
+/// Shown for a week the server has no lessons for — holidays, or a week
+/// beyond the timetable.
+class _NoLessons extends StatelessWidget {
+  const _NoLessons();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Text(
+          "Keine Stunden in dieser Woche",
+          style: Theme.of(context).textTheme.titleMedium,
+          textAlign: TextAlign.center,
+        ),
+      ),
     );
   }
 }

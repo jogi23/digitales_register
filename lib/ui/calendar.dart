@@ -117,7 +117,11 @@ class _CalendarState extends ConsumerState<Calendar> with TickerProviderStateMix
     _dateRangeOpacityAnimation =
         _dateRangeOpacityController.drive(_dateRangeOpacityTween);
 
-    widget.dayCallback(widget.vm.currentMonday);
+    // After the frame: loading now marks the week as pending, and a provider
+    // must not be written to while the tree is building.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) widget.dayCallback(widget.vm.currentMonday);
+    });
 
     _pageView = PageView.builder(
       itemBuilder: (BuildContext context, int index) {
