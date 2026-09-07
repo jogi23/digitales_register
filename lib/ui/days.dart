@@ -345,7 +345,12 @@ class _DaysWidgetState extends State<DaysWidget> {
   Widget _calendarBody() {
     return widget.vm.viewMode == DashboardViewMode.week
         ? DashboardWeekContainer(days: widget.vm.days)
-        : DashboardCalendar(days: widget.vm.days, dayBuilder: _buildDay);
+        : DashboardCalendar(
+            days: widget.vm.days,
+            dayBuilder: _buildDay,
+            loading: widget.vm.loading,
+            onLoadMissing: widget.loadBothDirections,
+          );
   }
 
   @override

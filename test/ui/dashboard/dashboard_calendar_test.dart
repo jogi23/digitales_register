@@ -101,8 +101,11 @@ Future<void> main() async {
   Widget dashboard({
     required bool calendarView,
     Brightness brightness = Brightness.light,
+    bool loading = false,
   }) {
-    notifier = _TestDashboardNotifier(_mayState);
+    notifier = _TestDashboardNotifier(
+      loading ? _mayState.rebuild((b) => b..loading = true) : _mayState,
+    );
     return ProviderScope(
       overrides: [
         dashboardProvider.overrideWith(() => notifier),
@@ -135,6 +138,13 @@ Future<void> main() async {
       dashboard(calendarView: true, brightness: brightness),
     );
     await tester.pumpAndSettle();
+  }
+
+  /// Renders while entries are still being fetched.
+  Future<void> pumpLoading(WidgetTester tester) async {
+    await tester.pumpWidget(dashboard(calendarView: true, loading: true));
+    // Not settled: the progress bar animates forever.
+    await tester.pump();
   }
 
   /// Taps the given day of the month in the grid.
@@ -190,6 +200,74 @@ Future<void> main() async {
             find.text('Vergangenheit').evaluate().isNotEmpty,
         isTrue,
       );
+    });
+  });
+
+  group('fetching what is missing', () {
+    testWidgets('picking an unloaded day asks for more', (tester) async {
+      await pumpCalendar(tester);
+      final before = notifier.bothDirectionsCalls;
+      // July was never loaded.
+      await tester.tap(find.byTooltip('Nächster Monat'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Nächster Monat'));
+      await tester.pumpAndSettle();
+      await tapDay(tester, '15');
+      expect(notifier.bothDirectionsCalls, before + 1);
+    });
+
+    testWidgets('picking an unloaded week asks for more', (tester) async {
+      await pumpCalendar(tester);
+      final before = notifier.bothDirectionsCalls;
+      await tester.tap(find.byTooltip('Nächster Monat'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Nächster Monat'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Kalenderwoche 28'));
+      await tester.pumpAndSettle();
+      expect(notifier.bothDirectionsCalls, before + 1);
+    });
+
+    testWidgets('the same day is not asked for twice', (tester) async {
+      // The server answers for a limited span; without this a day beyond it
+      // would fire a request on every tap.
+      await pumpCalendar(tester);
+      await tester.tap(find.byTooltip('Nächster Monat'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Nächster Monat'));
+      await tester.pumpAndSettle();
+      await tapDay(tester, '15');
+      final after = notifier.bothDirectionsCalls;
+      await tapDay(tester, '15');
+      await tapDay(tester, '15');
+      expect(notifier.bothDirectionsCalls, after);
+    });
+
+    testWidgets('picking a loaded day asks for nothing', (tester) async {
+      await pumpCalendar(tester);
+      final before = notifier.bothDirectionsCalls;
+      await tapDay(tester, '11');
+      expect(notifier.bothDirectionsCalls, before);
+    });
+  });
+
+  group('while the missing days are on their way', () {
+    testWidgets('a bar shows that something is happening', (tester) async {
+      await pumpLoading(tester);
+      expect(find.byType(LinearProgressIndicator), findsWidgets);
+    });
+
+    testWidgets('an unknown day says it is loading, not that it is empty',
+        (tester) async {
+      await pumpLoading(tester);
+      await tester.tap(find.byTooltip('Nächster Monat'));
+      await tester.pump();
+      await tester.tap(find.byTooltip('Nächster Monat'));
+      await tester.pump();
+      await tester.tap(find.text('15').first);
+      await tester.pump();
+      expect(find.text('Wird geladen …'), findsOneWidget);
+      expect(find.text('(Kein Eintrag)'), findsNothing);
     });
   });
 
@@ -295,6 +373,28 @@ Future<void> main() async {
       await tester.tap(find.byTooltip('Kalenderwoche 18'));
       await tester.pumpAndSettle();
       expect(find.text('(Kein Eintrag)'), findsOneWidget);
+    });
+  });
+
+  group('day circles', () {
+    /// The size of the circle drawn around a day number.
+    Size circleOf(WidgetTester tester, String dayOfMonth) {
+      final circle = find
+          .ancestor(
+            of: find.text(dayOfMonth),
+            matching: find.byType(SizedBox),
+          )
+          .first;
+      return tester.getSize(circle);
+    }
+
+    testWidgets('are the same size for one and two digit days',
+        (tester) async {
+      // A circle sized to its text alone shrinks for single digits, which
+      // made the 7th look smaller than the 17th.
+      await pumpCalendar(tester);
+      expect(circleOf(tester, '7'), circleOf(tester, '17'));
+      expect(circleOf(tester, '9'), circleOf(tester, '30'));
     });
   });
 
