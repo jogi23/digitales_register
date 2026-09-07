@@ -47,6 +47,7 @@ class SettingsPageWidget extends StatefulWidget {
   final OnSettingChanged<bool> onSetFollowDeviceDarkMode;
   final OnSettingChanged<bool> onSetDashboardColorBorders;
   final OnSettingChanged<bool> onSetCalenderColorBackground;
+  final OnSettingChanged<bool> onSetCalendarShowTimes;
   final OnSettingChanged<bool> onSetDashboardColorTestsInRed;
   final OnSettingChanged<List<String>> onSetIgnoreForGradesAverage;
   final VoidCallback onShowProfile;
@@ -67,6 +68,7 @@ class SettingsPageWidget extends StatefulWidget {
     required this.onSetIgnoreForGradesAverage,
     required this.onSetDashboardColorBorders,
     required this.onSetCalenderColorBackground,
+    required this.onSetCalendarShowTimes,
     required this.onSetDashboardColorTestsInRed,
   });
 
@@ -214,6 +216,13 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
             ),
             value: widget.vm.calendarColorBackground,
             onChanged: widget.onSetCalenderColorBackground,
+          ),
+          SwitchListTile.adaptive(
+            title: const Text(
+              "Uhrzeiten im Kalender anzeigen",
+            ),
+            value: widget.vm.calendarShowTimes,
+            onChanged: widget.onSetCalendarShowTimes,
           ),
           SwitchListTile.adaptive(
             title: const Text(
