@@ -21,6 +21,7 @@ import 'package:dr/container/calendar_week_container.dart';
 import 'package:dr/data.dart';
 import 'package:dr/providers/calendar_provider.dart';
 import 'package:dr/providers/subject_appearance_provider.dart';
+import 'package:dr/ui/calendar_grid.dart';
 import 'package:dr/ui/last_fetched_overlay.dart';
 import 'package:dr/ui/no_internet.dart';
 import 'package:dr/utc_date_time.dart';
@@ -43,6 +44,7 @@ class CalendarWeek extends StatelessWidget {
   Widget build(BuildContext context) {
     final latestHour =
         vm.days.fold<int>(0, (a, b) => a < b.toHour ? b.toHour : a);
+    final grid = CalendarGrid.fromDays(vm.days, latestHour);
     return vm.days.isEmpty
         ? vm.noInternet
             ? const NoInternet()
@@ -56,28 +58,100 @@ class CalendarWeek extends StatelessWidget {
               children: <Widget>[
                 Expanded(
                   child: Row(
-                    children: vm.days
-                        .map(
-                          (d) => Expanded(
-                            child: CalendarDayWidget(
-                              calendarDay: d,
-                              max: latestHour,
-                              subjectNicks: vm.subjectNicks,
-                              isSelected: vm.selection?.date == d.date,
-                              selectedHour: vm.selection?.date == d.date
-                                  ? vm.selection?.hour
-                                  : null,
-                              colorBackground: vm.colorBackground,
-                              subjectThemes: vm.subjectThemes,
-                            ),
+                    children: <Widget>[
+                      if (vm.showTimes && grid.hasTimes) _TimeAxis(grid: grid),
+                      for (final d in vm.days)
+                        Expanded(
+                          child: CalendarDayWidget(
+                            calendarDay: d,
+                            grid: grid,
+                            subjectNicks: vm.subjectNicks,
+                            isSelected: vm.selection?.date == d.date,
+                            selectedHour: vm.selection?.date == d.date
+                                ? vm.selection?.hour
+                                : null,
+                            colorBackground: vm.colorBackground,
+                            subjectThemes: vm.subjectThemes,
                           ),
-                        )
-                        .toList(),
+                        ),
+                    ],
                   ),
                 ),
               ],
             ),
           );
+  }
+}
+
+
+/// The time column left of the week grid.
+///
+/// Uses the same slots as the day columns, so every label lines up with the
+/// lesson it belongs to. Each lesson shows its start time; the last one also
+/// shows when the day ends.
+class _TimeAxis extends StatelessWidget {
+  final CalendarGrid grid;
+
+  const _TimeAxis({required this.grid});
+
+  static final _format = DateFormat("HH:mm");
+
+  @override
+  Widget build(BuildContext context) {
+    final baseStyle = DefaultTextStyle.of(context).style;
+    final labelStyle = baseStyle.copyWith(
+      fontSize: 10,
+      color: Theme.of(context).hintColor,
+    );
+
+    // Show an end time where the reader would otherwise not know when the
+    // block stops: at the very end, and before a break.
+    final showsEnd = <LessonSlot>{};
+    LessonSlot? previous;
+    for (final slot in grid.slots) {
+      if (slot is BreakSlot && previous != null) showsEnd.add(previous);
+      if (slot is LessonSlot && slot.time != null) previous = slot;
+    }
+    if (previous != null) showsEnd.add(previous);
+
+    return SizedBox(
+      width: 42,
+      child: Column(
+        children: <Widget>[
+          // Placeholders for the weekday and date labels of a day column, so
+          // the axis starts at the same height as the grid.
+          const Text(""),
+          Text("", style: baseStyle.copyWith(fontSize: 12)),
+          for (final slot in grid.slots)
+            Expanded(
+              flex: slot.flex,
+              child: Padding(
+                padding: const EdgeInsets.only(right: 4),
+                child: _label(slot, labelStyle, showsEnd: showsEnd.contains(slot)),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _label(CalendarSlot slot, TextStyle style,
+      {required bool showsEnd}) {
+    if (slot is BreakSlot) {
+      return Center(
+        child: Text("${slot.duration.inMinutes} min", style: style),
+      );
+    }
+    final time = (slot as LessonSlot).time;
+    if (time == null) return const SizedBox.shrink();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: <Widget>[
+        Text(_format.format(time.from), style: style),
+        if (showsEnd) Text(_format.format(time.to), style: style),
+      ],
+    );
   }
 }
 
@@ -167,7 +241,7 @@ class _HoursChunk extends StatelessWidget {
 }
 
 class CalendarDayWidget extends StatelessWidget {
-  final int max;
+  final CalendarGrid grid;
   final CalendarDay calendarDay;
   final Map<String, String> subjectNicks;
   final bool isSelected;
@@ -177,7 +251,7 @@ class CalendarDayWidget extends StatelessWidget {
 
   const CalendarDayWidget({
     super.key,
-    required this.max,
+    required this.grid,
     required this.calendarDay,
     required this.subjectNicks,
     required this.isSelected,
@@ -193,7 +267,10 @@ class CalendarDayWidget extends StatelessWidget {
         chunks.add([hour]);
       } else {
         final last = chunks.last;
-        if (last.last.toHour + 1 < hour.fromHour) {
+        // Split on a skipped hour number (a cancelled lesson) and on a break,
+        // so the gap is visible between two cards instead of inside one.
+        if (last.last.toHour + 1 < hour.fromHour ||
+            grid.breakAfter(last.last.toHour)) {
           chunks.add([hour]);
         } else {
           last.add(hour);
@@ -210,13 +287,13 @@ class CalendarDayWidget extends StatelessWidget {
         if (chunks.isNotEmpty) ...[
           for (var i = 0; i < chunks.length; i++) ...[
             Expanded(
-              flex: chunks[i].first.fromHour -
-                  (i == 0 ? 0 : chunks[i - 1].last.toHour) -
-                  1,
+              flex: grid.flexBefore(chunks[i].first.fromHour) -
+                  (i == 0 ? 0 : grid.flexThrough(chunks[i - 1].last.toHour)),
               child: Container(),
             ),
             Expanded(
-              flex: chunks[i].last.toHour - chunks[i].first.fromHour + 1,
+              flex: grid.flexThrough(chunks[i].last.toHour) -
+                  grid.flexBefore(chunks[i].first.fromHour),
               child: _HoursChunk(
                 hours: chunks[i],
                 subjectNicks: subjectNicks,
@@ -229,7 +306,7 @@ class CalendarDayWidget extends StatelessWidget {
             )
           ],
           Expanded(
-            flex: max - calendarDay.toHour,
+            flex: grid.totalFlex - grid.flexThrough(calendarDay.toHour),
             child: Container(),
           )
         ] else

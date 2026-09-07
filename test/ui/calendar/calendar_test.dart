@@ -300,12 +300,17 @@ Future<void> main() async {
   });
 
   group('demo data KW 2026-05-11', () {
-    Widget getDemoCalendar() {
+    Widget getDemoCalendar({bool showTimes = true}) {
       navigatorKey = GlobalKey();
       final container = ProviderContainer(
         overrides: [
           calendarProvider.overrideWith(
             () => _TestCalendarNotifier(_demoState),
+          ),
+          settingsProvider.overrideWith(
+            () => _TestSettingsNotifier(
+              SettingsState(calendarShowTimes: showTimes),
+            ),
           ),
           noInternetProvider.overrideWith(NoInternetNotifier.new),
           subjectAppearanceProvider.overrideWith(
@@ -364,6 +369,38 @@ Future<void> main() async {
       await tester.pumpWidget(getDemoCalendar());
       await tester.pump();
       expect(find.text('Testfrau'), findsWidgets);
+    });
+
+
+    testWidgets('shows the time axis with lesson times', (tester) async {
+      await tester.pumpWidget(getDemoCalendar());
+      await tester.pump();
+      expect(find.text('07:50'), findsOneWidget);
+      expect(find.text('11:40'), findsOneWidget);
+    });
+
+    testWidgets('shows the end time before a break and at the end',
+        (tester) async {
+      await tester.pumpWidget(getDemoCalendar());
+      await tester.pump();
+      // 6th lesson ends at 12:30, then the lunch break; the day ends 15:10.
+      expect(find.text('12:30'), findsOneWidget);
+      expect(find.text('15:10'), findsOneWidget);
+    });
+
+    testWidgets('shows the lunch break with its duration', (tester) async {
+      await tester.pumpWidget(getDemoCalendar());
+      await tester.pump();
+      expect(find.text('60 min'), findsOneWidget);
+    });
+
+    testWidgets('hides the time axis when the setting is off', (tester) async {
+      await tester.pumpWidget(getDemoCalendar(showTimes: false));
+      await tester.pump();
+      expect(find.text('07:50'), findsNothing);
+      expect(find.text('60 min'), findsNothing);
+      // The timetable itself is unaffected.
+      expect(find.text('Mathematik'), findsWidgets);
     });
 
     testGoldens('demo week view golden', (tester) async {

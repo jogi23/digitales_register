@@ -47,6 +47,7 @@ class CalendarWeekContainer extends ConsumerWidget {
       noInternet: noInternet,
       selection: calendarState.selection,
       colorBackground: settings.calendarColorBackground,
+      showTimes: settings.calendarShowTimes,
       subjectThemes: subjectAppearance.themes,
     );
     return CalendarWeek(vm: vm, key: key);
@@ -59,6 +60,7 @@ class CalendarWeekViewModel {
   final bool noInternet;
   final CalendarSelection? selection;
   final bool colorBackground;
+  final bool showTimes;
   final Map<String, SubjectTheme> subjectThemes;
 
   CalendarWeekViewModel({
@@ -67,6 +69,7 @@ class CalendarWeekViewModel {
     required this.noInternet,
     required this.selection,
     required this.colorBackground,
+    required this.showTimes,
     required this.subjectThemes,
   });
 }
