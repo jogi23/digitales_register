@@ -151,7 +151,10 @@ Future<void> main() async {
   }
 
   /// Renders the week view on the week the fixtures cover.
-  Future<void> pumpWeek(WidgetTester tester) async {
+  Future<void> pumpWeek(
+    WidgetTester tester, {
+    Brightness brightness = Brightness.light,
+  }) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -173,7 +176,10 @@ Future<void> main() async {
               initialMonday: _monday,
             ),
           ),
-          theme: ThemeData(primarySwatch: Colors.deepOrange),
+          theme: ThemeData(
+            primarySwatch: Colors.deepOrange,
+            brightness: brightness,
+          ),
         ),
       ),
     );
@@ -216,6 +222,27 @@ Future<void> main() async {
     });
   });
 
+  /// How far the lesson of [subject] on Monday is faded out.
+  double opacityOnMonday(WidgetTester tester, String subject) {
+    final hour = find.byWidgetPredicate((w) =>
+        w is HourWidget && w.hour.subject == subject && w.day.date == _monday);
+    return tester
+        .widget<Opacity>(
+          find.descendant(of: hour, matching: find.byType(Opacity)).first,
+        )
+        .opacity;
+  }
+
+  /// The tile's own background colour, null when it keeps the plain one.
+  Color? tintOnMonday(WidgetTester tester, String subject) {
+    final hour = find.byWidgetPredicate((w) =>
+        w is HourWidget && w.hour.subject == subject && w.day.date == _monday);
+    final box = tester.widget<DecoratedBox>(
+      find.descendant(of: hour, matching: find.byType(DecoratedBox)).first,
+    );
+    return (box.decoration as BoxDecoration).color;
+  }
+
   group('dimming', () {
     testWidgets('subjects with entries stay in the foreground',
         (tester) async {
@@ -244,6 +271,38 @@ Future<void> main() async {
 
   });
 
+  // The first attempt tinted dimmed tiles, which turned nearly black on a
+  // dark background — the quiet lessons became the loudest ones.
+  for (final brightness in Brightness.values) {
+    group('dimming in ${brightness.name} mode', () {
+      testWidgets('fades lessons without entries', (tester) async {
+        await pumpWeek(tester, brightness: brightness);
+        expect(opacityOnMonday(tester, 'Religion'), lessThan(1.0));
+        expect(opacityOnMonday(tester, 'Vormittagspause'), lessThan(1.0));
+      });
+
+      testWidgets('leaves lessons with entries untouched', (tester) async {
+        await pumpWeek(tester, brightness: brightness);
+        expect(opacityOnMonday(tester, 'Mathematik'), 1.0);
+        expect(opacityOnMonday(tester, 'NatGeGeo'), 1.0);
+      });
+
+      testWidgets('gives dimmed lessons no background of their own',
+          (tester) async {
+        await pumpWeek(tester, brightness: brightness);
+        expect(tintOnMonday(tester, 'Religion'), isNull);
+      });
+
+      testWidgets('keeps the text readable', (tester) async {
+        await pumpWeek(tester, brightness: brightness);
+        // Material treats 0.6 as the lower bound for readable secondary text.
+        expect(opacityOnMonday(tester, 'Religion'),
+            greaterThanOrEqualTo(0.6));
+        expect(find.text('Religion'), findsWidgets);
+      });
+    });
+  }
+
   group('changing the week', () {
     testWidgets('moves forward and back', (tester) async {
       await pumpWeek(tester);
@@ -265,6 +324,17 @@ Future<void> main() async {
     await expectLater(
       find.byType(DashboardWeekContainer),
       matchesGoldenFile('week_view.png'),
+    );
+  });
+
+  // Dimming used to tint the tile, which turned nearly black on a dark
+  // background and made the quiet lessons the loudest thing on screen.
+  testGoldens('week view golden in dark mode', (tester) async {
+    await loadAppFonts();
+    await pumpWeek(tester, brightness: Brightness.dark);
+    await expectLater(
+      find.byType(DashboardWeekContainer),
+      matchesGoldenFile('week_view_dark.png'),
     );
   });
 }

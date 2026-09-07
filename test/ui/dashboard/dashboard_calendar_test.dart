@@ -86,7 +86,10 @@ Future<void> main() async {
     );
   });
 
-  Widget dashboard({required bool calendarView}) {
+  Widget dashboard({
+    required bool calendarView,
+    Brightness brightness = Brightness.light,
+  }) {
     return ProviderScope(
       overrides: [
         dashboardProvider.overrideWith(() => _TestDashboardNotifier(_mayState)),
@@ -103,13 +106,21 @@ Future<void> main() async {
       ],
       child: MaterialApp(
         home: DaysContainer(),
-        theme: ThemeData(primarySwatch: Colors.deepOrange),
+        theme: ThemeData(
+          primarySwatch: Colors.deepOrange,
+          brightness: brightness,
+        ),
       ),
     );
   }
 
-  Future<void> pumpCalendar(WidgetTester tester) async {
-    await tester.pumpWidget(dashboard(calendarView: true));
+  Future<void> pumpCalendar(
+    WidgetTester tester, {
+    Brightness brightness = Brightness.light,
+  }) async {
+    await tester.pumpWidget(
+      dashboard(calendarView: true, brightness: brightness),
+    );
     await tester.pumpAndSettle();
   }
 
@@ -203,6 +214,15 @@ Future<void> main() async {
     });
   });
 
+  for (final brightness in Brightness.values) {
+    testWidgets('the empty-day hint shows in ${brightness.name} mode',
+        (tester) async {
+      await pumpCalendar(tester, brightness: brightness);
+      await tapDay(tester, '9');
+      expect(find.text('(Kein Eintrag)'), findsOneWidget);
+    });
+  }
+
   testGoldens('month grid golden', (tester) async {
     await loadAppFonts();
     await pumpCalendar(tester);
@@ -210,6 +230,16 @@ Future<void> main() async {
     await expectLater(
       find.byType(DashboardCalendar),
       matchesGoldenFile('calendar_view.png'),
+    );
+  });
+
+  testGoldens('month grid golden in dark mode', (tester) async {
+    await loadAppFonts();
+    await pumpCalendar(tester, brightness: Brightness.dark);
+    await tapDay(tester, '11');
+    await expectLater(
+      find.byType(DashboardCalendar),
+      matchesGoldenFile('calendar_view_dark.png'),
     );
   });
 }

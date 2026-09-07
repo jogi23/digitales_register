@@ -396,22 +396,20 @@ class HourWidget extends ConsumerWidget {
                       color: Theme.of(context).colorScheme.error, width: 5),
                 )
               : null,
-          // Dimmed lessons drop their subject colour for a quiet, neutral
-          // ground. Veiling the whole tile would cost the text its contrast,
-          // so only the ground is toned down.
+          // Dimmed lessons lose their subject colour and keep the plain
+          // background. Tinting them instead broke in dark mode, where the
+          // tint was darker than the tile and made them stand out.
           color: dimmed
-              ? Theme.of(context)
-                  .colorScheme
-                  .surfaceContainerHighest
-                  .withValues(alpha: 0.5)
+              ? null
               : isSelected
                   ? selectedBackgroundColor
                   : backgroundColor,
         ),
-        child: DefaultTextStyle.merge(
-          style: dimmed
-              ? TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)
-              : null,
+        // Fading the content is theme independent: it reads as "in the
+        // background" on light and dark alike, and at this level the text
+        // stays comfortably readable.
+        child: Opacity(
+          opacity: dimmed ? 0.6 : 1,
           child: SizedBox.expand(
             child: FittedBox(
               fit: BoxFit.scaleDown,
