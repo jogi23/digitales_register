@@ -85,9 +85,28 @@ class _TestSubjectAppearanceNotifier extends SubjectAppearanceNotifier {
 
   @override
   SubjectAppearanceState build() => initial;
+
+  // The week view self-heals missing colours; generating them here would make
+  // the state — and with it the goldens — depend on timing.
+  @override
+  Future<void> ensureThemesFor(List<String> subjects) async {}
 }
 
 final _monday = UtcDateTime(2026, 5, 11);
+
+/// Every subject of that Monday with a colour, so the week view can show one.
+SubjectAppearanceState _appearanceWithColours() => SubjectAppearanceState(
+      themes: <String, SubjectTheme>{
+        for (final subject in const [
+          'Deutsch',
+          'Mathematik',
+          'NatGeGeo',
+          'Religion',
+          'Vormittagspause',
+        ])
+          normalizeSubject(subject): const SubjectTheme(color: 0xFF4CAF50),
+      },
+    );
 
 // Monday 11.05.2026 has entries for Mathematik, NatGeGeo and Deutsch, while
 // its timetable also holds Religion and Vormittagspause — those get dimmed.
@@ -166,7 +185,7 @@ Future<void> main() async {
             ),
           ),
           subjectAppearanceProvider.overrideWith(
-            () => _TestSubjectAppearanceNotifier(const SubjectAppearanceState()),
+            () => _TestSubjectAppearanceNotifier(_appearanceWithColours()),
           ),
         ],
         child: MaterialApp(
@@ -302,6 +321,23 @@ Future<void> main() async {
       });
     });
   }
+
+  group('subject colours', () {
+    testWidgets('lessons with entries carry the subject colour',
+        (tester) async {
+      await pumpWeek(tester);
+      expect(tintOnMonday(tester, 'Mathematik'), isNotNull);
+      expect(tintOnMonday(tester, 'Deutsch'), isNotNull);
+    });
+
+    testWidgets('lessons without entries stay colourless', (tester) async {
+      // The colour is what says "something is due", so a quiet lesson must
+      // not carry one even though its subject has a theme.
+      await pumpWeek(tester);
+      expect(tintOnMonday(tester, 'Religion'), isNull);
+      expect(tintOnMonday(tester, 'Vormittagspause'), isNull);
+    });
+  });
 
   group('changing the week', () {
     testWidgets('moves forward and back', (tester) async {

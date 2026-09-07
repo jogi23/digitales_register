@@ -271,6 +271,14 @@ class CalendarDayWidget extends StatelessWidget {
     required this.colorBackground,
     required this.subjectThemes,
   });
+  /// Whether this column is the day the user is living through.
+  bool get isToday {
+    final today = Day.dateToday();
+    return calendarDay.date.year == today.year &&
+        calendarDay.date.month == today.month &&
+        calendarDay.date.day == today.day;
+  }
+
   @override
   Widget build(BuildContext context) {
     final chunks = <List<CalendarHour>>[];
@@ -291,10 +299,22 @@ class CalendarDayWidget extends StatelessWidget {
     }
     return Column(
       children: <Widget>[
-        Text(DateFormat("E", "de").format(calendarDay.date)),
+        Text(
+          DateFormat("E", "de").format(calendarDay.date),
+          style: isToday
+              ? TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.primary,
+                )
+              : null,
+        ),
         Text(
           DateFormat("dd.MM", "de").format(calendarDay.date),
-          style: DefaultTextStyle.of(context).style.copyWith(fontSize: 12),
+          style: DefaultTextStyle.of(context).style.copyWith(
+                fontSize: 12,
+                fontWeight: isToday ? FontWeight.bold : null,
+                color: isToday ? Theme.of(context).colorScheme.primary : null,
+              ),
         ),
         if (chunks.isNotEmpty) ...[
           for (var i = 0; i < chunks.length; i++) ...[

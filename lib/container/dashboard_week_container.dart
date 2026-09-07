@@ -67,7 +67,10 @@ class _DashboardWeekContainerState
     // to wherever the dashboard happens to start.
     _monday = widget.initialMonday ?? toMonday(Day.dateToday());
     // Loading during build would be a state change mid-frame.
-    WidgetsBinding.instance.addPostFrameCallback((_) => _ensureLoaded());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _ensureLoaded();
+      _ensureThemes();
+    });
   }
 
   static UtcDateTime _dateOnly(UtcDateTime date) =>
@@ -83,6 +86,23 @@ class _DashboardWeekContainerState
   void _changeWeek(int weeks) {
     setState(() => _monday = _monday.add(Duration(days: 7 * weeks)));
     _ensureLoaded();
+    _ensureThemes();
+  }
+
+  /// Subjects seen only in the timetable may have no colour yet, and here the
+  /// colour is what says "something is due" — so make sure one exists.
+  void _ensureThemes() {
+    if (!mounted) return;
+    final subjects = <String>{
+      for (final day in ref.read(calendarProvider).daysForWeek(_monday))
+        for (final hour in day.hours) hour.subject,
+    };
+    if (subjects.isEmpty) return;
+    unawaited(
+      ref
+          .read(subjectAppearanceProvider.notifier)
+          .ensureThemesFor(subjects.toList()),
+    );
   }
 
   /// The subjects that carry entries, per day. Everything else gets dimmed.
@@ -119,7 +139,9 @@ class _DashboardWeekContainerState
               subjectNicks: subjectAppearance.nicks,
               noInternet: noInternet,
               selection: calendarState.selection,
-              colorBackground: settings.calendarColorBackground,
+              // Here the subject colour carries the meaning "something is
+              // due", so it is on regardless of the calendar setting.
+              colorBackground: true,
               showTimes: settings.calendarShowTimes,
               subjectThemes: subjectAppearance.themes,
               subjectsWithEntries: _subjectsWithEntries(),

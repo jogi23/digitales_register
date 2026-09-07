@@ -17,16 +17,36 @@
 
 import 'package:built_collection/built_collection.dart';
 import 'package:dr/data.dart';
+import 'package:dr/util.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 DateTime dateOnly(DateTime date) => DateTime(date.year, date.month, date.day);
 
-/// Shown for a day that carries nothing.
+/// Shown for a day or week that carries nothing.
 const _noEntries = "(Kein Eintrag)";
 
+/// What the area below the grid shows.
+sealed class _Pick {
+  const _Pick();
+}
+
+class _DayPick extends _Pick {
+  final DateTime date;
+  const _DayPick(this.date);
+}
+
+class _WeekPick extends _Pick {
+  final DateTime monday;
+  const _WeekPick(this.monday);
+
+  bool covers(DateTime date) =>
+      !date.isBefore(monday) &&
+      date.isBefore(monday.add(const Duration(days: 7)));
+}
+
 /// The dashboard as a month grid: which days carry entries at a glance, with
-/// the entries of the picked day below.
+/// the entries of the picked day — or of a whole week — below.
 ///
 /// Rendering an entry is left to [dayBuilder], so this widget only owns the
 /// month and the selection; entries look and behave as in the list view.
@@ -48,13 +68,14 @@ class _DashboardCalendarState extends State<DashboardCalendar> {
   /// First of the month currently shown.
   late DateTime _month;
 
-  /// The day the user picked, null while none is picked.
-  DateTime? _selected;
+  _Pick? _pick;
 
   @override
   void initState() {
     super.initState();
     _month = _startingMonth();
+    // Open on today, so the view starts where the user is.
+    _pick = _DayPick(dateOnly(DateTime.now()));
   }
 
   @override
@@ -87,12 +108,24 @@ class _DashboardCalendarState extends State<DashboardCalendar> {
         _month = DateTime(_month.year, _month.month + delta);
       });
 
+  /// Picking the same thing twice clears the selection.
+  void _pickDay(DateTime date) => setState(() {
+        final pick = _pick;
+        _pick = pick is _DayPick && pick.date == date ? null : _DayPick(date);
+      });
+
+  void _pickWeek(DateTime monday) => setState(() {
+        final pick = _pick;
+        _pick = pick is _WeekPick && pick.monday == monday
+            ? null
+            : _WeekPick(monday);
+      });
+
   @override
   Widget build(BuildContext context) {
     final byDate = <DateTime, Day>{
       for (final day in widget.days) dateOnly(day.date): day,
     };
-    final selectedDay = _selected != null ? byDate[_selected] : null;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -105,35 +138,49 @@ class _DashboardCalendarState extends State<DashboardCalendar> {
         _MonthGrid(
           month: _month,
           byDate: byDate,
-          selected: _selected,
-          onSelect: (date) => setState(
-            () => _selected = _selected == date ? null : date,
-          ),
+          pick: _pick,
+          onPickDay: _pickDay,
+          onPickWeek: _pickWeek,
         ),
         const Divider(height: 1),
-        Expanded(child: _detail(context, selectedDay)),
+        Expanded(child: _detail(context, byDate)),
       ],
     );
   }
 
-  /// What sits below the grid: the entries of the picked day, or a hint.
-  Widget _detail(BuildContext context, Day? day) {
-    if (_selected == null) {
-      return Center(child: _hint(context, "Tag auswählen"));
+  Widget _detail(BuildContext context, Map<DateTime, Day> byDate) {
+    final pick = _pick;
+    if (pick == null) return Center(child: _hint(context, "Tag auswählen"));
+
+    if (pick is _DayPick) {
+      final day = byDate[pick.date];
+      if (day == null) return Center(child: _hint(context, _noEntries));
+      if (day.homework.isEmpty) {
+        // The day header stays, so a reminder can still be added here.
+        return SingleChildScrollView(
+          child: Column(
+            children: <Widget>[
+              widget.dayBuilder(day),
+              _hint(context, _noEntries),
+            ],
+          ),
+        );
+      }
+      return SingleChildScrollView(child: widget.dayBuilder(day));
     }
-    if (day == null) return Center(child: _hint(context, _noEntries));
-    if (day.homework.isEmpty) {
-      // The day header stays, so a reminder can still be added here.
-      return SingleChildScrollView(
-        child: Column(
-          children: <Widget>[
-            widget.dayBuilder(day),
-            _hint(context, _noEntries),
-          ],
-        ),
-      );
-    }
-    return SingleChildScrollView(child: widget.dayBuilder(day));
+
+    final monday = (pick as _WeekPick).monday;
+    final days = <Day>[
+      for (var i = 0; i < 7; i++)
+        if (byDate[monday.add(Duration(days: i))]?.homework.isNotEmpty ?? false)
+          byDate[monday.add(Duration(days: i))]!,
+    ];
+    if (days.isEmpty) return Center(child: _hint(context, _noEntries));
+    return SingleChildScrollView(
+      child: Column(
+        children: <Widget>[for (final day in days) widget.dayBuilder(day)],
+      ),
+    );
   }
 
   Widget _hint(BuildContext context, String text) => Padding(
@@ -184,32 +231,21 @@ class _MonthHeader extends StatelessWidget {
 class _MonthGrid extends StatelessWidget {
   final DateTime month;
   final Map<DateTime, Day> byDate;
-  final DateTime? selected;
-  final void Function(DateTime date) onSelect;
+  final _Pick? pick;
+  final void Function(DateTime date) onPickDay;
+  final void Function(DateTime monday) onPickWeek;
 
   const _MonthGrid({
     required this.month,
     required this.byDate,
-    required this.selected,
-    required this.onSelect,
+    required this.pick,
+    required this.onPickDay,
+    required this.onPickWeek,
   });
 
   static const _weekdays = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
   static const _rowHeight = 46.0;
-
-  /// The month laid out in weeks of seven, null where no day falls.
-  static List<List<int?>> _weeks(int leading, int dayCount) {
-    final cells = <int?>[
-      for (var i = 0; i < leading; i++) null,
-      for (var day = 1; day <= dayCount; day++) day,
-    ];
-    while (cells.length % 7 != 0) {
-      cells.add(null);
-    }
-    return <List<int?>>[
-      for (var i = 0; i < cells.length; i += 7) cells.sublist(i, i + 7),
-    ];
-  }
+  static const _weekColumnWidth = 28.0;
 
   @override
   Widget build(BuildContext context) {
@@ -218,6 +254,7 @@ class _MonthGrid extends StatelessWidget {
     final leading = first.weekday - 1;
     // Day zero of the next month is the last day of this one.
     final dayCount = DateTime(month.year, month.month + 1, 0).day;
+    final weeks = ((leading + dayCount) / 7).ceil();
     final today = dateOnly(DateTime.now());
 
     return Padding(
@@ -226,6 +263,7 @@ class _MonthGrid extends StatelessWidget {
         children: <Widget>[
           Row(
             children: <Widget>[
+              const SizedBox(width: _weekColumnWidth),
               for (final name in _weekdays)
                 Expanded(
                   child: Center(
@@ -239,21 +277,14 @@ class _MonthGrid extends StatelessWidget {
           ),
           // Fixed row height rather than square cells: a month spanning six
           // weeks would otherwise overflow the screen on a phone.
-          for (final week in _weeks(leading, dayCount))
+          for (var week = 0; week < weeks; week++)
             SizedBox(
               height: _rowHeight,
-              child: Row(
-                children: <Widget>[
-                  for (final dayOfMonth in week)
-                    Expanded(
-                      child: dayOfMonth == null
-                          ? const SizedBox.shrink()
-                          : _cell(
-                              DateTime(month.year, month.month, dayOfMonth),
-                              today,
-                            ),
-                    ),
-                ],
+              // The row always starts on a Monday, which for the first row
+              // can still lie in the previous month.
+              child: _week(
+                first.subtract(Duration(days: leading - week * 7)),
+                today,
               ),
             ),
         ],
@@ -261,15 +292,76 @@ class _MonthGrid extends StatelessWidget {
     );
   }
 
+  Widget _week(DateTime monday, DateTime today) {
+    final selectedWeek = pick;
+    return Row(
+      children: <Widget>[
+        SizedBox(
+          width: _weekColumnWidth,
+          child: _WeekCell(
+            week: isoWeekNumber(monday),
+            isSelected:
+                selectedWeek is _WeekPick && selectedWeek.monday == monday,
+            onTap: () => onPickWeek(monday),
+          ),
+        ),
+        for (var i = 0; i < 7; i++)
+          Expanded(child: _cell(monday.add(Duration(days: i)), today)),
+      ],
+    );
+  }
+
   Widget _cell(DateTime date, DateTime today) {
+    // Days of the neighbouring months stay blank.
+    if (date.month != month.month || date.year != month.year) {
+      return const SizedBox.shrink();
+    }
     final day = byDate[date];
+    final current = pick;
+    final selected = switch (current) {
+      _DayPick() => current.date == date,
+      _WeekPick() => current.covers(date),
+      null => false,
+    };
     return _DayCell(
       dayOfMonth: date.day,
       hasEntries: day?.homework.isNotEmpty ?? false,
       hasWarning: day?.homework.any((h) => h.warning) ?? false,
       isToday: date == today,
-      isSelected: date == selected,
-      onTap: () => onSelect(date),
+      isSelected: selected,
+      onTap: () => onPickDay(date),
+    );
+  }
+}
+
+class _WeekCell extends StatelessWidget {
+  final int week;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _WeekCell({
+    required this.week,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Tooltip(
+      message: "Kalenderwoche $week",
+      child: InkWell(
+        onTap: onTap,
+        child: Center(
+          child: Text(
+            "$week",
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: isSelected ? scheme.primary : scheme.onSurfaceVariant,
+                  fontWeight: isSelected ? FontWeight.bold : null,
+                ),
+          ),
+        ),
+      ),
     );
   }
 }

@@ -149,8 +149,17 @@ Future<void> main() async {
   });
 
   group('picking a day', () {
-    testWidgets('nothing is selected at first', (tester) async {
+    testWidgets('opens on today', (tester) async {
+      // Today is preselected, so the view starts where the user is instead of
+      // asking them to pick first.
       await pumpCalendar(tester);
+      expect(find.text('Tag auswählen'), findsNothing);
+    });
+
+    testWidgets('clearing the selection asks for one again', (tester) async {
+      await pumpCalendar(tester);
+      await tapDay(tester, '11');
+      await tapDay(tester, '11');
       expect(find.text('Tag auswählen'), findsOneWidget);
     });
 
@@ -160,14 +169,6 @@ Future<void> main() async {
       expect(find.text('Tag auswählen'), findsNothing);
       // The day header of the entry list carries the date.
       expect(find.textContaining('11.5.'), findsWidgets);
-    });
-
-    testWidgets('tapping the same day again clears the selection',
-        (tester) async {
-      await pumpCalendar(tester);
-      await tapDay(tester, '11');
-      await tapDay(tester, '11');
-      expect(find.text('Tag auswählen'), findsOneWidget);
     });
 
     testWidgets('a loaded day without entries says so', (tester) async {
@@ -188,6 +189,41 @@ Future<void> main() async {
       await tester.pumpAndSettle();
       expect(find.text('Juli 2026'), findsOneWidget);
       await tapDay(tester, '15');
+      expect(find.text('(Kein Eintrag)'), findsOneWidget);
+    });
+  });
+
+  group('picking a week', () {
+    testWidgets('the week numbers are shown', (tester) async {
+      await pumpCalendar(tester);
+      // 11.05.2026 falls into ISO week 20.
+      expect(find.byTooltip('Kalenderwoche 20'), findsOneWidget);
+    });
+
+    testWidgets('tapping one shows every day of that week', (tester) async {
+      await pumpCalendar(tester);
+      await tester.tap(find.byTooltip('Kalenderwoche 20'));
+      await tester.pumpAndSettle();
+      // Monday to Thursday of that week carry entries.
+      expect(find.textContaining('11.5.'), findsWidgets);
+      expect(find.textContaining('12.5.'), findsWidgets);
+      expect(find.textContaining('14.5.'), findsWidgets);
+    });
+
+    testWidgets('tapping it again clears the selection', (tester) async {
+      await pumpCalendar(tester);
+      await tester.tap(find.byTooltip('Kalenderwoche 20'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Kalenderwoche 20'));
+      await tester.pumpAndSettle();
+      expect(find.text('Tag auswählen'), findsOneWidget);
+    });
+
+    testWidgets('a week without entries says so', (tester) async {
+      await pumpCalendar(tester);
+      // The first week of May 2026 carries nothing.
+      await tester.tap(find.byTooltip('Kalenderwoche 18'));
+      await tester.pumpAndSettle();
       expect(find.text('(Kein Eintrag)'), findsOneWidget);
     });
   });
