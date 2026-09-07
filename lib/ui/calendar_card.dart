@@ -20,6 +20,7 @@ import 'package:dr/app_state.dart';
 import 'package:dr/data.dart';
 import 'package:dr/ui/animated_linear_progress_indicator.dart';
 import 'package:dr/utc_date_time.dart';
+import 'package:dr/util.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -160,10 +161,7 @@ class CircledLetter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textColor =
-        ThemeData.estimateBrightnessForColor(color) == Brightness.dark
-            ? Colors.white
-            : Colors.black;
+    final textColor = readableOn(color);
     return Container(
       width: 45,
       height: 45,

@@ -371,13 +371,7 @@ class SelectionWidget extends StatelessWidget {
                     ),
                     child: Text(
                       selection.text,
-                      style: TextStyle(
-                        color: ThemeData.estimateBrightnessForColor(
-                                    selection.color) ==
-                                Brightness.light
-                            ? Colors.black
-                            : Colors.white,
-                      ),
+                      style: TextStyle(color: readableOn(selection.color)),
                     ),
                   ),
               ],

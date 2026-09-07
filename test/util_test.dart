@@ -23,6 +23,7 @@ import 'package:dr/middleware/middleware.dart';
 import 'package:dr/serializers.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -300,6 +301,54 @@ void main() {
 
     test('never returns more than three characters', () {
       expect(accountInitials('Maximiliane Musterfrau').length, 3);
+    });
+  });
+
+  group('readableOn', () {
+    double contrast(Color a, Color b) {
+      final la = a.computeLuminance(), lb = b.computeLuminance();
+      final lighter = la > lb ? la : lb, darker = la > lb ? lb : la;
+      return (lighter + 0.05) / (darker + 0.05);
+    }
+
+    test('picks black on the mid-green accent', () {
+      // estimateBrightnessForColor calls this one dark and picks white, which
+      // only reaches a contrast of 2.8 — the check mark barely showed.
+      const green = Color(0xFF4CAF50);
+      expect(readableOn(green), Colors.black);
+      expect(contrast(readableOn(green), green), greaterThan(4.5));
+    });
+
+    test('picks white on dark colours', () {
+      expect(readableOn(const Color(0xFF3F51B5)), Colors.white);
+      expect(readableOn(Colors.black), Colors.white);
+    });
+
+    test('picks black on light colours', () {
+      expect(readableOn(Colors.white), Colors.black);
+      expect(readableOn(const Color(0xFFFFEB3B)), Colors.black);
+    });
+
+    test('every accent of the picker gets a readable check mark', () {
+      const accents = [
+        Color(0xFFFF5722),
+        Color(0xFFF44336),
+        Color(0xFFE91E63),
+        Color(0xFF9C27B0),
+        Color(0xFF3F51B5),
+        Color(0xFF2196F3),
+        Color(0xFF009688),
+        Color(0xFF4CAF50),
+        Color(0xFF795548),
+        Color(0xFF607D8B),
+      ];
+      for (final accent in accents) {
+        expect(
+          contrast(readableOn(accent), accent),
+          greaterThanOrEqualTo(4.5),
+          reason: 'accent $accent',
+        );
+      }
     });
   });
 }

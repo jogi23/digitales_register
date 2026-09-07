@@ -24,6 +24,7 @@ import 'package:dr/ui/dialog.dart';
 import 'package:dr/ui/debug_log_page.dart';
 import 'package:dr/ui/network_protocol_page.dart';
 import 'package:dr/ui/subject_appearance_page.dart';
+import 'package:dr/util.dart';
 import 'package:flutter/foundation.dart';
 import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:flutter/material.dart';
@@ -567,11 +568,7 @@ class _SeedColorPicker extends StatelessWidget {
                           ? Icon(
                               Icons.check,
                               size: 18,
-                              color: ThemeData.estimateBrightnessForColor(
-                                          entry.color) ==
-                                      Brightness.dark
-                                  ? Colors.white
-                                  : Colors.black,
+                              color: readableOn(entry.color),
                             )
                           : null,
                     ),
