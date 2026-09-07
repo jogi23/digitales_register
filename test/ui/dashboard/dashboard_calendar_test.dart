@@ -254,6 +254,31 @@ Future<void> main() async {
       expect(notifier.bothDirectionsCalls, after);
     });
 
+    testWidgets('says so when the fetch brought nothing', (tester) async {
+      // The server answers only for a couple of months around today. Once a
+      // day was asked for and is still missing, saying "(Kein Eintrag)" would
+      // suggest there is nothing due — the truth is there is no data at all.
+      await pumpCalendar(tester);
+      await tester.tap(find.byTooltip('Nächster Monat'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Nächster Monat'));
+      await tester.pumpAndSettle();
+
+      await tapDay(tester, '15');
+      expect(
+        find.text('Für diesen Zeitraum liegen keine Daten vor'),
+        findsOneWidget,
+      );
+      expect(find.text('(Kein Eintrag)'), findsNothing);
+    });
+
+    testWidgets('a loaded day without entries still says "(Kein Eintrag)"',
+        (tester) async {
+      await pumpCalendar(tester);
+      await tapDay(tester, '9');
+      expect(find.text('(Kein Eintrag)'), findsOneWidget);
+    });
+
     testWidgets('the view stays on the month one navigated to', (tester) async {
       // Fetching changes the days, which used to send the calendar back to
       // its starting month — right out from under the tap.
@@ -354,17 +379,6 @@ Future<void> main() async {
       expect(find.textContaining('9.5.'), findsWidgets);
     });
 
-    testWidgets('a day the dashboard did not load says so', (tester) async {
-      await pumpCalendar(tester);
-      // July was never loaded, so no day of it can have entries.
-      await tester.tap(find.byTooltip('Nächster Monat'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.byTooltip('Nächster Monat'));
-      await tester.pumpAndSettle();
-      expect(find.text('Juli 2026'), findsOneWidget);
-      await tapDay(tester, '15');
-      expect(find.text('(Kein Eintrag)'), findsOneWidget);
-    });
   });
 
   group('picking a week', () {
@@ -393,12 +407,16 @@ Future<void> main() async {
       expect(find.text('Tag auswählen'), findsOneWidget);
     });
 
-    testWidgets('a week without entries says so', (tester) async {
+    testWidgets('a week reaching outside the loaded span reports that',
+        (tester) async {
+      // Week 18 starts on 27 April, which the dashboard never loaded.
       await pumpCalendar(tester);
-      // The first week of May 2026 carries nothing.
       await tester.tap(find.byTooltip('Kalenderwoche 18'));
       await tester.pumpAndSettle();
-      expect(find.text('(Kein Eintrag)'), findsOneWidget);
+      expect(
+        find.text('Für diesen Zeitraum liegen keine Daten vor'),
+        findsOneWidget,
+      );
     });
   });
 

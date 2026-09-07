@@ -29,6 +29,11 @@ const _noEntries = "(Kein Eintrag)";
 /// Shown while the days being looked at are still on their way.
 const _loadingEntries = "Wird geladen …";
 
+/// Shown once asking for a span brought nothing: the server answers only for
+/// a couple of months around today, and repeating the request will not change
+/// that.
+const _noData = "Für diesen Zeitraum liegen keine Daten vor";
+
 /// What the area below the grid shows.
 sealed class _Pick {
   const _Pick();
@@ -193,11 +198,8 @@ class _DashboardCalendarState extends State<DashboardCalendar> {
 
     if (pick is _DayPick) {
       final day = byDate[pick.date];
-      if (day == null) {
-        return Center(
-          child: _hint(context, widget.loading ? _loadingEntries : _noEntries),
-        );
-      }
+      if (day == null)
+        return Center(child: _hint(context, _missing(pick.date)));
       if (day.homework.isEmpty) {
         // The day header stays, so a reminder can still be added here.
         return SingleChildScrollView(
@@ -219,15 +221,20 @@ class _DashboardCalendarState extends State<DashboardCalendar> {
           byDate[monday.add(Duration(days: i))]!,
     ];
     if (days.isEmpty) {
-      return Center(
-        child: _hint(context, widget.loading ? _loadingEntries : _noEntries),
-      );
+      return Center(child: _hint(context, _missing(monday)));
     }
     return SingleChildScrollView(
       child: Column(
         children: <Widget>[for (final day in days) widget.dayBuilder(day)],
       ),
     );
+  }
+
+  /// What to say about a span the dashboard holds nothing for.
+  String _missing(DateTime date) {
+    if (widget.loading) return _loadingEntries;
+    // Asked for and still not there: the server has nothing for it.
+    return _requested.contains(date) ? _noData : _noEntries;
   }
 
   Widget _hint(BuildContext context, String text) => Padding(
