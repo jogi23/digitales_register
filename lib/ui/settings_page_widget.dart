@@ -25,6 +25,7 @@ import 'package:dr/ui/debug_log_page.dart';
 import 'package:dr/ui/network_protocol_page.dart';
 import 'package:dr/ui/subject_appearance_page.dart';
 import 'package:dr/util.dart';
+import 'package:dr/services/app_sharing.dart';
 import 'package:flutter/foundation.dart';
 import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:flutter/material.dart';
@@ -128,6 +129,14 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
         padding: EdgeInsets.only(
             bottom: MediaQuery.of(context).viewPadding.bottom),
         children: <Widget>[
+          const SizedBox(height: 8),
+          ListTile(
+            leading: const Icon(Icons.share),
+            title: const Text("App mit anderen Eltern/Mitschülern teilen"),
+            subtitle: const Text("Einladung samt Link zum Play Store"),
+            onTap: shareApp,
+          ),
+          const Divider(),
           if (!widget.vm.demoMode) ...[
             const SizedBox(height: 8),
             ListTile(
