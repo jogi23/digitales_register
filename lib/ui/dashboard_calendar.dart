@@ -22,6 +22,9 @@ import 'package:intl/intl.dart';
 
 DateTime dateOnly(DateTime date) => DateTime(date.year, date.month, date.day);
 
+/// Shown for a day that carries nothing.
+const _noEntries = "(Kein Eintrag)";
+
 /// The dashboard as a month grid: which days carry entries at a glance, with
 /// the entries of the picked day below.
 ///
@@ -108,25 +111,39 @@ class _DashboardCalendarState extends State<DashboardCalendar> {
           ),
         ),
         const Divider(height: 1),
-        Expanded(
-          child: selectedDay != null
-              ? SingleChildScrollView(child: widget.dayBuilder(selectedDay))
-              : Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Text(
-                      _selected == null
-                          ? "Tag auswählen"
-                          : "Keine Einträge an diesem Tag",
-                      style: Theme.of(context).textTheme.titleMedium,
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
-        ),
+        Expanded(child: _detail(context, selectedDay)),
       ],
     );
   }
+
+  /// What sits below the grid: the entries of the picked day, or a hint.
+  Widget _detail(BuildContext context, Day? day) {
+    if (_selected == null) {
+      return Center(child: _hint(context, "Tag auswählen"));
+    }
+    if (day == null) return Center(child: _hint(context, _noEntries));
+    if (day.homework.isEmpty) {
+      // The day header stays, so a reminder can still be added here.
+      return SingleChildScrollView(
+        child: Column(
+          children: <Widget>[
+            widget.dayBuilder(day),
+            _hint(context, _noEntries),
+          ],
+        ),
+      );
+    }
+    return SingleChildScrollView(child: widget.dayBuilder(day));
+  }
+
+  Widget _hint(BuildContext context, String text) => Padding(
+        padding: const EdgeInsets.all(24),
+        child: Text(
+          text,
+          style: Theme.of(context).textTheme.titleMedium,
+          textAlign: TextAlign.center,
+        ),
+      );
 }
 
 class _MonthHeader extends StatelessWidget {

@@ -159,6 +159,15 @@ Future<void> main() async {
       expect(find.text('Tag auswählen'), findsOneWidget);
     });
 
+    testWidgets('a loaded day without entries says so', (tester) async {
+      await pumpCalendar(tester);
+      // The 9th of May is loaded but carries nothing.
+      await tapDay(tester, '9');
+      expect(find.text('(Kein Eintrag)'), findsOneWidget);
+      // The day header stays so a reminder can still be added.
+      expect(find.textContaining('9.5.'), findsWidgets);
+    });
+
     testWidgets('a day the dashboard did not load says so', (tester) async {
       await pumpCalendar(tester);
       // July was never loaded, so no day of it can have entries.
@@ -168,7 +177,7 @@ Future<void> main() async {
       await tester.pumpAndSettle();
       expect(find.text('Juli 2026'), findsOneWidget);
       await tapDay(tester, '15');
-      expect(find.text('Keine Einträge an diesem Tag'), findsOneWidget);
+      expect(find.text('(Kein Eintrag)'), findsOneWidget);
     });
   });
 

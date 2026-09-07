@@ -231,6 +231,17 @@ Future<void> main() async {
       expect(dimmedOnMonday(tester, 'Vormittagspause'), isTrue);
     });
 
+    testWidgets('a dimmed subject stays readable', (tester) async {
+      // Dimming tones the tile down, it must not hide the text: the subject
+      // has to stay in the tree with a colour of its own.
+      await pumpWeek(tester);
+      expect(find.text('Religion'), findsWidgets);
+      final style = tester
+          .widget<Text>(find.text('Religion').first)
+          .style;
+      expect(style?.color, isNot(Colors.transparent));
+    });
+
   });
 
   group('changing the week', () {

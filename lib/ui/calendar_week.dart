@@ -375,22 +375,7 @@ class HourWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Expanded(
       flex: hour.length,
-      child: ClipRect(
-        child: Stack(
-          fit: StackFit.expand,
-          children: <Widget>[
-            _lesson(context, ref),
-            // A grey veil over lessons with nothing due, so the ones that
-            // matter stand out. It must not swallow taps.
-            if (dimmed)
-              IgnorePointer(
-                child: ColoredBox(
-                  color: Colors.grey.withValues(alpha: 0.55),
-                ),
-              ),
-          ],
-        ),
-      ),
+      child: ClipRect(child: _lesson(context, ref)),
     );
   }
 
@@ -411,50 +396,65 @@ class HourWidget extends ConsumerWidget {
                       color: Theme.of(context).colorScheme.error, width: 5),
                 )
               : null,
-          color: isSelected ? selectedBackgroundColor : backgroundColor,
+          // Dimmed lessons drop their subject colour for a quiet, neutral
+          // ground. Veiling the whole tile would cost the text its contrast,
+          // so only the ground is toned down.
+          color: dimmed
+              ? Theme.of(context)
+                  .colorScheme
+                  .surfaceContainerHighest
+                  .withValues(alpha: 0.5)
+              : isSelected
+                  ? selectedBackgroundColor
+                  : backgroundColor,
         ),
-        child: SizedBox.expand(
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  subjectNicks[hour.subject.toLowerCase()] ?? hour.subject,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  softWrap: false,
-                ),
-                if (hour.teachers.isNotEmpty)
-                  const SizedBox(
-                    height: 5,
-                  ),
-                for (final teacher in hour.teachers)
+        child: DefaultTextStyle.merge(
+          style: dimmed
+              ? TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)
+              : null,
+          child: SizedBox.expand(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
                   Text(
-                    teacher.lastName,
+                    subjectNicks[hour.subject.toLowerCase()] ?? hour.subject,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     softWrap: false,
-                    style: DefaultTextStyle.of(context)
-                        .style
-                        .copyWith(fontSize: 11),
                   ),
-                if (hour.rooms.isNotEmpty)
-                  const SizedBox(
-                    height: 5,
-                  ),
-                for (final room in hour.rooms)
-                  Text(
-                    room,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    softWrap: false,
-                    style: DefaultTextStyle.of(context)
-                        .style
-                        .copyWith(fontSize: 11),
-                  ),
-              ],
+                  if (hour.teachers.isNotEmpty)
+                    const SizedBox(
+                      height: 5,
+                    ),
+                  for (final teacher in hour.teachers)
+                    Text(
+                      teacher.lastName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      softWrap: false,
+                      style: DefaultTextStyle.of(context)
+                          .style
+                          .copyWith(fontSize: 11),
+                    ),
+                  if (hour.rooms.isNotEmpty)
+                    const SizedBox(
+                      height: 5,
+                    ),
+                  for (final room in hour.rooms)
+                    Text(
+                      room,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      softWrap: false,
+                      style: DefaultTextStyle.of(context)
+                          .style
+                          .copyWith(fontSize: 11),
+                    ),
+                ],
+              ),
             ),
           ),
         ),
