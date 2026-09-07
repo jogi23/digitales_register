@@ -216,10 +216,21 @@ class _AccountBottomSheetState extends ConsumerState<AccountBottomSheet> {
             ),
           ),
           const SizedBox(width: 8),
-          IconButton.filled(
-            onPressed: () => _saveAlias(_aliasController.text),
-            icon: const Icon(Icons.check),
-            tooltip: 'Alias bestätigen',
+          Builder(
+            builder: (context) {
+              final background = Theme.of(context).colorScheme.primary;
+              return IconButton.filled(
+                onPressed: () => _saveAlias(_aliasController.text),
+                icon: const Icon(Icons.check),
+                tooltip: 'Alias bestätigen',
+                // Spelled out rather than left to the theme: the derived
+                // pairing left the check mark barely visible on the accent.
+                style: IconButton.styleFrom(
+                  backgroundColor: background,
+                  foregroundColor: readableOn(background),
+                ),
+              );
+            },
           ),
         ],
       );
