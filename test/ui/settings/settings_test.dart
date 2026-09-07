@@ -82,6 +82,35 @@ void main() {
     },
   );
 
+  testWidgets(
+    'toggling the calendar view writes the setting',
+    (tester) async {
+      final container = await _pumpSettingsPage(tester);
+      addTearDown(container.dispose);
+
+      const label = 'Als Kalender statt als Liste anzeigen';
+      // The settings list builds lazily, so the switch has to be scrolled in.
+      await tester.scrollUntilVisible(
+        find.text(label),
+        100,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      expect(find.text(label), findsOneWidget);
+      expect(
+        container.read(settingsProvider).dashboardCalendarView,
+        isFalse,
+      );
+
+      await tester.tap(find.text(label));
+      await tester.pumpAndSettle();
+      expect(
+        container.read(settingsProvider).dashboardCalendarView,
+        isTrue,
+      );
+    },
+  );
+
   testGoldens(
     'scrolls to grades settings',
     (tester) async {

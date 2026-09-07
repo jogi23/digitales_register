@@ -55,6 +55,7 @@ class SettingsPageContainer extends ConsumerWidget {
       onSetDashboardColorBorders: notifier.setDashboardColorBorders,
       onSetCalenderColorBackground: notifier.setCalendarColorBackground,
       onSetCalendarShowTimes: notifier.setCalendarShowTimes,
+      onSetDashboardCalendarView: notifier.setDashboardCalendarView,
       onSetDashboardColorTestsInRed: notifier.setDashboardColorTestsInRed,
     );
   }
@@ -73,6 +74,7 @@ class SettingsViewModel {
   final bool dashboardColorBorders;
   final bool calendarColorBackground;
   final bool calendarShowTimes;
+  final bool dashboardCalendarView;
   final bool dashboardColorTestsInRed;
   final bool demoMode;
   final List<String> allSubjects;
@@ -89,6 +91,7 @@ class SettingsViewModel {
     required this.dashboardColorBorders,
     required this.calendarColorBackground,
     required this.calendarShowTimes,
+    required this.dashboardCalendarView,
     required this.dashboardColorTestsInRed,
     required this.allSubjects,
     required this.ignoreForGradesAverage,
@@ -108,6 +111,7 @@ class SettingsViewModel {
         dashboardColorBorders: s.dashboardColorBorders,
         calendarColorBackground: s.calendarColorBackground,
         calendarShowTimes: s.calendarShowTimes,
+        dashboardCalendarView: s.dashboardCalendarView,
         dashboardColorTestsInRed: s.dashboardColorTestsInRed,
         allSubjects: allSubjects,
         ignoreForGradesAverage: s.ignoreForGradesAverage,

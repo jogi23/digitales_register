@@ -108,6 +108,9 @@ abstract class DaysViewModel
   bool get showAddReminder;
   bool get colorBorders;
   bool get colorTestsInRed;
+
+  /// Show a month calendar instead of the list of days.
+  bool get calendarView;
   BuiltMap<String, SubjectTheme> get subjectThemes;
 
   bool get showNotifications;
@@ -138,6 +141,7 @@ abstract class DaysViewModel
           ..askWhenDelete = settings.askWhenDelete
           ..showAddReminder = !blacklist.contains(HomeworkType.homework)
           ..showNotifications = showNotifications
+          ..calendarView = settings.dashboardCalendarView
           ..colorBorders = settings.dashboardColorBorders
           ..colorTestsInRed = settings.dashboardColorTestsInRed
           ..subjectThemes = MapBuilder(subjectThemes),

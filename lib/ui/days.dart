@@ -34,6 +34,7 @@ import 'package:dr/middleware/middleware.dart';
 import 'package:dr/providers/dashboard_provider.dart';
 import 'package:dr/ui/animated_linear_progress_indicator.dart';
 import 'package:dr/ui/dialog.dart';
+import 'package:dr/ui/dashboard_calendar.dart';
 import 'package:dr/ui/last_fetched_overlay.dart';
 import 'package:dr/ui/no_internet.dart';
 import 'package:dr/utc_date_time.dart';
@@ -302,11 +303,21 @@ class _DaysWidgetState extends State<DaysWidget> {
       );
     }
     final itemIndex = (n - 1) ~/ 2;
+    return _buildDay(
+      widget.vm.days[itemIndex],
+      index: _dayStartIndices[itemIndex]!,
+      showLastFetched: showLastFetched,
+    );
+  }
+
+  /// One day with all its entries — shared by the list and the calendar, so
+  /// entries behave the same in both.
+  Widget _buildDay(Day day, {int index = 0, bool showLastFetched = false}) {
     return DayWidget(
-      day: widget.vm.days[itemIndex],
+      day: day,
       vm: widget.vm,
       controller: controller,
-      index: _dayStartIndices[itemIndex]!,
+      index: index,
       addReminderCallback: widget.addReminderCallback,
       removeReminderCallback: widget.removeReminderCallback,
       toggleDoneCallback: widget.toggleDoneCallback,
@@ -316,7 +327,7 @@ class _DaysWidgetState extends State<DaysWidget> {
       colorTestsInRed: widget.vm.colorTestsInRed,
       subjectThemes: widget.vm.subjectThemes.toMap(),
       showLastFetched: showLastFetched,
-      gradeCompetences: widget.gradeCompetences, // Added line
+      gradeCompetences: widget.gradeCompetences,
     );
   }
 
@@ -366,7 +377,22 @@ class _DaysWidgetState extends State<DaysWidget> {
       body = LastFetchedOverlay(
         noInternet: widget.vm.noInternet,
         lastFetched: lastFetched,
-        child: ListView.builder(
+        child: widget.vm.calendarView
+            ? Column(
+                children: <Widget>[
+                  DashboardHeader(
+                    future: widget.vm.future,
+                    onSwitchFuture: widget.onSwitchFuture,
+                  ),
+                  Expanded(
+                    child: DashboardCalendar(
+                      days: widget.vm.days,
+                      dayBuilder: _buildDay,
+                    ),
+                  ),
+                ],
+              )
+            : ListView.builder(
           physics: const AlwaysScrollableScrollPhysics(),
           controller: controller,
           padding: EdgeInsets.only(

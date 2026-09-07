@@ -275,6 +275,7 @@ class SettingsState {
     this.dashboardColorBorders = false,
     this.calendarColorBackground = false,
     this.calendarShowTimes = true,
+    this.dashboardCalendarView = false,
     this.dashboardColorTestsInRed = true,
     List<String>? ignoreForGradesAverage,
     this.drawerFullyExpanded = true,
@@ -301,6 +302,9 @@ class SettingsState {
 
   /// Show a time axis next to the week grid.
   final bool calendarShowTimes;
+
+  /// Show the dashboard as a month calendar instead of a list of days.
+  final bool dashboardCalendarView;
   final bool dashboardColorTestsInRed;
   final List<String> ignoreForGradesAverage;
 
@@ -321,6 +325,7 @@ class SettingsState {
     bool? dashboardColorBorders,
     bool? calendarColorBackground,
     bool? calendarShowTimes,
+    bool? dashboardCalendarView,
     bool? dashboardColorTestsInRed,
     List<String>? ignoreForGradesAverage,
     bool? drawerFullyExpanded,
@@ -344,6 +349,8 @@ class SettingsState {
         calendarColorBackground:
             calendarColorBackground ?? this.calendarColorBackground,
         calendarShowTimes: calendarShowTimes ?? this.calendarShowTimes,
+        dashboardCalendarView:
+            dashboardCalendarView ?? this.dashboardCalendarView,
         dashboardColorTestsInRed:
             dashboardColorTestsInRed ?? this.dashboardColorTestsInRed,
         ignoreForGradesAverage:
@@ -364,6 +371,7 @@ class SettingsState {
         'dashboardColorBorders': dashboardColorBorders,
         'calendarColorBackground': calendarColorBackground,
         'calendarShowTimes': calendarShowTimes,
+        'dashboardCalendarView': dashboardCalendarView,
         'dashboardColorTestsInRed': dashboardColorTestsInRed,
         'ignoreForGradesAverage': ignoreForGradesAverage,
         'drawerFullyExpanded': drawerFullyExpanded,
@@ -385,6 +393,8 @@ class SettingsState {
         calendarColorBackground:
             json['calendarColorBackground'] as bool? ?? false,
         calendarShowTimes: json['calendarShowTimes'] as bool? ?? true,
+        dashboardCalendarView:
+            json['dashboardCalendarView'] as bool? ?? false,
         dashboardColorTestsInRed:
             json['dashboardColorTestsInRed'] as bool? ?? true,
         ignoreForGradesAverage:
@@ -413,6 +423,7 @@ class SettingsState {
         other.dashboardColorBorders == dashboardColorBorders &&
         other.calendarColorBackground == calendarColorBackground &&
         other.calendarShowTimes == calendarShowTimes &&
+        other.dashboardCalendarView == dashboardCalendarView &&
         other.dashboardColorTestsInRed == dashboardColorTestsInRed &&
         _listEq.equals(other.ignoreForGradesAverage, ignoreForGradesAverage) &&
         other.drawerFullyExpanded == drawerFullyExpanded;
@@ -433,6 +444,7 @@ class SettingsState {
         dashboardColorBorders,
         calendarColorBackground,
         calendarShowTimes,
+        dashboardCalendarView,
         dashboardColorTestsInRed,
         ...ignoreForGradesAverage,
         drawerFullyExpanded,

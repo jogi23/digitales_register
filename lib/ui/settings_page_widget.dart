@@ -48,6 +48,7 @@ class SettingsPageWidget extends StatefulWidget {
   final OnSettingChanged<bool> onSetDashboardColorBorders;
   final OnSettingChanged<bool> onSetCalenderColorBackground;
   final OnSettingChanged<bool> onSetCalendarShowTimes;
+  final OnSettingChanged<bool> onSetDashboardCalendarView;
   final OnSettingChanged<bool> onSetDashboardColorTestsInRed;
   final OnSettingChanged<List<String>> onSetIgnoreForGradesAverage;
   final VoidCallback onShowProfile;
@@ -69,6 +70,7 @@ class SettingsPageWidget extends StatefulWidget {
     required this.onSetDashboardColorBorders,
     required this.onSetCalenderColorBackground,
     required this.onSetCalendarShowTimes,
+    required this.onSetDashboardCalendarView,
     required this.onSetDashboardColorTestsInRed,
   });
 
@@ -242,6 +244,13 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
             ),
+          ),
+          SwitchListTile.adaptive(
+            title: const Text("Als Kalender statt als Liste anzeigen"),
+            onChanged: (bool value) {
+              widget.onSetDashboardCalendarView(value);
+            },
+            value: widget.vm.dashboardCalendarView,
           ),
           SwitchListTile.adaptive(
             title: const Text("Neue oder geänderte Einträge markieren"),
