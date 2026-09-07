@@ -262,7 +262,7 @@ class CalendarDayWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final chunks = <List<CalendarHour>>[];
-    for (final hour in calendarDay.hours) {
+    for (final hour in grid.splitAtBreaks(calendarDay.hours)) {
       if (chunks.isEmpty) {
         chunks.add([hour]);
       } else {

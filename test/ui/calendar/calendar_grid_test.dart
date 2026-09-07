@@ -148,6 +148,63 @@ void main() {
     });
   });
 
+
+  group('splitAtBreaks', () {
+    // 6th ends 12:30, 7th starts 13:30 -> lunch break between them.
+    CalendarGrid gridWithLunchBreak() => CalendarGrid.fromDays([
+          _day([
+            _lesson(6, 6, ["11:40", "12:30"]),
+            _lesson(7, 7, ["13:30", "14:20"]),
+          ])
+        ], 7);
+
+    test('a lesson spanning the break is cut in two', () {
+      // Same subject before and after lunch: the server merges both hours
+      // into one entry, which would otherwise swallow the break.
+      final merged = _lesson(6, 7, ["11:40", "12:30", "13:30", "14:20"]);
+      final parts = gridWithLunchBreak().splitAtBreaks([merged]);
+      expect(parts, hasLength(2));
+      expect(parts[0].fromHour, 6);
+      expect(parts[0].toHour, 6);
+      expect(parts[1].fromHour, 7);
+      expect(parts[1].toHour, 7);
+    });
+
+    test('each part keeps the times of its own hours', () {
+      final merged = _lesson(6, 7, ["11:40", "12:30", "13:30", "14:20"]);
+      final parts = gridWithLunchBreak().splitAtBreaks([merged]);
+      expect(parts[0].timeSpans.single.to, _at("12:30"));
+      expect(parts[1].timeSpans.single.from, _at("13:30"));
+    });
+
+    test('the subject is carried over to both parts', () {
+      final merged = _lesson(6, 7, ["11:40", "12:30", "13:30", "14:20"]);
+      final parts = gridWithLunchBreak().splitAtBreaks([merged]);
+      expect(parts.map((p) => p.subject), everyElement("Deutsch"));
+    });
+
+    test('a lesson that does not span a break is left alone', () {
+      final double_ = _lesson(1, 2, ["07:50", "08:45", "08:45", "09:35"]);
+      final grid = CalendarGrid.fromDays([_day([double_])], 2);
+      expect(grid.splitAtBreaks([double_]), [same(double_)]);
+    });
+
+    test('only the lesson spanning the break is cut', () {
+      final before = _lesson(6, 7, ["11:40", "12:30", "13:30", "14:20"]);
+      final after = _lesson(8, 8, ["14:20", "15:10"]);
+      final grid = CalendarGrid.fromDays([
+        _day([
+          _lesson(6, 6, ["11:40", "12:30"]),
+          _lesson(7, 7, ["13:30", "14:20"]),
+          after,
+        ])
+      ], 8);
+      final parts = grid.splitAtBreaks([before, after]);
+      expect(parts.map((p) => "${p.fromHour}-${p.toHour}"),
+          ["6-6", "7-7", "8-8"]);
+    });
+  });
+
   group('flex', () {
     // 1st, 2nd, break, 3rd
     final grid = CalendarGrid.fromDays([

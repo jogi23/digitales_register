@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'package:built_collection/built_collection.dart';
 import 'package:dr/data.dart';
 import 'package:dr/utc_date_time.dart';
 
@@ -109,6 +110,37 @@ class CalendarGrid {
       }
     }
     return false;
+  }
+
+  /// Cuts lessons that span a break into one lesson per side.
+  ///
+  /// The server merges neighbouring hours with the same subject into a single
+  /// entry — across the lunch break too. Rendered as one card, that card would
+  /// swallow the break, so the day would look like uninterrupted lessons.
+  List<CalendarHour> splitAtBreaks(Iterable<CalendarHour> hours) {
+    final result = <CalendarHour>[];
+    for (final hour in hours) {
+      var start = hour.fromHour;
+      for (var at = hour.fromHour; at < hour.toHour; at++) {
+        if (!breakAfter(at)) continue;
+        result.add(_slice(hour, start, at));
+        start = at + 1;
+      }
+      result.add(start == hour.fromHour ? hour : _slice(hour, start, hour.toHour));
+    }
+    return result;
+  }
+
+  /// [hour] limited to [from]..[to], keeping the time spans of those hours.
+  static CalendarHour _slice(CalendarHour hour, int from, int to) {
+    final spans = hour.timeSpans;
+    final first = from - hour.fromHour, last = to - hour.fromHour;
+    return hour.rebuild((b) => b
+      ..fromHour = from
+      ..toHour = to
+      ..timeSpans = ListBuilder<TimeSpan>(
+        last < spans.length ? spans.toList().sublist(first, last + 1) : spans,
+      ));
   }
 
   int get totalFlex => slots.fold(0, (sum, slot) => sum + slot.flex);

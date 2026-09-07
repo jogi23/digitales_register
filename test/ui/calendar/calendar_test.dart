@@ -299,6 +299,91 @@ Future<void> main() async {
     );
   });
 
+  group('lesson spanning the lunch break', () {
+    final monday = UtcDateTime(2026, 5, 11);
+
+    TimeSpan span(int fromH, int fromM, int toH, int toM) => TimeSpan(
+          (b) => b
+            ..from = UtcDateTime(2026, 5, 11, fromH, fromM)
+            ..to = UtcDateTime(2026, 5, 11, toH, toM),
+        );
+
+    /// The server merges neighbouring hours with the same subject into one
+    /// entry — here the 6th and 7th, which sit on either side of the break.
+    CalendarState mergedAcrossBreak() => CalendarState(
+          (b) => b
+            ..currentMonday = monday
+            ..days = MapBuilder(<UtcDateTime, CalendarDay>{
+              monday: CalendarDay(
+                (b) => b
+                  ..date = monday
+                  ..hours = ListBuilder(<CalendarHour>[
+                    CalendarHour(
+                      (b) => b
+                        ..subject = "KuTE"
+                        ..fromHour = 6
+                        ..toHour = 7
+                        ..rooms = ListBuilder()
+                        ..homeworkExams = ListBuilder()
+                        ..lessonContents = ListBuilder()
+                        ..timeSpans = ListBuilder(<TimeSpan>[
+                          span(11, 40, 12, 30),
+                          span(13, 30, 14, 20),
+                        ]),
+                    ),
+                  ]),
+              ),
+            }),
+        );
+
+    Widget calendarWith(CalendarState state) {
+      navigatorKey = GlobalKey();
+      final container = ProviderContainer(
+        overrides: [
+          calendarProvider.overrideWith(() => _TestCalendarNotifier(state)),
+          settingsProvider.overrideWith(
+            () => _TestSettingsNotifier(SettingsState()),
+          ),
+          noInternetProvider.overrideWith(NoInternetNotifier.new),
+          subjectAppearanceProvider.overrideWith(
+            () => _TestSubjectAppearanceNotifier(const SubjectAppearanceState()),
+          ),
+        ],
+      );
+      pc.providerContainer = container;
+      return UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(
+          navigatorKey: navigatorKey,
+          home: CalendarContainer(),
+          theme: ThemeData(primarySwatch: Colors.deepOrange),
+          localizationsDelegates: const [
+            GlobalCupertinoLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: const [Locale("de")],
+        ),
+      );
+    }
+
+    testWidgets('is drawn on both sides of the break', (tester) async {
+      await tester.pumpWidget(calendarWith(mergedAcrossBreak()));
+      await tester.pump();
+      // Undivided it would be one tall card swallowing the break, so the
+      // subject has to show up once per side.
+      expect(find.text('KuTE'), findsNWidgets(2));
+    });
+
+    testWidgets('the break itself stays visible', (tester) async {
+      await tester.pumpWidget(calendarWith(mergedAcrossBreak()));
+      await tester.pump();
+      expect(find.text('60 min'), findsOneWidget);
+      expect(find.text('12:30'), findsOneWidget);
+      expect(find.text('13:30'), findsOneWidget);
+    });
+  });
+
   group('demo data KW 2026-05-11', () {
     Widget getDemoCalendar({bool showTimes = true}) {
       navigatorKey = GlobalKey();
