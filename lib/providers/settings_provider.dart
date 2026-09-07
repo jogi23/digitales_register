@@ -77,8 +77,8 @@ class SettingsNotifier extends Notifier<SettingsState> {
   void setCalendarShowTimes(bool value) =>
       state = state.copyWith(calendarShowTimes: value);
 
-  void setDashboardCalendarView(bool value) =>
-      state = state.copyWith(dashboardCalendarView: value);
+  void setDashboardViewMode(DashboardViewMode value) =>
+      state = state.copyWith(dashboardViewMode: value);
 
   // ─── Appearance / UI settings ─────────────────────────────────────────────
 

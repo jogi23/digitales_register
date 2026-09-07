@@ -93,7 +93,11 @@ Future<void> main() async {
         gradesProvider.overrideWith(() => _TestGradesNotifier(GradesState())),
         settingsProvider.overrideWith(
           () => _TestSettingsNotifier(
-            SettingsState(dashboardCalendarView: calendarView),
+            SettingsState(
+              dashboardViewMode: calendarView
+                  ? DashboardViewMode.month
+                  : DashboardViewMode.list,
+            ),
           ),
         ),
       ],

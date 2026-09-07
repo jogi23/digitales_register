@@ -61,6 +61,10 @@ class CalendarWeekViewModel {
   final CalendarSelection? selection;
   final bool colorBackground;
   final bool showTimes;
+
+  /// Subjects that carry dashboard entries, per day. Lessons outside this are
+  /// dimmed; `null` dims nothing, which is what the calendar page wants.
+  final Map<UtcDateTime, Set<String>>? subjectsWithEntries;
   final Map<String, SubjectTheme> subjectThemes;
 
   CalendarWeekViewModel({
@@ -70,6 +74,7 @@ class CalendarWeekViewModel {
     required this.selection,
     required this.colorBackground,
     required this.showTimes,
+    this.subjectsWithEntries,
     required this.subjectThemes,
   });
 }

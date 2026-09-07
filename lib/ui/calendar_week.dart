@@ -65,6 +65,9 @@ class CalendarWeek extends StatelessWidget {
                           child: CalendarDayWidget(
                             calendarDay: d,
                             grid: grid,
+                            highlightedSubjects: vm.subjectsWithEntries?[
+                                UtcDateTime(
+                                    d.date.year, d.date.month, d.date.day)],
                             subjectNicks: vm.subjectNicks,
                             isSelected: vm.selection?.date == d.date,
                             selectedHour: vm.selection?.date == d.date
@@ -82,7 +85,6 @@ class CalendarWeek extends StatelessWidget {
           );
   }
 }
-
 
 /// The time column left of the week grid.
 ///
@@ -127,7 +129,8 @@ class _TimeAxis extends StatelessWidget {
               flex: slot.flex,
               child: Padding(
                 padding: const EdgeInsets.only(right: 4),
-                child: _label(slot, labelStyle, showsEnd: showsEnd.contains(slot)),
+                child:
+                    _label(slot, labelStyle, showsEnd: showsEnd.contains(slot)),
               ),
             ),
         ],
@@ -135,8 +138,7 @@ class _TimeAxis extends StatelessWidget {
     );
   }
 
-  Widget _label(CalendarSlot slot, TextStyle style,
-      {required bool showsEnd}) {
+  Widget _label(CalendarSlot slot, TextStyle style, {required bool showsEnd}) {
     if (slot is BreakSlot) {
       return Center(
         child: Text("${slot.duration.inMinutes} min", style: style),
@@ -156,6 +158,7 @@ class _TimeAxis extends StatelessWidget {
 }
 
 class _HoursChunk extends StatelessWidget {
+  final Set<String>? highlightedSubjects;
   final Map<String, String> subjectNicks;
   final List<CalendarHour> hours;
   final CalendarDay day;
@@ -165,6 +168,7 @@ class _HoursChunk extends StatelessWidget {
   final Map<String, SubjectTheme> subjectThemes;
 
   const _HoursChunk({
+    this.highlightedSubjects,
     required this.subjectNicks,
     required this.hours,
     required this.day,
@@ -206,6 +210,10 @@ class _HoursChunk extends StatelessWidget {
               (n) => n.isEven
                   ? HourWidget(
                       hour: hours[n ~/ 2],
+                      dimmed: highlightedSubjects != null &&
+                          !highlightedSubjects!.contains(
+                            normalizeSubject(hours[n ~/ 2].subject),
+                          ),
                       subjectNicks: subjectNicks,
                       day: day,
                       isSelected: selectedHour == hours[n ~/ 2].fromHour,
@@ -243,6 +251,9 @@ class _HoursChunk extends StatelessWidget {
 class CalendarDayWidget extends StatelessWidget {
   final CalendarGrid grid;
   final CalendarDay calendarDay;
+
+  /// Lessons whose subject is not in here are dimmed. `null` dims nothing.
+  final Set<String>? highlightedSubjects;
   final Map<String, String> subjectNicks;
   final bool isSelected;
   final int? selectedHour;
@@ -253,6 +264,7 @@ class CalendarDayWidget extends StatelessWidget {
     super.key,
     required this.grid,
     required this.calendarDay,
+    this.highlightedSubjects,
     required this.subjectNicks,
     required this.isSelected,
     required this.selectedHour,
@@ -296,6 +308,7 @@ class CalendarDayWidget extends StatelessWidget {
                   grid.flexBefore(chunks[i].first.fromHour),
               child: _HoursChunk(
                 hours: chunks[i],
+                highlightedSubjects: highlightedSubjects,
                 subjectNicks: subjectNicks,
                 day: calendarDay,
                 selectedHour: selectedHour,
@@ -339,6 +352,9 @@ class CalendarDayWidget extends StatelessWidget {
 
 class HourWidget extends ConsumerWidget {
   final CalendarHour hour;
+
+  /// Pushes the lesson into the background because nothing is due in it.
+  final bool dimmed;
   final CalendarDay day;
   final Map<String, String> subjectNicks;
   final bool isSelected;
@@ -348,6 +364,7 @@ class HourWidget extends ConsumerWidget {
   const HourWidget({
     super.key,
     required this.hour,
+    this.dimmed = false,
     required this.subjectNicks,
     required this.day,
     required this.isSelected,
@@ -359,68 +376,85 @@ class HourWidget extends ConsumerWidget {
     return Expanded(
       flex: hour.length,
       child: ClipRect(
-        child: InkWell(
-          onTap: () {
-            ref.read(calendarProvider.notifier).select(
-                  CalendarSelection((b) => b
-                    ..date = day.date
-                    ..hour = hour.fromHour),
-                );
-          },
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              border: hour.warning
-                  ? Border(
-                      left: BorderSide(
-                          color: Theme.of(context).colorScheme.error, width: 5),
-                    )
-                  : null,
-              color: isSelected ? selectedBackgroundColor : backgroundColor,
-            ),
-            child: SizedBox.expand(
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      subjectNicks[hour.subject.toLowerCase()] ?? hour.subject,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      softWrap: false,
-                    ),
-                    if (hour.teachers.isNotEmpty)
-                      const SizedBox(
-                        height: 5,
-                      ),
-                    for (final teacher in hour.teachers)
-                      Text(
-                        teacher.lastName,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        softWrap: false,
-                        style: DefaultTextStyle.of(context)
-                            .style
-                            .copyWith(fontSize: 11),
-                      ),
-                    if (hour.rooms.isNotEmpty)
-                      const SizedBox(
-                        height: 5,
-                      ),
-                    for (final room in hour.rooms)
-                      Text(
-                        room,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        softWrap: false,
-                        style: DefaultTextStyle.of(context)
-                            .style
-                            .copyWith(fontSize: 11),
-                      ),
-                  ],
+        child: Stack(
+          fit: StackFit.expand,
+          children: <Widget>[
+            _lesson(context, ref),
+            // A grey veil over lessons with nothing due, so the ones that
+            // matter stand out. It must not swallow taps.
+            if (dimmed)
+              IgnorePointer(
+                child: ColoredBox(
+                  color: Colors.grey.withValues(alpha: 0.55),
                 ),
               ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _lesson(BuildContext context, WidgetRef ref) {
+    return InkWell(
+      onTap: () {
+        ref.read(calendarProvider.notifier).select(
+              CalendarSelection((b) => b
+                ..date = day.date
+                ..hour = hour.fromHour),
+            );
+      },
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          border: hour.warning
+              ? Border(
+                  left: BorderSide(
+                      color: Theme.of(context).colorScheme.error, width: 5),
+                )
+              : null,
+          color: isSelected ? selectedBackgroundColor : backgroundColor,
+        ),
+        child: SizedBox.expand(
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  subjectNicks[hour.subject.toLowerCase()] ?? hour.subject,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  softWrap: false,
+                ),
+                if (hour.teachers.isNotEmpty)
+                  const SizedBox(
+                    height: 5,
+                  ),
+                for (final teacher in hour.teachers)
+                  Text(
+                    teacher.lastName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    softWrap: false,
+                    style: DefaultTextStyle.of(context)
+                        .style
+                        .copyWith(fontSize: 11),
+                  ),
+                if (hour.rooms.isNotEmpty)
+                  const SizedBox(
+                    height: 5,
+                  ),
+                for (final room in hour.rooms)
+                  Text(
+                    room,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    softWrap: false,
+                    style: DefaultTextStyle.of(context)
+                        .style
+                        .copyWith(fontSize: 11),
+                  ),
+              ],
             ),
           ),
         ),

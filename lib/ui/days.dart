@@ -34,6 +34,7 @@ import 'package:dr/middleware/middleware.dart';
 import 'package:dr/providers/dashboard_provider.dart';
 import 'package:dr/ui/animated_linear_progress_indicator.dart';
 import 'package:dr/ui/dialog.dart';
+import 'package:dr/container/dashboard_week_container.dart';
 import 'package:dr/ui/dashboard_calendar.dart';
 import 'package:dr/ui/last_fetched_overlay.dart';
 import 'package:dr/ui/no_internet.dart';
@@ -331,6 +332,13 @@ class _DaysWidgetState extends State<DaysWidget> {
     );
   }
 
+  /// The month grid or the week timetable, depending on the setting.
+  Widget _calendarBody() {
+    return widget.vm.viewMode == DashboardViewMode.week
+        ? DashboardWeekContainer(days: widget.vm.days)
+        : DashboardCalendar(days: widget.vm.days, dayBuilder: _buildDay);
+  }
+
   @override
   Widget build(BuildContext context) {
     final noInternet = widget.vm.noInternet;
@@ -377,19 +385,14 @@ class _DaysWidgetState extends State<DaysWidget> {
       body = LastFetchedOverlay(
         noInternet: widget.vm.noInternet,
         lastFetched: lastFetched,
-        child: widget.vm.calendarView
+        child: widget.vm.viewMode != DashboardViewMode.list
             ? Column(
                 children: <Widget>[
                   DashboardHeader(
                     future: widget.vm.future,
                     onSwitchFuture: widget.onSwitchFuture,
                   ),
-                  Expanded(
-                    child: DashboardCalendar(
-                      days: widget.vm.days,
-                      dayBuilder: _buildDay,
-                    ),
-                  ),
+                  Expanded(child: _calendarBody()),
                 ],
               )
             : ListView.builder(

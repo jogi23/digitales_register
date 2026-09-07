@@ -28,6 +28,7 @@ import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/providers/subject_appearance_provider.dart';
 import 'package:dr/ui/dialog.dart';
 import 'package:dr/ui/subject_appearance_page.dart';
+import 'package:dr/ui/calendar_week.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
 import 'package:dynamic_theme/dynamic_theme.dart';
@@ -486,6 +487,19 @@ Future<void> main() async {
       expect(find.text('60 min'), findsNothing);
       // The timetable itself is unaffected.
       expect(find.text('Mathematik'), findsWidgets);
+    });
+
+    testWidgets('the calendar page dims no lesson', (tester) async {
+      // Dimming belongs to the dashboard week; the calendar passes no
+      // subjects, so every lesson has to stay in the foreground.
+      await tester.pumpWidget(getDemoCalendar());
+      await tester.pump();
+      expect(
+        tester
+            .widgetList<HourWidget>(find.byType(HourWidget))
+            .every((w) => !w.dimmed),
+        isTrue,
+      );
     });
 
     testGoldens('demo week view golden', (tester) async {
