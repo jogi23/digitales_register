@@ -40,6 +40,7 @@ import 'package:dr/ui/last_fetched_overlay.dart';
 import 'package:dr/ui/no_internet.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
+import 'package:dr/services/review_prompt.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:intl/intl.dart';
@@ -220,6 +221,9 @@ class _DaysWidgetState extends State<DaysWidget> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       update();
       _ensureGradeCompetences();
+      // Once the dashboard actually stands: asking during startup would
+      // land before the user has seen anything.
+      unawaited(reviewPrompt.maybeAsk());
       // The month and week views navigate freely, so they need past and
       // future; with one direction the other looks empty.
       if (widget.vm.viewMode != DashboardViewMode.list) {

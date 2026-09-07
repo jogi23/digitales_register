@@ -72,6 +72,7 @@ dependencies:
   flutter_markdown_plus: ^1.0.6
   image_picker: ^1.2.2
   share_plus: ^10.1.4
+  in_app_review: ^2.0.12
 
 dependency_overrides:
   file: ^6.1.4
