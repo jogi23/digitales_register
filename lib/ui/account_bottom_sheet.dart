@@ -21,6 +21,7 @@ import 'package:dr/providers/account_profile_provider.dart';
 import 'package:dr/providers/config_provider.dart';
 import 'package:dr/providers/login_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
+import 'package:dr/util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -326,7 +327,7 @@ class _AccountBottomSheetState extends ConsumerState<AccountBottomSheet> {
         );
       }
     }
-    final initials = _initials(profile.alias ?? fallbackName);
+    final initials = accountInitials(profile.alias ?? fallbackName);
     return CircleAvatar(
       radius: radius,
       backgroundColor: colorScheme.primaryContainer,
@@ -342,8 +343,4 @@ class _AccountBottomSheetState extends ConsumerState<AccountBottomSheet> {
   }
 }
 
-String _initials(String name) {
-  final trimmed = name.trim();
-  if (trimmed.isEmpty) return '?';
-  return trimmed.substring(0, trimmed.length.clamp(0, 3)).toUpperCase();
-}
+

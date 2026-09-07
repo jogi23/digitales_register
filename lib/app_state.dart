@@ -260,6 +260,21 @@ abstract class Semester implements Built<Semester, SemesterBuilder> {
   Semester._();
 }
 
+/// How the dashboard lays out its entries.
+enum DashboardViewMode {
+  /// One day after another, the long-standing default.
+  list,
+
+  /// A month grid; picking a day shows its entries.
+  month,
+
+  /// The timetable of one week, with lessons that have no entries dimmed.
+  week;
+
+  static DashboardViewMode fromName(String? name) =>
+      DashboardViewMode.values.asNameMap()[name] ?? DashboardViewMode.list;
+}
+
 class SettingsState {
   SettingsState({
     this.noPasswordSaving = false,
@@ -275,6 +290,7 @@ class SettingsState {
     this.dashboardColorBorders = false,
     this.calendarColorBackground = false,
     this.calendarShowTimes = true,
+    this.dashboardViewMode = DashboardViewMode.list,
     this.dashboardColorTestsInRed = true,
     List<String>? ignoreForGradesAverage,
     this.drawerFullyExpanded = true,
@@ -301,6 +317,9 @@ class SettingsState {
 
   /// Show a time axis next to the week grid.
   final bool calendarShowTimes;
+
+  /// Whether the dashboard shows a list, a month grid or a week.
+  final DashboardViewMode dashboardViewMode;
   final bool dashboardColorTestsInRed;
   final List<String> ignoreForGradesAverage;
 
@@ -321,6 +340,7 @@ class SettingsState {
     bool? dashboardColorBorders,
     bool? calendarColorBackground,
     bool? calendarShowTimes,
+    DashboardViewMode? dashboardViewMode,
     bool? dashboardColorTestsInRed,
     List<String>? ignoreForGradesAverage,
     bool? drawerFullyExpanded,
@@ -344,6 +364,7 @@ class SettingsState {
         calendarColorBackground:
             calendarColorBackground ?? this.calendarColorBackground,
         calendarShowTimes: calendarShowTimes ?? this.calendarShowTimes,
+        dashboardViewMode: dashboardViewMode ?? this.dashboardViewMode,
         dashboardColorTestsInRed:
             dashboardColorTestsInRed ?? this.dashboardColorTestsInRed,
         ignoreForGradesAverage:
@@ -364,6 +385,7 @@ class SettingsState {
         'dashboardColorBorders': dashboardColorBorders,
         'calendarColorBackground': calendarColorBackground,
         'calendarShowTimes': calendarShowTimes,
+        'dashboardViewMode': dashboardViewMode.name,
         'dashboardColorTestsInRed': dashboardColorTestsInRed,
         'ignoreForGradesAverage': ignoreForGradesAverage,
         'drawerFullyExpanded': drawerFullyExpanded,
@@ -385,6 +407,12 @@ class SettingsState {
         calendarColorBackground:
             json['calendarColorBackground'] as bool? ?? false,
         calendarShowTimes: json['calendarShowTimes'] as bool? ?? true,
+        // Migrates the earlier boolean, which only knew list and month.
+        dashboardViewMode: json['dashboardViewMode'] != null
+            ? DashboardViewMode.fromName(json['dashboardViewMode'] as String?)
+            : (json['dashboardCalendarView'] as bool? ?? false)
+                ? DashboardViewMode.month
+                : DashboardViewMode.list,
         dashboardColorTestsInRed:
             json['dashboardColorTestsInRed'] as bool? ?? true,
         ignoreForGradesAverage:
@@ -413,6 +441,7 @@ class SettingsState {
         other.dashboardColorBorders == dashboardColorBorders &&
         other.calendarColorBackground == calendarColorBackground &&
         other.calendarShowTimes == calendarShowTimes &&
+        other.dashboardViewMode == dashboardViewMode &&
         other.dashboardColorTestsInRed == dashboardColorTestsInRed &&
         _listEq.equals(other.ignoreForGradesAverage, ignoreForGradesAverage) &&
         other.drawerFullyExpanded == drawerFullyExpanded;
@@ -433,6 +462,7 @@ class SettingsState {
         dashboardColorBorders,
         calendarColorBackground,
         calendarShowTimes,
+        dashboardViewMode,
         dashboardColorTestsInRed,
         ...ignoreForGradesAverage,
         drawerFullyExpanded,

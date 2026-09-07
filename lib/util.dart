@@ -64,6 +64,34 @@ extension StringUtils on String? {
   }
 }
 
+/// The letters shown in an account's avatar.
+///
+/// Usernames tend to start with the enrolment year ("2019feithe_2"), and the
+/// leading digits say nothing about whose account it is — so only letters
+/// count. Falls back to the raw text when there are none.
+String accountInitials(String name) {
+  final trimmed = name.trim();
+  if (trimmed.isEmpty) return '?';
+  final letters = trimmed.replaceAll(RegExp(r'[^\p{L}]', unicode: true), '');
+  final source = letters.isEmpty ? trimmed : letters;
+  return source.substring(0, source.length.clamp(0, 3)).toUpperCase();
+}
+
+/// The ISO 8601 calendar week [date] falls into.
+///
+/// ISO counts the week containing the first Thursday of a year as week 1, so
+/// early January can still belong to week 52 or 53 of the year before, and
+/// late December can already be week 1 of the next.
+int isoWeekNumber(DateTime date) {
+  // In UTC: across a daylight saving change a local difference is off by an
+  // hour, which inDays would swallow as a whole day.
+  final day = DateTime.utc(date.year, date.month, date.day);
+  final thursday = day.add(Duration(days: 4 - day.weekday));
+  final dayOfYear =
+      thursday.difference(DateTime.utc(thursday.year)).inDays + 1;
+  return ((dayOfYear - 1) ~/ 7) + 1;
+}
+
 UtcDateTime toMonday(UtcDateTime date) {
   final s = date.weekday >= 6
       ? date.add(Duration(days: 8 - date.weekday))

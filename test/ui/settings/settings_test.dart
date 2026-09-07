@@ -82,6 +82,35 @@ void main() {
     },
   );
 
+  testWidgets(
+    'picking the month view writes the setting',
+    (tester) async {
+      final container = await _pumpSettingsPage(tester);
+      addTearDown(container.dispose);
+
+      const label = 'Als Monatskalender anzeigen';
+      // The settings list builds lazily, so the option has to be scrolled in.
+      await tester.scrollUntilVisible(
+        find.text(label),
+        100,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      expect(find.text(label), findsOneWidget);
+      expect(
+        container.read(settingsProvider).dashboardViewMode,
+        DashboardViewMode.list,
+      );
+
+      await tester.tap(find.text(label));
+      await tester.pumpAndSettle();
+      expect(
+        container.read(settingsProvider).dashboardViewMode,
+        DashboardViewMode.month,
+      );
+    },
+  );
+
   testGoldens(
     'scrolls to grades settings',
     (tester) async {

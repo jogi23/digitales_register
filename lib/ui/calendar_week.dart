@@ -65,6 +65,9 @@ class CalendarWeek extends StatelessWidget {
                           child: CalendarDayWidget(
                             calendarDay: d,
                             grid: grid,
+                            highlightedSubjects: vm.subjectsWithEntries?[
+                                UtcDateTime(
+                                    d.date.year, d.date.month, d.date.day)],
                             subjectNicks: vm.subjectNicks,
                             isSelected: vm.selection?.date == d.date,
                             selectedHour: vm.selection?.date == d.date
@@ -82,7 +85,6 @@ class CalendarWeek extends StatelessWidget {
           );
   }
 }
-
 
 /// The time column left of the week grid.
 ///
@@ -127,7 +129,8 @@ class _TimeAxis extends StatelessWidget {
               flex: slot.flex,
               child: Padding(
                 padding: const EdgeInsets.only(right: 4),
-                child: _label(slot, labelStyle, showsEnd: showsEnd.contains(slot)),
+                child:
+                    _label(slot, labelStyle, showsEnd: showsEnd.contains(slot)),
               ),
             ),
         ],
@@ -135,8 +138,7 @@ class _TimeAxis extends StatelessWidget {
     );
   }
 
-  Widget _label(CalendarSlot slot, TextStyle style,
-      {required bool showsEnd}) {
+  Widget _label(CalendarSlot slot, TextStyle style, {required bool showsEnd}) {
     if (slot is BreakSlot) {
       return Center(
         child: Text("${slot.duration.inMinutes} min", style: style),
@@ -156,6 +158,7 @@ class _TimeAxis extends StatelessWidget {
 }
 
 class _HoursChunk extends StatelessWidget {
+  final Set<String>? highlightedSubjects;
   final Map<String, String> subjectNicks;
   final List<CalendarHour> hours;
   final CalendarDay day;
@@ -165,6 +168,7 @@ class _HoursChunk extends StatelessWidget {
   final Map<String, SubjectTheme> subjectThemes;
 
   const _HoursChunk({
+    this.highlightedSubjects,
     required this.subjectNicks,
     required this.hours,
     required this.day,
@@ -206,6 +210,10 @@ class _HoursChunk extends StatelessWidget {
               (n) => n.isEven
                   ? HourWidget(
                       hour: hours[n ~/ 2],
+                      dimmed: highlightedSubjects != null &&
+                          !highlightedSubjects!.contains(
+                            normalizeSubject(hours[n ~/ 2].subject),
+                          ),
                       subjectNicks: subjectNicks,
                       day: day,
                       isSelected: selectedHour == hours[n ~/ 2].fromHour,
@@ -243,6 +251,9 @@ class _HoursChunk extends StatelessWidget {
 class CalendarDayWidget extends StatelessWidget {
   final CalendarGrid grid;
   final CalendarDay calendarDay;
+
+  /// Lessons whose subject is not in here are dimmed. `null` dims nothing.
+  final Set<String>? highlightedSubjects;
   final Map<String, String> subjectNicks;
   final bool isSelected;
   final int? selectedHour;
@@ -253,12 +264,21 @@ class CalendarDayWidget extends StatelessWidget {
     super.key,
     required this.grid,
     required this.calendarDay,
+    this.highlightedSubjects,
     required this.subjectNicks,
     required this.isSelected,
     required this.selectedHour,
     required this.colorBackground,
     required this.subjectThemes,
   });
+  /// Whether this column is the day the user is living through.
+  bool get isToday {
+    final today = Day.dateToday();
+    return calendarDay.date.year == today.year &&
+        calendarDay.date.month == today.month &&
+        calendarDay.date.day == today.day;
+  }
+
   @override
   Widget build(BuildContext context) {
     final chunks = <List<CalendarHour>>[];
@@ -279,10 +299,22 @@ class CalendarDayWidget extends StatelessWidget {
     }
     return Column(
       children: <Widget>[
-        Text(DateFormat("E", "de").format(calendarDay.date)),
+        Text(
+          DateFormat("E", "de").format(calendarDay.date),
+          style: isToday
+              ? TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.primary,
+                )
+              : null,
+        ),
         Text(
           DateFormat("dd.MM", "de").format(calendarDay.date),
-          style: DefaultTextStyle.of(context).style.copyWith(fontSize: 12),
+          style: DefaultTextStyle.of(context).style.copyWith(
+                fontSize: 12,
+                fontWeight: isToday ? FontWeight.bold : null,
+                color: isToday ? Theme.of(context).colorScheme.primary : null,
+              ),
         ),
         if (chunks.isNotEmpty) ...[
           for (var i = 0; i < chunks.length; i++) ...[
@@ -296,6 +328,7 @@ class CalendarDayWidget extends StatelessWidget {
                   grid.flexBefore(chunks[i].first.fromHour),
               child: _HoursChunk(
                 hours: chunks[i],
+                highlightedSubjects: highlightedSubjects,
                 subjectNicks: subjectNicks,
                 day: calendarDay,
                 selectedHour: selectedHour,
@@ -339,6 +372,9 @@ class CalendarDayWidget extends StatelessWidget {
 
 class HourWidget extends ConsumerWidget {
   final CalendarHour hour;
+
+  /// Pushes the lesson into the background because nothing is due in it.
+  final bool dimmed;
   final CalendarDay day;
   final Map<String, String> subjectNicks;
   final bool isSelected;
@@ -348,6 +384,7 @@ class HourWidget extends ConsumerWidget {
   const HourWidget({
     super.key,
     required this.hour,
+    this.dimmed = false,
     required this.subjectNicks,
     required this.day,
     required this.isSelected,
@@ -358,68 +395,83 @@ class HourWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Expanded(
       flex: hour.length,
-      child: ClipRect(
-        child: InkWell(
-          onTap: () {
-            ref.read(calendarProvider.notifier).select(
-                  CalendarSelection((b) => b
-                    ..date = day.date
-                    ..hour = hour.fromHour),
-                );
-          },
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              border: hour.warning
-                  ? Border(
-                      left: BorderSide(
-                          color: Theme.of(context).colorScheme.error, width: 5),
-                    )
-                  : null,
-              color: isSelected ? selectedBackgroundColor : backgroundColor,
-            ),
-            child: SizedBox.expand(
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
+      child: ClipRect(child: _lesson(context, ref)),
+    );
+  }
+
+  Widget _lesson(BuildContext context, WidgetRef ref) {
+    return InkWell(
+      onTap: () {
+        ref.read(calendarProvider.notifier).select(
+              CalendarSelection((b) => b
+                ..date = day.date
+                ..hour = hour.fromHour),
+            );
+      },
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          border: hour.warning
+              ? Border(
+                  left: BorderSide(
+                      color: Theme.of(context).colorScheme.error, width: 5),
+                )
+              : null,
+          // Dimmed lessons lose their subject colour and keep the plain
+          // background. Tinting them instead broke in dark mode, where the
+          // tint was darker than the tile and made them stand out.
+          color: dimmed
+              ? null
+              : isSelected
+                  ? selectedBackgroundColor
+                  : backgroundColor,
+        ),
+        // Fading the content is theme independent: it reads as "in the
+        // background" on light and dark alike, and at this level the text
+        // stays comfortably readable.
+        child: Opacity(
+          opacity: dimmed ? 0.6 : 1,
+          child: SizedBox.expand(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    subjectNicks[hour.subject.toLowerCase()] ?? hour.subject,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    softWrap: false,
+                  ),
+                  if (hour.teachers.isNotEmpty)
+                    const SizedBox(
+                      height: 5,
+                    ),
+                  for (final teacher in hour.teachers)
                     Text(
-                      subjectNicks[hour.subject.toLowerCase()] ?? hour.subject,
+                      teacher.lastName,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       softWrap: false,
+                      style: DefaultTextStyle.of(context)
+                          .style
+                          .copyWith(fontSize: 11),
                     ),
-                    if (hour.teachers.isNotEmpty)
-                      const SizedBox(
-                        height: 5,
-                      ),
-                    for (final teacher in hour.teachers)
-                      Text(
-                        teacher.lastName,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        softWrap: false,
-                        style: DefaultTextStyle.of(context)
-                            .style
-                            .copyWith(fontSize: 11),
-                      ),
-                    if (hour.rooms.isNotEmpty)
-                      const SizedBox(
-                        height: 5,
-                      ),
-                    for (final room in hour.rooms)
-                      Text(
-                        room,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        softWrap: false,
-                        style: DefaultTextStyle.of(context)
-                            .style
-                            .copyWith(fontSize: 11),
-                      ),
-                  ],
-                ),
+                  if (hour.rooms.isNotEmpty)
+                    const SizedBox(
+                      height: 5,
+                    ),
+                  for (final room in hour.rooms)
+                    Text(
+                      room,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      softWrap: false,
+                      style: DefaultTextStyle.of(context)
+                          .style
+                          .copyWith(fontSize: 11),
+                    ),
+                ],
               ),
             ),
           ),

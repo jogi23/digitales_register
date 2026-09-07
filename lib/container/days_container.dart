@@ -108,6 +108,9 @@ abstract class DaysViewModel
   bool get showAddReminder;
   bool get colorBorders;
   bool get colorTestsInRed;
+
+  /// Whether the entries are laid out as a list, a month or a week.
+  DashboardViewMode get viewMode;
   BuiltMap<String, SubjectTheme> get subjectThemes;
 
   bool get showNotifications;
@@ -138,6 +141,7 @@ abstract class DaysViewModel
           ..askWhenDelete = settings.askWhenDelete
           ..showAddReminder = !blacklist.contains(HomeworkType.homework)
           ..showNotifications = showNotifications
+          ..viewMode = settings.dashboardViewMode
           ..colorBorders = settings.dashboardColorBorders
           ..colorTestsInRed = settings.dashboardColorTestsInRed
           ..subjectThemes = MapBuilder(subjectThemes),

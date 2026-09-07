@@ -28,10 +28,12 @@ import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/providers/subject_appearance_provider.dart';
 import 'package:dr/ui/dialog.dart';
 import 'package:dr/ui/subject_appearance_page.dart';
+import 'package:dr/ui/calendar_week.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
 import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -299,6 +301,91 @@ Future<void> main() async {
     );
   });
 
+  group('today in the week grid', () {
+    // Pinned so the test does not depend on the day it runs on; other groups
+    // in this file mock the clock too.
+    final today = UtcDateTime(2026, 5, 11);
+    setUp(() => mockNow = today);
+    tearDown(() => mockNow = null);
+
+    CalendarState stateWithToday() => CalendarState(
+          (b) => b
+            ..currentMonday = today
+            ..days = MapBuilder(<UtcDateTime, CalendarDay>{
+              today: CalendarDay(
+                (b) => b
+                  ..date = today
+                  ..hours = ListBuilder(<CalendarHour>[
+                    CalendarHour(
+                      (b) => b
+                        ..subject = "Deutsch"
+                        ..fromHour = 1
+                        ..toHour = 1
+                        ..rooms = ListBuilder()
+                        ..homeworkExams = ListBuilder()
+                        ..lessonContents = ListBuilder()
+                        ..timeSpans = ListBuilder(<TimeSpan>[
+                          TimeSpan((b) => b
+                            ..from = UtcDateTime(
+                                today.year, today.month, today.day, 7, 50)
+                            ..to = UtcDateTime(
+                                today.year, today.month, today.day, 8, 45)),
+                        ]),
+                    ),
+                  ]),
+              ),
+            }),
+        );
+
+    Widget calendarWithToday() {
+      navigatorKey = GlobalKey();
+      final container = ProviderContainer(
+        overrides: [
+          calendarProvider
+              .overrideWith(() => _TestCalendarNotifier(stateWithToday())),
+          settingsProvider.overrideWith(
+            () => _TestSettingsNotifier(SettingsState()),
+          ),
+          noInternetProvider.overrideWith(NoInternetNotifier.new),
+          subjectAppearanceProvider.overrideWith(
+            () => _TestSubjectAppearanceNotifier(const SubjectAppearanceState()),
+          ),
+        ],
+      );
+      pc.providerContainer = container;
+      return UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(
+          navigatorKey: navigatorKey,
+          home: CalendarContainer(),
+          theme: ThemeData(primarySwatch: Colors.deepOrange),
+          localizationsDelegates: const [
+            GlobalCupertinoLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: const [Locale("de")],
+        ),
+      );
+    }
+
+    testWidgets('the current day is set apart from the others', (tester) async {
+      await tester.pumpWidget(calendarWithToday());
+      await tester.pump();
+      final weekday = DateFormat("E", "de").format(today);
+      final style = tester
+          .widget<Text>(
+            find.descendant(
+              of: find.byType(CalendarDayWidget),
+              matching: find.text(weekday),
+            ),
+          )
+          .style;
+      expect(style?.fontWeight, FontWeight.bold);
+      expect(style?.color, isNotNull);
+    });
+  });
+
   group('lesson spanning the lunch break', () {
     final monday = UtcDateTime(2026, 5, 11);
 
@@ -486,6 +573,19 @@ Future<void> main() async {
       expect(find.text('60 min'), findsNothing);
       // The timetable itself is unaffected.
       expect(find.text('Mathematik'), findsWidgets);
+    });
+
+    testWidgets('the calendar page dims no lesson', (tester) async {
+      // Dimming belongs to the dashboard week; the calendar passes no
+      // subjects, so every lesson has to stay in the foreground.
+      await tester.pumpWidget(getDemoCalendar());
+      await tester.pump();
+      expect(
+        tester
+            .widgetList<HourWidget>(find.byType(HourWidget))
+            .every((w) => !w.dimmed),
+        isTrue,
+      );
     });
 
     testGoldens('demo week view golden', (tester) async {

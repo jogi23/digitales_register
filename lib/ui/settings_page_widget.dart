@@ -17,6 +17,7 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:deleteable_tile/deleteable_tile.dart';
+import 'package:dr/app_state.dart';
 import 'package:dr/container/settings_page.dart';
 import 'package:dr/ui/autocomplete_options.dart';
 import 'package:dr/ui/dialog.dart';
@@ -48,6 +49,7 @@ class SettingsPageWidget extends StatefulWidget {
   final OnSettingChanged<bool> onSetDashboardColorBorders;
   final OnSettingChanged<bool> onSetCalenderColorBackground;
   final OnSettingChanged<bool> onSetCalendarShowTimes;
+  final void Function(DashboardViewMode mode) onSetDashboardViewMode;
   final OnSettingChanged<bool> onSetDashboardColorTestsInRed;
   final OnSettingChanged<List<String>> onSetIgnoreForGradesAverage;
   final VoidCallback onShowProfile;
@@ -69,6 +71,7 @@ class SettingsPageWidget extends StatefulWidget {
     required this.onSetDashboardColorBorders,
     required this.onSetCalenderColorBackground,
     required this.onSetCalendarShowTimes,
+    required this.onSetDashboardViewMode,
     required this.onSetDashboardColorTestsInRed,
   });
 
@@ -243,6 +246,19 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
               ),
             ),
           ),
+          for (final entry in const <DashboardViewMode, String>{
+            DashboardViewMode.list: "Als Liste anzeigen",
+            DashboardViewMode.month: "Als Monatskalender anzeigen",
+            DashboardViewMode.week: "Als Wochenplan anzeigen",
+          }.entries)
+            RadioListTile<DashboardViewMode>(
+              title: Text(entry.value),
+              value: entry.key,
+              groupValue: widget.vm.dashboardViewMode,
+              onChanged: (mode) {
+                if (mode != null) widget.onSetDashboardViewMode(mode);
+              },
+            ),
           SwitchListTile.adaptive(
             title: const Text("Neue oder geänderte Einträge markieren"),
             onChanged: (bool value) {

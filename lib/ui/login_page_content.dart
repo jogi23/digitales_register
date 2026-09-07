@@ -660,9 +660,7 @@ class _AccountTile extends ConsumerWidget {
         : const AccountProfile();
 
     final display = profile.alias ?? username;
-    final initialsSource = display.trim().isEmpty ? '?' : display.trim();
-    final initials =
-        initialsSource.substring(0, initialsSource.length.clamp(0, 3)).toUpperCase();
+    final initials = accountInitials(display);
 
     Widget avatar = _initialsAvatar(context, initials);
     if (profile.photoPath != null) {
