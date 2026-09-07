@@ -35,6 +35,12 @@ class MessagesPageContainer extends ConsumerWidget {
           ref.read(messagesProvider.notifier).openMessageFile(file),
       onMarkAsRead: (message) =>
           ref.read(messagesProvider.notifier).markAsRead(message.id),
+      onReply: (message, {String? response, String? signature}) =>
+          ref.read(messagesProvider.notifier).reply(
+                message.id,
+                response: response,
+                signature: signature,
+              ),
       onMarkAllAsRead: () =>
           ref.read(messagesProvider.notifier).markAllAsRead(),
       onRefresh: () => noInternet

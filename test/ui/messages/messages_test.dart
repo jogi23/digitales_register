@@ -85,6 +85,55 @@ Widget _buildWidget(MessagesState state) {
   );
 }
 
+
+MessagesState _stateWithResponse(MessageResponseInfo? info) {
+  return MessagesState(
+    (b) => b.messages = ListBuilder(
+      <Message>[
+        Message(
+          (b) => b
+            ..fromName = "Sender"
+            ..recipientString = "Empfänger"
+            ..id = 25
+            ..subject = "Betreff"
+            ..timeSent = UtcDateTime.parse("2020-03-04 20:57:38")
+            ..text = _messageText
+            ..responseInfo = info?.toBuilder(),
+        )
+      ],
+    ),
+  );
+}
+
+MessageResponseInfo _info({
+  String type = MessageResponseInfo.typeAgree,
+  bool signatureRequired = false,
+  bool parentSignatureRequired = false,
+  String? givenResponse,
+  String? givenSignature,
+  String? historyText,
+  String? badge,
+}) {
+  return MessageResponseInfo(
+    (b) => b
+      ..type = type
+      ..responseRequired = type == MessageResponseInfo.typeAgree
+      ..signatureRequired = signatureRequired
+      ..parentSignatureRequired = parentSignatureRequired
+      ..givenResponse = givenResponse
+      ..givenSignature = givenSignature
+      ..historyText = historyText
+      ..badge = badge,
+  );
+}
+
+/// Opens the single message so the confirmation section is built.
+Future<void> _openMessage(WidgetTester tester, MessagesState state) async {
+  await tester.pumpWidget(_buildWidget(state));
+  await tester.tap(find.text("Betreff"));
+  await tester.pumpAndSettle();
+}
+
 void main() {
   testGoldens('with attachment', (WidgetTester tester) async {
     final widget = _buildWidget(
@@ -131,5 +180,114 @@ void main() {
       matchesGoldenFile("attachment_downloaded.png"),
     );
   });
-}
 
+  group('confirmation section', () {
+    testWidgets('agree message shows both buttons and no signature field',
+        (tester) async {
+      await _openMessage(tester, _stateWithResponse(_info()));
+      expect(find.text("Stimme zu"), findsOneWidget);
+      expect(find.text("Stimme nicht zu"), findsOneWidget);
+      expect(find.byType(TextField), findsNothing);
+    });
+
+    testWidgets('signature message shows a field and one confirm button',
+        (tester) async {
+      await _openMessage(
+        tester,
+        _stateWithResponse(
+          _info(type: MessageResponseInfo.typeRead, signatureRequired: true),
+        ),
+      );
+      expect(find.byType(TextField), findsOneWidget);
+      expect(find.text("Bestätigen"), findsOneWidget);
+      expect(find.text("Stimme zu"), findsNothing);
+    });
+
+    testWidgets('confirm stays disabled until a name is typed',
+        (tester) async {
+      await _openMessage(
+        tester,
+        _stateWithResponse(
+          _info(type: MessageResponseInfo.typeRead, signatureRequired: true),
+        ),
+      );
+      FilledButton button() => tester.widget<FilledButton>(
+            find.widgetWithText(FilledButton, "Bestätigen"),
+          );
+      expect(button().onPressed, isNull);
+
+      await tester.enterText(find.byType(TextField), "Max Mustermann");
+      await tester.pumpAndSettle();
+      expect(button().onPressed, isNotNull);
+    });
+
+    testWidgets('whitespace alone does not enable the confirm button',
+        (tester) async {
+      await _openMessage(
+        tester,
+        _stateWithResponse(
+          _info(type: MessageResponseInfo.typeRead, signatureRequired: true),
+        ),
+      );
+      await tester.enterText(find.byType(TextField), "   ");
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<FilledButton>(
+              find.widgetWithText(FilledButton, "Bestätigen"),
+            )
+            .onPressed,
+        isNull,
+      );
+    });
+
+    testWidgets('an answered message shows the history instead of controls',
+        (tester) async {
+      await _openMessage(
+        tester,
+        _stateWithResponse(
+          _info(
+            type: MessageResponseInfo.typeRead,
+            signatureRequired: true,
+            givenSignature: "Notburga Mair",
+            historyText: "Von Eltern-Account 1 am 05.09.2026 bestätigt.",
+          ),
+        ),
+      );
+      expect(
+        find.text("Von Eltern-Account 1 am 05.09.2026 bestätigt."),
+        findsOneWidget,
+      );
+      expect(find.text("Bestätigen"), findsNothing);
+      expect(find.byType(TextField), findsNothing);
+    });
+
+    testWidgets('guardian-only messages offer no controls', (tester) async {
+      await _openMessage(
+        tester,
+        _stateWithResponse(_info(parentSignatureRequired: true)),
+      );
+      expect(find.textContaining("Erziehungsberechtigten"), findsOneWidget);
+      expect(find.text("Stimme zu"), findsNothing);
+    });
+
+    testWidgets('an unknown response type points to the browser',
+        (tester) async {
+      await _openMessage(
+        tester,
+        _stateWithResponse(_info(type: "poll")),
+      );
+      expect(find.textContaining("im Browser"), findsOneWidget);
+      expect(find.text("Stimme zu"), findsNothing);
+      expect(find.text("Bestätigen"), findsNothing);
+    });
+
+    testWidgets('a message without confirmation shows no section',
+        (tester) async {
+      await _openMessage(tester, _stateWithResponse(null));
+      expect(find.text("Stimme zu"), findsNothing);
+      expect(find.text("Bestätigen"), findsNothing);
+      expect(find.byType(TextField), findsNothing);
+    });
+  });
+}

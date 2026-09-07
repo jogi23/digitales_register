@@ -17,6 +17,7 @@
 
 import 'dart:convert';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
@@ -80,11 +81,20 @@ Future<dynamic> getDemoResponse(String url, dynamic args) async {
   };
   if (synthetic.containsKey(url)) return synthetic[url];
 
+  if (url == _replyUrl) return _demoReply(args);
+
   final matches = _capture
       .where((item) => _pathOf(item['address'] as String) == url)
       .toList();
 
   if (matches.isEmpty) return null;
+
+  // Messages carry the confirmations sent during this demo session.
+  if (url == _myMessagesUrl) {
+    final stored = matches.first['response'];
+    return stored is List ? _withDemoReplies(stored) : stored;
+  }
+
   if (matches.length == 1) return matches.first['response'];
 
   // Calendar: shift stored week to the requested week
@@ -103,6 +113,63 @@ Future<dynamic> getDemoResponse(String url, dynamic args) async {
   }
 
   return matches.last['response'];
+}
+
+
+// ---------------------------------------------------------------------------
+// Message confirmations
+// ---------------------------------------------------------------------------
+
+const _myMessagesUrl = 'api/message/getMyMessages';
+const _replyUrl = 'api/message/reply';
+
+/// Confirmations sent while the demo runs. The capture is read-only, so the
+/// answers live here and are merged into every message list.
+final Map<int, Map<String, dynamic>> _demoReplies = <int, Map<String, dynamic>>{};
+
+/// Applies [_demoReplies] on top of the captured messages.
+List<dynamic> _withDemoReplies(List<dynamic> messages) {
+  if (_demoReplies.isEmpty) return messages;
+  return <dynamic>[
+    for (final message in messages)
+      if (message is Map && _demoReplies.containsKey(message['id']))
+        <String, dynamic>{
+          ...message.cast<String, dynamic>(),
+          ..._demoReplies[message['id']]!,
+        }
+      else
+        message,
+  ];
+}
+
+/// Records a confirmation and answers like the server does: with the full,
+/// updated message list.
+dynamic _demoReply(dynamic args) {
+  final stored = _capture
+      .where((item) => _pathOf(item['address'] as String) == _myMessagesUrl)
+      .map((item) => item['response'])
+      .whereType<List<dynamic>>()
+      .firstOrNull;
+  if (stored == null) return null;
+
+  final id = args is Map ? args['messageId'] : null;
+  final response = args is Map && args['response'] is Map
+      ? (args['response'] as Map).cast<String, dynamic>()
+      : const <String, dynamic>{};
+
+  if (id is int) {
+    _demoReplies[id] = <String, dynamic>{
+      'response': response['response'],
+      'responseSignature': response['signature'],
+      'needsResponse': false,
+      'needsSignature': false,
+      'replied': true,
+      'badge': null,
+      'historyString': 'Von Eltern-Account Demo am '
+          '${DateFormat('dd.MM.yyyy').format(DateTime.now())} bestätigt. ',
+    };
+  }
+  return _withDemoReplies(stored);
 }
 
 // ---------------------------------------------------------------------------

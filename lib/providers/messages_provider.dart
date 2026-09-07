@@ -108,6 +108,34 @@ class MessagesNotifier extends Notifier<MessagesState> {
     ));
   }
 
+  /// Sends a confirmation for [messageId].
+  ///
+  /// [response] is [MessageResponseInfo.answerAgree] / [answerNotAgree], or
+  /// `null` for a plain acknowledgement. [signature] is the typed name, only
+  /// for messages that require one.
+  ///
+  /// Unlike [markAsRead] this is not optimistic: the answer is binding, so the
+  /// server state wins. It replies with the full, updated message list.
+  Future<void> reply(
+    int messageId, {
+    String? response,
+    String? signature,
+  }) async {
+    final dynamic result = await wrapper.send(
+      "api/message/reply",
+      args: <String, Object?>{
+        "messageId": messageId,
+        // The web frontend omits these keys rather than sending null; mirror
+        // that so the backend sees the exact same request.
+        "response": <String, Object?>{
+          if (signature != null) "signature": signature,
+          if (response != null) "response": response,
+        },
+      },
+    );
+    if (result is List) state = _parseMessages(result);
+  }
+
   void _markDownloading(MessageAttachmentFile file) {
     final messageIndex =
         state.messages.indexWhere((m) => m.id == file.messageId);
@@ -178,7 +206,8 @@ class MessagesNotifier extends Notifier<MessagesState> {
       ..timeRead = timeRead
       ..recipientString = getString(json["recipientString"])
       ..fromName = getString(json["fromName"])
-      ..id = id;
+      ..id = id
+      ..responseInfo = _parseResponseInfo(json)?.toBuilder();
     final attachments = ListBuilder<MessageAttachmentFile>();
     for (final attachmentJson
         in getList(json["submissions"]) ?? <dynamic>[]) {
@@ -190,6 +219,34 @@ class MessagesNotifier extends Notifier<MessagesState> {
     }
     message.attachments = attachments;
     return message.build();
+  }
+
+  /// Maps the confirmation fields of a message, or `null` when the portal
+  /// renders no controls for it.
+  ///
+  /// The two axes are independent: the buttons hang off `responseType` alone,
+  /// the signature field off `signatureRequired` alone. `responseRequired` is
+  /// deliberately not used as a gate -- signed messages carry a 0 there.
+  MessageResponseInfo? _parseResponseInfo(Map json) {
+    final type =
+        getString(json["responseType"]) ?? MessageResponseInfo.typeRead;
+    // The backend mixes ints and bools across these flags.
+    final signatureRequired = getBool(json["signatureRequired"]) ?? false;
+    if (type != MessageResponseInfo.typeAgree && !signatureRequired) {
+      return null;
+    }
+    return MessageResponseInfo(
+      (b) => b
+        ..type = type
+        ..responseRequired = getBool(json["responseRequired"]) ?? false
+        ..signatureRequired = signatureRequired
+        ..parentSignatureRequired =
+            getBool(json["needsParentSignature"]) ?? false
+        ..givenResponse = getString(json["response"])
+        ..givenSignature = getString(json["responseSignature"])
+        ..historyText = getString(json["historyString"])
+        ..badge = getString(json["badge"]),
+    );
   }
 
   MessageAttachmentFile? _parseAttachment(Map json, Message? oldMessage) {

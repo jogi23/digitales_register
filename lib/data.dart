@@ -710,6 +710,65 @@ abstract class LessonContentSubmission
     ..downloading = false;
 }
 
+/// The confirmation a message asks its recipient for.
+///
+/// Two independent axes: a response ("Stimme zu" / "Stimme nicht zu") and a
+/// signature typed with the recipient's own name. Both can be required at the
+/// same time, which is why this is not a single enum.
+///
+/// A `null` [Message.responseInfo] means nothing is asked for.
+abstract class MessageResponseInfo
+    implements Built<MessageResponseInfo, MessageResponseInfoBuilder> {
+  /// Response types the portal knows.
+  static const typeAgree = "agree";
+  static const typeRead = "read";
+
+  /// Values the portal sends for [givenResponse].
+  static const answerAgree = "agree";
+  static const answerNotAgree = "not_agree";
+
+  /// Kept verbatim, so an unknown type can be detected instead of silently
+  /// rendering the wrong controls for a binding confirmation.
+  String get type;
+
+  bool get responseRequired;
+  bool get signatureRequired;
+
+  /// Only a legal guardian may confirm; the portal blocks everyone else.
+  bool get parentSignatureRequired;
+
+  /// [answerAgree] or [answerNotAgree], `null` while unanswered.
+  String? get givenResponse;
+
+  /// The name that was typed, `null` while unsigned.
+  String? get givenSignature;
+
+  /// Server rendered history, e.g. "Von X am 05.09.2026 bestaetigt.".
+  String? get historyText;
+
+  /// Server rendered status label, e.g. "Nicht beantwortet". Display only --
+  /// it is localized by the server and absent on messages without an action.
+  String? get badge;
+
+  /// Whether either axis has been fulfilled. The portal confirms per message,
+  /// not per account, so this can be true because the *other* guardian acted.
+  bool get answered => givenResponse != null || givenSignature != null;
+
+  bool get showAgreeButtons => type == typeAgree;
+  bool get showConfirmButton => signatureRequired && type == typeRead;
+  bool get showSignatureField => signatureRequired;
+
+  /// The server asks for something no control covers. Sending the user to the
+  /// browser beats guessing at a confirmation that binds them for a year.
+  bool get unsupported => !showAgreeButtons && !showConfirmButton;
+
+  static Serializer<MessageResponseInfo> get serializer =>
+      _$messageResponseInfoSerializer;
+  factory MessageResponseInfo(
+      [Function(MessageResponseInfoBuilder b)? updates]) = _$MessageResponseInfo;
+  MessageResponseInfo._();
+}
+
 abstract class Message implements Built<Message, MessageBuilder> {
   String get subject;
   String get text;
@@ -721,6 +780,9 @@ abstract class Message implements Built<Message, MessageBuilder> {
 
   int get id;
   BuiltList<MessageAttachmentFile> get attachments;
+
+  /// `null` when the message asks for no confirmation.
+  MessageResponseInfo? get responseInfo;
 
   bool get isNew => timeRead == null;
 

@@ -38,6 +38,8 @@ class MessagesPage extends StatelessWidget {
   final bool hasUnread;
   final void Function(MessageAttachmentFile message) onOpenFile;
   final void Function(Message message) onMarkAsRead;
+  final void Function(Message message, {String? response, String? signature})
+      onReply;
   final VoidCallback onMarkAllAsRead;
   final Future<void> Function() onRefresh;
 
@@ -48,6 +50,7 @@ class MessagesPage extends StatelessWidget {
     required this.hasUnread,
     required this.onOpenFile,
     required this.onMarkAsRead,
+    required this.onReply,
     required this.onMarkAllAsRead,
     required this.onRefresh,
   });
@@ -112,6 +115,7 @@ class MessagesPage extends StatelessWidget {
                           message: state!.messages[i],
                           onOpenFile: onOpenFile,
                           onMarkAsRead: onMarkAsRead,
+                          onReply: onReply,
                           noInternet: noInternet,
                           expand: state!.messages[i].id == state!.showMessage,
                           tileColor: i.isOdd ? altColor : null,
@@ -130,6 +134,8 @@ class MessageWidget extends StatefulWidget {
   final Message message;
   final void Function(MessageAttachmentFile message) onOpenFile;
   final void Function(Message message) onMarkAsRead;
+  final void Function(Message message, {String? response, String? signature})
+      onReply;
   final bool noInternet;
   final bool expand;
   final Color? tileColor;
@@ -140,6 +146,7 @@ class MessageWidget extends StatefulWidget {
     required this.onOpenFile,
     required this.noInternet,
     required this.onMarkAsRead,
+    required this.onReply,
     required this.expand,
     this.tileColor,
   });
@@ -290,10 +297,160 @@ class _MessageWidgetState extends State<MessageWidget> {
                     ),
                   ]
               ].intersperse(const Divider()),
+              if (widget.message.responseInfo case final info?) ...[
+                const Divider(),
+                MessageResponseSection(
+                  info: info,
+                  noInternet: widget.noInternet,
+                  onReply: ({String? response, String? signature}) =>
+                      widget.onReply(
+                    widget.message,
+                    response: response,
+                    signature: signature,
+                  ),
+                ),
+              ],
             ],
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Renders the confirmation a message asks for: two buttons, a signature
+/// field, or both.
+///
+/// Mirrors the portal: the buttons hang off the response type, the signature
+/// field off [MessageResponseInfo.signatureRequired], and an empty signature
+/// blocks sending.
+class MessageResponseSection extends StatefulWidget {
+  final MessageResponseInfo info;
+  final bool noInternet;
+  final void Function({String? response, String? signature}) onReply;
+
+  const MessageResponseSection({
+    super.key,
+    required this.info,
+    required this.noInternet,
+    required this.onReply,
+  });
+
+  @override
+  State<MessageResponseSection> createState() => _MessageResponseSectionState();
+}
+
+class _MessageResponseSectionState extends State<MessageResponseSection> {
+  final TextEditingController _signature = TextEditingController();
+  bool _sent = false;
+
+  @override
+  void dispose() {
+    _signature.dispose();
+    super.dispose();
+  }
+
+  bool get _canSend {
+    if (_sent || widget.noInternet) return false;
+    // The portal only checks for a non-empty name, it does not match it
+    // against the account.
+    return !widget.info.showSignatureField ||
+        _signature.text.trim().isNotEmpty;
+  }
+
+  void _send(String? response) {
+    setState(() => _sent = true);
+    widget.onReply(
+      response: response,
+      signature: widget.info.showSignatureField
+          ? _signature.text.trim()
+          : null,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final info = widget.info;
+    final theme = Theme.of(context);
+
+    if (info.answered) {
+      return _Hint(info.historyText ?? info.badge ?? "Bereits bestätigt.");
+    }
+    if (info.parentSignatureRequired) {
+      return const _Hint(
+        "Diese Mitteilung kann nur von einem Erziehungsberechtigten "
+        "bestätigt werden.",
+      );
+    }
+    if (info.unsupported) {
+      return const _Hint(
+        "Diese Mitteilung verlangt eine Bestätigung, die in der App noch "
+        "nicht unterstützt wird. Bitte im Browser öffnen.",
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (info.badge != null)
+          Text(info.badge!, style: theme.textTheme.labelLarge),
+        if (info.showSignatureField) ...[
+          const SizedBox(height: 8),
+          TextField(
+            controller: _signature,
+            enabled: !_sent,
+            textCapitalization: TextCapitalization.words,
+            decoration: const InputDecoration(
+              labelText: "Bitte bestätigen Sie mit Ihrem Vor- und Nachnamen",
+              border: OutlineInputBorder(),
+            ),
+            onChanged: (_) => setState(() {}),
+          ),
+        ],
+        const SizedBox(height: 8),
+        if (info.showAgreeButtons)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              OutlinedButton(
+                onPressed: _canSend
+                    ? () => _send(MessageResponseInfo.answerNotAgree)
+                    : null,
+                child: const Text("Stimme nicht zu"),
+              ),
+              const SizedBox(width: 8),
+              FilledButton(
+                onPressed: _canSend
+                    ? () => _send(MessageResponseInfo.answerAgree)
+                    : null,
+                child: const Text("Stimme zu"),
+              ),
+            ],
+          )
+        else
+          Align(
+            alignment: Alignment.centerRight,
+            child: FilledButton(
+              onPressed: _canSend ? () => _send(null) : null,
+              child: const Text("Bestätigen"),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _Hint extends StatelessWidget {
+  final String text;
+  const _Hint(this.text);
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            fontStyle: FontStyle.italic,
+          ),
     );
   }
 }
