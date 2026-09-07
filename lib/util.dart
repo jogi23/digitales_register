@@ -64,6 +64,24 @@ extension StringUtils on String? {
   }
 }
 
+/// Black or white, whichever reads better on [background].
+///
+/// ThemeData.estimateBrightnessForColor decides by a fixed luminance
+/// threshold, which counts mid-tones like the green accent (#4CAF50) as dark
+/// and puts white on them — a contrast of 2.8 where black reaches 7.6. This
+/// compares the actual contrast instead.
+Color readableOn(Color background) {
+  double contrastWith(Color foreground) {
+    final a = foreground.computeLuminance(), b = background.computeLuminance();
+    final lighter = a > b ? a : b, darker = a > b ? b : a;
+    return (lighter + 0.05) / (darker + 0.05);
+  }
+
+  return contrastWith(Colors.black) >= contrastWith(Colors.white)
+      ? Colors.black
+      : Colors.white;
+}
+
 /// The letters shown in an account's avatar.
 ///
 /// Usernames tend to start with the enrolment year ("2019feithe_2"), and the

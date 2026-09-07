@@ -120,9 +120,11 @@ class ResponsiveScaffoldState<T> extends State<ResponsiveScaffold<T>>
   }
 
   void closeDrawerIfOpen() {
-    if (scaffoldKey.currentState?.isDrawerOpen == true) {
-      Navigator.of(scaffoldKey.currentContext!).pop();
-    }
+    final state = scaffoldKey.currentState;
+    // closeDrawer, not Navigator.pop: the drawer is not a route, so popping
+    // the scaffold's navigator took the current page down instead and left
+    // the drawer sitting behind it — visible again on the way back.
+    if (state?.isDrawerOpen == true) state!.closeDrawer();
   }
 
   /// Pushes [content] to the body of the scaffold, associating [data] with it.

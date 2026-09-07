@@ -24,6 +24,7 @@ import 'package:dr/providers/dashboard_provider.dart';
 import 'package:dr/providers/grades_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/ui/dashboard_calendar.dart';
+import 'package:dr/utc_date_time.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -38,6 +39,26 @@ class _TestDashboardNotifier extends DashboardNotifier {
 
   @override
   DashboardState build() => _initialState;
+
+  // The calendar views fetch past and future on their own; in tests that
+  // would hit the network and leave the progress bar animating forever.
+  @override
+  Future<void> load(bool future) async {}
+
+  @override
+  Future<void> loadBothDirections() async {
+    bothDirectionsCalls++;
+    // Answers with the same days, as the server does for a span it has
+    // nothing for — but the rebuild is real, and that rebuild is what used
+    // to throw the calendar back to its starting month.
+    state = state.rebuild(
+      (b) => b.allDays.map(
+        (day) => day.rebuild((b) => b..lastRequested = UtcDateTime(2026, 9, 7)),
+      ),
+    );
+  }
+
+  int bothDirectionsCalls = 0;
 }
 
 /// The dashboard pulls grade competences, which would hit the network.
@@ -86,13 +107,19 @@ Future<void> main() async {
     );
   });
 
+  late _TestDashboardNotifier notifier;
+
   Widget dashboard({
     required bool calendarView,
     Brightness brightness = Brightness.light,
+    bool loading = false,
   }) {
+    notifier = _TestDashboardNotifier(
+      loading ? _mayState.rebuild((b) => b..loading = true) : _mayState,
+    );
     return ProviderScope(
       overrides: [
-        dashboardProvider.overrideWith(() => _TestDashboardNotifier(_mayState)),
+        dashboardProvider.overrideWith(() => notifier),
         gradesProvider.overrideWith(() => _TestGradesNotifier(GradesState())),
         settingsProvider.overrideWith(
           () => _TestSettingsNotifier(
@@ -124,6 +151,13 @@ Future<void> main() async {
     await tester.pumpAndSettle();
   }
 
+  /// Renders while entries are still being fetched.
+  Future<void> pumpLoading(WidgetTester tester) async {
+    await tester.pumpWidget(dashboard(calendarView: true, loading: true));
+    // Not settled: the progress bar animates forever.
+    await tester.pump();
+  }
+
   /// Taps the given day of the month in the grid.
   Future<void> tapDay(WidgetTester tester, String dayOfMonth) async {
     await tester.tap(find.text(dayOfMonth).first);
@@ -145,6 +179,171 @@ Future<void> main() async {
       await tester.pumpAndSettle();
       expect(find.byType(DashboardCalendar), findsNothing);
       expect(find.text('Mai 2026'), findsNothing);
+    });
+  });
+
+  group('loading both directions', () {
+    testWidgets('the month view fetches past and future', (tester) async {
+      // The server only knows "before" or "after"; with one direction the
+      // other half of the calendar would look empty.
+      await pumpCalendar(tester);
+      expect(notifier.bothDirectionsCalls, 1);
+    });
+
+    testWidgets('the list view does not', (tester) async {
+      await tester.pumpWidget(dashboard(calendarView: false));
+      await tester.pumpAndSettle();
+      expect(notifier.bothDirectionsCalls, 0);
+    });
+
+    testWidgets('the past/future switch is hidden in the month view',
+        (tester) async {
+      await pumpCalendar(tester);
+      expect(find.text('Zukunft'), findsNothing);
+      expect(find.text('Vergangenheit'), findsNothing);
+    });
+
+    testWidgets('the list view keeps the switch', (tester) async {
+      await tester.pumpWidget(dashboard(calendarView: false));
+      await tester.pumpAndSettle();
+      expect(
+        find.text('Zukunft').evaluate().isNotEmpty ||
+            find.text('Vergangenheit').evaluate().isNotEmpty,
+        isTrue,
+      );
+    });
+  });
+
+  group('fetching what is missing', () {
+    testWidgets('picking an unloaded day asks for more', (tester) async {
+      await pumpCalendar(tester);
+      final before = notifier.bothDirectionsCalls;
+      // July was never loaded.
+      await tester.tap(find.byTooltip('Nächster Monat'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Nächster Monat'));
+      await tester.pumpAndSettle();
+      await tapDay(tester, '15');
+      expect(notifier.bothDirectionsCalls, before + 1);
+    });
+
+    testWidgets('picking an unloaded week asks for more', (tester) async {
+      await pumpCalendar(tester);
+      final before = notifier.bothDirectionsCalls;
+      await tester.tap(find.byTooltip('Nächster Monat'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Nächster Monat'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Kalenderwoche 28'));
+      await tester.pumpAndSettle();
+      expect(notifier.bothDirectionsCalls, before + 1);
+    });
+
+    testWidgets('the same day is not asked for twice', (tester) async {
+      // The server answers for a limited span; without this a day beyond it
+      // would fire a request on every tap.
+      await pumpCalendar(tester);
+      await tester.tap(find.byTooltip('Nächster Monat'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Nächster Monat'));
+      await tester.pumpAndSettle();
+      await tapDay(tester, '15');
+      final after = notifier.bothDirectionsCalls;
+      await tapDay(tester, '15');
+      await tapDay(tester, '15');
+      expect(notifier.bothDirectionsCalls, after);
+    });
+
+    testWidgets('says so when the fetch brought nothing', (tester) async {
+      // The server answers only for a couple of months around today. Once a
+      // day was asked for and is still missing, saying "(Kein Eintrag)" would
+      // suggest there is nothing due — the truth is there is no data at all.
+      await pumpCalendar(tester);
+      await tester.tap(find.byTooltip('Nächster Monat'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Nächster Monat'));
+      await tester.pumpAndSettle();
+
+      await tapDay(tester, '15');
+      expect(
+        find.text('Für diesen Zeitraum liegen keine Daten vor'),
+        findsOneWidget,
+      );
+      expect(find.text('(Kein Eintrag)'), findsNothing);
+    });
+
+    testWidgets('a loaded day without entries still says "(Kein Eintrag)"',
+        (tester) async {
+      await pumpCalendar(tester);
+      await tapDay(tester, '9');
+      expect(find.text('(Kein Eintrag)'), findsOneWidget);
+    });
+
+    testWidgets('the view stays on the month one navigated to', (tester) async {
+      // Fetching changes the days, which used to send the calendar back to
+      // its starting month — right out from under the tap.
+      await pumpCalendar(tester);
+      await tester.tap(find.byTooltip('Nächster Monat'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Nächster Monat'));
+      await tester.pumpAndSettle();
+      expect(find.text('Juli 2026'), findsOneWidget);
+
+      await tapDay(tester, '15');
+      expect(find.text('Juli 2026'), findsOneWidget);
+      expect(find.text('Mai 2026'), findsNothing);
+    });
+
+    testWidgets('picking a loaded day asks for nothing', (tester) async {
+      await pumpCalendar(tester);
+      final before = notifier.bothDirectionsCalls;
+      await tapDay(tester, '11');
+      expect(notifier.bothDirectionsCalls, before);
+    });
+  });
+
+  group('while the missing days are on their way', () {
+    testWidgets('a bar shows that something is happening', (tester) async {
+      await pumpLoading(tester);
+      expect(find.byType(LinearProgressIndicator), findsWidgets);
+    });
+
+    testWidgets('an unknown day says it is loading, not that it is empty',
+        (tester) async {
+      await pumpLoading(tester);
+      await tester.tap(find.byTooltip('Nächster Monat'));
+      await tester.pump();
+      await tester.tap(find.byTooltip('Nächster Monat'));
+      await tester.pump();
+      await tester.tap(find.text('15').first);
+      await tester.pump();
+      expect(find.text('Wird geladen …'), findsOneWidget);
+      expect(find.text('(Kein Eintrag)'), findsNothing);
+    });
+  });
+
+  group('days outside the loaded span', () {
+    /// The colour the day number is drawn in.
+    Color? colourOfDay(WidgetTester tester, String dayOfMonth) => tester
+        .widget<Text>(find.text(dayOfMonth).first)
+        .style
+        ?.color;
+
+    testWidgets('are faded, so no dot does not read as "nothing to do"',
+        (tester) async {
+      await pumpCalendar(tester);
+      // Only May is loaded, so July is unknown territory.
+      await tester.tap(find.byTooltip('Nächster Monat'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Nächster Monat'));
+      await tester.pumpAndSettle();
+      expect(find.text('Juli 2026'), findsOneWidget);
+      expect(colourOfDay(tester, '15'), isNotNull);
+    });
+
+    testWidgets('loaded days keep the normal colour', (tester) async {
+      await pumpCalendar(tester);
+      expect(colourOfDay(tester, '15'), isNull);
     });
   });
 
@@ -180,17 +379,6 @@ Future<void> main() async {
       expect(find.textContaining('9.5.'), findsWidgets);
     });
 
-    testWidgets('a day the dashboard did not load says so', (tester) async {
-      await pumpCalendar(tester);
-      // July was never loaded, so no day of it can have entries.
-      await tester.tap(find.byTooltip('Nächster Monat'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.byTooltip('Nächster Monat'));
-      await tester.pumpAndSettle();
-      expect(find.text('Juli 2026'), findsOneWidget);
-      await tapDay(tester, '15');
-      expect(find.text('(Kein Eintrag)'), findsOneWidget);
-    });
   });
 
   group('picking a week', () {
@@ -219,12 +407,38 @@ Future<void> main() async {
       expect(find.text('Tag auswählen'), findsOneWidget);
     });
 
-    testWidgets('a week without entries says so', (tester) async {
+    testWidgets('a week reaching outside the loaded span reports that',
+        (tester) async {
+      // Week 18 starts on 27 April, which the dashboard never loaded.
       await pumpCalendar(tester);
-      // The first week of May 2026 carries nothing.
       await tester.tap(find.byTooltip('Kalenderwoche 18'));
       await tester.pumpAndSettle();
-      expect(find.text('(Kein Eintrag)'), findsOneWidget);
+      expect(
+        find.text('Für diesen Zeitraum liegen keine Daten vor'),
+        findsOneWidget,
+      );
+    });
+  });
+
+  group('day circles', () {
+    /// The size of the circle drawn around a day number.
+    Size circleOf(WidgetTester tester, String dayOfMonth) {
+      final circle = find
+          .ancestor(
+            of: find.text(dayOfMonth),
+            matching: find.byType(SizedBox),
+          )
+          .first;
+      return tester.getSize(circle);
+    }
+
+    testWidgets('are the same size for one and two digit days',
+        (tester) async {
+      // A circle sized to its text alone shrinks for single digits, which
+      // made the 7th look smaller than the 17th.
+      await pumpCalendar(tester);
+      expect(circleOf(tester, '7'), circleOf(tester, '17'));
+      expect(circleOf(tester, '9'), circleOf(tester, '30'));
     });
   });
 

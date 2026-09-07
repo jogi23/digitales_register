@@ -48,6 +48,7 @@ class CalendarWeekContainer extends ConsumerWidget {
       selection: calendarState.selection,
       colorBackground: settings.calendarColorBackground,
       showTimes: settings.calendarShowTimes,
+      loading: calendarState.isLoadingWeek(monday),
       subjectThemes: subjectAppearance.themes,
     );
     return CalendarWeek(vm: vm, key: key);
@@ -62,6 +63,9 @@ class CalendarWeekViewModel {
   final bool colorBackground;
   final bool showTimes;
 
+  /// Whether this week is still being fetched.
+  final bool loading;
+
   /// Subjects that carry dashboard entries, per day. Lessons outside this are
   /// dimmed; `null` dims nothing, which is what the calendar page wants.
   final Map<UtcDateTime, Set<String>>? subjectsWithEntries;
@@ -74,6 +78,7 @@ class CalendarWeekViewModel {
     required this.selection,
     required this.colorBackground,
     required this.showTimes,
+    this.loading = false,
     this.subjectsWithEntries,
     required this.subjectThemes,
   });

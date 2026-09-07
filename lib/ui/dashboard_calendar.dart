@@ -26,6 +26,14 @@ DateTime dateOnly(DateTime date) => DateTime(date.year, date.month, date.day);
 /// Shown for a day or week that carries nothing.
 const _noEntries = "(Kein Eintrag)";
 
+/// Shown while the days being looked at are still on their way.
+const _loadingEntries = "Wird geladen …";
+
+/// Shown once asking for a span brought nothing: the server answers only for
+/// a couple of months around today, and repeating the request will not change
+/// that.
+const _noData = "Für diesen Zeitraum liegen keine Daten vor";
+
 /// What the area below the grid shows.
 sealed class _Pick {
   const _Pick();
@@ -54,10 +62,18 @@ class DashboardCalendar extends StatefulWidget {
   final BuiltList<Day> days;
   final Widget Function(Day day) dayBuilder;
 
+  /// Whether entries are being fetched right now.
+  final bool loading;
+
+  /// Asks for the days the dashboard does not hold yet.
+  final VoidCallback onLoadMissing;
+
   const DashboardCalendar({
     super.key,
     required this.days,
     required this.dayBuilder,
+    this.loading = false,
+    required this.onLoadMissing,
   });
 
   @override
@@ -70,22 +86,16 @@ class _DashboardCalendarState extends State<DashboardCalendar> {
 
   _Pick? _pick;
 
+  /// Days already asked for, so a span the server simply has nothing for is
+  /// not requested again on every tap.
+  final Set<DateTime> _requested = {};
+
   @override
   void initState() {
     super.initState();
     _month = _startingMonth();
     // Open on today, so the view starts where the user is.
     _pick = _DayPick(dateOnly(DateTime.now()));
-  }
-
-  @override
-  void didUpdateWidget(DashboardCalendar oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    // Switching between past and future replaces the days entirely. Without
-    // this the calendar would keep showing a month that now has nothing.
-    if (widget.days != oldWidget.days && !_hasDaysIn(_month)) {
-      setState(() => _month = _startingMonth());
-    }
   }
 
   /// The month of today when today is loaded, otherwise the month of the first
@@ -101,25 +111,44 @@ class _DashboardCalendarState extends State<DashboardCalendar> {
 
   static DateTime _monthOf(DateTime date) => DateTime(date.year, date.month);
 
-  bool _hasDaysIn(DateTime month) => widget.days
-      .any((d) => d.date.year == month.year && d.date.month == month.month);
-
   void _changeMonth(int delta) => setState(() {
         _month = DateTime(_month.year, _month.month + delta);
       });
 
   /// Picking the same thing twice clears the selection.
-  void _pickDay(DateTime date) => setState(() {
-        final pick = _pick;
-        _pick = pick is _DayPick && pick.date == date ? null : _DayPick(date);
-      });
+  void _pickDay(DateTime date) {
+    setState(() {
+      final pick = _pick;
+      _pick = pick is _DayPick && pick.date == date ? null : _DayPick(date);
+    });
+    _fetchIfMissing([date]);
+  }
 
-  void _pickWeek(DateTime monday) => setState(() {
-        final pick = _pick;
-        _pick = pick is _WeekPick && pick.monday == monday
-            ? null
-            : _WeekPick(monday);
-      });
+  void _pickWeek(DateTime monday) {
+    setState(() {
+      final pick = _pick;
+      _pick =
+          pick is _WeekPick && pick.monday == monday ? null : _WeekPick(monday);
+    });
+    _fetchIfMissing([
+      for (var i = 0; i < 7; i++) monday.add(Duration(days: i)),
+    ]);
+  }
+
+  /// Fetches when the picked days are outside what the dashboard holds.
+  ///
+  /// Asked only once per day: the server answers for a limited span, so days
+  /// beyond it would otherwise trigger a request on every tap.
+  void _fetchIfMissing(List<DateTime> dates) {
+    final range = _loadedRange(
+      <DateTime>{for (final day in widget.days) dateOnly(day.date)},
+    );
+    final missing = dates.where((date) =>
+        range == null || date.isBefore(range.$1) || date.isAfter(range.$2));
+    if (missing.isEmpty) return;
+    if (!missing.any((date) => _requested.add(date))) return;
+    widget.onLoadMissing();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -135,9 +164,16 @@ class _DashboardCalendarState extends State<DashboardCalendar> {
           onPrevious: () => _changeMonth(-1),
           onNext: () => _changeMonth(1),
         ),
+        // Says that something is happening while the missing days arrive;
+        // the grid itself fills in as soon as they do.
+        SizedBox(
+          height: 2,
+          child: widget.loading ? const LinearProgressIndicator() : null,
+        ),
         _MonthGrid(
           month: _month,
           byDate: byDate,
+          loaded: _loadedRange(byDate.keys),
           pick: _pick,
           onPickDay: _pickDay,
           onPickWeek: _pickWeek,
@@ -148,13 +184,22 @@ class _DashboardCalendarState extends State<DashboardCalendar> {
     );
   }
 
+  /// First and last day the dashboard actually holds. The server answers for
+  /// a limited span, and days outside it are unknown — not free.
+  static (DateTime, DateTime)? _loadedRange(Iterable<DateTime> dates) {
+    if (dates.isEmpty) return null;
+    final sorted = dates.toList()..sort();
+    return (sorted.first, sorted.last);
+  }
+
   Widget _detail(BuildContext context, Map<DateTime, Day> byDate) {
     final pick = _pick;
     if (pick == null) return Center(child: _hint(context, "Tag auswählen"));
 
     if (pick is _DayPick) {
       final day = byDate[pick.date];
-      if (day == null) return Center(child: _hint(context, _noEntries));
+      if (day == null)
+        return Center(child: _hint(context, _missing(pick.date)));
       if (day.homework.isEmpty) {
         // The day header stays, so a reminder can still be added here.
         return SingleChildScrollView(
@@ -175,12 +220,21 @@ class _DashboardCalendarState extends State<DashboardCalendar> {
         if (byDate[monday.add(Duration(days: i))]?.homework.isNotEmpty ?? false)
           byDate[monday.add(Duration(days: i))]!,
     ];
-    if (days.isEmpty) return Center(child: _hint(context, _noEntries));
+    if (days.isEmpty) {
+      return Center(child: _hint(context, _missing(monday)));
+    }
     return SingleChildScrollView(
       child: Column(
         children: <Widget>[for (final day in days) widget.dayBuilder(day)],
       ),
     );
+  }
+
+  /// What to say about a span the dashboard holds nothing for.
+  String _missing(DateTime date) {
+    if (widget.loading) return _loadingEntries;
+    // Asked for and still not there: the server has nothing for it.
+    return _requested.contains(date) ? _noData : _noEntries;
   }
 
   Widget _hint(BuildContext context, String text) => Padding(
@@ -231,6 +285,9 @@ class _MonthHeader extends StatelessWidget {
 class _MonthGrid extends StatelessWidget {
   final DateTime month;
   final Map<DateTime, Day> byDate;
+
+  /// The span the dashboard has data for, null when it has none at all.
+  final (DateTime, DateTime)? loaded;
   final _Pick? pick;
   final void Function(DateTime date) onPickDay;
   final void Function(DateTime monday) onPickWeek;
@@ -238,6 +295,7 @@ class _MonthGrid extends StatelessWidget {
   const _MonthGrid({
     required this.month,
     required this.byDate,
+    required this.loaded,
     required this.pick,
     required this.onPickDay,
     required this.onPickWeek,
@@ -323,8 +381,11 @@ class _MonthGrid extends StatelessWidget {
       _WeekPick() => current.covers(date),
       null => false,
     };
+    final range = loaded;
     return _DayCell(
       dayOfMonth: date.day,
+      isKnown:
+          range != null && !date.isBefore(range.$1) && !date.isAfter(range.$2),
       hasEntries: day?.homework.isNotEmpty ?? false,
       hasWarning: day?.homework.any((h) => h.warning) ?? false,
       isToday: date == today,
@@ -366,8 +427,14 @@ class _WeekCell extends StatelessWidget {
   }
 }
 
+/// Diameter of the day circle, so every day looks the same size.
+const _circleSize = 30.0;
+
 class _DayCell extends StatelessWidget {
   final int dayOfMonth;
+
+  /// Whether the dashboard covers this day at all.
+  final bool isKnown;
   final bool hasEntries;
   final bool hasWarning;
   final bool isToday;
@@ -376,6 +443,7 @@ class _DayCell extends StatelessWidget {
 
   const _DayCell({
     required this.dayOfMonth,
+    required this.isKnown,
     required this.hasEntries,
     required this.hasWarning,
     required this.isToday,
@@ -393,21 +461,32 @@ class _DayCell extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          DecoratedBox(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: isSelected ? scheme.primary : Colors.transparent,
-              border: isToday && !isSelected
-                  ? Border.all(color: scheme.primary, width: 1.5)
-                  : null,
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(6),
-              child: Text(
-                "$dayOfMonth",
-                style: TextStyle(
-                  color: isSelected ? scheme.onPrimary : null,
-                  fontWeight: isToday ? FontWeight.bold : null,
+          // Fixed size: a circle around text alone would shrink for the
+          // single-digit days, so the 7th looked smaller than the 17th.
+          SizedBox(
+            width: _circleSize,
+            height: _circleSize,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isSelected ? scheme.primary : Colors.transparent,
+                border: isToday && !isSelected
+                    ? Border.all(color: scheme.primary, width: 1.5)
+                    : null,
+              ),
+              child: Center(
+                child: Text(
+                  "$dayOfMonth",
+                  style: TextStyle(
+                    // Days the dashboard never loaded are faded: no dot there
+                    // means "unknown", not "nothing to do".
+                    color: isSelected
+                        ? scheme.onPrimary
+                        : isKnown
+                            ? null
+                            : scheme.onSurfaceVariant.withValues(alpha: 0.4),
+                    fontWeight: isToday ? FontWeight.bold : null,
+                  ),
                 ),
               ),
             ),

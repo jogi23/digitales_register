@@ -151,6 +151,7 @@ class _DashboardWeekContainerState
               showTimes: settings.calendarShowTimes,
               subjectThemes: subjectAppearance.themes,
               subjectsWithEntries: _subjectsWithEntries(),
+              loading: calendarState.isLoadingWeek(_monday),
             ),
           ),
         ),
