@@ -64,6 +64,19 @@ extension StringUtils on String? {
   }
 }
 
+/// The letters shown in an account's avatar.
+///
+/// Usernames tend to start with the enrolment year ("2019feithe_2"), and the
+/// leading digits say nothing about whose account it is — so only letters
+/// count. Falls back to the raw text when there are none.
+String accountInitials(String name) {
+  final trimmed = name.trim();
+  if (trimmed.isEmpty) return '?';
+  final letters = trimmed.replaceAll(RegExp(r'[^\p{L}]', unicode: true), '');
+  final source = letters.isEmpty ? trimmed : letters;
+  return source.substring(0, source.length.clamp(0, 3)).toUpperCase();
+}
+
 /// The ISO 8601 calendar week [date] falls into.
 ///
 /// ISO counts the week containing the first Thursday of a year as week 1, so

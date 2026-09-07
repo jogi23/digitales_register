@@ -250,4 +250,56 @@ void main() {
       expect(decoded.noPasswordSaving, isFalse);
     });
   });
+
+  group('isoWeekNumber', () {
+    test('counts from the week holding the first Thursday', () {
+      expect(isoWeekNumber(DateTime(2026, 1, 1)), 1);
+      expect(isoWeekNumber(DateTime(2026, 5, 11)), 20);
+      expect(isoWeekNumber(DateTime(2026, 12, 31)), 53);
+    });
+
+    test('every day of one week shares its number', () {
+      final numbers = <int>{
+        for (var i = 0; i < 7; i++)
+          isoWeekNumber(DateTime(2026, 5, 11).add(Duration(days: i))),
+      };
+      expect(numbers, {20});
+    });
+
+    test('early January can still belong to the year before', () {
+      // 2027-01-01 is a Friday, so it belongs to week 53 of 2026.
+      expect(isoWeekNumber(DateTime(2027, 1, 1)), 53);
+    });
+
+    test('late December can already be week 1 of the next year', () {
+      // 2024-12-30 is a Monday whose Thursday falls into 2025.
+      expect(isoWeekNumber(DateTime(2024, 12, 30)), 1);
+    });
+  });
+
+  group('accountInitials', () {
+    test('skips the enrolment year in a username', () {
+      // The digits say nothing about whose account it is.
+      expect(accountInitials('2019feithe_2'), 'FEI');
+      expect(accountInitials('2016feiida_2'), 'FEI');
+    });
+
+    test('keeps working for a real name', () {
+      expect(accountInitials('Feichter Theo Eltern-Account 2'), 'FEI');
+    });
+
+    test('uses an alias as it is', () {
+      expect(accountInitials('Theo'), 'THE');
+    });
+
+    test('falls back when there are no letters at all', () {
+      expect(accountInitials('2019'), '201');
+      expect(accountInitials('   '), '?');
+      expect(accountInitials(''), '?');
+    });
+
+    test('never returns more than three characters', () {
+      expect(accountInitials('Maximiliane Musterfrau').length, 3);
+    });
+  });
 }

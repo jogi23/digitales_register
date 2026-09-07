@@ -21,6 +21,7 @@ import 'package:dr/providers/account_profile_provider.dart';
 import 'package:dr/providers/config_provider.dart';
 import 'package:dr/providers/login_provider.dart';
 import 'package:dr/ui/account_bottom_sheet.dart';
+import 'package:dr/util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -62,7 +63,7 @@ class AccountAvatarButton extends ConsumerWidget {
         );
       }
     }
-    final initials = _initials(profile.alias ?? displayName);
+    final initials = accountInitials(profile.alias ?? displayName);
     return CircleAvatar(
       radius: 24,
       backgroundColor: colorScheme.primaryContainer,
@@ -78,8 +79,4 @@ class AccountAvatarButton extends ConsumerWidget {
   }
 }
 
-String _initials(String name) {
-  final trimmed = name.trim();
-  if (trimmed.isEmpty) return '?';
-  return trimmed.substring(0, trimmed.length.clamp(0, 3)).toUpperCase();
-}
+
