@@ -17,12 +17,12 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:built_collection/built_collection.dart';
-import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:dr/app_state.dart';
 import 'package:dr/container/grades_chart_container.dart';
 import 'package:dr/data.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -33,262 +33,331 @@ class _Selection {
   _Selection(this.text, this.color);
 }
 
-class GradesChart extends StatelessWidget {
+/// One subject's grades over time, ready to be drawn.
+class _SubjectLine {
+  final String name;
+  final Color color;
+  final double width;
+
+  /// Sorted by date, which is what the axis and the tick maths assume.
+  final List<MapEntry<UtcDateTime, GradeChartPoint>> points;
+
+  const _SubjectLine({
+    required this.name,
+    required this.color,
+    required this.width,
+    required this.points,
+  });
+}
+
+class GradesChart extends StatefulWidget {
   final VoidCallback? goFullscreen;
   final bool isFullscreen;
   final GradingMode gradingMode;
-  final List<charts.Series<MapEntry<UtcDateTime, GradeChartPoint>, UtcDateTime>>
-      grades;
+  final Map<SubjectGrades, SubjectTheme> graphs;
 
-  final ValueNotifier<(UtcDateTime, BuiltList<_Selection>)?> selection =
-      ValueNotifier(null);
-
-  GradesChart({
+  const GradesChart({
     super.key,
-    required Map<SubjectGrades, SubjectTheme> graphs,
+    required this.graphs,
     required this.gradingMode,
     this.goFullscreen,
     required this.isFullscreen,
-  }) : grades = convert(graphs);
+  });
 
-  static List<
-          charts.Series<MapEntry<UtcDateTime, GradeChartPoint>, UtcDateTime>>
-      convert(Map<SubjectGrades, SubjectTheme> data) {
-    return data.entries.where((entry) => entry.value.thick != 0).map(
-      (entry) {
-        final s = entry.key;
-        final strokeWidth = entry.value.thick;
-        final color = Color(entry.value.color);
-        return charts.Series<MapEntry<UtcDateTime, GradeChartPoint>,
-            UtcDateTime>(
-          domainFn: (grade, _) => grade.key,
-          measureFn: (grade, _) => grade.value.value,
-          data: s.grades.entries.toList(),
-          strokeWidthPxFn: (_, __) => strokeWidth,
-          id: s.name,
-          seriesColor: charts.Color(
-            r: color.red,
-            g: color.green,
-            b: color.blue,
-          ),
-        );
-      },
-    ).toList();
+  @override
+  State<GradesChart> createState() => _GradesChartState();
+}
+
+class _GradesChartState extends State<GradesChart> {
+  /// One day in milliseconds — the axis works in epoch milliseconds, and this
+  /// is the step between two possible date labels.
+  static const _dayMs = 86400000.0;
+
+  /// What the reader last tapped on, if anything.
+  (UtcDateTime, BuiltList<_Selection>)? _selection;
+
+  late List<_SubjectLine> _lines = _buildLines();
+
+  @override
+  void didUpdateWidget(GradesChart oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _lines = _buildLines();
+    _selection = null;
   }
 
-  List<charts.TickSpec<UtcDateTime>> createDomainAxisTags(Locale locale) {
+  List<_SubjectLine> _buildLines() {
+    return widget.graphs.entries
+        .where((entry) => entry.value.thick != 0)
+        .map(
+          (entry) => _SubjectLine(
+            name: entry.key.name,
+            color: Color(entry.value.color),
+            width: entry.value.thick.toDouble(),
+            points: entry.key.grades.entries.toList()
+              ..sort((a, b) => a.key.compareTo(b.key)),
+          ),
+        )
+        .toList();
+  }
+
+  /// The dates that should carry a label.
+  ///
+  /// Preferably the 15th of every month; if the first date is later than that,
+  /// the tick moves to it so no month goes unlabelled. A range inside a single
+  /// month gets its first and last date instead.
+  List<UtcDateTime> _tickDates() {
     UtcDateTime? first;
     UtcDateTime? last;
-    // find the first given date and the last given date
-    for (final subject in grades) {
-      if (subject.data.isEmpty) continue;
-      final firstSubjectDate = subject.data.first.key;
-      assert(subject.data.every((e) => !e.key.isBefore(firstSubjectDate)));
-      final lastSubjectDate = subject.data.last.key;
-      assert(subject.data.every((e) => !e.key.isAfter(lastSubjectDate)));
-      if (first == null || firstSubjectDate.isBefore(first)) {
-        first = firstSubjectDate;
-      }
-      if (last == null || lastSubjectDate.isAfter(last)) {
-        last = lastSubjectDate;
-      }
+    for (final line in _lines) {
+      if (line.points.isEmpty) continue;
+      final firstOfLine = line.points.first.key;
+      final lastOfLine = line.points.last.key;
+      if (first == null || firstOfLine.isBefore(first)) first = firstOfLine;
+      if (last == null || lastOfLine.isAfter(last)) last = lastOfLine;
     }
-    // This means that there are no grades available
     if (first == null || last == null) return [];
-    // Preferrably show all ticks on the 15th.
-    // However, if the first date is after the 15th, show the tick there to make
-    // sure all months are represented as ticks.
+
     final dates = [
-      UtcDateTime(first.year, first.month, first.day < 15 ? 15 : first.day)
+      UtcDateTime(first.year, first.month, first.day < 15 ? 15 : first.day),
     ];
-    // Collect all 15th's that are before the last date
     while (true) {
-      final newDate = UtcDateTime(dates.last.year, dates.last.month + 1, 15);
-      if (last.isBefore(newDate)) break;
-      dates.add(newDate);
+      final next = UtcDateTime(dates.last.year, dates.last.month + 1, 15);
+      if (last.isBefore(next)) break;
+      dates.add(next);
     }
-    // make sure the last month is included
     if (dates.last.month != last.month) dates.add(last);
-    // if the dates are in only one month, show ticks for the first and the last
-    // one. Also include the day in the label in this case.
-    // If there is only one date, show one tick for it.
-    if (dates.length == 1) {
-      return (first == last ? [first] : [first, last]).map((date) {
-        return charts.TickSpec(
-          date,
-          label: DateFormat.MMMd(
-            locale.toLanguageTag(),
-          ).format(date),
-        );
-      }).toList();
-    } else {
-      return dates.map((date) {
-        return charts.TickSpec(
-          date,
-          label: DateFormat.MMM(
-            locale.toLanguageTag(),
-          ).format(date),
-        );
-      }).toList();
-    }
+    if (dates.length > 1) return dates;
+    return first == last ? [first] : [first, last];
   }
 
-  charts.DateTimeExtents? dateTimeExtents() {
+  /// Tick position in epoch milliseconds to the label it carries.
+  Map<double, String> _domainTicks(Locale locale) {
+    final dates = _tickDates();
+    // Inside a single month the day matters, across months it does not.
+    final format = dates.length > 2
+        ? DateFormat.MMM(locale.toLanguageTag())
+        : DateFormat.MMMd(locale.toLanguageTag());
+    return {
+      for (final date in dates)
+        date.millisecondsSinceEpoch.toDouble(): format.format(date),
+    };
+  }
+
+  /// First and last position of the axis, in epoch milliseconds.
+  ///
+  /// A little padding on both ends keeps the outermost points off the edge.
+  (double, double)? _domainRange() {
     DateTime? first;
     DateTime? last;
-    for (final subject in grades) {
-      for (final grade in subject.data) {
-        if (first == null || grade.key.isBefore(first)) first = grade.key;
-        if (last == null || grade.key.isAfter(last)) last = grade.key;
+    for (final line in _lines) {
+      for (final point in line.points) {
+        if (first == null || point.key.isBefore(first)) first = point.key;
+        if (last == null || point.key.isAfter(last)) last = point.key;
       }
     }
     if (first == null || last == null) return null;
-    // Add some padding to avoid cutting off the graph at the edge of the diagram
     final padding = Duration(hours: last.difference(first).inHours ~/ 100);
-    return charts.DateTimeExtents(
-      start: first.subtract(padding),
-      end: last.add(padding),
+    return (
+      first.subtract(padding).millisecondsSinceEpoch.toDouble(),
+      last.add(padding).millisecondsSinceEpoch.toDouble(),
+    );
+  }
+
+  /// The grades the axis is scaled to: stars go from 1 to 6, marks from 3 to
+  /// 10 — below 3 nothing is ever awarded.
+  List<int> get _measureTicks => widget.gradingMode == GradingMode.stars
+      ? const [1, 2, 3, 4, 5, 6]
+      : const [3, 4, 5, 6, 7, 8, 9, 10];
+
+  void _onTouch(FlTouchEvent event, LineTouchResponse? response) {
+    final spots = response?.lineBarSpots;
+    if (spots == null || spots.isEmpty) return;
+    // The spots arrive sorted by distance: the nearest one decides which date
+    // is being read, and the other lines only join in on that same date.
+    final touchedX = spots.first.x;
+    final date = _lines[spots.first.barIndex].points[spots.first.spotIndex].key;
+    final selections = <_Selection>[];
+    for (final spot in spots) {
+      if (spot.x != touchedX) continue;
+      final line = _lines[spot.barIndex];
+      final point = line.points[spot.spotIndex].value;
+      selections.add(
+        _Selection(formatChartSelectionText(line.name, point), line.color),
+      );
+    }
+    if (selections.isEmpty) return;
+    setState(() => _selection = (date, selections.toBuiltList()));
+  }
+
+  /// Which spot of [line] the indicator is drawn on, if any.
+  List<int> _shownIndicators(_SubjectLine line) {
+    final date = _selection?.$1;
+    if (date == null) return const [];
+    final index = line.points.indexWhere((point) => point.key == date);
+    return index == -1 ? const [] : [index];
+  }
+
+  LineChartBarData _bar(_SubjectLine line) {
+    return LineChartBarData(
+      spots: [
+        for (final point in line.points)
+          FlSpot(
+            point.key.millisecondsSinceEpoch.toDouble(),
+            point.value.value,
+          ),
+      ],
+      isCurved: false,
+      color: line.color,
+      barWidth: line.width,
+      isStrokeCapRound: true,
+      showingIndicators: _shownIndicators(line),
+      dotData: FlDotData(
+        show: widget.isFullscreen,
+        getDotPainter: (spot, percent, bar, index) => FlDotCirclePainter(
+          // Wide enough to stay visible on top of the line itself.
+          radius: line.width / 2 + 2,
+          color: line.color,
+          strokeWidth: 0,
+        ),
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final darkMode = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final darkMode = theme.brightness == Brightness.dark;
+    final labelStyle = TextStyle(
+      fontSize: 10,
+      color: darkMode ? Colors.white : Colors.black,
+    );
+    final range = _domainRange();
+    final ticks = _domainTicks(Localizations.localeOf(context));
+
     return GestureDetector(
-      onTap: isFullscreen ? null : goFullscreen,
+      onTap: widget.isFullscreen ? null : widget.goFullscreen,
       child: Stack(
         children: [
           Hero(
             tag: 1337,
-            child: charts.TimeSeriesChart(
-              grades,
-              animate: false,
-              behaviors: isFullscreen
-                  ? [
-                      charts.SelectNearest(
-                        eventTrigger: charts.SelectionTrigger.tapAndDrag,
+            child: Padding(
+              // Room for the topmost grade label and for the line not to end
+              // flush against the edge.
+              padding: const EdgeInsets.only(top: 8, right: 8),
+              child: LineChart(
+                LineChartData(
+                  minX: range?.$1,
+                  maxX: range?.$2,
+                  minY: _measureTicks.first.toDouble(),
+                  maxY: _measureTicks.last.toDouble(),
+                  lineBarsData: [for (final line in _lines) _bar(line)],
+                  clipData: const FlClipData.all(),
+                  borderData: FlBorderData(show: false),
+                  gridData: FlGridData(
+                    drawVerticalLine: false,
+                    horizontalInterval: 1,
+                    getDrawingHorizontalLine: (value) => FlLine(
+                      color: theme.dividerColor,
+                      strokeWidth: 1,
+                    ),
+                  ),
+                  titlesData: FlTitlesData(
+                    topTitles: const AxisTitles(
+                        sideTitles: SideTitles(showTitles: false)),
+                    rightTitles: const AxisTitles(
+                        sideTitles: SideTitles(showTitles: false)),
+                    leftTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        interval: 1,
+                        reservedSize: 20,
+                        getTitlesWidget: (value, meta) {
+                          if (!_measureTicks.contains(value.round()) ||
+                              value != value.roundToDouble()) {
+                            return const SizedBox.shrink();
+                          }
+                          return SideTitleWidget(
+                            meta: meta,
+                            space: 4,
+                            child: Text('${value.round()}', style: labelStyle),
+                          );
+                        },
                       ),
-                    ]
-                  : null,
-              defaultRenderer: charts.LineRendererConfig(
-                includePoints: isFullscreen,
-                radiusPx: 2,
-                roundEndCaps: true,
-              ),
-              layoutConfig: charts.LayoutConfig(
-                bottomMarginSpec: charts.MarginSpec.fixedPixel(16),
-                rightMarginSpec: charts.MarginSpec.fixedPixel(8),
-                leftMarginSpec: charts.MarginSpec.fixedPixel(20),
-                topMarginSpec: charts.MarginSpec.fixedPixel(16),
-              ),
-              selectionModels: [
-                charts.SelectionModelConfig(
-                  changedListener: (model) {
-                    UtcDateTime? allDate;
-                    final selections = model.selectedDatum.map((datum) {
-                      final point = datum.datum.value as GradeChartPoint;
-                      final subject = datum.series.displayName ?? '';
-                      final color = datum.series.colorFn!(0)!;
-                      final date = datum.datum.key as UtcDateTime;
-                      assert(allDate == null || allDate == date);
-                      allDate = date;
-                      final text = formatChartSelectionText(subject, point);
-                      return _Selection(
-                        text,
-                        Color.fromARGB(
-                          color.a,
-                          color.r,
-                          color.g,
-                          color.b,
+                    ),
+                    bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        // fl_chart puts ticks on a fixed grid instead of at
+                        // given positions. A step of one day, counted from the
+                        // epoch, lands exactly on the midnights the grades carry
+                        // — so the days that should be labelled can be picked
+                        // out and the rest left blank.
+                        interval: _dayMs,
+                        // Enough for a 10px label plus its small gap; more
+                        // would only take height away from the chart.
+                        reservedSize: 18,
+                        getTitlesWidget: (value, meta) {
+                          final label = ticks[value];
+                          if (label == null) return const SizedBox.shrink();
+                          return SideTitleWidget(
+                            meta: meta,
+                            space: 2,
+                            // Keeps the outermost labels from hanging over the
+                            // edge of the chart.
+                            fitInside:
+                                SideTitleFitInsideData.fromTitleMeta(meta),
+                            child: Text(label, style: labelStyle),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                  lineTouchData: LineTouchData(
+                    enabled: widget.isFullscreen,
+                    touchCallback: _onTouch,
+                    // A tap anywhere picks the nearest grade, rather than only
+                    // one within a few pixels — the chart is read by tapping
+                    // roughly at a date, not by hitting a dot.
+                    touchSpotThreshold: double.maxFinite,
+                    // The selection stays until the next tap. fl_chart's own
+                    // handling would clear it the moment the finger lifts, and
+                    // it overwrites showingIndicators while it is on.
+                    handleBuiltInTouches: false,
+                    getTouchedSpotIndicator: (bar, indexes) => [
+                      for (final _ in indexes)
+                        TouchedSpotIndicatorData(
+                          FlLine(
+                            color: theme.dividerColor,
+                            strokeWidth: 1,
+                            dashArray: const [4, 4],
+                          ),
+                          FlDotData(
+                            getDotPainter: (spot, percent, barData, index) =>
+                                FlDotCirclePainter(
+                              radius: 4,
+                              color: barData.color ?? Colors.grey,
+                              strokeWidth: 0,
+                            ),
+                          ),
                         ),
-                      );
-                    }).toBuiltList();
-                    if (allDate != null) {
-                      selection.value = (
-                        allDate!,
-                        selections,
-                      );
-                    } else {
-                      selection.value = null;
-                    }
-                  },
-                )
-              ],
-              primaryMeasureAxis: charts.NumericAxisSpec(
-                tickProviderSpec: charts.StaticNumericTickProviderSpec(
-                  gradingMode == GradingMode.stars
-                      ? const [
-                          charts.TickSpec(1),
-                          charts.TickSpec(2),
-                          charts.TickSpec(3),
-                          charts.TickSpec(4),
-                          charts.TickSpec(5),
-                          charts.TickSpec(6),
-                        ]
-                      : const [
-                          charts.TickSpec(3),
-                          charts.TickSpec(4),
-                          charts.TickSpec(5),
-                          charts.TickSpec(6),
-                          charts.TickSpec(7),
-                          charts.TickSpec(8),
-                          charts.TickSpec(9),
-                          charts.TickSpec(10),
-                        ],
-                ),
-                renderSpec: charts.GridlineRendererSpec(
-                  labelStyle: charts.TextStyleSpec(
-                    fontSize: 10,
-                    color: darkMode
-                        ? charts.MaterialPalette.white
-                        : charts.MaterialPalette.black,
-                  ),
-                  lineStyle: charts.LineStyleSpec(
-                    thickness: 0,
-                    color: charts.MaterialPalette.gray.shadeDefault,
-                  ),
-                ),
-              ),
-              defaultInteractions: isFullscreen,
-              domainAxis: charts.DateTimeAxisSpec(
-                viewport: dateTimeExtents(),
-                tickProviderSpec: charts.StaticDateTimeTickProviderSpec(
-                  createDomainAxisTags(
-                    Localizations.localeOf(context),
-                  ),
-                ),
-                renderSpec: charts.SmallTickRendererSpec(
-                  labelStyle: charts.TextStyleSpec(
-                    fontSize: 10,
-                    color: darkMode
-                        ? charts.MaterialPalette.white
-                        : charts.MaterialPalette.black,
-                  ),
-                  labelAnchor: charts.TickLabelAnchor.inside,
-                  lineStyle: charts.LineStyleSpec(
-                    thickness: 0,
-                    color: charts.MaterialPalette.gray.shadeDefault,
+                    ],
                   ),
                 ),
               ),
             ),
           ),
-          if (isFullscreen)
-            ValueListenableBuilder<(UtcDateTime, BuiltList<_Selection>)?>(
-                valueListenable: selection,
-                builder: (context, data, _) {
-                  return Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Padding(
-                      padding: const EdgeInsets.all(32),
-                      child: SelectionWidget(
-                        date: data?.$1,
-                        selections: data?.$2,
-                      ),
-                    ),
-                  );
-                }),
-          if (!isFullscreen)
+          if (widget.isFullscreen)
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: SelectionWidget(
+                  date: _selection?.$1,
+                  selections: _selection?.$2,
+                ),
+              ),
+            ),
+          if (!widget.isFullscreen)
             const Positioned(
               right: 20,
               bottom: 20,
