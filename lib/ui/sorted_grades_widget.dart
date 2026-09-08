@@ -21,6 +21,7 @@ import 'package:dr/container/grades_page_container.dart';
 import 'package:dr/container/sorted_grades_container.dart';
 import 'package:dr/data.dart';
 import 'package:dr/ui/animated_linear_progress_indicator.dart';
+import 'package:dr/ui/star_rating.dart';
 import 'package:dr/util.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -404,27 +405,10 @@ class CompetenceWidget extends StatelessWidget {
             competence.typeName,
             style: cancelled ? lineThrough : null,
           ),
-          Row(
-            children: List.generate(
-              6,
-              (n) => Star(
-                filled: n < competence.grade,
-              ),
-            ),
-          ),
+          StarRow(filled: competence.grade),
         ],
       ),
     );
-  }
-}
-
-class Star extends StatelessWidget {
-  final bool filled;
-
-  const Star({super.key, required this.filled});
-  @override
-  Widget build(BuildContext context) {
-    return Icon(filled ? Icons.star : Icons.star_border);
   }
 }
 

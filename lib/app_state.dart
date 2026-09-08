@@ -275,6 +275,10 @@ enum DashboardViewMode {
       DashboardViewMode.values.asNameMap()[name] ?? DashboardViewMode.list;
 }
 
+/// Star colour setting meaning "follow the app's accent colour".
+/// The palette itself lives in ui/star_rating.dart.
+const accentStarColorId = 'accent';
+
 class SettingsState {
   SettingsState({
     this.noPasswordSaving = false,
@@ -294,6 +298,7 @@ class SettingsState {
     this.dashboardColorTestsInRed = true,
     List<String>? ignoreForGradesAverage,
     this.drawerFullyExpanded = true,
+    this.starColor = accentStarColorId,
   }) : ignoreForGradesAverage = ignoreForGradesAverage ?? [];
 
   final bool noPasswordSaving;
@@ -326,6 +331,10 @@ class SettingsState {
   // Whether to fully expand the drawer if in tablet mode
   final bool drawerFullyExpanded;
 
+  /// Id of the palette entry the competence stars are drawn in.
+  /// See `starColors` in ui/star_rating.dart.
+  final String starColor;
+
   SettingsState copyWith({
     bool? noPasswordSaving,
     bool? typeSorted,
@@ -344,6 +353,7 @@ class SettingsState {
     bool? dashboardColorTestsInRed,
     List<String>? ignoreForGradesAverage,
     bool? drawerFullyExpanded,
+    String? starColor,
   }) =>
       SettingsState(
         noPasswordSaving: noPasswordSaving ?? this.noPasswordSaving,
@@ -370,6 +380,7 @@ class SettingsState {
         ignoreForGradesAverage:
             ignoreForGradesAverage ?? List.of(this.ignoreForGradesAverage),
         drawerFullyExpanded: drawerFullyExpanded ?? this.drawerFullyExpanded,
+        starColor: starColor ?? this.starColor,
       );
 
   Map<String, dynamic> toJson() => {
@@ -389,6 +400,7 @@ class SettingsState {
         'dashboardColorTestsInRed': dashboardColorTestsInRed,
         'ignoreForGradesAverage': ignoreForGradesAverage,
         'drawerFullyExpanded': drawerFullyExpanded,
+        'starColor': starColor,
       };
 
   factory SettingsState.fromJson(Map<dynamic, dynamic> json) => SettingsState(
@@ -419,6 +431,7 @@ class SettingsState {
             (json['ignoreForGradesAverage'] as List<dynamic>?)
                 ?.cast<String>(),
         drawerFullyExpanded: json['drawerFullyExpanded'] as bool? ?? true,
+        starColor: json['starColor'] as String? ?? accentStarColorId,
       );
 
   static const _listEq = ListEquality<String>();
@@ -444,7 +457,8 @@ class SettingsState {
         other.dashboardViewMode == dashboardViewMode &&
         other.dashboardColorTestsInRed == dashboardColorTestsInRed &&
         _listEq.equals(other.ignoreForGradesAverage, ignoreForGradesAverage) &&
-        other.drawerFullyExpanded == drawerFullyExpanded;
+        other.drawerFullyExpanded == drawerFullyExpanded &&
+        other.starColor == starColor;
   }
 
   @override
@@ -466,6 +480,7 @@ class SettingsState {
         dashboardColorTestsInRed,
         ...ignoreForGradesAverage,
         drawerFullyExpanded,
+        starColor,
       ]);
 }
 

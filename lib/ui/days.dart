@@ -38,6 +38,7 @@ import 'package:dr/container/dashboard_week_container.dart';
 import 'package:dr/ui/dashboard_calendar.dart';
 import 'package:dr/ui/last_fetched_overlay.dart';
 import 'package:dr/ui/no_internet.dart';
+import 'package:dr/ui/star_rating.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
 import 'package:dr/services/review_prompt.dart';
@@ -897,17 +898,7 @@ class ItemWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           for (final competence in gradeCompetences!)
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: List.generate(
-                6,
-                (n) => Icon(
-                  n < competence.grade ? Icons.star : Icons.star_border,
-                  color: Theme.of(context).colorScheme.primary,
-                  size: 24,
-                ),
-              ),
-            ),
+            StarRow(filled: competence.grade, size: 24),
         ],
       );
     }

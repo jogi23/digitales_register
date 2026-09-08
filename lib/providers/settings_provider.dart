@@ -52,6 +52,8 @@ class SettingsNotifier extends Notifier<SettingsState> {
   void setIgnoreForGradesAverage(List<String> subjects) =>
       state = state.copyWith(ignoreForGradesAverage: List.of(subjects));
 
+  void setStarColor(String id) => state = state.copyWith(starColor: id);
+
   // ─── Dashboard settings ───────────────────────────────────────────────────
 
   void setMarkNewOrChanged(bool value) =>

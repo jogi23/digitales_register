@@ -111,6 +111,31 @@ void main() {
     },
   );
 
+  testWidgets(
+    'picking a star colour writes the setting',
+    (tester) async {
+      final container = await _pumpSettingsPage(tester);
+      addTearDown(container.dispose);
+
+      const label = 'Farbe der Sterne';
+      await tester.scrollUntilVisible(
+        find.text(label),
+        100,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      expect(container.read(settingsProvider).starColor, accentStarColorId);
+
+      await tester.tap(find.text('Standard'));
+      await tester.pumpAndSettle();
+      // The closed button shows the selection too, so the menu entry is last.
+      await tester.tap(find.text('Gelb').last);
+      await tester.pumpAndSettle();
+
+      expect(container.read(settingsProvider).starColor, 'amber');
+    },
+  );
+
   testGoldens(
     'scrolls to grades settings',
     (tester) async {
