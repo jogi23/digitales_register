@@ -1,6 +1,6 @@
 # 📋 DigiReg ST
 
-> Eine plattformübergreifende App für das Digitale Register Südtirol ().
+> Eine plattformübergreifende App für das Digitale Register Südtirol.
 
 Inoffizielle App für [digitalesregister.it](http://digitalesregister.it).
 
@@ -15,7 +15,7 @@ Vielen Dank für die tolle Arbeit.
 
 | Plattform | Link |
 |---|---|
-| Android | _in Kürze verfügbar_ |
+| Android | [Google Play](https://play.google.com/store/apps/details?id=io.wertwerk.digitalesregister) |
 | iOS | _fraglich_ |
 | Windows | _in Kürze verfügbar_ |
 | macOS | _fraglich_ |
@@ -24,14 +24,15 @@ Vielen Dank für die tolle Arbeit.
 
 ## ✨ Features
 
-- Login ins Digitale Register mit Session-Verwaltung
-- Dashboard/Merkheft mit neuen/geänderten Einträgen
+- Login ins Digitale Register mit Session-Verwaltung, mehrere Konten
+- Merkheft wahlweise als Liste, Monatskalender oder Wochenplan
 - Notenansicht inklusive Diagramm und Durchschnitt
-- Kalenderansicht mit Detailseiten für Einträge
+- Kalenderansicht mit Uhrzeiten, Pausen und Detailseiten
 - Absenzen-Übersicht
-- Mitteilungsansicht
+- Mitteilungen lesen und geforderte Bestätigungen direkt beantworten
 - Benachrichtigungen im App-Bereich
 - Umfangreiche Einstellungen (Darstellung, Sortierung, Farben)
+- Demomodus zum Ausprobieren ohne Zugangsdaten
 
 ---
 
