@@ -522,10 +522,20 @@ class GradeTypeWidget extends StatelessWidget {
         .toList();
     return displayGrades.isEmpty
         ? const SizedBox()
+        // Indented and quieter than the subject above it, so the grouping
+        // reads as a level below the subject rather than as another subject.
         : ExpansionTile(
+            tilePadding: const EdgeInsets.only(left: 32, right: 16),
+            childrenPadding: const EdgeInsets.only(left: 16),
             title: Text(
               typeName,
-              style: TextStyle(color: theme.colorScheme.primary),
+              // A label, not a smaller entry: weight and letter spacing keep
+              // it from reading as a de-emphasised version of the rows below.
+              style: theme.textTheme.titleSmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.4,
+              ),
             ),
             initiallyExpanded: true,
             children: displayGrades,

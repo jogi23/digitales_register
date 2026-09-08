@@ -420,6 +420,66 @@ void main() {
     });
   });
 
+  group('grouping by type', () {
+    Widget grouped({Brightness brightness = Brightness.light}) => ProviderScope(
+          overrides: [
+            gradesProvider.overrideWith(
+              () => _TestGradesNotifier(_getGradesState().gradesState),
+            ),
+            settingsProvider.overrideWith(
+              () => _TestSettingsNotifier(SettingsState(typeSorted: true)),
+            ),
+            subjectAppearanceProvider.overrideWith(
+              () => _TestSubjectAppearanceNotifier(_gradesSettings),
+            ),
+          ],
+          child: MaterialApp(
+            home: const GradesPageContainer(),
+            theme: ThemeData(
+              colorSchemeSeed: Colors.deepOrange,
+              brightness: brightness,
+            ),
+          ),
+        );
+
+    Future<void> openFach1(WidgetTester tester, Widget widget) async {
+      await tester.pumpWidget(widget);
+      await tester.tap(_subjectRow("Fach1"));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('sits indented under the subject', (tester) async {
+      // Subject and group used to look exactly alike, so nothing said which
+      // was which.
+      await openFach1(tester, grouped());
+      final subject = tester.getTopLeft(_subjectRow("Fach1"));
+      final group = tester.getTopLeft(find.text("Schularbeit3"));
+      expect(group.dx, greaterThan(subject.dx));
+    });
+
+    testWidgets('is written differently from the subject', (tester) async {
+      await openFach1(tester, grouped());
+      final scheme =
+          Theme.of(tester.element(find.text("Schularbeit3"))).colorScheme;
+      final style = tester.widget<Text>(find.text("Schularbeit3")).style!;
+      expect(style.color, scheme.onSurfaceVariant);
+      expect(style.color, isNot(scheme.primary));
+    });
+
+    for (final (name, brightness) in [
+      ("light", Brightness.light),
+      ("dark", Brightness.dark),
+    ]) {
+      testGoldens('reads as a sub-level in $name mode', (tester) async {
+        await openFach1(tester, grouped(brightness: brightness));
+        await expectLater(
+          find.byType(GradesPageContainer),
+          matchesGoldenFile("grouped_$name.png"),
+        );
+      });
+    }
+  });
+
   testWidgets('competence stars sit under their name', (tester) async {
     // A short name used to leave them beside it, which lined up with nothing.
     final widget = _wrapWithScope(
