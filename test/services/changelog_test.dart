@@ -19,8 +19,12 @@ import 'package:dr/services/changelog.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-ChangelogEntry _entry(String version) =>
-    ChangelogEntry(version: version, points: ['Neu in $version']);
+ChangelogEntry _entry(String version) => ChangelogEntry(
+      version: version,
+      sections: [
+        ChangelogSection(title: 'Neue Funktionen', items: ['Neu in $version']),
+      ],
+    );
 
 Future<String?> _storedVersion() async =>
     (await SharedPreferences.getInstance()).getString('changelog_last_seen');
@@ -141,15 +145,68 @@ void main() {
     });
   });
 
-  test('the shipped notes cover the version being released', () async {
-    // A release without its own notes shows nothing at all, which is easy to
-    // miss until it is too late.
-    final changelog =
-        Changelog(currentVersion: '1.2.1', freshInstall: false);
-    final entries = await changelog.pending();
-    expect(entries, hasLength(1));
-    expect(entries.single.version, '1.2.1');
-    expect(entries.single.points, isNotEmpty);
-    expect(entries.single.points.length, lessThanOrEqualTo(3));
+  group('the notes shipped with the app', () {
+    test('cover the version being released', () async {
+      // A release without its own notes shows nothing at all, which is easy
+      // to miss until it is too late.
+      final changelog =
+          Changelog(currentVersion: '1.2.1', freshInstall: false);
+      final entries = await changelog.pending();
+      expect(entries, hasLength(1));
+      expect(entries.single.version, '1.2.1');
+      expect(entries.single.points, isNotEmpty);
+    });
+
+    test('hold the whole history, newest first', () async {
+      // The full list is read from the app itself, not fetched from GitHub.
+      final entries = await Changelog().load();
+      expect(entries.length, greaterThan(1));
+      expect(entries.first.version, '1.2.1');
+      expect(entries.last.version, '1.0.0');
+      for (var i = 1; i < entries.length; i++) {
+        expect(
+          compareVersions(entries[i - 1].version, entries[i].version),
+          greaterThan(0),
+          reason: '${entries[i - 1].version} vor ${entries[i].version}',
+        );
+      }
+    });
+
+    test('give every version a date and at least one line', () async {
+      for (final entry in await Changelog().load()) {
+        expect(entry.points, isNotEmpty, reason: entry.version);
+        expect(DateTime.tryParse(entry.date ?? ''), isNotNull,
+            reason: entry.version);
+      }
+    });
+
+    test('keep the headings the release notes were written under', () async {
+      // "Neue Funktionen", "Fehlerbehebungen" and so on: the card drops them,
+      // the full list keeps them.
+      final entries = await Changelog().load();
+      for (final entry in entries) {
+        expect(entry.sections, isNotEmpty, reason: entry.version);
+        for (final section in entry.sections) {
+          expect(section.title, isNotEmpty, reason: entry.version);
+          expect(section.items, isNotEmpty, reason: section.title);
+        }
+      }
+      final headings = {
+        for (final entry in entries)
+          for (final section in entry.sections) section.title,
+      };
+      expect(headings, contains('Neue Funktionen'));
+      expect(headings, contains('Fehlerbehebungen'));
+    });
+
+    test('flatten to plain lines for the card', () async {
+      final entry = (await Changelog().load()).first;
+      expect(
+        entry.points,
+        containsAll(entry.sections.first.items),
+      );
+      expect(entry.points.length,
+          entry.sections.fold<int>(0, (n, s) => n + s.items.length));
+    });
   });
 }

@@ -48,7 +48,7 @@ void showAppAboutDialog(BuildContext context) {
           child: const Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text("What's new"),
+              Text("Neuerungen"),
               SizedBox(width: 8),
               Icon(Icons.new_releases_outlined),
             ],

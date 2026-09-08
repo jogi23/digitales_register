@@ -28,16 +28,23 @@ class _StubChangelog extends Changelog {
   Future<List<ChangelogEntry>> pending() async => entries;
 }
 
-ChangelogEntry _entry(String version, List<String> points) =>
-    ChangelogEntry(version: version, points: points);
+ChangelogEntry _entry(String version, List<String> points) => ChangelogEntry(
+      version: version,
+      sections: [ChangelogSection(title: 'Neue Funktionen', items: points)],
+    );
 
 const _oneVersion = [
   ChangelogEntry(
     version: '1.2.1',
-    points: [
-      'Bewertungen: eigene Detailseite mit dem Kommentar zu jeder Kompetenz',
-      'Bewertungen: Anzahl der Einträge und Durchschnitt je Fach',
-      'Die App startet ohne Kontoabfrage im zuletzt genutzten Konto',
+    sections: [
+      ChangelogSection(
+        title: 'Neue Funktionen',
+        items: [
+          'Bewertungen: eigene Detailseite mit dem Kommentar zu jeder Kompetenz',
+          'Bewertungen: Anzahl der Einträge und Durchschnitt je Fach',
+          'Die App startet ohne Kontoabfrage im zuletzt genutzten Konto',
+        ],
+      ),
     ],
   ),
 ];

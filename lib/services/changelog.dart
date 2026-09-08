@@ -16,7 +16,6 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'dart:convert';
-import 'dart:ui' show PlatformDispatcher;
 
 import 'package:dr/util.dart';
 import 'package:flutter/foundation.dart';
@@ -37,14 +36,36 @@ const firstPublishedVersion = '1.2.0';
 /// The language the notes are written in when the device speaks none we ship.
 const changelogFallbackLanguage = 'de';
 
+/// One heading of a release and what belongs under it — new features,
+/// improvements, fixes, internals.
+class ChangelogSection {
+  final String title;
+
+  /// One line each, already worded for the reader.
+  final List<String> items;
+
+  const ChangelogSection({required this.title, required this.items});
+}
+
 /// What is new in one version.
 class ChangelogEntry {
   final String version;
 
-  /// One line each, already worded for the reader.
-  final List<String> points;
+  /// When it was released, as written in the file.
+  final String? date;
 
-  const ChangelogEntry({required this.version, required this.points});
+  final List<ChangelogSection> sections;
+
+  const ChangelogEntry({
+    required this.version,
+    required this.sections,
+    this.date,
+  });
+
+  /// Every line of the release, headings dropped — what the card shows, which
+  /// has room for a handful of lines and none for structure.
+  List<String> get points =>
+      [for (final section in sections) ...section.items];
 }
 
 /// Compares two dotted versions the way their numbers read.
@@ -132,7 +153,7 @@ class Changelog {
     }
 
     final entries = entriesBetween(
-      all: await _load(),
+      all: await load(),
       lastSeen: from,
       current: current,
     );
@@ -159,9 +180,10 @@ class Changelog {
     }
   }
 
-  /// The notes shipped with the app, in the device's language where we have
-  /// it and in German otherwise.
-  Future<List<ChangelogEntry>> _load() async {
+  /// Every version the app ships notes for, newest first.
+  ///
+  /// In the device's language where we have it, in German otherwise.
+  Future<List<ChangelogEntry>> load() async {
     final String raw;
     try {
       raw = await rootBundle.loadString(_asset);
@@ -173,18 +195,27 @@ class Changelog {
     final decoded = json.decode(raw) as Map<String, dynamic>;
     final language = PlatformDispatcher.instance.locale.languageCode;
     final entries = <ChangelogEntry>[];
-    decoded.forEach((version, dynamic byLanguage) {
-      final languages = (byLanguage as Map).cast<String, dynamic>();
-      final points =
-          languages[language] ?? languages[changelogFallbackLanguage];
-      if (points == null) return;
+    decoded.forEach((version, dynamic value) {
+      final release = (value as Map).cast<String, dynamic>();
+      final byLanguage = (release['points'] as Map).cast<String, dynamic>();
+      final sections =
+          byLanguage[language] ?? byLanguage[changelogFallbackLanguage];
+      if (sections == null) return;
       entries.add(
         ChangelogEntry(
           version: version,
-          points: (points as List).cast<String>(),
+          date: release['date'] as String?,
+          sections: [
+            for (final dynamic section in sections as List)
+              ChangelogSection(
+                title: (section as Map)['title'] as String,
+                items: (section['items'] as List).cast<String>(),
+              ),
+          ],
         ),
       );
     });
+    entries.sort((a, b) => compareVersions(b.version, a.version));
     return entries;
   }
 }
