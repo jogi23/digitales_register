@@ -374,7 +374,7 @@ void main() {
       find.byType(GradesPageContainer),
       matchesGoldenFile("open_unsorted.png"),
     );
-    await tester.tap(find.text("Noten nach Art sortieren"));
+    await tester.tap(find.text("Noten nach Art gruppieren"));
     await tester.pumpAndSettle();
 
     expect(

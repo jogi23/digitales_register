@@ -379,18 +379,6 @@ Future<void> _doAddAccount() async {
   await _doLoad();
 }
 
-Future<void> _doLoginCurrentFromStorage() async {
-  final raw = await secureStorage.read(key: "login");
-  if (raw == null) return;
-  final dynamic parsed = json.decode(raw);
-  final user = getString(parsed["user"]);
-  final pass = getString(parsed["pass"]);
-  final url = getString(parsed["url"]);
-  if (user != null && pass != null) {
-    await _doLogin(user, pass, url ?? "", fromStorage: true);
-  }
-}
-
 Future<void> _doSelectAccount(int index) async {
   final dynamic login =
       json.decode((await secureStorage.read(key: "login"))!);
@@ -414,7 +402,7 @@ Future<void> _doSelectAccount(int index) async {
   providerContainer.read(loginProvider.notifier).logout(hard: true);
   providerContainer.read(loginProvider.notifier).setLoggingIn();
   _resetAllProviders();
-  await _doLoad(forceAutoLogin: true);
+  await _doLoad();
 }
 
 void _restoreProvidersFromAppState(AppState appState) {

@@ -86,8 +86,6 @@ void wireLoginDispatchers(LoginNotifier notifier) {
     changePass: (user, oldPass, newPass, url) =>
         unawaited(_doChangePass(user, oldPass, newPass, url)),
     saveNoPass: (value) => unawaited(_doSaveNoPass(value)),
-    loginCurrentFromStorage: () =>
-        unawaited(_withErrorHandling(_doLoginCurrentFromStorage)),
     resetPass: (newPass) => unawaited(_doResetPass(newPass)),
     requestPassReset: (user, email) =>
         unawaited(_doRequestPassReset(user, email)),
@@ -178,7 +176,7 @@ Future<void> saveStateImmediately() => _doSaveState(immediately: true);
 @visibleForTesting
 Future<void> triggerDeferredSaveState() => _doSaveState();
 
-Future<void> _doLoad({bool forceAutoLogin = false}) async {
+Future<void> _doLoad() async {
   // By resetting the wrapper we clear all cookies.
   // However we don't want to reset the wrapper in tests
   if (wrapper is! Mock) {
@@ -228,13 +226,14 @@ Future<void> _doLoad({bool forceAutoLogin = false}) async {
     await _doDeletePass();
     providerContainer.read(appRouterProvider).showLogin();
   } else {
-    if (user != null && pass != null && (otherAccounts.isEmpty || forceAutoLogin)) {
-      // 1 account, or called after an explicit account-selection → auto-login.
+    if (user != null && pass != null) {
+      // Straight into the account that was used last — selecting an account
+      // makes it the stored one, so this is the one the user left off with.
+      // Switching happens from the account sheet, not from a prompt at every
+      // start.
       await _doLogin(user, pass, url ?? "", fromStorage: true);
     } else {
-      // 0 accounts → show login form.
-      // 2+ accounts at cold start → set current account info so the startup
-      // sheet can show it, then show login form.
+      // No saved password → show the login form.
       if (user != null) {
         providerContainer.read(loginProvider.notifier).setUsername(user);
       }

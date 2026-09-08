@@ -27,25 +27,38 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 
-void showAccountBottomSheet(BuildContext context) {
-  showModalBottomSheet<void>(
+/// Drops the account card down from the top of the screen.
+///
+/// It belongs to the avatar in the app bar, so it comes from where that
+/// avatar sits rather than from the far edge of the screen.
+Future<void> showAccountSheet(BuildContext context) {
+  return showGeneralDialog<void>(
     context: context,
-    isScrollControlled: true,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+    barrierDismissible: true,
+    barrierLabel: "Konto schließen",
+    barrierColor: Colors.black54,
+    transitionDuration: const Duration(milliseconds: 250),
+    pageBuilder: (_, __, ___) => const AccountSheet(),
+    transitionBuilder: (_, animation, __, child) => SlideTransition(
+      position: Tween<Offset>(
+        begin: const Offset(0, -1),
+        end: Offset.zero,
+      ).animate(
+        CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+      ),
+      child: child,
     ),
-    builder: (_) => const AccountBottomSheet(),
   );
 }
 
-class AccountBottomSheet extends ConsumerStatefulWidget {
-  const AccountBottomSheet({super.key});
+class AccountSheet extends ConsumerStatefulWidget {
+  const AccountSheet({super.key});
 
   @override
-  ConsumerState<AccountBottomSheet> createState() => _AccountBottomSheetState();
+  ConsumerState<AccountSheet> createState() => _AccountSheetState();
 }
 
-class _AccountBottomSheetState extends ConsumerState<AccountBottomSheet> {
+class _AccountSheetState extends ConsumerState<AccountSheet> {
   late TextEditingController _aliasController;
   bool _saving = false;
   bool _editingAlias = false;
@@ -114,29 +127,48 @@ class _AccountBottomSheetState extends ConsumerState<AccountBottomSheet> {
     final displayName = config?.fullName ?? username;
     final canAddAccount = !settings.noPasswordSaving;
 
-    return Padding(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-      ),
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildHandle(),
-              const SizedBox(height: 16),
-              _buildCurrentAccountSection(context, profile, displayName),
-              const SizedBox(height: 16),
-              _buildAliasRow(context, profile),
-              if (login.otherAccounts.isNotEmpty) ...[
-                const Divider(height: 32),
-                _buildOtherAccountsList(context, login, profiles),
-              ],
-              const Divider(height: 32),
-              _buildAddAccountButton(context, canAddAccount),
-              const SizedBox(height: 8),
-            ],
+    final media = MediaQuery.of(context);
+    return Align(
+      alignment: Alignment.topCenter,
+      child: Padding(
+        // The keyboard, when the alias is being edited, must not push the
+        // card off the top; it only limits how tall the card may get.
+        padding: EdgeInsets.only(bottom: media.viewInsets.bottom),
+        child: Material(
+          color: Theme.of(context).colorScheme.surface,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(bottom: Radius.circular(16)),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxHeight: media.size.height * 0.85),
+            child: SafeArea(
+              bottom: false,
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _buildCurrentAccountSection(context, profile, displayName),
+                      const SizedBox(height: 16),
+                      _buildAliasRow(context, profile),
+                      if (login.otherAccounts.isNotEmpty) ...[
+                        const Divider(height: 32),
+                        _buildOtherAccountsList(context, login, profiles),
+                      ],
+                      const Divider(height: 32),
+                      _buildAddAccountButton(context, canAddAccount),
+                      const SizedBox(height: 16),
+                      // At the bottom now: that is the edge the card can be
+                      // pulled back towards.
+                      _buildHandle(),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
       ),

@@ -59,7 +59,7 @@ class SortedGradesWidget extends StatelessWidget {
       key: ValueKey(vm.semester),
       children: <Widget>[
         SwitchListTile.adaptive(
-          title: const Text("Noten nach Art sortieren"),
+          title: const Text("Noten nach Art gruppieren"),
           onChanged: sortByTypeCallback,
           value: vm.sortByType,
         ),

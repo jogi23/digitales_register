@@ -19,6 +19,7 @@
 import 'package:deleteable_tile/deleteable_tile.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/container/settings_page.dart';
+import 'package:dr/ui/account_avatar_button.dart';
 import 'package:dr/ui/autocomplete_options.dart';
 import 'package:dr/ui/dialog.dart';
 import 'package:dr/ui/debug_log_page.dart';
@@ -185,6 +186,7 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
               ),
             ),
           ),
+          if (!widget.vm.demoMode) const AccountSettingsTile(),
           SwitchListTile.adaptive(
             title: const Text("Angemeldet bleiben"),
             subtitle: const Text("Deine Zugangsdaten werden lokal gespeichert"),
@@ -236,7 +238,7 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
             ),
           ),
           ListTile(
-            title: const Text("Fächer Kürzel und Farben"),
+            title: const Text("Kürzel und Farben"),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               Navigator.push(
