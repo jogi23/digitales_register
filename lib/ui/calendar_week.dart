@@ -67,9 +67,18 @@ class CalendarWeek extends StatelessWidget {
                           child: CalendarDayWidget(
                             calendarDay: d,
                             grid: grid,
-                            highlightedSubjects: vm.subjectsWithEntries?[
-                                UtcDateTime(
-                                    d.date.year, d.date.month, d.date.day)],
+                            // A day the dashboard never loaded has nothing
+                            // due — passing null would leave it undimmed and
+                            // make past days look like they carry work.
+                            onTap: vm.onDayTap,
+                            highlightedSubjects: vm.subjectsWithEntries == null
+                                ? null
+                                : vm.subjectsWithEntries![UtcDateTime(
+                                      d.date.year,
+                                      d.date.month,
+                                      d.date.day,
+                                    )] ??
+                                    const <String>{},
                             subjectNicks: vm.subjectNicks,
                             isSelected: vm.selection?.date == d.date,
                             selectedHour: vm.selection?.date == d.date
@@ -276,6 +285,9 @@ class CalendarDayWidget extends StatelessWidget {
 
   /// Lessons whose subject is not in here are dimmed. `null` dims nothing.
   final Set<String>? highlightedSubjects;
+
+  /// Tapping the day header; null leaves it inert.
+  final void Function(UtcDateTime date)? onTap;
   final Map<String, String> subjectNicks;
   final bool isSelected;
   final int? selectedHour;
@@ -287,12 +299,14 @@ class CalendarDayWidget extends StatelessWidget {
     required this.grid,
     required this.calendarDay,
     this.highlightedSubjects,
+    this.onTap,
     required this.subjectNicks,
     required this.isSelected,
     required this.selectedHour,
     required this.colorBackground,
     required this.subjectThemes,
   });
+
   /// Whether this column is the day the user is living through.
   bool get isToday {
     final today = Day.dateToday();
@@ -321,22 +335,39 @@ class CalendarDayWidget extends StatelessWidget {
     }
     return Column(
       children: <Widget>[
-        Text(
-          DateFormat("E", "de").format(calendarDay.date),
-          style: isToday
-              ? TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.primary,
-                )
-              : null,
-        ),
-        Text(
-          DateFormat("dd.MM", "de").format(calendarDay.date),
-          style: DefaultTextStyle.of(context).style.copyWith(
-                fontSize: 12,
-                fontWeight: isToday ? FontWeight.bold : null,
-                color: isToday ? Theme.of(context).colorScheme.primary : null,
+        // Tapping a day adds a reminder to it; inert on the calendar page.
+        InkWell(
+          onTap: onTap == null ? null : () => onTap!(calendarDay.date),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Text(
+                DateFormat("E", "de").format(calendarDay.date),
+                style: isToday
+                    ? TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary,
+                      )
+                    : null,
               ),
+              Text(
+                DateFormat("dd.MM", "de").format(calendarDay.date),
+                style: DefaultTextStyle.of(context).style.copyWith(
+                      fontSize: 12,
+                      fontWeight: isToday ? FontWeight.bold : null,
+                      color: isToday
+                          ? Theme.of(context).colorScheme.primary
+                          : null,
+                    ),
+              ),
+              if (onTap != null)
+                Icon(
+                  Icons.add,
+                  size: 14,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+            ],
+          ),
         ),
         if (chunks.isNotEmpty) ...[
           for (var i = 0; i < chunks.length; i++) ...[

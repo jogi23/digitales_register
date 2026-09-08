@@ -205,6 +205,12 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
             height: 0,
           ),
           ListTile(
+            title: Text(
+              "Fächer",
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+          ),
+          ListTile(
             title: const Text("Fächer Kürzel und Farben"),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {

@@ -331,6 +331,34 @@ Future<void> main() async {
     });
   }
 
+  group('days the dashboard never loaded', () {
+    testWidgets('are dimmed, not left in full colour', (tester) async {
+      // A missing day used to yield null, which means "dim nothing" — past
+      // days then looked as if work was due on them.
+      await pumpWeek(tester);
+      // The fixture holds May only; the week view asks for 11.05 onwards, so
+      // every day of it is known. Take one the dashboard has no entry for.
+      expect(dimmedOnMonday(tester, 'Religion'), isTrue);
+      expect(tintOnMonday(tester, 'Religion'), isNull);
+    });
+  });
+
+  group('adding a reminder', () {
+    testWidgets('every day header offers it', (tester) async {
+      await pumpWeek(tester);
+      // One plus per weekday column.
+      expect(find.byIcon(Icons.add), findsWidgets);
+    });
+
+    testWidgets('tapping a header opens the reminder dialog', (tester) async {
+      await pumpWeek(tester);
+      await tester.tap(find.text('Mo'));
+      await tester.pumpAndSettle();
+      expect(find.text('Erinnerung'), findsOneWidget);
+      expect(find.text('Speichern'), findsOneWidget);
+    });
+  });
+
   group('subject colours', () {
     testWidgets('lessons with entries carry the subject colour',
         (tester) async {

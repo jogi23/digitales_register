@@ -623,45 +623,6 @@ class DayWidget extends StatelessWidget {
     required this.showLastFetched,
   });
 
-  Future<String?> showEnterReminderDialog(BuildContext context) async {
-    return showDialog(
-      context: context,
-      builder: (context) {
-        String message = "";
-        return StatefulBuilder(
-          builder: (context, setState) => InfoDialog(
-            title: const Text("Erinnerung"),
-            content: TextField(
-              autofocus: true,
-              maxLines: null,
-              onChanged: (msg) {
-                setState(() => message = msg);
-              },
-              decoration: const InputDecoration(hintText: 'zB. Hausaufgabe'),
-            ),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: const Text("Abbrechen"),
-              ),
-              ElevatedButton(
-                onPressed: message.isNullOrEmpty
-                    ? null
-                    : () {
-                        Navigator.pop(context, message);
-                      },
-                child: const Text(
-                  "Speichern",
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -1261,3 +1222,47 @@ class AttachmentWidget extends StatelessWidget {
     );
   }
 }
+
+/// Asks for the text of a reminder, null when cancelled.
+///
+/// Free function rather than a method: the week view needs it too.
+Future<String?> showEnterReminderDialog(BuildContext context) async {
+  return showDialog(
+    context: context,
+    builder: (context) {
+      String message = "";
+      return StatefulBuilder(
+        builder: (context, setState) => InfoDialog(
+          title: const Text("Erinnerung"),
+          content: TextField(
+            autofocus: true,
+            maxLines: null,
+            onChanged: (msg) {
+              setState(() => message = msg);
+            },
+            decoration: const InputDecoration(hintText: 'zB. Hausaufgabe'),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text("Abbrechen"),
+            ),
+            ElevatedButton(
+              onPressed: message.isNullOrEmpty
+                  ? null
+                  : () {
+                      Navigator.pop(context, message);
+                    },
+              child: const Text(
+                "Speichern",
+              ),
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
+

@@ -66,6 +66,10 @@ class CalendarWeekViewModel {
   /// Whether this week is still being fetched.
   final bool loading;
 
+  /// Tapping a day header, for adding a reminder. Null leaves the header
+  /// inert, which is what the calendar page wants.
+  final void Function(UtcDateTime date)? onDayTap;
+
   /// Subjects that carry dashboard entries, per day. Lessons outside this are
   /// dimmed; `null` dims nothing, which is what the calendar page wants.
   final Map<UtcDateTime, Set<String>>? subjectsWithEntries;
@@ -79,6 +83,7 @@ class CalendarWeekViewModel {
     required this.colorBackground,
     required this.showTimes,
     this.loading = false,
+    this.onDayTap,
     this.subjectsWithEntries,
     required this.subjectThemes,
   });

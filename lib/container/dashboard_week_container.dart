@@ -27,6 +27,8 @@ import 'package:dr/providers/subject_appearance_provider.dart';
 import 'package:dr/ui/calendar_week.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
+import 'package:dr/providers/dashboard_provider.dart';
+import 'package:dr/ui/days.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -120,6 +122,13 @@ class _DashboardWeekContainerState
     };
   }
 
+  /// Asks for a reminder and files it under [date].
+  Future<void> _addReminder(UtcDateTime date) async {
+    final message = await showEnterReminderDialog(context);
+    if (message == null || !mounted) return;
+    await ref.read(dashboardProvider.notifier).addReminder(date, message);
+  }
+
   @override
   Widget build(BuildContext context) {
     final calendarState = ref.watch(calendarProvider);
@@ -152,6 +161,7 @@ class _DashboardWeekContainerState
               subjectThemes: subjectAppearance.themes,
               subjectsWithEntries: _subjectsWithEntries(),
               loading: calendarState.isLoadingWeek(_monday),
+              onDayTap: _addReminder,
             ),
           ),
         ),
