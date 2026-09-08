@@ -268,6 +268,14 @@ abstract class Subject implements Built<Subject, SubjectBuilder> {
   BuiltMap<Semester, BuiltList<GradeAll>> get gradesAll;
   BuiltMap<Semester, BuiltList<GradeDetail>> get grades;
   BuiltMap<Semester, BuiltList<Observation>> get observations;
+
+  /// How many observations the register counted for a semester, straight from
+  /// the subject list. Known before the details are fetched, which is what
+  /// makes the overview able to show it.
+  BuiltMap<Semester, int> get observationCounts;
+
+  /// Same, for the competence entries across all grades of a semester.
+  BuiltMap<Semester, int> get competenceCounts;
   int? get id;
   String get name;
   BuiltMap<Semester, UtcDateTime>? get lastFetchedBasic;
@@ -305,6 +313,50 @@ abstract class Subject implements Built<Subject, SubjectBuilder> {
       ...grades[semester]!,
       ...observations[semester]!,
     ]..sort((a, b) => -a.date.compareTo(b.date));
+  }
+
+  /// What the subject holds in [semester], null while nothing was fetched.
+  ///
+  /// Cancelled entries are left out throughout, matching both the list below
+  /// and the way the register counts competences.
+  SubjectCounts? counts(Semester semester) {
+    final grades = basicGrades(semester);
+    final entries = detailEntries(semester)?.where((e) => !e.cancelled);
+    if (grades == null && entries == null) return null;
+    // Once the details are there they are the truth. Before that, the
+    // register's own numbers are all there is — and they arrive with the
+    // subject list, so the overview can show them right away.
+    //
+    // The grade count has to come from the details as well: classes that are
+    // graded in competences only report an empty grade list in the overview.
+    if (entries == null) {
+      return SubjectCounts(
+        grades: grades!.where((g) => !g.cancelled).length,
+        competences: _countFor(competenceCounts, semester) ?? 0,
+        observations: _countFor(observationCounts, semester) ?? 0,
+      );
+    }
+    return SubjectCounts(
+      grades: entries.whereType<GradeDetail>().length,
+      competences: entries
+          .whereType<GradeDetail>()
+          .fold<int>(0, (n, g) => n + g.competences.length),
+      observations: entries.whereType<Observation>().length,
+    );
+  }
+
+  /// Sums the two half-years for [Semester.all], as the counts are reported
+  /// per semester and the register has no total.
+  int? _countFor(BuiltMap<Semester, int> counts, Semester semester) {
+    if (semester == Semester.all) {
+      final known = [Semester.first, Semester.second]
+          .map((s) => counts[s])
+          .nonNulls
+          .toList();
+      if (known.isEmpty) return null;
+      return known.fold<int>(0, (a, b) => a + b);
+    }
+    return counts[semester];
   }
 
   bool hasDetailData(Semester semester) {
@@ -368,6 +420,17 @@ abstract class Subject implements Built<Subject, SubjectBuilder> {
     }
   }
 
+  /// The average as it is shown next to the subject, or null while nothing
+  /// has been graded — an "Ø /" says nothing worth the space.
+  String? formattedAverage(Semester semester) {
+    if (detectGradingMode([this], semester) == GradingMode.stars) {
+      return starAverage(semester) == null
+          ? null
+          : starAverageFormatted(semester);
+    }
+    return average(semester) == null ? null : averageFormatted(semester);
+  }
+
   String starAverageFormatted(Semester semester) {
     final avg = starAverage(semester);
     if (avg == null) {
@@ -398,6 +461,21 @@ abstract class Subject implements Built<Subject, SubjectBuilder> {
     }
     return m;
   }
+}
+
+/// How much a subject holds, for the line under its name.
+class SubjectCounts {
+  final int grades;
+  final int competences;
+  final int observations;
+
+  const SubjectCounts({
+    required this.grades,
+    required this.competences,
+    required this.observations,
+  });
+
+  bool get isEmpty => grades == 0 && competences == 0 && observations == 0;
 }
 
 GradingMode detectGradingMode(Iterable<Subject> subjects, Semester semester) {
@@ -488,6 +566,13 @@ abstract class GradeDetail
 
   String? get cancelledDescription;
 
+  /// When the grade became visible, already worded by the register
+  /// ("Bewertung sichtbar ab Montag, 02.02.2026 17:00").
+  ///
+  /// Only api/student/entry/getGrade reports it, so it stays null until the
+  /// grade itself is opened.
+  String? get visibleAtFormatted;
+
   /// This is presented as "comment" in the ui, however I wanted to be conistent
   /// with the api naming here.
   String? get description;
@@ -502,6 +587,9 @@ abstract class Competence implements Built<Competence, CompetenceBuilder> {
   String get typeName;
   // The grade from 0 to 5.
   int get grade;
+
+  /// What the teacher wrote about this single competence.
+  String? get description;
 }
 
 abstract class AbsenceGroup

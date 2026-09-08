@@ -19,10 +19,12 @@
 import 'package:deleteable_tile/deleteable_tile.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/container/settings_page.dart';
+import 'package:dr/ui/account_avatar_button.dart';
 import 'package:dr/ui/autocomplete_options.dart';
 import 'package:dr/ui/dialog.dart';
 import 'package:dr/ui/debug_log_page.dart';
 import 'package:dr/ui/network_protocol_page.dart';
+import 'package:dr/ui/star_rating.dart';
 import 'package:dr/ui/subject_appearance_page.dart';
 import 'package:dr/util.dart';
 import 'package:dr/services/app_sharing.dart';
@@ -44,6 +46,7 @@ class SettingsPageWidget extends StatefulWidget {
   final OnSettingChanged<bool> onSetAskWhenDelete;
   final OnSettingChanged<bool> onSetShowGradesDiagram;
   final OnSettingChanged<bool> onSetShowAllSubjectsAverage;
+  final OnSettingChanged<bool> onSetShowSubjectAverage;
   final OnSettingChanged<bool> onSetDashboardMarkNewOrChangedEntries;
   final OnSettingChanged<bool> onSetDashboardDeduplicateEntries;
   final OnSettingChanged<bool> onSetDarkMode;
@@ -53,6 +56,7 @@ class SettingsPageWidget extends StatefulWidget {
   final OnSettingChanged<bool> onSetCalendarShowTimes;
   final void Function(DashboardViewMode mode) onSetDashboardViewMode;
   final OnSettingChanged<bool> onSetDashboardColorTestsInRed;
+  final OnSettingChanged<String> onSetStarColor;
   final OnSettingChanged<List<String>> onSetIgnoreForGradesAverage;
   final VoidCallback onShowProfile;
   final SettingsViewModel vm;
@@ -63,6 +67,7 @@ class SettingsPageWidget extends StatefulWidget {
     required this.onSetAskWhenDelete,
     required this.onSetShowGradesDiagram,
     required this.onSetShowAllSubjectsAverage,
+    required this.onSetShowSubjectAverage,
     required this.onSetDashboardMarkNewOrChangedEntries,
     required this.onSetDashboardDeduplicateEntries,
     required this.onSetDarkMode,
@@ -75,6 +80,7 @@ class SettingsPageWidget extends StatefulWidget {
     required this.onSetCalendarShowTimes,
     required this.onSetDashboardViewMode,
     required this.onSetDashboardColorTestsInRed,
+    required this.onSetStarColor,
   });
 
   @override
@@ -96,6 +102,26 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
       });
     }
     super.initState();
+  }
+
+  /// One palette entry, shown as a star in the colour it stands for so the
+  /// choice can be made without applying it first.
+  DropdownMenuItem<String> _starColorItem(
+    BuildContext context, {
+    required String id,
+    required String name,
+  }) {
+    return DropdownMenuItem(
+      value: id,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.star, color: resolveStarColor(context, id), size: 20),
+          const SizedBox(width: 8),
+          Text(name),
+        ],
+      ),
+    );
   }
 
   void _selectTheme(_Theme? theme) {
@@ -160,6 +186,7 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
               ),
             ),
           ),
+          if (!widget.vm.demoMode) const AccountSettingsTile(),
           SwitchListTile.adaptive(
             title: const Text("Angemeldet bleiben"),
             subtitle: const Text("Deine Zugangsdaten werden lokal gespeichert"),
@@ -211,7 +238,7 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
             ),
           ),
           ListTile(
-            title: const Text("Fächer Kürzel und Farben"),
+            title: const Text("Kürzel und Farben"),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               Navigator.push(
@@ -321,6 +348,34 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
               widget.onSetShowAllSubjectsAverage(value);
             },
             value: widget.vm.showAllSubjectsAverage,
+          ),
+          SwitchListTile.adaptive(
+            title: const Text('Durchschnitt je Fach anzeigen'),
+            onChanged: (bool value) {
+              widget.onSetShowSubjectAverage(value);
+            },
+            value: widget.vm.showSubjectAverage,
+          ),
+          ListTile(
+            title: const Text("Farbe der Sterne"),
+            subtitle: const Text("Für Fächer, die mit Sternen bewertet werden"),
+            trailing: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: widget.vm.starColor,
+                onChanged: (value) {
+                  if (value != null) widget.onSetStarColor(value);
+                },
+                items: [
+                  _starColorItem(
+                    context,
+                    id: accentStarColorId,
+                    name: "Standard",
+                  ),
+                  for (final color in starColors)
+                    _starColorItem(context, id: color.id, name: color.name),
+                ],
+              ),
+            ),
           ),
           ListTile(
             title: const Text("Fächer aus dem Notendurchschnitt ausschließen"),

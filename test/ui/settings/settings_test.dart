@@ -21,6 +21,8 @@ import 'package:dr/app_state.dart';
 import 'package:dr/container/settings_page.dart';
 import 'package:dr/providers/provider_container.dart' as pc;
 import 'package:dr/providers/settings_provider.dart';
+import 'package:dr/ui/account_avatar_button.dart';
+import 'package:dr/ui/account_sheet.dart';
 import 'package:dr/ui/dialog.dart';
 import 'package:dr/ui/subject_appearance_page.dart';
 import 'package:dynamic_theme/dynamic_theme.dart';
@@ -111,6 +113,67 @@ void main() {
     },
   );
 
+  testWidgets(
+    'the account row opens the account card',
+    (tester) async {
+      // Switching accounts used to hide behind the app bar avatar alone.
+      final container = await _pumpSettingsPage(tester);
+      addTearDown(container.dispose);
+
+      expect(find.byType(AccountSettingsTile), findsOneWidget);
+      await tester.tap(find.byType(AccountSettingsTile));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AccountSheet), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'switching off the per-subject average writes the setting',
+    (tester) async {
+      final container = await _pumpSettingsPage(tester);
+      addTearDown(container.dispose);
+
+      const label = 'Durchschnitt je Fach anzeigen';
+      await tester.scrollUntilVisible(
+        find.text(label),
+        100,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      expect(container.read(settingsProvider).showSubjectAverage, isTrue);
+
+      await tester.tap(find.text(label));
+      await tester.pumpAndSettle();
+      expect(container.read(settingsProvider).showSubjectAverage, isFalse);
+    },
+  );
+
+  testWidgets(
+    'picking a star colour writes the setting',
+    (tester) async {
+      final container = await _pumpSettingsPage(tester);
+      addTearDown(container.dispose);
+
+      const label = 'Farbe der Sterne';
+      await tester.scrollUntilVisible(
+        find.text(label),
+        100,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      expect(container.read(settingsProvider).starColor, accentStarColorId);
+
+      await tester.tap(find.text('Standard'));
+      await tester.pumpAndSettle();
+      // The closed button shows the selection too, so the menu entry is last.
+      await tester.tap(find.text('Gelb').last);
+      await tester.pumpAndSettle();
+
+      expect(container.read(settingsProvider).starColor, 'amber');
+    },
+  );
+
   testGoldens(
     'scrolls to grades settings',
     (tester) async {
@@ -133,12 +196,12 @@ void main() {
       final container = await _pumpSettingsPage(tester);
       addTearDown(container.dispose);
       await tester.dragUntilVisible(
-        find.text("Fächer Kürzel und Farben"),
+        find.text("Kürzel und Farben"),
         find.byType(Scrollable).first,
         const Offset(0, -300),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.text("Fächer Kürzel und Farben"));
+      await tester.tap(find.text("Kürzel und Farben"));
       await tester.pumpAndSettle();
       expect(find.byType(SubjectAppearancePage), findsOneWidget);
     },

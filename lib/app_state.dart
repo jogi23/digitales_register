@@ -275,6 +275,10 @@ enum DashboardViewMode {
       DashboardViewMode.values.asNameMap()[name] ?? DashboardViewMode.list;
 }
 
+/// Star colour setting meaning "follow the app's accent colour".
+/// The palette itself lives in ui/star_rating.dart.
+const accentStarColorId = 'accent';
+
 class SettingsState {
   SettingsState({
     this.noPasswordSaving = false,
@@ -285,6 +289,7 @@ class SettingsState {
     this.showCalendarNicksBar = true,
     this.showGradesDiagram = true,
     this.showAllSubjectsAverage = true,
+    this.showSubjectAverage = true,
     this.dashboardMarkNewOrChangedEntries = true,
     this.dashboardDeduplicateEntries = true,
     this.dashboardColorBorders = false,
@@ -294,6 +299,7 @@ class SettingsState {
     this.dashboardColorTestsInRed = true,
     List<String>? ignoreForGradesAverage,
     this.drawerFullyExpanded = true,
+    this.starColor = accentStarColorId,
   }) : ignoreForGradesAverage = ignoreForGradesAverage ?? [];
 
   final bool noPasswordSaving;
@@ -310,6 +316,9 @@ class SettingsState {
   final bool showCalendarNicksBar;
   final bool showGradesDiagram;
   final bool showAllSubjectsAverage;
+
+  /// Whether each subject shows its own average next to its name.
+  final bool showSubjectAverage;
   final bool dashboardMarkNewOrChangedEntries;
   final bool dashboardDeduplicateEntries;
   final bool dashboardColorBorders;
@@ -326,6 +335,10 @@ class SettingsState {
   // Whether to fully expand the drawer if in tablet mode
   final bool drawerFullyExpanded;
 
+  /// Id of the palette entry the competence stars are drawn in.
+  /// See `starColors` in ui/star_rating.dart.
+  final String starColor;
+
   SettingsState copyWith({
     bool? noPasswordSaving,
     bool? typeSorted,
@@ -335,6 +348,7 @@ class SettingsState {
     bool? showCalendarNicksBar,
     bool? showGradesDiagram,
     bool? showAllSubjectsAverage,
+    bool? showSubjectAverage,
     bool? dashboardMarkNewOrChangedEntries,
     bool? dashboardDeduplicateEntries,
     bool? dashboardColorBorders,
@@ -344,6 +358,7 @@ class SettingsState {
     bool? dashboardColorTestsInRed,
     List<String>? ignoreForGradesAverage,
     bool? drawerFullyExpanded,
+    String? starColor,
   }) =>
       SettingsState(
         noPasswordSaving: noPasswordSaving ?? this.noPasswordSaving,
@@ -355,6 +370,7 @@ class SettingsState {
         showGradesDiagram: showGradesDiagram ?? this.showGradesDiagram,
         showAllSubjectsAverage:
             showAllSubjectsAverage ?? this.showAllSubjectsAverage,
+        showSubjectAverage: showSubjectAverage ?? this.showSubjectAverage,
         dashboardMarkNewOrChangedEntries: dashboardMarkNewOrChangedEntries ??
             this.dashboardMarkNewOrChangedEntries,
         dashboardDeduplicateEntries:
@@ -370,6 +386,7 @@ class SettingsState {
         ignoreForGradesAverage:
             ignoreForGradesAverage ?? List.of(this.ignoreForGradesAverage),
         drawerFullyExpanded: drawerFullyExpanded ?? this.drawerFullyExpanded,
+        starColor: starColor ?? this.starColor,
       );
 
   Map<String, dynamic> toJson() => {
@@ -380,6 +397,7 @@ class SettingsState {
         'showCalendarNicksBar': showCalendarNicksBar,
         'showGradesDiagram': showGradesDiagram,
         'showAllSubjectsAverage': showAllSubjectsAverage,
+        'showSubjectAverage': showSubjectAverage,
         'dashboardMarkNewOrChangedEntries': dashboardMarkNewOrChangedEntries,
         'dashboardDeduplicateEntries': dashboardDeduplicateEntries,
         'dashboardColorBorders': dashboardColorBorders,
@@ -389,6 +407,7 @@ class SettingsState {
         'dashboardColorTestsInRed': dashboardColorTestsInRed,
         'ignoreForGradesAverage': ignoreForGradesAverage,
         'drawerFullyExpanded': drawerFullyExpanded,
+        'starColor': starColor,
       };
 
   factory SettingsState.fromJson(Map<dynamic, dynamic> json) => SettingsState(
@@ -399,6 +418,7 @@ class SettingsState {
         showCalendarNicksBar: json['showCalendarNicksBar'] as bool? ?? true,
         showGradesDiagram: json['showGradesDiagram'] as bool? ?? true,
         showAllSubjectsAverage: json['showAllSubjectsAverage'] as bool? ?? true,
+        showSubjectAverage: json['showSubjectAverage'] as bool? ?? true,
         dashboardMarkNewOrChangedEntries:
             json['dashboardMarkNewOrChangedEntries'] as bool? ?? true,
         dashboardDeduplicateEntries:
@@ -419,7 +439,54 @@ class SettingsState {
             (json['ignoreForGradesAverage'] as List<dynamic>?)
                 ?.cast<String>(),
         drawerFullyExpanded: json['drawerFullyExpanded'] as bool? ?? true,
+        starColor: json['starColor'] as String? ?? accentStarColorId,
       );
+
+  /// The settings that belong to the app rather than to one account:
+  /// everything under Aussehen, Fächer, Merkheft and Noten on the settings
+  /// page. They are stored once for the whole app, so a parent with two
+  /// children does not set them twice.
+  ///
+  /// What stays with the account: whether its password is saved, and the view
+  /// toggles that sit on the screens themselves rather than in the settings.
+  /// The theme and the subject colours were app-wide already, through
+  /// SharedPreferences of their own.
+  static const _globalKeys = {
+    'dashboardColorBorders',
+    'calendarColorBackground',
+    'calendarShowTimes',
+    'dashboardColorTestsInRed',
+    'dashboardViewMode',
+    'dashboardMarkNewOrChangedEntries',
+    'dashboardDeduplicateEntries',
+    'askWhenDelete',
+    'showGradesDiagram',
+    'showAllSubjectsAverage',
+    'showSubjectAverage',
+    'starColor',
+    'ignoreForGradesAverage',
+  };
+
+  /// Only the app-wide settings, for storing them on their own.
+  Map<String, dynamic> globalJson() => {
+        for (final entry in toJson().entries)
+          if (_globalKeys.contains(entry.key)) entry.key: entry.value,
+      };
+
+  /// This state with its app-wide settings taken from [json]. Keys the json
+  /// does not carry keep their current value.
+  SettingsState withGlobalJson(Map<dynamic, dynamic> json) =>
+      SettingsState.fromJson({
+        ...toJson(),
+        for (final entry in json.entries)
+          if (_globalKeys.contains(entry.key)) entry.key: entry.value,
+      })
+          // fromJson does not carry the ephemeral scroll flag.
+          .copyWith(scrollToGrades: scrollToGrades);
+
+  /// This state with its app-wide settings taken from [other].
+  SettingsState withGlobalsFrom(SettingsState other) =>
+      withGlobalJson(other.globalJson());
 
   static const _listEq = ListEquality<String>();
 
@@ -435,6 +502,7 @@ class SettingsState {
         other.showCalendarNicksBar == showCalendarNicksBar &&
         other.showGradesDiagram == showGradesDiagram &&
         other.showAllSubjectsAverage == showAllSubjectsAverage &&
+        other.showSubjectAverage == showSubjectAverage &&
         other.dashboardMarkNewOrChangedEntries ==
             dashboardMarkNewOrChangedEntries &&
         other.dashboardDeduplicateEntries == dashboardDeduplicateEntries &&
@@ -444,7 +512,8 @@ class SettingsState {
         other.dashboardViewMode == dashboardViewMode &&
         other.dashboardColorTestsInRed == dashboardColorTestsInRed &&
         _listEq.equals(other.ignoreForGradesAverage, ignoreForGradesAverage) &&
-        other.drawerFullyExpanded == drawerFullyExpanded;
+        other.drawerFullyExpanded == drawerFullyExpanded &&
+        other.starColor == starColor;
   }
 
   @override
@@ -457,6 +526,7 @@ class SettingsState {
         showCalendarNicksBar,
         showGradesDiagram,
         showAllSubjectsAverage,
+        showSubjectAverage,
         dashboardMarkNewOrChangedEntries,
         dashboardDeduplicateEntries,
         dashboardColorBorders,
@@ -466,6 +536,7 @@ class SettingsState {
         dashboardColorTestsInRed,
         ...ignoreForGradesAverage,
         drawerFullyExpanded,
+        starColor,
       ]);
 }
 

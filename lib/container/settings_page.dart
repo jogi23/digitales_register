@@ -48,6 +48,7 @@ class SettingsPageContainer extends ConsumerWidget {
       onSetAskWhenDelete: notifier.setAskWhenDelete,
       onSetShowGradesDiagram: notifier.setShowGradesDiagram,
       onSetShowAllSubjectsAverage: notifier.setShowAllSubjectsAverage,
+      onSetShowSubjectAverage: notifier.setShowSubjectAverage,
       onSetDashboardMarkNewOrChangedEntries: notifier.setMarkNewOrChanged,
       onSetDashboardDeduplicateEntries: notifier.setDeduplicate,
       onShowProfile: ref.read(appRouterProvider).showProfile,
@@ -57,6 +58,7 @@ class SettingsPageContainer extends ConsumerWidget {
       onSetCalendarShowTimes: notifier.setCalendarShowTimes,
       onSetDashboardViewMode: notifier.setDashboardViewMode,
       onSetDashboardColorTestsInRed: notifier.setDashboardColorTestsInRed,
+      onSetStarColor: notifier.setStarColor,
     );
   }
 }
@@ -68,6 +70,7 @@ class SettingsViewModel {
   final bool askWhenDelete;
   final bool showGradesDiagram;
   final bool showAllSubjectsAverage;
+  final bool showSubjectAverage;
   final bool dashboardMarkNewOrChangedEntries;
   final bool dashboardDeduplicateEntries;
   final bool showGradesSettings;
@@ -76,6 +79,7 @@ class SettingsViewModel {
   final bool calendarShowTimes;
   final DashboardViewMode dashboardViewMode;
   final bool dashboardColorTestsInRed;
+  final String starColor;
   final bool demoMode;
   final List<String> allSubjects;
   final List<String> ignoreForGradesAverage;
@@ -86,6 +90,7 @@ class SettingsViewModel {
     required this.showGradesSettings,
     required this.showGradesDiagram,
     required this.showAllSubjectsAverage,
+    required this.showSubjectAverage,
     required this.dashboardMarkNewOrChangedEntries,
     required this.dashboardDeduplicateEntries,
     required this.dashboardColorBorders,
@@ -93,6 +98,7 @@ class SettingsViewModel {
     required this.calendarShowTimes,
     required this.dashboardViewMode,
     required this.dashboardColorTestsInRed,
+    required this.starColor,
     required this.allSubjects,
     required this.ignoreForGradesAverage,
     required this.demoMode,
@@ -106,6 +112,7 @@ class SettingsViewModel {
         showGradesSettings: s.scrollToGrades,
         showGradesDiagram: s.showGradesDiagram,
         showAllSubjectsAverage: s.showAllSubjectsAverage,
+        showSubjectAverage: s.showSubjectAverage,
         dashboardMarkNewOrChangedEntries: s.dashboardMarkNewOrChangedEntries,
         dashboardDeduplicateEntries: s.dashboardDeduplicateEntries,
         dashboardColorBorders: s.dashboardColorBorders,
@@ -113,6 +120,7 @@ class SettingsViewModel {
         calendarShowTimes: s.calendarShowTimes,
         dashboardViewMode: s.dashboardViewMode,
         dashboardColorTestsInRed: s.dashboardColorTestsInRed,
+        starColor: s.starColor,
         allSubjects: allSubjects,
         ignoreForGradesAverage: s.ignoreForGradesAverage,
         demoMode: isDemo,

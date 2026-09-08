@@ -20,9 +20,12 @@ import 'package:dr/app_state.dart';
 import 'package:dr/container/grades_page_container.dart';
 import 'package:dr/container/sorted_grades_container.dart';
 import 'package:dr/data.dart';
+import 'package:dr/services/app_router.dart';
 import 'package:dr/ui/animated_linear_progress_indicator.dart';
+import 'package:dr/ui/star_rating.dart';
 import 'package:dr/util.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 typedef ViewSubjectDetailCallback = void Function(Subject s);
@@ -56,7 +59,7 @@ class SortedGradesWidget extends StatelessWidget {
       key: ValueKey(vm.semester),
       children: <Widget>[
         SwitchListTile.adaptive(
-          title: const Text("Noten nach Art sortieren"),
+          title: const Text("Noten nach Art gruppieren"),
           onChanged: sortByTypeCallback,
           value: vm.sortByType,
         ),
@@ -72,6 +75,7 @@ class SortedGradesWidget extends StatelessWidget {
           SubjectWidget(
             subject: s,
             sortByType: vm.sortByType,
+            showAverage: vm.showSubjectAverage,
             viewSubjectDetail: () => viewSubjectDetail(s),
             showCancelled: vm.showCancelled!,
             semester: vm.semester,
@@ -115,6 +119,9 @@ class SortedGradesWidget extends StatelessWidget {
 
 class SubjectWidget extends StatefulWidget {
   final bool sortByType, showCancelled, noInternet, ignoredForAverage;
+
+  /// Whether the subject's own average is shown next to its name.
+  final bool showAverage;
   final Subject subject;
   final Semester semester;
   final VoidCallback viewSubjectDetail;
@@ -126,6 +133,7 @@ class SubjectWidget extends StatefulWidget {
   const SubjectWidget(
       {super.key,
       required this.sortByType,
+      required this.showAverage,
       required this.subject,
       required this.viewSubjectDetail,
       required this.showCancelled,
@@ -150,7 +158,11 @@ class _SubjectWidgetState extends State<SubjectWidget> {
       return ObservationWidget(
           observation: entry as Observation, tileColor: tileColor);
     }
-    final child = GradeWidget(grade: entry, tileColor: tileColor);
+    final child = GradeWidget(
+      grade: entry,
+      tileColor: tileColor,
+      subjectId: widget.subject.id,
+    );
     if (widget.pendingGradeId == entry.id) {
       return PendingGradeTarget(
         onVisible: widget.clearPendingGrade,
@@ -193,10 +205,50 @@ class _SubjectWidgetState extends State<SubjectWidget> {
     );
   }
 
+  /// "17 Bewertungen · 18 Kompetenzen · 2 Beobachtungen", leaving out what a
+  /// subject does not have. Null while nothing has been fetched yet.
+  ///
+  /// The numbers come with the subject list, so they are here before a
+  /// subject has ever been expanded.
+  Widget? _countsMessage() {
+    final counts = widget.subject.counts(widget.semester);
+    if (counts == null || counts.isEmpty) return null;
+    final parts = [
+      _plural(counts.grades, "Bewertung", "Bewertungen"),
+      _plural(counts.competences, "Kompetenz", "Kompetenzen"),
+      _plural(counts.observations, "Beobachtung", "Beobachtungen"),
+    ].nonNulls;
+    return Text(
+      parts.join(" · "),
+      style: Theme.of(context).textTheme.bodySmall,
+    );
+  }
+
+  /// Null for an empty count — nothing worth its own part of the line.
+  static String? _plural(int count, String one, String many) {
+    if (count == 0) return null;
+    return "$count ${count == 1 ? one : many}";
+  }
+
+  Widget? _subtitle() {
+    final counts = _countsMessage();
+    final lastFetched = _lastFetchedMessage();
+    if (counts == null || lastFetched == null) return counts ?? lastFetched;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [counts, lastFetched],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final entries = widget.subject.detailEntries(widget.semester);
     final theme = Theme.of(context);
+    // Null while nothing is graded yet — then there is no average to show.
+    final average = widget.showAverage
+        ? widget.subject.formattedAverage(widget.semester)
+        : null;
     final altColor =
         theme.colorScheme.surfaceContainerHighest.withOpacity(0.75);
     return AbsorbPointer(
@@ -209,6 +261,11 @@ class _SubjectWidgetState extends State<SubjectWidget> {
             text: widget.subject.name,
             style: TextStyle(color: theme.colorScheme.primary),
             children: [
+              if (average != null)
+                TextSpan(
+                  text: " (Ø $average)",
+                  style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+                ),
               if (widget.ignoredForAverage)
                 const TextSpan(
                   text: " *",
@@ -217,20 +274,7 @@ class _SubjectWidgetState extends State<SubjectWidget> {
             ],
           ),
         ),
-        subtitle: _lastFetchedMessage(),
-        leading: Text.rich(
-          TextSpan(
-            text: 'Ø ',
-            children: <TextSpan>[
-              TextSpan(
-                text: detectGradingMode([widget.subject], widget.semester) ==
-                        GradingMode.stars
-                    ? widget.subject.starAverageFormatted(widget.semester)
-                    : widget.subject.averageFormatted(widget.semester),
-              ),
-            ],
-          ),
-        ),
+        subtitle: _subtitle(),
         trailing:
             widget.noInternet && entries == null ? const SizedBox() : null,
         onExpansionChanged: (expansion) {
@@ -280,6 +324,7 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                                       .where((g) =>
                                           widget.showCancelled || !g.cancelled)
                                       .toList(),
+                                  subjectId: widget.subject.id,
                                   pendingGradeId: widget.pendingGradeId,
                                   clearPendingGrade: widget.clearPendingGrade,
                                 ),
@@ -306,16 +351,32 @@ class _SubjectWidgetState extends State<SubjectWidget> {
 
 const lineThrough = TextStyle(decoration: TextDecoration.lineThrough);
 
-class GradeWidget extends StatelessWidget {
+class GradeWidget extends ConsumerWidget {
   final GradeDetail grade;
   final Color? tileColor;
 
-  const GradeWidget({super.key, required this.grade, this.tileColor});
+  /// Which subject the grade belongs to; without it there is nothing to
+  /// open, so the tile stays inert.
+  final int? subjectId;
+
+  const GradeWidget({
+    super.key,
+    required this.grade,
+    this.tileColor,
+    this.subjectId,
+  });
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final column = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         ListTile(
+          onTap: subjectId == null
+              ? null
+              : () => ref.read(appRouterProvider).showGrade(
+                    subjectId: subjectId!,
+                    gradeId: grade.id,
+                  ),
           title: Text(
             grade.name,
             style: grade.cancelled ? lineThrough : null,
@@ -396,41 +457,28 @@ class CompetenceWidget extends StatelessWidget {
   });
   @override
   Widget build(BuildContext context) {
+    // A column, not a wrap: a short name used to leave the stars beside it
+    // while a long one pushed them below, so no two rows lined up.
     return Padding(
       padding: const EdgeInsets.only(left: 32, bottom: 16, right: 8),
-      child: Wrap(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
             competence.typeName,
             style: cancelled ? lineThrough : null,
           ),
-          Row(
-            children: List.generate(
-              6,
-              (n) => Star(
-                filled: n < competence.grade,
-              ),
-            ),
-          ),
+          StarRow(filled: competence.grade),
         ],
       ),
     );
   }
 }
 
-class Star extends StatelessWidget {
-  final bool filled;
-
-  const Star({super.key, required this.filled});
-  @override
-  Widget build(BuildContext context) {
-    return Icon(filled ? Icons.star : Icons.star_border);
-  }
-}
-
 class GradeTypeWidget extends StatelessWidget {
   final String typeName;
   final List<DetailEntry> entries;
+  final int? subjectId;
   final int? pendingGradeId;
   final VoidCallback? clearPendingGrade;
 
@@ -438,6 +486,7 @@ class GradeTypeWidget extends StatelessWidget {
       {super.key,
       required this.typeName,
       required this.entries,
+      this.subjectId,
       this.pendingGradeId,
       this.clearPendingGrade});
   @override
@@ -451,26 +500,42 @@ class GradeTypeWidget extends StatelessWidget {
           ((int, DetailEntry) pair) {
             final (i, g) = pair;
             final bgColor = i.isOdd ? altColor : null;
-            return g is GradeDetail
-                ? (pendingGradeId == g.id
-                    ? PendingGradeTarget(
-                        onVisible: clearPendingGrade,
-                        child: GradeWidget(grade: g, tileColor: bgColor),
-                      )
-                    : GradeWidget(grade: g, tileColor: bgColor))
-                : ObservationWidget(
-                    observation: g as Observation,
-                    tileColor: bgColor,
-                  );
+            if (g is! GradeDetail) {
+              return ObservationWidget(
+                observation: g as Observation,
+                tileColor: bgColor,
+              );
+            }
+            final gradeWidget = GradeWidget(
+              grade: g,
+              tileColor: bgColor,
+              subjectId: subjectId,
+            );
+            return pendingGradeId == g.id
+                ? PendingGradeTarget(
+                    onVisible: clearPendingGrade,
+                    child: gradeWidget,
+                  )
+                : gradeWidget;
           },
         )
         .toList();
     return displayGrades.isEmpty
         ? const SizedBox()
+        // Indented and quieter than the subject above it, so the grouping
+        // reads as a level below the subject rather than as another subject.
         : ExpansionTile(
+            tilePadding: const EdgeInsets.only(left: 32, right: 16),
+            childrenPadding: const EdgeInsets.only(left: 16),
             title: Text(
               typeName,
-              style: TextStyle(color: theme.colorScheme.primary),
+              // A label, not a smaller entry: weight and letter spacing keep
+              // it from reading as a de-emphasised version of the rows below.
+              style: theme.textTheme.titleSmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.4,
+              ),
             ),
             initiallyExpanded: true,
             children: displayGrades,

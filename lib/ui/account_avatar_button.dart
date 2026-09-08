@@ -20,13 +20,16 @@ import 'dart:io';
 import 'package:dr/providers/account_profile_provider.dart';
 import 'package:dr/providers/config_provider.dart';
 import 'package:dr/providers/login_provider.dart';
-import 'package:dr/ui/account_bottom_sheet.dart';
+import 'package:dr/ui/account_sheet.dart';
 import 'package:dr/util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class AccountAvatarButton extends ConsumerWidget {
-  const AccountAvatarButton({super.key});
+/// The picture of the account currently logged in, or its initials.
+class AccountAvatar extends ConsumerWidget {
+  final double radius;
+
+  const AccountAvatar({super.key, this.radius = 24});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -34,46 +37,75 @@ class AccountAvatarButton extends ConsumerWidget {
     final config = ref.watch(configProvider);
     final profiles = ref.watch(accountProfileProvider);
 
-    final username = config?.fullName ?? login.username ?? '';
-    final url = login.url ?? '';
-    final key = accountProfileKey(login.username ?? '', url);
+    final displayName = config?.fullName ?? login.username ?? '';
+    final key = accountProfileKey(login.username ?? '', login.url ?? '');
     final profile = profiles[key] ?? const AccountProfile();
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-      child: GestureDetector(
-        onTap: () => showAccountBottomSheet(context),
-        child: _buildAvatar(context, profile, username),
-      ),
-    );
-  }
-
-  Widget _buildAvatar(
-    BuildContext context,
-    AccountProfile profile,
-    String displayName,
-  ) {
     final colorScheme = Theme.of(context).colorScheme;
     if (profile.photoPath != null) {
       final file = File(profile.photoPath!);
       if (file.existsSync()) {
         return CircleAvatar(
-          radius: 24,
+          radius: radius,
           backgroundImage: FileImage(file),
         );
       }
     }
-    final initials = accountInitials(profile.alias ?? displayName);
     return CircleAvatar(
-      radius: 24,
+      radius: radius,
       backgroundColor: colorScheme.primaryContainer,
       child: Text(
-        initials,
+        accountInitials(profile.alias ?? displayName),
         style: TextStyle(
-          fontSize: 15,
+          // Two letters have to fit whatever size the avatar is.
+          fontSize: radius * 0.625,
           fontWeight: FontWeight.bold,
           color: colorScheme.onPrimaryContainer,
         ),
+      ),
+    );
+  }
+}
+
+/// The account row in the settings; opens the same card as the app bar avatar.
+///
+/// Switching accounts used to be reachable only through that avatar, which is
+/// easy to miss for something one looks for under settings.
+class AccountSettingsTile extends ConsumerWidget {
+  const AccountSettingsTile({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final login = ref.watch(loginProvider);
+    final config = ref.watch(configProvider);
+    final profiles = ref.watch(accountProfileProvider);
+
+    final username = login.username ?? '';
+    final key = accountProfileKey(username, login.url ?? '');
+    final profile = profiles[key] ?? const AccountProfile();
+    final name = profile.alias ?? config?.fullName ?? username;
+
+    return ListTile(
+      leading: const AccountAvatar(radius: 20),
+      title: Text(name),
+      subtitle: name != username && username.isNotEmpty ? Text(username) : null,
+      trailing: const Icon(Icons.chevron_right),
+      onTap: () => showAccountSheet(context),
+    );
+  }
+}
+
+/// The avatar in the app bar; opens the account card.
+class AccountAvatarButton extends StatelessWidget {
+  const AccountAvatarButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      child: GestureDetector(
+        onTap: () => showAccountSheet(context),
+        child: const AccountAvatar(),
       ),
     );
   }

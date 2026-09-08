@@ -42,6 +42,7 @@ class SortedGradesContainer extends ConsumerWidget {
         showCancelled: settings.showCancelled,
         noInternet: noInternet,
         ignoredSubjectsForAverage: settings.ignoreForGradesAverage,
+        showSubjectAverage: settings.showSubjectAverage,
       ),
       showCancelledCallback:
           ref.read(settingsProvider.notifier).setShowCancelledGrades,
@@ -71,6 +72,9 @@ class SortedGradesViewModel {
   final bool? showCancelled;
   final bool noInternet;
 
+  /// Whether each subject shows its own average next to its name.
+  final bool showSubjectAverage;
+
   const SortedGradesViewModel({
     required this.subjects,
     required this.ignoredSubjectsForAverage,
@@ -78,5 +82,6 @@ class SortedGradesViewModel {
     required this.sortByType,
     required this.showCancelled,
     required this.noInternet,
+    required this.showSubjectAverage,
   });
 }

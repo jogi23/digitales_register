@@ -22,6 +22,7 @@ import 'package:dr/container/grades_page_container.dart';
 import 'package:dr/data.dart';
 import 'package:dr/providers/grades_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
+import 'package:dr/services/app_router.dart';
 import 'package:dr/providers/subject_appearance_provider.dart';
 import 'package:dr/ui/sorted_grades_widget.dart';
 import 'package:dr/utc_date_time.dart';
@@ -29,8 +30,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
+import 'package:mocktail/mocktail.dart';
 
 import '../../fixtures/api_fixtures.dart';
+
+/// Fach1 needs an id: without one a grade has no subject to open.
+const _fach1Id = 1;
+
+/// The row of a subject. Its name is followed by the average in brackets, so
+/// an exact text match would miss it.
+Finder _subjectRow(String name) => find.textContaining(RegExp('^$name'));
+
+class _MockAppRouter extends Mock implements AppRouter {}
 
 class _TestGradesNotifier extends GradesNotifier {
   final GradesState initial;
@@ -83,6 +94,7 @@ AppState _getGradesState({bool loading = false}) {
           <Subject>[
             Subject(
               (b) => b
+                ..id = _fach1Id
                 ..name = "Fach1"
                 ..grades = MapBuilder()
                 ..gradesAll = MapBuilder(
@@ -355,14 +367,14 @@ void main() {
     );
     await tester.pumpWidget(widget);
     expect(find.text("Dritte Schularbeit"), findsNothing);
-    await tester.tap(find.text("Fach1"));
+    await tester.tap(_subjectRow("Fach1"));
     await tester.pumpAndSettle();
     expect(find.text("Dritte Schularbeit"), findsOneWidget);
     await expectLater(
       find.byType(GradesPageContainer),
       matchesGoldenFile("open_unsorted.png"),
     );
-    await tester.tap(find.text("Noten nach Art sortieren"));
+    await tester.tap(find.text("Noten nach Art gruppieren"));
     await tester.pumpAndSettle();
 
     expect(
@@ -374,6 +386,154 @@ void main() {
       matchesGoldenFile("open_sorted.png"),
     );
   });
+  group('the subject average', () {
+    Widget pageWith(SettingsState settings) => ProviderScope(
+          overrides: [
+            gradesProvider.overrideWith(
+              () => _TestGradesNotifier(_getGradesState().gradesState),
+            ),
+            settingsProvider
+                .overrideWith(() => _TestSettingsNotifier(settings)),
+            subjectAppearanceProvider.overrideWith(
+              () => _TestSubjectAppearanceNotifier(_gradesSettings),
+            ),
+          ],
+          child: MaterialApp(
+            home: const GradesPageContainer(),
+            theme: ThemeData(primarySwatch: Colors.deepOrange),
+          ),
+        );
+
+    testWidgets('stands in brackets after the subject name', (tester) async {
+      await tester.pumpWidget(pageWith(SettingsState()));
+      await tester.pumpAndSettle();
+      expect(find.textContaining("Fach1 (Ø 7,5)"), findsOneWidget);
+    });
+
+    testWidgets('can be switched off', (tester) async {
+      await tester.pumpWidget(
+        pageWith(SettingsState(showSubjectAverage: false)),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text("Fach1"), findsOneWidget);
+      expect(find.textContaining("Ø"), findsNothing);
+    });
+  });
+
+  group('grouping by type', () {
+    Widget grouped({Brightness brightness = Brightness.light}) => ProviderScope(
+          overrides: [
+            gradesProvider.overrideWith(
+              () => _TestGradesNotifier(_getGradesState().gradesState),
+            ),
+            settingsProvider.overrideWith(
+              () => _TestSettingsNotifier(SettingsState(typeSorted: true)),
+            ),
+            subjectAppearanceProvider.overrideWith(
+              () => _TestSubjectAppearanceNotifier(_gradesSettings),
+            ),
+          ],
+          child: MaterialApp(
+            home: const GradesPageContainer(),
+            theme: ThemeData(
+              colorSchemeSeed: Colors.deepOrange,
+              brightness: brightness,
+            ),
+          ),
+        );
+
+    Future<void> openFach1(WidgetTester tester, Widget widget) async {
+      await tester.pumpWidget(widget);
+      await tester.tap(_subjectRow("Fach1"));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('sits indented under the subject', (tester) async {
+      // Subject and group used to look exactly alike, so nothing said which
+      // was which.
+      await openFach1(tester, grouped());
+      final subject = tester.getTopLeft(_subjectRow("Fach1"));
+      final group = tester.getTopLeft(find.text("Schularbeit3"));
+      expect(group.dx, greaterThan(subject.dx));
+    });
+
+    testWidgets('is written differently from the subject', (tester) async {
+      await openFach1(tester, grouped());
+      final scheme =
+          Theme.of(tester.element(find.text("Schularbeit3"))).colorScheme;
+      final style = tester.widget<Text>(find.text("Schularbeit3")).style!;
+      expect(style.color, scheme.onSurfaceVariant);
+      expect(style.color, isNot(scheme.primary));
+    });
+
+    for (final (name, brightness) in [
+      ("light", Brightness.light),
+      ("dark", Brightness.dark),
+    ]) {
+      testGoldens('reads as a sub-level in $name mode', (tester) async {
+        await openFach1(tester, grouped(brightness: brightness));
+        await expectLater(
+          find.byType(GradesPageContainer),
+          matchesGoldenFile("grouped_$name.png"),
+        );
+      });
+    }
+  });
+
+  testWidgets('competence stars sit under their name', (tester) async {
+    // A short name used to leave them beside it, which lined up with nothing.
+    final widget = _wrapWithScope(
+      MaterialApp(
+        home: const GradesPageContainer(),
+        theme: ThemeData(primarySwatch: Colors.deepOrange),
+      ),
+      _getGradesState(),
+      _gradesSettings,
+    );
+    await tester.pumpWidget(widget);
+    await tester.tap(_subjectRow("Fach1"));
+    await tester.pumpAndSettle();
+
+    final name = tester.getTopLeft(find.text("Kompetenz1"));
+    final firstStar = tester.getTopLeft(find.byIcon(Icons.star).first);
+    expect(firstStar.dx, name.dx);
+    expect(firstStar.dy, greaterThan(name.dy));
+  });
+
+  testWidgets('tapping a grade opens its detail page', (tester) async {
+    final appRouter = _MockAppRouter();
+    when(() => appRouter.showGrade(
+          subjectId: any(named: 'subjectId'),
+          gradeId: any(named: 'gradeId'),
+        )).thenReturn(null);
+    final widget = ProviderScope(
+      overrides: [
+        gradesProvider.overrideWith(
+          () => _TestGradesNotifier(_getGradesState().gradesState),
+        ),
+        settingsProvider
+            .overrideWith(() => _TestSettingsNotifier(SettingsState())),
+        subjectAppearanceProvider.overrideWith(
+          () => _TestSubjectAppearanceNotifier(_gradesSettings),
+        ),
+        appRouterProvider.overrideWith((ref) => appRouter),
+      ],
+      child: MaterialApp(
+        home: const GradesPageContainer(),
+        theme: ThemeData(primarySwatch: Colors.deepOrange),
+      ),
+    );
+    await tester.pumpWidget(widget);
+    await tester.tap(_subjectRow("Fach1"));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text("Dritte Schularbeit"));
+    await tester.pumpAndSettle();
+
+    verify(() => appRouter.showGrade(subjectId: _fach1Id, gradeId: 2))
+        .called(1);
+  });
+
   testWidgets('competences', (tester) async {
     final appState = _getGradesState();
     final widget = _wrapWithScope(
@@ -385,7 +545,7 @@ void main() {
       _gradesSettings,
     );
     await tester.pumpWidget(widget);
-    await tester.tap(find.text("Fach1"));
+    await tester.tap(_subjectRow("Fach1"));
     await tester.pumpAndSettle();
     expect(find.byIcon(Icons.star), findsNWidgets(3));
     expect(find.byIcon(Icons.star_border), findsNWidgets(3));
@@ -403,7 +563,7 @@ void main() {
     testWidgets('shows subject Deutsch in overview', (tester) async {
       await tester.pumpWidget(buildDemo());
       await tester.pump();
-      expect(find.text('Deutsch'), findsOneWidget);
+      expect(_subjectRow('Deutsch'), findsOneWidget);
     });
 
     testWidgets('grades hidden before expanding', (tester) async {
@@ -414,7 +574,7 @@ void main() {
 
     testWidgets('shows grade names after expanding Deutsch', (tester) async {
       await tester.pumpWidget(buildDemo());
-      await tester.tap(find.text('Deutsch'));
+      await tester.tap(_subjectRow('Deutsch'));
       await tester.pumpAndSettle();
       expect(
         find.textContaining('Buchstaben sauber nachspuren'),
@@ -432,14 +592,14 @@ void main() {
 
     testWidgets('shows typeName in grade subtitle', (tester) async {
       await tester.pumpWidget(buildDemo());
-      await tester.tap(find.text('Deutsch'));
+      await tester.tap(_subjectRow('Deutsch'));
       await tester.pumpAndSettle();
       expect(find.textContaining('Praktisches Arbeiten'), findsOneWidget);
     });
 
     testWidgets('shows competence stars after expanding', (tester) async {
       await tester.pumpWidget(buildDemo());
-      await tester.tap(find.text('Deutsch'));
+      await tester.tap(_subjectRow('Deutsch'));
       await tester.pumpAndSettle();
       // 3 grades: 5+5+6 filled stars, 1+1+0 empty stars = 16 filled, 2 empty
       expect(find.byIcon(Icons.star), findsNWidgets(16));
@@ -448,7 +608,7 @@ void main() {
 
     testWidgets('shows competence type name', (tester) async {
       await tester.pumpWidget(buildDemo());
-      await tester.tap(find.text('Deutsch'));
+      await tester.tap(_subjectRow('Deutsch'));
       await tester.pumpAndSettle();
       expect(find.text('Schreiben: Sätze schreiben'), findsOneWidget);
       expect(find.text('Lesefertigkeit'), findsOneWidget);
@@ -465,7 +625,7 @@ void main() {
 
     testGoldens('demo expanded Deutsch golden', (tester) async {
       await tester.pumpWidget(buildDemo());
-      await tester.tap(find.text('Deutsch'));
+      await tester.tap(_subjectRow('Deutsch'));
       await tester.pumpAndSettle();
       await expectLater(
         find.byType(GradesPageContainer),

@@ -33,6 +33,7 @@ import 'package:dr/providers/account_profile_provider.dart';
 import 'package:dr/providers/login_provider.dart';
 import 'package:dr/providers/provider_container.dart';
 import 'package:dr/ui/grade_calculator.dart';
+import 'package:dr/ui/grade_detail_page.dart';
 import 'package:dr/ui/grades_chart_page.dart';
 import 'package:dr/ui/splash_overlay.dart';
 import 'package:dr/ui/subject_appearance_page.dart';
@@ -184,6 +185,13 @@ class RegisterApp extends StatelessWidget {
                   settings: settings,
                   builder: (_) => NotificationPageContainer(),
                   fullscreenDialog: true,
+                );
+              case "gradeDetail":
+                return MaterialPageRoute<void>(
+                  settings: settings,
+                  builder: (_) => GradeDetailPage(
+                    args: settings.arguments! as GradeDetailArgs,
+                  ),
                 );
               case "gradesChart":
                 return MaterialPageRoute<void>(

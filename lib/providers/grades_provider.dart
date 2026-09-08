@@ -162,7 +162,7 @@ class GradesNotifier extends Notifier<GradesState> {
             .firstWhere((subj) => subj.id == subject.id)
             .grades[s]!
             .where((g) => g.cancelled)) {
-          await loadCancelledDescription(grade, s);
+          await loadGradeDetail(grade, s);
         }
       },
     );
@@ -189,8 +189,10 @@ class GradesNotifier extends Notifier<GradesState> {
     }
   }
 
-  Future<void> loadCancelledDescription(
-      GradeDetail grade, Semester semester) async {
+  /// Fetches what only api/student/entry/getGrade reports — why a grade was
+  /// cancelled, and when it became visible. The subject detail carries
+  /// neither.
+  Future<void> loadGradeDetail(GradeDetail grade, Semester semester) async {
     if (ref.read(noInternetProvider)) return;
     _doForSemester([semester], (s) async {
       final dynamic data = await wrapper.send(
@@ -198,7 +200,7 @@ class GradesNotifier extends Notifier<GradesState> {
         args: {"gradeId": grade.id},
       );
       if (data == null) return;
-      _applyCancelledDescription(data, grade, s);
+      _applyGradeDetail(data, grade, s);
     });
   }
 
@@ -230,12 +232,16 @@ class GradesNotifier extends Notifier<GradesState> {
                       getList(mapData["grades"])!.map<GradeDetail>(
                         (dynamic g) =>
                             tryParse(getMap(g)!, _parseGrade).rebuild(
-                          (d) => d
-                            ..cancelledDescription = sb.grades[semester]
-                                ?.firstWhereOrNull(
-                                  (gd) => gd.id == d.id,
-                                )
-                                ?.cancelledDescription,
+                          (d) {
+                            // Both come from getGrade only; refetching the
+                            // subject would otherwise drop them again.
+                            final known = sb.grades[semester]
+                                ?.firstWhereOrNull((gd) => gd.id == d.id);
+                            d
+                              ..cancelledDescription =
+                                  known?.cancelledDescription
+                              ..visibleAtFormatted = known?.visibleAtFormatted;
+                          },
                         ),
                       ),
                     )
@@ -244,22 +250,24 @@ class GradesNotifier extends Notifier<GradesState> {
                         (dynamic o) => tryParse(getMap(o)!, _parseObservation),
                       ),
                     )
+                    ..observationCounts[semester] =
+                        _count(mapData["countObservations"])
+                    ..competenceCounts[semester] =
+                        _count(mapData["countCompetences"])
                     ..lastFetchedDetailed[semester] = UtcDateTime.now(),
                 )
               : s,
         ));
   }
 
-  void _applyCancelledDescription(
-      dynamic data, GradeDetail grade, Semester semester) {
+  void _applyGradeDetail(dynamic data, GradeDetail grade, Semester semester) {
     state = state.rebuild((b) => b.subjects.map(
           (s) => s.grades[semester]?.contains(grade) == true
               ? s.rebuild(
                   (sb) => sb
                     ..grades[semester] = sb.grades[semester]!.rebuild(
                       (gb) => gb.map(
-                        (g) =>
-                            g == grade ? _addCancelledDescription(g, data) : g,
+                        (g) => g == grade ? _addGradeDetail(g, data) : g,
                       ),
                     ),
                 )
@@ -301,6 +309,8 @@ void _updateSubjects(BuiltList<Subject> oldSubjects,
               (dynamic g) => tryParse(getMap(g)!, _parseGradeAll),
             ),
           )
+          ..observationCounts[semester] = _count(subject["countObservations"])
+          ..competenceCounts[semester] = _count(subject["countCompetences"])
           ..lastFetchedBasic[semester] = UtcDateTime.now(),
       );
     } else {
@@ -317,6 +327,12 @@ void _updateSubjects(BuiltList<Subject> oldSubjects,
                   ),
                 ),
               },
+            )
+            ..observationCounts = MapBuilder(
+              {semester: _count(subject["countObservations"])},
+            )
+            ..competenceCounts = MapBuilder(
+              {semester: _count(subject["countCompetences"])},
             ),
         ),
       );
@@ -326,6 +342,9 @@ void _updateSubjects(BuiltList<Subject> oldSubjects,
     subjectsBuilder.removeWhere((s) => s.id == subject);
   }
 }
+
+/// A count the register reports; a missing or malformed one means zero.
+int _count(dynamic value) => getInt(value) ?? 0;
 
 Observation _parseObservation(Map data) {
   return Observation(
@@ -381,15 +400,18 @@ GradeDetail _parseGrade(Map data) {
   );
 }
 
-GradeDetail _addCancelledDescription(GradeDetail grade, dynamic data) {
+GradeDetail _addGradeDetail(GradeDetail grade, dynamic data) {
   return grade.rebuild(
-    (b) => b..cancelledDescription = getString(data["cancelledDescription"]),
+    (b) => b
+      ..cancelledDescription = getString(data["cancelledDescription"])
+      ..visibleAtFormatted = getString(data["visibleAtFormatted"]),
   );
 }
 
 Competence _parseCompetence(Map data) {
   return Competence((b) => b
     ..typeName = getString(data["typeName"])
+    ..description = getString(data["description"])
     ..grade = (double.tryParse(getString(data["grade"]) ?? "") ?? 0).toInt());
 }
 
