@@ -39,6 +39,7 @@ Widget _build({
   VoidCallback? onShowCertificate,
   VoidCallback? onShowMessages,
   VoidCallback? onShowSettings,
+  VoidCallback? onShowAccount,
   VoidCallback? onLogout,
 }) {
   return MaterialApp(
@@ -62,6 +63,7 @@ Widget _build({
           showCertificate: onShowCertificate ?? () {},
           showMessages: onShowMessages ?? () {},
           showSettings: onShowSettings ?? () {},
+          showAccount: onShowAccount ?? () {},
           logout: onLogout ?? () {},
         ),
       ),
@@ -70,6 +72,19 @@ Widget _build({
 }
 
 void main() {
+  testWidgets('tapping the account name opens the account card',
+      (tester) async {
+    // The name at the top used to be decoration only.
+    var opened = 0;
+    await tester.pumpWidget(_build(onShowAccount: () => opened++));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('max.mustermann'));
+    await tester.pumpAndSettle();
+
+    expect(opened, 1);
+  });
+
   testWidgets('shows all navigation items', (tester) async {
     await tester.pumpWidget(_build());
     await tester.pumpAndSettle();

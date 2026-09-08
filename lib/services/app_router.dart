@@ -120,6 +120,9 @@ class AppRouter {
     );
   }
 
+  /// Slides the drawer away, for actions that show something on top of it.
+  void closeDrawer() => scaffoldKey?.currentState?.closeDrawerIfOpen();
+
   void showAbsences() {
     scaffoldKey!.currentState!
         .selectContentWidget(const AbsencesPageContainer(), Pages.absences);

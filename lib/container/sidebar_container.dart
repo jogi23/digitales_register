@@ -16,12 +16,15 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'dart:async';
+
 import 'package:dr/middleware/middleware.dart';
 import 'package:dr/providers/account_profile_provider.dart';
 import 'package:dr/providers/config_provider.dart';
 import 'package:dr/providers/login_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/services/app_router.dart';
+import 'package:dr/ui/account_sheet.dart';
 import 'package:dr/ui/sidebar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -63,6 +66,12 @@ class SidebarContainer extends ConsumerWidget {
       showGrades: router.showGrades,
       showMessages: router.showMessages,
       showSettings: router.showSettings,
+      showAccount: () {
+        // Out from behind the drawer first, otherwise the card drops in
+        // over it.
+        router.closeDrawer();
+        unawaited(showAccountSheet(context));
+      },
       logout: () => ref.read(loginProvider.notifier).requestLogout(hard: true),
     );
   }

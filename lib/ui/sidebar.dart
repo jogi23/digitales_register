@@ -41,6 +41,7 @@ class Sidebar extends StatelessWidget {
     required this.showCertificate,
     required this.showMessages,
     required this.showSettings,
+    required this.showAccount,
     required this.logout,
   });
 
@@ -52,6 +53,7 @@ class Sidebar extends StatelessWidget {
       showCertificate,
       showMessages,
       showSettings,
+      showAccount,
       logout;
   final bool tabletMode, drawerExpanded;
   final Pages currentSelected;
@@ -70,6 +72,7 @@ class Sidebar extends StatelessWidget {
       minWidth: 70,
       screenPadding: 0,
       title: Text(alias ?? username ?? "?"),
+      onTitleTap: showAccount,
       titleTooltip: alias ?? username ?? "?",
       toggleTooltipCollapsed: "Ausklappen",
       toggleTooltipExpanded: "Einklappen",

@@ -14,6 +14,7 @@ class CollapsibleSidebar extends StatefulWidget {
     super.key,
     required this.items,
     this.title,
+    this.onTitleTap,
     this.titleStyle,
     this.textStyle,
     this.toggleTitleStyle,
@@ -47,6 +48,9 @@ class CollapsibleSidebar extends StatefulWidget {
   });
 
   final Widget? title, toggleTitle;
+
+  /// Called when the title row — avatar and name — is tapped.
+  final VoidCallback? onTitleTap;
   final String titleTooltip, toggleTooltipCollapsed, toggleTooltipExpanded;
   final TextStyle? titleStyle, textStyle, toggleTitleStyle;
   final Widget body;
@@ -251,6 +255,7 @@ class _CollapsibleSidebarState extends State<CollapsibleSidebar>
       title: widget.title,
       textStyle: _textStyle(widget.unselectedTextColor, widget.titleStyle),
       tooltip: widget.titleTooltip,
+      onTap: widget.onTitleTap,
     );
   }
 
