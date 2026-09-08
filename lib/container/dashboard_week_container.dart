@@ -227,6 +227,7 @@ class _DashboardWeekContainerState
               subjectsWithEntries: _subjectsWithEntries(),
               loading: calendarState.isLoadingWeek(_monday),
               onDayTap: _showDay,
+              onEntryTap: _showDay,
               onAddReminder: _addReminder,
               daysWithEntries: _daysWithEntries(),
             ),

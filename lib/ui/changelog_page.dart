@@ -75,6 +75,16 @@ class _Release extends StatelessWidget {
     return DateFormat.yMMMMd("de").format(parsed);
   }
 
+  /// The four headings the notes are written under. Anything else — a
+  /// heading added later — gets the neutral one.
+  static IconData _iconFor(String title) => switch (title) {
+        'Neue Funktionen' => Icons.auto_awesome_outlined,
+        'Verbesserungen' => Icons.trending_up,
+        'Fehlerbehebungen' => Icons.bug_report_outlined,
+        'Intern' => Icons.build_outlined,
+        _ => Icons.label_outline,
+      };
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -90,8 +100,10 @@ class _Release extends StatelessWidget {
             children: [
               Text(
                 entry.version,
-                style: theme.textTheme.titleMedium
-                    ?.copyWith(color: theme.colorScheme.primary),
+                // Plain but heavy: the headings below carry the accent
+                // colour, and two levels in the same colour compete.
+                style: theme.textTheme.titleLarge
+                    ?.copyWith(fontWeight: FontWeight.w600),
               ),
               if (date != null) ...[
                 const SizedBox(width: 8),
@@ -105,11 +117,23 @@ class _Release extends StatelessWidget {
           ),
           for (final section in entry.sections) ...[
             Padding(
-              padding: const EdgeInsets.only(top: 8, bottom: 2),
-              child: Text(
-                section.title,
-                style: theme.textTheme.labelLarge
-                    ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+              padding: const EdgeInsets.only(top: 12, bottom: 4),
+              child: Row(
+                children: [
+                  Icon(
+                    _iconFor(section.title),
+                    size: 16,
+                    color: theme.colorScheme.primary,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    section.title,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      color: theme.colorScheme.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
               ),
             ),
             for (final item in section.items)

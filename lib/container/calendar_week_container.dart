@@ -73,6 +73,10 @@ class CalendarWeekViewModel {
   /// Adding a reminder straight from the header.
   final void Function(UtcDateTime date)? onAddReminder;
 
+  /// Tapping a lesson that carries an entry opens its day. Null keeps the
+  /// calendar's own behaviour, which is to select the lesson.
+  final void Function(UtcDateTime date)? onEntryTap;
+
   /// Days that carry entries. Their header is set apart — reminders have no
   /// subject, so colouring lessons alone would never show them.
   final Set<UtcDateTime> daysWithEntries;
@@ -92,6 +96,7 @@ class CalendarWeekViewModel {
     this.loading = false,
     this.onDayTap,
     this.onAddReminder,
+    this.onEntryTap,
     this.daysWithEntries = const {},
     this.subjectsWithEntries,
     required this.subjectThemes,

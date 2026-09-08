@@ -15,6 +15,8 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'dart:io';
+
 import 'package:dr/services/changelog.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -28,6 +30,14 @@ ChangelogEntry _entry(String version) => ChangelogEntry(
 
 Future<String?> _storedVersion() async =>
     (await SharedPreferences.getInstance()).getString('changelog_last_seen');
+
+/// The version this build would be released as, without its build number.
+String _pubspecVersion() {
+  final line = File('pubspec.yaml')
+      .readAsLinesSync()
+      .firstWhere((line) => line.startsWith('version:'));
+  return line.split(':')[1].split('+').first.trim();
+}
 
 void main() {
   setUp(() {
@@ -147,14 +157,19 @@ void main() {
 
   group('the notes shipped with the app', () {
     test('cover the version being released', () async {
-      // A release without its own notes shows nothing at all, which is easy
-      // to miss until it is too late.
-      final changelog =
-          Changelog(currentVersion: '1.2.1', freshInstall: false);
-      final entries = await changelog.pending();
-      expect(entries, hasLength(1));
-      expect(entries.single.version, '1.2.1');
-      expect(entries.single.points, isNotEmpty);
+      // Read from pubspec so this fails at the next version bump rather than
+      // shipping a release whose card stays silently empty.
+      final released = _pubspecVersion();
+      final entries = await Changelog(
+        currentVersion: released,
+        freshInstall: false,
+      ).pending();
+      expect(
+        entries.map((e) => e.version),
+        contains(released),
+        reason: 'assets/changelog.json kennt $released nicht',
+      );
+      expect(entries.first.points, isNotEmpty);
     });
 
     test('hold the whole history, newest first', () async {
