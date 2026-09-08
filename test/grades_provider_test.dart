@@ -157,4 +157,37 @@ void main() {
     expect(container.read(gradesProvider).pendingSubjectId, _subjectId);
     expect(container.read(pendingGradeIdProvider), _gradeId);
   });
+
+  test('the subject list carries the counts for the overview', () async {
+    // Against the recorded response, so the field names stay honest: the
+    // counts arrive with the subject list, before any detail is fetched.
+    when(
+      () => mockWrapper.send(
+        'api/student/all_subjects',
+        args: any(named: 'args'),
+      ),
+    ).thenAnswer((_) async => fixtureFor('api/student/all_subjects'));
+    // Keeps the background detail prefetch from filling in the entries.
+    when(
+      () => mockWrapper.send(
+        'api/student/subject_detail',
+        args: any(named: 'args'),
+      ),
+    ).thenAnswer((_) async => null);
+
+    final notifier = container.read(gradesProvider.notifier);
+    // load() hands the request to the semester lock without awaiting it.
+    await notifier.load(Semester.first);
+    await pumpEventQueue();
+
+    final subject = container
+        .read(gradesProvider)
+        .subjects
+        .firstWhere((s) => s.id == _subjectId);
+    final counts = subject.counts(Semester.first)!;
+    expect(counts.competences, 18);
+    expect(counts.observations, 2);
+    // This class is graded in competences only, so the list reports no grades.
+    expect(counts.grades, 0);
+  });
 }

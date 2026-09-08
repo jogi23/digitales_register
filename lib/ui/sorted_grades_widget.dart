@@ -194,6 +194,42 @@ class _SubjectWidgetState extends State<SubjectWidget> {
     );
   }
 
+  /// "17 Bewertungen · 18 Kompetenzen · 2 Beobachtungen", leaving out what a
+  /// subject does not have. Null while nothing has been fetched yet.
+  ///
+  /// The numbers come with the subject list, so they are here before a
+  /// subject has ever been expanded.
+  Widget? _countsMessage() {
+    final counts = widget.subject.counts(widget.semester);
+    if (counts == null || counts.isEmpty) return null;
+    final parts = [
+      _plural(counts.grades, "Bewertung", "Bewertungen"),
+      _plural(counts.competences, "Kompetenz", "Kompetenzen"),
+      _plural(counts.observations, "Beobachtung", "Beobachtungen"),
+    ].nonNulls;
+    return Text(
+      parts.join(" · "),
+      style: Theme.of(context).textTheme.bodySmall,
+    );
+  }
+
+  /// Null for an empty count — nothing worth its own part of the line.
+  static String? _plural(int count, String one, String many) {
+    if (count == 0) return null;
+    return "$count ${count == 1 ? one : many}";
+  }
+
+  Widget? _subtitle() {
+    final counts = _countsMessage();
+    final lastFetched = _lastFetchedMessage();
+    if (counts == null || lastFetched == null) return counts ?? lastFetched;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [counts, lastFetched],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final entries = widget.subject.detailEntries(widget.semester);
@@ -218,7 +254,7 @@ class _SubjectWidgetState extends State<SubjectWidget> {
             ],
           ),
         ),
-        subtitle: _lastFetchedMessage(),
+        subtitle: _subtitle(),
         leading: Text.rich(
           TextSpan(
             text: 'Ø ',

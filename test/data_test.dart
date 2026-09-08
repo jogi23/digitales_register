@@ -43,7 +43,141 @@ Subject _subject({
   );
 }
 
+
+GradeDetail _gradeDetail({
+  int id = 1,
+  bool cancelled = false,
+  List<Competence> competences = const [],
+}) {
+  return GradeDetail(
+    (b) => b
+      ..id = id
+      ..name = 'Bewertung'
+      ..type = 'Schularbeit'
+      ..created = ''
+      ..weightPercentage = 100
+      ..cancelled = cancelled
+      ..date = UtcDateTime(2026, 5, 11)
+      ..competences = ListBuilder(competences),
+  );
+}
+
+Observation _observation({bool cancelled = false}) {
+  return Observation(
+    (b) => b
+      ..typeName = 'Beobachtung'
+      ..created = ''
+      ..note = ''
+      ..cancelled = cancelled
+      ..date = UtcDateTime(2026, 5, 11),
+  );
+}
+
+Competence _competence() => Competence(
+      (b) => b
+        ..typeName = 'Kompetenz'
+        ..grade = 5,
+    );
+
+/// A subject as it looks after a fetch: [reported] are the register's own
+/// counts, [detailGrades]/[observations] the entries once they are loaded.
+Subject _counted({
+  Map<Semester, int> reportedObservations = const {},
+  Map<Semester, int> reportedCompetences = const {},
+  List<GradeAll>? basicGrades,
+  List<GradeDetail>? detailGrades,
+  List<Observation>? observations,
+}) {
+  final semester = Semester.first;
+  return Subject(
+    (b) => b
+      ..name = 'Fach'
+      ..gradesAll = MapBuilder({
+        if (basicGrades != null) semester: BuiltList<GradeAll>(basicGrades),
+      })
+      ..grades = MapBuilder({
+        if (detailGrades != null) semester: BuiltList<GradeDetail>(detailGrades),
+      })
+      ..observations = MapBuilder({
+        if (observations != null) semester: BuiltList<Observation>(observations),
+      })
+      ..observationCounts = MapBuilder(reportedObservations)
+      ..competenceCounts = MapBuilder(reportedCompetences),
+  );
+}
+
 void main() {
+
+  group('Subject.counts', () {
+    test('are unknown before anything was fetched', () {
+      expect(_counted().counts(Semester.first), isNull);
+    });
+
+    test("uses the register's own numbers before the details arrive", () {
+      // They come with the subject list, which is the whole point: the
+      // overview can show them without expanding a subject first.
+      final subject = _counted(
+        basicGrades: [],
+        reportedCompetences: {Semester.first: 18},
+        reportedObservations: {Semester.first: 2},
+      );
+      final counts = subject.counts(Semester.first)!;
+      expect(counts.competences, 18);
+      expect(counts.observations, 2);
+    });
+
+    test('counts the loaded entries once they are there', () {
+      // Classes graded in competences report an empty grade list in the
+      // overview, so the grade count has to come from the details.
+      final subject = _counted(
+        basicGrades: [],
+        reportedCompetences: {Semester.first: 18},
+        reportedObservations: {Semester.first: 2},
+        detailGrades: [
+          _gradeDetail(id: 1, competences: [_competence(), _competence()]),
+          _gradeDetail(id: 2, competences: [_competence()]),
+        ],
+        observations: [_observation()],
+      );
+      final counts = subject.counts(Semester.first)!;
+      expect(counts.grades, 2);
+      expect(counts.competences, 3);
+      expect(counts.observations, 1);
+    });
+
+    test('leaves cancelled entries out', () {
+      final subject = _counted(
+        basicGrades: [],
+        detailGrades: [
+          _gradeDetail(id: 1, competences: [_competence()]),
+          _gradeDetail(id: 2, cancelled: true, competences: [_competence()]),
+        ],
+        observations: [_observation(), _observation(cancelled: true)],
+      );
+      final counts = subject.counts(Semester.first)!;
+      expect(counts.grades, 1);
+      expect(counts.competences, 1);
+      expect(counts.observations, 1);
+    });
+
+    test('adds up both halves for the whole year', () {
+      // The register reports per semester and has no total of its own.
+      final subject = _counted(
+        basicGrades: [],
+        reportedCompetences: {Semester.first: 4, Semester.second: 3},
+        reportedObservations: {Semester.first: 1, Semester.second: 2},
+      );
+      final counts = subject.counts(Semester.all)!;
+      expect(counts.competences, 7);
+      expect(counts.observations, 3);
+    });
+
+    test('is empty for a subject without any entries', () {
+      final counts = _counted(basicGrades: []).counts(Semester.first)!;
+      expect(counts.isEmpty, isTrue);
+    });
+  });
+
   group('formatGradeFromString', () {
     test('null returns ohne Note', () {
       expect(formatGradeFromString(null), 'ohne Note');

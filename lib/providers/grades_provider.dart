@@ -244,6 +244,10 @@ class GradesNotifier extends Notifier<GradesState> {
                         (dynamic o) => tryParse(getMap(o)!, _parseObservation),
                       ),
                     )
+                    ..observationCounts[semester] =
+                        _count(mapData["countObservations"])
+                    ..competenceCounts[semester] =
+                        _count(mapData["countCompetences"])
                     ..lastFetchedDetailed[semester] = UtcDateTime.now(),
                 )
               : s,
@@ -301,6 +305,8 @@ void _updateSubjects(BuiltList<Subject> oldSubjects,
               (dynamic g) => tryParse(getMap(g)!, _parseGradeAll),
             ),
           )
+          ..observationCounts[semester] = _count(subject["countObservations"])
+          ..competenceCounts[semester] = _count(subject["countCompetences"])
           ..lastFetchedBasic[semester] = UtcDateTime.now(),
       );
     } else {
@@ -317,6 +323,12 @@ void _updateSubjects(BuiltList<Subject> oldSubjects,
                   ),
                 ),
               },
+            )
+            ..observationCounts = MapBuilder(
+              {semester: _count(subject["countObservations"])},
+            )
+            ..competenceCounts = MapBuilder(
+              {semester: _count(subject["countCompetences"])},
             ),
         ),
       );
@@ -326,6 +338,9 @@ void _updateSubjects(BuiltList<Subject> oldSubjects,
     subjectsBuilder.removeWhere((s) => s.id == subject);
   }
 }
+
+/// A count the register reports; a missing or malformed one means zero.
+int _count(dynamic value) => getInt(value) ?? 0;
 
 Observation _parseObservation(Map data) {
   return Observation(
