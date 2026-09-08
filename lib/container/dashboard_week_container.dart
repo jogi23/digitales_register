@@ -17,6 +17,7 @@
 
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:built_collection/built_collection.dart';
 import 'package:dr/container/calendar_week_container.dart';
 import 'package:dr/data.dart';
@@ -27,6 +28,9 @@ import 'package:dr/providers/subject_appearance_provider.dart';
 import 'package:dr/ui/calendar_week.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
+import 'package:dr/providers/dashboard_provider.dart';
+import 'package:dr/ui/days.dart';
+import 'package:dr/ui/snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -41,6 +45,10 @@ class DashboardWeekContainer extends ConsumerStatefulWidget {
   /// Dashboard days, which carry the entries.
   final BuiltList<Day> days;
 
+  /// Renders one day with its entries — the same widget the list view uses,
+  /// so entries can be read, ticked off and added the usual way.
+  final Widget Function(Day day) dayBuilder;
+
   /// Week to open on. Defaults to the current one.
   @visibleForTesting
   final UtcDateTime? initialMonday;
@@ -48,6 +56,7 @@ class DashboardWeekContainer extends ConsumerStatefulWidget {
   const DashboardWeekContainer({
     super.key,
     required this.days,
+    required this.dayBuilder,
     this.initialMonday,
   });
 
@@ -120,6 +129,71 @@ class _DashboardWeekContainerState
     };
   }
 
+  /// Opens the day the user tapped: its entries, and the way to add one.
+  ///
+  /// Deliberately the shared day widget rather than a dialog of its own —
+  /// that one filed reminders under a date the dashboard did not recognise,
+  /// so they vanished until the next refresh.
+  Widget Function(Day day) get dayBuilder => widget.dayBuilder;
+
+  /// The dashboard day behind a calendar date, if it holds one.
+  Day? _dayFor(UtcDateTime date) => widget.days
+      .firstWhereOrNull((d) => _dateOnly(d.date) == _dateOnly(date));
+
+  /// Days that have something noted, for setting their header apart.
+  Set<UtcDateTime> _daysWithEntries() => <UtcDateTime>{
+        for (final day in widget.days)
+          if (day.homework.isNotEmpty) _dateOnly(day.date),
+      };
+
+  /// Opens the day full screen: everything noted for it, and the way to add
+  /// more — the same widget the list view builds.
+  void _showDay(UtcDateTime date) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => Scaffold(
+          appBar: AppBar(
+            title: Text(DateFormat("EEEE, d. MMMM", "de").format(date)),
+          ),
+          // Watches the dashboard rather than capturing the day: a page built
+          // around a fixed day misses new entries, and a deleted one stays in
+          // the tree, which the deleteable tile reports as an error.
+          body: Consumer(
+            builder: (context, ref, _) {
+              ref.watch(dashboardProvider);
+              final day = _dayFor(date);
+              if (day == null) {
+                return const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(32),
+                    child: Text("Für diesen Tag liegen keine Daten vor"),
+                  ),
+                );
+              }
+              return SingleChildScrollView(child: dayBuilder(day));
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Asks for a reminder and files it under the dashboard's own date.
+  ///
+  /// Its date, not the timetable's: the dashboard matches the saved entry by
+  /// exact date, and a value built from the calendar day does not match — the
+  /// reminder was stored but never showed up.
+  Future<void> _addReminder(UtcDateTime date) async {
+    final day = _dayFor(date);
+    if (day == null) {
+      showSnackBar("Für diesen Tag liegen keine Daten vor");
+      return;
+    }
+    final message = await showEnterReminderDialog(context);
+    if (message == null || !mounted) return;
+    await ref.read(dashboardProvider.notifier).addReminder(day.date, message);
+  }
+
   @override
   Widget build(BuildContext context) {
     final calendarState = ref.watch(calendarProvider);
@@ -152,6 +226,9 @@ class _DashboardWeekContainerState
               subjectThemes: subjectAppearance.themes,
               subjectsWithEntries: _subjectsWithEntries(),
               loading: calendarState.isLoadingWeek(_monday),
+              onDayTap: _showDay,
+              onAddReminder: _addReminder,
+              daysWithEntries: _daysWithEntries(),
             ),
           ),
         ),

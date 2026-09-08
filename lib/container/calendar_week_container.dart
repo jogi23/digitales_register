@@ -66,6 +66,17 @@ class CalendarWeekViewModel {
   /// Whether this week is still being fetched.
   final bool loading;
 
+  /// Tapping a day header opens that day. Null leaves the header inert,
+  /// which is what the calendar page wants.
+  final void Function(UtcDateTime date)? onDayTap;
+
+  /// Adding a reminder straight from the header.
+  final void Function(UtcDateTime date)? onAddReminder;
+
+  /// Days that carry entries. Their header is set apart — reminders have no
+  /// subject, so colouring lessons alone would never show them.
+  final Set<UtcDateTime> daysWithEntries;
+
   /// Subjects that carry dashboard entries, per day. Lessons outside this are
   /// dimmed; `null` dims nothing, which is what the calendar page wants.
   final Map<UtcDateTime, Set<String>>? subjectsWithEntries;
@@ -79,6 +90,9 @@ class CalendarWeekViewModel {
     required this.colorBackground,
     required this.showTimes,
     this.loading = false,
+    this.onDayTap,
+    this.onAddReminder,
+    this.daysWithEntries = const {},
     this.subjectsWithEntries,
     required this.subjectThemes,
   });

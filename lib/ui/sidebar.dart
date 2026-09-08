@@ -21,6 +21,7 @@ import 'package:dr/main.dart';
 import 'package:dr/middleware/middleware.dart';
 import 'package:dr/ui/app_about_dialog.dart';
 import 'package:dr/ui/help_feedback_page.dart';
+import 'package:dr/services/app_sharing.dart';
 import 'package:flutter/material.dart';
 
 class Sidebar extends StatelessWidget {
@@ -136,6 +137,11 @@ class Sidebar extends StatelessWidget {
               builder: (_) => const HelpFeedbackPage(),
             ),
           ),
+        ),
+        CollapsibleItem(
+          text: "Bei Google Play bewerten",
+          icon: Icons.star_outline,
+          onPressed: openPlayStoreListing,
         ),
         CollapsibleItem(
           text: "Über diese App",

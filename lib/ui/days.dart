@@ -40,6 +40,7 @@ import 'package:dr/ui/last_fetched_overlay.dart';
 import 'package:dr/ui/no_internet.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
+import 'package:dr/services/review_prompt.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:intl/intl.dart';
@@ -220,6 +221,9 @@ class _DaysWidgetState extends State<DaysWidget> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       update();
       _ensureGradeCompetences();
+      // Once the dashboard actually stands: asking during startup would
+      // land before the user has seen anything.
+      unawaited(reviewPrompt.maybeAsk());
       // The month and week views navigate freely, so they need past and
       // future; with one direction the other looks empty.
       if (widget.vm.viewMode != DashboardViewMode.list) {
@@ -344,7 +348,10 @@ class _DaysWidgetState extends State<DaysWidget> {
   /// The month grid or the week timetable, depending on the setting.
   Widget _calendarBody() {
     return widget.vm.viewMode == DashboardViewMode.week
-        ? DashboardWeekContainer(days: widget.vm.days)
+        ? DashboardWeekContainer(
+            days: widget.vm.days,
+            dayBuilder: _buildDay,
+          )
         : DashboardCalendar(
             days: widget.vm.days,
             dayBuilder: _buildDay,
@@ -619,45 +626,6 @@ class DayWidget extends StatelessWidget {
     required this.showLastFetched,
   });
 
-  Future<String?> showEnterReminderDialog(BuildContext context) async {
-    return showDialog(
-      context: context,
-      builder: (context) {
-        String message = "";
-        return StatefulBuilder(
-          builder: (context, setState) => InfoDialog(
-            title: const Text("Erinnerung"),
-            content: TextField(
-              autofocus: true,
-              maxLines: null,
-              onChanged: (msg) {
-                setState(() => message = msg);
-              },
-              decoration: const InputDecoration(hintText: 'zB. Hausaufgabe'),
-            ),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: const Text("Abbrechen"),
-              ),
-              ElevatedButton(
-                onPressed: message.isNullOrEmpty
-                    ? null
-                    : () {
-                        Navigator.pop(context, message);
-                      },
-                child: const Text(
-                  "Speichern",
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -1257,3 +1225,47 @@ class AttachmentWidget extends StatelessWidget {
     );
   }
 }
+
+/// Asks for the text of a reminder, null when cancelled.
+///
+/// Free function rather than a method: the week view needs it too.
+Future<String?> showEnterReminderDialog(BuildContext context) async {
+  return showDialog(
+    context: context,
+    builder: (context) {
+      String message = "";
+      return StatefulBuilder(
+        builder: (context, setState) => InfoDialog(
+          title: const Text("Erinnerung"),
+          content: TextField(
+            autofocus: true,
+            maxLines: null,
+            onChanged: (msg) {
+              setState(() => message = msg);
+            },
+            decoration: const InputDecoration(hintText: 'zB. Hausaufgabe'),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text("Abbrechen"),
+            ),
+            ElevatedButton(
+              onPressed: message.isNullOrEmpty
+                  ? null
+                  : () {
+                      Navigator.pop(context, message);
+                    },
+              child: const Text(
+                "Speichern",
+              ),
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
+

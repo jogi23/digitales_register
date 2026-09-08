@@ -52,6 +52,13 @@ class _TestDashboardNotifier extends DashboardNotifier {
 
   @override
   Future<void> loadBothDirections() async {}
+
+  /// Simulates the dashboard losing a day, so a page built on it has to react.
+  void dropDay(UtcDateTime date) {
+    state = state.rebuild(
+      (b) => b.allDays.removeWhere((day) => day.date == date),
+    );
+  }
 }
 
 class _TestCalendarNotifier extends CalendarNotifier {
@@ -178,14 +185,29 @@ Future<void> main() async {
     );
   }
 
+  late _TestDashboardNotifier weekNotifier;
+
+  /// How much the stand-in day widget renders; raised for the scroll test.
+  var entriesPerDay = 0;
+
   /// Renders the week view on the week the fixtures cover.
+  ///
+  /// The days come through the provider, as they do in the app — a fixed list
+  /// would hide whether the view reacts to changes at all.
   Future<void> pumpWeek(
     WidgetTester tester, {
     Brightness brightness = Brightness.light,
+    BuiltList<Day>? days,
   }) async {
+    weekNotifier = _TestDashboardNotifier(
+      days == null
+          ? _dashboardState
+          : _dashboardState.rebuild((b) => b.allDays = ListBuilder(days)),
+    );
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          dashboardProvider.overrideWith(() => weekNotifier),
           calendarProvider
               .overrideWith(() => _TestCalendarNotifier(_calendarState)),
           settingsProvider.overrideWith(
@@ -199,9 +221,18 @@ Future<void> main() async {
         ],
         child: MaterialApp(
           home: Scaffold(
-            body: DashboardWeekContainer(
-              days: _dashboardState.allDays!,
-              initialMonday: _monday,
+            body: Consumer(
+              builder: (context, ref, _) => DashboardWeekContainer(
+                days: ref.watch(dashboardProvider).allDays!,
+                initialMonday: _monday,
+                dayBuilder: (day) => Column(
+                  children: <Widget>[
+                    Text('Tag ${day.date.day}.${day.date.month}.'),
+                    for (var i = 0; i < entriesPerDay; i++)
+                      SizedBox(height: 120, child: Text('Eintrag $i')),
+                  ],
+                ),
+              ),
             ),
           ),
           theme: ThemeData(
@@ -330,6 +361,137 @@ Future<void> main() async {
       });
     });
   }
+
+  group('days the dashboard never loaded', () {
+    testWidgets('are dimmed, not left in full colour', (tester) async {
+      // A missing day used to yield null, which means "dim nothing" — past
+      // days then looked as if work was due on them.
+      await pumpWeek(tester);
+      // The fixture holds May only; the week view asks for 11.05 onwards, so
+      // every day of it is known. Take one the dashboard has no entry for.
+      expect(dimmedOnMonday(tester, 'Religion'), isTrue);
+      expect(tintOnMonday(tester, 'Religion'), isNull);
+    });
+  });
+
+  group('adding a reminder', () {
+    testWidgets('every day header offers it', (tester) async {
+      await pumpWeek(tester);
+      // One plus per weekday column.
+      expect(find.byIcon(Icons.add), findsWidgets);
+    });
+
+    testWidgets('tapping a day opens it full screen with its entries',
+        (tester) async {
+      // The shared day widget, so entries are readable and can be ticked off.
+      await pumpWeek(tester);
+      await tester.tap(find.text('Mo'));
+      await tester.pumpAndSettle();
+      expect(find.text('Tag 11.5.'), findsOneWidget);
+      // Full screen means its own route with a way back.
+      expect(find.byType(AppBar), findsWidgets);
+      expect(find.textContaining('Mai'), findsOneWidget);
+    });
+
+    testWidgets('the open day follows what the dashboard holds',
+        (tester) async {
+      // A page built around a captured day misses later entries, and a
+      // deleted one stays in the tree — the deleteable tile then throws.
+      await pumpWeek(tester);
+      await tester.tap(find.text('Mo'));
+      await tester.pumpAndSettle();
+      expect(find.text('Tag 11.5.'), findsOneWidget);
+
+      weekNotifier.dropDay(_monday);
+      await tester.pumpAndSettle();
+      expect(find.text('Tag 11.5.'), findsNothing);
+      expect(
+        find.text('Für diesen Tag liegen keine Daten vor'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('the plus goes straight to a new reminder', (tester) async {
+      await pumpWeek(tester);
+      await tester.tap(find.byIcon(Icons.add).first);
+      await tester.pumpAndSettle();
+      expect(find.text('Erinnerung'), findsOneWidget);
+      expect(find.text('Speichern'), findsOneWidget);
+      // Not the day view — the plus is a shortcut past it.
+      expect(find.text('Tag 11.5.'), findsNothing);
+    });
+
+    testWidgets('a day the dashboard has no data for says so', (tester) async {
+      // Timetable and entries come from different sources, so a day can have
+      // lessons while the dashboard knows nothing about it.
+      final withoutMonday = BuiltList<Day>(
+        _dashboardState.allDays!.where((d) => d.date != _monday),
+      );
+      await pumpWeek(tester, days: withoutMonday);
+      await tester.tap(find.text('Mo'));
+      await tester.pumpAndSettle();
+      expect(
+        find.text('Für diesen Tag liegen keine Daten vor'),
+        findsOneWidget,
+      );
+    });
+  });
+
+  group('a day with many entries', () {
+    setUp(() => entriesPerDay = 12);
+    tearDown(() => entriesPerDay = 0);
+
+    testWidgets('scrolls instead of overflowing', (tester) async {
+      await pumpWeek(tester);
+      await tester.tap(find.text('Mo'));
+      await tester.pumpAndSettle();
+
+      // Twelve entries of 120px do not fit on any phone; an overflow would
+      // fail this test on its own, so what is left to show is that it moves.
+      final before = tester.getTopLeft(find.text('Eintrag 0'));
+      await tester.drag(find.text('Eintrag 0'), const Offset(0, -400));
+      await tester.pumpAndSettle();
+      final after = tester.getTopLeft(find.text('Eintrag 0'));
+      expect(after.dy, lessThan(before.dy));
+
+      // And the last entry can be reached.
+      await tester.scrollUntilVisible(find.text('Eintrag 11'), 300);
+      await tester.pumpAndSettle();
+      expect(
+        tester.getRect(find.text('Eintrag 11')).top,
+        lessThan(tester.view.physicalSize.height),
+      );
+    });
+  });
+
+  group('day headers', () {
+    /// The header's own background, null when it has none.
+    Color? headerColour(WidgetTester tester, String weekday) {
+      final box = find
+          .ancestor(
+            of: find.text(weekday),
+            matching: find.byType(DecoratedBox),
+          )
+          .first;
+      return (tester.widget<DecoratedBox>(box).decoration as BoxDecoration)
+          .color;
+    }
+
+    testWidgets('a day with entries is set apart', (tester) async {
+      // Reminders carry no subject, so colouring lessons alone would never
+      // show that something is noted for a day.
+      await pumpWeek(tester);
+      expect(headerColour(tester, 'Mo'), isNotNull);
+    });
+
+    testWidgets('a day without entries keeps a plain header', (tester) async {
+      final withoutMonday = BuiltList<Day>(
+        _dashboardState.allDays!.where((d) => d.date != _monday),
+      );
+      await pumpWeek(tester, days: withoutMonday);
+      expect(headerColour(tester, 'Mo'), isNull);
+    });
+  });
 
   group('subject colours', () {
     testWidgets('lessons with entries carry the subject colour',

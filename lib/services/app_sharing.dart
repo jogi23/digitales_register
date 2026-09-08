@@ -1,0 +1,60 @@
+// Copyright (C) 2026 Johannes Feichter
+//
+// This file is part of digitales_register.
+//
+// digitales_register is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// digitales_register is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
+
+import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+/// Play Store id of the released app.
+///
+/// Written out rather than read from package_info: debug builds carry the
+/// `.debug` suffix and would point at a listing that does not exist.
+const playStorePackage = "io.wertwerk.digitalesregister";
+
+/// Opens the listing in the Play Store app.
+Uri get playStoreAppUri => Uri.parse("market://details?id=$playStorePackage");
+
+/// The listing on the web, for devices without the Play Store app.
+Uri get playStoreWebUri => Uri.parse(
+    "https://play.google.com/store/apps/details?id=$playStorePackage");
+
+/// What gets sent when someone shares the app.
+///
+/// Short enough for a chat, and it names a reason to look rather than only
+/// describing what the app is.
+String get invitationText => """
+Kennst du schon die App fürs Digitale Register? Hausaufgaben, Noten und Mitteilungen auf einen Blick — ohne jedes Mal im Browser einzuloggen. Spart mir täglich ein paar Minuten:
+
+$playStoreWebUri""";
+
+/// Opens the store listing so the app can be rated.
+///
+/// Tries the Play Store app first; without it — an emulator, a device without
+/// Google services — the web listing still works.
+Future<bool> openPlayStoreListing() async {
+  if (await launchUrl(playStoreAppUri, mode: LaunchMode.externalApplication)) {
+    return true;
+  }
+  return launchUrl(playStoreWebUri, mode: LaunchMode.externalApplication);
+}
+
+/// Offers the invitation to whatever the device can share with.
+///
+/// The system sheet rather than a WhatsApp deep link: WhatsApp sits on top of
+/// it anyway, and this keeps working when it is not installed.
+Future<void> shareApp() async {
+  await Share.share(invitationText, subject: "Digitales Register als App");
+}

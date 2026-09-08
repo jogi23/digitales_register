@@ -41,6 +41,7 @@ import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:dr/ui/snack_bar.dart';
+import 'package:dr/services/review_prompt.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:responsive_scaffold/responsive_scaffold.dart';
@@ -88,6 +89,7 @@ Future<void> _runApp() async {
   providerContainer = ProviderContainer();
   wireLoginDispatchers(providerContainer.read(loginProvider.notifier));
   unawaited(providerContainer.read(accountProfileProvider.notifier).load());
+  unawaited(reviewPrompt.recordLaunch());
   runApp(SentryWidget(
     child: UncontrolledProviderScope(
       container: providerContainer,
