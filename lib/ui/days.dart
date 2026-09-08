@@ -348,7 +348,10 @@ class _DaysWidgetState extends State<DaysWidget> {
   /// The month grid or the week timetable, depending on the setting.
   Widget _calendarBody() {
     return widget.vm.viewMode == DashboardViewMode.week
-        ? DashboardWeekContainer(days: widget.vm.days)
+        ? DashboardWeekContainer(
+            days: widget.vm.days,
+            dayBuilder: _buildDay,
+          )
         : DashboardCalendar(
             days: widget.vm.days,
             dayBuilder: _buildDay,

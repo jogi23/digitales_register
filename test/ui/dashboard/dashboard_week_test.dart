@@ -182,6 +182,7 @@ Future<void> main() async {
   Future<void> pumpWeek(
     WidgetTester tester, {
     Brightness brightness = Brightness.light,
+    BuiltList<Day>? days,
   }) async {
     await tester.pumpWidget(
       ProviderScope(
@@ -200,8 +201,9 @@ Future<void> main() async {
         child: MaterialApp(
           home: Scaffold(
             body: DashboardWeekContainer(
-              days: _dashboardState.allDays!,
+              days: days ?? _dashboardState.allDays!,
               initialMonday: _monday,
+              dayBuilder: (day) => Text('Tag ${day.date.day}.${day.date.month}.'),
             ),
           ),
           theme: ThemeData(
@@ -350,12 +352,29 @@ Future<void> main() async {
       expect(find.byIcon(Icons.add), findsWidgets);
     });
 
-    testWidgets('tapping a header opens the reminder dialog', (tester) async {
+    testWidgets('tapping a day shows that day with its entries',
+        (tester) async {
+      // The shared day widget, so existing entries are visible and a new one
+      // is filed the same way as in the list.
       await pumpWeek(tester);
       await tester.tap(find.text('Mo'));
       await tester.pumpAndSettle();
-      expect(find.text('Erinnerung'), findsOneWidget);
-      expect(find.text('Speichern'), findsOneWidget);
+      expect(find.text('Tag 11.5.'), findsOneWidget);
+    });
+
+    testWidgets('a day the dashboard has no data for says so', (tester) async {
+      // Timetable and entries come from different sources, so a day can have
+      // lessons while the dashboard knows nothing about it.
+      final withoutMonday = BuiltList<Day>(
+        _dashboardState.allDays!.where((d) => d.date != _monday),
+      );
+      await pumpWeek(tester, days: withoutMonday);
+      await tester.tap(find.text('Mo'));
+      await tester.pumpAndSettle();
+      expect(
+        find.text('Für diesen Tag liegen keine Daten vor'),
+        findsOneWidget,
+      );
     });
   });
 

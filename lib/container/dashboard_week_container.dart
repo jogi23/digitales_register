@@ -17,6 +17,7 @@
 
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:built_collection/built_collection.dart';
 import 'package:dr/container/calendar_week_container.dart';
 import 'package:dr/data.dart';
@@ -43,6 +44,10 @@ class DashboardWeekContainer extends ConsumerStatefulWidget {
   /// Dashboard days, which carry the entries.
   final BuiltList<Day> days;
 
+  /// Renders one day with its entries — the same widget the list view uses,
+  /// so entries can be read, ticked off and added the usual way.
+  final Widget Function(Day day) dayBuilder;
+
   /// Week to open on. Defaults to the current one.
   @visibleForTesting
   final UtcDateTime? initialMonday;
@@ -50,6 +55,7 @@ class DashboardWeekContainer extends ConsumerStatefulWidget {
   const DashboardWeekContainer({
     super.key,
     required this.days,
+    required this.dayBuilder,
     this.initialMonday,
   });
 
@@ -122,11 +128,33 @@ class _DashboardWeekContainerState
     };
   }
 
-  /// Asks for a reminder and files it under [date].
-  Future<void> _addReminder(UtcDateTime date) async {
-    final message = await showEnterReminderDialog(context);
-    if (message == null || !mounted) return;
-    await ref.read(dashboardProvider.notifier).addReminder(date, message);
+  /// Opens the day the user tapped: its entries, and the way to add one.
+  ///
+  /// Deliberately the shared day widget rather than a dialog of its own —
+  /// that one filed reminders under a date the dashboard did not recognise,
+  /// so they vanished until the next refresh.
+  Widget Function(Day day) get dayBuilder => widget.dayBuilder;
+
+  void _showDay(UtcDateTime date) {
+    final day = widget.days.firstWhereOrNull(
+      (d) => _dateOnly(d.date) == _dateOnly(date),
+    );
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => SafeArea(
+        child: SingleChildScrollView(
+          child: day == null
+              ? const Padding(
+                  padding: EdgeInsets.all(32),
+                  child: Center(
+                    child: Text("Für diesen Tag liegen keine Daten vor"),
+                  ),
+                )
+              : dayBuilder(day),
+        ),
+      ),
+    );
   }
 
   @override
@@ -161,7 +189,7 @@ class _DashboardWeekContainerState
               subjectThemes: subjectAppearance.themes,
               subjectsWithEntries: _subjectsWithEntries(),
               loading: calendarState.isLoadingWeek(_monday),
-              onDayTap: _addReminder,
+              onDayTap: _showDay,
             ),
           ),
         ),
