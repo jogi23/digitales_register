@@ -420,6 +420,17 @@ abstract class Subject implements Built<Subject, SubjectBuilder> {
     }
   }
 
+  /// The average as it is shown next to the subject, or null while nothing
+  /// has been graded — an "Ø /" says nothing worth the space.
+  String? formattedAverage(Semester semester) {
+    if (detectGradingMode([this], semester) == GradingMode.stars) {
+      return starAverage(semester) == null
+          ? null
+          : starAverageFormatted(semester);
+    }
+    return average(semester) == null ? null : averageFormatted(semester);
+  }
+
   String starAverageFormatted(Semester semester) {
     final avg = starAverage(semester);
     if (avg == null) {

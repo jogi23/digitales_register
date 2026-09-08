@@ -289,6 +289,7 @@ class SettingsState {
     this.showCalendarNicksBar = true,
     this.showGradesDiagram = true,
     this.showAllSubjectsAverage = true,
+    this.showSubjectAverage = true,
     this.dashboardMarkNewOrChangedEntries = true,
     this.dashboardDeduplicateEntries = true,
     this.dashboardColorBorders = false,
@@ -315,6 +316,9 @@ class SettingsState {
   final bool showCalendarNicksBar;
   final bool showGradesDiagram;
   final bool showAllSubjectsAverage;
+
+  /// Whether each subject shows its own average next to its name.
+  final bool showSubjectAverage;
   final bool dashboardMarkNewOrChangedEntries;
   final bool dashboardDeduplicateEntries;
   final bool dashboardColorBorders;
@@ -344,6 +348,7 @@ class SettingsState {
     bool? showCalendarNicksBar,
     bool? showGradesDiagram,
     bool? showAllSubjectsAverage,
+    bool? showSubjectAverage,
     bool? dashboardMarkNewOrChangedEntries,
     bool? dashboardDeduplicateEntries,
     bool? dashboardColorBorders,
@@ -365,6 +370,7 @@ class SettingsState {
         showGradesDiagram: showGradesDiagram ?? this.showGradesDiagram,
         showAllSubjectsAverage:
             showAllSubjectsAverage ?? this.showAllSubjectsAverage,
+        showSubjectAverage: showSubjectAverage ?? this.showSubjectAverage,
         dashboardMarkNewOrChangedEntries: dashboardMarkNewOrChangedEntries ??
             this.dashboardMarkNewOrChangedEntries,
         dashboardDeduplicateEntries:
@@ -391,6 +397,7 @@ class SettingsState {
         'showCalendarNicksBar': showCalendarNicksBar,
         'showGradesDiagram': showGradesDiagram,
         'showAllSubjectsAverage': showAllSubjectsAverage,
+        'showSubjectAverage': showSubjectAverage,
         'dashboardMarkNewOrChangedEntries': dashboardMarkNewOrChangedEntries,
         'dashboardDeduplicateEntries': dashboardDeduplicateEntries,
         'dashboardColorBorders': dashboardColorBorders,
@@ -411,6 +418,7 @@ class SettingsState {
         showCalendarNicksBar: json['showCalendarNicksBar'] as bool? ?? true,
         showGradesDiagram: json['showGradesDiagram'] as bool? ?? true,
         showAllSubjectsAverage: json['showAllSubjectsAverage'] as bool? ?? true,
+        showSubjectAverage: json['showSubjectAverage'] as bool? ?? true,
         dashboardMarkNewOrChangedEntries:
             json['dashboardMarkNewOrChangedEntries'] as bool? ?? true,
         dashboardDeduplicateEntries:
@@ -448,6 +456,7 @@ class SettingsState {
         other.showCalendarNicksBar == showCalendarNicksBar &&
         other.showGradesDiagram == showGradesDiagram &&
         other.showAllSubjectsAverage == showAllSubjectsAverage &&
+        other.showSubjectAverage == showSubjectAverage &&
         other.dashboardMarkNewOrChangedEntries ==
             dashboardMarkNewOrChangedEntries &&
         other.dashboardDeduplicateEntries == dashboardDeduplicateEntries &&
@@ -471,6 +480,7 @@ class SettingsState {
         showCalendarNicksBar,
         showGradesDiagram,
         showAllSubjectsAverage,
+        showSubjectAverage,
         dashboardMarkNewOrChangedEntries,
         dashboardDeduplicateEntries,
         dashboardColorBorders,

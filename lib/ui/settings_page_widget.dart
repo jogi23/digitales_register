@@ -45,6 +45,7 @@ class SettingsPageWidget extends StatefulWidget {
   final OnSettingChanged<bool> onSetAskWhenDelete;
   final OnSettingChanged<bool> onSetShowGradesDiagram;
   final OnSettingChanged<bool> onSetShowAllSubjectsAverage;
+  final OnSettingChanged<bool> onSetShowSubjectAverage;
   final OnSettingChanged<bool> onSetDashboardMarkNewOrChangedEntries;
   final OnSettingChanged<bool> onSetDashboardDeduplicateEntries;
   final OnSettingChanged<bool> onSetDarkMode;
@@ -65,6 +66,7 @@ class SettingsPageWidget extends StatefulWidget {
     required this.onSetAskWhenDelete,
     required this.onSetShowGradesDiagram,
     required this.onSetShowAllSubjectsAverage,
+    required this.onSetShowSubjectAverage,
     required this.onSetDashboardMarkNewOrChangedEntries,
     required this.onSetDashboardDeduplicateEntries,
     required this.onSetDarkMode,
@@ -344,6 +346,13 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
               widget.onSetShowAllSubjectsAverage(value);
             },
             value: widget.vm.showAllSubjectsAverage,
+          ),
+          SwitchListTile.adaptive(
+            title: const Text('Durchschnitt je Fach anzeigen'),
+            onChanged: (bool value) {
+              widget.onSetShowSubjectAverage(value);
+            },
+            value: widget.vm.showSubjectAverage,
           ),
           ListTile(
             title: const Text("Farbe der Sterne"),

@@ -48,6 +48,7 @@ class SettingsPageContainer extends ConsumerWidget {
       onSetAskWhenDelete: notifier.setAskWhenDelete,
       onSetShowGradesDiagram: notifier.setShowGradesDiagram,
       onSetShowAllSubjectsAverage: notifier.setShowAllSubjectsAverage,
+      onSetShowSubjectAverage: notifier.setShowSubjectAverage,
       onSetDashboardMarkNewOrChangedEntries: notifier.setMarkNewOrChanged,
       onSetDashboardDeduplicateEntries: notifier.setDeduplicate,
       onShowProfile: ref.read(appRouterProvider).showProfile,
@@ -69,6 +70,7 @@ class SettingsViewModel {
   final bool askWhenDelete;
   final bool showGradesDiagram;
   final bool showAllSubjectsAverage;
+  final bool showSubjectAverage;
   final bool dashboardMarkNewOrChangedEntries;
   final bool dashboardDeduplicateEntries;
   final bool showGradesSettings;
@@ -88,6 +90,7 @@ class SettingsViewModel {
     required this.showGradesSettings,
     required this.showGradesDiagram,
     required this.showAllSubjectsAverage,
+    required this.showSubjectAverage,
     required this.dashboardMarkNewOrChangedEntries,
     required this.dashboardDeduplicateEntries,
     required this.dashboardColorBorders,
@@ -109,6 +112,7 @@ class SettingsViewModel {
         showGradesSettings: s.scrollToGrades,
         showGradesDiagram: s.showGradesDiagram,
         showAllSubjectsAverage: s.showAllSubjectsAverage,
+        showSubjectAverage: s.showSubjectAverage,
         dashboardMarkNewOrChangedEntries: s.dashboardMarkNewOrChangedEntries,
         dashboardDeduplicateEntries: s.dashboardDeduplicateEntries,
         dashboardColorBorders: s.dashboardColorBorders,

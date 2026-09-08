@@ -37,6 +37,10 @@ import '../../fixtures/api_fixtures.dart';
 /// Fach1 needs an id: without one a grade has no subject to open.
 const _fach1Id = 1;
 
+/// The row of a subject. Its name is followed by the average in brackets, so
+/// an exact text match would miss it.
+Finder _subjectRow(String name) => find.textContaining(RegExp('^$name'));
+
 class _MockAppRouter extends Mock implements AppRouter {}
 
 class _TestGradesNotifier extends GradesNotifier {
@@ -363,7 +367,7 @@ void main() {
     );
     await tester.pumpWidget(widget);
     expect(find.text("Dritte Schularbeit"), findsNothing);
-    await tester.tap(find.text("Fach1"));
+    await tester.tap(_subjectRow("Fach1"));
     await tester.pumpAndSettle();
     expect(find.text("Dritte Schularbeit"), findsOneWidget);
     await expectLater(
@@ -382,6 +386,60 @@ void main() {
       matchesGoldenFile("open_sorted.png"),
     );
   });
+  group('the subject average', () {
+    Widget pageWith(SettingsState settings) => ProviderScope(
+          overrides: [
+            gradesProvider.overrideWith(
+              () => _TestGradesNotifier(_getGradesState().gradesState),
+            ),
+            settingsProvider
+                .overrideWith(() => _TestSettingsNotifier(settings)),
+            subjectAppearanceProvider.overrideWith(
+              () => _TestSubjectAppearanceNotifier(_gradesSettings),
+            ),
+          ],
+          child: MaterialApp(
+            home: const GradesPageContainer(),
+            theme: ThemeData(primarySwatch: Colors.deepOrange),
+          ),
+        );
+
+    testWidgets('stands in brackets after the subject name', (tester) async {
+      await tester.pumpWidget(pageWith(SettingsState()));
+      await tester.pumpAndSettle();
+      expect(find.textContaining("Fach1 (Ø 7,5)"), findsOneWidget);
+    });
+
+    testWidgets('can be switched off', (tester) async {
+      await tester.pumpWidget(
+        pageWith(SettingsState(showSubjectAverage: false)),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text("Fach1"), findsOneWidget);
+      expect(find.textContaining("Ø"), findsNothing);
+    });
+  });
+
+  testWidgets('competence stars sit under their name', (tester) async {
+    // A short name used to leave them beside it, which lined up with nothing.
+    final widget = _wrapWithScope(
+      MaterialApp(
+        home: const GradesPageContainer(),
+        theme: ThemeData(primarySwatch: Colors.deepOrange),
+      ),
+      _getGradesState(),
+      _gradesSettings,
+    );
+    await tester.pumpWidget(widget);
+    await tester.tap(_subjectRow("Fach1"));
+    await tester.pumpAndSettle();
+
+    final name = tester.getTopLeft(find.text("Kompetenz1"));
+    final firstStar = tester.getTopLeft(find.byIcon(Icons.star).first);
+    expect(firstStar.dx, name.dx);
+    expect(firstStar.dy, greaterThan(name.dy));
+  });
+
   testWidgets('tapping a grade opens its detail page', (tester) async {
     final appRouter = _MockAppRouter();
     when(() => appRouter.showGrade(
@@ -406,7 +464,7 @@ void main() {
       ),
     );
     await tester.pumpWidget(widget);
-    await tester.tap(find.text("Fach1"));
+    await tester.tap(_subjectRow("Fach1"));
     await tester.pumpAndSettle();
 
     await tester.tap(find.text("Dritte Schularbeit"));
@@ -427,7 +485,7 @@ void main() {
       _gradesSettings,
     );
     await tester.pumpWidget(widget);
-    await tester.tap(find.text("Fach1"));
+    await tester.tap(_subjectRow("Fach1"));
     await tester.pumpAndSettle();
     expect(find.byIcon(Icons.star), findsNWidgets(3));
     expect(find.byIcon(Icons.star_border), findsNWidgets(3));
@@ -445,7 +503,7 @@ void main() {
     testWidgets('shows subject Deutsch in overview', (tester) async {
       await tester.pumpWidget(buildDemo());
       await tester.pump();
-      expect(find.text('Deutsch'), findsOneWidget);
+      expect(_subjectRow('Deutsch'), findsOneWidget);
     });
 
     testWidgets('grades hidden before expanding', (tester) async {
@@ -456,7 +514,7 @@ void main() {
 
     testWidgets('shows grade names after expanding Deutsch', (tester) async {
       await tester.pumpWidget(buildDemo());
-      await tester.tap(find.text('Deutsch'));
+      await tester.tap(_subjectRow('Deutsch'));
       await tester.pumpAndSettle();
       expect(
         find.textContaining('Buchstaben sauber nachspuren'),
@@ -474,14 +532,14 @@ void main() {
 
     testWidgets('shows typeName in grade subtitle', (tester) async {
       await tester.pumpWidget(buildDemo());
-      await tester.tap(find.text('Deutsch'));
+      await tester.tap(_subjectRow('Deutsch'));
       await tester.pumpAndSettle();
       expect(find.textContaining('Praktisches Arbeiten'), findsOneWidget);
     });
 
     testWidgets('shows competence stars after expanding', (tester) async {
       await tester.pumpWidget(buildDemo());
-      await tester.tap(find.text('Deutsch'));
+      await tester.tap(_subjectRow('Deutsch'));
       await tester.pumpAndSettle();
       // 3 grades: 5+5+6 filled stars, 1+1+0 empty stars = 16 filled, 2 empty
       expect(find.byIcon(Icons.star), findsNWidgets(16));
@@ -490,7 +548,7 @@ void main() {
 
     testWidgets('shows competence type name', (tester) async {
       await tester.pumpWidget(buildDemo());
-      await tester.tap(find.text('Deutsch'));
+      await tester.tap(_subjectRow('Deutsch'));
       await tester.pumpAndSettle();
       expect(find.text('Schreiben: Sätze schreiben'), findsOneWidget);
       expect(find.text('Lesefertigkeit'), findsOneWidget);
@@ -507,7 +565,7 @@ void main() {
 
     testGoldens('demo expanded Deutsch golden', (tester) async {
       await tester.pumpWidget(buildDemo());
-      await tester.tap(find.text('Deutsch'));
+      await tester.tap(_subjectRow('Deutsch'));
       await tester.pumpAndSettle();
       await expectLater(
         find.byType(GradesPageContainer),

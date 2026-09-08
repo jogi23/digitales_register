@@ -49,6 +49,9 @@ class SettingsNotifier extends Notifier<SettingsState> {
   void setShowAllSubjectsAverage(bool value) =>
       state = state.copyWith(showAllSubjectsAverage: value);
 
+  void setShowSubjectAverage(bool value) =>
+      state = state.copyWith(showSubjectAverage: value);
+
   void setIgnoreForGradesAverage(List<String> subjects) =>
       state = state.copyWith(ignoreForGradesAverage: List.of(subjects));
 

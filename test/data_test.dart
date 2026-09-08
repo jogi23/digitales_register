@@ -178,6 +178,43 @@ void main() {
     });
   });
 
+  group('Subject.formattedAverage', () {
+    GradeAll _basic(int grade) => GradeAll(
+          (b) => b
+            ..grade = grade
+            ..weightPercentage = 100
+            ..cancelled = false
+            ..date = UtcDateTime(2026, 5, 11)
+            ..type = 'Schularbeit',
+        );
+
+    test('is null while nothing has been graded', () {
+      // "Ø /" next to a subject says nothing worth the space.
+      expect(_counted(basicGrades: []).formattedAverage(Semester.first),
+          isNull);
+    });
+
+    test('is null before the grades were fetched', () {
+      expect(_counted().formattedAverage(Semester.first), isNull);
+    });
+
+    test('formats the numeric average', () {
+      final subject = _counted(basicGrades: [_basic(700), _basic(800)]);
+      expect(subject.formattedAverage(Semester.first), '7,5');
+    });
+
+    test('formats the star average out of six', () {
+      final subject = _counted(
+        basicGrades: [],
+        detailGrades: [
+          _gradeDetail(competences: [_competence(), _competence()]),
+        ],
+        observations: [],
+      );
+      expect(subject.formattedAverage(Semester.first), '5/6');
+    });
+  });
+
   group('formatGradeFromString', () {
     test('null returns ohne Note', () {
       expect(formatGradeFromString(null), 'ohne Note');

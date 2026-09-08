@@ -112,6 +112,27 @@ void main() {
   );
 
   testWidgets(
+    'switching off the per-subject average writes the setting',
+    (tester) async {
+      final container = await _pumpSettingsPage(tester);
+      addTearDown(container.dispose);
+
+      const label = 'Durchschnitt je Fach anzeigen';
+      await tester.scrollUntilVisible(
+        find.text(label),
+        100,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      expect(container.read(settingsProvider).showSubjectAverage, isTrue);
+
+      await tester.tap(find.text(label));
+      await tester.pumpAndSettle();
+      expect(container.read(settingsProvider).showSubjectAverage, isFalse);
+    },
+  );
+
+  testWidgets(
     'picking a star colour writes the setting',
     (tester) async {
       final container = await _pumpSettingsPage(tester);

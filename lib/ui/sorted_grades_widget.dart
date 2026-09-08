@@ -75,6 +75,7 @@ class SortedGradesWidget extends StatelessWidget {
           SubjectWidget(
             subject: s,
             sortByType: vm.sortByType,
+            showAverage: vm.showSubjectAverage,
             viewSubjectDetail: () => viewSubjectDetail(s),
             showCancelled: vm.showCancelled!,
             semester: vm.semester,
@@ -118,6 +119,9 @@ class SortedGradesWidget extends StatelessWidget {
 
 class SubjectWidget extends StatefulWidget {
   final bool sortByType, showCancelled, noInternet, ignoredForAverage;
+
+  /// Whether the subject's own average is shown next to its name.
+  final bool showAverage;
   final Subject subject;
   final Semester semester;
   final VoidCallback viewSubjectDetail;
@@ -129,6 +133,7 @@ class SubjectWidget extends StatefulWidget {
   const SubjectWidget(
       {super.key,
       required this.sortByType,
+      required this.showAverage,
       required this.subject,
       required this.viewSubjectDetail,
       required this.showCancelled,
@@ -240,6 +245,10 @@ class _SubjectWidgetState extends State<SubjectWidget> {
   Widget build(BuildContext context) {
     final entries = widget.subject.detailEntries(widget.semester);
     final theme = Theme.of(context);
+    // Null while nothing is graded yet — then there is no average to show.
+    final average = widget.showAverage
+        ? widget.subject.formattedAverage(widget.semester)
+        : null;
     final altColor =
         theme.colorScheme.surfaceContainerHighest.withOpacity(0.75);
     return AbsorbPointer(
@@ -252,6 +261,11 @@ class _SubjectWidgetState extends State<SubjectWidget> {
             text: widget.subject.name,
             style: TextStyle(color: theme.colorScheme.primary),
             children: [
+              if (average != null)
+                TextSpan(
+                  text: " (Ø $average)",
+                  style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+                ),
               if (widget.ignoredForAverage)
                 const TextSpan(
                   text: " *",
@@ -261,19 +275,6 @@ class _SubjectWidgetState extends State<SubjectWidget> {
           ),
         ),
         subtitle: _subtitle(),
-        leading: Text.rich(
-          TextSpan(
-            text: 'Ø ',
-            children: <TextSpan>[
-              TextSpan(
-                text: detectGradingMode([widget.subject], widget.semester) ==
-                        GradingMode.stars
-                    ? widget.subject.starAverageFormatted(widget.semester)
-                    : widget.subject.averageFormatted(widget.semester),
-              ),
-            ],
-          ),
-        ),
         trailing:
             widget.noInternet && entries == null ? const SizedBox() : null,
         onExpansionChanged: (expansion) {
@@ -367,6 +368,7 @@ class GradeWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final column = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         ListTile(
           onTap: subjectId == null
@@ -455,9 +457,12 @@ class CompetenceWidget extends StatelessWidget {
   });
   @override
   Widget build(BuildContext context) {
+    // A column, not a wrap: a short name used to leave the stars beside it
+    // while a long one pushed them below, so no two rows lined up.
     return Padding(
       padding: const EdgeInsets.only(left: 32, bottom: 16, right: 8),
-      child: Wrap(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
             competence.typeName,
