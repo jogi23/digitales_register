@@ -72,6 +72,7 @@ class CalendarWeek extends StatelessWidget {
                             // make past days look like they carry work.
                             onTap: vm.onDayTap,
                             onAddReminder: vm.onAddReminder,
+                            onEntryTap: vm.onEntryTap,
                             hasEntries: vm.daysWithEntries.contains(
                               UtcDateTime(
                                   d.date.year, d.date.month, d.date.day),
@@ -262,6 +263,9 @@ class _DayHeader extends StatelessWidget {
 
 class _HoursChunk extends StatelessWidget {
   final Set<String>? highlightedSubjects;
+
+  /// Opens the day behind a lesson that carries an entry.
+  final VoidCallback? onEntryTap;
   final Map<String, String> subjectNicks;
   final List<CalendarHour> hours;
   final CalendarDay day;
@@ -272,6 +276,7 @@ class _HoursChunk extends StatelessWidget {
 
   const _HoursChunk({
     this.highlightedSubjects,
+    this.onEntryTap,
     required this.subjectNicks,
     required this.hours,
     required this.day,
@@ -317,6 +322,14 @@ class _HoursChunk extends StatelessWidget {
                           !highlightedSubjects!.contains(
                             normalizeSubject(hours[n ~/ 2].subject),
                           ),
+                      // Only lessons that carry an entry lead anywhere; a
+                      // dimmed one has nothing to show.
+                      onEntryTap: highlightedSubjects != null &&
+                              !highlightedSubjects!.contains(
+                                normalizeSubject(hours[n ~/ 2].subject),
+                              )
+                          ? null
+                          : onEntryTap,
                       subjectNicks: subjectNicks,
                       day: day,
                       isSelected: selectedHour == hours[n ~/ 2].fromHour,
@@ -364,6 +377,10 @@ class CalendarDayWidget extends StatelessWidget {
   /// Adding a reminder for this day; null hides the button.
   final void Function(UtcDateTime date)? onAddReminder;
 
+  /// Tapping a lesson that carries an entry; null leaves the lesson to the
+  /// calendar's own selection.
+  final void Function(UtcDateTime date)? onEntryTap;
+
   /// Whether anything is noted for this day.
   final bool hasEntries;
   final Map<String, String> subjectNicks;
@@ -379,6 +396,7 @@ class CalendarDayWidget extends StatelessWidget {
     this.highlightedSubjects,
     this.onTap,
     this.onAddReminder,
+    this.onEntryTap,
     this.hasEntries = false,
     required this.subjectNicks,
     required this.isSelected,
@@ -436,6 +454,9 @@ class CalendarDayWidget extends StatelessWidget {
               child: _HoursChunk(
                 hours: chunks[i],
                 highlightedSubjects: highlightedSubjects,
+                onEntryTap: onEntryTap == null
+                    ? null
+                    : () => onEntryTap!(calendarDay.date),
                 subjectNicks: subjectNicks,
                 day: calendarDay,
                 selectedHour: selectedHour,
@@ -482,6 +503,10 @@ class HourWidget extends ConsumerWidget {
 
   /// Pushes the lesson into the background because nothing is due in it.
   final bool dimmed;
+
+  /// Opens the day this lesson belongs to. Null falls back to selecting the
+  /// lesson, which is what the calendar page does.
+  final VoidCallback? onEntryTap;
   final CalendarDay day;
   final Map<String, String> subjectNicks;
   final bool isSelected;
@@ -492,6 +517,7 @@ class HourWidget extends ConsumerWidget {
     super.key,
     required this.hour,
     this.dimmed = false,
+    this.onEntryTap,
     required this.subjectNicks,
     required this.day,
     required this.isSelected,
@@ -508,13 +534,14 @@ class HourWidget extends ConsumerWidget {
 
   Widget _lesson(BuildContext context, WidgetRef ref) {
     return InkWell(
-      onTap: () {
-        ref.read(calendarProvider.notifier).select(
-              CalendarSelection((b) => b
-                ..date = day.date
-                ..hour = hour.fromHour),
-            );
-      },
+      onTap: onEntryTap ??
+          () {
+            ref.read(calendarProvider.notifier).select(
+                  CalendarSelection((b) => b
+                    ..date = day.date
+                    ..hour = hour.fromHour),
+                );
+          },
       child: DecoratedBox(
         decoration: BoxDecoration(
           border: hour.warning

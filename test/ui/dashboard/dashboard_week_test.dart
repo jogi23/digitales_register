@@ -393,6 +393,25 @@ Future<void> main() async {
       expect(find.textContaining('Mai'), findsOneWidget);
     });
 
+    testWidgets('tapping a lesson with homework opens its day',
+        (tester) async {
+      // The subject cell is where the eye lands; making only the header lead
+      // anywhere left the coloured tiles inert.
+      await pumpWeek(tester);
+      await tester.tap(find.text('Mathematik').first);
+      await tester.pumpAndSettle();
+      expect(find.text('Tag 11.5.'), findsOneWidget);
+    });
+
+    testWidgets('tapping a lesson without homework opens nothing',
+        (tester) async {
+      // A dimmed lesson has nothing to show, so it keeps out of the way.
+      await pumpWeek(tester);
+      await tester.tap(find.text('Religion').first);
+      await tester.pumpAndSettle();
+      expect(find.text('Tag 11.5.'), findsNothing);
+    });
+
     testWidgets('the open day follows what the dashboard holds',
         (tester) async {
       // A page built around a captured day misses later entries, and a

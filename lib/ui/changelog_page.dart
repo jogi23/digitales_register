@@ -15,47 +15,144 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
-import 'dart:convert';
-
+import 'package:dr/services/changelog.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
-import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 
-Future<String> _fetchChangelog() async {
-  final response = await http.get(
-    Uri.parse(
-        'https://api.github.com/repos/jogi23/digitales_register/releases'),
-    headers: {'Accept': 'application/vnd.github+json'},
-  );
-  if (response.statusCode != 200) {
-    throw Exception('Failed to load releases: ${response.statusCode}');
-  }
-  final releases = jsonDecode(response.body) as List<dynamic>;
-  return releases.map((r) {
-    final version = (r['tag_name'] as String).replaceFirst('v', '');
-    final body = (r['body'] as String? ?? '').trim();
-    return '## $version\n\n$body';
-  }).join('\n\n');
+/// Every version the app knows about, newest first.
+///
+/// The notes ship with the app rather than being fetched, so this works
+/// without a connection and says the same thing as the card in the dashboard.
+class ChangelogPage extends StatefulWidget {
+  const ChangelogPage({super.key});
+
+  @override
+  State<ChangelogPage> createState() => _ChangelogPageState();
 }
 
-class ChangelogPage extends StatelessWidget {
-  const ChangelogPage({super.key});
+class _ChangelogPageState extends State<ChangelogPage> {
+  late final Future<List<ChangelogEntry>> _entries = changelog.load();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("What's new")),
-      body: FutureBuilder<String>(
-        future: _fetchChangelog(),
+      appBar: AppBar(title: const Text("Neuerungen")),
+      body: FutureBuilder<List<ChangelogEntry>>(
+        future: _entries,
         builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return const Center(child: Text('Keine Verbindung'));
-          }
-          if (!snapshot.hasData) {
+          final entries = snapshot.data;
+          if (entries == null) {
             return const Center(child: CircularProgressIndicator());
           }
-          return Markdown(data: snapshot.data!);
+          if (entries.isEmpty) {
+            return const Center(child: Text("Keine Einträge"));
+          }
+          return ListView.builder(
+            padding: EdgeInsets.only(
+              top: 8,
+              bottom: MediaQuery.of(context).viewPadding.bottom + 24,
+            ),
+            itemCount: entries.length,
+            itemBuilder: (context, index) => _Release(entry: entries[index]),
+          );
         },
+      ),
+    );
+  }
+}
+
+class _Release extends StatelessWidget {
+  final ChangelogEntry entry;
+
+  const _Release({required this.entry});
+
+  /// "11. Juli 2026", or nothing when the file carries no date.
+  String? get _date {
+    final date = entry.date;
+    if (date == null) return null;
+    final parsed = DateTime.tryParse(date);
+    if (parsed == null) return null;
+    return DateFormat.yMMMMd("de").format(parsed);
+  }
+
+  /// The four headings the notes are written under. Anything else — a
+  /// heading added later — gets the neutral one.
+  static IconData _iconFor(String title) => switch (title) {
+        'Neue Funktionen' => Icons.auto_awesome_outlined,
+        'Verbesserungen' => Icons.trending_up,
+        'Fehlerbehebungen' => Icons.bug_report_outlined,
+        'Intern' => Icons.build_outlined,
+        _ => Icons.label_outline,
+      };
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final date = _date;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                entry.version,
+                // Plain but heavy: the headings below carry the accent
+                // colour, and two levels in the same colour compete.
+                style: theme.textTheme.titleLarge
+                    ?.copyWith(fontWeight: FontWeight.w600),
+              ),
+              if (date != null) ...[
+                const SizedBox(width: 8),
+                Text(
+                  date,
+                  style: theme.textTheme.bodySmall
+                      ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                ),
+              ],
+            ],
+          ),
+          for (final section in entry.sections) ...[
+            Padding(
+              padding: const EdgeInsets.only(top: 12, bottom: 4),
+              child: Row(
+                children: [
+                  Icon(
+                    _iconFor(section.title),
+                    size: 16,
+                    color: theme.colorScheme.primary,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    section.title,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      color: theme.colorScheme.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            for (final item in section.items)
+              Padding(
+                padding: const EdgeInsets.only(top: 2),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("• ", style: theme.textTheme.bodyMedium),
+                    Expanded(
+                      child: Text(item, style: theme.textTheme.bodyMedium),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+          const SizedBox(height: 12),
+          const Divider(height: 1),
+        ],
       ),
     );
   }

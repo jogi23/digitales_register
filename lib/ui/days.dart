@@ -32,7 +32,9 @@ import 'package:dr/data.dart';
 import 'package:dr/main.dart';
 import 'package:dr/middleware/middleware.dart';
 import 'package:dr/providers/dashboard_provider.dart';
+import 'package:dr/services/changelog.dart';
 import 'package:dr/ui/animated_linear_progress_indicator.dart';
+import 'package:dr/ui/changelog_card.dart';
 import 'package:dr/ui/dialog.dart';
 import 'package:dr/container/dashboard_week_container.dart';
 import 'package:dr/ui/dashboard_calendar.dart';
@@ -223,8 +225,13 @@ class _DaysWidgetState extends State<DaysWidget> {
       update();
       _ensureGradeCompetences();
       // Once the dashboard actually stands: asking during startup would
-      // land before the user has seen anything.
-      unawaited(reviewPrompt.maybeAsk());
+      // land before the user has seen anything. And not at all on the start
+      // that already greets the reader with what is new.
+      unawaited(() async {
+        if ((await changelog.pending()).isEmpty) {
+          await reviewPrompt.maybeAsk();
+        }
+      }());
       // The month and week views navigate freely, so they need past and
       // future; with one direction the other looks empty.
       if (widget.vm.viewMode != DashboardViewMode.list) {
@@ -446,7 +453,12 @@ class _DaysWidgetState extends State<DaysWidget> {
     }
     return ResponsiveScaffold<Pages>(
       key: scaffoldKey,
-      homeBody: body,
+      homeBody: Column(
+        children: [
+          const ChangelogCard(),
+          Expanded(child: body),
+        ],
+      ),
       onRouteChanged: (route) {
         if (route == Pages.homework) {
           widget.refresh();
