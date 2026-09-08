@@ -71,6 +71,11 @@ class CalendarWeek extends StatelessWidget {
                             // due — passing null would leave it undimmed and
                             // make past days look like they carry work.
                             onTap: vm.onDayTap,
+                            onAddReminder: vm.onAddReminder,
+                            hasEntries: vm.daysWithEntries.contains(
+                              UtcDateTime(
+                                  d.date.year, d.date.month, d.date.day),
+                            ),
                             highlightedSubjects: vm.subjectsWithEntries == null
                                 ? null
                                 : vm.subjectsWithEntries![UtcDateTime(
@@ -188,6 +193,73 @@ class _NoLessons extends StatelessWidget {
   }
 }
 
+/// The weekday and date above a column.
+///
+/// Tapping it opens the day; the plus goes straight to a new reminder. A day
+/// that carries entries is set apart — reminders have no subject, so the
+/// coloured lessons alone would never reveal them.
+class _DayHeader extends StatelessWidget {
+  final UtcDateTime date;
+  final bool isToday;
+  final bool hasEntries;
+  final void Function(UtcDateTime date)? onTap;
+  final void Function(UtcDateTime date)? onAddReminder;
+
+  const _DayHeader({
+    required this.date,
+    required this.isToday,
+    required this.hasEntries,
+    required this.onTap,
+    required this.onAddReminder,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final accent = isToday ? scheme.primary : null;
+
+    return InkWell(
+      onTap: onTap == null ? null : () => onTap!(date),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: hasEntries
+              ? scheme.primaryContainer.withValues(alpha: 0.6)
+              : null,
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Text(
+              DateFormat("E", "de").format(date),
+              style: TextStyle(
+                fontWeight: isToday ? FontWeight.bold : null,
+                color: accent,
+              ),
+            ),
+            Text(
+              DateFormat("dd.MM", "de").format(date),
+              style: DefaultTextStyle.of(context).style.copyWith(
+                    fontSize: 12,
+                    fontWeight: isToday ? FontWeight.bold : null,
+                    color: accent,
+                  ),
+            ),
+            if (onAddReminder != null)
+              InkWell(
+                onTap: () => onAddReminder!(date),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Icon(Icons.add, size: 16, color: scheme.primary),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _HoursChunk extends StatelessWidget {
   final Set<String>? highlightedSubjects;
   final Map<String, String> subjectNicks;
@@ -288,6 +360,12 @@ class CalendarDayWidget extends StatelessWidget {
 
   /// Tapping the day header; null leaves it inert.
   final void Function(UtcDateTime date)? onTap;
+
+  /// Adding a reminder for this day; null hides the button.
+  final void Function(UtcDateTime date)? onAddReminder;
+
+  /// Whether anything is noted for this day.
+  final bool hasEntries;
   final Map<String, String> subjectNicks;
   final bool isSelected;
   final int? selectedHour;
@@ -300,6 +378,8 @@ class CalendarDayWidget extends StatelessWidget {
     required this.calendarDay,
     this.highlightedSubjects,
     this.onTap,
+    this.onAddReminder,
+    this.hasEntries = false,
     required this.subjectNicks,
     required this.isSelected,
     required this.selectedHour,
@@ -336,38 +416,12 @@ class CalendarDayWidget extends StatelessWidget {
     return Column(
       children: <Widget>[
         // Tapping a day adds a reminder to it; inert on the calendar page.
-        InkWell(
-          onTap: onTap == null ? null : () => onTap!(calendarDay.date),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Text(
-                DateFormat("E", "de").format(calendarDay.date),
-                style: isToday
-                    ? TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary,
-                      )
-                    : null,
-              ),
-              Text(
-                DateFormat("dd.MM", "de").format(calendarDay.date),
-                style: DefaultTextStyle.of(context).style.copyWith(
-                      fontSize: 12,
-                      fontWeight: isToday ? FontWeight.bold : null,
-                      color: isToday
-                          ? Theme.of(context).colorScheme.primary
-                          : null,
-                    ),
-              ),
-              if (onTap != null)
-                Icon(
-                  Icons.add,
-                  size: 14,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-            ],
-          ),
+        _DayHeader(
+          date: calendarDay.date,
+          isToday: isToday,
+          hasEntries: hasEntries,
+          onTap: onTap,
+          onAddReminder: onAddReminder,
         ),
         if (chunks.isNotEmpty) ...[
           for (var i = 0; i < chunks.length; i++) ...[

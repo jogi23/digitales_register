@@ -352,14 +352,26 @@ Future<void> main() async {
       expect(find.byIcon(Icons.add), findsWidgets);
     });
 
-    testWidgets('tapping a day shows that day with its entries',
+    testWidgets('tapping a day opens it full screen with its entries',
         (tester) async {
-      // The shared day widget, so existing entries are visible and a new one
-      // is filed the same way as in the list.
+      // The shared day widget, so entries are readable and can be ticked off.
       await pumpWeek(tester);
       await tester.tap(find.text('Mo'));
       await tester.pumpAndSettle();
       expect(find.text('Tag 11.5.'), findsOneWidget);
+      // Full screen means its own route with a way back.
+      expect(find.byType(AppBar), findsWidgets);
+      expect(find.textContaining('Mai'), findsOneWidget);
+    });
+
+    testWidgets('the plus goes straight to a new reminder', (tester) async {
+      await pumpWeek(tester);
+      await tester.tap(find.byIcon(Icons.add).first);
+      await tester.pumpAndSettle();
+      expect(find.text('Erinnerung'), findsOneWidget);
+      expect(find.text('Speichern'), findsOneWidget);
+      // Not the day view — the plus is a shortcut past it.
+      expect(find.text('Tag 11.5.'), findsNothing);
     });
 
     testWidgets('a day the dashboard has no data for says so', (tester) async {
@@ -375,6 +387,35 @@ Future<void> main() async {
         find.text('Für diesen Tag liegen keine Daten vor'),
         findsOneWidget,
       );
+    });
+  });
+
+  group('day headers', () {
+    /// The header's own background, null when it has none.
+    Color? headerColour(WidgetTester tester, String weekday) {
+      final box = find
+          .ancestor(
+            of: find.text(weekday),
+            matching: find.byType(DecoratedBox),
+          )
+          .first;
+      return (tester.widget<DecoratedBox>(box).decoration as BoxDecoration)
+          .color;
+    }
+
+    testWidgets('a day with entries is set apart', (tester) async {
+      // Reminders carry no subject, so colouring lessons alone would never
+      // show that something is noted for a day.
+      await pumpWeek(tester);
+      expect(headerColour(tester, 'Mo'), isNotNull);
+    });
+
+    testWidgets('a day without entries keeps a plain header', (tester) async {
+      final withoutMonday = BuiltList<Day>(
+        _dashboardState.allDays!.where((d) => d.date != _monday),
+      );
+      await pumpWeek(tester, days: withoutMonday);
+      expect(headerColour(tester, 'Mo'), isNull);
     });
   });
 

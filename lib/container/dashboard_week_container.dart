@@ -30,6 +30,7 @@ import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
 import 'package:dr/providers/dashboard_provider.dart';
 import 'package:dr/ui/days.dart';
+import 'package:dr/ui/snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -135,26 +136,53 @@ class _DashboardWeekContainerState
   /// so they vanished until the next refresh.
   Widget Function(Day day) get dayBuilder => widget.dayBuilder;
 
+  /// The dashboard day behind a calendar date, if it holds one.
+  Day? _dayFor(UtcDateTime date) => widget.days
+      .firstWhereOrNull((d) => _dateOnly(d.date) == _dateOnly(date));
+
+  /// Days that have something noted, for setting their header apart.
+  Set<UtcDateTime> _daysWithEntries() => <UtcDateTime>{
+        for (final day in widget.days)
+          if (day.homework.isNotEmpty) _dateOnly(day.date),
+      };
+
+  /// Opens the day full screen: everything noted for it, and the way to add
+  /// more — the same widget the list view builds.
   void _showDay(UtcDateTime date) {
-    final day = widget.days.firstWhereOrNull(
-      (d) => _dateOnly(d.date) == _dateOnly(date),
-    );
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) => SafeArea(
-        child: SingleChildScrollView(
-          child: day == null
-              ? const Padding(
-                  padding: EdgeInsets.all(32),
-                  child: Center(
+    final day = _dayFor(date);
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => Scaffold(
+          appBar: AppBar(
+            title: Text(DateFormat("EEEE, d. MMMM", "de").format(date)),
+          ),
+          body: day == null
+              ? const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(32),
                     child: Text("Für diesen Tag liegen keine Daten vor"),
                   ),
                 )
-              : dayBuilder(day),
+              : SingleChildScrollView(child: dayBuilder(day)),
         ),
       ),
     );
+  }
+
+  /// Asks for a reminder and files it under the dashboard's own date.
+  ///
+  /// Its date, not the timetable's: the dashboard matches the saved entry by
+  /// exact date, and a value built from the calendar day does not match — the
+  /// reminder was stored but never showed up.
+  Future<void> _addReminder(UtcDateTime date) async {
+    final day = _dayFor(date);
+    if (day == null) {
+      showSnackBar("Für diesen Tag liegen keine Daten vor");
+      return;
+    }
+    final message = await showEnterReminderDialog(context);
+    if (message == null || !mounted) return;
+    await ref.read(dashboardProvider.notifier).addReminder(day.date, message);
   }
 
   @override
@@ -190,6 +218,8 @@ class _DashboardWeekContainerState
               subjectsWithEntries: _subjectsWithEntries(),
               loading: calendarState.isLoadingWeek(_monday),
               onDayTap: _showDay,
+              onAddReminder: _addReminder,
+              daysWithEntries: _daysWithEntries(),
             ),
           ),
         ),
