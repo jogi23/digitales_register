@@ -52,6 +52,13 @@ class _TestDashboardNotifier extends DashboardNotifier {
 
   @override
   Future<void> loadBothDirections() async {}
+
+  /// Simulates the dashboard losing a day, so a page built on it has to react.
+  void dropDay(UtcDateTime date) {
+    state = state.rebuild(
+      (b) => b.allDays.removeWhere((day) => day.date == date),
+    );
+  }
 }
 
 class _TestCalendarNotifier extends CalendarNotifier {
@@ -178,15 +185,29 @@ Future<void> main() async {
     );
   }
 
+  late _TestDashboardNotifier weekNotifier;
+
+  /// How much the stand-in day widget renders; raised for the scroll test.
+  var entriesPerDay = 0;
+
   /// Renders the week view on the week the fixtures cover.
+  ///
+  /// The days come through the provider, as they do in the app — a fixed list
+  /// would hide whether the view reacts to changes at all.
   Future<void> pumpWeek(
     WidgetTester tester, {
     Brightness brightness = Brightness.light,
     BuiltList<Day>? days,
   }) async {
+    weekNotifier = _TestDashboardNotifier(
+      days == null
+          ? _dashboardState
+          : _dashboardState.rebuild((b) => b.allDays = ListBuilder(days)),
+    );
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          dashboardProvider.overrideWith(() => weekNotifier),
           calendarProvider
               .overrideWith(() => _TestCalendarNotifier(_calendarState)),
           settingsProvider.overrideWith(
@@ -200,10 +221,18 @@ Future<void> main() async {
         ],
         child: MaterialApp(
           home: Scaffold(
-            body: DashboardWeekContainer(
-              days: days ?? _dashboardState.allDays!,
-              initialMonday: _monday,
-              dayBuilder: (day) => Text('Tag ${day.date.day}.${day.date.month}.'),
+            body: Consumer(
+              builder: (context, ref, _) => DashboardWeekContainer(
+                days: ref.watch(dashboardProvider).allDays!,
+                initialMonday: _monday,
+                dayBuilder: (day) => Column(
+                  children: <Widget>[
+                    Text('Tag ${day.date.day}.${day.date.month}.'),
+                    for (var i = 0; i < entriesPerDay; i++)
+                      SizedBox(height: 120, child: Text('Eintrag $i')),
+                  ],
+                ),
+              ),
             ),
           ),
           theme: ThemeData(
@@ -364,6 +393,24 @@ Future<void> main() async {
       expect(find.textContaining('Mai'), findsOneWidget);
     });
 
+    testWidgets('the open day follows what the dashboard holds',
+        (tester) async {
+      // A page built around a captured day misses later entries, and a
+      // deleted one stays in the tree — the deleteable tile then throws.
+      await pumpWeek(tester);
+      await tester.tap(find.text('Mo'));
+      await tester.pumpAndSettle();
+      expect(find.text('Tag 11.5.'), findsOneWidget);
+
+      weekNotifier.dropDay(_monday);
+      await tester.pumpAndSettle();
+      expect(find.text('Tag 11.5.'), findsNothing);
+      expect(
+        find.text('Für diesen Tag liegen keine Daten vor'),
+        findsOneWidget,
+      );
+    });
+
     testWidgets('the plus goes straight to a new reminder', (tester) async {
       await pumpWeek(tester);
       await tester.tap(find.byIcon(Icons.add).first);
@@ -386,6 +433,33 @@ Future<void> main() async {
       expect(
         find.text('Für diesen Tag liegen keine Daten vor'),
         findsOneWidget,
+      );
+    });
+  });
+
+  group('a day with many entries', () {
+    setUp(() => entriesPerDay = 12);
+    tearDown(() => entriesPerDay = 0);
+
+    testWidgets('scrolls instead of overflowing', (tester) async {
+      await pumpWeek(tester);
+      await tester.tap(find.text('Mo'));
+      await tester.pumpAndSettle();
+
+      // Twelve entries of 120px do not fit on any phone; an overflow would
+      // fail this test on its own, so what is left to show is that it moves.
+      final before = tester.getTopLeft(find.text('Eintrag 0'));
+      await tester.drag(find.text('Eintrag 0'), const Offset(0, -400));
+      await tester.pumpAndSettle();
+      final after = tester.getTopLeft(find.text('Eintrag 0'));
+      expect(after.dy, lessThan(before.dy));
+
+      // And the last entry can be reached.
+      await tester.scrollUntilVisible(find.text('Eintrag 11'), 300);
+      await tester.pumpAndSettle();
+      expect(
+        tester.getRect(find.text('Eintrag 11')).top,
+        lessThan(tester.view.physicalSize.height),
       );
     });
   });

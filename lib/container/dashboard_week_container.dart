@@ -149,21 +149,30 @@ class _DashboardWeekContainerState
   /// Opens the day full screen: everything noted for it, and the way to add
   /// more — the same widget the list view builds.
   void _showDay(UtcDateTime date) {
-    final day = _dayFor(date);
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (context) => Scaffold(
           appBar: AppBar(
             title: Text(DateFormat("EEEE, d. MMMM", "de").format(date)),
           ),
-          body: day == null
-              ? const Center(
+          // Watches the dashboard rather than capturing the day: a page built
+          // around a fixed day misses new entries, and a deleted one stays in
+          // the tree, which the deleteable tile reports as an error.
+          body: Consumer(
+            builder: (context, ref, _) {
+              ref.watch(dashboardProvider);
+              final day = _dayFor(date);
+              if (day == null) {
+                return const Center(
                   child: Padding(
                     padding: EdgeInsets.all(32),
                     child: Text("Für diesen Tag liegen keine Daten vor"),
                   ),
-                )
-              : SingleChildScrollView(child: dayBuilder(day)),
+                );
+              }
+              return SingleChildScrollView(child: dayBuilder(day));
+            },
+          ),
         ),
       ),
     );
