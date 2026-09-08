@@ -442,6 +442,52 @@ class SettingsState {
         starColor: json['starColor'] as String? ?? accentStarColorId,
       );
 
+  /// The settings that belong to the app rather than to one account:
+  /// everything under Aussehen, Fächer, Merkheft and Noten on the settings
+  /// page. They are stored once for the whole app, so a parent with two
+  /// children does not set them twice.
+  ///
+  /// What stays with the account: whether its password is saved, and the view
+  /// toggles that sit on the screens themselves rather than in the settings.
+  /// The theme and the subject colours were app-wide already, through
+  /// SharedPreferences of their own.
+  static const _globalKeys = {
+    'dashboardColorBorders',
+    'calendarColorBackground',
+    'calendarShowTimes',
+    'dashboardColorTestsInRed',
+    'dashboardViewMode',
+    'dashboardMarkNewOrChangedEntries',
+    'dashboardDeduplicateEntries',
+    'askWhenDelete',
+    'showGradesDiagram',
+    'showAllSubjectsAverage',
+    'showSubjectAverage',
+    'starColor',
+    'ignoreForGradesAverage',
+  };
+
+  /// Only the app-wide settings, for storing them on their own.
+  Map<String, dynamic> globalJson() => {
+        for (final entry in toJson().entries)
+          if (_globalKeys.contains(entry.key)) entry.key: entry.value,
+      };
+
+  /// This state with its app-wide settings taken from [json]. Keys the json
+  /// does not carry keep their current value.
+  SettingsState withGlobalJson(Map<dynamic, dynamic> json) =>
+      SettingsState.fromJson({
+        ...toJson(),
+        for (final entry in json.entries)
+          if (_globalKeys.contains(entry.key)) entry.key: entry.value,
+      })
+          // fromJson does not carry the ephemeral scroll flag.
+          .copyWith(scrollToGrades: scrollToGrades);
+
+  /// This state with its app-wide settings taken from [other].
+  SettingsState withGlobalsFrom(SettingsState other) =>
+      withGlobalJson(other.globalJson());
+
   static const _listEq = ListEquality<String>();
 
   @override

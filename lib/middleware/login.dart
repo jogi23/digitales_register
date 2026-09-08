@@ -30,6 +30,10 @@ void _resetAllProviders() {
   providerContainer.read(networkProtocolProvider.notifier).reset();
   providerContainer.read(configProvider.notifier).state = null;
   providerContainer.read(dashboardErrorProvider.notifier).state = null;
+  // The app-wide settings survive this; the account's own go back to their
+  // defaults, so an account with nothing stored yet does not inherit them
+  // from the one being switched away from.
+  providerContainer.read(settingsProvider.notifier).resetForAccount();
 }
 
 Future<void> _doLogout({required bool hard, bool forced = false}) async {

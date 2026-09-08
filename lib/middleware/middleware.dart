@@ -190,6 +190,7 @@ Future<void> _doLoad() async {
   // available before any network login takes place.
   await providerContainer.read(accountProfileProvider.notifier).load();
   await providerContainer.read(subjectAppearanceProvider.notifier).load();
+  await providerContainer.read(settingsProvider.notifier).loadGlobal();
   dynamic login;
   try {
     login = json.decode(await secureStorage.read(key: "login") ?? "{}");
