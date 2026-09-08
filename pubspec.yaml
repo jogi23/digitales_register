@@ -19,10 +19,6 @@ dependencies:
   biometric_storage: ^5.0.0
   built_collection: ^5.1.1
   built_value: ^8.12.6
-  charts_common:
-    path: packages/charts_common/
-  charts_flutter:
-    path: packages/charts_flutter/
   collapsible_sidebar:
     path: packages/collapsible_sidebar/
   collection: ^1.15.0
@@ -73,6 +69,7 @@ dependencies:
   image_picker: ^1.2.2
   share_plus: ^10.1.4
   in_app_review: ^2.0.12
+  fl_chart: ^1.2.0
 
 dependency_overrides:
   file: ^6.1.4
