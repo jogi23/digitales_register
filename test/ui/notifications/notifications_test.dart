@@ -358,7 +358,7 @@ void main() {
         args: {"id": 4},
       ),
     ).thenAnswer((_) async => "");
-    when(() => appRouter.showGradeDetail(17)).thenReturn(null);
+    when(() => appRouter.revealGrade(17)).thenReturn(null);
 
     final container = ProviderContainer(
       overrides: [
@@ -386,7 +386,7 @@ void main() {
     await tester.tap(find.byTooltip("Bewertung öffnen"));
     await tester.pumpAndSettle();
 
-    verify(() => appRouter.showGradeDetail(17)).called(1);
+    verify(() => appRouter.revealGrade(17)).called(1);
     expect(container.read(notificationsProvider).notifications, isEmpty);
   });
 }

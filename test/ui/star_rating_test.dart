@@ -85,15 +85,15 @@ void main() {
 
   group('a row of stars', () {
     testWidgets('fills as many as the competence scored', (tester) async {
-      await tester.pumpWidget(stars(accentStarColorId,
-          brightness: Brightness.light));
+      await tester
+          .pumpWidget(stars(accentStarColorId, brightness: Brightness.light));
       expect(find.byIcon(Icons.star), findsNWidgets(4));
       expect(find.byIcon(Icons.star_border), findsNWidgets(2));
     });
 
     testWidgets('follows the accent colour by default', (tester) async {
-      await tester.pumpWidget(stars(accentStarColorId,
-          brightness: Brightness.light));
+      await tester
+          .pumpWidget(stars(accentStarColorId, brightness: Brightness.light));
       final theme = Theme.of(tester.element(find.byType(StarRow)));
       expect(drawnColor(tester), theme.colorScheme.primary);
     });
@@ -111,8 +111,8 @@ void main() {
 
     testWidgets('falls back to the accent colour for an unknown id',
         (tester) async {
-      await tester.pumpWidget(
-          stars('chartreuse', brightness: Brightness.light));
+      await tester
+          .pumpWidget(stars('chartreuse', brightness: Brightness.light));
       final theme = Theme.of(tester.element(find.byType(StarRow)));
       expect(drawnColor(tester), theme.colorScheme.primary);
     });

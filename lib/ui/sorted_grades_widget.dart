@@ -20,10 +20,12 @@ import 'package:dr/app_state.dart';
 import 'package:dr/container/grades_page_container.dart';
 import 'package:dr/container/sorted_grades_container.dart';
 import 'package:dr/data.dart';
+import 'package:dr/services/app_router.dart';
 import 'package:dr/ui/animated_linear_progress_indicator.dart';
 import 'package:dr/ui/star_rating.dart';
 import 'package:dr/util.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 typedef ViewSubjectDetailCallback = void Function(Subject s);
@@ -151,7 +153,11 @@ class _SubjectWidgetState extends State<SubjectWidget> {
       return ObservationWidget(
           observation: entry as Observation, tileColor: tileColor);
     }
-    final child = GradeWidget(grade: entry, tileColor: tileColor);
+    final child = GradeWidget(
+      grade: entry,
+      tileColor: tileColor,
+      subjectId: widget.subject.id,
+    );
     if (widget.pendingGradeId == entry.id) {
       return PendingGradeTarget(
         onVisible: widget.clearPendingGrade,
@@ -317,6 +323,7 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                                       .where((g) =>
                                           widget.showCancelled || !g.cancelled)
                                       .toList(),
+                                  subjectId: widget.subject.id,
                                   pendingGradeId: widget.pendingGradeId,
                                   clearPendingGrade: widget.clearPendingGrade,
                                 ),
@@ -343,16 +350,31 @@ class _SubjectWidgetState extends State<SubjectWidget> {
 
 const lineThrough = TextStyle(decoration: TextDecoration.lineThrough);
 
-class GradeWidget extends StatelessWidget {
+class GradeWidget extends ConsumerWidget {
   final GradeDetail grade;
   final Color? tileColor;
 
-  const GradeWidget({super.key, required this.grade, this.tileColor});
+  /// Which subject the grade belongs to; without it there is nothing to
+  /// open, so the tile stays inert.
+  final int? subjectId;
+
+  const GradeWidget({
+    super.key,
+    required this.grade,
+    this.tileColor,
+    this.subjectId,
+  });
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final column = Column(
       children: <Widget>[
         ListTile(
+          onTap: subjectId == null
+              ? null
+              : () => ref.read(appRouterProvider).showGrade(
+                    subjectId: subjectId!,
+                    gradeId: grade.id,
+                  ),
           title: Text(
             grade.name,
             style: grade.cancelled ? lineThrough : null,
@@ -451,6 +473,7 @@ class CompetenceWidget extends StatelessWidget {
 class GradeTypeWidget extends StatelessWidget {
   final String typeName;
   final List<DetailEntry> entries;
+  final int? subjectId;
   final int? pendingGradeId;
   final VoidCallback? clearPendingGrade;
 
@@ -458,6 +481,7 @@ class GradeTypeWidget extends StatelessWidget {
       {super.key,
       required this.typeName,
       required this.entries,
+      this.subjectId,
       this.pendingGradeId,
       this.clearPendingGrade});
   @override
@@ -471,17 +495,23 @@ class GradeTypeWidget extends StatelessWidget {
           ((int, DetailEntry) pair) {
             final (i, g) = pair;
             final bgColor = i.isOdd ? altColor : null;
-            return g is GradeDetail
-                ? (pendingGradeId == g.id
-                    ? PendingGradeTarget(
-                        onVisible: clearPendingGrade,
-                        child: GradeWidget(grade: g, tileColor: bgColor),
-                      )
-                    : GradeWidget(grade: g, tileColor: bgColor))
-                : ObservationWidget(
-                    observation: g as Observation,
-                    tileColor: bgColor,
-                  );
+            if (g is! GradeDetail) {
+              return ObservationWidget(
+                observation: g as Observation,
+                tileColor: bgColor,
+              );
+            }
+            final gradeWidget = GradeWidget(
+              grade: g,
+              tileColor: bgColor,
+              subjectId: subjectId,
+            );
+            return pendingGradeId == g.id
+                ? PendingGradeTarget(
+                    onVisible: clearPendingGrade,
+                    child: gradeWidget,
+                  )
+                : gradeWidget;
           },
         )
         .toList();

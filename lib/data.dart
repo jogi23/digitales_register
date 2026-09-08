@@ -555,6 +555,13 @@ abstract class GradeDetail
 
   String? get cancelledDescription;
 
+  /// When the grade became visible, already worded by the register
+  /// ("Bewertung sichtbar ab Montag, 02.02.2026 17:00").
+  ///
+  /// Only api/student/entry/getGrade reports it, so it stays null until the
+  /// grade itself is opened.
+  String? get visibleAtFormatted;
+
   /// This is presented as "comment" in the ui, however I wanted to be conistent
   /// with the api naming here.
   String? get description;
@@ -569,6 +576,9 @@ abstract class Competence implements Built<Competence, CompetenceBuilder> {
   String get typeName;
   // The grade from 0 to 5.
   int get grade;
+
+  /// What the teacher wrote about this single competence.
+  String? get description;
 }
 
 abstract class AbsenceGroup

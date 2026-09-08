@@ -34,6 +34,7 @@ import 'package:dr/providers/messages_provider.dart';
 import 'package:dr/providers/profile_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/ui/certificate.dart';
+import 'package:dr/ui/grade_detail_page.dart';
 import 'package:dr/util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -99,11 +100,24 @@ class AppRouter {
         .load(_ref.read(gradesProvider).semester));
   }
 
-  void showGradeDetail(int objectId) {
+  /// Opens the grades page with [objectId] — a subject or a single grade —
+  /// expanded and scrolled to. Not the grade's detail page; see
+  /// [showGrade] for that.
+  void revealGrade(int objectId) {
     navigatorKey!.currentState!.pop();
     showGrades();
     unawaited(
         _ref.read(gradesProvider.notifier).requestSubjectDetail(objectId));
+  }
+
+  /// The detail page of one grade.
+  void showGrade({required int subjectId, required int gradeId}) {
+    unawaited(
+      navigatorKey!.currentState!.pushNamed(
+        "/gradeDetail",
+        arguments: GradeDetailArgs(subjectId: subjectId, gradeId: gradeId),
+      ),
+    );
   }
 
   void showAbsences() {

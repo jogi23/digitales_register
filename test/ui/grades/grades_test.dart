@@ -22,6 +22,7 @@ import 'package:dr/container/grades_page_container.dart';
 import 'package:dr/data.dart';
 import 'package:dr/providers/grades_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
+import 'package:dr/services/app_router.dart';
 import 'package:dr/providers/subject_appearance_provider.dart';
 import 'package:dr/ui/sorted_grades_widget.dart';
 import 'package:dr/utc_date_time.dart';
@@ -29,8 +30,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
+import 'package:mocktail/mocktail.dart';
 
 import '../../fixtures/api_fixtures.dart';
+
+/// Fach1 needs an id: without one a grade has no subject to open.
+const _fach1Id = 1;
+
+class _MockAppRouter extends Mock implements AppRouter {}
 
 class _TestGradesNotifier extends GradesNotifier {
   final GradesState initial;
@@ -83,6 +90,7 @@ AppState _getGradesState({bool loading = false}) {
           <Subject>[
             Subject(
               (b) => b
+                ..id = _fach1Id
                 ..name = "Fach1"
                 ..grades = MapBuilder()
                 ..gradesAll = MapBuilder(
@@ -374,6 +382,40 @@ void main() {
       matchesGoldenFile("open_sorted.png"),
     );
   });
+  testWidgets('tapping a grade opens its detail page', (tester) async {
+    final appRouter = _MockAppRouter();
+    when(() => appRouter.showGrade(
+          subjectId: any(named: 'subjectId'),
+          gradeId: any(named: 'gradeId'),
+        )).thenReturn(null);
+    final widget = ProviderScope(
+      overrides: [
+        gradesProvider.overrideWith(
+          () => _TestGradesNotifier(_getGradesState().gradesState),
+        ),
+        settingsProvider
+            .overrideWith(() => _TestSettingsNotifier(SettingsState())),
+        subjectAppearanceProvider.overrideWith(
+          () => _TestSubjectAppearanceNotifier(_gradesSettings),
+        ),
+        appRouterProvider.overrideWith((ref) => appRouter),
+      ],
+      child: MaterialApp(
+        home: const GradesPageContainer(),
+        theme: ThemeData(primarySwatch: Colors.deepOrange),
+      ),
+    );
+    await tester.pumpWidget(widget);
+    await tester.tap(find.text("Fach1"));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text("Dritte Schularbeit"));
+    await tester.pumpAndSettle();
+
+    verify(() => appRouter.showGrade(subjectId: _fach1Id, gradeId: 2))
+        .called(1);
+  });
+
   testWidgets('competences', (tester) async {
     final appState = _getGradesState();
     final widget = _wrapWithScope(

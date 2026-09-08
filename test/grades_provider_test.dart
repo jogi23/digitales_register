@@ -190,4 +190,110 @@ void main() {
     // This class is graded in competences only, so the list reports no grades.
     expect(counts.grades, 0);
   });
+
+  test('the subject detail carries a comment per competence', () async {
+    // They were parsed away before, and they are the reason the detail page
+    // exists — the list has nowhere to put them.
+    final notifier = container.read(gradesProvider.notifier);
+    notifier.restore(
+      GradesState(
+        (b) => b
+          ..semester = Semester.first.toBuilder()
+          ..subjects = ListBuilder([
+            _subject(id: _subjectId, name: 'Mathematik'),
+          ]),
+      ),
+    );
+    when(
+      () => mockWrapper.send(
+        'api/student/subject_detail',
+        args: any(named: 'args'),
+      ),
+    ).thenAnswer(
+      (_) async => fixtureFor(
+        'api/student/subject_detail',
+        params: {'subjectId': _subjectId},
+      ),
+    );
+    when(
+      () => mockWrapper.send(
+        'api/student/entry/getGrade',
+        args: any(named: 'args'),
+      ),
+    ).thenAnswer((_) async => null);
+
+    await notifier.loadDetails(
+      container.read(gradesProvider).subjects.first,
+      Semester.first,
+    );
+    await pumpEventQueue();
+
+    final competences = container
+        .read(gradesProvider)
+        .subjects
+        .first
+        .grades[Semester.first]!
+        .expand((g) => g.competences);
+    expect(competences, isNotEmpty);
+    expect(
+      competences.any((c) => c.description?.isNotEmpty == true),
+      isTrue,
+    );
+  });
+
+  test('opening a grade adds what only getGrade reports', () async {
+    final notifier = container.read(gradesProvider.notifier);
+    notifier.restore(
+      GradesState(
+        (b) => b
+          ..semester = Semester.first.toBuilder()
+          ..subjects = ListBuilder([
+            _subject(id: _subjectId, name: 'Mathematik'),
+          ]),
+      ),
+    );
+    when(
+      () => mockWrapper.send(
+        'api/student/subject_detail',
+        args: any(named: 'args'),
+      ),
+    ).thenAnswer(
+      (_) async => fixtureFor(
+        'api/student/subject_detail',
+        params: {'subjectId': _subjectId},
+      ),
+    );
+    when(
+      () => mockWrapper.send(
+        'api/student/entry/getGrade',
+        args: any(named: 'args'),
+      ),
+    ).thenAnswer(
+      (_) async => fixtureFor(
+        'api/student/entry/getGrade',
+        params: {'gradeId': 13278},
+      ),
+    );
+
+    await notifier.loadDetails(
+      container.read(gradesProvider).subjects.first,
+      Semester.first,
+    );
+    await pumpEventQueue();
+
+    // A grade that both fixtures know: the subject detail lists it and
+    // getGrade has a recorded answer for it.
+    const gradeId = 13278;
+    GradeDetail grade() => container
+        .read(gradesProvider)
+        .subjects
+        .first
+        .grades[Semester.first]!
+        .firstWhere((g) => g.id == gradeId);
+
+    expect(grade().visibleAtFormatted, isNull);
+    await notifier.loadGradeDetail(grade(), Semester.first);
+    await pumpEventQueue();
+    expect(grade().visibleAtFormatted, startsWith('Bewertung sichtbar ab'));
+  });
 }
