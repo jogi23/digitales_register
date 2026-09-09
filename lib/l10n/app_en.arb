@@ -21,6 +21,17 @@
   "menuHomeworkOverview": "Homework",
   "menuCourseContent": "Course materials",
   "courseContentPickSubject": "Pick a subject above to load its materials.",
+  "courseContentFailed": "The materials could not be loaded. This section may not be open to this account.",
+  "courseContentEmpty": "Nothing has been added for this subject yet.",
+  "courseContentEntryCount": "{count, plural, =0{no entries} =1{1 entry} other{{count} entries}}",
+  "@courseContentEntryCount": {
+    "placeholders": {
+      "count": {
+        "type": "num",
+        "format": "compact"
+      }
+    }
+  },
   "homeworkOverviewLoading": "Loading the assignments …",
   "homeworkOverviewEmpty": "Nothing assigned for the weeks loaded so far. Open more weeks in the calendar and they will show up here.",
   "classbookLoading": "Loading the class log …",

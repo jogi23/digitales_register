@@ -21,6 +21,17 @@
   "menuHomeworkOverview": "Hausaufgaben",
   "menuCourseContent": "Unterrichtsmaterialien",
   "courseContentPickSubject": "Fach oben wählen, um das Material zu laden.",
+  "courseContentFailed": "Das Material konnte nicht geladen werden. Möglicherweise steht dieser Bereich dem Konto nicht offen.",
+  "courseContentEmpty": "Für dieses Fach ist noch nichts hinterlegt.",
+  "courseContentEntryCount": "{count, plural, =0{keine Einträge} =1{1 Eintrag} other{{count} Einträge}}",
+  "@courseContentEntryCount": {
+    "placeholders": {
+      "count": {
+        "type": "num",
+        "format": "compact"
+      }
+    }
+  },
   "homeworkOverviewLoading": "Die Aufgaben werden geladen …",
   "homeworkOverviewEmpty": "Für die geladenen Wochen ist nichts aufgegeben. Im Kalender weitere Wochen öffnen, dann erscheinen sie hier.",
   "classbookLoading": "Das Klassenbuch wird geladen …",

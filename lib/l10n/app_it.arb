@@ -21,6 +21,17 @@
   "menuHomeworkOverview": "Compiti",
   "menuCourseContent": "Materiali didattici",
   "courseContentPickSubject": "Scegli una materia in alto per caricare i materiali.",
+  "courseContentFailed": "Non è stato possibile caricare i materiali. Forse questa sezione non è accessibile a questo account.",
+  "courseContentEmpty": "Per questa materia non c'è ancora nulla.",
+  "courseContentEntryCount": "{count, plural, =0{nessuna voce} =1{1 voce} other{{count} voci}}",
+  "@courseContentEntryCount": {
+    "placeholders": {
+      "count": {
+        "type": "num",
+        "format": "compact"
+      }
+    }
+  },
   "homeworkOverviewLoading": "Caricamento dei compiti …",
   "homeworkOverviewEmpty": "Per le settimane caricate non c'è nessun compito. Apri altre settimane nel calendario e compariranno qui.",
   "classbookLoading": "Caricamento del registro di classe …",
