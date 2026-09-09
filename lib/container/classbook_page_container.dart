@@ -18,6 +18,7 @@
 import 'package:dr/l10n/l10n.dart';
 import 'package:dr/providers/calendar_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
+import 'package:dr/providers/subject_appearance_provider.dart';
 import 'package:dr/ui/account_avatar_button.dart';
 import 'package:dr/ui/classbook_page.dart';
 import 'package:flutter/material.dart';
@@ -31,6 +32,7 @@ class ClassbookPageContainer extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final calendar = ref.watch(calendarProvider);
     final settings = ref.watch(settingsProvider);
+    final appearance = ref.watch(subjectAppearanceProvider);
     // Der Kalender ist die Quelle: Jede geladene Woche bringt die Einträge
     // schon mit, das Klassenbuch ordnet sie nur anders an.
     // Gerüst und Kopfbalken sitzen hier, nicht in der Seite: Der Avatar
@@ -47,6 +49,10 @@ class ClassbookPageContainer extends ConsumerWidget {
         selectedSubjects: settings.classbookSubjects,
         onSelectedSubjectsChanged:
             ref.read(settingsProvider.notifier).setClassbookSubjects,
+        // Ohne hinterlegtes Kürzel bleibt der volle Name stehen - ein
+        // leerer Chip wäre schlimmer als ein langer.
+        subjectLabel: (subject) =>
+            appearance.nickFor(subject) ?? subject,
         loading: calendar.loadingWeeks.isNotEmpty,
       ),
     );

@@ -84,12 +84,14 @@ class _Huelle extends StatefulWidget {
   final ClassbookViewMode mode;
   final bool loading;
   final List<String> initial;
+  final Map<String, String> kuerzel;
 
   const _Huelle({
     required this.entries,
     required this.mode,
     required this.loading,
     required this.initial,
+    required this.kuerzel,
   });
 
   @override
@@ -106,6 +108,7 @@ class _HuelleState extends State<_Huelle> {
         loading: widget.loading,
         selectedSubjects: _gewaehlt,
         onSelectedSubjectsChanged: (f) => setState(() => _gewaehlt = f),
+        subjectLabel: (fach) => widget.kuerzel[fach] ?? fach,
       );
 }
 
@@ -114,6 +117,7 @@ Widget _seite(
   ClassbookViewMode mode = ClassbookViewMode.chronological,
   bool loading = false,
   List<String> selected = const [],
+  Map<String, String> kuerzel = const {},
 }) =>
     MaterialApp(
       supportedLocales: const [Locale('de')],
@@ -128,6 +132,7 @@ Widget _seite(
           mode: mode,
           loading: loading,
           initial: selected,
+          kuerzel: kuerzel,
         ),
       ),
     );
@@ -255,6 +260,60 @@ void main() {
       expect(find.text('Alle Fächer'), findsOneWidget);
       expect(find.text('Diktat'), findsOneWidget);
       expect(find.text('Notenlehre'), findsOneWidget);
+    });
+
+    testWidgets('labels the chips with the subject nickname', (tester) async {
+      // Bei zehn Fächern nebeneinander füllen die vollen Namen mehrere
+      // Zeilen, und die Liste rückt nach unten weg.
+      await tester.pumpWidget(_seite(
+        classbookEntries(_tage()),
+        kuerzel: const {'Deutsch': 'Deu', 'Musik': 'Mus'},
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.widgetWithText(FilterChip, 'Deu'), findsOneWidget);
+      expect(find.widgetWithText(FilterChip, 'Mus'), findsOneWidget);
+      expect(find.widgetWithText(FilterChip, 'Deutsch'), findsNothing);
+    });
+
+    testWidgets('falls back to the full name without a nickname',
+        (tester) async {
+      // Ein leerer Chip wäre schlimmer als ein langer.
+      await tester.pumpWidget(_seite(
+        classbookEntries(_tage()),
+        kuerzel: const {'Deutsch': 'Deu'},
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.widgetWithText(FilterChip, 'Musik'), findsOneWidget);
+    });
+
+    testWidgets('filters by the subject behind the nickname', (tester) async {
+      await tester.pumpWidget(_seite(
+        classbookEntries(_tage()),
+        kuerzel: const {'Deutsch': 'Deu', 'Musik': 'Mus'},
+      ));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.widgetWithText(FilterChip, 'Mus'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Notenlehre'), findsOneWidget);
+      expect(find.text('Diktat'), findsNothing);
+    });
+
+    testWidgets('marks a chosen chip without a tick', (tester) async {
+      await tester.pumpWidget(_seite(
+        classbookEntries(_tage()),
+        selected: const ['Musik'],
+      ));
+      await tester.pumpAndSettle();
+
+      final chip = tester.widget<FilterChip>(
+        find.widgetWithText(FilterChip, 'Musik'),
+      );
+      expect(chip.selected, isTrue);
+      expect(chip.showCheckmark, isFalse);
     });
 
     testWidgets('keeps more than one subject at a time', (tester) async {

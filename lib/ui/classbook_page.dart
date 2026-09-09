@@ -91,12 +91,19 @@ class ClassbookPage extends StatelessWidget {
   final List<String> selectedSubjects;
   final ValueChanged<List<String>> onSelectedSubjectsChanged;
 
+  /// Das Kürzel eines Fachs, für die Chips der Mehrfachauswahl.
+  ///
+  /// Gereicht statt selbst nachgeschlagen: Die Kürzel liegen in einem
+  /// Provider, und die Seite bleibt ohne einen prüfbar.
+  final String Function(String subject) subjectLabel;
+
   const ClassbookPage({
     super.key,
     required this.entries,
     required this.viewMode,
     required this.selectedSubjects,
     required this.onSelectedSubjectsChanged,
+    required this.subjectLabel,
     this.loading = false,
   });
 
@@ -130,6 +137,7 @@ class ClassbookPage extends StatelessWidget {
               subjects: vorhanden,
               selected: gewaehlt,
               onChanged: onSelectedSubjectsChanged,
+              label: subjectLabel,
             ),
             Expanded(
               child: _ByDay(
@@ -245,11 +253,13 @@ class _SubjectFilter extends StatelessWidget {
   final List<String> subjects;
   final List<String> selected;
   final ValueChanged<List<String>> onChanged;
+  final String Function(String subject) label;
 
   const _SubjectFilter({
     required this.subjects,
     required this.selected,
     required this.onChanged,
+    required this.label,
   });
 
   @override
@@ -263,14 +273,19 @@ class _SubjectFilter extends StatelessWidget {
           FilterChip(
             label: Text(tr(context).classbookAllSubjects),
             selected: selected.isEmpty,
+            showCheckmark: false,
             // Erneutes Antippen der bereits leeren Auswahl ändert nichts;
             // "alle" ist kein Zustand, den man abwählen könnte.
             onSelected: (_) => onChanged(const []),
           ),
           for (final subject in subjects)
             FilterChip(
-              label: Text(subject),
+              // Das Kürzel: Bei zehn Fächern nebeneinander füllen die vollen
+              // Namen mehrere Zeilen, und die Liste rückt nach unten weg.
+              label: Text(label(subject)),
+              tooltip: subject,
               selected: selected.contains(subject),
+              showCheckmark: false,
               onSelected: (an) => onChanged([
                 for (final s in subjects)
                   if (s == subject ? an : selected.contains(s)) s,
