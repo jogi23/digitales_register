@@ -40,6 +40,7 @@ class Sidebar extends StatelessWidget {
     required this.showCalendar,
     required this.showCertificate,
     required this.showClassbook,
+    required this.showHomeworkOverview,
     required this.showMessages,
     required this.showSettings,
     required this.showAccount,
@@ -53,6 +54,7 @@ class Sidebar extends StatelessWidget {
       showCalendar,
       showCertificate,
       showClassbook,
+      showHomeworkOverview,
       showMessages,
       showSettings,
       showAccount,
@@ -131,6 +133,12 @@ class Sidebar extends StatelessWidget {
           icon: Icons.menu_book,
           isSelected: currentSelected == Pages.classbook,
           onPressed: showClassbook,
+        ),
+        CollapsibleItem(
+          text: tr(context).menuHomeworkOverview,
+          icon: Icons.assignment_turned_in,
+          isSelected: currentSelected == Pages.homeworkOverview,
+          onPressed: showHomeworkOverview,
         ),
         CollapsibleItem(
           hasDivider: true,

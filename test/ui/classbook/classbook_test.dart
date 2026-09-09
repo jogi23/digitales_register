@@ -19,6 +19,7 @@ import 'package:built_collection/built_collection.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/data.dart';
 import 'package:dr/ui/classbook_page.dart';
+import 'package:dr/ui/lesson_entry_list.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -80,7 +81,7 @@ List<CalendarDay> _tage() => [
 
 /// Haelt die Auswahl so, wie es in der App die Einstellungen tun.
 class _Huelle extends StatefulWidget {
-  final List<ClassbookEntry> entries;
+  final List<LessonEntry> entries;
   final ClassbookViewMode mode;
   final bool loading;
   final List<String> initial;
@@ -102,18 +103,21 @@ class _HuelleState extends State<_Huelle> {
   late List<String> _gewaehlt = widget.initial;
 
   @override
-  Widget build(BuildContext context) => ClassbookPage(
+  Widget build(BuildContext context) => LessonEntryList(
         entries: widget.entries,
         viewMode: widget.mode,
         loading: widget.loading,
         selectedSubjects: _gewaehlt,
         onSelectedSubjectsChanged: (f) => setState(() => _gewaehlt = f),
         subjectLabel: (fach) => widget.kuerzel[fach] ?? fach,
+        loadingText: 'wird geladen',
+        emptyText: 'nichts eingetragen',
+        ordinaryType: ordinaryLessonType,
       );
 }
 
 Widget _seite(
-  List<ClassbookEntry> entries, {
+  List<LessonEntry> entries, {
   ClassbookViewMode mode = ClassbookViewMode.chronological,
   bool loading = false,
   List<String> selected = const [],
@@ -145,7 +149,7 @@ void main() {
       final entries = classbookEntries(_tage());
       expect(entries, hasLength(4));
       // Neuester Tag zuerst, innerhalb des Tages nach der Stunde.
-      expect(entries.map((e) => e.content.name),
+      expect(entries.map((e) => e.title),
           ['Diktat', 'Leseübung', 'Notenlehre', 'Silbenlesen']);
     });
 
@@ -164,7 +168,7 @@ void main() {
     });
 
     test('lists only subjects that carry entries, alphabetically', () {
-      expect(classbookSubjects(classbookEntries(_tage())),
+      expect(entrySubjects(classbookEntries(_tage())),
           ['Deutsch', 'Musik']);
     });
   });

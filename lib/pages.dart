@@ -22,6 +22,7 @@ enum Pages {
   calendar,
   certificate,
   classbook,
+  homeworkOverview,
   messages,
   settings,
 }

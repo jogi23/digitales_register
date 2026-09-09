@@ -18,19 +18,21 @@
 import 'package:dr/data.dart';
 import 'package:dr/ui/lesson_entry_list.dart';
 
-/// Die Art, die fast jeder Unterrichtseintrag trägt; nur Abweichungen davon
-/// sind erwähnenswert.
-const ordinaryLessonType = 'Fachunterricht';
+/// Die Art, die fast jede Aufgabe trägt; Prüfungen weichen davon ab und
+/// werden deshalb genannt.
+const ordinaryHomeworkType = 'Hausaufgabe';
 
-/// Every lesson content in [days], newest lesson first.
+/// Jede Aufgabe und Prüfung aus [days], neueste zuerst.
 ///
-/// Hours without an entry are left out: an empty lesson says nothing, and
-/// carrying it would bury the ones that do.
-List<LessonEntry> classbookEntries(Iterable<CalendarDay> days) {
+/// Anders als es "Fälligkeit" vermuten lässt, liegt das deadline der
+/// Schnittstelle auf dem Tag der Stunde selbst - in der Aufzeichnung bei
+/// allen 74 Einträgen. Aufgegeben und fällig fallen hier also zusammen, und
+/// die Gruppierung nach Tagen bildet beides ab.
+List<LessonEntry> homeworkEntries(Iterable<CalendarDay> days) {
   final entries = <LessonEntry>[
     for (final day in days)
       for (final hour in day.hours)
-        for (final content in hour.lessonContents)
+        for (final homework in hour.homeworkExams)
           LessonEntry(
             date: day.date,
             fromHour: hour.fromHour,
@@ -38,8 +40,8 @@ List<LessonEntry> classbookEntries(Iterable<CalendarDay> days) {
             teachers: [
               for (final teacher in hour.teachers) teacher.fullName,
             ],
-            title: content.name,
-            typeName: content.typeName,
+            title: homework.name,
+            typeName: homework.typeName,
           ),
   ];
   entries.sort((a, b) {
@@ -48,4 +50,3 @@ List<LessonEntry> classbookEntries(Iterable<CalendarDay> days) {
   });
   return entries;
 }
-

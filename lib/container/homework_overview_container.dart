@@ -20,44 +20,38 @@ import 'package:dr/providers/calendar_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/providers/subject_appearance_provider.dart';
 import 'package:dr/ui/account_avatar_button.dart';
-import 'package:dr/ui/classbook_page.dart';
+import 'package:dr/ui/homework_overview_page.dart';
 import 'package:dr/ui/lesson_entry_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:responsive_scaffold/responsive_scaffold.dart';
 
-class ClassbookPageContainer extends ConsumerWidget {
-  const ClassbookPageContainer({super.key});
+class HomeworkOverviewContainer extends ConsumerWidget {
+  const HomeworkOverviewContainer({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final calendar = ref.watch(calendarProvider);
     final settings = ref.watch(settingsProvider);
     final appearance = ref.watch(subjectAppearanceProvider);
-    // Der Kalender ist die Quelle: Jede geladene Woche bringt die Einträge
-    // schon mit, das Klassenbuch ordnet sie nur anders an.
-    // Gerüst und Kopfbalken sitzen hier, nicht in der Seite: Der Avatar
-    // braucht die Provider, die Seite selbst nicht - so bleibt sie für sich
-    // prüfbar.
+    // Dieselbe Quelle wie das Klassenbuch: Jede Kalenderwoche bringt die
+    // Aufgaben schon mit, nur eine andere Liste je Stunde.
     return Scaffold(
       appBar: ResponsiveAppBar(
-        title: Text(tr(context).menuClassbook),
+        title: Text(tr(context).menuHomeworkOverview),
         actions: const [AccountAvatarButton()],
       ),
       body: LessonEntryList(
-        entries: classbookEntries(calendar.days.values),
+        entries: homeworkEntries(calendar.days.values),
         viewMode: settings.classbookViewMode,
         selectedSubjects: settings.classbookSubjects,
         onSelectedSubjectsChanged:
             ref.read(settingsProvider.notifier).setClassbookSubjects,
-        // Ohne hinterlegtes Kürzel bleibt der volle Name stehen - ein
-        // leerer Chip wäre schlimmer als ein langer.
-        subjectLabel: (subject) =>
-            appearance.nickFor(subject) ?? subject,
+        subjectLabel: (subject) => appearance.nickFor(subject) ?? subject,
         loading: calendar.loadingWeeks.isNotEmpty,
-        loadingText: tr(context).classbookLoading,
-        emptyText: tr(context).classbookEmpty,
-        ordinaryType: ordinaryLessonType,
+        loadingText: tr(context).homeworkOverviewLoading,
+        emptyText: tr(context).homeworkOverviewEmpty,
+        ordinaryType: ordinaryHomeworkType,
       ),
     );
   }
