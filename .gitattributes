@@ -12,6 +12,7 @@
 
 # Ausdrücklich binär, damit die Inhaltserkennung nicht danebenliegen kann.
 *.png binary
+*.webp binary
 *.gif binary
 *.ico binary
 *.pdf binary
