@@ -20,6 +20,7 @@ import 'package:dr/app_state.dart';
 import 'package:dr/container/settings_page.dart';
 import 'package:dr/ui/no_internet.dart';
 import 'package:dr/ui/user_profile.dart';
+import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 
 class Profile extends StatelessWidget {
@@ -41,7 +42,7 @@ class Profile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Profil"),
+        title: Text(tr(context).settingsProfile),
       ),
       body: profileState.name == null
           ? Center(
@@ -62,19 +63,19 @@ class Profile extends StatelessWidget {
                   ),
                 ),
                 SwitchListTile.adaptive(
-                  title: const Text("Emails für Benachrichtigungen senden"),
+                  title: Text(tr(context).profileSendEmails),
                   value: profileState.sendNotificationEmails!,
                   onChanged: noInternet ? null : setSendNotificationEmails,
                 ),
                 ListTile(
-                  title: const Text("Email-Adresse ändern"),
+                  title: Text(tr(context).profileChangeEmail),
                   subtitle: Text(profileState.email!),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: changeEmail,
                   enabled: !noInternet,
                 ),
                 ListTile(
-                  title: const Text("Passwort ändern"),
+                  title: Text(tr(context).profileChangePassword),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: changePass,
                   enabled: !noInternet,

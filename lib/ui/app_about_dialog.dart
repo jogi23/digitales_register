@@ -18,6 +18,7 @@
 import 'package:dr/ui/changelog_page.dart';
 import 'package:dr/util.dart';
 import 'package:flutter/gestures.dart';
+import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -45,10 +46,10 @@ void showAppAboutDialog(BuildContext context) {
               ),
             );
           },
-          child: const Row(
+          child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text("Neuerungen"),
+              Text(tr(context).changelogTitle),
               SizedBox(width: 8),
               Icon(Icons.new_releases_outlined),
             ],
@@ -57,7 +58,7 @@ void showAppAboutDialog(BuildContext context) {
       ),
       Text.rich(
         TextSpan(children: [
-          const TextSpan(text: "Ein Client für das "),
+          TextSpan(text: tr(context).aboutClientFor),
           TextSpan(
             text: "Digitale Register",
             style: TextStyle(color: Theme.of(context).colorScheme.primary),
@@ -74,7 +75,7 @@ void showAppAboutDialog(BuildContext context) {
       ),
       Text.rich(
         TextSpan(children: [
-          const TextSpan(text: "Entwickelt von "),
+          TextSpan(text: tr(context).aboutDevelopedBy),
           TextSpan(
             text: "Johannes Feichter",
             style: TextStyle(color: Theme.of(context).colorScheme.primary),
@@ -138,7 +139,7 @@ void showAppAboutDialog(BuildContext context) {
         alignment: Alignment.centerLeft,
         child: InkWell(
           child: Text(
-            "Datenschutzerklärung",
+            tr(context).aboutPrivacy,
             style: TextStyle(color: Theme.of(context).colorScheme.primary),
           ),
           onTap: () {

@@ -16,6 +16,7 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:dr/util.dart';
+import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -26,13 +27,13 @@ class HelpFeedbackPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Hilfe & Feedback"),
+        title: Text(tr(context).helpTitle),
       ),
       body: ListView(
         children: [
           ListTile(
             leading: const Icon(Icons.email),
-            title: const Text("Email schreiben"),
+            title: Text(tr(context).helpWriteEmail),
             trailing: const Icon(Icons.open_in_new),
             onTap: () async {
               await launchUrl(
@@ -48,7 +49,7 @@ class HelpFeedbackPage extends StatelessWidget {
           ),
           ListTile(
             leading: const Icon(Icons.help_outline),
-            title: const Text("FAQ"),
+            title: Text(tr(context).helpFaq),
             trailing: const Icon(Icons.open_in_new),
             onTap: () => launchUrl(
               Uri.parse(
@@ -59,7 +60,7 @@ class HelpFeedbackPage extends StatelessWidget {
           ),
           ListTile(
             leading: const Icon(Icons.lightbulb_outline),
-            title: const Text("Feature/Idee vorschlagen"),
+            title: Text(tr(context).helpSuggestFeature),
             trailing: const Icon(Icons.open_in_new),
             onTap: () => launchUrl(
               Uri.parse("https://tally.so/r/Y5xKgv"),
@@ -68,7 +69,7 @@ class HelpFeedbackPage extends StatelessWidget {
           ),
           ListTile(
             leading: const Icon(Icons.bug_report_outlined),
-            title: const Text("Bug/Fehler melden"),
+            title: Text(tr(context).helpReportBug),
             trailing: const Icon(Icons.open_in_new),
             onTap: () => launchUrl(
               Uri.parse("https://tally.so/r/yPdpP6"),

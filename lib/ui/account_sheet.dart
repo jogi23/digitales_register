@@ -22,6 +22,7 @@ import 'package:dr/providers/config_provider.dart';
 import 'package:dr/providers/login_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/util.dart';
+import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -35,7 +36,7 @@ Future<void> showAccountSheet(BuildContext context) {
   return showGeneralDialog<void>(
     context: context,
     barrierDismissible: true,
-    barrierLabel: "Konto schließen",
+    barrierLabel: tr(context).accountSheetClose,
     barrierColor: Colors.black54,
     transitionDuration: const Duration(milliseconds: 250),
     pageBuilder: (_, __, ___) => const AccountSheet(),

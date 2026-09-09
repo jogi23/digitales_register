@@ -24,6 +24,7 @@ import 'package:dr/providers/account_profile_provider.dart';
 import 'package:dr/ui/animated_linear_progress_indicator.dart';
 import 'package:dr/ui/autocomplete_options.dart';
 import 'package:dr/util.dart';
+import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fuzzy/fuzzy.dart';
@@ -87,7 +88,7 @@ class _LoginPageContentState extends State<LoginPageContent> {
       selectedPresetServer = (school.key, school.value);
       _schoolController.text = school.key;
     } else if (selectedPresetServer == null) {
-      _schoolController.text = "Andere Schule";
+      _schoolController.text = tr(context).loginOtherSchool;
     }
   }
 
@@ -99,7 +100,6 @@ class _LoginPageContentState extends State<LoginPageContent> {
     }
     if (widget.vm.url != null) {
       _urlController.text = widget.vm.url!;
-      _syncSelectedSchoolFromUrl();
     }
     _schoolFocusNode.addListener(() {
       setState(() {
@@ -107,6 +107,15 @@ class _LoginPageContentState extends State<LoginPageContent> {
       });
     });
     super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Not in initState: naming the school falls back to "Andere Schule",
+    // and a translation cannot be looked up before the dependencies are
+    // available.
+    if (widget.vm.url != null) _syncSelectedSchoolFromUrl();
   }
 
   @override
@@ -181,13 +190,13 @@ class _LoginPageContentState extends State<LoginPageContent> {
                                 });
                               },
                               decoration: InputDecoration(
-                                labelText: "Schule",
+                                labelText: tr(context).loginSchool,
                                 errorText: !_schoolFocusNode.hasFocus &&
                                         _schoolController.text !=
-                                            "Andere Schule" &&
+                                            tr(context).loginOtherSchool &&
                                         _schoolController.text.isNotEmpty &&
                                         selectedPresetServer == null
-                                    ? "Schule nicht gefunden"
+                                    ? tr(context).loginSchoolNotFound
                                     : null,
                               ),
                             );
@@ -217,7 +226,7 @@ class _LoginPageContentState extends State<LoginPageContent> {
                                   .search(textEditingValue.text)
                                   .take(15)
                                   .map((e) => e.item),
-                              "Andere Schule",
+                              tr(context).loginOtherSchool,
                             ];
                           },
                           onSelected: (option) {
@@ -227,7 +236,7 @@ class _LoginPageContentState extends State<LoginPageContent> {
                                 option,
                                 widget.vm.servers[option],
                               );
-                              if (option == "Andere Schule") {
+                              if (option == tr(context).loginOtherSchool) {
                                 selectedPresetServer = null;
                                 _urlController.text = ".digitalesregister.it";
                                 _urlController.selection =
@@ -262,7 +271,7 @@ class _LoginPageContentState extends State<LoginPageContent> {
                               ),
                             );
                           },
-                          child: const Text("Feedback?"),
+                          child: Text(tr(context).loginFeedback),
                         ),
                         TextButton(
                           style: TextButton.styleFrom(
@@ -285,7 +294,7 @@ class _LoginPageContentState extends State<LoginPageContent> {
                               'https://wertwerk-demo.digitalesregister.it',
                             );
                           },
-                          child: const Text("Demo"),
+                          child: Text(tr(context).loginDemo),
                         ),
                       ],
                     ),
@@ -337,8 +346,8 @@ class _LoginPageContentState extends State<LoginPageContent> {
                                     const EdgeInsets.symmetric(horizontal: 16),
                               ),
                               onPressed: () => widget.onRequestPassReset(url),
-                              child: const Text(
-                                "Passwort vergessen",
+                              child: Text(
+                                tr(context).loginForgotPassword,
                               ),
                             ),
                           ),
@@ -347,10 +356,10 @@ class _LoginPageContentState extends State<LoginPageContent> {
                               height: 8,
                             ),
                             if (widget.vm.mustChangePass)
-                              const ListTile(
+                              ListTile(
                                 contentPadding: EdgeInsets.zero,
                                 title: Text(
-                                  "Du musst dein Passwort ändern:",
+                                  tr(context).loginMustChangePassword,
                                 ),
                               ),
                             Container(
@@ -397,7 +406,7 @@ class _LoginPageContentState extends State<LoginPageContent> {
                                 labelText: 'Neues Passwort wiederholen',
                                 errorText: newPasswordsMatch
                                     ? null
-                                    : "Die neuen Passwörter stimmen nicht überein",
+                                    : tr(context).loginPasswordsDiffer,
                               ),
                               controller: _newPassword2Controller,
                               obscureText: true,
@@ -444,9 +453,9 @@ class _LoginPageContentState extends State<LoginPageContent> {
                     ),
                   ),
                   SwitchListTile.adaptive(
-                    title: const Text("Angemeldet bleiben"),
-                    subtitle: const Text(
-                        "Deine Zugangsdaten werden lokal gespeichert"),
+                    title: Text(tr(context).settingsStayLoggedIn),
+                    subtitle: Text(
+                        tr(context).settingsStayLoggedInSubtitle),
                     value: !safeMode,
                     onChanged: widget.vm.loading
                         ? null
@@ -463,7 +472,7 @@ class _LoginPageContentState extends State<LoginPageContent> {
                     ),
                     ListTile(
                       title: Text(
-                        "Andere Accounts",
+                        tr(context).loginOtherAccounts,
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                     ),
@@ -486,7 +495,7 @@ class _LoginPageContentState extends State<LoginPageContent> {
                             padding: const EdgeInsets.all(8.0),
                             child: Text(
                               widget.vm.noInternet
-                                  ? 'Keine Verbindung mit "${widget.vm.url}" möglich. Bitte überprüfe deine Internetverbindung.\nWenn du "Andere Schule" ausgewählt hast, musst du eine gültige Adresse eingeben.'
+                                  ? 'Keine Verbindung mit "${widget.vm.url}" möglich. Bitte überprüfe deine Internetverbindung.\nWenn du tr(context).loginOtherSchool ausgewählt hast, musst du eine gültige Adresse eingeben.'
                                   : widget.vm.error!,
                               style: Theme.of(context)
                                   .textTheme
