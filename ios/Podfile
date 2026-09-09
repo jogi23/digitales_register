@@ -1,5 +1,7 @@
-# Uncomment this line to define a global platform for your project
-# platform :ios, '11.0'
+# Kept in sync with IPHONEOS_DEPLOYMENT_TARGET in the Xcode project. Without
+# it CocoaPods falls back to its own default, and the pods end up built
+# against a different minimum than the app.
+platform :ios, '15.0'
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
