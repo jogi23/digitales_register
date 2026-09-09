@@ -406,5 +406,12 @@
         "type": "int"
       }
     }
-  }
+  },
+  "accountAlias": "Alias",
+  "accountAliasHint": "Kurzname für dieses Konto",
+  "accountSetAlias": "Alias setzen",
+  "accountOthers": "Andere Konten",
+  "accountAdd": "Konto hinzufügen",
+  "accountSwitchDisabled": "Konto wechseln (Passwort-Speicherung deaktiviert)",
+  "colorAmber": "Gelb"
 }

@@ -406,5 +406,12 @@
         "type": "int"
       }
     }
-  }
+  },
+  "accountAlias": "Alias",
+  "accountAliasHint": "A short name for this account",
+  "accountSetAlias": "Set an alias",
+  "accountOthers": "Other accounts",
+  "accountAdd": "Add an account",
+  "accountSwitchDisabled": "Switch account (password saving is off)",
+  "colorAmber": "Yellow"
 }

@@ -53,7 +53,9 @@ void main() {
 
   group('the palette', () {
     test('resolves a stored id', () {
-      expect(starColorById('amber')?.name, 'Gelb');
+      // The name is not part of the palette any more: it comes from the
+      // translations, keyed by this id.
+      expect(starColorById('amber')?.light, isNotNull);
     });
 
     test('has no entry for the accent colour', () {

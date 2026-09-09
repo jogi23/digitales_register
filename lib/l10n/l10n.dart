@@ -41,6 +41,20 @@ const languageNames = <String, String>{
 /// to wire up localisation to show a single label.
 L tr(BuildContext context) => L.of(context) ?? lookupL(const Locale('de'));
 
+/// What to call the colour the stars are drawn in. The palette stores ids,
+/// which stay the same whatever language the reader picked.
+String starColorName(BuildContext context, String id) => switch (id) {
+      'amber' => tr(context).colorAmber,
+      'orange' => tr(context).colorOrange,
+      'red' => tr(context).colorRed,
+      'pink' => tr(context).colorPink,
+      'purple' => tr(context).colorPurple,
+      'blue' => tr(context).colorBlue,
+      'teal' => tr(context).colorTeal,
+      'green' => tr(context).colorGreen,
+      _ => tr(context).settingsStarColorDefault,
+    };
+
 /// What to call a semester. The value object carries a German name, which
 /// is what the register sends and not something to show as it stands.
 String semesterName(BuildContext context, Semester semester) =>

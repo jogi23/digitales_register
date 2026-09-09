@@ -112,7 +112,6 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
   DropdownMenuItem<String> _starColorItem(
     BuildContext context, {
     required String id,
-    required String name,
   }) {
     return DropdownMenuItem(
       value: id,
@@ -121,7 +120,7 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
         children: [
           Icon(Icons.star, color: resolveStarColor(context, id), size: 20),
           const SizedBox(width: 8),
-          Text(name),
+          Text(starColorName(context, id)),
         ],
       ),
     );
@@ -392,13 +391,9 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
                   if (value != null) widget.onSetStarColor(value);
                 },
                 items: [
-                  _starColorItem(
-                    context,
-                    id: accentStarColorId,
-                    name: tr(context).settingsStarColorDefault,
-                  ),
+                  _starColorItem(context, id: accentStarColorId),
                   for (final color in starColors)
-                    _starColorItem(context, id: color.id, name: color.name),
+                    _starColorItem(context, id: color.id),
                 ],
               ),
             ),

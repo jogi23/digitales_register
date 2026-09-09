@@ -238,9 +238,9 @@ class _AccountSheetState extends ConsumerState<AccountSheet> {
             child: TextField(
               controller: _aliasController,
               autofocus: true,
-              decoration: const InputDecoration(
-                labelText: 'Alias',
-                hintText: 'Kurzname für diesen Account',
+              decoration: InputDecoration(
+                labelText: tr(context).accountAlias,
+                hintText: tr(context).accountAliasHint,
                 border: OutlineInputBorder(),
                 isDense: true,
               ),
@@ -275,7 +275,7 @@ class _AccountSheetState extends ConsumerState<AccountSheet> {
       children: [
         Flexible(
           child: Text(
-            aliasText ?? 'Alias setzen',
+            aliasText ?? tr(context).accountSetAlias,
             textAlign: TextAlign.center,
             style: aliasText != null
                 ? Theme.of(context).textTheme.bodyLarge
@@ -305,7 +305,7 @@ class _AccountSheetState extends ConsumerState<AccountSheet> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Andere Konten',
+            tr(context).accountOthers,
             style: Theme.of(context).textTheme.labelLarge,
           ),
           const SizedBox(height: 8),
@@ -349,8 +349,8 @@ class _AccountSheetState extends ConsumerState<AccountSheet> {
           icon: const Icon(Icons.person_add_outlined),
           label: Text(
             canAddAccount
-                ? 'Konto hinzufügen'
-                : 'Konto wechseln (Passwort-Speicherung deaktiviert)',
+                ? tr(context).accountAdd
+                : tr(context).accountSwitchDisabled,
           ),
         ),
       );

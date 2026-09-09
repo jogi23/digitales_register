@@ -28,15 +28,11 @@ class StarColor {
   /// Persisted in the settings, so it has to stay stable.
   final String id;
 
-  /// What the settings page calls it.
-  final String name;
-
   final Color light;
   final Color dark;
 
   const StarColor({
     required this.id,
-    required this.name,
     required this.light,
     required this.dark,
   });
@@ -52,49 +48,41 @@ class StarColor {
 const starColors = <StarColor>[
   StarColor(
     id: 'amber',
-    name: 'Gelb',
     light: Color(0xFFF9A825),
     dark: Color(0xFFFFD54F),
   ),
   StarColor(
     id: 'orange',
-    name: 'Orange',
     light: Color(0xFFEF6C00),
     dark: Color(0xFFFFB74D),
   ),
   StarColor(
     id: 'red',
-    name: 'Rot',
     light: Color(0xFFC62828),
     dark: Color(0xFFEF9A9A),
   ),
   StarColor(
     id: 'pink',
-    name: 'Pink',
     light: Color(0xFFAD1457),
     dark: Color(0xFFF48FB1),
   ),
   StarColor(
     id: 'purple',
-    name: 'Lila',
     light: Color(0xFF6A1B9A),
     dark: Color(0xFFCE93D8),
   ),
   StarColor(
     id: 'blue',
-    name: 'Blau',
     light: Color(0xFF1565C0),
     dark: Color(0xFF90CAF9),
   ),
   StarColor(
     id: 'teal',
-    name: 'Türkis',
     light: Color(0xFF00695C),
     dark: Color(0xFF80CBC4),
   ),
   StarColor(
     id: 'green',
-    name: 'Grün',
     light: Color(0xFF2E7D32),
     dark: Color(0xFFA5D6A7),
   ),

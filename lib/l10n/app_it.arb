@@ -406,5 +406,12 @@
         "type": "int"
       }
     }
-  }
+  },
+  "accountAlias": "Nome breve",
+  "accountAliasHint": "Nome breve per questo account",
+  "accountSetAlias": "Imposta un nome breve",
+  "accountOthers": "Altri account",
+  "accountAdd": "Aggiungi un account",
+  "accountSwitchDisabled": "Cambia account (salvataggio della password disattivato)",
+  "colorAmber": "Giallo"
 }
