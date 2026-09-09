@@ -39,6 +39,7 @@ Widget _build({
   VoidCallback? onShowCertificate,
   VoidCallback? onShowClassbook,
   VoidCallback? onShowHomeworkOverview,
+  VoidCallback? onShowCourseContent,
   VoidCallback? onShowMessages,
   VoidCallback? onShowSettings,
   VoidCallback? onShowAccount,
@@ -65,6 +66,7 @@ Widget _build({
           showCertificate: onShowCertificate ?? () {},
           showClassbook: onShowClassbook ?? () {},
           showHomeworkOverview: onShowHomeworkOverview ?? () {},
+          showCourseContent: onShowCourseContent ?? () {},
           showMessages: onShowMessages ?? () {},
           showSettings: onShowSettings ?? () {},
           showAccount: onShowAccount ?? () {},
@@ -197,6 +199,12 @@ void main() {
         'opens help & feedback page when Hilfe und Feedback tapped',
         (tester) async {
       await tester.pumpWidget(_build());
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.text('Hilfe und Feedback'),
+        500,
+        scrollable: find.byType(Scrollable).first,
+      );
       await tester.pumpAndSettle();
       await tester.tap(find.text('Hilfe und Feedback'));
       await tester.pumpAndSettle();

@@ -19,6 +19,8 @@
   "menuLogout": "Sign out",
   "menuClassbook": "Class log",
   "menuHomeworkOverview": "Homework",
+  "menuCourseContent": "Course materials",
+  "courseContentPickSubject": "Pick a subject above to load its materials.",
   "homeworkOverviewLoading": "Loading the assignments …",
   "homeworkOverviewEmpty": "Nothing assigned for the weeks loaded so far. Open more weeks in the calendar and they will show up here.",
   "classbookLoading": "Loading the class log …",

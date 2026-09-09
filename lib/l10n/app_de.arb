@@ -19,6 +19,8 @@
   "menuLogout": "Abmelden",
   "menuClassbook": "Klassenbuch",
   "menuHomeworkOverview": "Hausaufgaben",
+  "menuCourseContent": "Unterrichtsmaterialien",
+  "courseContentPickSubject": "Fach oben wählen, um das Material zu laden.",
   "homeworkOverviewLoading": "Die Aufgaben werden geladen …",
   "homeworkOverviewEmpty": "Für die geladenen Wochen ist nichts aufgegeben. Im Kalender weitere Wochen öffnen, dann erscheinen sie hier.",
   "classbookLoading": "Das Klassenbuch wird geladen …",

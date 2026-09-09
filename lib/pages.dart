@@ -23,6 +23,7 @@ enum Pages {
   certificate,
   classbook,
   homeworkOverview,
+  courseContent,
   messages,
   settings,
 }

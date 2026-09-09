@@ -19,6 +19,8 @@
   "menuLogout": "Esci",
   "menuClassbook": "Registro di classe",
   "menuHomeworkOverview": "Compiti",
+  "menuCourseContent": "Materiali didattici",
+  "courseContentPickSubject": "Scegli una materia in alto per caricare i materiali.",
   "homeworkOverviewLoading": "Caricamento dei compiti …",
   "homeworkOverviewEmpty": "Per le settimane caricate non c'è nessun compito. Apri altre settimane nel calendario e compariranno qui.",
   "classbookLoading": "Caricamento del registro di classe …",
