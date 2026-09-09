@@ -364,8 +364,24 @@ Future<void> handleRestarted() async {
 
 Future<void> _doStart(Uri? uri) async {
   providerContainer.read(loginProvider.notifier).clearAfterLoginCallbacks();
+
+  // Erreicht ein Link die bereits laufende App, will er nur zu einer Seite
+  // springen - anmelden muss sich niemand mehr. Trotzdem den ganzen
+  // Startvorgang zu fahren baute die Oberfläche ein zweites Mal auf, während
+  // die erste noch stand: zwei DaysWidget mit demselben scaffoldKey, und bei
+  // dieser Kollision hängt Flutter den Teilbaum ab - übrig blieb ein
+  // schwarzer Bildschirm.
+  final sitzungLaeuft = uri != null &&
+      providerContainer.read(loginProvider).loggedIn &&
+      sameServer(uri.origin, wrapper.url);
+
   if (uri != null) {
-    providerContainer.read(loginProvider.notifier).setUrl(uri.origin);
+    // Die Adresse der laufenden Sitzung bleibt stehen: Sie kann anders
+    // geschrieben sein als uri.origin, und daran hängt unter anderem, ob das
+    // Demokonto als solches erkannt wird.
+    if (!sitzungLaeuft) {
+      providerContainer.read(loginProvider.notifier).setUrl(uri.origin);
+    }
     final parameters = uri.queryParameters;
     switch (parameters["semesterWechsel"]) {
       case "1":
@@ -410,6 +426,14 @@ Future<void> _doStart(Uri? uri) async {
     }
     await redirectAfterLogin(uri.fragment);
   }
+
+  if (sitzungLaeuft) {
+    // Die Sprünge, die redirectAfterLogin eben vorgemerkt hat, laufen sonst
+    // erst nach einer Anmeldung - die hier nicht mehr kommt.
+    providerContainer.read(loginProvider.notifier).executeAfterLoginCallbacks();
+    return;
+  }
+
   await _doLoad();
 }
 

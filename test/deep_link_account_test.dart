@@ -149,6 +149,57 @@ void main() {
     });
   });
 
+  group('a link reaching the running app', () {
+    test('leaves the running session untouched', () async {
+      // #187: der volle Startvorgang baute die Oberfläche ein zweites Mal
+      // auf, während die erste noch stand - zwei DaysWidget mit demselben
+      // scaffoldKey, und der Bildschirm blieb schwarz.
+      //
+      // Messbar ist das an der Adresse: Ohne den Fix überschreibt _doStart
+      // sie mit uri.origin, das nie einen Schrägstrich am Ende hat. Daran
+      // hängt unter anderem, ob das Demokonto noch als solches erkannt wird.
+      // Gemessen wird an der Kontenliste: _doLoad füllt sie aus dem
+      // Speicher. Bleibt sie leer, ist der Startvorgang ausgeblieben.
+      secureStorage = FakeSecureStorage(
+        storage: _storageWith("$_ownServer/", otherAccounts: [
+          <String, Object?>{
+            "user": "zweitkonto",
+            "pass": "Passwort456",
+            "url": _otherServer,
+          }
+        ]),
+      );
+      _stubLoginAttempt(mockWrapper, "$_ownServer/");
+      when(() => mockWrapper.url).thenReturn("$_ownServer/");
+      final notifier = pc.providerContainer.read(loginProvider.notifier);
+      notifier.setUrl("$_ownServer/");
+      notifier.setLoggedIn(username: "username23");
+
+      await startApp(Uri.parse("$_ownServer/"));
+
+      expect(pc.providerContainer.read(loginProvider).otherAccounts, isEmpty);
+      expect(pc.providerContainer.read(loginProvider).loggedIn, isTrue);
+    });
+
+    test('still starts up when the link names another server', () async {
+      // Dort passen die laufenden Zugangsdaten nicht, also gehört der
+      // reguläre Weg gegangen - er endet im Anmeldeformular.
+      secureStorage = FakeSecureStorage(storage: _storageWith(_ownServer));
+      _stubLoginAttempt(mockWrapper, _ownServer);
+      when(() => mockWrapper.url).thenReturn(_ownServer);
+      pc.providerContainer
+          .read(loginProvider.notifier)
+          .setLoggedIn(username: "username23");
+
+      await startApp(Uri.parse("$_otherServer/"));
+
+      // Das gespeicherte Konto überlebt auch diesen Weg (siehe #186).
+      final login = await _storedLogin();
+      expect(login["user"], "username23");
+      expect(login["pass"], "Passwort123");
+    });
+  });
+
   group('saving a second account', () {
     test('moves the first one into the list instead of overwriting it',
         () async {
