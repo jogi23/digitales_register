@@ -353,5 +353,58 @@
   "debugLogCopied": "Dati copiati negli appunti",
   "semesterFirst": "1° semestre",
   "semesterSecond": "2° semestre",
-  "semesterBoth": "Entrambi i semestri"
+  "semesterBoth": "Entrambi i semestri",
+  "passwordRules": "La nuova password deve:\n- essere lunga almeno 10 caratteri\n- contenere almeno una lettera maiuscola\n- contenere almeno una lettera minuscola\n- contenere almeno una cifra\n- contenere almeno un carattere speciale\n- essere diversa dalla password precedente",
+  "aboutFreeSoftware": "Questo è software libero e puoi ridistribuirlo a determinate condizioni.\nIl programma è fornito SENZA ALCUNA GARANZIA.",
+  "aboutSeeLicence": "I dettagli sono nella GNU General Public License.",
+  "shareInvitation": "Conosci già l'app per il Registro Elettronico? Compiti, voti e comunicazioni a colpo d'occhio, senza accedere ogni volta dal browser:",
+  "shareSubject": "Il Registro Elettronico come app",
+  "absenceJustified": "Giustificata",
+  "absenceForSchool": "Per incarico della scuola (giustificata)",
+  "absenceNotJustified": "Non giustificata",
+  "absenceNotYetJustified": "Non ancora giustificata",
+  "absenceEnteredAs": "Inserita il {date} alle {time} come «{name}»",
+  "absenceJustifiedAs": "Giustificata il {date} alle {time} come «{name}»",
+  "@absenceEnteredAs": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@absenceJustifiedAs": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "absenceHours": "{count} ore di lezione",
+  "absenceMinutes": "{count} minuti",
+  "@absenceHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@absenceMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

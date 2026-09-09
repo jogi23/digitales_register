@@ -15,6 +15,9 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'dart:ui';
+
+import 'package:dr/l10n/l10n.dart';
 import 'package:dr/services/app_sharing.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -38,19 +41,24 @@ void main() {
   });
 
   group('invitation', () {
-    test('carries a link someone can actually open', () {
-      // A share that only names the app is useless in a chat.
-      expect(invitationText, contains(playStoreWebUri.toString()));
-      expect(invitationText, contains('https://'));
-    });
+    // Whatever the reader's language, the invitation has to hold up.
+    for (final language in supportedLanguages) {
+      final text = invitationText(lookupL(Locale(language)));
 
-    test('says what the app is for', () {
-      expect(invitationText, contains('Digitale'));
-      expect(invitationText.trim(), isNotEmpty);
-    });
+      test('$language carries a link someone can actually open', () {
+        // A share that only names the app is useless in a chat.
+        expect(text, contains(playStoreWebUri.toString()));
+        expect(text, contains('https://'));
+      });
 
-    test('stays short enough for a chat message', () {
-      expect(invitationText.length, lessThan(300));
-    });
+      test('$language says what the app is for', () {
+        expect(text.trim(), isNotEmpty);
+        expect(text.split(RegExp(r'\s+')).length, greaterThan(10));
+      });
+
+      test('$language stays short enough for a chat message', () {
+        expect(text.length, lessThan(300));
+      });
+    }
   });
 }

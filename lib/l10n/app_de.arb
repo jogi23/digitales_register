@@ -353,5 +353,58 @@
   "debugLogCopied": "Daten in Zwischenablage kopiert",
   "semesterFirst": "1. Semester",
   "semesterSecond": "2. Semester",
-  "semesterBoth": "Beide Semester"
+  "semesterBoth": "Beide Semester",
+  "passwordRules": "Das neue Passwort muss:\n- mindestens 10 Zeichen lang sein\n- mindestens einen Großbuchstaben enthalten\n- mindestens einen Kleinbuchstaben enthalten\n- mindestens eine Zahl enthalten\n- mindestens ein Sonderzeichen enthalten\n- nicht mit dem alten Passwort übereinstimmen",
+  "aboutFreeSoftware": "Dies ist freie Software, und du darfst sie unter bestimmten Bedingungen weitergeben.\nFür dieses Programm gibt es KEINERLEI GARANTIE.",
+  "aboutSeeLicence": "Einzelheiten stehen in der GNU General Public License.",
+  "shareInvitation": "Kennst du schon die App fürs Digitale Register? Hausaufgaben, Noten und Mitteilungen auf einen Blick — ohne jedes Mal im Browser einzuloggen:",
+  "shareSubject": "Digitales Register als App",
+  "absenceJustified": "Entschuldigt",
+  "absenceForSchool": "Im Auftrag der Schule (entschuldigt)",
+  "absenceNotJustified": "Nicht entschuldigt",
+  "absenceNotYetJustified": "Noch nicht entschuldigt",
+  "absenceEnteredAs": "Am {date} um {time} als „{name}“ eingetragen",
+  "absenceJustifiedAs": "Am {date} um {time} als „{name}“ entschuldigt",
+  "@absenceEnteredAs": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@absenceJustifiedAs": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "absenceHours": "{count} Schulstunden",
+  "absenceMinutes": "{count} Minuten",
+  "@absenceHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@absenceMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

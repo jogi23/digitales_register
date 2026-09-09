@@ -23,6 +23,7 @@ import 'package:dr/data.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -423,7 +424,7 @@ class SelectionWidget extends StatelessWidget {
                     color: Colors.black,
                   ),
                   child: Text(
-                    DateFormat.MMMMd("de").format(date!),
+                    DateFormat.MMMMd(tr(context).localeName).format(date!),
                     style: const TextStyle(color: Colors.white),
                   ),
                 ),

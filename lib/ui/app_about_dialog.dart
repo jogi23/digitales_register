@@ -116,15 +116,12 @@ void showAppAboutDialog(BuildContext context) {
       const SizedBox(
         height: 8,
       ),
-      const Text(
-        "This is free software, and you are welcome to redistribute it under certain conditions.\n"
-        "This program comes with ABSOLUTELY NO WARRANTY.",
-      ),
+      Text(tr(context).aboutFreeSoftware),
       Align(
         alignment: Alignment.centerLeft,
         child: InkWell(
           child: Text(
-            "See the GNU General Public License for more details.",
+            tr(context).aboutSeeLicence,
             style: TextStyle(color: Theme.of(context).colorScheme.primary),
           ),
           onTap: () {

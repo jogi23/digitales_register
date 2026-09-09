@@ -163,7 +163,7 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
             leading: const Icon(Icons.share),
             title: Text(tr(context).settingsShare),
             subtitle: Text(tr(context).settingsShareSubtitle),
-            onTap: shareApp,
+            onTap: () => shareApp(context),
           ),
           const Divider(),
           if (!widget.vm.demoMode) ...[

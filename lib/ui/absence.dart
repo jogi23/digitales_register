@@ -18,6 +18,7 @@
 
 import 'package:dr/container/absence_group_container.dart';
 import 'package:dr/data.dart';
+import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -83,9 +84,11 @@ class FutureAbsenceWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
+    final l = tr(context);
     var fromTo = '';
     if (absence.startDate == absence.endDate) {
-      fromTo += '${DateFormat("EE d.M.yyyy", "de").format(absence.startDate)}, ';
+      fromTo +=
+          '${DateFormat("EE d.M.yyyy", l.localeName).format(absence.startDate)}, ';
       if (absence.startHour == absence.endHour) {
         fromTo += '${absence.startHour}. h';
       } else {
@@ -93,8 +96,8 @@ class FutureAbsenceWidget extends StatelessWidget {
       }
     } else {
       fromTo +=
-          '${DateFormat("EE d.M.yyyy", "de").format(absence.startDate)} ${absence.startHour}. h'
-          ' - ${DateFormat("EE d.M.yyyy", "de").format(absence.endDate)} ${absence.endHour}. h';
+          '${DateFormat("EE d.M.yyyy", l.localeName).format(absence.startDate)} ${absence.startHour}. h'
+          ' - ${DateFormat("EE d.M.yyyy", l.localeName).format(absence.endDate)} ${absence.endHour}. h';
     }
 
     final isApproved = absence.justified == AbsenceJustified.justified ||
@@ -117,20 +120,25 @@ class FutureAbsenceWidget extends StatelessWidget {
     final String justifiedString;
     switch (absence.justified) {
       case AbsenceJustified.justified:
-        justifiedString = 'Entschuldigt';
+        justifiedString = l.absenceJustified;
       case AbsenceJustified.forSchool:
-        justifiedString = 'Im Auftrag der Schule (entschuldigt)';
+        justifiedString = l.absenceForSchool;
       case AbsenceJustified.notJustified:
-        justifiedString = 'Nicht entschuldigt';
+        justifiedString = l.absenceNotJustified;
       default:
-        justifiedString = 'Noch nicht entschuldigt';
+        justifiedString = l.absenceNotYetJustified;
     }
 
     final subtitleParts = <String>[
       if (absence.reason?.isNotEmpty == true) absence.reason!,
       if (absence.note?.isNotEmpty == true) absence.note!,
       if (absence.reasonTimestamp != null && absence.reasonSignature != null)
-        '${DateFormat("EE d.M.yyyy \'um\' HH:mm", "de").format(absence.reasonTimestamp!)} als „${absence.reasonSignature}” eingetragen',
+        l.absenceEnteredAs(
+          DateFormat("EE d.M.yyyy", l.localeName)
+              .format(absence.reasonTimestamp!),
+          DateFormat("HH:mm").format(absence.reasonTimestamp!),
+          absence.reasonSignature!,
+        ),
     ];
 
     return ListTile(

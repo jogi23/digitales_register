@@ -265,7 +265,7 @@ class _MonthHeader extends StatelessWidget {
           onPressed: onPrevious,
         ),
         Text(
-          DateFormat("MMMM yyyy", "de").format(month),
+          DateFormat("MMMM yyyy", tr(context).localeName).format(month),
           style: Theme.of(context).textTheme.titleMedium,
         ),
         IconButton(

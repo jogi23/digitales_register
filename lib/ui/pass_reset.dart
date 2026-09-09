@@ -76,14 +76,8 @@ class _PassResetState extends State<PassReset> {
                       ),
                     ),
                     padding: const EdgeInsets.all(8),
-                    child: const Text(
-                      "Das neue Passwort muss:\n"
-                      "- mindestens 10 Zeichen lang sein\n"
-                      "- mindestens einen Großbuchstaben enthalten\n"
-                      "- mindestens einen Kleinbuchstaben enthalten\n"
-                      "- mindestens eine Zahl enthalten\n"
-                      "- mindestens ein Sonderzeichen enthalten\n"
-                      "- nicht mit dem alten Passwort übereinstimmen",
+                    child: Text(
+tr(context).passwordRules,
                     ),
                   ),
                   TextField(

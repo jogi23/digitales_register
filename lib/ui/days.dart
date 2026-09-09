@@ -529,9 +529,9 @@ class _DaysWidgetState extends State<DaysWidget> {
           if (widget.vm.noInternet)
             TextButton(
               onPressed: widget.refreshNoInternet,
-              child: const Row(
+              child: Row(
                 children: [
-                  Text("Keine Verbindung"),
+                  Text(tr(context).noConnection),
                   SizedBox(width: 8),
                   Icon(Icons.refresh),
                 ],

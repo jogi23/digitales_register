@@ -154,7 +154,8 @@ class _DashboardWeekContainerState
       MaterialPageRoute<void>(
         builder: (context) => Scaffold(
           appBar: AppBar(
-            title: Text(DateFormat("EEEE, d. MMMM", "de").format(date)),
+            title: Text(DateFormat("EEEE, d. MMMM", tr(context).localeName)
+                .format(date)),
           ),
           // Watches the dashboard rather than capturing the day: a page built
           // around a fixed day misses new entries, and a deleted one stays in

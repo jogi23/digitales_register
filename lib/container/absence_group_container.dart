@@ -19,6 +19,7 @@
 import 'package:dr/data.dart';
 import 'package:dr/providers/absences_provider.dart';
 import 'package:dr/ui/absence.dart';
+import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -36,11 +37,13 @@ class AbsenceGroupContainer extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final absenceGroup =
         ref.watch(absencesProvider.select((s) => s.absences[group]));
+    final l = tr(context);
     final first = absenceGroup.absences.last; //<--- flip is intentional
     final last = absenceGroup.absences.first; //<---
     var fromTo = "";
     if (first.date == last.date) {
-      fromTo += "${DateFormat("EE d.M.yyyy", "de").format(first.date)}, ";
+      fromTo +=
+          "${DateFormat("EE d.M.yyyy", l.localeName).format(first.date)}, ";
       if (first == last) {
         fromTo += "${first.hour}. h";
       } else {
@@ -48,29 +51,35 @@ class AbsenceGroupContainer extends ConsumerWidget {
       }
     } else {
       fromTo +=
-          "${DateFormat("EE d.M.yyyy", "de").format(first.date)} ${first.hour}. h - ${DateFormat("EE d.M.yyyy", "de").format(last.date)} ${last.hour}. h ";
+          "${DateFormat("EE d.M.yyyy", l.localeName).format(first.date)} ${first.hour}. h - "
+              "${DateFormat("EE d.M.yyyy", l.localeName).format(last.date)} ${last.hour}. h ";
     }
     var duration = "";
     if (absenceGroup.hours != 0) {
-      duration += "${absenceGroup.hours} Schulstunden";
+      duration += l.absenceHours(absenceGroup.hours);
     }
     if (absenceGroup.minutes != 0) {
       if (duration != "") duration += ", ";
-      duration += "${absenceGroup.minutes} Minuten";
+      duration += l.absenceMinutes(absenceGroup.minutes);
     }
     String justifiedString;
     switch (absenceGroup.justified) {
       case AbsenceJustified.justified:
         justifiedString = absenceGroup.reasonSignature != null &&
                 absenceGroup.reasonTimestamp != null
-            ? '${DateFormat("EE d.M.yyyy 'um' HH:mm", "de").format(absenceGroup.reasonTimestamp!)} als \u201e${absenceGroup.reasonSignature}\u201c entschuldigt'
-            : "entschuldigt";
+            ? l.absenceJustifiedAs(
+                    DateFormat("EE d.M.yyyy", l.localeName)
+                        .format(absenceGroup.reasonTimestamp!),
+                    DateFormat("HH:mm").format(absenceGroup.reasonTimestamp!),
+                    absenceGroup.reasonSignature!,
+                  )
+            : l.absenceJustified;
       case AbsenceJustified.forSchool:
-        justifiedString = "Im Auftrag der Schule (entschuldigt)";
+        justifiedString = l.absenceForSchool;
       case AbsenceJustified.notJustified:
-        justifiedString = "Nicht entschuldigt";
+        justifiedString = l.absenceNotJustified;
       default:
-        justifiedString = "Noch nicht entschuldigt";
+        justifiedString = l.absenceNotYetJustified;
     }
     return AbsenceGroupWidget(
       tileColor: tileColor,

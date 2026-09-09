@@ -353,5 +353,58 @@
   "debugLogCopied": "Data copied to the clipboard",
   "semesterFirst": "First semester",
   "semesterSecond": "Second semester",
-  "semesterBoth": "Both semesters"
+  "semesterBoth": "Both semesters",
+  "passwordRules": "The new password has to:\n- be at least 10 characters long\n- contain at least one capital letter\n- contain at least one small letter\n- contain at least one digit\n- contain at least one special character\n- differ from the old password",
+  "aboutFreeSoftware": "This is free software, and you are welcome to redistribute it under certain conditions.\nThis program comes with ABSOLUTELY NO WARRANTY.",
+  "aboutSeeLicence": "See the GNU General Public License for more details.",
+  "shareInvitation": "Do you know the app for the Digital Register yet? Homework, grades and messages at a glance, without signing in through the browser every time:",
+  "shareSubject": "The Digital Register as an app",
+  "absenceJustified": "Justified",
+  "absenceForSchool": "On behalf of the school (justified)",
+  "absenceNotJustified": "Not justified",
+  "absenceNotYetJustified": "Not justified yet",
+  "absenceEnteredAs": "Entered on {date} at {time} as “{name}”",
+  "absenceJustifiedAs": "Justified on {date} at {time} as “{name}”",
+  "@absenceEnteredAs": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@absenceJustifiedAs": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "absenceHours": "{count} school hours",
+  "absenceMinutes": "{count} minutes",
+  "@absenceHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@absenceMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }
