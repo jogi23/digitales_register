@@ -274,6 +274,29 @@ String fixupUrl(String enteredUrl) {
   return url;
 }
 
+/// Whether two addresses name the same server.
+///
+/// Dieselbe Schule kommt in zwei Schreibweisen vor: [Uri.origin] liefert
+/// `https://host` ohne Schrägstrich am Ende, die gespeicherte Adresse läuft
+/// dagegen durch [fixupUrl] und behält bei einer aus dem Browser kopierten
+/// Adresse einen. Ein Textvergleich hielte das für zwei verschiedene Server.
+bool sameServer(String? a, String? b) {
+  if (a == null || b == null) return a == b;
+  Uri? parse(String value) {
+    final uri = Uri.tryParse(fixupUrl(value.trim()));
+    return uri != null && uri.host.isNotEmpty ? uri : null;
+  }
+
+  final left = parse(a);
+  final right = parse(b);
+  // Unparsbares bleibt beim Textvergleich, statt stillschweigend als gleich
+  // durchzugehen.
+  if (left == null || right == null) return a == b;
+  return left.scheme.toLowerCase() == right.scheme.toLowerCase() &&
+      left.host.toLowerCase() == right.host.toLowerCase() &&
+      left.port == right.port;
+}
+
 Future<bool> cannotConnectTo(String url) async {
   var noInternet = false;
   try {

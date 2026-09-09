@@ -222,10 +222,16 @@ Future<void> _doLoad() async {
   ];
   providerContainer.read(loginProvider.notifier).setOtherAccounts(otherAccounts);
   final currentLogin = providerContainer.read(loginProvider);
-  if ((currentLogin.url != null && currentLogin.url != url) ||
+  // Der Zweig greift, wenn die App über einen Link gestartet wurde, der auf
+  // einen anderen Server oder Benutzer zeigt als das gespeicherte Konto -
+  // dann passen die gespeicherten Zugangsdaten nicht dazu.
+  //
+  // Sie deshalb wegzuwerfen war falsch: Es kostete bei jedem solchen Link ein
+  // Konto, und wegen des Schrägstrichs am Ende traf es auch Links auf die
+  // eigene Schule. Das Anmeldeformular reicht; das gespeicherte Konto bleibt
+  // liegen und ist über die Konten-Karte erreichbar.
+  if ((currentLogin.url != null && !sameServer(currentLogin.url, url)) ||
       (currentLogin.username != null && currentLogin.username != user)) {
-    // TODO: Figure out when exactly we'd hit this code path and how to handle it better.
-    await _doDeletePass();
     providerContainer.read(appRouterProvider).showLogin();
   } else {
     if (user != null && pass != null) {
