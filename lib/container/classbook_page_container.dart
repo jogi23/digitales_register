@@ -30,6 +30,7 @@ class ClassbookPageContainer extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final calendar = ref.watch(calendarProvider);
+    final settings = ref.watch(settingsProvider);
     // Der Kalender ist die Quelle: Jede geladene Woche bringt die Einträge
     // schon mit, das Klassenbuch ordnet sie nur anders an.
     // Gerüst und Kopfbalken sitzen hier, nicht in der Seite: Der Avatar
@@ -42,7 +43,10 @@ class ClassbookPageContainer extends ConsumerWidget {
       ),
       body: ClassbookPage(
         entries: classbookEntries(calendar.days.values),
-        viewMode: ref.watch(settingsProvider).classbookViewMode,
+        viewMode: settings.classbookViewMode,
+        selectedSubjects: settings.classbookSubjects,
+        onSelectedSubjectsChanged:
+            ref.read(settingsProvider.notifier).setClassbookSubjects,
         loading: calendar.loadingWeeks.isNotEmpty,
       ),
     );

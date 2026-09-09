@@ -143,6 +143,9 @@ class SettingsNotifier extends Notifier<SettingsState> {
   void setClassbookViewMode(ClassbookViewMode value) =>
       _update(state.copyWith(classbookViewMode: value));
 
+  void setClassbookSubjects(List<String> value) =>
+      _update(state.copyWith(classbookSubjects: value));
+
   // ─── Appearance / UI settings ─────────────────────────────────────────────
 
   void setDrawerFullyExpanded(bool value) =>

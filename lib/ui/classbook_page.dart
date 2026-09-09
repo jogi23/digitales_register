@@ -79,45 +79,35 @@ List<String> classbookSubjects(List<ClassbookEntry> entries) {
   return subjects;
 }
 
-class ClassbookPage extends StatefulWidget {
+class ClassbookPage extends StatelessWidget {
   final List<ClassbookEntry> entries;
   final ClassbookViewMode viewMode;
   final bool loading;
+
+  /// Die gewählten Fächer; leer heißt alle.
+  ///
+  /// Sie liegt in den Einstellungen und damit beim Konto, nicht im Widget:
+  /// Wer sie einmal gesetzt hat, findet sie beim nächsten Öffnen wieder.
+  final List<String> selectedSubjects;
+  final ValueChanged<List<String>> onSelectedSubjectsChanged;
 
   const ClassbookPage({
     super.key,
     required this.entries,
     required this.viewMode,
+    required this.selectedSubjects,
+    required this.onSelectedSubjectsChanged,
     this.loading = false,
   });
 
   @override
-  State<ClassbookPage> createState() => _ClassbookPageState();
-}
-
-class _ClassbookPageState extends State<ClassbookPage> {
-  /// Null means every subject.
-  String? _subjectFilter;
-
-  @override
-  void didUpdateWidget(ClassbookPage oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    // A filter for a subject that has no entries any more would show an empty
-    // page with no hint why.
-    if (_subjectFilter != null &&
-        !classbookSubjects(widget.entries).contains(_subjectFilter)) {
-      _subjectFilter = null;
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    if (widget.entries.isEmpty) {
+    if (entries.isEmpty) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Text(
-            widget.loading
+            loading
                 ? tr(context).classbookLoading
                 : tr(context).classbookEmpty,
             textAlign: TextAlign.center,
@@ -127,27 +117,32 @@ class _ClassbookPageState extends State<ClassbookPage> {
       );
     }
 
-    return switch (widget.viewMode) {
+    // Ein Fach, das keine Einträge mehr hat, würde die Liste leeren, ohne
+    // dass ein Grund zu sehen wäre.
+    final vorhanden = classbookSubjects(entries);
+    final gewaehlt =
+        selectedSubjects.where(vorhanden.contains).toList();
+
+    return switch (viewMode) {
       ClassbookViewMode.chronological => Column(
           children: [
             _SubjectFilter(
-              subjects: classbookSubjects(widget.entries),
-              selected: _subjectFilter,
-              onChanged: (subject) =>
-                  setState(() => _subjectFilter = subject),
+              subjects: vorhanden,
+              selected: gewaehlt,
+              onChanged: onSelectedSubjectsChanged,
             ),
             Expanded(
               child: _ByDay(
-                entries: _subjectFilter == null
-                    ? widget.entries
-                    : widget.entries
-                        .where((e) => e.subject == _subjectFilter)
+                entries: gewaehlt.isEmpty
+                    ? entries
+                    : entries
+                        .where((e) => gewaehlt.contains(e.subject))
                         .toList(),
               ),
             ),
           ],
         ),
-      ClassbookViewMode.bySubject => _BySubject(entries: widget.entries),
+      ClassbookViewMode.bySubject => _BySubject(entries: entries),
     };
   }
 }
@@ -241,10 +236,15 @@ class _BySubject extends StatelessWidget {
   }
 }
 
+/// Mehrfachauswahl der Fächer als Chips.
+///
+/// Chips statt eines Auswahlfeldes, weil bei mehreren gewählten Fächern
+/// sonst nirgends stünde, welche es sind - ein Auswahlfeld zeigt immer nur
+/// einen Wert.
 class _SubjectFilter extends StatelessWidget {
   final List<String> subjects;
-  final String? selected;
-  final ValueChanged<String?> onChanged;
+  final List<String> selected;
+  final ValueChanged<List<String>> onChanged;
 
   const _SubjectFilter({
     required this.subjects,
@@ -255,22 +255,28 @@ class _SubjectFilter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-      child: DropdownButtonFormField<String?>(
-        initialValue: selected,
-        decoration: InputDecoration(
-          labelText: tr(context).classbookSubjectFilter,
-          border: const OutlineInputBorder(),
-          isDense: true,
-        ),
-        items: [
-          DropdownMenuItem<String?>(
-            child: Text(tr(context).classbookAllSubjects),
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 4,
+        children: [
+          FilterChip(
+            label: Text(tr(context).classbookAllSubjects),
+            selected: selected.isEmpty,
+            // Erneutes Antippen der bereits leeren Auswahl ändert nichts;
+            // "alle" ist kein Zustand, den man abwählen könnte.
+            onSelected: (_) => onChanged(const []),
           ),
           for (final subject in subjects)
-            DropdownMenuItem<String?>(value: subject, child: Text(subject)),
+            FilterChip(
+              label: Text(subject),
+              selected: selected.contains(subject),
+              onSelected: (an) => onChanged([
+                for (final s in subjects)
+                  if (s == subject ? an : selected.contains(s)) s,
+              ]),
+            ),
         ],
-        onChanged: onChanged,
       ),
     );
   }
@@ -306,7 +312,16 @@ class _EntryTile extends StatelessWidget {
       dense: true,
       leading: Icon(Icons.school, color: theme.colorScheme.primary),
       title: Text(entry.content.name),
-      subtitle: Text(untertitel.join(" · ")),
+      // Hervorgehoben, weil hier das Suchbare steht: Fach, Stunde,
+      // Lehrperson. Der Eintragstext darüber ist oft lang, und ohne
+      // Absetzung verschwimmt die Zuordnung zwischen den Zeilen.
+      subtitle: Text(
+        untertitel.join(" · "),
+        style: theme.textTheme.bodyMedium?.copyWith(
+          color: theme.colorScheme.primary,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
     );
   }
 }

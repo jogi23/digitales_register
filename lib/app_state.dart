@@ -322,10 +322,12 @@ class SettingsState {
     this.classbookViewMode = ClassbookViewMode.chronological,
     this.dashboardColorTestsInRed = true,
     List<String>? ignoreForGradesAverage,
+    List<String>? classbookSubjects,
     this.drawerFullyExpanded = true,
     this.starColor = accentStarColorId,
     this.language,
-  }) : ignoreForGradesAverage = ignoreForGradesAverage ?? [];
+  })  : ignoreForGradesAverage = ignoreForGradesAverage ?? [],
+        classbookSubjects = classbookSubjects ?? [];
 
   final bool noPasswordSaving;
 
@@ -360,6 +362,13 @@ class SettingsState {
   final bool dashboardColorTestsInRed;
   final List<String> ignoreForGradesAverage;
 
+  /// Die Faecher, auf die das Klassenbuch eingeschraenkt ist.
+  ///
+  /// Leer heisst alle. Bewusst nicht kontouebergreifend: Welche Faecher es
+  /// gibt, haengt am Konto, und die Auswahl eines Kindes sagt nichts ueber
+  /// die eines anderen.
+  final List<String> classbookSubjects;
+
   // Whether to fully expand the drawer if in tablet mode
   final bool drawerFullyExpanded;
 
@@ -389,6 +398,7 @@ class SettingsState {
     ClassbookViewMode? classbookViewMode,
     bool? dashboardColorTestsInRed,
     List<String>? ignoreForGradesAverage,
+    List<String>? classbookSubjects,
     bool? drawerFullyExpanded,
     String? starColor,
     Object? language = _unchanged,
@@ -419,6 +429,8 @@ class SettingsState {
             dashboardColorTestsInRed ?? this.dashboardColorTestsInRed,
         ignoreForGradesAverage:
             ignoreForGradesAverage ?? List.of(this.ignoreForGradesAverage),
+        classbookSubjects:
+            classbookSubjects ?? List.of(this.classbookSubjects),
         drawerFullyExpanded: drawerFullyExpanded ?? this.drawerFullyExpanded,
         starColor: starColor ?? this.starColor,
         language: identical(language, _unchanged)
@@ -444,6 +456,7 @@ class SettingsState {
         'classbookViewMode': classbookViewMode.name,
         'dashboardColorTestsInRed': dashboardColorTestsInRed,
         'ignoreForGradesAverage': ignoreForGradesAverage,
+        'classbookSubjects': classbookSubjects,
         'drawerFullyExpanded': drawerFullyExpanded,
         'starColor': starColor,
         'language': language,
@@ -479,6 +492,8 @@ class SettingsState {
         ignoreForGradesAverage:
             (json['ignoreForGradesAverage'] as List<dynamic>?)
                 ?.cast<String>(),
+        classbookSubjects:
+            (json['classbookSubjects'] as List<dynamic>?)?.cast<String>(),
         drawerFullyExpanded: json['drawerFullyExpanded'] as bool? ?? true,
         starColor: json['starColor'] as String? ?? accentStarColorId,
         language: json['language'] as String?,
@@ -557,6 +572,7 @@ class SettingsState {
         other.classbookViewMode == classbookViewMode &&
         other.dashboardColorTestsInRed == dashboardColorTestsInRed &&
         _listEq.equals(other.ignoreForGradesAverage, ignoreForGradesAverage) &&
+        _listEq.equals(other.classbookSubjects, classbookSubjects) &&
         other.drawerFullyExpanded == drawerFullyExpanded &&
         other.starColor == starColor &&
         other.language == language;
@@ -582,6 +598,7 @@ class SettingsState {
         classbookViewMode,
         dashboardColorTestsInRed,
         ...ignoreForGradesAverage,
+        ...classbookSubjects,
         drawerFullyExpanded,
         starColor,
         language,

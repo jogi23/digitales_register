@@ -78,10 +78,42 @@ List<CalendarDay> _tage() => [
       ]),
     ];
 
+/// Haelt die Auswahl so, wie es in der App die Einstellungen tun.
+class _Huelle extends StatefulWidget {
+  final List<ClassbookEntry> entries;
+  final ClassbookViewMode mode;
+  final bool loading;
+  final List<String> initial;
+
+  const _Huelle({
+    required this.entries,
+    required this.mode,
+    required this.loading,
+    required this.initial,
+  });
+
+  @override
+  State<_Huelle> createState() => _HuelleState();
+}
+
+class _HuelleState extends State<_Huelle> {
+  late List<String> _gewaehlt = widget.initial;
+
+  @override
+  Widget build(BuildContext context) => ClassbookPage(
+        entries: widget.entries,
+        viewMode: widget.mode,
+        loading: widget.loading,
+        selectedSubjects: _gewaehlt,
+        onSelectedSubjectsChanged: (f) => setState(() => _gewaehlt = f),
+      );
+}
+
 Widget _seite(
   List<ClassbookEntry> entries, {
   ClassbookViewMode mode = ClassbookViewMode.chronological,
   bool loading = false,
+  List<String> selected = const [],
 }) =>
     MaterialApp(
       supportedLocales: const [Locale('de')],
@@ -91,10 +123,11 @@ Widget _seite(
         GlobalWidgetsLocalizations.delegate,
       ],
       home: Scaffold(
-        body: ClassbookPage(
+        body: _Huelle(
           entries: entries,
-          viewMode: mode,
+          mode: mode,
           loading: loading,
+          initial: selected,
         ),
       ),
     );
@@ -154,12 +187,30 @@ void main() {
       expect(find.text('Diktat'), findsOneWidget);
     });
 
+    testWidgets('sets off the line carrying subject, hour and teacher',
+        (tester) async {
+      // Der Eintragstext darüber ist oft lang; ohne Absetzung verschwimmt
+      // die Zuordnung zwischen den Zeilen.
+      await tester.pumpWidget(_seite(classbookEntries(_tage())));
+      await tester.pumpAndSettle();
+
+      final zeile = tester.widget<Text>(
+        find.textContaining('Deutsch · 1. h').first,
+      );
+      final farbe = Theme.of(
+        tester.element(find.textContaining('Deutsch · 1. h').first),
+      ).colorScheme.primary;
+      expect(zeile.style?.color, farbe);
+      expect(zeile.style?.fontWeight, FontWeight.w500);
+    });
+
     testWidgets('carries the subject filter', (tester) async {
       // Ohne ihn beantwortet die Liste "was hatten wir", aber nicht "was
       // hatten wir in Deutsch" - und danach fragt ein Klassenbuch.
       await tester.pumpWidget(_seite(classbookEntries(_tage())));
       await tester.pumpAndSettle();
-      expect(find.byType(DropdownButtonFormField<String?>), findsOneWidget);
+      expect(find.widgetWithText(FilterChip, 'Alle Fächer'), findsOneWidget);
+      expect(find.widgetWithText(FilterChip, 'Deutsch'), findsOneWidget);
     });
   });
 
@@ -206,15 +257,65 @@ void main() {
       expect(find.text('Notenlehre'), findsOneWidget);
     });
 
+    testWidgets('keeps more than one subject at a time', (tester) async {
+      // Der eigentliche Zweck der Mehrfachauswahl: zwei Fächer nebeneinander
+      // sehen, ohne zwischen ihnen umzuschalten.
+      await tester.pumpWidget(_seite(classbookEntries(_tage())));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.widgetWithText(FilterChip, 'Musik'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilterChip, 'Deutsch'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Notenlehre'), findsOneWidget);
+      expect(find.text('Diktat'), findsOneWidget);
+    });
+
+    testWidgets('starts from what the account had chosen', (tester) async {
+      // Die Auswahl liegt in den Einstellungen, nicht im Widget.
+      await tester.pumpWidget(
+        _seite(classbookEntries(_tage()), selected: const ['Musik']),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Notenlehre'), findsOneWidget);
+      expect(find.text('Diktat'), findsNothing);
+    });
+
+    testWidgets('ignores a subject that has no entries any more',
+        (tester) async {
+      // Sonst bliebe die Liste leer, ohne dass ein Grund zu sehen wäre.
+      await tester.pumpWidget(
+        _seite(classbookEntries(_tage()), selected: const ['Chemie']),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Diktat'), findsOneWidget);
+      expect(find.text('Notenlehre'), findsOneWidget);
+    });
+
+    testWidgets('goes back to everything through the all-subjects chip',
+        (tester) async {
+      await tester.pumpWidget(
+        _seite(classbookEntries(_tage()), selected: const ['Musik']),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.widgetWithText(FilterChip, 'Alle Fächer'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Diktat'), findsOneWidget);
+      expect(find.text('Notenlehre'), findsOneWidget);
+    });
+
     testWidgets('narrows down to the chosen subject', (tester) async {
       await tester.pumpWidget(_seite(
         classbookEntries(_tage()),
       ));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byType(DropdownButtonFormField<String?>));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Musik').last);
+      await tester.tap(find.widgetWithText(FilterChip, 'Musik'));
       await tester.pumpAndSettle();
 
       expect(find.text('Notenlehre'), findsOneWidget);
