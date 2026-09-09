@@ -21,6 +21,7 @@ import 'package:dr/ui/account_avatar_button.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/ui/last_fetched_overlay.dart';
 import 'package:dr/ui/no_internet.dart';
+import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:html/parser.dart' show parse;
@@ -138,8 +139,8 @@ class Certificate extends ConsumerWidget {
     final certState = ref.watch(certificateProvider);
     final noInternet = ref.watch(noInternetProvider);
     return Scaffold(
-      appBar: const ResponsiveAppBar(
-        title: Text('Zeugnis'),
+      appBar: ResponsiveAppBar(
+        title: Text(tr(context).menuCertificate),
         actions: [AccountAvatarButton()],
       ),
       body: certState.html == null

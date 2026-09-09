@@ -54,9 +54,7 @@ class GradesPage extends StatelessWidget {
                   .map(
                     (s) => DropdownMenuItem(
                       value: s,
-                      child: Text(
-                        s.name,
-                      ),
+                      child: Text(semesterName(context, s)),
                     ),
                   )
                   .toList(),

@@ -287,7 +287,7 @@ class _CalendarState extends ConsumerState<Calendar> with TickerProviderStateMix
                                     : widget.vm.noInternet
                                         ? Text(tr(context).calendarPickDate)
                                         : Semantics(
-                                            label: 'Lade Termine',
+                                            label: tr(context).calendarLoadingEvents,
                                             child: const SizedBox(
                                               width: 20,
                                               height: 20,

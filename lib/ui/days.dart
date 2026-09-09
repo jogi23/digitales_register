@@ -489,7 +489,7 @@ class _DaysWidgetState extends State<DaysWidget> {
                 );
               },
               mini: true,
-              tooltip: 'Zum aktuellen Tag scrollen',
+              tooltip: tr(context).dashboardScrollToToday,
               child: Icon(
                 Icons.arrow_drop_up,
                 color: Theme.of(context).colorScheme.onPrimaryContainer,
@@ -505,7 +505,7 @@ class _DaysWidgetState extends State<DaysWidget> {
                 widget.markAllAsSeenCallback();
               },
               mini: true,
-              tooltip: 'Alle als gesehen markieren',
+              tooltip: tr(context).dashboardMarkAllSeen,
               child: const Icon(Icons.close),
             ),
           if (_targets.isNotEmpty && _afterFirstFrame)

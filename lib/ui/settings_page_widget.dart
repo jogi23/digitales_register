@@ -369,14 +369,14 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
             value: widget.vm.showGradesDiagram,
           ),
           SwitchListTile.adaptive(
-            title: const Text('Durchschnitt aller Fächer anzeigen'),
+            title: Text(tr(context).settingsShowAllSubjectsAverage),
             onChanged: (bool value) {
               widget.onSetShowAllSubjectsAverage(value);
             },
             value: widget.vm.showAllSubjectsAverage,
           ),
           SwitchListTile.adaptive(
-            title: const Text('Durchschnitt je Fach anzeigen'),
+            title: Text(tr(context).settingsShowSubjectAverage),
             onChanged: (bool value) {
               widget.onSetShowSubjectAverage(value);
             },
@@ -612,18 +612,19 @@ class _AddSubjectState extends State<AddSubject> {
 }
 
 class _SeedColorPicker extends StatelessWidget {
-  static const _colors = [
-    (label: 'Orange', color: Color(0xFFFF5722)),
-    (label: 'Rot', color: Color(0xFFF44336)),
-    (label: 'Pink', color: Color(0xFFE91E63)),
-    (label: 'Lila', color: Color(0xFF9C27B0)),
-    (label: 'Indigo', color: Color(0xFF3F51B5)),
-    (label: 'Blau', color: Color(0xFF2196F3)),
-    (label: 'Türkis', color: Color(0xFF009688)),
-    (label: 'Grün', color: Color(0xFF4CAF50)),
-    (label: 'Braun', color: Color(0xFF795548)),
-    (label: 'Grau', color: Color(0xFF607D8B)),
-  ];
+  /// The colours to choose from, named in the reader's language.
+  static List<({String label, Color color})> _colors(BuildContext context) => [
+        (label: tr(context).colorOrange, color: const Color(0xFFFF5722)),
+        (label: tr(context).colorRed, color: const Color(0xFFF44336)),
+        (label: tr(context).colorPink, color: const Color(0xFFE91E63)),
+        (label: tr(context).colorPurple, color: const Color(0xFF9C27B0)),
+        (label: tr(context).colorIndigo, color: const Color(0xFF3F51B5)),
+        (label: tr(context).colorBlue, color: const Color(0xFF2196F3)),
+        (label: tr(context).colorTeal, color: const Color(0xFF009688)),
+        (label: tr(context).colorGreen, color: const Color(0xFF4CAF50)),
+        (label: tr(context).colorBrown, color: const Color(0xFF795548)),
+        (label: tr(context).colorGrey, color: const Color(0xFF607D8B)),
+      ];
 
   const _SeedColorPicker();
 
@@ -635,13 +636,13 @@ class _SeedColorPicker extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Akzentfarbe', style: Theme.of(context).textTheme.titleMedium),
+          Text(tr(context).settingsAccentColor, style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
             runSpacing: 8,
             children: [
-              for (final entry in _colors)
+              for (final entry in _colors(context))
                 Tooltip(
                   message: entry.label,
                   child: GestureDetector(

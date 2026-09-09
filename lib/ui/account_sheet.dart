@@ -255,7 +255,7 @@ class _AccountSheetState extends ConsumerState<AccountSheet> {
               return IconButton.filled(
                 onPressed: () => _saveAlias(_aliasController.text),
                 icon: const Icon(Icons.check),
-                tooltip: 'Alias bestätigen',
+                tooltip: tr(context).accountConfirmAlias,
                 // Spelled out rather than left to the theme: the derived
                 // pairing left the check mark barely visible on the accent.
                 style: IconButton.styleFrom(
@@ -290,7 +290,7 @@ class _AccountSheetState extends ConsumerState<AccountSheet> {
             setState(() => _editingAlias = true);
           },
           icon: const Icon(Icons.edit_outlined, size: 18),
-          tooltip: 'Alias bearbeiten',
+          tooltip: tr(context).accountEditAlias,
         ),
       ],
     );

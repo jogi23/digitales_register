@@ -233,14 +233,14 @@ class _DayHeader extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             Text(
-              DateFormat("E", "de").format(date),
+              DateFormat("E", tr(context).localeName).format(date),
               style: TextStyle(
                 fontWeight: isToday ? FontWeight.bold : null,
                 color: accent,
               ),
             ),
             Text(
-              DateFormat("dd.MM", "de").format(date),
+              DateFormat("dd.MM", tr(context).localeName).format(date),
               style: DefaultTextStyle.of(context).style.copyWith(
                     fontSize: 12,
                     fontWeight: isToday ? FontWeight.bold : null,

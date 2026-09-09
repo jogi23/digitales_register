@@ -18,6 +18,7 @@
 import 'dart:io';
 
 import 'package:dr/debug_log.dart';
+import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
@@ -43,7 +44,7 @@ class _DebugLogPageState extends State<DebugLogPage> {
     final text = DebugLog.instance.export();
     if (text.isEmpty) {
       ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Log ist leer')));
+          .showSnackBar(SnackBar(content: Text(tr(context).debugLogEmpty)));
       return;
     }
 
@@ -73,22 +74,22 @@ class _DebugLogPageState extends State<DebugLogPage> {
     final entries = _entries;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Debug-Log'),
+        title: Text(tr(context).settingsDebugLog),
         actions: [
           IconButton(
             icon: const Icon(Icons.share),
-            tooltip: 'Teilen',
+            tooltip: tr(context).commonShare,
             onPressed: _share,
           ),
           IconButton(
             icon: const Icon(Icons.delete_outline),
-            tooltip: 'Löschen',
+            tooltip: tr(context).commonDelete,
             onPressed: _clear,
           ),
         ],
       ),
       body: entries.isEmpty
-          ? const Center(child: Text('Keine Einträge'))
+          ? Center(child: Text(tr(context).changelogEmpty))
           : ListView.separated(
               padding: EdgeInsets.only(
                   bottom: MediaQuery.of(context).viewPadding.bottom),
@@ -139,7 +140,7 @@ class _EntryTile extends StatelessWidget {
           onLongPress: () {
             Clipboard.setData(ClipboardData(text: entry.data!));
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Daten in Zwischenablage kopiert')),
+              SnackBar(content: Text(tr(context).debugLogCopied)),
             );
           },
           child: Container(

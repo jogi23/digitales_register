@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'package:dr/app_state.dart';
 import 'package:dr/l10n/app_localizations.dart';
 import 'package:flutter/widgets.dart';
 
@@ -39,6 +40,15 @@ const languageNames = <String, String>{
 /// building its own MaterialApp, and every one of them would otherwise have
 /// to wire up localisation to show a single label.
 L tr(BuildContext context) => L.of(context) ?? lookupL(const Locale('de'));
+
+/// What to call a semester. The value object carries a German name, which
+/// is what the register sends and not something to show as it stands.
+String semesterName(BuildContext context, Semester semester) =>
+    switch (semester.n) {
+      1 => tr(context).semesterFirst,
+      2 => tr(context).semesterSecond,
+      _ => tr(context).semesterBoth,
+    };
 
 /// The translations for code that has none — middleware and providers that
 /// put a message on the screen without ever touching the widget tree.
