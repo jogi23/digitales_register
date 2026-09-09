@@ -27,7 +27,6 @@ import 'package:dr/providers/grades_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/providers/subject_appearance_provider.dart';
 import 'package:dr/ui/calendar_week.dart';
-import 'package:dr/ui/days.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
 import 'package:flutter/material.dart';

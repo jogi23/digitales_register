@@ -16,11 +16,8 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
-import 'dart:io';
-
 import 'package:collection/collection.dart';
 import 'package:dr/container/login_page.dart';
-import 'package:dr/providers/account_profile_provider.dart';
 import 'package:dr/ui/animated_linear_progress_indicator.dart';
 import 'package:dr/ui/autocomplete_options.dart';
 import 'package:dr/util.dart';

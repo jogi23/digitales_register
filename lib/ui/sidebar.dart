@@ -17,7 +17,6 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:collapsible_sidebar/collapsible_sidebar.dart';
-import 'package:dr/main.dart';
 import 'package:dr/middleware/middleware.dart';
 import 'package:dr/ui/app_about_dialog.dart';
 import 'package:dr/ui/help_feedback_page.dart';

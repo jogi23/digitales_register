@@ -331,7 +331,10 @@ Future<void> _writeToStorage(String key, String txt) async {
 
 Future<String?> _readFromStorage(String key) async {
   try {
-    return secureStorage.read(key: escapeKey(key));
+    // Awaited, or the catch below never sees anything: an unawaited future
+    // leaves the try block before it fails, and the recovery this function
+    // exists for — a keystore that cannot be read any more — never runs.
+    return await secureStorage.read(key: escapeKey(key));
   } catch (e) {
     try {
       await secureStorage.deleteAll();

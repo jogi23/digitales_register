@@ -143,7 +143,12 @@ class FutureAbsenceWidget extends StatelessWidget {
 
     return ListTile(
       tileColor: tileColor,
-      leading: Icon(iconData, color: iconColor),
+      // The symbol alone only tells approved, rejected and pending apart by
+      // colour, so it carries the wording as well.
+      leading: Tooltip(
+        message: justifiedString,
+        child: Icon(iconData, color: iconColor),
+      ),
       title: Text(
         fromTo,
         style: TextStyle(color: theme.colorScheme.primary),
