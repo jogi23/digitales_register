@@ -28,8 +28,6 @@ const _testSize = Size(300, 700);
 
 Widget _build({
   Pages current = Pages.homework,
-  String? username = 'max.mustermann',
-  String? alias,
   bool tabletMode = false,
   bool drawerExpanded = true,
   VoidCallback? onGoHome,
@@ -42,7 +40,6 @@ Widget _build({
   VoidCallback? onShowCourseContent,
   VoidCallback? onShowMessages,
   VoidCallback? onShowSettings,
-  VoidCallback? onShowAccount,
   VoidCallback? onLogout,
 }) {
   return MaterialApp(
@@ -53,9 +50,6 @@ Widget _build({
         height: _testSize.height,
         child: Sidebar(
           currentSelected: current,
-          username: username,
-          alias: alias,
-          userIcon: null,
           tabletMode: tabletMode,
           drawerExpanded: drawerExpanded,
           onDrawerExpansionChange: (_) {},
@@ -69,7 +63,6 @@ Widget _build({
           showCourseContent: onShowCourseContent ?? () {},
           showMessages: onShowMessages ?? () {},
           showSettings: onShowSettings ?? () {},
-          showAccount: onShowAccount ?? () {},
           logout: onLogout ?? () {},
         ),
       ),
@@ -78,19 +71,6 @@ Widget _build({
 }
 
 void main() {
-  testWidgets('tapping the account name opens the account card',
-      (tester) async {
-    // The name at the top used to be decoration only.
-    var opened = 0;
-    await tester.pumpWidget(_build(onShowAccount: () => opened++));
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.text('max.mustermann'));
-    await tester.pumpAndSettle();
-
-    expect(opened, 1);
-  });
-
   testWidgets('shows all navigation items', (tester) async {
     await tester.pumpWidget(_build());
     await tester.pumpAndSettle();
@@ -113,27 +93,6 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Über diese App'), findsOneWidget);
     expect(find.text('Abmelden'), findsOneWidget);
-  });
-
-  testWidgets('shows username when no alias', (tester) async {
-    await tester.pumpWidget(_build(username: 'max.mustermann', alias: null));
-    await tester.pumpAndSettle();
-    expect(find.text('max.mustermann'), findsOneWidget);
-  });
-
-  testWidgets('shows alias instead of username when both set', (tester) async {
-    await tester.pumpWidget(
-      _build(username: 'max.mustermann', alias: 'Max M.'),
-    );
-    await tester.pumpAndSettle();
-    expect(find.text('Max M.'), findsOneWidget);
-    expect(find.text('max.mustermann'), findsNothing);
-  });
-
-  testWidgets('shows placeholder when no username and no alias', (tester) async {
-    await tester.pumpWidget(_build(username: null, alias: null));
-    await tester.pumpAndSettle();
-    expect(find.text('?'), findsOneWidget);
   });
 
   group('callbacks', () {
