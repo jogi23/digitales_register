@@ -44,6 +44,7 @@ import 'package:dr/ui/star_rating.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
 import 'package:dr/services/review_prompt.dart';
+import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:intl/intl.dart';
@@ -383,7 +384,7 @@ class _DaysWidgetState extends State<DaysWidget> {
         fullScreenBody = Padding(
           padding: const EdgeInsets.all(32),
           child: Text(
-            "Keine Einträge vorhanden",
+            tr(context).dashboardNoEntries,
             style: Theme.of(context).textTheme.headlineMedium,
             textAlign: TextAlign.center,
           ),
@@ -512,7 +513,7 @@ class _DaysWidgetState extends State<DaysWidget> {
               backgroundColor: Theme.of(context).colorScheme.error,
               foregroundColor: Theme.of(context).colorScheme.onError,
               icon: const Icon(Icons.arrow_drop_down),
-              label: const Text("Neue Einträge"),
+              label: Text(tr(context).dashboardNewEntries),
               onPressed: () async {
                 await controller.scrollToIndex(
                   _targets.first,
@@ -523,7 +524,7 @@ class _DaysWidgetState extends State<DaysWidget> {
         ],
       ),
       homeAppBar: ResponsiveAppBar(
-        title: const Text("Register"),
+        title: Text(tr(context).dashboardTitle),
         actions: <Widget>[
           if (widget.vm.noInternet)
             TextButton(
@@ -592,7 +593,7 @@ class DashboardHeader extends StatelessWidget {
             child: ElevatedButton(
               onPressed: onSwitchFuture,
               child: Text(
-                future ? "Vergangenheit" : "Zukunft",
+                future ? tr(context).dashboardPast : tr(context).dashboardFuture,
               ),
             ),
           ),
@@ -701,7 +702,7 @@ class DayWidget extends StatelessWidget {
                         context: context,
                         builder: (context) {
                           return InfoDialog(
-                            title: const Text("Gelöschte Einträge"),
+                            title: Text(tr(context).dashboardDeletedEntries),
                             content: SingleChildScrollView(
                               child: Column(
                                 children: day.deletedHomework
@@ -813,23 +814,23 @@ class ItemWidget extends StatelessWidget {
         return InfoDialog(
           content: StatefulBuilder(
             builder: (context, setState) => SwitchListTile.adaptive(
-              title: const Text("Nie fragen"),
+              title: Text(tr(context).dialogNeverAsk),
               onChanged: (bool value) {
                 setState(() => ask = !value);
               },
               value: !ask,
             ),
           ),
-          title: const Text("Erinnerung löschen?"),
+          title: Text(tr(context).reminderDeleteTitle),
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text("Abbrechen"),
+              child: Text(tr(context).commonCancel),
             ),
             ElevatedButton(
               onPressed: () => Navigator.pop(context, true),
-              child: const Text(
-                "Löschen",
+              child: Text(
+                tr(context).commonDelete,
               ),
             )
           ],
@@ -853,7 +854,7 @@ class ItemWidget extends StatelessWidget {
                 Text(formatChanged(historyItem)),
                 if (historyItem.previousVersion != null)
                   ExpansionTile(
-                    title: const Text("Versionen"),
+                    title: Text(tr(context).homeworkVersions),
                     children: <Widget>[
                       ItemWidget(
                         item: historyItem,
@@ -917,7 +918,7 @@ class ItemWidget extends StatelessWidget {
     if (!gradeCompetencesLoaded) {
       return const SizedBox(height: 32, width: 32);
     }
-    // No numeric grade and no competences: show "ohne Note" constrained to the
+    // No numeric grade and no competences: show tr(context).gradeWithoutMark constrained to the
     // same width as a star-row (6 × 24dp = 144dp) so the right column never
     // pushes the card content out of view.
     return ConstrainedBox(
@@ -997,8 +998,8 @@ class ItemWidget extends StatelessWidget {
                                             : item.isNew
                                                 ? "neu"
                                                 : item.deleted
-                                                    ? "gelöscht"
-                                                    : "geändert",
+                                                    ? tr(context).homeworkDeleted
+                                                    : tr(context).homeworkChanged,
                                         style: const TextStyle(
                                             color: Colors.white),
                                       ),
@@ -1120,7 +1121,7 @@ class ItemWidget extends StatelessWidget {
                   alignment: Alignment.centerLeft,
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Text("Anhang",
+                    child: Text(tr(context).attachment,
                         style: Theme.of(context).textTheme.titleMedium),
                   ),
                 ),
@@ -1221,7 +1222,7 @@ class AttachmentWidget extends StatelessWidget {
                 : () {
                     openCallback(ggs);
                   },
-            child: const Text("Öffnen"),
+            child: Text(tr(context).commonOpen),
           )
         ],
       ),
@@ -1239,7 +1240,7 @@ Future<String?> showEnterReminderDialog(BuildContext context) async {
       String message = "";
       return StatefulBuilder(
         builder: (context, setState) => InfoDialog(
-          title: const Text("Erinnerung"),
+          title: Text(tr(context).reminderTitle),
           content: TextField(
             autofocus: true,
             maxLines: null,
@@ -1253,7 +1254,7 @@ Future<String?> showEnterReminderDialog(BuildContext context) async {
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: const Text("Abbrechen"),
+              child: Text(tr(context).commonCancel),
             ),
             ElevatedButton(
               onPressed: message.isNullOrEmpty
@@ -1261,8 +1262,8 @@ Future<String?> showEnterReminderDialog(BuildContext context) async {
                   : () {
                       Navigator.pop(context, message);
                     },
-              child: const Text(
-                "Speichern",
+              child: Text(
+                tr(context).commonSave,
               ),
             ),
           ],

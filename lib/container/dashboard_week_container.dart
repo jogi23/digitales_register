@@ -31,6 +31,7 @@ import 'package:dr/util.dart';
 import 'package:dr/providers/dashboard_provider.dart';
 import 'package:dr/ui/days.dart';
 import 'package:dr/ui/snack_bar.dart';
+import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -163,10 +164,10 @@ class _DashboardWeekContainerState
               ref.watch(dashboardProvider);
               final day = _dayFor(date);
               if (day == null) {
-                return const Center(
+                return Center(
                   child: Padding(
                     padding: EdgeInsets.all(32),
-                    child: Text("Für diesen Tag liegen keine Daten vor"),
+                    child: Text(tr(context).noDataForDay),
                   ),
                 );
               }
@@ -186,7 +187,7 @@ class _DashboardWeekContainerState
   Future<void> _addReminder(UtcDateTime date) async {
     final day = _dayFor(date);
     if (day == null) {
-      showSnackBar("Für diesen Tag liegen keine Daten vor");
+      showSnackBar(tr(context).noDataForDay);
       return;
     }
     final message = await showEnterReminderDialog(context);
@@ -262,7 +263,7 @@ class _WeekHeader extends StatelessWidget {
       children: <Widget>[
         IconButton(
           icon: const Icon(Icons.chevron_left),
-          tooltip: "Vorige Woche",
+          tooltip: tr(context).previousWeek,
           onPressed: onPrevious,
         ),
         Text(
@@ -276,12 +277,12 @@ class _WeekHeader extends StatelessWidget {
             // for a labelled button. Disabled while already there.
             IconButton(
               icon: const Icon(Icons.today),
-              tooltip: "Aktuelle Woche",
+              tooltip: tr(context).calendarCurrentWeek,
               onPressed: isCurrentWeek ? null : onToday,
             ),
             IconButton(
               icon: const Icon(Icons.chevron_right),
-              tooltip: "Nächste Woche",
+              tooltip: tr(context).nextWeek,
               onPressed: onNext,
             ),
           ],

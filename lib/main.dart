@@ -139,7 +139,7 @@ class RegisterApp extends ConsumerWidget {
           );
         },
         themedWidgetBuilder: (context, theme) => MaterialApp(
-          onGenerateTitle: (context) => L.of(context).appTitle,
+          onGenerateTitle: (context) => tr(context).appTitle,
           localizationsDelegates: const [
             L.delegate,
             GlobalCupertinoLocalizations.delegate,

@@ -16,6 +16,7 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:dr/services/changelog.dart';
+import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -36,7 +37,7 @@ class _ChangelogPageState extends State<ChangelogPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Neuerungen")),
+      appBar: AppBar(title: Text(tr(context).changelogTitle)),
       body: FutureBuilder<List<ChangelogEntry>>(
         future: _entries,
         builder: (context, snapshot) {
@@ -45,7 +46,7 @@ class _ChangelogPageState extends State<ChangelogPage> {
             return const Center(child: CircularProgressIndicator());
           }
           if (entries.isEmpty) {
-            return const Center(child: Text("Keine Einträge"));
+            return Center(child: Text(tr(context).changelogEmpty));
           }
           return ListView.builder(
             padding: EdgeInsets.only(

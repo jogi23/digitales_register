@@ -18,6 +18,7 @@
 import 'package:built_collection/built_collection.dart';
 import 'package:dr/data.dart';
 import 'package:dr/util.dart';
+import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -25,14 +26,6 @@ DateTime dateOnly(DateTime date) => DateTime(date.year, date.month, date.day);
 
 /// Shown for a day or week that carries nothing.
 const _noEntries = "(Kein Eintrag)";
-
-/// Shown while the days being looked at are still on their way.
-const _loadingEntries = "Wird geladen …";
-
-/// Shown once asking for a span brought nothing: the server answers only for
-/// a couple of months around today, and repeating the request will not change
-/// that.
-const _noData = "Für diesen Zeitraum liegen keine Daten vor";
 
 /// What the area below the grid shows.
 sealed class _Pick {
@@ -194,12 +187,12 @@ class _DashboardCalendarState extends State<DashboardCalendar> {
 
   Widget _detail(BuildContext context, Map<DateTime, Day> byDate) {
     final pick = _pick;
-    if (pick == null) return Center(child: _hint(context, "Tag auswählen"));
+    if (pick == null) return Center(child: _hint(context, tr(context).pickDay));
 
     if (pick is _DayPick) {
       final day = byDate[pick.date];
       if (day == null)
-        return Center(child: _hint(context, _missing(pick.date)));
+        return Center(child: _hint(context, _missing(context, pick.date)));
       if (day.homework.isEmpty) {
         // The day header stays, so a reminder can still be added here.
         return SingleChildScrollView(
@@ -221,7 +214,7 @@ class _DashboardCalendarState extends State<DashboardCalendar> {
           byDate[monday.add(Duration(days: i))]!,
     ];
     if (days.isEmpty) {
-      return Center(child: _hint(context, _missing(monday)));
+      return Center(child: _hint(context, _missing(context, monday)));
     }
     return SingleChildScrollView(
       child: Column(
@@ -231,10 +224,13 @@ class _DashboardCalendarState extends State<DashboardCalendar> {
   }
 
   /// What to say about a span the dashboard holds nothing for.
-  String _missing(DateTime date) {
-    if (widget.loading) return _loadingEntries;
-    // Asked for and still not there: the server has nothing for it.
-    return _requested.contains(date) ? _noData : _noEntries;
+  String _missing(BuildContext context, DateTime date) {
+    if (widget.loading) return tr(context).loadingEllipsis;
+    // Asked for and still not there: the server answers only for a couple of
+    // months around today, and asking again will not change that.
+    return _requested.contains(date)
+        ? tr(context).noDataForPeriod
+        : _noEntries;
   }
 
   Widget _hint(BuildContext context, String text) => Padding(
@@ -265,7 +261,7 @@ class _MonthHeader extends StatelessWidget {
       children: <Widget>[
         IconButton(
           icon: const Icon(Icons.chevron_left),
-          tooltip: "Voriger Monat",
+          tooltip: tr(context).previousMonth,
           onPressed: onPrevious,
         ),
         Text(
@@ -274,7 +270,7 @@ class _MonthHeader extends StatelessWidget {
         ),
         IconButton(
           icon: const Icon(Icons.chevron_right),
-          tooltip: "Nächster Monat",
+          tooltip: tr(context).nextMonth,
           onPressed: onNext,
         ),
       ],
@@ -301,7 +297,15 @@ class _MonthGrid extends StatelessWidget {
     required this.onPickWeek,
   });
 
-  static const _weekdays = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
+  static List<String> _weekdays(BuildContext context) => [
+        tr(context).weekdayMon,
+        tr(context).weekdayTue,
+        tr(context).weekdayWed,
+        tr(context).weekdayThu,
+        tr(context).weekdayFri,
+        tr(context).weekdaySat,
+        tr(context).weekdaySun,
+      ];
   static const _rowHeight = 46.0;
   static const _weekColumnWidth = 28.0;
 
@@ -322,7 +326,7 @@ class _MonthGrid extends StatelessWidget {
           Row(
             children: <Widget>[
               const SizedBox(width: _weekColumnWidth),
-              for (final name in _weekdays)
+              for (final name in _weekdays(context))
                 Expanded(
                   child: Center(
                     child: Text(

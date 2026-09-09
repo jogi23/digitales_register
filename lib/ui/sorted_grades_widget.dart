@@ -24,6 +24,7 @@ import 'package:dr/services/app_router.dart';
 import 'package:dr/ui/animated_linear_progress_indicator.dart';
 import 'package:dr/ui/star_rating.dart';
 import 'package:dr/util.dart';
+import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -59,12 +60,12 @@ class SortedGradesWidget extends StatelessWidget {
       key: ValueKey(vm.semester),
       children: <Widget>[
         SwitchListTile.adaptive(
-          title: const Text("Noten nach Art gruppieren"),
+          title: Text(tr(context).gradesGroupByType),
           onChanged: sortByTypeCallback,
           value: vm.sortByType,
         ),
         SwitchListTile.adaptive(
-          title: const Text("Gelöschte Noten anzeigen"),
+          title: Text(tr(context).gradesShowCancelled),
           onChanged: showCancelledCallback,
           value: vm.showCancelled!,
         ),
@@ -93,22 +94,22 @@ class SortedGradesWidget extends StatelessWidget {
             (element) => element.toLowerCase() == s.name.toLowerCase(),
           ),
         ))
-          const ListTile(
+          ListTile(
             title: Text(
-              "* Du hast dieses Fach aus dem Notendurchschnitt ausgeschlossen",
+              tr(context).gradesExcludedHint,
               style: TextStyle(color: Colors.grey),
             ),
           ),
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 16),
           child: ListTile(
-            title: const Row(
+            title: Row(
               children: [
-                Text("Notenrechner"),
+                Text(tr(context).gradesCalculator),
               ],
             ),
             subtitle:
-                const Text("Berechne den Durchschnitt von beliebigen Noten"),
+                Text(tr(context).gradesCalculatorSubtitle),
             onTap: showGradeCalculator,
           ),
         ),
@@ -214,9 +215,9 @@ class _SubjectWidgetState extends State<SubjectWidget> {
     final counts = widget.subject.counts(widget.semester);
     if (counts == null || counts.isEmpty) return null;
     final parts = [
-      _plural(counts.grades, "Bewertung", "Bewertungen"),
-      _plural(counts.competences, "Kompetenz", "Kompetenzen"),
-      _plural(counts.observations, "Beobachtung", "Beobachtungen"),
+      _plural(counts.grades, tr(context).countGrade, tr(context).countGrades),
+      _plural(counts.competences, tr(context).countCompetence, tr(context).countCompetences),
+      _plural(counts.observations, tr(context).countObservation, tr(context).countObservations),
     ].nonNulls;
     return Text(
       parts.join(" · "),

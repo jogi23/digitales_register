@@ -23,6 +23,7 @@ import 'package:dr/container/calendar_week_container.dart';
 import 'package:dr/providers/calendar_provider.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
+import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -206,7 +207,7 @@ class _CalendarState extends ConsumerState<Calendar> with TickerProviderStateMix
               children: [
                 Scaffold(
                   appBar: ResponsiveAppBar(
-                    title: const Text("Kalender"),
+                    title: Text(tr(context).calendarTitle),
                     actions: <Widget>[
                       TextButton(
                         onPressed: toMonday(now) == widget.vm.currentMonday
@@ -217,10 +218,10 @@ class _CalendarState extends ConsumerState<Calendar> with TickerProviderStateMix
                                     curve: _animatePageCurve,
                                     duration: _animatePageDuration);
                               },
-                        child: const Row(
+                        child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text("Aktuelle Woche"),
+                            Text(tr(context).calendarCurrentWeek),
                             SizedBox(width: 8),
                             Icon(Icons.today),
                           ],
@@ -284,7 +285,7 @@ class _CalendarState extends ConsumerState<Calendar> with TickerProviderStateMix
                                         "${_dateFormat.format(widget.vm.first!)} - ${_dateFormat.format(widget.vm.last!)}",
                                       )
                                     : widget.vm.noInternet
-                                        ? const Text("Wähle ein Datum")
+                                        ? Text(tr(context).calendarPickDate)
                                         : Semantics(
                                             label: 'Lade Termine',
                                             child: const SizedBox(
@@ -421,11 +422,11 @@ class EditNickBar extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(horizontal: 8),
                           child: TextButton(
                             onPressed: onShowEditNicks,
-                            child: const Row(
+                            child: Row(
                               children: [
                                 Padding(
                                   padding: EdgeInsets.symmetric(horizontal: 8),
-                                  child: Text("Kürzel bearbeiten"),
+                                  child: Text(tr(context).subjectEditNick),
                                 ),
                                 Spacer(),
                               ],

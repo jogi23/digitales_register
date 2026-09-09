@@ -26,6 +26,7 @@ import 'package:dr/ui/last_fetched_overlay.dart';
 import 'package:dr/ui/no_internet.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
+import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -210,7 +211,7 @@ class _CalendarDetailPageState extends ConsumerState<CalendarDetailPage> {
             child: Text(
               selectedDate != null
                   ? DateFormat.MMMEd("de").format(selectedDate!)
-                  : "Detailansicht",
+                  : tr(context).calendarDetailTitle,
               key: ValueKey(selectedDate),
             ),
           ),
@@ -383,7 +384,7 @@ class _NoSchool extends StatelessWidget {
           150,
         ),
         Text(
-          "Keine Schule",
+          tr(context).calendarNoSchool,
           style: Theme.of(context).textTheme.headlineMedium,
         ),
       ],

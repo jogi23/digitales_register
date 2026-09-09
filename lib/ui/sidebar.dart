@@ -22,6 +22,7 @@ import 'package:dr/middleware/middleware.dart';
 import 'package:dr/ui/app_about_dialog.dart';
 import 'package:dr/ui/help_feedback_page.dart';
 import 'package:dr/services/app_sharing.dart';
+import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 
 class Sidebar extends StatelessWidget {
@@ -74,8 +75,8 @@ class Sidebar extends StatelessWidget {
       title: Text(alias ?? username ?? "?"),
       onTitleTap: showAccount,
       titleTooltip: alias ?? username ?? "?",
-      toggleTooltipCollapsed: "Ausklappen",
-      toggleTooltipExpanded: "Einklappen",
+      toggleTooltipCollapsed: tr(context).menuExpand,
+      toggleTooltipExpanded: tr(context).menuCollapse,
       toggleTitle: const SizedBox(),
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       avatar:
@@ -92,16 +93,16 @@ class Sidebar extends StatelessWidget {
         CollapsibleItem(
           isSelected: currentSelected == Pages.homework,
           icon: Icons.assignment,
-          text: "Merkheft",
+          text: tr(context).menuHomework,
           onPressed: goHome,
         ),
         CollapsibleItem(
-            text: "Absenzen",
+            text: tr(context).menuAbsences,
             icon: Icons.hotel,
             isSelected: currentSelected == Pages.absences,
             onPressed: showAbsences),
         CollapsibleItem(
-          text: "Kalender",
+          text: tr(context).menuCalendar,
           icon: Icons.calendar_today,
           isSelected: currentSelected == Pages.calendar,
           onPressed: showCalendar,
@@ -109,31 +110,31 @@ class Sidebar extends StatelessWidget {
         CollapsibleItem(
           onPressed: showGrades,
           isSelected: currentSelected == Pages.grades,
-          text: "Bewertungen",
+          text: tr(context).menuGrades,
           icon: Icons.grade,
         ),
         CollapsibleItem(
-          text: "Mitteilungen",
+          text: tr(context).menuMessages,
           icon: Icons.message,
           isSelected: currentSelected == Pages.messages,
           onPressed: showMessages,
         ),
         CollapsibleItem(
-          text: "Zeugnis",
+          text: tr(context).menuCertificate,
           icon: Icons.list,
           isSelected: currentSelected == Pages.certificate,
           onPressed: showCertificate,
         ),
         CollapsibleItem(
           hasDivider: true,
-          text: "Einstellungen",
+          text: tr(context).menuSettings,
           icon: Icons.settings,
           isSelected: currentSelected == Pages.settings,
           onPressed: showSettings,
         ),
         CollapsibleItem(
           hasDivider: true,
-          text: "Hilfe und Feedback",
+          text: tr(context).menuHelp,
           icon: Icons.help,
           onPressed: () => Navigator.of(context).push(
             MaterialPageRoute(
@@ -142,18 +143,18 @@ class Sidebar extends StatelessWidget {
           ),
         ),
         CollapsibleItem(
-          text: "Bei Google Play bewerten",
+          text: tr(context).menuRate,
           icon: Icons.star_outline,
           onPressed: openPlayStoreListing,
         ),
         CollapsibleItem(
-          text: "Über diese App",
+          text: tr(context).menuAbout,
           icon: Icons.info_outline,
           onPressed: () => showAppAboutDialog(context),
         ),
         CollapsibleItem(
           hasDivider: true,
-          text: "Abmelden",
+          text: tr(context).menuLogout,
           icon: Icons.logout,
           onPressed: logout,
         ),

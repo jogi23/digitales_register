@@ -18,7 +18,7 @@
 import 'package:dr/l10n/app_localizations.dart';
 import 'package:flutter/widgets.dart';
 
-export 'package:dr/l10n/app_localizations.dart' show L;
+export 'package:dr/l10n/app_localizations.dart' show L, lookupL;
 
 /// The languages the app is translated into.
 ///
@@ -34,7 +34,11 @@ const languageNames = <String, String>{
 };
 
 /// The translations, for widgets that have a [BuildContext].
-L tr(BuildContext context) => L.of(context);
+///
+/// German when no delegate sits above the widget: that is a widget test
+/// building its own MaterialApp, and every one of them would otherwise have
+/// to wire up localisation to show a single label.
+L tr(BuildContext context) => L.of(context) ?? lookupL(const Locale('de'));
 
 /// The translations for code that has none — middleware and providers that
 /// put a message on the screen without ever touching the widget tree.
@@ -44,5 +48,5 @@ late L trGlobal;
 
 /// Remembers the translations for [trGlobal]. Called from the app's builder.
 void rememberTranslations(BuildContext context) {
-  trGlobal = L.of(context);
+  trGlobal = tr(context);
 }

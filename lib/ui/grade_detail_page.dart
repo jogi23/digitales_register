@@ -21,6 +21,7 @@ import 'package:dr/app_state.dart';
 import 'package:dr/data.dart';
 import 'package:dr/providers/grades_provider.dart';
 import 'package:dr/ui/star_rating.dart';
+import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -85,13 +86,13 @@ class _GradeDetailPageState extends ConsumerState<GradeDetailPage> {
   Widget build(BuildContext context) {
     final found = _find(ref.watch(gradesProvider));
     return Scaffold(
-      appBar: AppBar(title: Text(found?.subject.name ?? "Bewertung")),
+      appBar: AppBar(title: Text(found?.subject.name ?? tr(context).gradeDetailTitle)),
       body: found == null
-          ? const Center(
+          ? Center(
               child: Padding(
                 padding: EdgeInsets.all(24),
                 child: Text(
-                  "Diese Bewertung ist nicht mehr verfügbar",
+                  tr(context).gradeDetailGone,
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -136,12 +137,12 @@ class _GradeDetail extends StatelessWidget {
         ),
         if (!_isEmpty(grade.description)) ...[
           const Divider(),
-          _Section(title: "Kommentar", child: Text(grade.description!)),
+          _Section(title: tr(context).gradeDetailComment, child: Text(grade.description!)),
         ],
         if (grade.competences.isNotEmpty) ...[
           const Divider(),
           _Section(
-            title: "Kompetenzen",
+            title: tr(context).gradeDetailCompetences,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -153,7 +154,7 @@ class _GradeDetail extends StatelessWidget {
         ],
         const Divider(),
         _Section(
-          title: "Eingetragen",
+          title: tr(context).gradeDetailEntered,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -166,10 +167,10 @@ class _GradeDetail extends StatelessWidget {
         if (grade.cancelled) ...[
           const Divider(),
           _Section(
-            title: "Gelöscht",
+            title: tr(context).gradeDetailCancelled,
             child: Text(
               _isEmpty(grade.cancelledDescription)
-                  ? "Diese Bewertung wurde gelöscht."
+                  ? tr(context).gradeDetailCancelledPlain
                   : grade.cancelledDescription!,
             ),
           ),
