@@ -56,6 +56,7 @@ class SettingsPageWidget extends StatefulWidget {
   final OnSettingChanged<bool> onSetCalenderColorBackground;
   final OnSettingChanged<bool> onSetCalendarShowTimes;
   final void Function(DashboardViewMode mode) onSetDashboardViewMode;
+  final void Function(ClassbookViewMode mode) onSetClassbookViewMode;
   final OnSettingChanged<bool> onSetDashboardColorTestsInRed;
   final OnSettingChanged<String> onSetStarColor;
   final OnSettingChanged<String?> onSetLanguage;
@@ -81,6 +82,7 @@ class SettingsPageWidget extends StatefulWidget {
     required this.onSetCalenderColorBackground,
     required this.onSetCalendarShowTimes,
     required this.onSetDashboardViewMode,
+    required this.onSetClassbookViewMode,
     required this.onSetDashboardColorTestsInRed,
     required this.onSetStarColor,
     required this.onSetLanguage,
@@ -341,6 +343,35 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
             },
             value: widget.vm.dashboardDeduplicateEntries,
           ),
+          const Divider(),
+          ListTile(
+            title: Text(
+              tr(context).settingsClassbook,
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+          ),
+          ListTile(
+            dense: true,
+            title: Text(
+              tr(context).settingsClassbookView,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+          ),
+          for (final entry in <ClassbookViewMode, String>{
+            ClassbookViewMode.chronological:
+                tr(context).classbookViewChronological,
+            ClassbookViewMode.bySubject: tr(context).classbookViewBySubject,
+            ClassbookViewMode.filtered: tr(context).classbookViewFiltered,
+          }.entries)
+            RadioListTile<ClassbookViewMode>(
+              title: Text(entry.value),
+              value: entry.key,
+              groupValue: widget.vm.classbookViewMode,
+              onChanged: (mode) {
+                if (mode != null) widget.onSetClassbookViewMode(mode);
+              },
+            ),
+          const Divider(),
           SwitchListTile.adaptive(
             title: Text(tr(context).settingsAskWhenDeleting),
             onChanged: (bool value) {

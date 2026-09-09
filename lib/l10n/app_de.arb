@@ -17,6 +17,25 @@
   "menuRate": "Bei Google Play bewerten",
   "menuAbout": "Über diese App",
   "menuLogout": "Abmelden",
+  "menuClassbook": "Klassenbuch",
+  "classbookLoading": "Das Klassenbuch wird geladen …",
+  "classbookEmpty": "Für die geladenen Wochen ist nichts eingetragen. Im Kalender weitere Wochen öffnen, dann erscheinen sie hier.",
+  "classbookEntryCount": "{count, plural, =1{1 Eintrag} other{{count} Einträge}}",
+  "@classbookEntryCount": {
+    "placeholders": {
+      "count": {
+        "type": "num",
+        "format": "compact"
+      }
+    }
+  },
+  "classbookSubjectFilter": "Fach",
+  "classbookAllSubjects": "Alle Fächer",
+  "settingsClassbook": "Klassenbuch",
+  "settingsClassbookView": "Ansicht",
+  "classbookViewChronological": "Nach Tagen",
+  "classbookViewBySubject": "Nach Fach",
+  "classbookViewFiltered": "Nach Tagen, mit Fachfilter",
   "noConnection": "Keine Verbindung",
   "gradesAverageStars": "Sternedurchschnitt",
   "gradesAverageNumeric": "Notendurchschnitt",

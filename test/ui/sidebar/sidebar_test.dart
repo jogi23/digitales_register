@@ -37,6 +37,7 @@ Widget _build({
   VoidCallback? onShowAbsences,
   VoidCallback? onShowCalendar,
   VoidCallback? onShowCertificate,
+  VoidCallback? onShowClassbook,
   VoidCallback? onShowMessages,
   VoidCallback? onShowSettings,
   VoidCallback? onShowAccount,
@@ -61,6 +62,7 @@ Widget _build({
           showAbsences: onShowAbsences ?? () {},
           showCalendar: onShowCalendar ?? () {},
           showCertificate: onShowCertificate ?? () {},
+          showClassbook: onShowClassbook ?? () {},
           showMessages: onShowMessages ?? () {},
           showSettings: onShowSettings ?? () {},
           showAccount: onShowAccount ?? () {},
@@ -94,17 +96,18 @@ void main() {
     expect(find.text('Bewertungen'), findsOneWidget);
     expect(find.text('Mitteilungen'), findsOneWidget);
     expect(find.text('Zeugnis'), findsOneWidget);
+    expect(find.text('Klassenbuch'), findsOneWidget);
     expect(find.text('Einstellungen'), findsOneWidget);
     expect(find.text('Hilfe und Feedback'), findsOneWidget);
-    expect(find.text('Über diese App'), findsOneWidget);
     // The sidebar list is scrollable and doesn't build off-screen items
-    // eagerly, so the last item needs scrolling into view first.
+    // eagerly, so the ones further down need scrolling into view first.
     await tester.scrollUntilVisible(
       find.text('Abmelden'),
       500,
       scrollable: find.byType(Scrollable).first,
     );
     await tester.pumpAndSettle();
+    expect(find.text('Über diese App'), findsOneWidget);
     expect(find.text('Abmelden'), findsOneWidget);
   });
 
@@ -176,6 +179,12 @@ void main() {
     testWidgets('shows about dialog when Über diese App tapped',
         (tester) async {
       await tester.pumpWidget(_build());
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.text('Über diese App'),
+        500,
+        scrollable: find.byType(Scrollable).first,
+      );
       await tester.pumpAndSettle();
       await tester.tap(find.text('Über diese App'));
       await tester.pumpAndSettle();

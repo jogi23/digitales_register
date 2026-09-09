@@ -275,6 +275,25 @@ enum DashboardViewMode {
       DashboardViewMode.values.asNameMap()[name] ?? DashboardViewMode.list;
 }
 
+/// How the classbook lists what was taught.
+///
+/// The entries themselves come with every calendar week already; only the
+/// arrangement differs.
+enum ClassbookViewMode {
+  /// Day after day, newest first — the same shape as the homework list.
+  chronological,
+
+  /// One expandable row per subject, its entries underneath.
+  bySubject,
+
+  /// Day after day, with a filter for one subject on top.
+  filtered;
+
+  static ClassbookViewMode fromName(String? name) =>
+      ClassbookViewMode.values.asNameMap()[name] ??
+      ClassbookViewMode.chronological;
+}
+
 /// Lets copyWith tell "leave it alone" from "set it back to null".
 const _unchanged = Object();
 
@@ -299,6 +318,7 @@ class SettingsState {
     this.calendarColorBackground = false,
     this.calendarShowTimes = true,
     this.dashboardViewMode = DashboardViewMode.list,
+    this.classbookViewMode = ClassbookViewMode.chronological,
     this.dashboardColorTestsInRed = true,
     List<String>? ignoreForGradesAverage,
     this.drawerFullyExpanded = true,
@@ -333,6 +353,9 @@ class SettingsState {
 
   /// Whether the dashboard shows a list, a month grid or a week.
   final DashboardViewMode dashboardViewMode;
+
+  /// Wie das Klassenbuch die Einträge anordnet.
+  final ClassbookViewMode classbookViewMode;
   final bool dashboardColorTestsInRed;
   final List<String> ignoreForGradesAverage;
 
@@ -362,6 +385,7 @@ class SettingsState {
     bool? calendarColorBackground,
     bool? calendarShowTimes,
     DashboardViewMode? dashboardViewMode,
+    ClassbookViewMode? classbookViewMode,
     bool? dashboardColorTestsInRed,
     List<String>? ignoreForGradesAverage,
     bool? drawerFullyExpanded,
@@ -389,6 +413,7 @@ class SettingsState {
             calendarColorBackground ?? this.calendarColorBackground,
         calendarShowTimes: calendarShowTimes ?? this.calendarShowTimes,
         dashboardViewMode: dashboardViewMode ?? this.dashboardViewMode,
+        classbookViewMode: classbookViewMode ?? this.classbookViewMode,
         dashboardColorTestsInRed:
             dashboardColorTestsInRed ?? this.dashboardColorTestsInRed,
         ignoreForGradesAverage:
@@ -415,6 +440,7 @@ class SettingsState {
         'calendarColorBackground': calendarColorBackground,
         'calendarShowTimes': calendarShowTimes,
         'dashboardViewMode': dashboardViewMode.name,
+        'classbookViewMode': classbookViewMode.name,
         'dashboardColorTestsInRed': dashboardColorTestsInRed,
         'ignoreForGradesAverage': ignoreForGradesAverage,
         'drawerFullyExpanded': drawerFullyExpanded,
@@ -445,6 +471,8 @@ class SettingsState {
             : (json['dashboardCalendarView'] as bool? ?? false)
                 ? DashboardViewMode.month
                 : DashboardViewMode.list,
+        classbookViewMode:
+            ClassbookViewMode.fromName(json['classbookViewMode'] as String?),
         dashboardColorTestsInRed:
             json['dashboardColorTestsInRed'] as bool? ?? true,
         ignoreForGradesAverage:
@@ -470,6 +498,7 @@ class SettingsState {
     'calendarShowTimes',
     'dashboardColorTestsInRed',
     'dashboardViewMode',
+    'classbookViewMode',
     'dashboardMarkNewOrChangedEntries',
     'dashboardDeduplicateEntries',
     'askWhenDelete',
@@ -524,6 +553,7 @@ class SettingsState {
         other.calendarColorBackground == calendarColorBackground &&
         other.calendarShowTimes == calendarShowTimes &&
         other.dashboardViewMode == dashboardViewMode &&
+        other.classbookViewMode == classbookViewMode &&
         other.dashboardColorTestsInRed == dashboardColorTestsInRed &&
         _listEq.equals(other.ignoreForGradesAverage, ignoreForGradesAverage) &&
         other.drawerFullyExpanded == drawerFullyExpanded &&
@@ -548,6 +578,7 @@ class SettingsState {
         calendarColorBackground,
         calendarShowTimes,
         dashboardViewMode,
+        classbookViewMode,
         dashboardColorTestsInRed,
         ...ignoreForGradesAverage,
         drawerFullyExpanded,

@@ -17,6 +17,25 @@
   "menuRate": "Rate on Google Play",
   "menuAbout": "About this app",
   "menuLogout": "Sign out",
+  "menuClassbook": "Class log",
+  "classbookLoading": "Loading the class log …",
+  "classbookEmpty": "Nothing recorded for the weeks loaded so far. Open more weeks in the calendar and they will show up here.",
+  "classbookEntryCount": "{count, plural, =1{1 entry} other{{count} entries}}",
+  "@classbookEntryCount": {
+    "placeholders": {
+      "count": {
+        "type": "num",
+        "format": "compact"
+      }
+    }
+  },
+  "classbookSubjectFilter": "Subject",
+  "classbookAllSubjects": "All subjects",
+  "settingsClassbook": "Class log",
+  "settingsClassbookView": "Arrangement",
+  "classbookViewChronological": "By day",
+  "classbookViewBySubject": "By subject",
+  "classbookViewFiltered": "By day, with a subject filter",
   "noConnection": "No connection",
   "gradesAverageStars": "Star average",
   "gradesAverageNumeric": "Grade average",

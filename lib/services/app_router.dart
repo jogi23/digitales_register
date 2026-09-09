@@ -24,6 +24,7 @@ import 'package:dr/container/grades_page_container.dart';
 import 'package:dr/container/messages_container.dart';
 import 'package:dr/container/settings_page.dart';
 import 'package:dr/main.dart';
+import 'package:dr/container/classbook_page_container.dart';
 import 'package:dr/pages.dart';
 import 'package:dr/providers/absences_provider.dart';
 import 'package:dr/providers/calendar_provider.dart';
@@ -78,6 +79,15 @@ class AppRouter {
     _ref.read(settingsProvider.notifier).resetScroll();
     scaffoldKey!.currentState!
         .selectContentWidget(SettingsPageContainer(), Pages.settings);
+  }
+
+  void showClassbook() {
+    scaffoldKey!.currentState!
+        .selectContentWidget(const ClassbookPageContainer(), Pages.classbook);
+    // Die Einträge kommen mit den Kalenderwochen. Ohne eine geladene Woche
+    // bliebe die Seite leer, ohne dass jemand wüsste warum.
+    final monday = _ref.read(calendarProvider).currentMonday ?? toMonday(now);
+    unawaited(_ref.read(calendarProvider.notifier).load(monday));
   }
 
   void showCalendar() {

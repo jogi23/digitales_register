@@ -63,6 +63,7 @@ class SidebarContainer extends ConsumerWidget {
       showAbsences: router.showAbsences,
       showCalendar: router.showCalendar,
       showCertificate: router.showCertificate,
+      showClassbook: router.showClassbook,
       showGrades: router.showGrades,
       showMessages: router.showMessages,
       showSettings: router.showSettings,

@@ -17,6 +17,25 @@
   "menuRate": "Valuta su Google Play",
   "menuAbout": "Informazioni sull'app",
   "menuLogout": "Esci",
+  "menuClassbook": "Registro di classe",
+  "classbookLoading": "Caricamento del registro di classe …",
+  "classbookEmpty": "Per le settimane caricate non c'è nessuna voce. Apri altre settimane nel calendario e compariranno qui.",
+  "classbookEntryCount": "{count, plural, =1{1 voce} other{{count} voci}}",
+  "@classbookEntryCount": {
+    "placeholders": {
+      "count": {
+        "type": "num",
+        "format": "compact"
+      }
+    }
+  },
+  "classbookSubjectFilter": "Materia",
+  "classbookAllSubjects": "Tutte le materie",
+  "settingsClassbook": "Registro di classe",
+  "settingsClassbookView": "Visualizzazione",
+  "classbookViewChronological": "Per giorni",
+  "classbookViewBySubject": "Per materia",
+  "classbookViewFiltered": "Per giorni, con filtro materia",
   "noConnection": "Nessuna connessione",
   "gradesAverageStars": "Media delle stelle",
   "gradesAverageNumeric": "Media dei voti",
