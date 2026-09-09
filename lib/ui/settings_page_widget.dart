@@ -361,7 +361,6 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
             ClassbookViewMode.chronological:
                 tr(context).classbookViewChronological,
             ClassbookViewMode.bySubject: tr(context).classbookViewBySubject,
-            ClassbookViewMode.filtered: tr(context).classbookViewFiltered,
           }.entries)
             RadioListTile<ClassbookViewMode>(
               title: Text(entry.value),

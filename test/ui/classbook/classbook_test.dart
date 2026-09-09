@@ -153,6 +153,14 @@ void main() {
       expect(find.textContaining('11. Mai 2026'), findsOneWidget);
       expect(find.text('Diktat'), findsOneWidget);
     });
+
+    testWidgets('carries the subject filter', (tester) async {
+      // Ohne ihn beantwortet die Liste "was hatten wir", aber nicht "was
+      // hatten wir in Deutsch" - und danach fragt ein Klassenbuch.
+      await tester.pumpWidget(_seite(classbookEntries(_tage())));
+      await tester.pumpAndSettle();
+      expect(find.byType(DropdownButtonFormField<String?>), findsOneWidget);
+    });
   });
 
   group('by subject', () {
@@ -186,11 +194,10 @@ void main() {
     });
   });
 
-  group('with a subject filter', () {
+  group('the subject filter of the day view', () {
     testWidgets('shows everything until a subject is picked', (tester) async {
       await tester.pumpWidget(_seite(
         classbookEntries(_tage()),
-        mode: ClassbookViewMode.filtered,
       ));
       await tester.pumpAndSettle();
 
@@ -202,7 +209,6 @@ void main() {
     testWidgets('narrows down to the chosen subject', (tester) async {
       await tester.pumpWidget(_seite(
         classbookEntries(_tage()),
-        mode: ClassbookViewMode.filtered,
       ));
       await tester.pumpAndSettle();
 

@@ -280,14 +280,15 @@ enum DashboardViewMode {
 /// The entries themselves come with every calendar week already; only the
 /// arrangement differs.
 enum ClassbookViewMode {
-  /// Day after day, newest first — the same shape as the homework list.
+  /// Day after day, newest first, with a filter for one subject on top.
+  ///
+  /// The filter belongs to this arrangement rather than being an option of
+  /// its own: without it the list answers "what did we do" but not "what did
+  /// we do in German", and that is the question a classbook gets asked.
   chronological,
 
   /// One expandable row per subject, its entries underneath.
-  bySubject,
-
-  /// Day after day, with a filter for one subject on top.
-  filtered;
+  bySubject;
 
   static ClassbookViewMode fromName(String? name) =>
       ClassbookViewMode.values.asNameMap()[name] ??

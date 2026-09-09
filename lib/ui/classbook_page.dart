@@ -27,6 +27,9 @@ import 'package:intl/intl.dart';
 /// Flattened out of the calendar, where the same entries sit inside their
 /// hour. The classbook asks a different question — "what did we do in
 /// German lately" — and that answer is spread across days there.
+/// Die Art, die fast jeder Eintrag trägt; nur Abweichungen sind erwähnenswert.
+const ordinaryLessonType = 'Fachunterricht';
+
 class ClassbookEntry {
   final UtcDateTime date;
   final int fromHour;
@@ -93,7 +96,7 @@ class ClassbookPage extends StatefulWidget {
 }
 
 class _ClassbookPageState extends State<ClassbookPage> {
-  /// Null means every subject; only the filtered arrangement uses it.
+  /// Null means every subject.
   String? _subjectFilter;
 
   @override
@@ -125,9 +128,7 @@ class _ClassbookPageState extends State<ClassbookPage> {
     }
 
     return switch (widget.viewMode) {
-      ClassbookViewMode.chronological => _ByDay(entries: widget.entries),
-      ClassbookViewMode.bySubject => _BySubject(entries: widget.entries),
-      ClassbookViewMode.filtered => Column(
+      ClassbookViewMode.chronological => Column(
           children: [
             _SubjectFilter(
               subjects: classbookSubjects(widget.entries),
@@ -146,6 +147,7 @@ class _ClassbookPageState extends State<ClassbookPage> {
             ),
           ],
         ),
+      ClassbookViewMode.bySubject => _BySubject(entries: widget.entries),
     };
   }
 }
@@ -293,6 +295,11 @@ class _EntryTile extends StatelessWidget {
       if (!showDate) entry.subject,
       "${entry.fromHour}. h",
       if (entry.teachers.isNotEmpty) entry.teachers.join(", "),
+      // Die Art nur, wenn sie vom Regelfall abweicht: Sie steht sonst an
+      // jeder einzelnen Zeile und engt den eigentlichen Eintrag ein.
+      if (entry.content.typeName.isNotEmpty &&
+          entry.content.typeName != ordinaryLessonType)
+        entry.content.typeName,
     ];
 
     return ListTile(
@@ -300,12 +307,6 @@ class _EntryTile extends StatelessWidget {
       leading: Icon(Icons.school, color: theme.colorScheme.primary),
       title: Text(entry.content.name),
       subtitle: Text(untertitel.join(" · ")),
-      trailing: entry.content.typeName.isEmpty
-          ? null
-          : Text(
-              entry.content.typeName,
-              style: theme.textTheme.labelSmall,
-            ),
     );
   }
 }

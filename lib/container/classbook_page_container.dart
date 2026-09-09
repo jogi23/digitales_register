@@ -15,11 +15,14 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'package:dr/l10n/l10n.dart';
 import 'package:dr/providers/calendar_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
+import 'package:dr/ui/account_avatar_button.dart';
 import 'package:dr/ui/classbook_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:responsive_scaffold/responsive_scaffold.dart';
 
 class ClassbookPageContainer extends ConsumerWidget {
   const ClassbookPageContainer({super.key});
@@ -29,10 +32,19 @@ class ClassbookPageContainer extends ConsumerWidget {
     final calendar = ref.watch(calendarProvider);
     // Der Kalender ist die Quelle: Jede geladene Woche bringt die Einträge
     // schon mit, das Klassenbuch ordnet sie nur anders an.
-    return ClassbookPage(
-      entries: classbookEntries(calendar.days.values),
-      viewMode: ref.watch(settingsProvider).classbookViewMode,
-      loading: calendar.loadingWeeks.isNotEmpty,
+    // Gerüst und Kopfbalken sitzen hier, nicht in der Seite: Der Avatar
+    // braucht die Provider, die Seite selbst nicht - so bleibt sie für sich
+    // prüfbar.
+    return Scaffold(
+      appBar: ResponsiveAppBar(
+        title: Text(tr(context).menuClassbook),
+        actions: const [AccountAvatarButton()],
+      ),
+      body: ClassbookPage(
+        entries: classbookEntries(calendar.days.values),
+        viewMode: ref.watch(settingsProvider).classbookViewMode,
+        loading: calendar.loadingWeeks.isNotEmpty,
+      ),
     );
   }
 }
