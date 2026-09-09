@@ -275,6 +275,9 @@ enum DashboardViewMode {
       DashboardViewMode.values.asNameMap()[name] ?? DashboardViewMode.list;
 }
 
+/// Lets copyWith tell "leave it alone" from "set it back to null".
+const _unchanged = Object();
+
 /// Star colour setting meaning "follow the app's accent colour".
 /// The palette itself lives in ui/star_rating.dart.
 const accentStarColorId = 'accent';
@@ -300,6 +303,7 @@ class SettingsState {
     List<String>? ignoreForGradesAverage,
     this.drawerFullyExpanded = true,
     this.starColor = accentStarColorId,
+    this.language,
   }) : ignoreForGradesAverage = ignoreForGradesAverage ?? [];
 
   final bool noPasswordSaving;
@@ -339,6 +343,9 @@ class SettingsState {
   /// See `starColors` in ui/star_rating.dart.
   final String starColor;
 
+  /// Language code the app is shown in, null to follow the device.
+  final String? language;
+
   SettingsState copyWith({
     bool? noPasswordSaving,
     bool? typeSorted,
@@ -359,6 +366,7 @@ class SettingsState {
     List<String>? ignoreForGradesAverage,
     bool? drawerFullyExpanded,
     String? starColor,
+    Object? language = _unchanged,
   }) =>
       SettingsState(
         noPasswordSaving: noPasswordSaving ?? this.noPasswordSaving,
@@ -387,6 +395,9 @@ class SettingsState {
             ignoreForGradesAverage ?? List.of(this.ignoreForGradesAverage),
         drawerFullyExpanded: drawerFullyExpanded ?? this.drawerFullyExpanded,
         starColor: starColor ?? this.starColor,
+        language: identical(language, _unchanged)
+            ? this.language
+            : language as String?,
       );
 
   Map<String, dynamic> toJson() => {
@@ -408,6 +419,7 @@ class SettingsState {
         'ignoreForGradesAverage': ignoreForGradesAverage,
         'drawerFullyExpanded': drawerFullyExpanded,
         'starColor': starColor,
+        'language': language,
       };
 
   factory SettingsState.fromJson(Map<dynamic, dynamic> json) => SettingsState(
@@ -440,6 +452,7 @@ class SettingsState {
                 ?.cast<String>(),
         drawerFullyExpanded: json['drawerFullyExpanded'] as bool? ?? true,
         starColor: json['starColor'] as String? ?? accentStarColorId,
+        language: json['language'] as String?,
       );
 
   /// The settings that belong to the app rather than to one account:
@@ -464,6 +477,7 @@ class SettingsState {
     'showAllSubjectsAverage',
     'showSubjectAverage',
     'starColor',
+    'language',
     'ignoreForGradesAverage',
   };
 
@@ -513,7 +527,8 @@ class SettingsState {
         other.dashboardColorTestsInRed == dashboardColorTestsInRed &&
         _listEq.equals(other.ignoreForGradesAverage, ignoreForGradesAverage) &&
         other.drawerFullyExpanded == drawerFullyExpanded &&
-        other.starColor == starColor;
+        other.starColor == starColor &&
+        other.language == language;
   }
 
   @override
@@ -537,6 +552,7 @@ class SettingsState {
         ...ignoreForGradesAverage,
         drawerFullyExpanded,
         starColor,
+        language,
       ]);
 }
 

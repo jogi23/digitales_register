@@ -109,6 +109,9 @@ class SettingsNotifier extends Notifier<SettingsState> {
 
   void setStarColor(String id) => _update(state.copyWith(starColor: id));
 
+  /// Null follows the device language.
+  void setLanguage(String? code) => _update(state.copyWith(language: code));
+
   // ─── Dashboard settings ───────────────────────────────────────────────────
 
   void setMarkNewOrChanged(bool value) =>

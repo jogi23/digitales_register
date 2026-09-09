@@ -1,0 +1,5 @@
+{
+  "@@locale": "en",
+  "appTitle": "DigiReg ST",
+  "@appTitle": { "description": "Name der App, wie er im Umschalter erscheint" }
+}

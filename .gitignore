@@ -71,3 +71,4 @@ packages/responsive_scaffold/example/ios/Flutter/ephemeral/
 similar.contains(c))
 
 key.properties
+lib/l10n/app_localizations*.dart
