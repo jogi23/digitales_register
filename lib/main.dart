@@ -49,7 +49,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:responsive_scaffold/responsive_scaffold.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
-import 'package:uni_links/uni_links.dart';
+import 'package:app_links/app_links.dart';
 
 export 'package:dr/ui/snack_bar.dart' show scaffoldMessengerKey, showSnackBar;
 
@@ -104,8 +104,11 @@ Future<void> _runApp() async {
       binding.allowFirstFrame();
       Uri? uri;
       if (Platform.isAndroid) {
-        uri = await getInitialUri();
-        uriLinkStream.listen((event) {
+        // app_links statt uni_links: Letzteres ist auf pub.dev eingestellt,
+        // seit 2021 unverändert und baute mit AGP 9 nicht mehr.
+        final appLinks = AppLinks();
+        uri = await appLinks.getInitialLink();
+        appLinks.uriLinkStream.listen((event) {
           unawaited(startApp(event));
         });
       }
