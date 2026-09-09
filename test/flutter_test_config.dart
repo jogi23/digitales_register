@@ -44,7 +44,12 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
       await testMain();
     },
     config: GoldenToolkitConfiguration(
-      skipGoldenAssertion: () => !Platform.isLinux,
+      // Only Linux, and not on a build runner: the reference images are
+      // rendered on the maintainer's machine, and a runner rasterises fonts
+      // differently enough that every comparison would fail. Everything the
+      // widget tests assert about structure and behaviour still runs there.
+      skipGoldenAssertion: () =>
+          !Platform.isLinux || Platform.environment['CI'] == 'true',
       enableRealShadows: true,
     ),
   );
