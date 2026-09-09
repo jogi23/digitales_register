@@ -20,11 +20,21 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:dr/providers/provider_container.dart' as pc;
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> testExecutable(FutureOr<void> Function() testMain) async {
+  // A German device: the app speaks three languages now, and the test host
+  // reports en_US, which would put every golden and every finder into
+  // English.
+  final binding = TestWidgetsFlutterBinding.ensureInitialized();
+  binding.platformDispatcher
+    ..localeTestValue = const Locale('de')
+    ..localesTestValue = const [Locale('de')];
+
   SharedPreferences.setMockInitialValues({});
   pc.providerContainer = ProviderContainer();
 

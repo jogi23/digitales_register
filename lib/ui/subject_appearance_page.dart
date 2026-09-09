@@ -21,6 +21,7 @@ import 'package:dr/app_state.dart';
 import 'package:dr/providers/all_subjects_provider.dart';
 import 'package:dr/providers/subject_appearance_provider.dart';
 import 'package:dr/ui/dialog.dart';
+import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -32,7 +33,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class SubjectAppearancePage extends ConsumerStatefulWidget {
   /// If set, immediately opens the nickname editor for the first subject
   /// that doesn't have one yet — used when arriving from the calendar's
-  /// "Kürzel bearbeiten" prompt.
+  /// tr(context).subjectEditNick prompt.
   final bool autoEditMissingNick;
 
   const SubjectAppearancePage({super.key, this.autoEditMissingNick = false});
@@ -106,10 +107,10 @@ class _SubjectAppearancePageState
     final appearance = ref.watch(subjectAppearanceProvider);
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Fächer Kürzel und Farben"),
+        title: Text(tr(context).subjectAppearanceTitle),
       ),
       body: subjects.isEmpty
-          ? const Center(child: Text("Keine Fächer vorhanden"))
+          ? Center(child: Text(tr(context).subjectNoSubjects))
           : ListView.builder(
               itemCount: subjects.length,
               itemBuilder: (context, index) {
@@ -129,7 +130,7 @@ class _SubjectAppearancePageState
                     ),
                   ),
                   title: Text(subject),
-                  subtitle: Text(nick ?? "Kein Kürzel"),
+                  subtitle: Text(nick ?? tr(context).subjectNoNick),
                   trailing: IconButton(
                     icon: const Icon(Icons.edit),
                     onPressed: () => _editNick(subject),
@@ -170,7 +171,7 @@ class _EditNickDialogState extends State<_EditNickDialog> {
   @override
   Widget build(BuildContext context) {
     return InfoDialog(
-      title: Text("Kürzel für ${widget.subject}"),
+      title: Text(tr(context).subjectNickFor(widget.subject)),
       content: TextField(
         controller: controller,
         autofocus: true,
@@ -184,13 +185,13 @@ class _EditNickDialogState extends State<_EditNickDialog> {
       actions: <Widget>[
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text("Abbrechen"),
+          child: Text(tr(context).commonCancel),
         ),
         ElevatedButton(
           onPressed: controller.text.isNotEmpty
               ? () => Navigator.of(context).pop(controller.text)
               : null,
-          child: const Text("Fertig"),
+          child: Text(tr(context).commonDone),
         ),
       ],
     );
@@ -218,7 +219,7 @@ class _ColorPickerDialogState extends State<_ColorPickerDialog> {
   @override
   Widget build(BuildContext context) {
     return InfoDialog(
-      title: const Text("Farbe auswählen"),
+      title: Text(tr(context).colorPickTitle),
       content: SingleChildScrollView(
         child: MaterialPicker(
           pickerColor: color,
@@ -232,13 +233,13 @@ class _ColorPickerDialogState extends State<_ColorPickerDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text("Abbrechen"),
+          child: Text(tr(context).commonCancel),
         ),
         ElevatedButton(
           onPressed: color != widget.initialColor
               ? () => Navigator.pop(context, color)
               : null,
-          child: const Text("Auswählen"),
+          child: Text(tr(context).colorPick),
         ),
       ],
     );

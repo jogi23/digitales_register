@@ -18,6 +18,7 @@
 
 import 'package:dr/app_state.dart';
 import 'package:dr/main.dart';
+import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -28,8 +29,8 @@ class NetworkProtocol extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return items.isEmpty
-        ? const Center(
-            child: Text("Nichts vorhanden"),
+        ? Center(
+            child: Text(tr(context).networkNothing),
           )
         : ListView.builder(
             padding: EdgeInsets.only(
@@ -54,11 +55,11 @@ class _Item extends StatelessWidget {
       title: Text(item.address),
       children: <Widget>[
         _Detail(
-          type: "Parameter",
+          type: tr(context).networkParameters,
           content: item.parameters,
         ),
         _Detail(
-          type: "Antwort",
+          type: tr(context).networkResponse,
           content: item.response,
         ),
       ],
@@ -73,7 +74,7 @@ class _Detail extends StatelessWidget {
   const _Detail({required this.type, this.content});
   @override
   Widget build(BuildContext context) {
-    final content = this.content ?? "Keine $type";
+    final content = this.content ?? tr(context).networkNoneOfType(type);
     return Padding(
       padding: const EdgeInsets.only(left: 24, bottom: 8),
       child: Column(
@@ -86,7 +87,7 @@ class _Detail extends StatelessWidget {
                 icon: const Icon(Icons.assignment),
                 onPressed: () {
                   Clipboard.setData(ClipboardData(text: content));
-                  showSnackBar("In die Zwischenablage kopiert");
+                  showSnackBar(tr(context).networkCopied);
                 },
               )
             ],

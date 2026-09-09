@@ -59,6 +59,7 @@ class SettingsPageContainer extends ConsumerWidget {
       onSetDashboardViewMode: notifier.setDashboardViewMode,
       onSetDashboardColorTestsInRed: notifier.setDashboardColorTestsInRed,
       onSetStarColor: notifier.setStarColor,
+      onSetLanguage: notifier.setLanguage,
     );
   }
 }
@@ -80,6 +81,9 @@ class SettingsViewModel {
   final DashboardViewMode dashboardViewMode;
   final bool dashboardColorTestsInRed;
   final String starColor;
+
+  /// Null follows the device language.
+  final String? language;
   final bool demoMode;
   final List<String> allSubjects;
   final List<String> ignoreForGradesAverage;
@@ -99,6 +103,7 @@ class SettingsViewModel {
     required this.dashboardViewMode,
     required this.dashboardColorTestsInRed,
     required this.starColor,
+    this.language,
     required this.allSubjects,
     required this.ignoreForGradesAverage,
     required this.demoMode,
@@ -121,6 +126,7 @@ class SettingsViewModel {
         dashboardViewMode: s.dashboardViewMode,
         dashboardColorTestsInRed: s.dashboardColorTestsInRed,
         starColor: s.starColor,
+        language: s.language,
         allSubjects: allSubjects,
         ignoreForGradesAverage: s.ignoreForGradesAverage,
         demoMode: isDemo,

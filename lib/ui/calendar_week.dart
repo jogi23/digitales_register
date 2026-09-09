@@ -25,6 +25,7 @@ import 'package:dr/ui/calendar_grid.dart';
 import 'package:dr/ui/last_fetched_overlay.dart';
 import 'package:dr/ui/no_internet.dart';
 import 'package:dr/utc_date_time.dart';
+import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -185,7 +186,7 @@ class _NoLessons extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(32),
         child: Text(
-          "Keine Stunden in dieser Woche",
+          tr(context).calendarNoLessons,
           style: Theme.of(context).textTheme.titleMedium,
           textAlign: TextAlign.center,
         ),
@@ -232,14 +233,14 @@ class _DayHeader extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             Text(
-              DateFormat("E", "de").format(date),
+              DateFormat("E", tr(context).localeName).format(date),
               style: TextStyle(
                 fontWeight: isToday ? FontWeight.bold : null,
                 color: accent,
               ),
             ),
             Text(
-              DateFormat("dd.MM", "de").format(date),
+              DateFormat("dd.MM", tr(context).localeName).format(date),
               style: DefaultTextStyle.of(context).style.copyWith(
                     fontSize: 12,
                     fontWeight: isToday ? FontWeight.bold : null,
@@ -487,7 +488,7 @@ class CalendarDayWidget extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  "Frei",
+                  tr(context).calendarFree,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
               ],

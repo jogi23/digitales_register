@@ -26,6 +26,7 @@ import 'package:dr/ui/animated_linear_progress_indicator.dart';
 import 'package:dr/ui/last_fetched_overlay.dart';
 import 'package:dr/ui/no_internet.dart';
 import 'package:dr/util.dart';
+import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:quill_delta/quill_delta.dart';
@@ -58,11 +59,11 @@ class MessagesPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: ResponsiveAppBar(
-        title: const Text("Mitteilungen"),
+        title: Text(tr(context).messagesTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.done_all),
-            tooltip: "Alle als gelesen markieren",
+            tooltip: tr(context).messagesMarkAllRead,
             onPressed: hasUnread ? onMarkAllAsRead : null,
           ),
           const AccountAvatarButton(),
@@ -96,7 +97,7 @@ class MessagesPage extends StatelessWidget {
                     if (state!.messages.isEmpty)
                       Center(
                         child: Text(
-                          "Noch keine Mitteilungen",
+                          tr(context).messagesEmpty,
                           style: Theme.of(context).textTheme.headlineMedium,
                           textAlign: TextAlign.center,
                         ),
@@ -231,8 +232,8 @@ class _MessageWidgetState extends State<MessageWidget> {
               Text.rich(
                 TextSpan(
                   children: [
-                    const TextSpan(
-                      text: "Gesendet: ",
+                    TextSpan(
+                      text: tr(context).messagesSent,
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     TextSpan(
@@ -244,8 +245,8 @@ class _MessageWidgetState extends State<MessageWidget> {
               Text.rich(
                 TextSpan(
                   children: [
-                    const TextSpan(
-                      text: "Von: ",
+                    TextSpan(
+                      text: tr(context).messagesFrom,
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     TextSpan(text: widget.message.fromName)
@@ -255,8 +256,8 @@ class _MessageWidgetState extends State<MessageWidget> {
               Text.rich(
                 TextSpan(
                   children: [
-                    const TextSpan(
-                      text: "An: ",
+                    TextSpan(
+                      text: tr(context).messagesTo,
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     TextSpan(text: widget.message.recipientString)
@@ -269,8 +270,8 @@ class _MessageWidgetState extends State<MessageWidget> {
                 const Divider(),
                 Text(
                   widget.message.attachments.length > 1
-                      ? "Anhänge:"
-                      : "Anhang:",
+                      ? tr(context).messagesAttachments
+                      : tr(context).messagesAttachment,
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
               ],
@@ -374,19 +375,13 @@ class _MessageResponseSectionState extends State<MessageResponseSection> {
     final theme = Theme.of(context);
 
     if (info.answered) {
-      return _Hint(info.historyText ?? info.badge ?? "Bereits bestätigt.");
+      return _Hint(info.historyText ?? info.badge ?? tr(context).messageAlreadyConfirmed);
     }
     if (info.parentSignatureRequired) {
-      return const _Hint(
-        "Diese Mitteilung kann nur von einem Erziehungsberechtigten "
-        "bestätigt werden.",
-      );
+      return _Hint(tr(context).messageParentOnly);
     }
     if (info.unsupported) {
-      return const _Hint(
-        "Diese Mitteilung verlangt eine Bestätigung, die in der App noch "
-        "nicht unterstützt wird. Bitte im Browser öffnen.",
-      );
+      return _Hint(tr(context).messageUnsupported);
     }
 
     return Column(
@@ -400,8 +395,8 @@ class _MessageResponseSectionState extends State<MessageResponseSection> {
             controller: _signature,
             enabled: !_sent,
             textCapitalization: TextCapitalization.words,
-            decoration: const InputDecoration(
-              labelText: "Bitte bestätigen Sie mit Ihrem Vor- und Nachnamen",
+            decoration: InputDecoration(
+              labelText: tr(context).messageSignaturePrompt,
               border: OutlineInputBorder(),
             ),
             onChanged: (_) => setState(() {}),
@@ -416,14 +411,14 @@ class _MessageResponseSectionState extends State<MessageResponseSection> {
                 onPressed: _canSend
                     ? () => _send(MessageResponseInfo.answerNotAgree)
                     : null,
-                child: const Text("Stimme nicht zu"),
+                child: Text(tr(context).messageDisagree),
               ),
               const SizedBox(width: 8),
               FilledButton(
                 onPressed: _canSend
                     ? () => _send(MessageResponseInfo.answerAgree)
                     : null,
-                child: const Text("Stimme zu"),
+                child: Text(tr(context).messageAgree),
               ),
             ],
           )
@@ -432,7 +427,7 @@ class _MessageResponseSectionState extends State<MessageResponseSection> {
             alignment: Alignment.centerRight,
             child: FilledButton(
               onPressed: _canSend ? () => _send(null) : null,
-              child: const Text("Bestätigen"),
+              child: Text(tr(context).messageConfirm),
             ),
           ),
       ],

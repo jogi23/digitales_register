@@ -16,6 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 
 class PassReset extends StatefulWidget {
@@ -55,7 +56,7 @@ class _PassResetState extends State<PassReset> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text("Passwort zurücksetzen"),
+          title: Text(tr(context).passResetTitle),
         ),
         body: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -75,14 +76,8 @@ class _PassResetState extends State<PassReset> {
                       ),
                     ),
                     padding: const EdgeInsets.all(8),
-                    child: const Text(
-                      "Das neue Passwort muss:\n"
-                      "- mindestens 10 Zeichen lang sein\n"
-                      "- mindestens einen Großbuchstaben enthalten\n"
-                      "- mindestens einen Kleinbuchstaben enthalten\n"
-                      "- mindestens eine Zahl enthalten\n"
-                      "- mindestens ein Sonderzeichen enthalten\n"
-                      "- nicht mit dem alten Passwort übereinstimmen",
+                    child: Text(
+tr(context).passwordRules,
                     ),
                   ),
                   TextField(
@@ -100,7 +95,7 @@ class _PassResetState extends State<PassReset> {
                       errorText:
                           _newPass1Controller.text == _newPass2Controller.text
                               ? null
-                              : "Die Passwörter stimmen noch nicht überein",
+                              : tr(context).passResetNotMatchingYet,
                     ),
                     obscureText: true,
                   ),
@@ -113,7 +108,7 @@ class _PassResetState extends State<PassReset> {
                               _newPass2Controller.text
                           ? null
                           : () => widget.resetPass(_newPass1Controller.text),
-                      child: const Text("Passwort zurücksetzen"),
+                      child: Text(tr(context).passResetTitle),
                     ),
                   const SizedBox(height: 16),
                   if (widget.message != null)
@@ -129,7 +124,7 @@ class _PassResetState extends State<PassReset> {
                   if (widget.message != null && !widget.failure)
                     ElevatedButton(
                       onPressed: widget.onClose,
-                      child: const Text("Ok"),
+                      child: Text(tr(context).commonOk),
                     )
                 ],
               ),

@@ -25,6 +25,7 @@ import 'package:dr/data.dart';
 import 'package:dr/ui/animated_linear_progress_indicator.dart';
 import 'package:dr/ui/last_fetched_overlay.dart';
 import 'package:dr/ui/no_internet.dart';
+import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:responsive_scaffold/responsive_scaffold.dart';
 
@@ -44,7 +45,7 @@ class GradesPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: ResponsiveAppBar(
-        title: const Text("Bewertungen"),
+        title: Text(tr(context).gradesTitle),
         actions: <Widget>[
           DropdownButtonHideUnderline(
             child: DropdownButton<Semester>(
@@ -53,9 +54,7 @@ class GradesPage extends StatelessWidget {
                   .map(
                     (s) => DropdownMenuItem(
                       value: s,
-                      child: Text(
-                        s.name,
-                      ),
+                      child: Text(semesterName(context, s)),
                     ),
                   )
                   .toList(),
@@ -94,8 +93,8 @@ class GradesPage extends StatelessWidget {
                                 children: [
                                   Text(
                                     vm.gradingMode == GradingMode.stars
-                                        ? "Sternedurchschnitt"
-                                        : "Notendurchschnitt",
+                                        ? tr(context).gradesAverageStars
+                                        : tr(context).gradesAverageNumeric,
                                   ),
                                   IconButton(
                                     icon: const Icon(Icons.settings),

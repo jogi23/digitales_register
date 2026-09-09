@@ -22,6 +22,7 @@ import 'package:dr/data.dart';
 import 'package:dr/providers/grades_provider.dart';
 import 'package:dr/ui/dialog.dart';
 import 'package:dr/util.dart';
+import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -150,7 +151,7 @@ class _GradeCalculatorState extends State<GradeCalculator> {
         int? weight;
         return StatefulBuilder(
           builder: (context, setState) => InfoDialog(
-            title: const Text("Neue Note erstellen"),
+            title: Text(tr(context).calcNewGrade),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -180,8 +181,8 @@ class _GradeCalculatorState extends State<GradeCalculator> {
                 onPressed: () {
                   Navigator.pop(context);
                 },
-                child: const Text(
-                  "Abbrechen",
+                child: Text(
+                  tr(context).commonCancel,
                 ),
               ),
               ElevatedButton(
@@ -190,8 +191,8 @@ class _GradeCalculatorState extends State<GradeCalculator> {
                         Navigator.pop(context, (grade!, weight!));
                       }
                     : null,
-                child: const Text(
-                  "Hinzufügen",
+                child: Text(
+                  tr(context).commonAdd,
                 ),
               ),
             ],
@@ -244,7 +245,7 @@ class _GradeCalculatorState extends State<GradeCalculator> {
     final showGreeting = grades.isEmpty;
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Notenrechner"),
+        title: Text(tr(context).gradesCalculator),
       ),
       body: AnimatedCrossFade(
         firstChild: Greeting(
@@ -264,7 +265,7 @@ class _GradeCalculatorState extends State<GradeCalculator> {
           ? null
           : FloatingActionButton.extended(
               onPressed: addGrade,
-              label: const Text("Note hinzufügen"),
+              label: Text(tr(context).calcAddGrade),
               icon: const Icon(Icons.add),
             ),
     );
@@ -289,7 +290,7 @@ class GradesList extends StatelessWidget {
         Material(
           elevation: 2,
           child: ListTile(
-            title: const Text("Durchschnitt"),
+            title: Text(tr(context).calcAverage),
             subtitle:
                 Text(grades.length == 1 ? "1 Note" : "${grades.length} Noten"),
             trailing: Text(_calculateAverage(grades)),
@@ -408,7 +409,7 @@ class Greeting extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.all(32),
           child: Text(
-            "Um zu beginnen, importiere entweder bestehende Noten aus einem Fach\noder füge eine erste Note hinzu.",
+            tr(context).calcStart,
             style: Theme.of(context).textTheme.titleLarge,
             textAlign: TextAlign.center,
           ),
@@ -418,12 +419,12 @@ class Greeting extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             child: ElevatedButton(
               onPressed: import,
-              child: const Row(
+              child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(Icons.save_alt),
                   SizedBox(width: 8),
-                  Text("Noten importieren"),
+                  Text(tr(context).calcImportGrades),
                 ],
               ),
             ),
@@ -434,12 +435,12 @@ class Greeting extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             child: ElevatedButton(
               onPressed: add,
-              child: const Row(
+              child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(Icons.add),
                   SizedBox(width: 8),
-                  Text("Note hinzufügen"),
+                  Text(tr(context).calcAddGrade),
                 ],
               ),
             ),
@@ -497,7 +498,7 @@ class _ImportGradesState extends State<_ImportGrades> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Noten importieren"),
+        title: Text(tr(context).calcImportGrades),
       ),
       body: SafeArea(
         top: false,
@@ -514,7 +515,7 @@ class _ImportGradesState extends State<_ImportGrades> {
                 ),
             ],
             value: selectedSubject,
-            hint: const Text("Fach auswählen"),
+            hint: Text(tr(context).calcPickSubject),
             onChanged: (subject) {
               setState(() {
                 selectedSubject = subject;
@@ -526,7 +527,7 @@ class _ImportGradesState extends State<_ImportGrades> {
             height: 16,
           ),
           RadioListTile<Semester>(
-            title: const Text("Erstes Semester"),
+            title: Text(tr(context).calcFirstSemester),
             value: Semester.first,
             groupValue: selectedSemester,
             onChanged: (value) {
@@ -537,7 +538,7 @@ class _ImportGradesState extends State<_ImportGrades> {
             },
           ),
           RadioListTile<Semester>(
-            title: const Text("Zweites Semester"),
+            title: Text(tr(context).calcSecondSemester),
             value: Semester.second,
             groupValue: selectedSemester,
             onChanged: (value) {
@@ -548,7 +549,7 @@ class _ImportGradesState extends State<_ImportGrades> {
             },
           ),
           RadioListTile<Semester>(
-            title: const Text("Beide Semester"),
+            title: Text(tr(context).calcBothSemesters),
             value: Semester.all,
             groupValue: selectedSemester,
             onChanged: (value) {
@@ -570,16 +571,16 @@ class _ImportGradesState extends State<_ImportGrades> {
                       Navigator.pop(context, grades);
                     }
                   : null,
-              child: const Text("Importieren"),
+              child: Text(tr(context).calcImport),
             ),
           ),
           if (selectedSemester != null &&
               selectedSubject != null &&
               grades!.isEmpty)
-            const Padding(
+            Padding(
               padding: EdgeInsets.all(8.0),
               child: Text(
-                "Für dieses Fach sind in diesem Zeitraum keine Noten verfügbar",
+                tr(context).calcNoGrades,
                 style: TextStyle(color: Colors.red),
               ),
             ),

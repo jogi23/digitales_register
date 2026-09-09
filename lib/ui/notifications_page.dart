@@ -22,6 +22,7 @@ import 'package:dr/main.dart';
 import 'package:dr/ui/last_fetched_overlay.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
+import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart' hide Notification;
 import 'package:intl/intl.dart';
 
@@ -48,7 +49,7 @@ class NotificationPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Benachrichtigungen"),
+        title: Text(tr(context).notificationsTitle),
       ),
       body: LastFetchedOverlay(
         lastFetched: lastFetched,
@@ -58,7 +59,7 @@ class NotificationPage extends StatelessWidget {
           child: notifications.isEmpty
               ? Center(
                   child: Text(
-                    "Keine Benachrichtigungen",
+                    tr(context).notificationsEmpty,
                     style: Theme.of(context).textTheme.headlineMedium,
                     textAlign: TextAlign.center,
                   ),
@@ -75,10 +76,10 @@ class NotificationPage extends StatelessWidget {
                         alignment: Alignment.centerRight,
                         child: TextButton(
                           onPressed: noInternet ? null : deleteAllNotifications,
-                          child: const Row(
+                          child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text("Alle gelesen"),
+                              Text(tr(context).notificationsAllRead),
                               SizedBox(width: 8),
                               Icon(Icons.done_all),
                             ],
@@ -172,19 +173,19 @@ class NotificationWidget extends StatelessWidget {
               if (notification.type == "message")
                 IconButton(
                   icon: const Icon(Icons.open_in_new),
-                  tooltip: "Mitteilung öffnen",
+                  tooltip: tr(context).notificationsOpenMessage,
                   onPressed: () => goToMessage(notification.objectId!),
                 )
               else if (notification.objectId != null && goToGrade != null)
                 IconButton(
                   icon: const Icon(Icons.open_in_new),
-                  tooltip: "Bewertung öffnen",
+                  tooltip: tr(context).notificationsOpenGrade,
                   onPressed: () => goToGrade!(notification),
                 )
               else
                 IconButton(
                   icon: const Icon(Icons.done),
-                  tooltip: "Gelesen",
+                  tooltip: tr(context).notificationsRead,
                   onPressed: noInternet!
                       ? null
                       : () async {

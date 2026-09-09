@@ -15,6 +15,8 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'package:dr/l10n/l10n.dart';
+import 'package:flutter/widgets.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -31,14 +33,11 @@ Uri get playStoreAppUri => Uri.parse("market://details?id=$playStorePackage");
 Uri get playStoreWebUri => Uri.parse(
     "https://play.google.com/store/apps/details?id=$playStorePackage");
 
-/// What gets sent when someone shares the app.
+/// What gets sent when someone shares the app, in the reader's language.
 ///
 /// Short enough for a chat, and it names a reason to look rather than only
 /// describing what the app is.
-String get invitationText => """
-Kennst du schon die App fürs Digitale Register? Hausaufgaben, Noten und Mitteilungen auf einen Blick — ohne jedes Mal im Browser einzuloggen. Spart mir täglich ein paar Minuten:
-
-$playStoreWebUri""";
+String invitationText(L l) => "${l.shareInvitation}\n\n$playStoreWebUri";
 
 /// Opens the store listing so the app can be rated.
 ///
@@ -55,6 +54,7 @@ Future<bool> openPlayStoreListing() async {
 ///
 /// The system sheet rather than a WhatsApp deep link: WhatsApp sits on top of
 /// it anyway, and this keeps working when it is not installed.
-Future<void> shareApp() async {
-  await Share.share(invitationText, subject: "Digitales Register als App");
+Future<void> shareApp(BuildContext context) async {
+  final l = tr(context);
+  await Share.share(invitationText(l), subject: l.shareSubject);
 }

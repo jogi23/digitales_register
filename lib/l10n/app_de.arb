@@ -1,0 +1,417 @@
+{
+  "@@locale": "de",
+  "appTitle": "DigiReg ST",
+  "@appTitle": {
+    "description": "Name der App, wie er im Umschalter erscheint"
+  },
+  "menuExpand": "Ausklappen",
+  "menuCollapse": "Einklappen",
+  "menuHomework": "Merkheft",
+  "menuAbsences": "Absenzen",
+  "menuCalendar": "Kalender",
+  "menuGrades": "Bewertungen",
+  "menuMessages": "Mitteilungen",
+  "menuCertificate": "Zeugnis",
+  "menuSettings": "Einstellungen",
+  "menuHelp": "Hilfe und Feedback",
+  "menuRate": "Bei Google Play bewerten",
+  "menuAbout": "Über diese App",
+  "menuLogout": "Abmelden",
+  "noConnection": "Keine Verbindung",
+  "gradesAverageStars": "Sternedurchschnitt",
+  "gradesAverageNumeric": "Notendurchschnitt",
+  "gradesChartTitle": "Notendiagramm",
+  "gradesChartLegend": "Legende",
+  "calendarDetailTitle": "Detailansicht",
+  "calendarNoSchool": "Keine Schule",
+  "changelogSinceLastUpdate": "Neu seit deinem letzten Update",
+  "changelogDismiss": "Ausblenden",
+  "changelogAll": "Alle Neuerungen",
+  "changelogTitle": "Neuerungen",
+  "changelogEmpty": "Keine Einträge",
+  "dashboardTitle": "Register",
+  "dashboardNoEntries": "Keine Einträge vorhanden",
+  "dashboardNewEntries": "Neue Einträge",
+  "dashboardPast": "Vergangenheit",
+  "dashboardFuture": "Zukunft",
+  "dashboardDeletedEntries": "Gelöschte Einträge",
+  "dialogNeverAsk": "Nie fragen",
+  "reminderDeleteTitle": "Erinnerung löschen?",
+  "commonCancel": "Abbrechen",
+  "commonDelete": "Löschen",
+  "homeworkVersions": "Versionen",
+  "gradeWithoutMark": "ohne Note",
+  "homeworkDeleted": "gelöscht",
+  "homeworkChanged": "geändert",
+  "attachment": "Anhang",
+  "commonOpen": "Öffnen",
+  "reminderTitle": "Erinnerung",
+  "commonSave": "Speichern",
+  "absencesTitle": "Absenzen",
+  "absencesEmpty": "Noch keine Absenzen",
+  "absencesPlanned": "Im Voraus eingetragene Absenzen",
+  "absencesStatistics": "Statistik",
+  "absencesForSchool": "Absenzen im Auftrag der Schule",
+  "absencesDelays": "Verspätungen",
+  "absencesJustified": "Entschuldigte Absenzen",
+  "absencesNotJustified": "Nicht entschuldigte Absenzen",
+  "absencesAbsence": "Abwesenheit",
+  "messagesTitle": "Mitteilungen",
+  "messagesMarkAllRead": "Alle als gelesen markieren",
+  "messagesEmpty": "Noch keine Mitteilungen",
+  "messagesSent": "Gesendet: ",
+  "messagesFrom": "Von: ",
+  "messagesTo": "An: ",
+  "messagesAttachments": "Anhänge:",
+  "messagesAttachment": "Anhang:",
+  "messageAlreadyConfirmed": "Bereits bestätigt.",
+  "messageSignaturePrompt": "Bitte bestätigen Sie mit Ihrem Vor- und Nachnamen",
+  "messageDisagree": "Stimme nicht zu",
+  "messageAgree": "Stimme zu",
+  "messageConfirm": "Bestätigen",
+  "notificationsTitle": "Benachrichtigungen",
+  "notificationsEmpty": "Keine Benachrichtigungen",
+  "notificationsAllRead": "Alle gelesen",
+  "notificationsOpenMessage": "Mitteilung öffnen",
+  "notificationsOpenGrade": "Bewertung öffnen",
+  "notificationsRead": "Gelesen",
+  "gradesTitle": "Bewertungen",
+  "subjectEditNick": "Kürzel bearbeiten",
+  "subjectAppearanceTitle": "Fächer Kürzel und Farben",
+  "subjectNoSubjects": "Keine Fächer vorhanden",
+  "subjectNoNick": "Kein Kürzel",
+  "commonDone": "Fertig",
+  "colorPickTitle": "Farbe auswählen",
+  "colorPick": "Auswählen",
+  "gradesGroupByType": "Noten nach Art gruppieren",
+  "gradesShowCancelled": "Gelöschte Noten anzeigen",
+  "gradesExcludedHint": "* Du hast dieses Fach aus dem Notendurchschnitt ausgeschlossen",
+  "gradesCalculator": "Notenrechner",
+  "gradesCalculatorSubtitle": "Berechne den Durchschnitt von beliebigen Noten",
+  "countGrade": "Bewertung",
+  "countGrades": "Bewertungen",
+  "countCompetence": "Kompetenz",
+  "countCompetences": "Kompetenzen",
+  "countObservation": "Beobachtung",
+  "countObservations": "Beobachtungen",
+  "gradeDetailTitle": "Bewertung",
+  "gradeDetailGone": "Diese Bewertung ist nicht mehr verfügbar",
+  "gradeDetailComment": "Kommentar",
+  "gradeDetailCompetences": "Kompetenzen",
+  "gradeDetailEntered": "Eingetragen",
+  "gradeDetailCancelled": "Gelöscht",
+  "gradeDetailCancelledPlain": "Diese Bewertung wurde gelöscht.",
+  "calendarTitle": "Kalender",
+  "calendarCurrentWeek": "Aktuelle Woche",
+  "calendarPickDate": "Wähle ein Datum",
+  "teacher": "Lehrer*in",
+  "teachers": "Lehrer*innen",
+  "rooms": "Räume",
+  "loadingEllipsis": "Wird geladen …",
+  "noDataForPeriod": "Für diesen Zeitraum liegen keine Daten vor",
+  "pickDay": "Tag auswählen",
+  "previousMonth": "Voriger Monat",
+  "nextMonth": "Nächster Monat",
+  "weekdayMon": "Mo",
+  "weekdayTue": "Di",
+  "weekdayWed": "Mi",
+  "weekdayThu": "Do",
+  "weekdayFri": "Fr",
+  "weekdaySat": "Sa",
+  "weekdaySun": "So",
+  "filterGradesAndTests": "Noten & Tests",
+  "filterHomeworkAndReminders": "Hausaufgaben & Erinnerungen",
+  "filterObservations": "Beobachtungen",
+  "noDataForDay": "Für diesen Tag liegen keine Daten vor",
+  "previousWeek": "Vorige Woche",
+  "nextWeek": "Nächste Woche",
+  "calendarNoLessons": "Keine Stunden in dieser Woche",
+  "calendarFree": "Frei",
+  "settingsTitle": "Einstellungen",
+  "settingsShare": "App mit anderen Eltern/Mitschülern teilen",
+  "settingsShareSubtitle": "Einladung samt Link zum Play Store",
+  "settingsProfile": "Profil",
+  "settingsSectionLogin": "Anmeldung",
+  "settingsStayLoggedIn": "Angemeldet bleiben",
+  "settingsStayLoggedInSubtitle": "Deine Zugangsdaten werden lokal gespeichert",
+  "settingsSectionAppearance": "Aussehen",
+  "settingsThemeFollowDevice": "Geräte-Theme folgen",
+  "settingsThemeLight": "Hell",
+  "settingsThemeDark": "Dunkel",
+  "settingsSectionSubjects": "Fächer",
+  "settingsNicksAndColors": "Kürzel und Farben",
+  "settingsColorHomework": "Hausaufgaben mit diesen Farben färben",
+  "settingsColorLessons": "Stunden im Kalender mit diesen Farben färben",
+  "settingsShowTimes": "Uhrzeiten im Kalender anzeigen",
+  "settingsFrameTestsRed": "Tests immer rot umrahmen",
+  "settingsSectionHomework": "Merkheft",
+  "settingsViewList": "Als Liste anzeigen",
+  "settingsViewMonth": "Als Monatskalender anzeigen",
+  "settingsViewWeek": "Als Wochenplan anzeigen",
+  "settingsMarkNewEntries": "Neue oder geänderte Einträge markieren",
+  "settingsIgnoreDuplicates": "Doppelte Einträge ignorieren",
+  "settingsAskWhenDeleting": "Beim Löschen von Erinnerungen fragen",
+  "settingsSectionGrades": "Noten",
+  "settingsShowChart": "Noten in einem Diagramm darstellen",
+  "settingsStarColor": "Farbe der Sterne",
+  "settingsStarColorSubtitle": "Für Fächer, die mit Sternen bewertet werden",
+  "settingsStarColorDefault": "Standard",
+  "settingsExcludeSubjects": "Fächer aus dem Notendurchschnitt ausschließen",
+  "settingsNoSubjectExcluded": "Kein Fach ausgeschlossen",
+  "settingsSectionAdvanced": "Erweitert",
+  "settingsNetworkLog": "Netzwerkprotokoll",
+  "settingsDebugLog": "Debug-Log",
+  "settingsSource": "Zum Quellcode",
+  "settingsAddSubject": "Fach hinzufügen",
+  "loginOtherSchool": "Andere Schule",
+  "loginSchool": "Schule",
+  "loginSchoolNotFound": "Schule nicht gefunden",
+  "loginFeedback": "Feedback?",
+  "loginDemo": "Demo",
+  "loginForgotPassword": "Passwort vergessen",
+  "loginMustChangePassword": "Du musst dein Passwort ändern:",
+  "loginPasswordsDiffer": "Die neuen Passwörter stimmen nicht überein",
+  "loginOtherAccounts": "Andere Accounts",
+  "helpTitle": "Hilfe & Feedback",
+  "helpWriteEmail": "Email schreiben",
+  "helpFaq": "FAQ",
+  "helpSuggestFeature": "Feature/Idee vorschlagen",
+  "helpReportBug": "Bug/Fehler melden",
+  "profileSendEmails": "Emails für Benachrichtigungen senden",
+  "profileChangeEmail": "Email-Adresse ändern",
+  "profileChangePassword": "Passwort ändern",
+  "passResetSendRequest": "Anfrage zum Zurücksetzen senden",
+  "passResetTitle": "Passwort zurücksetzen",
+  "passResetNotMatchingYet": "Die Passwörter stimmen noch nicht überein",
+  "commonOk": "Ok",
+  "accountSheetClose": "Konto schließen",
+  "aboutClientFor": "Ein Client für das ",
+  "aboutDevelopedBy": "Entwickelt von ",
+  "aboutPrivacy": "Datenschutzerklärung",
+  "calcNewGrade": "Neue Note erstellen",
+  "commonAdd": "Hinzufügen",
+  "calcAddGrade": "Note hinzufügen",
+  "calcAverage": "Durchschnitt",
+  "calcStart": "Um zu beginnen, importiere entweder bestehende Noten aus einem Fach\noder füge eine erste Note hinzu.",
+  "calcImportGrades": "Noten importieren",
+  "calcPickSubject": "Fach auswählen",
+  "calcFirstSemester": "Erstes Semester",
+  "calcSecondSemester": "Zweites Semester",
+  "calcBothSemesters": "Beide Semester",
+  "calcImport": "Importieren",
+  "calcNoGrades": "Für dieses Fach sind in diesem Zeitraum keine Noten verfügbar",
+  "networkExportAll": "Alle Antworten exportieren",
+  "networkNothingToExport": "Nichts zu exportieren",
+  "networkExportDone": "Export abgeschlossen",
+  "networkPathCopied": "Pfad in die Zwischenablage kopiert",
+  "networkCopyPath": "Pfad kopieren",
+  "networkJsonCopied": "JSON in die Zwischenablage kopiert",
+  "networkCopyJson": "JSON kopieren",
+  "commonOkCaps": "OK",
+  "networkNothing": "Nichts vorhanden",
+  "networkParameters": "Parameter",
+  "networkResponse": "Antwort",
+  "networkCopied": "In die Zwischenablage kopiert",
+  "errorConnectionFailed": "Verbindung fehlgeschlagen",
+  "errorLoadingSavedData": "Fehler beim Laden der gespeicherten Daten",
+  "passwordChanged": "Passwort erfolgreich geändert",
+  "errorReinstall": "Bitte versuche, die App neu zu installieren.",
+  "errorReinstallPrefixed": "Fehler: Bitte versuche, die App neu zu installieren.",
+  "errorLinkNotOpened": "Dieser Link konnte nicht geöffnet werden",
+  "historyBefore": "Vor {time}",
+  "@historyBefore": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "historyOnBetween": "Am {day} zwischen {from} und {to}",
+  "@historyOnBetween": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "historyBetween": "Zwischen {from} und {to}",
+  "@historyBetween": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "historyDeleted": "{when} gelöscht.",
+  "@historyDeleted": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "historyAdded": "{when} eingetragen.",
+  "@historyAdded": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "historyRestored": "{when} wiederhergestellt.",
+  "@historyRestored": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "historyChanged": "{when} geändert.",
+  "@historyChanged": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "calendarWeekNumber": "Kalenderwoche {week}",
+  "@calendarWeekNumber": {
+    "placeholders": {
+      "week": {
+        "type": "int"
+      }
+    }
+  },
+  "subjectNickFor": "Kürzel für {subject}",
+  "@subjectNickFor": {
+    "placeholders": {
+      "subject": {
+        "type": "String"
+      }
+    }
+  },
+  "networkNoneOfType": "Keine {type}",
+  "@networkNoneOfType": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "networkExportSaved": "{count} Antworten gespeichert unter:\n\n{path}",
+  "@networkExportSaved": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "networkExportFailed": "Export fehlgeschlagen: {error}",
+  "@networkExportFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "messageParentOnly": "Diese Mitteilung kann nur von einem Erziehungsberechtigten bestätigt werden.",
+  "messageUnsupported": "Diese Mitteilung verlangt eine Bestätigung, die in der App noch nicht unterstützt wird. Bitte im Browser öffnen.",
+  "settingsLanguage": "Sprache",
+  "settingsLanguageDevice": "Gerätesprache",
+  "settingsShowAllSubjectsAverage": "Durchschnitt aller Fächer anzeigen",
+  "settingsShowSubjectAverage": "Durchschnitt je Fach anzeigen",
+  "settingsAccentColor": "Akzentfarbe",
+  "colorOrange": "Orange",
+  "colorRed": "Rot",
+  "colorPink": "Pink",
+  "colorPurple": "Lila",
+  "colorIndigo": "Indigo",
+  "colorBlue": "Blau",
+  "colorTeal": "Türkis",
+  "colorGreen": "Grün",
+  "colorBrown": "Braun",
+  "colorGrey": "Grau",
+  "accountConfirmAlias": "Alias bestätigen",
+  "accountEditAlias": "Alias bearbeiten",
+  "calendarLoadingEvents": "Lade Termine",
+  "dashboardScrollToToday": "Zum aktuellen Tag scrollen",
+  "dashboardMarkAllSeen": "Alle als gesehen markieren",
+  "debugLogEmpty": "Log ist leer",
+  "commonShare": "Teilen",
+  "debugLogCopied": "Daten in Zwischenablage kopiert",
+  "semesterFirst": "1. Semester",
+  "semesterSecond": "2. Semester",
+  "semesterBoth": "Beide Semester",
+  "passwordRules": "Das neue Passwort muss:\n- mindestens 10 Zeichen lang sein\n- mindestens einen Großbuchstaben enthalten\n- mindestens einen Kleinbuchstaben enthalten\n- mindestens eine Zahl enthalten\n- mindestens ein Sonderzeichen enthalten\n- nicht mit dem alten Passwort übereinstimmen",
+  "aboutFreeSoftware": "Dies ist freie Software, und du darfst sie unter bestimmten Bedingungen weitergeben.\nFür dieses Programm gibt es KEINERLEI GARANTIE.",
+  "aboutSeeLicence": "Einzelheiten stehen in der GNU General Public License.",
+  "shareInvitation": "Kennst du schon die App fürs Digitale Register? Hausaufgaben, Noten und Mitteilungen auf einen Blick — ohne jedes Mal im Browser einzuloggen:",
+  "shareSubject": "Digitales Register als App",
+  "absenceJustified": "Entschuldigt",
+  "absenceForSchool": "Im Auftrag der Schule (entschuldigt)",
+  "absenceNotJustified": "Nicht entschuldigt",
+  "absenceNotYetJustified": "Noch nicht entschuldigt",
+  "absenceEnteredAs": "Am {date} um {time} als „{name}“ eingetragen",
+  "absenceJustifiedAs": "Am {date} um {time} als „{name}“ entschuldigt",
+  "@absenceEnteredAs": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@absenceJustifiedAs": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "absenceHours": "{count} Schulstunden",
+  "absenceMinutes": "{count} Minuten",
+  "@absenceHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@absenceMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "accountAlias": "Alias",
+  "accountAliasHint": "Kurzname für dieses Konto",
+  "accountSetAlias": "Alias setzen",
+  "accountOthers": "Andere Konten",
+  "accountAdd": "Konto hinzufügen",
+  "accountSwitchDisabled": "Konto wechseln (Passwort-Speicherung deaktiviert)",
+  "colorAmber": "Gelb"
+}

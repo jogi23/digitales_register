@@ -23,6 +23,7 @@ import 'dart:io';
 
 import 'package:built_collection/built_collection.dart';
 import 'package:dio/dio.dart' as dio;
+import 'package:dr/l10n/l10n.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/main.dart' hide scaffoldMessengerKey, showSnackBar;
 import 'package:dr/providers/absences_provider.dart';
@@ -196,12 +197,12 @@ Future<void> _doLoad() async {
     login = json.decode(await secureStorage.read(key: "login") ?? "{}");
   } catch (e) {
     login = const <Never, Never>{};
-    showSnackBar("Fehler beim Laden der gespeicherten Daten");
+    showSnackBar(trGlobal.errorLoadingSavedData);
     log("Failed to load login credentials", error: e);
     try {
       await secureStorage.deleteAll();
     } catch (e) {
-      showSnackBar("Bitte versuche, die App neu zu installieren.");
+      showSnackBar(trGlobal.errorReinstall);
     }
   }
 
@@ -335,7 +336,7 @@ Future<String?> _readFromStorage(String key) async {
     try {
       await secureStorage.deleteAll();
     } catch (e) {
-      showSnackBar("Fehler: Bitte versuche, die App neu zu installieren.");
+      showSnackBar(trGlobal.errorReinstallPrefixed);
     }
     return null;
   }
@@ -396,7 +397,7 @@ Future<void> _doStart(Uri? uri) async {
               parameters["redirect"]!.replaceFirst("#", ""));
         }
       default:
-        showSnackBar("Dieser Link konnte nicht geöffnet werden");
+        showSnackBar(trGlobal.errorLinkNotOpened);
     }
     await redirectAfterLogin(uri.fragment);
   }
@@ -429,7 +430,7 @@ Future<void> redirectAfterLogin(String location) async {
         () => providerContainer.read(appRouterProvider).showMessages(),
       );
     default:
-      showSnackBar("Dieser Link konnte nicht geöffnet werden");
+      showSnackBar(trGlobal.errorLinkNotOpened);
   }
 }
 

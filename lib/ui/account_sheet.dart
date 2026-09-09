@@ -22,6 +22,7 @@ import 'package:dr/providers/config_provider.dart';
 import 'package:dr/providers/login_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/util.dart';
+import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -35,7 +36,7 @@ Future<void> showAccountSheet(BuildContext context) {
   return showGeneralDialog<void>(
     context: context,
     barrierDismissible: true,
-    barrierLabel: "Konto schließen",
+    barrierLabel: tr(context).accountSheetClose,
     barrierColor: Colors.black54,
     transitionDuration: const Duration(milliseconds: 250),
     pageBuilder: (_, __, ___) => const AccountSheet(),
@@ -237,9 +238,9 @@ class _AccountSheetState extends ConsumerState<AccountSheet> {
             child: TextField(
               controller: _aliasController,
               autofocus: true,
-              decoration: const InputDecoration(
-                labelText: 'Alias',
-                hintText: 'Kurzname für diesen Account',
+              decoration: InputDecoration(
+                labelText: tr(context).accountAlias,
+                hintText: tr(context).accountAliasHint,
                 border: OutlineInputBorder(),
                 isDense: true,
               ),
@@ -254,7 +255,7 @@ class _AccountSheetState extends ConsumerState<AccountSheet> {
               return IconButton.filled(
                 onPressed: () => _saveAlias(_aliasController.text),
                 icon: const Icon(Icons.check),
-                tooltip: 'Alias bestätigen',
+                tooltip: tr(context).accountConfirmAlias,
                 // Spelled out rather than left to the theme: the derived
                 // pairing left the check mark barely visible on the accent.
                 style: IconButton.styleFrom(
@@ -274,7 +275,7 @@ class _AccountSheetState extends ConsumerState<AccountSheet> {
       children: [
         Flexible(
           child: Text(
-            aliasText ?? 'Alias setzen',
+            aliasText ?? tr(context).accountSetAlias,
             textAlign: TextAlign.center,
             style: aliasText != null
                 ? Theme.of(context).textTheme.bodyLarge
@@ -289,7 +290,7 @@ class _AccountSheetState extends ConsumerState<AccountSheet> {
             setState(() => _editingAlias = true);
           },
           icon: const Icon(Icons.edit_outlined, size: 18),
-          tooltip: 'Alias bearbeiten',
+          tooltip: tr(context).accountEditAlias,
         ),
       ],
     );
@@ -304,7 +305,7 @@ class _AccountSheetState extends ConsumerState<AccountSheet> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Andere Konten',
+            tr(context).accountOthers,
             style: Theme.of(context).textTheme.labelLarge,
           ),
           const SizedBox(height: 8),
@@ -348,8 +349,8 @@ class _AccountSheetState extends ConsumerState<AccountSheet> {
           icon: const Icon(Icons.person_add_outlined),
           label: Text(
             canAddAccount
-                ? 'Konto hinzufügen'
-                : 'Konto wechseln (Passwort-Speicherung deaktiviert)',
+                ? tr(context).accountAdd
+                : tr(context).accountSwitchDisabled,
           ),
         ),
       );

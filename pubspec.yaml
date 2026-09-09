@@ -7,7 +7,7 @@ description: A new Flutter project.
 # Both the version and the builder number may be overridden in flutter
 # build by specifying --build-name and --build-number, respectively.
 # Read more about versioning at semver.org.
-version: 1.2.1+20
+version: 1.2.1+21
 
 publish_to: none
 
@@ -113,6 +113,8 @@ flutter_native_splash:
 # following page: https://www.dartlang.org/tools/pub/pubspec
 # The following section is specific to Flutter.
 flutter:
+  # Generates lib/l10n/app_localizations.dart from the ARB files.
+  generate: true
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.

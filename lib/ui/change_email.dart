@@ -16,6 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 
 class ChangeEmail extends StatefulWidget {
@@ -35,7 +36,7 @@ class _ChangeEmailState extends State<ChangeEmail> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Email-Adresse ändern"),
+        title: Text(tr(context).profileChangeEmail),
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -63,7 +64,7 @@ class _ChangeEmailState extends State<ChangeEmail> {
                   _passController.text,
                   _emailController.text,
                 ),
-                child: const Text("Speichern"),
+                child: Text(tr(context).commonSave),
               ),
             ],
           ),

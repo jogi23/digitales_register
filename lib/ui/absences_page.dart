@@ -23,6 +23,7 @@ import 'package:dr/data.dart';
 import 'package:dr/ui/absence.dart';
 import 'package:dr/ui/last_fetched_overlay.dart';
 import 'package:dr/ui/no_internet.dart';
+import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:responsive_scaffold/responsive_scaffold.dart';
 
@@ -38,8 +39,8 @@ class AbsencesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const ResponsiveAppBar(
-        title: Text("Absenzen"),
+      appBar: ResponsiveAppBar(
+        title: Text(tr(context).absencesTitle),
         actions: [AccountAvatarButton()],
       ),
       body: LastFetchedOverlay(
@@ -72,7 +73,7 @@ class AbsencesBody extends StatelessWidget {
         ? state.absences.isEmpty && state.futureAbsences.isEmpty
             ? Center(
                 child: Text(
-                  "Noch keine Absenzen",
+                  tr(context).absencesEmpty,
                   style: Theme.of(context).textTheme.headlineMedium,
                   textAlign: TextAlign.center,
                 ),
@@ -89,7 +90,7 @@ class AbsencesBody extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.all(8.0).copyWith(top: 16),
                     child: Text(
-                      "Im Voraus eingetragene Absenzen",
+                      tr(context).absencesPlanned,
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                   ),
@@ -102,7 +103,7 @@ class AbsencesBody extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.all(8.0).copyWith(top: 16),
                     child: Text(
-                      "Absenzen",
+                      tr(context).absencesTitle,
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                   ),
@@ -129,36 +130,36 @@ class AbsencesStatisticWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ExpansionTile(
-      title: const Text("Statistik"),
+      title: Text(tr(context).absencesStatistics),
       children: <Widget>[
         if (stat.counter != null)
           ListTile(
-            title: const Text("Absenzen"),
+            title: Text(tr(context).absencesTitle),
             trailing: Text(stat.counter.toString()),
           ),
         if (stat.counterForSchool != null)
           ListTile(
-            title: const Text("Absenzen im Auftrag der Schule"),
+            title: Text(tr(context).absencesForSchool),
             trailing: Text(stat.counterForSchool.toString()),
           ),
         if (stat.delayed != null)
           ListTile(
-            title: const Text("Verspätungen"),
+            title: Text(tr(context).absencesDelays),
             trailing: Text(stat.delayed.toString()),
           ),
         if (stat.justified != null)
           ListTile(
-            title: const Text("Entschuldigte Absenzen"),
+            title: Text(tr(context).absencesJustified),
             trailing: Text(stat.justified.toString()),
           ),
         if (stat.notJustified != null)
           ListTile(
-            title: const Text("Nicht entschuldigte Absenzen"),
+            title: Text(tr(context).absencesNotJustified),
             trailing: Text(stat.notJustified.toString()),
           ),
         if (stat.percentage != null)
           ListTile(
-            title: const Text("Abwesenheit"),
+            title: Text(tr(context).absencesAbsence),
             trailing: Text("${stat.percentage} %"),
           ),
       ],

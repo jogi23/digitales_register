@@ -21,6 +21,7 @@ import 'package:dr/data.dart';
 import 'package:dr/ui/animated_linear_progress_indicator.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
+import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -96,7 +97,7 @@ class CalendarCard extends StatelessWidget {
             // Content
             if (hour.teachers.isNotEmpty)
               _ContentItem(
-                title: hour.teachers.length == 1 ? "Lehrer*in" : "Lehrer*innen",
+                title: hour.teachers.length == 1 ? tr(context).teacher : tr(context).teachers,
                 content: hour.teachers
                     .map((t) => "${t.firstName} ${t.lastName}")
                     .join(", "),
@@ -104,7 +105,7 @@ class CalendarCard extends StatelessWidget {
               ),
             if (hour.rooms.isNotEmpty)
               _ContentItem(
-                title: "Räume",
+                title: tr(context).rooms,
                 content: hour.rooms.join(", "),
                 icon: Icons.meeting_room,
               ),
@@ -251,8 +252,8 @@ class _SubmissionWidget extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                "Anhang",
+              Text(
+                tr(context).attachment,
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               Text(
@@ -271,9 +272,9 @@ class _SubmissionWidget extends StatelessWidget {
                         : () {
                             onOpenFile(submission);
                           },
-                    child: const Align(
+                    child: Align(
                       alignment: Alignment.centerLeft,
-                      child: Text("Öffnen"),
+                      child: Text(tr(context).commonOpen),
                     ),
                   ),
                 ),

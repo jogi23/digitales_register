@@ -24,6 +24,7 @@ import 'package:dr/container/network_protocol_container.dart';
 import 'package:dr/main.dart';
 import 'package:dr/providers/network_protocol_provider.dart';
 import 'package:flutter/foundation.dart';
+import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -37,7 +38,7 @@ class NetworkProtocolPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Netzwerkprotokoll"),
+        title: Text(tr(context).settingsNetworkLog),
         actions: <Widget>[
           // Debug-only: lets developers capture all recorded responses to a
           // single JSON file for use as test fixtures / demo data. Tree-shaken
@@ -45,7 +46,7 @@ class NetworkProtocolPage extends ConsumerWidget {
           if (kDebugMode)
             IconButton(
               icon: const Icon(Icons.download),
-              tooltip: "Alle Antworten exportieren",
+              tooltip: tr(context).networkExportAll,
               onPressed: () =>
                   _exportProtocol(ref.read(networkProtocolProvider)),
             ),
@@ -61,7 +62,7 @@ class NetworkProtocolPage extends ConsumerWidget {
 /// into nested JSON when possible, so the file is directly usable as fixtures.
 Future<void> _exportProtocol(List<NetworkProtocolItem> items) async {
   if (items.isEmpty) {
-    showSnackBar("Nichts zu exportieren");
+    showSnackBar(trGlobal.networkNothingToExport);
     return;
   }
 
@@ -98,34 +99,34 @@ Future<void> _exportProtocol(List<NetworkProtocolItem> items) async {
       // ignore: use_build_context_synchronously
       context: navContext,
       builder: (context) => AlertDialog(
-        title: const Text("Export abgeschlossen"),
+        title: Text(tr(context).networkExportDone),
         content: SelectableText(
-          "${items.length} Antworten gespeichert unter:\n\n${file.path}",
+          tr(context).networkExportSaved(items.length, file.path),
         ),
         actions: <Widget>[
           TextButton(
             onPressed: () {
               Clipboard.setData(ClipboardData(text: file.path));
-              showSnackBar("Pfad in die Zwischenablage kopiert");
+              showSnackBar(tr(context).networkPathCopied);
             },
-            child: const Text("Pfad kopieren"),
+            child: Text(tr(context).networkCopyPath),
           ),
           TextButton(
             onPressed: () {
               Clipboard.setData(ClipboardData(text: jsonString));
-              showSnackBar("JSON in die Zwischenablage kopiert");
+              showSnackBar(tr(context).networkJsonCopied);
             },
-            child: const Text("JSON kopieren"),
+            child: Text(tr(context).networkCopyJson),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text("OK"),
+            child: Text(tr(context).commonOkCaps),
           ),
         ],
       ),
     );
   } catch (e) {
-    showSnackBar("Export fehlgeschlagen: $e");
+    showSnackBar(trGlobal.networkExportFailed(e.toString()));
   }
 }
 

@@ -31,7 +31,9 @@ import 'package:dr/desktop.dart';
 import 'package:dr/middleware/middleware.dart';
 import 'package:dr/providers/account_profile_provider.dart';
 import 'package:dr/providers/login_provider.dart';
+import 'package:dr/l10n/l10n.dart';
 import 'package:dr/providers/provider_container.dart';
+import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/ui/grade_calculator.dart';
 import 'package:dr/ui/grade_detail_page.dart';
 import 'package:dr/ui/grades_chart_page.dart';
@@ -119,11 +121,13 @@ Future<void> _runApp() async {
   );
 }
 
-class RegisterApp extends StatelessWidget {
+class RegisterApp extends ConsumerWidget {
   const RegisterApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Null follows the device, which is what an untouched install does.
+    final language = ref.watch(settingsProvider).language;
     return Listener(
       onPointerDown: (_) => wrapper.interaction(),
       child: DynamicTheme(
@@ -135,14 +139,17 @@ class RegisterApp extends StatelessWidget {
           );
         },
         themedWidgetBuilder: (context, theme) => MaterialApp(
+          onGenerateTitle: (context) => tr(context).appTitle,
           localizationsDelegates: const [
+            L.delegate,
             GlobalCupertinoLocalizations.delegate,
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
           ],
-          supportedLocales: const [
-            Locale("de"),
+          supportedLocales: [
+            for (final code in supportedLanguages) Locale(code),
           ],
+          locale: language == null ? null : Locale(language),
           navigatorKey: navigatorKey,
           scaffoldMessengerKey: scaffoldMessengerKey,
           initialRoute: "/",
@@ -223,9 +230,14 @@ class RegisterApp extends StatelessWidget {
                 throw Exception("Unknown Route ${pathElements[1]}");
             }
           },
-          builder: (context, child) => Stack(
-            children: [child!, const Positioned.fill(child: SplashOverlay())],
-          ),
+          builder: (context, child) {
+            // Middleware and providers put messages on the screen without a
+            // context of their own; this keeps their translations current.
+            rememberTranslations(context);
+            return Stack(
+              children: [child!, const Positioned.fill(child: SplashOverlay())],
+            );
+          },
           theme: theme,
           debugShowCheckedModeBanner: false,
         ),

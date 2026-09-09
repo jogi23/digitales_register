@@ -16,6 +16,7 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:dr/services/changelog.dart';
+import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -36,7 +37,7 @@ class _ChangelogPageState extends State<ChangelogPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Neuerungen")),
+      appBar: AppBar(title: Text(tr(context).changelogTitle)),
       body: FutureBuilder<List<ChangelogEntry>>(
         future: _entries,
         builder: (context, snapshot) {
@@ -45,7 +46,7 @@ class _ChangelogPageState extends State<ChangelogPage> {
             return const Center(child: CircularProgressIndicator());
           }
           if (entries.isEmpty) {
-            return const Center(child: Text("Keine Einträge"));
+            return Center(child: Text(tr(context).changelogEmpty));
           }
           return ListView.builder(
             padding: EdgeInsets.only(
@@ -67,12 +68,12 @@ class _Release extends StatelessWidget {
   const _Release({required this.entry});
 
   /// "11. Juli 2026", or nothing when the file carries no date.
-  String? get _date {
+  String? date(BuildContext context) {
     final date = entry.date;
     if (date == null) return null;
     final parsed = DateTime.tryParse(date);
     if (parsed == null) return null;
-    return DateFormat.yMMMMd("de").format(parsed);
+    return DateFormat.yMMMMd(tr(context).localeName).format(parsed);
   }
 
   /// The four headings the notes are written under. Anything else — a
@@ -88,7 +89,7 @@ class _Release extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final date = _date;
+    final date = this.date(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
       child: Column(

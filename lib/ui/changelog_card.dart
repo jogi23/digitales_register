@@ -17,6 +17,7 @@
 
 import 'package:dr/services/changelog.dart';
 import 'package:dr/ui/changelog_page.dart';
+import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 
 /// Sits above the dashboard after an update and says what is new.
@@ -47,7 +48,7 @@ class _ChangelogCardState extends State<ChangelogCard> {
   /// inside.
   String _title(List<ChangelogEntry> entries) => entries.length == 1
       ? "Neu in Version ${entries.first.version}"
-      : "Neu seit deinem letzten Update";
+      : tr(context).changelogSinceLastUpdate;
 
   @override
   Widget build(BuildContext context) {
@@ -142,7 +143,7 @@ class _Card extends StatelessWidget {
                   icon: const Icon(Icons.close),
                   iconSize: 18,
                   color: scheme.onPrimaryContainer,
-                  tooltip: "Ausblenden",
+                  tooltip: tr(context).changelogDismiss,
                   visualDensity: VisualDensity.compact,
                 ),
               ],
@@ -161,10 +162,10 @@ class _Card extends StatelessWidget {
                   minimumSize: const Size(0, 32),
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text("Alle Neuerungen"),
+                    Text(tr(context).changelogAll),
                     Icon(Icons.chevron_right, size: 18),
                   ],
                 ),
