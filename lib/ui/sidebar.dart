@@ -165,6 +165,11 @@ class Sidebar extends StatelessWidget {
           onPressed: () => showAppAboutDialog(context),
         ),
         CollapsibleItem(
+          text: tr(context).menuShare,
+          icon: Icons.share,
+          onPressed: () => shareApp(context),
+        ),
+        CollapsibleItem(
           hasDivider: true,
           text: tr(context).menuLogout,
           icon: Icons.logout,

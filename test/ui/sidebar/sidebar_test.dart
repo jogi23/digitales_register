@@ -95,6 +95,27 @@ void main() {
     expect(find.text('Abmelden'), findsOneWidget);
   });
 
+  testWidgets('offers sharing between the about entry and signing out',
+      (tester) async {
+    // Der Platz ist gewollt: Teilen gehört zu den Punkten, die nichts mit
+    // dem eigenen Konto zu tun haben, und Abmelden bleibt der letzte.
+    await tester.pumpWidget(_build());
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text('Abmelden'),
+      500,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('App teilen'), findsOneWidget);
+    final about = tester.getCenter(find.text('Über diese App')).dy;
+    final share = tester.getCenter(find.text('App teilen')).dy;
+    final logout = tester.getCenter(find.text('Abmelden')).dy;
+    expect(share, greaterThan(about));
+    expect(share, lessThan(logout));
+  });
+
   group('callbacks', () {
     testWidgets('goHome fires', (tester) async {
       var called = false;
