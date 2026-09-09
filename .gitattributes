@@ -1,0 +1,17 @@
+# Zeilenenden
+#
+# Ohne diese Datei hing das Zeilenende daran, welcher Editor eine Datei
+# zuletzt angefasst hat: 121 Dart-Dateien lagen mit CRLF im Repository, 70 mit
+# LF und eine gemischt. Eine Änderung von drei Zeilen erschien dann als
+# Änderung der ganzen Datei, und `git blame` verlor ihre Geschichte.
+#
+# Git speichert Text ab jetzt einheitlich mit LF und legt ihn auch so im
+# Arbeitsordner ab. Windows braucht dafür nichts: Dart, Gradle, Xcode, MSVC
+# und jeder heute übliche Editor kommen mit LF zurecht.
+* text=auto eol=lf
+
+# Ausdrücklich binär, damit die Inhaltserkennung nicht danebenliegen kann.
+*.png binary
+*.gif binary
+*.ico binary
+*.pdf binary
