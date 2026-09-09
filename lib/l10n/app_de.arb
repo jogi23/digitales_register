@@ -199,5 +199,135 @@
   "calcSecondSemester": "Zweites Semester",
   "calcBothSemesters": "Beide Semester",
   "calcImport": "Importieren",
-  "calcNoGrades": "Für dieses Fach sind in diesem Zeitraum keine Noten verfügbar"
+  "calcNoGrades": "Für dieses Fach sind in diesem Zeitraum keine Noten verfügbar",
+  "networkExportAll": "Alle Antworten exportieren",
+  "networkNothingToExport": "Nichts zu exportieren",
+  "networkExportDone": "Export abgeschlossen",
+  "networkPathCopied": "Pfad in die Zwischenablage kopiert",
+  "networkCopyPath": "Pfad kopieren",
+  "networkJsonCopied": "JSON in die Zwischenablage kopiert",
+  "networkCopyJson": "JSON kopieren",
+  "commonOkCaps": "OK",
+  "networkNothing": "Nichts vorhanden",
+  "networkParameters": "Parameter",
+  "networkResponse": "Antwort",
+  "networkCopied": "In die Zwischenablage kopiert",
+  "errorConnectionFailed": "Verbindung fehlgeschlagen",
+  "errorLoadingSavedData": "Fehler beim Laden der gespeicherten Daten",
+  "passwordChanged": "Passwort erfolgreich geändert",
+  "errorReinstall": "Bitte versuche, die App neu zu installieren.",
+  "errorReinstallPrefixed": "Fehler: Bitte versuche, die App neu zu installieren.",
+  "errorLinkNotOpened": "Dieser Link konnte nicht geöffnet werden",
+  "historyBefore": "Vor {time}",
+  "@historyBefore": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "historyOnBetween": "Am {day} zwischen {from} und {to}",
+  "@historyOnBetween": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "historyBetween": "Zwischen {from} und {to}",
+  "@historyBetween": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "historyDeleted": "{when} gelöscht.",
+  "@historyDeleted": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "historyAdded": "{when} eingetragen.",
+  "@historyAdded": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "historyRestored": "{when} wiederhergestellt.",
+  "@historyRestored": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "historyChanged": "{when} geändert.",
+  "@historyChanged": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "calendarWeekNumber": "Kalenderwoche {week}",
+  "@calendarWeekNumber": {
+    "placeholders": {
+      "week": {
+        "type": "int"
+      }
+    }
+  },
+  "subjectNickFor": "Kürzel für {subject}",
+  "@subjectNickFor": {
+    "placeholders": {
+      "subject": {
+        "type": "String"
+      }
+    }
+  },
+  "networkNoneOfType": "Keine {type}",
+  "@networkNoneOfType": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "networkExportSaved": "{count} Antworten gespeichert unter:\n\n{path}",
+  "@networkExportSaved": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "networkExportFailed": "Export fehlgeschlagen: {error}",
+  "@networkExportFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "messageParentOnly": "Diese Mitteilung kann nur von einem Erziehungsberechtigten bestätigt werden.",
+  "messageUnsupported": "Diese Mitteilung verlangt eine Bestätigung, die in der App noch nicht unterstützt wird. Bitte im Browser öffnen.",
+  "settingsLanguage": "Sprache",
+  "settingsLanguageDevice": "Gerätesprache"
 }

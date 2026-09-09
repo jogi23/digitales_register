@@ -58,6 +58,7 @@ class SettingsPageWidget extends StatefulWidget {
   final void Function(DashboardViewMode mode) onSetDashboardViewMode;
   final OnSettingChanged<bool> onSetDashboardColorTestsInRed;
   final OnSettingChanged<String> onSetStarColor;
+  final OnSettingChanged<String?> onSetLanguage;
   final OnSettingChanged<List<String>> onSetIgnoreForGradesAverage;
   final VoidCallback onShowProfile;
   final SettingsViewModel vm;
@@ -82,6 +83,7 @@ class SettingsPageWidget extends StatefulWidget {
     required this.onSetDashboardViewMode,
     required this.onSetDashboardColorTestsInRed,
     required this.onSetStarColor,
+    required this.onSetLanguage,
   });
 
   @override
@@ -205,6 +207,29 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
               title: Text(
                 tr(context).settingsSectionAppearance,
                 style: Theme.of(context).textTheme.headlineSmall,
+              ),
+            ),
+          ),
+          ListTile(
+            title: Text(tr(context).settingsLanguage),
+            trailing: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                // The empty string stands for "follow the device": a
+                // DropdownButton cannot tell a null value from no value.
+                value: widget.vm.language ?? '',
+                onChanged: (value) =>
+                    widget.onSetLanguage(value == '' ? null : value),
+                items: [
+                  DropdownMenuItem(
+                    value: '',
+                    child: Text(tr(context).settingsLanguageDevice),
+                  ),
+                  for (final code in supportedLanguages)
+                    DropdownMenuItem(
+                      value: code,
+                      child: Text(languageNames[code]!),
+                    ),
+                ],
               ),
             ),
           ),

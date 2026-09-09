@@ -1,5 +1,333 @@
 {
   "@@locale": "en",
   "appTitle": "DigiReg ST",
-  "@appTitle": { "description": "Name der App, wie er im Umschalter erscheint" }
+  "@appTitle": {
+    "description": "Name der App, wie er im Umschalter erscheint"
+  },
+  "menuExpand": "Expand",
+  "menuCollapse": "Collapse",
+  "menuHomework": "Homework",
+  "menuAbsences": "Absences",
+  "menuCalendar": "Calendar",
+  "menuGrades": "Grades",
+  "menuMessages": "Messages",
+  "menuCertificate": "Report card",
+  "menuSettings": "Settings",
+  "menuHelp": "Help and feedback",
+  "menuRate": "Rate on Google Play",
+  "menuAbout": "About this app",
+  "menuLogout": "Sign out",
+  "noConnection": "No connection",
+  "gradesAverageStars": "Star average",
+  "gradesAverageNumeric": "Grade average",
+  "gradesChartTitle": "Grade chart",
+  "gradesChartLegend": "Legend",
+  "calendarDetailTitle": "Details",
+  "calendarNoSchool": "No school",
+  "changelogSinceLastUpdate": "New since your last update",
+  "changelogDismiss": "Hide",
+  "changelogAll": "All changes",
+  "changelogTitle": "What's new",
+  "changelogEmpty": "Nothing here",
+  "dashboardTitle": "Register",
+  "dashboardNoEntries": "Nothing here",
+  "dashboardNewEntries": "New entries",
+  "dashboardPast": "Past",
+  "dashboardFuture": "Future",
+  "dashboardDeletedEntries": "Deleted entries",
+  "dialogNeverAsk": "Never ask",
+  "reminderDeleteTitle": "Delete the reminder?",
+  "commonCancel": "Cancel",
+  "commonDelete": "Delete",
+  "homeworkVersions": "Versions",
+  "gradeWithoutMark": "no grade",
+  "homeworkDeleted": "deleted",
+  "homeworkChanged": "changed",
+  "attachment": "Attachment",
+  "commonOpen": "Open",
+  "reminderTitle": "Reminder",
+  "commonSave": "Save",
+  "absencesTitle": "Absences",
+  "absencesEmpty": "No absences yet",
+  "absencesPlanned": "Absences entered in advance",
+  "absencesStatistics": "Statistics",
+  "absencesForSchool": "Absences on behalf of the school",
+  "absencesDelays": "Late arrivals",
+  "absencesJustified": "Justified absences",
+  "absencesNotJustified": "Unjustified absences",
+  "absencesAbsence": "Absence",
+  "messagesTitle": "Messages",
+  "messagesMarkAllRead": "Mark all as read",
+  "messagesEmpty": "No messages yet",
+  "messagesSent": "Sent: ",
+  "messagesFrom": "From: ",
+  "messagesTo": "To: ",
+  "messagesAttachments": "Attachments:",
+  "messagesAttachment": "Attachment:",
+  "messageAlreadyConfirmed": "Already confirmed.",
+  "messageSignaturePrompt": "Please confirm with your first and last name",
+  "messageDisagree": "I do not agree",
+  "messageAgree": "I agree",
+  "messageConfirm": "Confirm",
+  "notificationsTitle": "Notifications",
+  "notificationsEmpty": "No notifications",
+  "notificationsAllRead": "All read",
+  "notificationsOpenMessage": "Open the message",
+  "notificationsOpenGrade": "Open the grade",
+  "notificationsRead": "Read",
+  "gradesTitle": "Grades",
+  "subjectEditNick": "Edit the short name",
+  "subjectAppearanceTitle": "Subject short names and colours",
+  "subjectNoSubjects": "No subjects yet",
+  "subjectNoNick": "No short name",
+  "commonDone": "Done",
+  "colorPickTitle": "Pick a colour",
+  "colorPick": "Pick",
+  "gradesGroupByType": "Group grades by type",
+  "gradesShowCancelled": "Show deleted grades",
+  "gradesExcludedHint": "* You left this subject out of the grade average",
+  "gradesCalculator": "Grade calculator",
+  "gradesCalculatorSubtitle": "Work out the average of any grades",
+  "countGrade": "grade",
+  "countGrades": "grades",
+  "countCompetence": "competence",
+  "countCompetences": "competences",
+  "countObservation": "observation",
+  "countObservations": "observations",
+  "gradeDetailTitle": "Grade",
+  "gradeDetailGone": "This grade is no longer available",
+  "gradeDetailComment": "Comment",
+  "gradeDetailCompetences": "Competences",
+  "gradeDetailEntered": "Entered",
+  "gradeDetailCancelled": "Deleted",
+  "gradeDetailCancelledPlain": "This grade was deleted.",
+  "calendarTitle": "Calendar",
+  "calendarCurrentWeek": "This week",
+  "calendarPickDate": "Pick a date",
+  "teacher": "Teacher",
+  "teachers": "Teachers",
+  "rooms": "Rooms",
+  "loadingEllipsis": "Loading …",
+  "noDataForPeriod": "There is no data for this period",
+  "pickDay": "Pick a day",
+  "previousMonth": "Previous month",
+  "nextMonth": "Next month",
+  "weekdayMon": "Mon",
+  "weekdayTue": "Tue",
+  "weekdayWed": "Wed",
+  "weekdayThu": "Thu",
+  "weekdayFri": "Fri",
+  "weekdaySat": "Sat",
+  "weekdaySun": "Sun",
+  "filterGradesAndTests": "Grades & tests",
+  "filterHomeworkAndReminders": "Homework & reminders",
+  "filterObservations": "Observations",
+  "noDataForDay": "There is no data for this day",
+  "previousWeek": "Previous week",
+  "nextWeek": "Next week",
+  "calendarNoLessons": "No lessons this week",
+  "calendarFree": "Free",
+  "settingsTitle": "Settings",
+  "settingsShare": "Share the app with other parents or classmates",
+  "settingsShareSubtitle": "An invitation with the Play Store link",
+  "settingsProfile": "Profile",
+  "settingsSectionLogin": "Sign-in",
+  "settingsStayLoggedIn": "Stay signed in",
+  "settingsStayLoggedInSubtitle": "Your credentials are stored on this device",
+  "settingsSectionAppearance": "Appearance",
+  "settingsThemeFollowDevice": "Follow the device theme",
+  "settingsThemeLight": "Light",
+  "settingsThemeDark": "Dark",
+  "settingsSectionSubjects": "Subjects",
+  "settingsNicksAndColors": "Short names and colours",
+  "settingsColorHomework": "Colour homework with these colours",
+  "settingsColorLessons": "Colour calendar lessons with these colours",
+  "settingsShowTimes": "Show times in the calendar",
+  "settingsFrameTestsRed": "Always frame tests in red",
+  "settingsSectionHomework": "Homework",
+  "settingsViewList": "Show as a list",
+  "settingsViewMonth": "Show as a month calendar",
+  "settingsViewWeek": "Show as a weekly timetable",
+  "settingsMarkNewEntries": "Mark new or changed entries",
+  "settingsIgnoreDuplicates": "Ignore duplicate entries",
+  "settingsAskWhenDeleting": "Ask before deleting a reminder",
+  "settingsSectionGrades": "Grades",
+  "settingsShowChart": "Show grades in a chart",
+  "settingsStarColor": "Star colour",
+  "settingsStarColorSubtitle": "For subjects graded with stars",
+  "settingsStarColorDefault": "Default",
+  "settingsExcludeSubjects": "Leave subjects out of the grade average",
+  "settingsNoSubjectExcluded": "No subject left out",
+  "settingsSectionAdvanced": "Advanced",
+  "settingsNetworkLog": "Network log",
+  "settingsDebugLog": "Debug log",
+  "settingsSource": "Source code",
+  "settingsAddSubject": "Add a subject",
+  "loginOtherSchool": "Other school",
+  "loginSchool": "School",
+  "loginSchoolNotFound": "School not found",
+  "loginFeedback": "Feedback?",
+  "loginDemo": "Demo",
+  "loginForgotPassword": "Forgot your password",
+  "loginMustChangePassword": "You have to change your password:",
+  "loginPasswordsDiffer": "The new passwords do not match",
+  "loginOtherAccounts": "Other accounts",
+  "helpTitle": "Help & feedback",
+  "helpWriteEmail": "Write an email",
+  "helpFaq": "FAQ",
+  "helpSuggestFeature": "Suggest a feature or an idea",
+  "helpReportBug": "Report a bug",
+  "profileSendEmails": "Send emails for notifications",
+  "profileChangeEmail": "Change the email address",
+  "profileChangePassword": "Change the password",
+  "passResetSendRequest": "Send a reset request",
+  "passResetTitle": "Reset the password",
+  "passResetNotMatchingYet": "The passwords do not match yet",
+  "commonOk": "Ok",
+  "accountSheetClose": "Close the account card",
+  "aboutClientFor": "A client for the ",
+  "aboutDevelopedBy": "Developed by ",
+  "aboutPrivacy": "Privacy policy",
+  "calcNewGrade": "Create a grade",
+  "commonAdd": "Add",
+  "calcAddGrade": "Add a grade",
+  "calcAverage": "Average",
+  "calcStart": "To begin, import the grades of a subject\nor add a first grade.",
+  "calcImportGrades": "Import grades",
+  "calcPickSubject": "Pick a subject",
+  "calcFirstSemester": "First semester",
+  "calcSecondSemester": "Second semester",
+  "calcBothSemesters": "Both semesters",
+  "calcImport": "Import",
+  "calcNoGrades": "This subject has no grades in this period",
+  "networkExportAll": "Export every response",
+  "networkNothingToExport": "Nothing to export",
+  "networkExportDone": "Export finished",
+  "networkPathCopied": "Path copied to the clipboard",
+  "networkCopyPath": "Copy the path",
+  "networkJsonCopied": "JSON copied to the clipboard",
+  "networkCopyJson": "Copy the JSON",
+  "commonOkCaps": "OK",
+  "networkNothing": "Nothing here",
+  "networkParameters": "Parameters",
+  "networkResponse": "Response",
+  "networkCopied": "Copied to the clipboard",
+  "errorConnectionFailed": "Connection failed",
+  "errorLoadingSavedData": "The saved data could not be loaded",
+  "passwordChanged": "Password changed",
+  "errorReinstall": "Please try reinstalling the app.",
+  "errorReinstallPrefixed": "Error: please try reinstalling the app.",
+  "errorLinkNotOpened": "This link could not be opened",
+  "historyBefore": "Before {time}",
+  "@historyBefore": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "historyOnBetween": "On {day} between {from} and {to}",
+  "@historyOnBetween": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "historyBetween": "Between {from} and {to}",
+  "@historyBetween": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "historyDeleted": "Deleted {when}.",
+  "@historyDeleted": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "historyAdded": "Added {when}.",
+  "@historyAdded": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "historyRestored": "Restored {when}.",
+  "@historyRestored": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "historyChanged": "Changed {when}.",
+  "@historyChanged": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "calendarWeekNumber": "Week {week}",
+  "@calendarWeekNumber": {
+    "placeholders": {
+      "week": {
+        "type": "int"
+      }
+    }
+  },
+  "subjectNickFor": "Short name for {subject}",
+  "@subjectNickFor": {
+    "placeholders": {
+      "subject": {
+        "type": "String"
+      }
+    }
+  },
+  "networkNoneOfType": "No {type}",
+  "@networkNoneOfType": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "networkExportSaved": "{count} responses saved to:\n\n{path}",
+  "@networkExportSaved": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "networkExportFailed": "Export failed: {error}",
+  "@networkExportFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "messageParentOnly": "This message can only be confirmed by a parent or guardian.",
+  "messageUnsupported": "This message asks for a confirmation the app does not support yet. Please open it in the browser.",
+  "settingsLanguage": "Language",
+  "settingsLanguageDevice": "Device language"
 }

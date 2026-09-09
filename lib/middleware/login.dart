@@ -148,7 +148,7 @@ Future<void> _doLogin(
     }
     if (fromStorage) {
       if (!noInternet) {
-        showSnackBar("Verbindung fehlgeschlagen");
+        showSnackBar(trGlobal.errorConnectionFailed);
       }
       return;
     }
@@ -217,7 +217,7 @@ Future<void> _doLoggedIn({
           providerContainer.read(settingsProvider).noPasswordSaving,
         );
       } catch (e) {
-        showSnackBar("Fehler beim Laden der gespeicherten Daten");
+        showSnackBar(trGlobal.errorLoadingSavedData);
         log("Failed to load data", error: e);
       }
     }
@@ -264,7 +264,7 @@ Future<void> _doChangePass(
   } else {
     await _doLogin(user, newPass, url);
     navigatorKey?.currentState?.pop();
-    showSnackBar("Passwort erfolgreich geändert");
+    showSnackBar(trGlobal.passwordChanged);
   }
 }
 

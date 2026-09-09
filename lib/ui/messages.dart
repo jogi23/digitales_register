@@ -378,16 +378,10 @@ class _MessageResponseSectionState extends State<MessageResponseSection> {
       return _Hint(info.historyText ?? info.badge ?? tr(context).messageAlreadyConfirmed);
     }
     if (info.parentSignatureRequired) {
-      return const _Hint(
-        "Diese Mitteilung kann nur von einem Erziehungsberechtigten "
-        "bestätigt werden.",
-      );
+      return _Hint(tr(context).messageParentOnly);
     }
     if (info.unsupported) {
-      return const _Hint(
-        "Diese Mitteilung verlangt eine Bestätigung, die in der App noch "
-        "nicht unterstützt wird. Bitte im Browser öffnen.",
-      );
+      return _Hint(tr(context).messageUnsupported);
     }
 
     return Column(

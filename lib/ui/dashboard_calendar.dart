@@ -414,7 +414,7 @@ class _WeekCell extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Tooltip(
-      message: "Kalenderwoche $week",
+      message: tr(context).calendarWeekNumber(week),
       child: InkWell(
         onTap: onTap,
         child: Center(

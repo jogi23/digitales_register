@@ -1,5 +1,333 @@
 {
   "@@locale": "it",
   "appTitle": "DigiReg ST",
-  "@appTitle": { "description": "Name der App, wie er im Umschalter erscheint" }
+  "@appTitle": {
+    "description": "Name der App, wie er im Umschalter erscheint"
+  },
+  "menuExpand": "Espandi",
+  "menuCollapse": "Riduci",
+  "menuHomework": "Agenda",
+  "menuAbsences": "Assenze",
+  "menuCalendar": "Calendario",
+  "menuGrades": "Valutazioni",
+  "menuMessages": "Comunicazioni",
+  "menuCertificate": "Pagella",
+  "menuSettings": "Impostazioni",
+  "menuHelp": "Aiuto e feedback",
+  "menuRate": "Valuta su Google Play",
+  "menuAbout": "Informazioni sull'app",
+  "menuLogout": "Esci",
+  "noConnection": "Nessuna connessione",
+  "gradesAverageStars": "Media delle stelle",
+  "gradesAverageNumeric": "Media dei voti",
+  "gradesChartTitle": "Grafico dei voti",
+  "gradesChartLegend": "Legenda",
+  "calendarDetailTitle": "Dettagli",
+  "calendarNoSchool": "Nessuna lezione",
+  "changelogSinceLastUpdate": "Novità dall'ultimo aggiornamento",
+  "changelogDismiss": "Nascondi",
+  "changelogAll": "Tutte le novità",
+  "changelogTitle": "Novità",
+  "changelogEmpty": "Nessuna voce",
+  "dashboardTitle": "Registro",
+  "dashboardNoEntries": "Nessuna voce presente",
+  "dashboardNewEntries": "Nuove voci",
+  "dashboardPast": "Passato",
+  "dashboardFuture": "Futuro",
+  "dashboardDeletedEntries": "Voci eliminate",
+  "dialogNeverAsk": "Non chiedere più",
+  "reminderDeleteTitle": "Eliminare il promemoria?",
+  "commonCancel": "Annulla",
+  "commonDelete": "Elimina",
+  "homeworkVersions": "Versioni",
+  "gradeWithoutMark": "senza voto",
+  "homeworkDeleted": "eliminata",
+  "homeworkChanged": "modificata",
+  "attachment": "Allegato",
+  "commonOpen": "Apri",
+  "reminderTitle": "Promemoria",
+  "commonSave": "Salva",
+  "absencesTitle": "Assenze",
+  "absencesEmpty": "Ancora nessuna assenza",
+  "absencesPlanned": "Assenze inserite in anticipo",
+  "absencesStatistics": "Statistica",
+  "absencesForSchool": "Assenze per incarico della scuola",
+  "absencesDelays": "Ritardi",
+  "absencesJustified": "Assenze giustificate",
+  "absencesNotJustified": "Assenze non giustificate",
+  "absencesAbsence": "Assenza",
+  "messagesTitle": "Comunicazioni",
+  "messagesMarkAllRead": "Segna tutte come lette",
+  "messagesEmpty": "Ancora nessuna comunicazione",
+  "messagesSent": "Inviata: ",
+  "messagesFrom": "Da: ",
+  "messagesTo": "A: ",
+  "messagesAttachments": "Allegati:",
+  "messagesAttachment": "Allegato:",
+  "messageAlreadyConfirmed": "Già confermata.",
+  "messageSignaturePrompt": "Conferma con il tuo nome e cognome",
+  "messageDisagree": "Non accetto",
+  "messageAgree": "Accetto",
+  "messageConfirm": "Conferma",
+  "notificationsTitle": "Notifiche",
+  "notificationsEmpty": "Nessuna notifica",
+  "notificationsAllRead": "Tutte lette",
+  "notificationsOpenMessage": "Apri la comunicazione",
+  "notificationsOpenGrade": "Apri la valutazione",
+  "notificationsRead": "Letta",
+  "gradesTitle": "Valutazioni",
+  "subjectEditNick": "Modifica sigla",
+  "subjectAppearanceTitle": "Sigle e colori delle materie",
+  "subjectNoSubjects": "Nessuna materia presente",
+  "subjectNoNick": "Nessuna sigla",
+  "commonDone": "Fatto",
+  "colorPickTitle": "Scegli un colore",
+  "colorPick": "Scegli",
+  "gradesGroupByType": "Raggruppa i voti per tipo",
+  "gradesShowCancelled": "Mostra i voti eliminati",
+  "gradesExcludedHint": "* Hai escluso questa materia dalla media dei voti",
+  "gradesCalculator": "Calcolatrice dei voti",
+  "gradesCalculatorSubtitle": "Calcola la media di voti a piacere",
+  "countGrade": "valutazione",
+  "countGrades": "valutazioni",
+  "countCompetence": "competenza",
+  "countCompetences": "competenze",
+  "countObservation": "osservazione",
+  "countObservations": "osservazioni",
+  "gradeDetailTitle": "Valutazione",
+  "gradeDetailGone": "Questa valutazione non è più disponibile",
+  "gradeDetailComment": "Commento",
+  "gradeDetailCompetences": "Competenze",
+  "gradeDetailEntered": "Inserita",
+  "gradeDetailCancelled": "Eliminata",
+  "gradeDetailCancelledPlain": "Questa valutazione è stata eliminata.",
+  "calendarTitle": "Calendario",
+  "calendarCurrentWeek": "Settimana corrente",
+  "calendarPickDate": "Scegli una data",
+  "teacher": "Insegnante",
+  "teachers": "Insegnanti",
+  "rooms": "Aule",
+  "loadingEllipsis": "Caricamento …",
+  "noDataForPeriod": "Per questo periodo non ci sono dati",
+  "pickDay": "Scegli un giorno",
+  "previousMonth": "Mese precedente",
+  "nextMonth": "Mese successivo",
+  "weekdayMon": "Lun",
+  "weekdayTue": "Mar",
+  "weekdayWed": "Mer",
+  "weekdayThu": "Gio",
+  "weekdayFri": "Ven",
+  "weekdaySat": "Sab",
+  "weekdaySun": "Dom",
+  "filterGradesAndTests": "Voti e verifiche",
+  "filterHomeworkAndReminders": "Compiti e promemoria",
+  "filterObservations": "Osservazioni",
+  "noDataForDay": "Per questo giorno non ci sono dati",
+  "previousWeek": "Settimana precedente",
+  "nextWeek": "Settimana successiva",
+  "calendarNoLessons": "Nessuna lezione in questa settimana",
+  "calendarFree": "Libero",
+  "settingsTitle": "Impostazioni",
+  "settingsShare": "Condividi l'app con altri genitori o compagni",
+  "settingsShareSubtitle": "Invito con il link al Play Store",
+  "settingsProfile": "Profilo",
+  "settingsSectionLogin": "Accesso",
+  "settingsStayLoggedIn": "Resta connesso",
+  "settingsStayLoggedInSubtitle": "I tuoi dati di accesso vengono salvati sul dispositivo",
+  "settingsSectionAppearance": "Aspetto",
+  "settingsThemeFollowDevice": "Segui il tema del dispositivo",
+  "settingsThemeLight": "Chiaro",
+  "settingsThemeDark": "Scuro",
+  "settingsSectionSubjects": "Materie",
+  "settingsNicksAndColors": "Sigle e colori",
+  "settingsColorHomework": "Colora i compiti con questi colori",
+  "settingsColorLessons": "Colora le lezioni nel calendario con questi colori",
+  "settingsShowTimes": "Mostra gli orari nel calendario",
+  "settingsFrameTestsRed": "Incornicia sempre le verifiche in rosso",
+  "settingsSectionHomework": "Agenda",
+  "settingsViewList": "Mostra come elenco",
+  "settingsViewMonth": "Mostra come calendario mensile",
+  "settingsViewWeek": "Mostra come orario settimanale",
+  "settingsMarkNewEntries": "Evidenzia le voci nuove o modificate",
+  "settingsIgnoreDuplicates": "Ignora le voci doppie",
+  "settingsAskWhenDeleting": "Chiedi prima di eliminare un promemoria",
+  "settingsSectionGrades": "Voti",
+  "settingsShowChart": "Mostra i voti in un grafico",
+  "settingsStarColor": "Colore delle stelle",
+  "settingsStarColorSubtitle": "Per le materie valutate con le stelle",
+  "settingsStarColorDefault": "Predefinito",
+  "settingsExcludeSubjects": "Escludi materie dalla media dei voti",
+  "settingsNoSubjectExcluded": "Nessuna materia esclusa",
+  "settingsSectionAdvanced": "Avanzate",
+  "settingsNetworkLog": "Registro di rete",
+  "settingsDebugLog": "Registro di debug",
+  "settingsSource": "Codice sorgente",
+  "settingsAddSubject": "Aggiungi materia",
+  "loginOtherSchool": "Altra scuola",
+  "loginSchool": "Scuola",
+  "loginSchoolNotFound": "Scuola non trovata",
+  "loginFeedback": "Feedback?",
+  "loginDemo": "Demo",
+  "loginForgotPassword": "Password dimenticata",
+  "loginMustChangePassword": "Devi cambiare la password:",
+  "loginPasswordsDiffer": "Le nuove password non coincidono",
+  "loginOtherAccounts": "Altri account",
+  "helpTitle": "Aiuto e feedback",
+  "helpWriteEmail": "Scrivi un'email",
+  "helpFaq": "Domande frequenti",
+  "helpSuggestFeature": "Proponi una funzione o un'idea",
+  "helpReportBug": "Segnala un errore",
+  "profileSendEmails": "Invia email per le notifiche",
+  "profileChangeEmail": "Cambia indirizzo email",
+  "profileChangePassword": "Cambia password",
+  "passResetSendRequest": "Invia la richiesta di reimpostazione",
+  "passResetTitle": "Reimposta la password",
+  "passResetNotMatchingYet": "Le password non coincidono ancora",
+  "commonOk": "Ok",
+  "accountSheetClose": "Chiudi l'account",
+  "aboutClientFor": "Un client per il ",
+  "aboutDevelopedBy": "Sviluppata da ",
+  "aboutPrivacy": "Informativa sulla privacy",
+  "calcNewGrade": "Crea un nuovo voto",
+  "commonAdd": "Aggiungi",
+  "calcAddGrade": "Aggiungi un voto",
+  "calcAverage": "Media",
+  "calcStart": "Per iniziare, importa i voti di una materia\noppure aggiungi un primo voto.",
+  "calcImportGrades": "Importa i voti",
+  "calcPickSubject": "Scegli una materia",
+  "calcFirstSemester": "Primo semestre",
+  "calcSecondSemester": "Secondo semestre",
+  "calcBothSemesters": "Entrambi i semestri",
+  "calcImport": "Importa",
+  "calcNoGrades": "Per questa materia non ci sono voti in questo periodo",
+  "networkExportAll": "Esporta tutte le risposte",
+  "networkNothingToExport": "Niente da esportare",
+  "networkExportDone": "Esportazione completata",
+  "networkPathCopied": "Percorso copiato negli appunti",
+  "networkCopyPath": "Copia il percorso",
+  "networkJsonCopied": "JSON copiato negli appunti",
+  "networkCopyJson": "Copia il JSON",
+  "commonOkCaps": "OK",
+  "networkNothing": "Niente da mostrare",
+  "networkParameters": "Parametri",
+  "networkResponse": "Risposta",
+  "networkCopied": "Copiato negli appunti",
+  "errorConnectionFailed": "Connessione non riuscita",
+  "errorLoadingSavedData": "Errore nel caricamento dei dati salvati",
+  "passwordChanged": "Password cambiata",
+  "errorReinstall": "Prova a reinstallare l'app.",
+  "errorReinstallPrefixed": "Errore: prova a reinstallare l'app.",
+  "errorLinkNotOpened": "Non è stato possibile aprire questo link",
+  "historyBefore": "Prima di {time}",
+  "@historyBefore": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "historyOnBetween": "Il {day} tra le {from} e le {to}",
+  "@historyOnBetween": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "historyBetween": "Tra {from} e {to}",
+  "@historyBetween": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "historyDeleted": "Eliminata {when}.",
+  "@historyDeleted": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "historyAdded": "Inserita {when}.",
+  "@historyAdded": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "historyRestored": "Ripristinata {when}.",
+  "@historyRestored": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "historyChanged": "Modificata {when}.",
+  "@historyChanged": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "calendarWeekNumber": "Settimana {week}",
+  "@calendarWeekNumber": {
+    "placeholders": {
+      "week": {
+        "type": "int"
+      }
+    }
+  },
+  "subjectNickFor": "Sigla per {subject}",
+  "@subjectNickFor": {
+    "placeholders": {
+      "subject": {
+        "type": "String"
+      }
+    }
+  },
+  "networkNoneOfType": "Nessun {type}",
+  "@networkNoneOfType": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "networkExportSaved": "{count} risposte salvate in:\n\n{path}",
+  "@networkExportSaved": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "networkExportFailed": "Esportazione non riuscita: {error}",
+  "@networkExportFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "messageParentOnly": "Questa comunicazione può essere confermata solo da un genitore o tutore.",
+  "messageUnsupported": "Questa comunicazione richiede una conferma non ancora supportata dall'app. Aprila nel browser.",
+  "settingsLanguage": "Lingua",
+  "settingsLanguageDevice": "Lingua del dispositivo"
 }

@@ -171,7 +171,7 @@ class _EditNickDialogState extends State<_EditNickDialog> {
   @override
   Widget build(BuildContext context) {
     return InfoDialog(
-      title: Text("Kürzel für ${widget.subject}"),
+      title: Text(tr(context).subjectNickFor(widget.subject)),
       content: TextField(
         controller: controller,
         autofocus: true,

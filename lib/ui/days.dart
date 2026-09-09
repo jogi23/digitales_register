@@ -851,7 +851,7 @@ class ItemWidget extends StatelessWidget {
           content: SingleChildScrollView(
             child: Column(
               children: [
-                Text(formatChanged(historyItem)),
+                Text(formatChanged(context, historyItem)),
                 if (historyItem.previousVersion != null)
                   ExpansionTile(
                     title: Text(tr(context).homeworkVersions),
@@ -1107,7 +1107,7 @@ class ItemWidget extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Text(
-                    formatChanged(item),
+                    formatChanged(context, item),
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ),
@@ -1166,28 +1166,34 @@ class ItemWidget extends StatelessWidget {
   }
 }
 
-String formatChanged(Homework hw) {
-  String date;
+String formatChanged(BuildContext context, Homework hw) {
+  final l = tr(context);
+  // The language of the translations, not of the widget tree: without a
+  // delegate the texts fall back to German, and the dates have to follow.
+  String at(String pattern, DateTime time) =>
+      DateFormat(pattern, l.localeName).format(time);
+
+  // Two sentences in one: when it happened, and what happened. Both are
+  // templates, so a translation can put the verb wherever it belongs.
+  final String when;
   if (hw.lastNotSeen == null) {
-    date =
-        "Vor ${DateFormat("EEEE, dd.MM, HH:mm,", "de").format(hw.firstSeen)}";
+    when = l.historyBefore(at("EEEE, dd.MM, HH:mm,", hw.firstSeen));
   } else if (toDate(hw.firstSeen) == toDate(hw.lastNotSeen!)) {
-    date = "Am ${DateFormat("EEEE, dd.MM,", "de").format(hw.firstSeen)}"
-        " zwischen ${DateFormat("HH:mm", "de").format(hw.lastNotSeen!)} und ${DateFormat("HH:mm", "de").format(hw.firstSeen)}";
+    when = l.historyOnBetween(
+      at("EEEE, dd.MM,", hw.firstSeen),
+      at("HH:mm", hw.lastNotSeen!),
+      at("HH:mm", hw.firstSeen),
+    );
   } else {
-    date =
-        "Zwischen ${DateFormat("EEEE, dd.MM, HH:mm,", "de").format(hw.lastNotSeen!)} "
-        "und ${DateFormat("EEEE, dd.MM, HH:mm,", "de").format(hw.firstSeen)}";
+    when = l.historyBetween(
+      at("EEEE, dd.MM, HH:mm,", hw.lastNotSeen!),
+      at("EEEE, dd.MM, HH:mm,", hw.firstSeen),
+    );
   }
-  if (hw.deleted) {
-    return "$date gelöscht.";
-  } else if (hw.previousVersion == null) {
-    return "$date eingetragen.";
-  } else if (hw.previousVersion!.deleted) {
-    return "$date wiederhergestellt.";
-  } else {
-    return "$date geändert.";
-  }
+  if (hw.deleted) return l.historyDeleted(when);
+  if (hw.previousVersion == null) return l.historyAdded(when);
+  if (hw.previousVersion!.deleted) return l.historyRestored(when);
+  return l.historyChanged(when);
 }
 
 UtcDateTime toDate(UtcDateTime dateTime) {
