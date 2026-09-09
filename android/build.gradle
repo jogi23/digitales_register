@@ -3,6 +3,17 @@ allprojects {
         google()
         mavenCentral()
     }
+    afterEvaluate {
+        // Manche Plugins nageln ein compileSdk fest, das älter ist als das,
+        // was ihre eigenen Abhängigkeiten verlangen - biometric_storage 5.0.1
+        // steht auf 31, androidx.biometric will 33. Seit AGP 9 bricht der Build
+        // daran ab, statt es stillschweigend anzuheben.
+        if (it.hasProperty('android') && it.android.compileSdk != null
+                && it.android.compileSdk < 36) {
+            it.android.compileSdk = 36
+        }
+    }
+
     // Workaround for old Flutter plugins that have no namespace in build.gradle (AGP 8.x requirement)
     afterEvaluate {
         if (it.hasProperty('android') && !it.android.hasProperty('namespace')) {

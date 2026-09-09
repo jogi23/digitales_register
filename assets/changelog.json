@@ -1,4 +1,40 @@
 {
+  "1.3.0": {
+    "date": "2026-09-09",
+    "points": {
+      "de": [
+        {
+          "title": "Neue Funktionen",
+          "items": [
+            "Die App spricht Italienisch und Englisch. Die Sprache lässt sich in den Einstellungen wählen; ohne eigene Wahl folgt sie dem Gerät."
+          ]
+        },
+        {
+          "title": "Verbesserungen",
+          "items": [
+            "Ein Link, der die bereits geöffnete App erreicht, springt direkt zur gewünschten Seite, statt die App neu zu laden",
+            "Bewertungen geben beim Antippen wieder eine sichtbare Rückmeldung"
+          ]
+        },
+        {
+          "title": "Fehlerbehebungen",
+          "items": [
+            "Ein geöffneter Link löscht nicht mehr die gespeicherten Zugangsdaten des gerade verwendeten Kontos",
+            "Beim Anmelden eines zweiten Kontos bleibt das erste erhalten",
+            "Die App bleibt sichtbar, wenn sie über einen Link aus dem Hintergrund geholt wird"
+          ]
+        },
+        {
+          "title": "Intern",
+          "items": [
+            "Flutter auf 3.47.2 und das Android-Build-Plugin auf 9.1.0 angehoben; damit entfallen die veralteten Aufrufe für die randlose Anzeige unter Android 15 und neuer",
+            "Zwei nicht mehr gepflegte Zusatzpakete durch ihre Nachfolger ersetzt",
+            "Jede Änderung wird vor dem Zusammenführen automatisch geprüft: Codeanalyse und alle Tests"
+          ]
+        }
+      ]
+    }
+  },
   "1.2.1": {
     "date": "2026-09-08",
     "points": {

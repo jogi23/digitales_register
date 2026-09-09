@@ -420,7 +420,11 @@ class GradeWidget extends ConsumerWidget {
       ],
     );
     if (tileColor != null) {
-      return ColoredBox(color: tileColor!, child: column);
+      // Material statt ColoredBox: Das ListTile zeichnet sein Tippkringel auf
+      // die nächste Material-Fläche darüber, und eine ColoredBox übermalt die
+      // — antippen zeigte dann keine Rückmeldung. Flutter meldet das seit 3.47
+      // als Zusicherung.
+      return Material(color: tileColor!, child: column);
     }
     return column;
   }

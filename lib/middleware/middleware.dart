@@ -222,10 +222,16 @@ Future<void> _doLoad() async {
   ];
   providerContainer.read(loginProvider.notifier).setOtherAccounts(otherAccounts);
   final currentLogin = providerContainer.read(loginProvider);
-  if ((currentLogin.url != null && currentLogin.url != url) ||
+  // Der Zweig greift, wenn die App über einen Link gestartet wurde, der auf
+  // einen anderen Server oder Benutzer zeigt als das gespeicherte Konto -
+  // dann passen die gespeicherten Zugangsdaten nicht dazu.
+  //
+  // Sie deshalb wegzuwerfen war falsch: Es kostete bei jedem solchen Link ein
+  // Konto, und wegen des Schrägstrichs am Ende traf es auch Links auf die
+  // eigene Schule. Das Anmeldeformular reicht; das gespeicherte Konto bleibt
+  // liegen und ist über die Konten-Karte erreichbar.
+  if ((currentLogin.url != null && !sameServer(currentLogin.url, url)) ||
       (currentLogin.username != null && currentLogin.username != user)) {
-    // TODO: Figure out when exactly we'd hit this code path and how to handle it better.
-    await _doDeletePass();
     providerContainer.read(appRouterProvider).showLogin();
   } else {
     if (user != null && pass != null) {
@@ -358,8 +364,24 @@ Future<void> handleRestarted() async {
 
 Future<void> _doStart(Uri? uri) async {
   providerContainer.read(loginProvider.notifier).clearAfterLoginCallbacks();
+
+  // Erreicht ein Link die bereits laufende App, will er nur zu einer Seite
+  // springen - anmelden muss sich niemand mehr. Trotzdem den ganzen
+  // Startvorgang zu fahren baute die Oberfläche ein zweites Mal auf, während
+  // die erste noch stand: zwei DaysWidget mit demselben scaffoldKey, und bei
+  // dieser Kollision hängt Flutter den Teilbaum ab - übrig blieb ein
+  // schwarzer Bildschirm.
+  final sitzungLaeuft = uri != null &&
+      providerContainer.read(loginProvider).loggedIn &&
+      sameServer(uri.origin, wrapper.url);
+
   if (uri != null) {
-    providerContainer.read(loginProvider.notifier).setUrl(uri.origin);
+    // Die Adresse der laufenden Sitzung bleibt stehen: Sie kann anders
+    // geschrieben sein als uri.origin, und daran hängt unter anderem, ob das
+    // Demokonto als solches erkannt wird.
+    if (!sitzungLaeuft) {
+      providerContainer.read(loginProvider.notifier).setUrl(uri.origin);
+    }
     final parameters = uri.queryParameters;
     switch (parameters["semesterWechsel"]) {
       case "1":
@@ -404,6 +426,14 @@ Future<void> _doStart(Uri? uri) async {
     }
     await redirectAfterLogin(uri.fragment);
   }
+
+  if (sitzungLaeuft) {
+    // Die Sprünge, die redirectAfterLogin eben vorgemerkt hat, laufen sonst
+    // erst nach einer Anmeldung - die hier nicht mehr kommt.
+    providerContainer.read(loginProvider.notifier).executeAfterLoginCallbacks();
+    return;
+  }
+
   await _doLoad();
 }
 

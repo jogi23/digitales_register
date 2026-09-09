@@ -28,6 +28,13 @@ android {
         main.java.srcDirs += 'src/main/kotlin'
     }
 
+    buildFeatures {
+        // Ab AGP 9 aus, muss also angefordert werden: Die Build-Typen unten
+        // setzen den App-Namen über resValue, damit die Debug-Fassung neben
+        // der veröffentlichten unterscheidbar bleibt.
+        resValues true
+    }
+
     defaultConfig {
         applicationId "io.wertwerk.digitalesregister"
         minSdkVersion flutter.minSdkVersion
