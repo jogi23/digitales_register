@@ -1,19 +1,29 @@
 {
   "1.3.0": {
-    "date": "2026-09-09",
+    "date": "2026-09-10",
     "points": {
       "de": [
         {
           "title": "Neue Funktionen",
           "items": [
-            "Die App spricht Italienisch und Englisch. Die Sprache lässt sich in den Einstellungen wählen; ohne eigene Wahl folgt sie dem Gerät."
+            "Die App spricht Italienisch und Englisch. Die Sprache lässt sich in den Einstellungen wählen; ohne eigene Wahl folgt sie dem Gerät.",
+            "Klassenbuch: alle Unterrichtseinträge auf einer eigenen Seite, wahlweise nach Tagen oder nach Fach",
+            "Klassenbuch: Fächer über Chips filtern; die Auswahl gilt je Konto",
+            "Hausaufgaben: Aufgaben und Prüfungen in einer Übersicht, statt nur in der einzelnen Stunde",
+            "Unterrichtsmaterialien: Themen je Fach mit Dateien, Links und Texten; Dateien landen wie jeder andere Anhang im gewohnten Ordner"
           ]
         },
         {
           "title": "Verbesserungen",
           "items": [
             "Ein Link, der die bereits geöffnete App erreicht, springt direkt zur gewünschten Seite, statt die App neu zu laden",
-            "Bewertungen geben beim Antippen wieder eine sichtbare Rückmeldung"
+            "Bewertungen geben beim Antippen wieder eine sichtbare Rückmeldung",
+            "Die App ist rund 39 MB kleiner: das Bild des Startbildschirms lag zehnmal im Paket",
+            "„App teilen“ steht jetzt im Menü bei „Über diese App“ statt oben in den Einstellungen",
+            "Das Konto ist über den Avatar in der Titelzeile erreichbar; der zweite Zugang oben im Menü entfällt",
+            "Das Merkheft heißt in der Überschrift wie im Menü",
+            "Die Kalenderwoche im Merkheft steht in der Akzentfarbe, die gewählte Woche zusätzlich hinterlegt",
+            "Das Netzwerkprotokoll in der Diagnose hält Zeitpunkt und Fehlergrund jeder Anfrage fest"
           ]
         },
         {
@@ -21,7 +31,11 @@
           "items": [
             "Ein geöffneter Link löscht nicht mehr die gespeicherten Zugangsdaten des gerade verwendeten Kontos",
             "Beim Anmelden eines zweiten Kontos bleibt das erste erhalten",
-            "Die App bleibt sichtbar, wenn sie über einen Link aus dem Hintergrund geholt wird"
+            "Die App bleibt sichtbar, wenn sie über einen Link aus dem Hintergrund geholt wird",
+            "Merkheft: die unterste Zeile der Kalenderansichten liegt nicht mehr unter der Navigationsleiste des Geräts",
+            "Merkheft: eine noch ladende Woche antippen verwirft die Auswahl nicht mehr",
+            "Ein Schlüsselspeicher, der sich nicht mehr lesen lässt, wird wieder gemeldet und geleert, statt die Anmeldung stumm scheitern zu lassen",
+            "Übersehene deutsche Texte in Meldungen und Diensten sowie ein falsches Anführungszeichen übersetzt"
           ]
         },
         {
@@ -29,7 +43,9 @@
           "items": [
             "Flutter auf 3.47.2 und das Android-Build-Plugin auf 9.1.0 angehoben; damit entfallen die veralteten Aufrufe für die randlose Anzeige unter Android 15 und neuer",
             "Zwei nicht mehr gepflegte Zusatzpakete durch ihre Nachfolger ersetzt",
-            "Jede Änderung wird vor dem Zusammenführen automatisch geprüft: Codeanalyse und alle Tests"
+            "Jede Änderung wird vor dem Zusammenführen automatisch geprüft: Codeanalyse und alle Tests",
+            "iOS wird unsigniert auf einem macOS-Runner mitgebaut",
+            "Zeilenenden im Projekt vereinheitlicht und per .gitattributes festgehalten"
           ]
         }
       ]
@@ -47,7 +63,13 @@
             "Bewertungen: Anzahl der Einträge, Kompetenzen und Beobachtungen je Fach in der Übersicht",
             "Farbe der Sterne in den Einstellungen wählbar, mit je einem Ton für den hellen und den dunklen Modus",
             "Konto in den Einstellungen und über den Namen im Menü erreichbar",
-            "Diese Neuerungen erscheinen nach einem Update direkt im Merkheft"
+            "Diese Neuerungen erscheinen nach einem Update direkt im Merkheft",
+            "Merkheft: zwei Kalenderansichten neben der Liste — Monatskalender und Wochenplan",
+            "Merkheft: die Kalenderansichten laden Vergangenheit und Zukunft nach; eine Schaltfläche springt zur aktuellen Woche",
+            "Merkheft: Fachfarben, hervorgehobener heutiger Tag und Kalenderwochen in den neuen Ansichten",
+            "Merkheft: der Tageskopf nennt die Einträge des Tages; ein Tag lässt sich in Vollbild öffnen",
+            "Kalender: Uhrzeit je Stunde, Pausen sind als solche zu sehen",
+            "„App teilen“ in den Einstellungen und „Bei Google Play bewerten“ im Menü"
           ]
         },
         {
@@ -58,14 +80,27 @@
             "Der Durchschnitt steht hinter dem Fachnamen und entfällt, solange nichts bewertet ist",
             "Einstellungen zu Aussehen, Fächern, Merkheft und Noten gelten für alle Konten",
             "Bewertungen: gruppierte Einträge sind als Unterebene des Fachs erkennbar",
-            "Bewertungen: Kompetenzsterne stehen immer unter ihrem Namen"
+            "Bewertungen: Kompetenzsterne stehen immer unter ihrem Namen",
+            "Eine Stunde mit Hausaufgabe öffnet den zugehörigen Tag; Überschriften im Merkheft sind hervorgehoben",
+            "Nach mehrfacher Nutzung fragt die App einmal nach einer Bewertung im Store",
+            "Schrift auf farbigen Flächen folgt dem tatsächlichen Kontrast statt einer festen Regel"
           ]
         },
         {
           "title": "Fehlerbehebungen",
           "items": [
             "Ein Konto ohne gespeicherten Stand übernimmt nicht mehr die Einstellungen des zuvor genutzten Kontos",
-            "Die Sterne im Merkheft und in den Bewertungen haben wieder dieselbe Farbe"
+            "Die Sterne im Merkheft und in den Bewertungen haben wieder dieselbe Farbe",
+            "Merkheft: Einträge im Wochenplan sind sichtbar und lassen sich dort anlegen",
+            "Merkheft: die Tagesansicht folgt Änderungen am Bestand",
+            "Merkheft: die Farbe folgt den Einträgen, die Erinnerung stammt aus der gewählten Woche",
+            "Merkheft: Ausgrauen im Dunkelmodus und der Hinweis bei leeren Tagen korrigiert",
+            "Merkheft: es steht jetzt da, wenn der Server für den Zeitraum nichts liefert",
+            "Kalender: eine leere Woche ist vom Ladevorgang zu unterscheiden",
+            "Kalender: die Mittagspause erscheint auch bei durchgehendem Fach",
+            "Konten: die Initialen kommen aus dem Namen statt aus der Matrikelnummer",
+            "Konten: das Häkchen zum Bestätigen des Alias ist klar zu sehen",
+            "Das Menü öffnete sich nach der Rückkehr aus einer Menüseite von selbst"
           ]
         },
         {
@@ -172,6 +207,12 @@
     "points": {
       "de": [
         {
+          "title": "Verbesserungen",
+          "items": [
+            "Eigenes App-Symbol, das sich der Form des Geräts anpasst, und ein eigener Startbildschirm"
+          ]
+        },
+        {
           "title": "Fehlerbehebungen",
           "items": [
             "Nach einem Neustart ohne Internet werden Bewertungen, Kalender, Mitteilungen, Absenzen, Benachrichtigungen und Profil wieder korrekt angezeigt",
@@ -205,7 +246,8 @@
           "title": "Intern",
           "items": [
             "Android Gradle Plugin und Kotlin aktualisiert",
-            "flutter_markdown durch flutter_markdown_plus ersetzt"
+            "flutter_markdown durch flutter_markdown_plus ersetzt",
+            "Die Neuerungen werden aus den GitHub-Releases geladen"
           ]
         }
       ]
@@ -221,7 +263,8 @@
             "Das Menü lässt sich von links her aufziehen",
             "Kalender: „Aktuelle Woche“ ist immer sichtbar und in der laufenden Woche ausgegraut",
             "Benachrichtigungen: „Mitteilung öffnen“ führt zur betreffenden Mitteilung statt zur Liste",
-            "„Über diese App“: „Neuerungen“ öffnet diese Liste"
+            "„Über diese App“: „Neuerungen“ öffnet diese Liste",
+            "„Über diese App“ zeigt das App-Symbol"
           ]
         }
       ]
@@ -251,6 +294,12 @@
     "date": "2026-06-01",
     "points": {
       "de": [
+        {
+          "title": "Verbesserungen",
+          "items": [
+            "Kalender und Merkheft bekommen farbige Hintergründe"
+          ]
+        },
         {
           "title": "Intern",
           "items": [

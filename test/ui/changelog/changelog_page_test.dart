@@ -113,8 +113,13 @@ Future<void> main() async {
   });
 
   testWidgets('shows the real history the app ships with', (tester) async {
+    // The shipped file, not a stub. Which version is newest is read from it
+    // rather than written here: a release would otherwise have to be entered
+    // twice, and a longer release pushes any older heading out of the
+    // viewport, where the list has not built it yet.
+    final newest = (await Changelog().load()).first.version;
     await pumpPage(tester);
-    expect(find.text('1.2.1'), findsOneWidget);
+    expect(find.text(newest), findsOneWidget);
     expect(find.text('Keine Einträge'), findsNothing);
   });
 
