@@ -28,7 +28,6 @@ import 'package:dr/ui/star_rating.dart';
 import 'package:dr/ui/subject_appearance_page.dart';
 import 'package:dr/l10n/l10n.dart';
 import 'package:dr/util.dart';
-import 'package:dr/services/app_sharing.dart';
 import 'package:flutter/foundation.dart';
 import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:flutter/material.dart';
@@ -56,6 +55,7 @@ class SettingsPageWidget extends StatefulWidget {
   final OnSettingChanged<bool> onSetCalenderColorBackground;
   final OnSettingChanged<bool> onSetCalendarShowTimes;
   final void Function(DashboardViewMode mode) onSetDashboardViewMode;
+  final void Function(ClassbookViewMode mode) onSetClassbookViewMode;
   final OnSettingChanged<bool> onSetDashboardColorTestsInRed;
   final OnSettingChanged<String> onSetStarColor;
   final OnSettingChanged<String?> onSetLanguage;
@@ -81,6 +81,7 @@ class SettingsPageWidget extends StatefulWidget {
     required this.onSetCalenderColorBackground,
     required this.onSetCalendarShowTimes,
     required this.onSetDashboardViewMode,
+    required this.onSetClassbookViewMode,
     required this.onSetDashboardColorTestsInRed,
     required this.onSetStarColor,
     required this.onSetLanguage,
@@ -157,14 +158,6 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
         padding: EdgeInsets.only(
             bottom: MediaQuery.of(context).viewPadding.bottom),
         children: <Widget>[
-          const SizedBox(height: 8),
-          ListTile(
-            leading: const Icon(Icons.share),
-            title: Text(tr(context).settingsShare),
-            subtitle: Text(tr(context).settingsShareSubtitle),
-            onTap: () => shareApp(context),
-          ),
-          const Divider(),
           if (!widget.vm.demoMode) ...[
             const SizedBox(height: 8),
             ListTile(
@@ -341,6 +334,34 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
             },
             value: widget.vm.dashboardDeduplicateEntries,
           ),
+          const Divider(),
+          ListTile(
+            title: Text(
+              tr(context).settingsClassbook,
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+          ),
+          ListTile(
+            dense: true,
+            title: Text(
+              tr(context).settingsClassbookView,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+          ),
+          for (final entry in <ClassbookViewMode, String>{
+            ClassbookViewMode.chronological:
+                tr(context).classbookViewChronological,
+            ClassbookViewMode.bySubject: tr(context).classbookViewBySubject,
+          }.entries)
+            RadioListTile<ClassbookViewMode>(
+              title: Text(entry.value),
+              value: entry.key,
+              groupValue: widget.vm.classbookViewMode,
+              onChanged: (mode) {
+                if (mode != null) widget.onSetClassbookViewMode(mode);
+              },
+            ),
+          const Divider(),
           SwitchListTile.adaptive(
             title: Text(tr(context).settingsAskWhenDeleting),
             onChanged: (bool value) {

@@ -24,6 +24,9 @@ import 'package:dr/container/grades_page_container.dart';
 import 'package:dr/container/messages_container.dart';
 import 'package:dr/container/settings_page.dart';
 import 'package:dr/main.dart';
+import 'package:dr/container/classbook_page_container.dart';
+import 'package:dr/container/course_content_container.dart';
+import 'package:dr/container/homework_overview_container.dart';
 import 'package:dr/pages.dart';
 import 'package:dr/providers/absences_provider.dart';
 import 'package:dr/providers/calendar_provider.dart';
@@ -78,6 +81,32 @@ class AppRouter {
     _ref.read(settingsProvider.notifier).resetScroll();
     scaffoldKey!.currentState!
         .selectContentWidget(SettingsPageContainer(), Pages.settings);
+  }
+
+  void showCourseContent() {
+    scaffoldKey!.currentState!.selectContentWidget(
+        const CourseContentContainer(), Pages.courseContent);
+    // Die Fächer stehen in den Kalenderwochen; ohne eine geladene gäbe es
+    // nichts zur Auswahl.
+    final monday = _ref.read(calendarProvider).currentMonday ?? toMonday(now);
+    unawaited(_ref.read(calendarProvider.notifier).load(monday));
+  }
+
+  void showHomeworkOverview() {
+    scaffoldKey!.currentState!.selectContentWidget(
+        const HomeworkOverviewContainer(), Pages.homeworkOverview);
+    // Wie beim Klassenbuch: Die Aufgaben kommen mit den Kalenderwochen.
+    final monday = _ref.read(calendarProvider).currentMonday ?? toMonday(now);
+    unawaited(_ref.read(calendarProvider.notifier).load(monday));
+  }
+
+  void showClassbook() {
+    scaffoldKey!.currentState!
+        .selectContentWidget(const ClassbookPageContainer(), Pages.classbook);
+    // Die Einträge kommen mit den Kalenderwochen. Ohne eine geladene Woche
+    // bliebe die Seite leer, ohne dass jemand wüsste warum.
+    final monday = _ref.read(calendarProvider).currentMonday ?? toMonday(now);
+    unawaited(_ref.read(calendarProvider.notifier).load(monday));
   }
 
   void showCalendar() {

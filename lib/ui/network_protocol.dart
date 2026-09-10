@@ -21,6 +21,7 @@ import 'package:dr/main.dart';
 import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 
 class NetworkProtocol extends StatelessWidget {
   final List<NetworkProtocolItem> items;
@@ -48,12 +49,22 @@ class NetworkProtocol extends StatelessWidget {
 class _Item extends StatelessWidget {
   final NetworkProtocolItem item;
 
+  // With the date: the log does not survive a restart, but a long session
+  // does, and then the time of day alone is not enough to place an entry.
+  static final _time = DateFormat("dd.MM.yy HH:mm:ss");
+
   const _Item({required this.item});
   @override
   Widget build(BuildContext context) {
+    final error = item.error;
     return ExpansionTile(
       title: Text(item.address),
+      // The time is what lets a reader line an entry up with what they just
+      // did; without it the log cannot answer "did that tap send anything?".
+      subtitle: Text(_time.format(item.timestamp)),
       children: <Widget>[
+        if (error != null)
+          _Detail(type: tr(context).networkError, content: error),
         _Detail(
           type: tr(context).networkParameters,
           content: item.parameters,

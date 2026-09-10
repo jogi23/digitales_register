@@ -16,7 +16,42 @@
   "menuHelp": "Aiuto e feedback",
   "menuRate": "Valuta su Google Play",
   "menuAbout": "Informazioni sull'app",
+  "menuShare": "Condividi l'app",
   "menuLogout": "Esci",
+  "menuClassbook": "Registro di classe",
+  "menuHomeworkOverview": "Compiti",
+  "menuCourseContent": "Materiali didattici",
+  "courseContentPickSubject": "Scegli una materia in alto per caricare i materiali.",
+  "courseContentFailed": "Non è stato possibile caricare i materiali. Forse questa sezione non è accessibile a questo account.",
+  "courseContentEmpty": "Per questa materia non c'è ancora nulla.",
+  "courseContentEntryCount": "{count, plural, =0{nessuna voce} =1{1 voce} other{{count} voci}}",
+  "@courseContentEntryCount": {
+    "placeholders": {
+      "count": {
+        "type": "num",
+        "format": "compact"
+      }
+    }
+  },
+  "homeworkOverviewLoading": "Caricamento dei compiti …",
+  "homeworkOverviewEmpty": "Per le settimane caricate non c'è nessun compito. Apri altre settimane nel calendario e compariranno qui.",
+  "classbookLoading": "Caricamento del registro di classe …",
+  "classbookEmpty": "Per le settimane caricate non c'è nessuna voce. Apri altre settimane nel calendario e compariranno qui.",
+  "classbookEntryCount": "{count, plural, =1{1 voce} other{{count} voci}}",
+  "@classbookEntryCount": {
+    "placeholders": {
+      "count": {
+        "type": "num",
+        "format": "compact"
+      }
+    }
+  },
+  "classbookSubjectFilter": "Materia",
+  "classbookAllSubjects": "Tutte le materie",
+  "settingsClassbook": "Registro di classe",
+  "settingsClassbookView": "Visualizzazione",
+  "classbookViewChronological": "Per giorni",
+  "classbookViewBySubject": "Per materia",
   "noConnection": "Nessuna connessione",
   "gradesAverageStars": "Media delle stelle",
   "gradesAverageNumeric": "Media dei voti",
@@ -29,7 +64,6 @@
   "changelogAll": "Tutte le novità",
   "changelogTitle": "Novità",
   "changelogEmpty": "Nessuna voce",
-  "dashboardTitle": "Registro",
   "dashboardNoEntries": "Nessuna voce presente",
   "dashboardNewEntries": "Nuove voci",
   "dashboardPast": "Passato",
@@ -128,8 +162,6 @@
   "calendarNoLessons": "Nessuna lezione in questa settimana",
   "calendarFree": "Libero",
   "settingsTitle": "Impostazioni",
-  "settingsShare": "Condividi l'app con altri genitori o compagni",
-  "settingsShareSubtitle": "Invito con il link al Play Store",
   "settingsProfile": "Profilo",
   "settingsSectionLogin": "Accesso",
   "settingsStayLoggedIn": "Resta connesso",
@@ -211,9 +243,41 @@
   "networkNothing": "Niente da mostrare",
   "networkParameters": "Parametri",
   "networkResponse": "Risposta",
+  "networkError": "Errore",
   "networkCopied": "Copiato negli appunti",
   "errorConnectionFailed": "Connessione non riuscita",
   "errorLoadingSavedData": "Errore nel caricamento dei dati salvati",
+  "commonBack": "Indietro",
+  "errorPageTitle": "Errore",
+  "errorReportedAutomatically": "L'errore è stato segnalato automaticamente.",
+  "errorOccurred": "Si è verificato un errore.",
+  "errorUnexpectedLogout": "Questo errore può verificarsi quando due dispositivi accedono contemporaneamente allo stesso account.\nIn tal caso prova a chiudere l'app e ad aprirla di nuovo.\n\nSe non è questo il caso, scrivici, così possiamo correggerlo.",
+  "errorWhileParsing": "Si è verificato un errore durante la lettura dei dati.\nScrivici, così possiamo correggerlo.\nTieni presente che il registro degli errori può contenere dati personali.",
+  "errorMaybeUnsupported": "Una funzione potrebbe non essere ancora supportata.\nScrivici, così possiamo correggerlo:",
+  "errorLogLabel": "Registro degli errori:",
+  "loginEnterSomething": "Inserisci i dati",
+  "loginUserTypeUnsupported": "Questo tipo di utente non è supportato.",
+  "errorNoConnectionTo": "Nessuna connessione con «{url}»",
+  "@errorNoConnectionTo": {
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "loginSorry": "Ci dispiace!",
+  "loginOnlyStudentsAndParents": "Questa app è pensata esclusivamente per studentesse, studenti e genitori.",
+  "fileExistsTitle": "Il file esiste già",
+  "fileExistsBody": "Il file «{fileName}» è già presente nella cartella Download.\n\nScaricandolo di nuovo, quello esistente verrà sostituito.",
+  "@fileExistsBody": {
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      }
+    }
+  },
+  "fileExistsUseExisting": "Usa il file esistente",
+  "fileExistsDownloadAgain": "Scarica di nuovo",
   "passwordChanged": "Password cambiata",
   "errorReinstall": "Prova a reinstallare l'app.",
   "errorReinstallPrefixed": "Errore: prova a reinstallare l'app.",

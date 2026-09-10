@@ -16,7 +16,42 @@
   "menuHelp": "Help and feedback",
   "menuRate": "Rate on Google Play",
   "menuAbout": "About this app",
+  "menuShare": "Share the app",
   "menuLogout": "Sign out",
+  "menuClassbook": "Class log",
+  "menuHomeworkOverview": "Homework",
+  "menuCourseContent": "Course materials",
+  "courseContentPickSubject": "Pick a subject above to load its materials.",
+  "courseContentFailed": "The materials could not be loaded. This section may not be open to this account.",
+  "courseContentEmpty": "Nothing has been added for this subject yet.",
+  "courseContentEntryCount": "{count, plural, =0{no entries} =1{1 entry} other{{count} entries}}",
+  "@courseContentEntryCount": {
+    "placeholders": {
+      "count": {
+        "type": "num",
+        "format": "compact"
+      }
+    }
+  },
+  "homeworkOverviewLoading": "Loading the assignments …",
+  "homeworkOverviewEmpty": "Nothing assigned for the weeks loaded so far. Open more weeks in the calendar and they will show up here.",
+  "classbookLoading": "Loading the class log …",
+  "classbookEmpty": "Nothing recorded for the weeks loaded so far. Open more weeks in the calendar and they will show up here.",
+  "classbookEntryCount": "{count, plural, =1{1 entry} other{{count} entries}}",
+  "@classbookEntryCount": {
+    "placeholders": {
+      "count": {
+        "type": "num",
+        "format": "compact"
+      }
+    }
+  },
+  "classbookSubjectFilter": "Subject",
+  "classbookAllSubjects": "All subjects",
+  "settingsClassbook": "Class log",
+  "settingsClassbookView": "Arrangement",
+  "classbookViewChronological": "By day",
+  "classbookViewBySubject": "By subject",
   "noConnection": "No connection",
   "gradesAverageStars": "Star average",
   "gradesAverageNumeric": "Grade average",
@@ -29,7 +64,6 @@
   "changelogAll": "All changes",
   "changelogTitle": "What's new",
   "changelogEmpty": "Nothing here",
-  "dashboardTitle": "Register",
   "dashboardNoEntries": "Nothing here",
   "dashboardNewEntries": "New entries",
   "dashboardPast": "Past",
@@ -128,8 +162,6 @@
   "calendarNoLessons": "No lessons this week",
   "calendarFree": "Free",
   "settingsTitle": "Settings",
-  "settingsShare": "Share the app with other parents or classmates",
-  "settingsShareSubtitle": "An invitation with the Play Store link",
   "settingsProfile": "Profile",
   "settingsSectionLogin": "Sign-in",
   "settingsStayLoggedIn": "Stay signed in",
@@ -211,9 +243,41 @@
   "networkNothing": "Nothing here",
   "networkParameters": "Parameters",
   "networkResponse": "Response",
+  "networkError": "Error",
   "networkCopied": "Copied to the clipboard",
   "errorConnectionFailed": "Connection failed",
   "errorLoadingSavedData": "The saved data could not be loaded",
+  "commonBack": "Back",
+  "errorPageTitle": "Error",
+  "errorReportedAutomatically": "The error has been reported automatically.",
+  "errorOccurred": "Something went wrong.",
+  "errorUnexpectedLogout": "This can happen when two devices use the same account at the same time.\nIf so, try closing the app and opening it again.\n\nIf that is not the case, please let us know so we can fix it.",
+  "errorWhileParsing": "Something went wrong while reading the data.\nPlease let us know so we can fix it.\nNote that the error log may contain personal data.",
+  "errorMaybeUnsupported": "A feature may not be supported yet.\nPlease let us know so we can fix it:",
+  "errorLogLabel": "Error log:",
+  "loginEnterSomething": "Please fill in both fields",
+  "loginUserTypeUnsupported": "This kind of account is not supported.",
+  "errorNoConnectionTo": "Cannot reach \"{url}\"",
+  "@errorNoConnectionTo": {
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "loginSorry": "Sorry!",
+  "loginOnlyStudentsAndParents": "This app is meant for students and parents only.",
+  "fileExistsTitle": "The file already exists",
+  "fileExistsBody": "The file \"{fileName}\" is already in the downloads folder.\n\nDownloading it again will replace the existing one.",
+  "@fileExistsBody": {
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      }
+    }
+  },
+  "fileExistsUseExisting": "Keep the existing file",
+  "fileExistsDownloadAgain": "Download again",
   "passwordChanged": "Password changed",
   "errorReinstall": "Please try reinstalling the app.",
   "errorReinstallPrefixed": "Error: please try reinstalling the app.",

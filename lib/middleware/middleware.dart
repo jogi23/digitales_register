@@ -117,43 +117,35 @@ Future<void> _handleError(dynamic e, StackTrace? trace) async {
   await navigatorKey?.currentState?.push(
     MaterialPageRoute<void>(
       fullscreenDialog: true,
-      builder: (_) {
+      builder: (context) {
+        final l = tr(context);
+        // Der Hinweis richtet sich nach der Art des Fehlers: Ein
+        // unerwarteter Abmeldevorgang hat eine bekannte Ursache, ein
+        // Lesefehler eine andere, alles Übrige bleibt offen.
+        final hinweis = e is UnexpectedLogoutException
+            ? l.errorUnexpectedLogout
+            : e is ParseException
+                ? l.errorWhileParsing
+                : l.errorMaybeUnsupported;
         return Scaffold(
           appBar: AppBar(
             backgroundColor: Colors.red,
-            title: const Text("Fehler!"),
+            title: Text(l.errorPageTitle),
           ),
           body: ListView(
             padding: const EdgeInsets.all(16),
             children: <Widget>[
-              const Center(
+              Center(
                 child: Text(
-                  "Der Fehler wurde automatisch gemeldet.",
-                  style: TextStyle(fontStyle: FontStyle.italic),
+                  l.errorReportedAutomatically,
+                  style: const TextStyle(fontStyle: FontStyle.italic),
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
-                  """
-Ein Fehler ist aufgetreten.
-${e is UnexpectedLogoutException ? """
-
-Dieser Fehler kann auftreten, wenn zwei Geräte gleichzeitig auf dasselbe Konto zugreifen.
-In diesem Fall kannst du versuchen, die App zu schließen und erneut zu öffnen.
-
-Falls dies nicht zutrifft, bitte benachrichtige uns, damit wir diesen Fehler beheben können.""" : e is ParseException ? """
-
-Beim Einlesen der Daten ist ein Fehler aufgetreten.
-Bitte benachrichtige uns, damit wir diesen Fehler beheben können.
-Bitte beachte, dass das Fehlerprotokoll möglicherweise private Daten enthält.""" : """
-
-Eine Funktion wird eventuell noch nicht unterstützt.
-Bitte benachrichtige uns, damit wir diesen Fehler beheben können:"""}
-
- --  Fehlerprotokoll: --
-
-$error""",
+                  "${l.errorOccurred}\n\n$hinweis\n\n"
+                  " --  ${l.errorLogLabel} --\n\n$error",
                 ),
               ),
             ],
@@ -568,19 +560,16 @@ Future<bool?> askShouldOverwriteFile(String fileName) async {
     DialogRoute(
       builder: (context) {
         return InfoDialog(
-          title: const Text("Datei existiert bereits"),
-          content: Text(
-            "Die Datei \"$fileName\" ist bereits im Downloads-Ordner vorhanden.\n\n"
-            "Wenn die Datei erneut heruntergeladen wird, wird die bestehende Datei ersetzt.",
-          ),
+          title: Text(tr(context).fileExistsTitle),
+          content: Text(tr(context).fileExistsBody(fileName)),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text("Bestehende Datei verwenden"),
+              child: Text(tr(context).fileExistsUseExisting),
             ),
             TextButton(
               onPressed: () => Navigator.pop(context, true),
-              child: const Text("Erneut herunterladen"),
+              child: Text(tr(context).fileExistsDownloadAgain),
             ),
           ],
         );

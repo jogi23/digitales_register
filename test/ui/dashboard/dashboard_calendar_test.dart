@@ -34,8 +34,14 @@ import 'package:intl/date_symbol_data_local.dart';
 import '../../fixtures/api_fixtures.dart';
 
 class _TestDashboardNotifier extends DashboardNotifier {
-  _TestDashboardNotifier(this._initialState);
+  _TestDashboardNotifier(this._initialState, {this.marksLoading = false});
   final DashboardState _initialState;
+
+  /// Whether fetching flips the loading flag, as the real notifier does.
+  ///
+  /// Not for the first call: the calendar asks once as it opens, and a test
+  /// that starts out loading can never settle.
+  final bool marksLoading;
 
   @override
   DashboardState build() => _initialState;
@@ -48,6 +54,9 @@ class _TestDashboardNotifier extends DashboardNotifier {
   @override
   Future<void> loadBothDirections() async {
     bothDirectionsCalls++;
+    if (marksLoading && bothDirectionsCalls > 1) {
+      state = state.rebuild((b) => b..loading = true);
+    }
     // Answers with the same days, as the server does for a span it has
     // nothing for — but the rebuild is real, and that rebuild is what used
     // to throw the calendar back to its starting month.
@@ -113,9 +122,11 @@ Future<void> main() async {
     required bool calendarView,
     Brightness brightness = Brightness.light,
     bool loading = false,
+    bool marksLoading = false,
   }) {
     notifier = _TestDashboardNotifier(
       loading ? _mayState.rebuild((b) => b..loading = true) : _mayState,
+      marksLoading: marksLoading,
     );
     return ProviderScope(
       overrides: [
@@ -162,6 +173,20 @@ Future<void> main() async {
   Future<void> tapDay(WidgetTester tester, String dayOfMonth) async {
     await tester.tap(find.text(dayOfMonth).first);
     await tester.pumpAndSettle();
+  }
+
+  /// Whether the given week number is drawn as the picked one.
+  ///
+  /// The number carries a filled background then; a picked week is otherwise
+  /// only a tint across its days, which no finder can tell from a loaded one.
+  bool isWeekPicked(WidgetTester tester, int week) {
+    final box = tester.widget<DecoratedBox>(
+      find.descendant(
+        of: find.byTooltip('Kalenderwoche $week'),
+        matching: find.byType(DecoratedBox),
+      ),
+    );
+    return (box.decoration as BoxDecoration).color != null;
   }
 
   group('switching views', () {
@@ -405,6 +430,30 @@ Future<void> main() async {
       await tester.tap(find.byTooltip('Kalenderwoche 20'));
       await tester.pumpAndSettle();
       expect(find.text('Tag auswählen'), findsOneWidget);
+    });
+
+    testWidgets('one that has to be fetched stays picked', (tester) async {
+      // Fetching flips the loading flag, and that used to take a widget out
+      // of the tree above the calendar: the selection was thrown away and
+      // the view jumped back to today before the week could even be read.
+      await tester.pumpWidget(
+        dashboard(calendarView: true, marksLoading: true),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byTooltip('Kalenderwoche 18'));
+      await tester.pump();
+
+      expect(
+        find.byTooltip('Kalenderwoche 18'),
+        findsOneWidget,
+        reason: 'the view should have stayed on May',
+      );
+      expect(
+        isWeekPicked(tester, 18),
+        isTrue,
+        reason: 'the tapped week should still be picked',
+      );
     });
 
     testWidgets('a week reaching outside the loaded span reports that',

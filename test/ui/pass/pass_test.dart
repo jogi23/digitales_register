@@ -202,6 +202,14 @@ void main() {
     await startApp(null);
     await tester.pumpAndSettle();
 
+    // Das Menü ist inzwischen länger als der Bildschirm; ohne Scrollen
+    // ginge der Tipp ins Leere.
+    await tester.scrollUntilVisible(
+      find.byIcon(Icons.settings),
+      500,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
     await tester.tap(find.byIcon(Icons.settings));
     await tester.pumpAndSettle();
 
