@@ -51,6 +51,12 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 - Farbe der Sterne in den Einstellungen wählbar, mit je einem Ton für den hellen und den dunklen Modus
 - Konto in den Einstellungen und über den Namen im Menü erreichbar
 - Diese Neuerungen erscheinen nach einem Update direkt im Merkheft
+- Merkheft: zwei Kalenderansichten neben der Liste — Monatskalender und Wochenplan
+- Merkheft: die Kalenderansichten laden Vergangenheit und Zukunft nach; eine Schaltfläche springt zur aktuellen Woche
+- Merkheft: Fachfarben, hervorgehobener heutiger Tag und Kalenderwochen in den neuen Ansichten
+- Merkheft: der Tageskopf nennt die Einträge des Tages; ein Tag lässt sich in Vollbild öffnen
+- Kalender: Uhrzeit je Stunde, Pausen sind als solche zu sehen
+- „App teilen“ in den Einstellungen und „Bei Google Play bewerten“ im Menü
 
 ### Verbesserungen
 
@@ -60,11 +66,24 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 - Einstellungen zu Aussehen, Fächern, Merkheft und Noten gelten für alle Konten
 - Bewertungen: gruppierte Einträge sind als Unterebene des Fachs erkennbar
 - Bewertungen: Kompetenzsterne stehen immer unter ihrem Namen
+- Eine Stunde mit Hausaufgabe öffnet den zugehörigen Tag; Überschriften im Merkheft sind hervorgehoben
+- Nach mehrfacher Nutzung fragt die App einmal nach einer Bewertung im Store
+- Schrift auf farbigen Flächen folgt dem tatsächlichen Kontrast statt einer festen Regel
 
 ### Fehlerbehebungen
 
 - Ein Konto ohne gespeicherten Stand übernimmt nicht mehr die Einstellungen des zuvor genutzten Kontos
 - Die Sterne im Merkheft und in den Bewertungen haben wieder dieselbe Farbe
+- Merkheft: Einträge im Wochenplan sind sichtbar und lassen sich dort anlegen
+- Merkheft: die Tagesansicht folgt Änderungen am Bestand
+- Merkheft: die Farbe folgt den Einträgen, die Erinnerung stammt aus der gewählten Woche
+- Merkheft: Ausgrauen im Dunkelmodus und der Hinweis bei leeren Tagen korrigiert
+- Merkheft: es steht jetzt da, wenn der Server für den Zeitraum nichts liefert
+- Kalender: eine leere Woche ist vom Ladevorgang zu unterscheiden
+- Kalender: die Mittagspause erscheint auch bei durchgehendem Fach
+- Konten: die Initialen kommen aus dem Namen statt aus der Matrikelnummer
+- Konten: das Häkchen zum Bestätigen des Alias ist klar zu sehen
+- Das Menü öffnete sich nach der Rückkehr aus einer Menüseite von selbst
 
 ### Intern
 
@@ -131,6 +150,10 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 
 ## 1.1.4 — 2026-06-09
 
+### Verbesserungen
+
+- Eigenes App-Symbol, das sich der Form des Geräts anpasst, und ein eigener Startbildschirm
+
 ### Fehlerbehebungen
 
 - Nach einem Neustart ohne Internet werden Bewertungen, Kalender, Mitteilungen, Absenzen, Benachrichtigungen und Profil wieder korrekt angezeigt
@@ -154,6 +177,7 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 
 - Android Gradle Plugin und Kotlin aktualisiert
 - flutter_markdown durch flutter_markdown_plus ersetzt
+- Die Neuerungen werden aus den GitHub-Releases geladen
 
 ## 1.1.2 — 2026-06-01
 
@@ -163,6 +187,7 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 - Kalender: „Aktuelle Woche“ ist immer sichtbar und in der laufenden Woche ausgegraut
 - Benachrichtigungen: „Mitteilung öffnen“ führt zur betreffenden Mitteilung statt zur Liste
 - „Über diese App“: „Neuerungen“ öffnet diese Liste
+- „Über diese App“ zeigt das App-Symbol
 
 ## 1.1.1 — 2026-06-01
 
@@ -176,6 +201,10 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 - Gelesene Mitteilungen galten nach Neustart, Seitenwechsel oder Kontowechsel wieder als ungelesen
 
 ## 1.1.0 — 2026-06-01
+
+### Verbesserungen
+
+- Kalender und Merkheft bekommen farbige Hintergründe
 
 ### Intern
 
