@@ -24,9 +24,16 @@ import 'package:intl/date_symbol_data_local.dart';
 
 class _StubChangelog extends Changelog {
   final List<ChangelogEntry> entries;
-  _StubChangelog(this.entries);
+
+  /// What the reader had seen before the installed version, as the real one
+  /// would read it back from the preferences.
+  final String? previous;
+
+  _StubChangelog(this.entries, {this.previous});
   @override
   Future<List<ChangelogEntry>> load() async => entries;
+  @override
+  Future<String?> previousSeen() async => previous;
 }
 
 Future<void> main() async {
@@ -121,6 +128,45 @@ Future<void> main() async {
     await pumpPage(tester);
     expect(find.text(newest), findsOneWidget);
     expect(find.text('Keine Einträge'), findsNothing);
+  });
+
+  testWidgets('marks the releases that came with the update', (tester) async {
+    changelog = _StubChangelog(
+      const [
+        ChangelogEntry(
+          version: '1.3.0',
+          sections: [
+            ChangelogSection(title: 'Neue Funktionen', items: ['Klassenbuch']),
+          ],
+        ),
+        ChangelogEntry(
+          version: '1.2.1',
+          sections: [
+            ChangelogSection(title: 'Neue Funktionen', items: ['Merkheft']),
+          ],
+        ),
+      ],
+      previous: '1.2.1',
+    );
+    await pumpPage(tester);
+    // One mark, and it belongs to the release above the one last seen.
+    expect(find.text('(neu)'), findsOneWidget);
+    final marked = tester.getTopLeft(find.text('(neu)'));
+    expect(marked.dy, lessThan(tester.getTopLeft(find.text('1.2.1')).dy));
+  });
+
+  testWidgets('marks nothing when no earlier version is known', (tester) async {
+    // A fresh install: none of the releases is news to this reader.
+    changelog = _StubChangelog(const [
+      ChangelogEntry(
+        version: '1.3.0',
+        sections: [
+          ChangelogSection(title: 'Neue Funktionen', items: ['Klassenbuch']),
+        ],
+      ),
+    ]);
+    await pumpPage(tester);
+    expect(find.text('(neu)'), findsNothing);
   });
 
   testGoldens('reads as a list of releases', (tester) async {

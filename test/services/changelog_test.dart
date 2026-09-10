@@ -155,6 +155,47 @@ void main() {
     });
   });
 
+  group('marking what came with the update', () {
+    test('keeps the version seen before the current one', () async {
+      SharedPreferences.setMockInitialValues(
+        {'changelog_last_seen': '1.2.1'},
+      );
+      final changelog =
+          Changelog(currentVersion: '1.3.0', freshInstall: false);
+      await changelog.pending();
+      expect(await changelog.previousSeen(), '1.2.1');
+    });
+
+    test('a restart on the same version leaves the mark alone', () async {
+      // The mark has to survive every start until the next update: nobody
+      // opens the list on the same start that brought the update.
+      SharedPreferences.setMockInitialValues(
+        {'changelog_last_seen': '1.2.1'},
+      );
+      await Changelog(currentVersion: '1.3.0', freshInstall: false).pending();
+
+      final next = Changelog(currentVersion: '1.3.0', freshInstall: false);
+      await next.pending();
+      expect(await next.previousSeen(), '1.2.1');
+    });
+
+    test('marks nothing on a fresh install', () async {
+      final changelog =
+          Changelog(currentVersion: '1.3.0', freshInstall: true);
+      await changelog.pending();
+      expect(await changelog.previousSeen(), isNull);
+    });
+
+    test('an update without a stored version marks from the store release',
+        () async {
+      // The same version the card counts from, so both say the same thing.
+      final changelog =
+          Changelog(currentVersion: '1.3.0', freshInstall: false);
+      await changelog.pending();
+      expect(await changelog.previousSeen(), firstPublishedVersion);
+    });
+  });
+
   group('the notes shipped with the app', () {
     test('cover the version being released', () async {
       // Read from pubspec so this fails at the next version bump rather than

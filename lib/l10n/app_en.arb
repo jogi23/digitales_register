@@ -64,6 +64,7 @@
   "changelogAll": "All changes",
   "changelogTitle": "What's new",
   "changelogEmpty": "Nothing here",
+  "changelogNew": "(new)",
   "dashboardNoEntries": "Nothing here",
   "dashboardNewEntries": "New entries",
   "dashboardPast": "Past",
