@@ -16,7 +16,42 @@
   "menuHelp": "Hilfe und Feedback",
   "menuRate": "Bei Google Play bewerten",
   "menuAbout": "Über diese App",
+  "menuShare": "App teilen",
   "menuLogout": "Abmelden",
+  "menuClassbook": "Klassenbuch",
+  "menuHomeworkOverview": "Hausaufgaben",
+  "menuCourseContent": "Unterrichtsmaterialien",
+  "courseContentPickSubject": "Fach oben wählen, um das Material zu laden.",
+  "courseContentFailed": "Das Material konnte nicht geladen werden. Möglicherweise steht dieser Bereich dem Konto nicht offen.",
+  "courseContentEmpty": "Für dieses Fach ist noch nichts hinterlegt.",
+  "courseContentEntryCount": "{count, plural, =0{keine Einträge} =1{1 Eintrag} other{{count} Einträge}}",
+  "@courseContentEntryCount": {
+    "placeholders": {
+      "count": {
+        "type": "num",
+        "format": "compact"
+      }
+    }
+  },
+  "homeworkOverviewLoading": "Die Aufgaben werden geladen …",
+  "homeworkOverviewEmpty": "Für die geladenen Wochen ist nichts aufgegeben. Im Kalender weitere Wochen öffnen, dann erscheinen sie hier.",
+  "classbookLoading": "Das Klassenbuch wird geladen …",
+  "classbookEmpty": "Für die geladenen Wochen ist nichts eingetragen. Im Kalender weitere Wochen öffnen, dann erscheinen sie hier.",
+  "classbookEntryCount": "{count, plural, =1{1 Eintrag} other{{count} Einträge}}",
+  "@classbookEntryCount": {
+    "placeholders": {
+      "count": {
+        "type": "num",
+        "format": "compact"
+      }
+    }
+  },
+  "classbookSubjectFilter": "Fach",
+  "classbookAllSubjects": "Alle Fächer",
+  "settingsClassbook": "Klassenbuch",
+  "settingsClassbookView": "Ansicht",
+  "classbookViewChronological": "Nach Tagen",
+  "classbookViewBySubject": "Nach Fach",
   "noConnection": "Keine Verbindung",
   "gradesAverageStars": "Sternedurchschnitt",
   "gradesAverageNumeric": "Notendurchschnitt",
@@ -128,8 +163,6 @@
   "calendarNoLessons": "Keine Stunden in dieser Woche",
   "calendarFree": "Frei",
   "settingsTitle": "Einstellungen",
-  "settingsShare": "App mit anderen Eltern/Mitschülern teilen",
-  "settingsShareSubtitle": "Einladung samt Link zum Play Store",
   "settingsProfile": "Profil",
   "settingsSectionLogin": "Anmeldung",
   "settingsStayLoggedIn": "Angemeldet bleiben",

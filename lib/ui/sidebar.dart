@@ -29,9 +29,6 @@ class Sidebar extends StatelessWidget {
     super.key,
     required this.drawerExpanded,
     required this.onDrawerExpansionChange,
-    required this.username,
-    required this.alias,
-    required this.userIcon,
     required this.tabletMode,
     required this.goHome,
     required this.currentSelected,
@@ -39,9 +36,11 @@ class Sidebar extends StatelessWidget {
     required this.showAbsences,
     required this.showCalendar,
     required this.showCertificate,
+    required this.showClassbook,
+    required this.showHomeworkOverview,
+    required this.showCourseContent,
     required this.showMessages,
     required this.showSettings,
-    required this.showAccount,
     required this.logout,
   });
 
@@ -51,13 +50,14 @@ class Sidebar extends StatelessWidget {
       showAbsences,
       showCalendar,
       showCertificate,
+      showClassbook,
+      showHomeworkOverview,
+      showCourseContent,
       showMessages,
       showSettings,
-      showAccount,
       logout;
   final bool tabletMode, drawerExpanded;
   final Pages currentSelected;
-  final String? username, alias, userIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -71,18 +71,13 @@ class Sidebar extends StatelessWidget {
       borderRadius: 0,
       minWidth: 70,
       screenPadding: 0,
-      title: Text(alias ?? username ?? "?"),
-      onTitleTap: showAccount,
-      titleTooltip: alias ?? username ?? "?",
+      // Kein Kopf mit Konto: Der Avatar steht in jeder Titelzeile, und das
+      // Menü ist mit vierzehn Punkten ohnehin länger als der Bildschirm.
+      titleTooltip: '',
       toggleTooltipCollapsed: tr(context).menuExpand,
       toggleTooltipExpanded: tr(context).menuCollapse,
       toggleTitle: const SizedBox(),
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      avatar:
-          //"https://vinzentinum.digitalesregister.it/v2/theme/icons/profile_empty.png" is the (ugly) default
-          userIcon?.endsWith("/profile_empty.png") ?? true
-              ? const Icon(Icons.account_circle)
-              : Image.network(userIcon!),
       unselectedIconColor: Theme.of(context).iconTheme.color!,
       selectedIconColor: Theme.of(context).colorScheme.secondary,
       unselectedTextColor: Theme.of(context).textTheme.titleMedium!.color!,
@@ -125,6 +120,24 @@ class Sidebar extends StatelessWidget {
           onPressed: showCertificate,
         ),
         CollapsibleItem(
+          text: tr(context).menuClassbook,
+          icon: Icons.menu_book,
+          isSelected: currentSelected == Pages.classbook,
+          onPressed: showClassbook,
+        ),
+        CollapsibleItem(
+          text: tr(context).menuHomeworkOverview,
+          icon: Icons.assignment_turned_in,
+          isSelected: currentSelected == Pages.homeworkOverview,
+          onPressed: showHomeworkOverview,
+        ),
+        CollapsibleItem(
+          text: tr(context).menuCourseContent,
+          icon: Icons.folder_open,
+          isSelected: currentSelected == Pages.courseContent,
+          onPressed: showCourseContent,
+        ),
+        CollapsibleItem(
           hasDivider: true,
           text: tr(context).menuSettings,
           icon: Icons.settings,
@@ -150,6 +163,11 @@ class Sidebar extends StatelessWidget {
           text: tr(context).menuAbout,
           icon: Icons.info_outline,
           onPressed: () => showAppAboutDialog(context),
+        ),
+        CollapsibleItem(
+          text: tr(context).menuShare,
+          icon: Icons.share,
+          onPressed: () => shareApp(context),
         ),
         CollapsibleItem(
           hasDivider: true,

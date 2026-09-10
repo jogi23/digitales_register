@@ -706,6 +706,15 @@ abstract class CalendarHour
   BuiltList<String> get rooms;
 
   String get subject;
+
+  /// Klasse und Fach, wie der Server sie nummeriert.
+  ///
+  /// Bisher weggeworfen; die Unterrichtsmaterialien brauchen beide, um ihren
+  /// Kurs anzufragen. Nullbar, weil ältere gespeicherte Stände sie nicht
+  /// haben.
+  int? get classId;
+  int? get subjectId;
+
   BuiltList<HomeworkExam> get homeworkExams;
   BuiltList<LessonContent> get lessonContents;
   int get length => toHour - fromHour + 1;

@@ -28,8 +28,6 @@ const _testSize = Size(300, 700);
 
 Widget _build({
   Pages current = Pages.homework,
-  String? username = 'max.mustermann',
-  String? alias,
   bool tabletMode = false,
   bool drawerExpanded = true,
   VoidCallback? onGoHome,
@@ -37,9 +35,11 @@ Widget _build({
   VoidCallback? onShowAbsences,
   VoidCallback? onShowCalendar,
   VoidCallback? onShowCertificate,
+  VoidCallback? onShowClassbook,
+  VoidCallback? onShowHomeworkOverview,
+  VoidCallback? onShowCourseContent,
   VoidCallback? onShowMessages,
   VoidCallback? onShowSettings,
-  VoidCallback? onShowAccount,
   VoidCallback? onLogout,
 }) {
   return MaterialApp(
@@ -50,9 +50,6 @@ Widget _build({
         height: _testSize.height,
         child: Sidebar(
           currentSelected: current,
-          username: username,
-          alias: alias,
-          userIcon: null,
           tabletMode: tabletMode,
           drawerExpanded: drawerExpanded,
           onDrawerExpansionChange: (_) {},
@@ -61,9 +58,11 @@ Widget _build({
           showAbsences: onShowAbsences ?? () {},
           showCalendar: onShowCalendar ?? () {},
           showCertificate: onShowCertificate ?? () {},
+          showClassbook: onShowClassbook ?? () {},
+          showHomeworkOverview: onShowHomeworkOverview ?? () {},
+          showCourseContent: onShowCourseContent ?? () {},
           showMessages: onShowMessages ?? () {},
           showSettings: onShowSettings ?? () {},
-          showAccount: onShowAccount ?? () {},
           logout: onLogout ?? () {},
         ),
       ),
@@ -72,19 +71,6 @@ Widget _build({
 }
 
 void main() {
-  testWidgets('tapping the account name opens the account card',
-      (tester) async {
-    // The name at the top used to be decoration only.
-    var opened = 0;
-    await tester.pumpWidget(_build(onShowAccount: () => opened++));
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.text('max.mustermann'));
-    await tester.pumpAndSettle();
-
-    expect(opened, 1);
-  });
-
   testWidgets('shows all navigation items', (tester) async {
     await tester.pumpWidget(_build());
     await tester.pumpAndSettle();
@@ -94,39 +80,40 @@ void main() {
     expect(find.text('Bewertungen'), findsOneWidget);
     expect(find.text('Mitteilungen'), findsOneWidget);
     expect(find.text('Zeugnis'), findsOneWidget);
+    expect(find.text('Klassenbuch'), findsOneWidget);
     expect(find.text('Einstellungen'), findsOneWidget);
     expect(find.text('Hilfe und Feedback'), findsOneWidget);
-    expect(find.text('Über diese App'), findsOneWidget);
     // The sidebar list is scrollable and doesn't build off-screen items
-    // eagerly, so the last item needs scrolling into view first.
+    // eagerly, so the ones further down need scrolling into view first.
     await tester.scrollUntilVisible(
       find.text('Abmelden'),
       500,
       scrollable: find.byType(Scrollable).first,
     );
     await tester.pumpAndSettle();
+    expect(find.text('Über diese App'), findsOneWidget);
     expect(find.text('Abmelden'), findsOneWidget);
   });
 
-  testWidgets('shows username when no alias', (tester) async {
-    await tester.pumpWidget(_build(username: 'max.mustermann', alias: null));
+  testWidgets('offers sharing between the about entry and signing out',
+      (tester) async {
+    // Der Platz ist gewollt: Teilen gehört zu den Punkten, die nichts mit
+    // dem eigenen Konto zu tun haben, und Abmelden bleibt der letzte.
+    await tester.pumpWidget(_build());
     await tester.pumpAndSettle();
-    expect(find.text('max.mustermann'), findsOneWidget);
-  });
-
-  testWidgets('shows alias instead of username when both set', (tester) async {
-    await tester.pumpWidget(
-      _build(username: 'max.mustermann', alias: 'Max M.'),
+    await tester.scrollUntilVisible(
+      find.text('Abmelden'),
+      500,
+      scrollable: find.byType(Scrollable).first,
     );
     await tester.pumpAndSettle();
-    expect(find.text('Max M.'), findsOneWidget);
-    expect(find.text('max.mustermann'), findsNothing);
-  });
 
-  testWidgets('shows placeholder when no username and no alias', (tester) async {
-    await tester.pumpWidget(_build(username: null, alias: null));
-    await tester.pumpAndSettle();
-    expect(find.text('?'), findsOneWidget);
+    expect(find.text('App teilen'), findsOneWidget);
+    final about = tester.getCenter(find.text('Über diese App')).dy;
+    final share = tester.getCenter(find.text('App teilen')).dy;
+    final logout = tester.getCenter(find.text('Abmelden')).dy;
+    expect(share, greaterThan(about));
+    expect(share, lessThan(logout));
   });
 
   group('callbacks', () {
@@ -177,6 +164,12 @@ void main() {
         (tester) async {
       await tester.pumpWidget(_build());
       await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.text('Über diese App'),
+        500,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Über diese App'));
       await tester.pumpAndSettle();
       expect(find.byType(AboutDialog), findsOneWidget);
@@ -186,6 +179,12 @@ void main() {
         'opens help & feedback page when Hilfe und Feedback tapped',
         (tester) async {
       await tester.pumpWidget(_build());
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.text('Hilfe und Feedback'),
+        500,
+        scrollable: find.byType(Scrollable).first,
+      );
       await tester.pumpAndSettle();
       await tester.tap(find.text('Hilfe und Feedback'));
       await tester.pumpAndSettle();

@@ -41,6 +41,26 @@ void main() {
       expect(after.read(settingsProvider).typeSorted, isFalse);
     });
 
+    test('the classbook subject filter belongs to the account', () async {
+      // Welche Fächer es gibt, hängt am Konto - die Auswahl eines Kindes
+      // sagt nichts über die eines anderen. Die Ansichtsform dagegen ist
+      // Geschmack und gilt app-weit.
+      final before = _makeContainer();
+      before
+          .read(settingsProvider.notifier)
+          .setClassbookSubjects(['Deutsch', 'Musik']);
+      before
+          .read(settingsProvider.notifier)
+          .setClassbookViewMode(ClassbookViewMode.bySubject);
+      await pumpEventQueue();
+
+      final after = _makeContainer();
+      await after.read(settingsProvider.notifier).loadGlobal();
+      expect(after.read(settingsProvider).classbookSubjects, isEmpty);
+      expect(after.read(settingsProvider).classbookViewMode,
+          ClassbookViewMode.bySubject);
+    });
+
     test('logging into an account keeps the app-wide settings', () async {
       final c = _makeContainer();
       c.read(settingsProvider.notifier).setStarColor('teal');

@@ -185,25 +185,6 @@ Future<void> main() async {
     expect(find.byType(Sidebar), findsOneWidget);
   });
 
-  testGoldens('Long user name is wrapped', (WidgetTester tester) async {
-    const longName = "Michael Debertol Elternaccount-1";
-    final widget = ProviderScope(
-      overrides: [
-        loginProvider.overrideWith(
-          () => _TestLoginNotifier(const LoginState(username: longName)),
-        ),
-      ],
-      child: MaterialApp(
-        home: DaysContainer(),
-        theme: ThemeData(
-          primarySwatch: Colors.deepOrange,
-        ),
-      ),
-    );
-    await tester.pumpWidget(widget);
-    await expectLater(find.text(longName), matchesGoldenFile('long_name.png'));
-  });
-
   testGoldens('shows circular progress indicator if there are no entries',
       (WidgetTester tester) async {
     final widget = ProviderScope(
@@ -702,7 +683,7 @@ Future<void> main() async {
       ),
     );
     await tester.pumpWidget(widget);
-    expect(find.byTooltip(username), findsOneWidget);
+    // Der Kopf mit dem Konto ist aus dem Menü heraus; sein Tooltip auch.
     expect(find.byTooltip("Merkheft"), findsOneWidget);
     expect(find.byTooltip("Bewertungen"), findsOneWidget);
     expect(find.byTooltip("Absenzen"), findsOneWidget);

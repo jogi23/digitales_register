@@ -275,6 +275,8 @@ class CalendarNotifier extends Notifier<CalendarState> {
             .map<String>((dynamic r) => r["name"] as String),
       )
       ..subject = getString(lesson["subject"]["name"])
+      ..classId = getInt(lesson["classId"])
+      ..subjectId = getInt(lesson["subject"]["id"])
       ..teachers = ListBuilder(
         getList(lesson["teachers"])!.map<Teacher>(
           (dynamic r) => Teacher(
