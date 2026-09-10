@@ -176,7 +176,9 @@ void main() {
       // The full list is read from the app itself, not fetched from GitHub.
       final entries = await Changelog().load();
       expect(entries.length, greaterThan(1));
-      expect(entries.first.version, '1.2.1');
+      // Against the pubspec rather than a fixed number, which would have to
+      // be raised by hand at every release.
+      expect(entries.first.version, _pubspecVersion());
       expect(entries.last.version, '1.0.0');
       for (var i = 1; i < entries.length; i++) {
         expect(

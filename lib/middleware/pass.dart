@@ -30,13 +30,31 @@ Future<void> _doSaveNoPass(bool value) async {
 
 Future<void> _doSavePass() async {
   if (wrapper.user == null || wrapper.pass == null || wrapper.safeMode) return;
-  final rawOthers = await _readStoredOtherAccounts();
+  final dynamic stored =
+      json.decode(await secureStorage.read(key: "login") ?? "{}");
   // Remove any otherAccount entry that matches the account being saved as
   // current — prevents duplicates when a user re-logs-in with an existing account.
-  final others = (rawOthers as List?)
-      ?.where((dynamic a) =>
-          !(a['user'] == wrapper.user && a['url'] == wrapper.url))
-      .toList();
+  final others = (stored["otherAccounts"] as List?)
+          ?.where((dynamic a) =>
+              !(a['user'] == wrapper.user && a['url'] == wrapper.url))
+          .toList() ??
+      <Object?>[];
+  // Das bisher aktive Konto behält seinen Platz in der Liste. Ohne das
+  // überschriebe das Anmelden eines zweiten Kontos das erste stillschweigend -
+  // beim Wechsel über die Konten-Karte oder das Abmelden ist es bereits
+  // umgezogen und wird hier nicht doppelt eingetragen.
+  final isSameAccount =
+      stored["user"] == wrapper.user && stored["url"] == wrapper.url;
+  if (!isSameAccount &&
+      stored["user"] != null &&
+      stored["pass"] != null &&
+      stored["url"] != null) {
+    others.insert(0, <String, Object?>{
+      "user": stored["user"],
+      "pass": stored["pass"],
+      "url": stored["url"],
+    });
+  }
   await secureStorage.write(
     key: "login",
     value: json.encode(
