@@ -2,28 +2,44 @@
 
 Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` — Änderungen bitte dort eintragen, nicht hier.
 
-## 1.3.0 — 2026-09-09
+## 1.3.0 — 2026-09-10
 
 ### Neue Funktionen
 
 - Die App spricht Italienisch und Englisch. Die Sprache lässt sich in den Einstellungen wählen; ohne eigene Wahl folgt sie dem Gerät.
+- Klassenbuch: alle Unterrichtseinträge auf einer eigenen Seite, wahlweise nach Tagen oder nach Fach
+- Klassenbuch: Fächer über Chips filtern; die Auswahl gilt je Konto
+- Hausaufgaben: Aufgaben und Prüfungen in einer Übersicht, statt nur in der einzelnen Stunde
+- Unterrichtsmaterialien: Themen je Fach mit Dateien, Links und Texten; Dateien landen wie jeder andere Anhang im gewohnten Ordner
 
 ### Verbesserungen
 
 - Ein Link, der die bereits geöffnete App erreicht, springt direkt zur gewünschten Seite, statt die App neu zu laden
 - Bewertungen geben beim Antippen wieder eine sichtbare Rückmeldung
+- Die App ist rund 39 MB kleiner: das Bild des Startbildschirms lag zehnmal im Paket
+- „App teilen“ steht jetzt im Menü bei „Über diese App“ statt oben in den Einstellungen
+- Das Konto ist über den Avatar in der Titelzeile erreichbar; der zweite Zugang oben im Menü entfällt
+- Das Merkheft heißt in der Überschrift wie im Menü
+- Die Kalenderwoche im Merkheft steht in der Akzentfarbe, die gewählte Woche zusätzlich hinterlegt
+- Das Netzwerkprotokoll in der Diagnose hält Zeitpunkt und Fehlergrund jeder Anfrage fest
 
 ### Fehlerbehebungen
 
 - Ein geöffneter Link löscht nicht mehr die gespeicherten Zugangsdaten des gerade verwendeten Kontos
 - Beim Anmelden eines zweiten Kontos bleibt das erste erhalten
 - Die App bleibt sichtbar, wenn sie über einen Link aus dem Hintergrund geholt wird
+- Merkheft: die unterste Zeile der Kalenderansichten liegt nicht mehr unter der Navigationsleiste des Geräts
+- Merkheft: eine noch ladende Woche antippen verwirft die Auswahl nicht mehr
+- Ein Schlüsselspeicher, der sich nicht mehr lesen lässt, wird wieder gemeldet und geleert, statt die Anmeldung stumm scheitern zu lassen
+- Übersehene deutsche Texte in Meldungen und Diensten sowie ein falsches Anführungszeichen übersetzt
 
 ### Intern
 
 - Flutter auf 3.47.2 und das Android-Build-Plugin auf 9.1.0 angehoben; damit entfallen die veralteten Aufrufe für die randlose Anzeige unter Android 15 und neuer
 - Zwei nicht mehr gepflegte Zusatzpakete durch ihre Nachfolger ersetzt
 - Jede Änderung wird vor dem Zusammenführen automatisch geprüft: Codeanalyse und alle Tests
+- iOS wird unsigniert auf einem macOS-Runner mitgebaut
+- Zeilenenden im Projekt vereinheitlicht und per .gitattributes festgehalten
 
 ## 1.2.1 — 2026-09-08
 
