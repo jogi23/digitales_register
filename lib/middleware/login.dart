@@ -75,7 +75,7 @@ Future<void> _doLogin(
 }) async {
   if (user == "" || pass == "") {
     providerContainer.read(loginProvider.notifier).setLoginFailed(
-      cause: "Bitte gib etwas ein",
+      cause: trGlobal.loginEnterSomething,
       username: user,
     );
     await _doDeletePass();
@@ -123,7 +123,7 @@ Future<void> _doLogin(
     if (!wrapper.config.isStudentOrParent) {
       wrapper.logout(hard: true);
       providerContainer.read(loginProvider.notifier).setLoginFailed(
-        cause: "Dieser Benutzertyp wird nicht unterstützt.",
+        cause: trGlobal.loginUserTypeUnsupported,
       );
       await _doDeletePass();
       providerContainer.read(appRouterProvider).showLogin();
@@ -302,7 +302,7 @@ Future<void> _doRequestPassReset(String user, String email) async {
   } catch (e) {
     final loginUrl = providerContainer.read(loginProvider).url;
     if (await cannotConnectTo(loginUrl!)) {
-      final msg = "Keine Verbindung mit \"$loginUrl\" möglich";
+      final msg = trGlobal.errorNoConnectionTo(loginUrl);
       providerContainer.read(loginProvider.notifier).updatePassResetState(
             providerContainer
                 .read(loginProvider)
@@ -489,7 +489,7 @@ void _showUserTypeNotSupported(String url) {
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Text(
-                  "Tut uns leid!",
+                  tr(context).loginSorry,
                   style: Theme.of(context).textTheme.headlineMedium,
                   textAlign: TextAlign.center,
                 ),
@@ -497,7 +497,7 @@ void _showUserTypeNotSupported(String url) {
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Text(
-                  "Diese App ist ausschließlich für Schüler*innen und Eltern geeignet.",
+                  tr(context).loginOnlyStudentsAndParents,
                   style: Theme.of(context).textTheme.headlineSmall,
                   textAlign: TextAlign.center,
                 ),
@@ -507,9 +507,7 @@ void _showUserTypeNotSupported(String url) {
                 children: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text(
-                      "Zurück",
-                    ),
+                    child: Text(tr(context).commonBack),
                   ),
                   const SizedBox(width: 16),
                   ElevatedButton(

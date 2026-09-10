@@ -247,6 +247,37 @@
   "networkCopied": "Copiato negli appunti",
   "errorConnectionFailed": "Connessione non riuscita",
   "errorLoadingSavedData": "Errore nel caricamento dei dati salvati",
+  "commonBack": "Indietro",
+  "errorPageTitle": "Errore",
+  "errorReportedAutomatically": "L'errore è stato segnalato automaticamente.",
+  "errorOccurred": "Si è verificato un errore.",
+  "errorUnexpectedLogout": "Questo errore può verificarsi quando due dispositivi accedono contemporaneamente allo stesso account.\nIn tal caso prova a chiudere l'app e ad aprirla di nuovo.\n\nSe non è questo il caso, scrivici, così possiamo correggerlo.",
+  "errorWhileParsing": "Si è verificato un errore durante la lettura dei dati.\nScrivici, così possiamo correggerlo.\nTieni presente che il registro degli errori può contenere dati personali.",
+  "errorMaybeUnsupported": "Una funzione potrebbe non essere ancora supportata.\nScrivici, così possiamo correggerlo:",
+  "errorLogLabel": "Registro degli errori:",
+  "loginEnterSomething": "Inserisci i dati",
+  "loginUserTypeUnsupported": "Questo tipo di utente non è supportato.",
+  "errorNoConnectionTo": "Nessuna connessione con «{url}»",
+  "@errorNoConnectionTo": {
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "loginSorry": "Ci dispiace!",
+  "loginOnlyStudentsAndParents": "Questa app è pensata esclusivamente per studentesse, studenti e genitori.",
+  "fileExistsTitle": "Il file esiste già",
+  "fileExistsBody": "Il file «{fileName}» è già presente nella cartella Download.\n\nScaricandolo di nuovo, quello esistente verrà sostituito.",
+  "@fileExistsBody": {
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      }
+    }
+  },
+  "fileExistsUseExisting": "Usa il file esistente",
+  "fileExistsDownloadAgain": "Scarica di nuovo",
   "passwordChanged": "Password cambiata",
   "errorReinstall": "Prova a reinstallare l'app.",
   "errorReinstallPrefixed": "Errore: prova a reinstallare l'app.",

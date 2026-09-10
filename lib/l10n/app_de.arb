@@ -247,6 +247,37 @@
   "networkCopied": "In die Zwischenablage kopiert",
   "errorConnectionFailed": "Verbindung fehlgeschlagen",
   "errorLoadingSavedData": "Fehler beim Laden der gespeicherten Daten",
+  "commonBack": "Zurück",
+  "errorPageTitle": "Fehler!",
+  "errorReportedAutomatically": "Der Fehler wurde automatisch gemeldet.",
+  "errorOccurred": "Ein Fehler ist aufgetreten.",
+  "errorUnexpectedLogout": "Dieser Fehler kann auftreten, wenn zwei Geräte gleichzeitig auf dasselbe Konto zugreifen.\nIn diesem Fall kannst du versuchen, die App zu schließen und erneut zu öffnen.\n\nFalls dies nicht zutrifft, bitte benachrichtige uns, damit wir diesen Fehler beheben können.",
+  "errorWhileParsing": "Beim Einlesen der Daten ist ein Fehler aufgetreten.\nBitte benachrichtige uns, damit wir diesen Fehler beheben können.\nBitte beachte, dass das Fehlerprotokoll möglicherweise private Daten enthält.",
+  "errorMaybeUnsupported": "Eine Funktion wird eventuell noch nicht unterstützt.\nBitte benachrichtige uns, damit wir diesen Fehler beheben können:",
+  "errorLogLabel": "Fehlerprotokoll:",
+  "loginEnterSomething": "Bitte gib etwas ein",
+  "loginUserTypeUnsupported": "Dieser Benutzertyp wird nicht unterstützt.",
+  "errorNoConnectionTo": "Keine Verbindung mit „{url}“ möglich",
+  "@errorNoConnectionTo": {
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "loginSorry": "Tut uns leid!",
+  "loginOnlyStudentsAndParents": "Diese App ist ausschließlich für Schüler*innen und Eltern geeignet.",
+  "fileExistsTitle": "Datei existiert bereits",
+  "fileExistsBody": "Die Datei „{fileName}“ ist bereits im Downloads-Ordner vorhanden.\n\nWenn die Datei erneut heruntergeladen wird, wird die bestehende Datei ersetzt.",
+  "@fileExistsBody": {
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      }
+    }
+  },
+  "fileExistsUseExisting": "Bestehende Datei verwenden",
+  "fileExistsDownloadAgain": "Erneut herunterladen",
   "passwordChanged": "Passwort erfolgreich geändert",
   "errorReinstall": "Bitte versuche, die App neu zu installieren.",
   "errorReinstallPrefixed": "Fehler: Bitte versuche, die App neu zu installieren.",

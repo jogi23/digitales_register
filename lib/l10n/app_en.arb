@@ -247,6 +247,37 @@
   "networkCopied": "Copied to the clipboard",
   "errorConnectionFailed": "Connection failed",
   "errorLoadingSavedData": "The saved data could not be loaded",
+  "commonBack": "Back",
+  "errorPageTitle": "Error",
+  "errorReportedAutomatically": "The error has been reported automatically.",
+  "errorOccurred": "Something went wrong.",
+  "errorUnexpectedLogout": "This can happen when two devices use the same account at the same time.\nIf so, try closing the app and opening it again.\n\nIf that is not the case, please let us know so we can fix it.",
+  "errorWhileParsing": "Something went wrong while reading the data.\nPlease let us know so we can fix it.\nNote that the error log may contain personal data.",
+  "errorMaybeUnsupported": "A feature may not be supported yet.\nPlease let us know so we can fix it:",
+  "errorLogLabel": "Error log:",
+  "loginEnterSomething": "Please fill in both fields",
+  "loginUserTypeUnsupported": "This kind of account is not supported.",
+  "errorNoConnectionTo": "Cannot reach \"{url}\"",
+  "@errorNoConnectionTo": {
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "loginSorry": "Sorry!",
+  "loginOnlyStudentsAndParents": "This app is meant for students and parents only.",
+  "fileExistsTitle": "The file already exists",
+  "fileExistsBody": "The file \"{fileName}\" is already in the downloads folder.\n\nDownloading it again will replace the existing one.",
+  "@fileExistsBody": {
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      }
+    }
+  },
+  "fileExistsUseExisting": "Keep the existing file",
+  "fileExistsDownloadAgain": "Download again",
   "passwordChanged": "Password changed",
   "errorReinstall": "Please try reinstalling the app.",
   "errorReinstallPrefixed": "Error: please try reinstalling the app.",
