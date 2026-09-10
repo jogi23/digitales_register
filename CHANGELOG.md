@@ -23,6 +23,7 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 - Die Kalenderwoche im Merkheft steht in der Akzentfarbe, die gewählte Woche zusätzlich hinterlegt
 - Das Netzwerkprotokoll in der Diagnose hält Zeitpunkt und Fehlergrund jeder Anfrage fest
 - Die Liste der Neuerungen kennzeichnet mit „(neu)“, was mit dem letzten Update dazugekommen ist
+- Der Name, mit dem eine Mitteilung unterschrieben wurde, steht beim nächsten Mal schon im Feld
 
 ### Fehlerbehebungen
 
@@ -33,6 +34,7 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 - Merkheft: eine noch ladende Woche antippen verwirft die Auswahl nicht mehr
 - Ein Schlüsselspeicher, der sich nicht mehr lesen lässt, wird wieder gemeldet und geleert, statt die Anmeldung stumm scheitern zu lassen
 - Übersehene deutsche Texte in Meldungen und Diensten sowie ein falsches Anführungszeichen übersetzt
+- Eine Bestätigung, die den Server nicht erreicht, wird als solche gemeldet, statt den Knopf stumm zu sperren
 
 ### Intern
 

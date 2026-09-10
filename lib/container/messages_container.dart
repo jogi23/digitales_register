@@ -18,6 +18,7 @@
 
 import 'package:dr/providers/messages_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
+import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/ui/messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -27,6 +28,8 @@ class MessagesPageContainer extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final messagesState = ref.watch(messagesProvider);
     final noInternet = ref.watch(noInternetProvider);
+    final signature =
+        ref.watch(settingsProvider.select((s) => s.messageSignature));
     return MessagesPage(
       state: messagesState,
       noInternet: noInternet,
@@ -41,6 +44,9 @@ class MessagesPageContainer extends ConsumerWidget {
                 response: response,
                 signature: signature,
               ),
+      signature: signature,
+      onSignature: (name) =>
+          ref.read(settingsProvider.notifier).setMessageSignature(name),
       onMarkAllAsRead: () =>
           ref.read(messagesProvider.notifier).markAllAsRead(),
       onRefresh: () => noInternet

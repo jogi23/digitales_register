@@ -43,7 +43,8 @@ void main() {
   setUp(() async {
     wrapper = MockWrapper();
     when(() => wrapper.noInternet).thenReturn(false);
-    when(() => wrapper.send(any(), args: any(named: 'args')))
+    when(() => wrapper.send(any(),
+            args: any(named: 'args'), onError: any(named: 'onError')))
         .thenAnswer((_) async => fixtureFor('api/message/getMyMessages'));
     container = ProviderContainer();
     await container.read(messagesProvider.notifier).load();
@@ -87,7 +88,8 @@ void main() {
   group('reply', () {
     Map<String, dynamic> capturedArgs() =>
         verify(() => wrapper.send('api/message/reply',
-                args: captureAny(named: 'args')))
+                args: captureAny(named: 'args'),
+                onError: any(named: 'onError')))
             .captured
             .single as Map<String, dynamic>;
 
@@ -128,6 +130,45 @@ void main() {
           .read(messagesProvider.notifier)
           .reply(_agreeOpenId, response: MessageResponseInfo.answerAgree);
       expect(container.read(messagesProvider).messages, isNotEmpty);
+    });
+
+    test('reports the message it answered as answered', () async {
+      // The fixture has this one signed already, so the reload the reply
+      // triggers finds it answered — which is what the caller asks about.
+      final answered = await container
+          .read(messagesProvider.notifier)
+          .reply(_signedId, signature: 'Max Mustermann');
+      expect(answered, isTrue);
+    });
+
+    test('an empty answer is no confirmation', () async {
+      // What the portal really does: it takes the request and returns
+      // nothing. The state has to come from asking again, and an unanswered
+      // message must not read as sent.
+      when(() => wrapper.send('api/message/reply',
+              args: any(named: 'args'), onError: any(named: 'onError')))
+          .thenAnswer((_) async => null);
+      final answered = await container
+          .read(messagesProvider.notifier)
+          .reply(_agreeOpenId, response: MessageResponseInfo.answerAgree);
+      expect(answered, isFalse);
+      verify(() => wrapper.send('api/message/getMyMessages')).called(2);
+    });
+
+    test('a failed request is no confirmation', () async {
+      when(() => wrapper.send('api/message/reply',
+              args: any(named: 'args'),
+              onError: any(named: 'onError'))).thenAnswer((invocation) async {
+        (invocation.namedArguments[#onError] as void Function(Object))
+            .call(Exception('offline'));
+        return null;
+      });
+      final answered = await container
+          .read(messagesProvider.notifier)
+          .reply(_agreeOpenId, response: MessageResponseInfo.answerAgree);
+      expect(answered, isFalse);
+      // Nothing is asked either: the request never left.
+      verify(() => wrapper.send('api/message/getMyMessages')).called(1);
     });
   });
 }
