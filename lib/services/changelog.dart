@@ -115,6 +115,15 @@ List<ChangelogEntry> entriesBetween({
 /// Decides what the reader gets to see after an update, and remembers it.
 class Changelog {
   static const _lastSeenKey = 'changelog_last_seen';
+
+  /// What [_lastSeenKey] held before the current version was written there.
+  ///
+  /// The list marks everything newer than this as new, and needs its own key
+  /// for it: [_lastSeenKey] is already up to date by the time anyone opens
+  /// the list, because [_decide] records the current version as soon as it
+  /// has decided about the card.
+  static const _previousSeenKey = 'changelog_previous_seen';
+
   static const _asset = 'assets/changelog.json';
 
   /// Both are read from the running build unless a test says otherwise.
@@ -142,13 +151,13 @@ class Changelog {
     if (lastSeen == null && (_freshInstall ?? _installedButNeverUpdated)) {
       // Nothing to catch up on: the notes would be about versions this reader
       // never had.
-      await prefs.setString(_lastSeenKey, current);
+      await _record(prefs, current: current, before: lastSeen);
       return const [];
     }
     final from = lastSeen ?? firstPublishedVersion;
     if (compareVersions(current, from) <= 0) {
       // Same version, or an older one installed over a newer one.
-      await prefs.setString(_lastSeenKey, current);
+      await _record(prefs, current: current, before: lastSeen);
       return const [];
     }
 
@@ -159,9 +168,32 @@ class Changelog {
     );
     // Recorded as soon as it is decided, not when the card is dismissed:
     // otherwise the card returns at every start until someone closes it.
-    await prefs.setString(_lastSeenKey, current);
+    await _record(prefs, current: current, before: from);
     return entries;
   }
+
+  /// Notes [current] as seen, keeping [before] as the version seen until now.
+  ///
+  /// The older value only moves when it is genuinely older: every start after
+  /// the update passes the current version as [before], and overwriting would
+  /// drop the mark before the reader has had a chance to look at the list.
+  Future<void> _record(
+    SharedPreferences prefs, {
+    required String current,
+    required String? before,
+  }) async {
+    if (before != null && compareVersions(before, current) < 0) {
+      await prefs.setString(_previousSeenKey, before);
+    }
+    await prefs.setString(_lastSeenKey, current);
+  }
+
+  /// The version this reader had seen before the one now installed.
+  ///
+  /// Null on a fresh install and until the first update after this feature
+  /// shipped — nothing is marked as new then, which is what those cases mean.
+  Future<String?> previousSeen() async =>
+      (await SharedPreferences.getInstance()).getString(_previousSeenKey);
 
   /// Whether the app was installed rather than updated.
   ///

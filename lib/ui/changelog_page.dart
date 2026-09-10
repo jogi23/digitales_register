@@ -32,29 +32,42 @@ class ChangelogPage extends StatefulWidget {
 }
 
 class _ChangelogPageState extends State<ChangelogPage> {
-  late final Future<List<ChangelogEntry>> _entries = changelog.load();
+  late final Future<_Notes> _notes = _load();
+
+  /// The list and the mark it needs, fetched together so the page does not
+  /// build once without knowing which releases are new.
+  Future<_Notes> _load() async => (
+        entries: await changelog.load(),
+        previousSeen: await changelog.previousSeen(),
+      );
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(tr(context).changelogTitle)),
-      body: FutureBuilder<List<ChangelogEntry>>(
-        future: _entries,
+      body: FutureBuilder<_Notes>(
+        future: _notes,
         builder: (context, snapshot) {
-          final entries = snapshot.data;
-          if (entries == null) {
+          final notes = snapshot.data;
+          if (notes == null) {
             return const Center(child: CircularProgressIndicator());
           }
+          final entries = notes.entries;
           if (entries.isEmpty) {
             return Center(child: Text(tr(context).changelogEmpty));
           }
+          final previousSeen = notes.previousSeen;
           return ListView.builder(
             padding: EdgeInsets.only(
               top: 8,
               bottom: MediaQuery.of(context).viewPadding.bottom + 24,
             ),
             itemCount: entries.length,
-            itemBuilder: (context, index) => _Release(entry: entries[index]),
+            itemBuilder: (context, index) => _Release(
+              entry: entries[index],
+              isNew: previousSeen != null &&
+                  compareVersions(entries[index].version, previousSeen) > 0,
+            ),
           );
         },
       ),
@@ -62,10 +75,17 @@ class _ChangelogPageState extends State<ChangelogPage> {
   }
 }
 
+/// What the page needs to draw itself: the releases, and the version the
+/// reader had before this one.
+typedef _Notes = ({List<ChangelogEntry> entries, String? previousSeen});
+
 class _Release extends StatelessWidget {
   final ChangelogEntry entry;
 
-  const _Release({required this.entry});
+  /// Whether this release arrived with the update the reader just got.
+  final bool isNew;
+
+  const _Release({required this.entry, required this.isNew});
 
   /// "11. Juli 2026", or nothing when the file carries no date.
   String? date(BuildContext context) {
@@ -106,6 +126,16 @@ class _Release extends StatelessWidget {
                 style: theme.textTheme.titleLarge
                     ?.copyWith(fontWeight: FontWeight.w600),
               ),
+              if (isNew) ...[
+                const SizedBox(width: 6),
+                Text(
+                  tr(context).changelogNew,
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
               if (date != null) ...[
                 const SizedBox(width: 8),
                 Text(

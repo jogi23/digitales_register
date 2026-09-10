@@ -22,6 +22,7 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 - Das Merkheft heißt in der Überschrift wie im Menü
 - Die Kalenderwoche im Merkheft steht in der Akzentfarbe, die gewählte Woche zusätzlich hinterlegt
 - Das Netzwerkprotokoll in der Diagnose hält Zeitpunkt und Fehlergrund jeder Anfrage fest
+- Die Liste der Neuerungen kennzeichnet mit „(neu)“, was mit dem letzten Update dazugekommen ist
 
 ### Fehlerbehebungen
 
