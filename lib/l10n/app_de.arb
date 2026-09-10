@@ -257,7 +257,7 @@
   "errorLogLabel": "Fehlerprotokoll:",
   "loginEnterSomething": "Bitte gib etwas ein",
   "loginUserTypeUnsupported": "Dieser Benutzertyp wird nicht unterstützt.",
-  "errorNoConnectionTo": "Keine Verbindung mit „{url}\" möglich",
+  "errorNoConnectionTo": "Keine Verbindung mit „{url}“ möglich",
   "@errorNoConnectionTo": {
     "placeholders": {
       "url": {
@@ -268,7 +268,7 @@
   "loginSorry": "Tut uns leid!",
   "loginOnlyStudentsAndParents": "Diese App ist ausschließlich für Schüler*innen und Eltern geeignet.",
   "fileExistsTitle": "Datei existiert bereits",
-  "fileExistsBody": "Die Datei „{fileName}\" ist bereits im Downloads-Ordner vorhanden.\n\nWenn die Datei erneut heruntergeladen wird, wird die bestehende Datei ersetzt.",
+  "fileExistsBody": "Die Datei „{fileName}“ ist bereits im Downloads-Ordner vorhanden.\n\nWenn die Datei erneut heruntergeladen wird, wird die bestehende Datei ersetzt.",
   "@fileExistsBody": {
     "placeholders": {
       "fileName": {
