@@ -52,7 +52,7 @@ class _SplashWidget extends StatelessWidget {
     return Scaffold(
       body: Center(
         child: Image.asset(
-          darkMode ? "assets/splash-dark.png" : "assets/splash-light.png",
+          darkMode ? "assets/splash-dark.webp" : "assets/splash-light.webp",
         ),
       ),
     );
