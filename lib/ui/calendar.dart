@@ -447,8 +447,10 @@ class EditNickBar extends StatelessWidget {
           ),
         ],
       ),
-      secondChild: Container(
-        height: 8,
+      secondChild: SizedBox(
+        // Same job the bar does when it is out: keep the timetable, which
+        // fills the height rather than scrolling, off the system bar.
+        height: 8 + MediaQuery.of(context).viewPadding.bottom,
       ),
       crossFadeState:
           show ? CrossFadeState.showFirst : CrossFadeState.showSecond,

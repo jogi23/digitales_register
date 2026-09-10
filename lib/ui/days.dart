@@ -416,10 +416,16 @@ class _DaysWidgetState extends State<DaysWidget> {
         noInternet: widget.vm.noInternet,
         lastFetched: lastFetched,
         child: widget.vm.viewMode != DashboardViewMode.list
-            ? Column(
-                // No past/future switch here: both directions are loaded,
-                // and these views navigate by month and week instead.
-                children: <Widget>[Expanded(child: _calendarBody())],
+            ? Padding(
+                // These views fill the height instead of scrolling, so the
+                // system navigation bar would sit on top of the last row.
+                padding: EdgeInsets.only(
+                    bottom: MediaQuery.of(context).viewPadding.bottom),
+                child: Column(
+                  // No past/future switch here: both directions are loaded,
+                  // and these views navigate by month and week instead.
+                  children: <Widget>[Expanded(child: _calendarBody())],
+                ),
               )
             : ListView.builder(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -439,12 +445,15 @@ class _DaysWidgetState extends State<DaysWidget> {
           },
         ),
       );
-      if (!noInternet && !widget.vm.loading) {
-        body = RefreshIndicator(
-          onRefresh: () async => widget.refresh(),
-          child: body,
-        );
-      }
+      // Always in the tree, even while loading: taking it out rebuilds
+      // everything below it, and the calendar loses the week just tapped.
+      body = RefreshIndicator(
+        onRefresh: () async {
+          if (noInternet || widget.vm.loading) return;
+          widget.refresh();
+        },
+        child: body,
+      );
       body = Stack(
         children: [
           body,
