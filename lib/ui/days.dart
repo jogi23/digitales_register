@@ -533,7 +533,7 @@ class _DaysWidgetState extends State<DaysWidget> {
         ],
       ),
       homeAppBar: ResponsiveAppBar(
-        title: Text(tr(context).dashboardTitle),
+        title: Text(tr(context).menuHomework),
         actions: <Widget>[
           if (widget.vm.noInternet)
             TextButton(
