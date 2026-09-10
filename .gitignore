@@ -74,3 +74,5 @@ similar.contains(c))
 
 key.properties
 lib/l10n/app_localizations*.dart
+
+CLAUDE.local.md

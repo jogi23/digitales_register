@@ -6,9 +6,13 @@ on:
       - main
     paths-ignore:
       - "README.md"
+  # Deliberately without a branch filter: `branches` matches the *target*
+  # branch, so a stacked pull request aimed at its predecessor ran nothing
+  # at all - and the page said "no checks reported", which reads like a
+  # pull request that needed none. Retargeting it later does not help
+  # either, because that raises an `edited` event, and `edited` is not one
+  # of the types Actions listens to by default.
   pull_request:
-    branches:
-      - main
     paths-ignore:
       - "README.md"
   workflow_dispatch:
@@ -16,6 +20,12 @@ on:
     types:
       - created
       - edited
+
+# One run per branch is enough: a new push makes the previous one moot.
+# Only for pull requests, though - a release must never be cut short.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
 
