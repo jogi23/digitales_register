@@ -35,6 +35,8 @@
 .pub-cache/
 .pub/
 /build/
+# Xcode's build directory; a stale copy of it was checked in once.
+ios/build/
 
 # Web related
 lib/generated_plugin_registrant.dart

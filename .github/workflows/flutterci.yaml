@@ -108,3 +108,33 @@ jobs:
           release_name: ${{ github.event_name == 'release' && github.event.release.name || 'Development Build' }}
           tag: ${{ github.event_name == 'release' && github.event.release.tag_name || 'continuous' }}
           overwrite: true
+
+  build-ios:
+    name: iOS
+    # The only macOS runner in this workflow: everything Apple needs Xcode,
+    # and Xcode only runs here. Free for public repositories.
+    runs-on: macos-latest
+    # No point building what does not analyse or pass its tests.
+    needs: check
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.47.2
+          cache: true
+
+      - name: Build Flutter app
+        # Unsigned on purpose. This job proves the iOS side still compiles —
+        # the pods resolve, the plugins have iOS implementations, the
+        # deployment target is one Xcode accepts. Producing an installable
+        # build needs a paid Apple Developer account, a signing certificate
+        # and a provisioning profile; none of that exists yet, and none of it
+        # is needed to catch a broken iOS build.
+        run: |
+          flutter pub get
+          dart run build_runner build --delete-conflicting-outputs
+          flutter build ios --release --no-codesign -v
