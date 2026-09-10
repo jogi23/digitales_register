@@ -49,7 +49,9 @@ class NetworkProtocol extends StatelessWidget {
 class _Item extends StatelessWidget {
   final NetworkProtocolItem item;
 
-  static final _time = DateFormat("HH:mm:ss");
+  // With the date: the log does not survive a restart, but a long session
+  // does, and then the time of day alone is not enough to place an entry.
+  static final _time = DateFormat("dd.MM.yy HH:mm:ss");
 
   const _Item({required this.item});
   @override
