@@ -69,9 +69,11 @@ Future<void> _exportProtocol(List<NetworkProtocolItem> items) async {
   final export = [
     for (final item in items)
       {
+        "timestamp": item.timestamp.toIso8601String(),
         "address": item.address,
         "parameters": _decodeMaybeJson(item.parameters),
         "response": _decodeMaybeJson(item.response),
+        if (item.error != null) "error": item.error,
       },
   ];
   final jsonString = const JsonEncoder.withIndent("  ").convert(export);

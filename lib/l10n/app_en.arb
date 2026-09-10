@@ -243,6 +243,7 @@
   "networkNothing": "Nothing here",
   "networkParameters": "Parameters",
   "networkResponse": "Response",
+  "networkError": "Error",
   "networkCopied": "Copied to the clipboard",
   "errorConnectionFailed": "Connection failed",
   "errorLoadingSavedData": "The saved data could not be loaded",

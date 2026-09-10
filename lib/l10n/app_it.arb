@@ -243,6 +243,7 @@
   "networkNothing": "Niente da mostrare",
   "networkParameters": "Parametri",
   "networkResponse": "Risposta",
+  "networkError": "Errore",
   "networkCopied": "Copiato negli appunti",
   "errorConnectionFailed": "Connessione non riuscita",
   "errorLoadingSavedData": "Errore nel caricamento dei dati salvati",

@@ -121,6 +121,7 @@ class SessionManager {
     Map<String, Object?> args = const <String, Object?>{},
     String method = "POST",
     bool isRetryAfterUnexpectedLogout = false,
+    void Function(Object error)? onError,
   }) async {
     if (_authService.demoMode) {
       return await getDemoResponse(url, args);
@@ -150,16 +151,11 @@ class SessionManager {
       responseData = response.data;
     } on Exception catch (e) {
       await _handleError(e);
-      _authService.onAddProtocolItem!(NetworkProtocolItem((b) => b
-        ..address = _apiClient.baseAddress + url
-        ..response = stringifyMaybeJson(responseData)
-        ..parameters = stringifyMaybeJson(args)));
+      _record(url, args, responseData, error: e);
+      onError?.call(e);
       return null;
     }
-    _authService.onAddProtocolItem!(NetworkProtocolItem((b) => b
-      ..address = _apiClient.baseAddress + url
-      ..response = stringifyMaybeJson(responseData)
-      ..parameters = stringifyMaybeJson(args)));
+    _record(url, args, responseData);
 
     // returned if we were logged out (there should be whitespace at both ends, but the editor is removing it):
     //	<script type="text/javascript">
@@ -182,6 +178,22 @@ class SessionManager {
       );
     }
     return responseData;
+  }
+
+  /// Writes one request to the network log. Both call sites used to build
+  /// the item themselves, and the failing one quietly left out the reason.
+  void _record(
+    String url,
+    Map<String, Object?> args,
+    dynamic responseData, {
+    Object? error,
+  }) {
+    _authService.onAddProtocolItem!(NetworkProtocolItem((b) => b
+      ..address = _apiClient.baseAddress + url
+      ..response = stringifyMaybeJson(responseData)
+      ..parameters = stringifyMaybeJson(args)
+      ..timestamp = DateTime.now()
+      ..error = error?.toString()));
   }
 
   Future<void> _handleError(Exception e) async {

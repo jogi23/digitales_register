@@ -103,11 +103,13 @@ class Wrapper {
     Map<String, Object?> args = const <String, Object?>{},
     String method = "POST",
     bool isRetryAfterUnexpectedLogout = false,
+    void Function(Object error)? onError,
   }) =>
       _session.send(url,
           args: args,
           method: method,
-          isRetryAfterUnexpectedLogout: isRetryAfterUnexpectedLogout);
+          isRetryAfterUnexpectedLogout: isRetryAfterUnexpectedLogout,
+          onError: onError);
 
   Future<dynamic> login(
     String? user,

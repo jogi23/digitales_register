@@ -154,13 +154,23 @@ class CourseContentNotifier extends Notifier<CourseContentState> {
   Future<void> load(CourseSubject subject) async {
     state = CourseContentState(subject: subject, loading: true);
     try {
+      // send schluckt Netzwerkfehler und gibt null zurueck - ohne diesen
+      // Rueckruf sieht ein gescheiterter Aufruf aus wie ein Fach ohne
+      // Material, und beides landete auf derselben Meldung.
+      Object? fehler;
       final antwort = getMap(await wrapper.send(
         "api/courseContent/getCourse",
         args: <String, Object?>{
           "classId": subject.classId,
           "subjectId": subject.subjectId,
         },
+        onError: (e) => fehler = e,
       ));
+      if (fehler != null) {
+        log("courseContent/getCourse fehlgeschlagen", error: fehler);
+        state = CourseContentState(subject: subject, error: fehler.toString());
+        return;
+      }
       state = CourseContentState(
         subject: subject,
         course: _parseCourse(antwort),

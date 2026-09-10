@@ -243,6 +243,7 @@
   "networkNothing": "Nichts vorhanden",
   "networkParameters": "Parameter",
   "networkResponse": "Antwort",
+  "networkError": "Fehler",
   "networkCopied": "In die Zwischenablage kopiert",
   "errorConnectionFailed": "Verbindung fehlgeschlagen",
   "errorLoadingSavedData": "Fehler beim Laden der gespeicherten Daten",
