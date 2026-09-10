@@ -712,6 +712,15 @@ abstract class NetworkProtocolItem
   String get parameters;
   String get response;
 
+  /// When the request was recorded. Without it the log cannot be lined up
+  /// with what the user just did, which is the only thing it is good for.
+  DateTime get timestamp;
+
+  /// Set when the request never got an answer at all. A failed request and
+  /// one the server answered with nothing both leave [response] empty, and
+  /// telling them apart is not possible afterwards.
+  String? get error;
+
   factory NetworkProtocolItem(
           [Function(NetworkProtocolItemBuilder b)? updates]) =
       _$NetworkProtocolItem;

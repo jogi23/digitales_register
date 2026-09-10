@@ -418,12 +418,28 @@ class _WeekCell extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         child: Center(
-          child: Text(
-            "$week",
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: isSelected ? scheme.primary : scheme.onSurfaceVariant,
-                  fontWeight: isSelected ? FontWeight.bold : null,
-                ),
+          child: DecoratedBox(
+            // The number alone is what marks the picked week; the days of
+            // that week are only tinted, which reads much the same as a
+            // loaded day.
+            decoration: BoxDecoration(
+              color: isSelected ? scheme.primaryContainer : null,
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+              child: Text(
+                "$week",
+                // Always set apart from the day numbers: the column says
+                // what it is by looking different, not by being read.
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: isSelected
+                          ? scheme.onPrimaryContainer
+                          : scheme.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+            ),
           ),
         ),
       ),
