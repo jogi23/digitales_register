@@ -326,6 +326,7 @@ class SettingsState {
     this.drawerFullyExpanded = true,
     this.starColor = accentStarColorId,
     this.language,
+    this.messageSignature,
   })  : ignoreForGradesAverage = ignoreForGradesAverage ?? [],
         classbookSubjects = classbookSubjects ?? [];
 
@@ -379,6 +380,10 @@ class SettingsState {
   /// Language code the app is shown in, null to follow the device.
   final String? language;
 
+  /// The name last used to sign a message, so it does not have to be typed
+  /// again. Bound to the account: who signs hangs on whose register it is.
+  final String? messageSignature;
+
   SettingsState copyWith({
     bool? noPasswordSaving,
     bool? typeSorted,
@@ -402,6 +407,7 @@ class SettingsState {
     bool? drawerFullyExpanded,
     String? starColor,
     Object? language = _unchanged,
+    Object? messageSignature = _unchanged,
   }) =>
       SettingsState(
         noPasswordSaving: noPasswordSaving ?? this.noPasswordSaving,
@@ -436,6 +442,9 @@ class SettingsState {
         language: identical(language, _unchanged)
             ? this.language
             : language as String?,
+        messageSignature: identical(messageSignature, _unchanged)
+            ? this.messageSignature
+            : messageSignature as String?,
       );
 
   Map<String, dynamic> toJson() => {
@@ -460,6 +469,7 @@ class SettingsState {
         'drawerFullyExpanded': drawerFullyExpanded,
         'starColor': starColor,
         'language': language,
+        'messageSignature': messageSignature,
       };
 
   factory SettingsState.fromJson(Map<dynamic, dynamic> json) => SettingsState(
@@ -497,6 +507,7 @@ class SettingsState {
         drawerFullyExpanded: json['drawerFullyExpanded'] as bool? ?? true,
         starColor: json['starColor'] as String? ?? accentStarColorId,
         language: json['language'] as String?,
+        messageSignature: json['messageSignature'] as String?,
       );
 
   /// The settings that belong to the app rather than to one account:

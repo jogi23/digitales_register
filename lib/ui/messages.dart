@@ -39,10 +39,16 @@ class MessagesPage extends StatelessWidget {
   final bool hasUnread;
   final void Function(MessageAttachmentFile message) onOpenFile;
   final void Function(Message message) onMarkAsRead;
-  final void Function(Message message, {String? response, String? signature})
-      onReply;
+  /// Answers a message; false means the answer did not reach the server.
+  final Future<bool> Function(Message message,
+      {String? response, String? signature}) onReply;
   final VoidCallback onMarkAllAsRead;
   final Future<void> Function() onRefresh;
+
+  /// The name last signed with, filled into the field so it is not typed
+  /// again, and handed back whenever a new one is used.
+  final String? signature;
+  final void Function(String signature) onSignature;
 
   const MessagesPage({
     super.key,
@@ -54,6 +60,8 @@ class MessagesPage extends StatelessWidget {
     required this.onReply,
     required this.onMarkAllAsRead,
     required this.onRefresh,
+    required this.signature,
+    required this.onSignature,
   });
   @override
   Widget build(BuildContext context) {
@@ -117,6 +125,8 @@ class MessagesPage extends StatelessWidget {
                           onOpenFile: onOpenFile,
                           onMarkAsRead: onMarkAsRead,
                           onReply: onReply,
+                          signature: signature,
+                          onSignature: onSignature,
                           noInternet: noInternet,
                           expand: state!.messages[i].id == state!.showMessage,
                           tileColor: i.isOdd ? altColor : null,
@@ -135,8 +145,10 @@ class MessageWidget extends StatefulWidget {
   final Message message;
   final void Function(MessageAttachmentFile message) onOpenFile;
   final void Function(Message message) onMarkAsRead;
-  final void Function(Message message, {String? response, String? signature})
-      onReply;
+  final Future<bool> Function(Message message,
+      {String? response, String? signature}) onReply;
+  final String? signature;
+  final void Function(String signature) onSignature;
   final bool noInternet;
   final bool expand;
   final Color? tileColor;
@@ -148,6 +160,8 @@ class MessageWidget extends StatefulWidget {
     required this.noInternet,
     required this.onMarkAsRead,
     required this.onReply,
+    required this.signature,
+    required this.onSignature,
     required this.expand,
     this.tileColor,
   });
@@ -303,6 +317,8 @@ class _MessageWidgetState extends State<MessageWidget> {
                 MessageResponseSection(
                   info: info,
                   noInternet: widget.noInternet,
+                  signature: widget.signature,
+                  onSignature: widget.onSignature,
                   onReply: ({String? response, String? signature}) =>
                       widget.onReply(
                     widget.message,
@@ -328,13 +344,19 @@ class _MessageWidgetState extends State<MessageWidget> {
 class MessageResponseSection extends StatefulWidget {
   final MessageResponseInfo info;
   final bool noInternet;
-  final void Function({String? response, String? signature}) onReply;
+  final Future<bool> Function({String? response, String? signature}) onReply;
+
+  /// The name signed with last time, prefilled here.
+  final String? signature;
+  final void Function(String signature) onSignature;
 
   const MessageResponseSection({
     super.key,
     required this.info,
     required this.noInternet,
     required this.onReply,
+    required this.signature,
+    required this.onSignature,
   });
 
   @override
@@ -342,8 +364,15 @@ class MessageResponseSection extends StatefulWidget {
 }
 
 class _MessageResponseSectionState extends State<MessageResponseSection> {
-  final TextEditingController _signature = TextEditingController();
+  late final TextEditingController _signature =
+      TextEditingController(text: widget.signature ?? '');
+
+  /// True while the answer is on its way. It goes back to false when the
+  /// answer did not arrive: the earlier version left the button disabled
+  /// either way, so a failure looked exactly like a confirmation.
+  bool _sending = false;
   bool _sent = false;
+  bool _failed = false;
 
   @override
   void dispose() {
@@ -352,21 +381,33 @@ class _MessageResponseSectionState extends State<MessageResponseSection> {
   }
 
   bool get _canSend {
-    if (_sent || widget.noInternet) return false;
+    if (_sending || _sent || widget.noInternet) return false;
     // The portal only checks for a non-empty name, it does not match it
     // against the account.
     return !widget.info.showSignatureField ||
         _signature.text.trim().isNotEmpty;
   }
 
-  void _send(String? response) {
-    setState(() => _sent = true);
-    widget.onReply(
+  Future<void> _send(String? response) async {
+    final signature =
+        widget.info.showSignatureField ? _signature.text.trim() : null;
+    setState(() {
+      _sending = true;
+      _failed = false;
+    });
+    final answered = await widget.onReply(
       response: response,
-      signature: widget.info.showSignatureField
-          ? _signature.text.trim()
-          : null,
+      signature: signature,
     );
+    if (signature != null && signature.isNotEmpty && answered) {
+      widget.onSignature(signature);
+    }
+    if (!mounted) return;
+    setState(() {
+      _sending = false;
+      _sent = answered;
+      _failed = !answered;
+    });
   }
 
   @override
@@ -389,11 +430,20 @@ class _MessageResponseSectionState extends State<MessageResponseSection> {
       children: [
         if (info.badge != null)
           Text(info.badge!, style: theme.textTheme.labelLarge),
+        if (_failed)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              tr(context).messageReplyFailed,
+              style: theme.textTheme.bodyMedium
+                  ?.copyWith(color: theme.colorScheme.error),
+            ),
+          ),
         if (info.showSignatureField) ...[
           const SizedBox(height: 8),
           TextField(
             controller: _signature,
-            enabled: !_sent,
+            enabled: !_sent && !_sending,
             textCapitalization: TextCapitalization.words,
             decoration: InputDecoration(
               labelText: tr(context).messageSignaturePrompt,

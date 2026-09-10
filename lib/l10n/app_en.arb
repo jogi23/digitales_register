@@ -104,6 +104,7 @@
   "messageDisagree": "I do not agree",
   "messageAgree": "I agree",
   "messageConfirm": "Confirm",
+  "messageReplyFailed": "The confirmation did not go through. Please try again.",
   "notificationsTitle": "Notifications",
   "notificationsEmpty": "No notifications",
   "notificationsAllRead": "All read",

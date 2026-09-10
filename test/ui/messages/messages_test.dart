@@ -22,6 +22,7 @@ import 'package:dr/container/messages_container.dart';
 import 'package:dr/data.dart';
 import 'package:dr/providers/messages_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
+import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -33,10 +34,33 @@ const _messageText =
 
 class _TestMessagesNotifier extends MessagesNotifier {
   final MessagesState initialState;
-  _TestMessagesNotifier(this.initialState);
+
+  /// What [reply] reports back: false stands for an answer that never
+  /// reached the server.
+  final bool replyResult;
+
+  /// The signature the last [reply] carried, so a test can see what was sent.
+  String? sentSignature;
+
+  _TestMessagesNotifier(this.initialState, {this.replyResult = true});
 
   @override
   MessagesState build() => initialState;
+
+  @override
+  Future<bool> reply(int messageId, {String? response, String? signature}) async {
+    sentSignature = signature;
+    return replyResult;
+  }
+}
+
+/// Settings with one field set, everything else left at its default.
+class _TestSettingsNotifier extends SettingsNotifier {
+  final SettingsState initialState;
+  _TestSettingsNotifier(this.initialState);
+
+  @override
+  SettingsState build() => initialState;
 }
 
 MessagesState _buildState({
@@ -73,11 +97,18 @@ MessagesState _buildState({
   );
 }
 
-Widget _buildWidget(MessagesState state) {
+Widget _buildWidget(
+  MessagesState state, {
+  _TestMessagesNotifier? messages,
+  SettingsState? settings,
+}) {
   return ProviderScope(
     overrides: [
-      messagesProvider.overrideWith(() => _TestMessagesNotifier(state)),
+      messagesProvider
+          .overrideWith(() => messages ?? _TestMessagesNotifier(state)),
       noInternetProvider.overrideWith(NoInternetNotifier.new),
+      if (settings != null)
+        settingsProvider.overrideWith(() => _TestSettingsNotifier(settings)),
     ],
     child: MaterialApp(
       home: MessagesPageContainer(),
@@ -128,8 +159,15 @@ MessageResponseInfo _info({
 }
 
 /// Opens the single message so the confirmation section is built.
-Future<void> _openMessage(WidgetTester tester, MessagesState state) async {
-  await tester.pumpWidget(_buildWidget(state));
+Future<void> _openMessage(
+  WidgetTester tester,
+  MessagesState state, {
+  _TestMessagesNotifier? messages,
+  SettingsState? settings,
+}) async {
+  await tester.pumpWidget(
+    _buildWidget(state, messages: messages, settings: settings),
+  );
   await tester.tap(find.text("Betreff"));
   await tester.pumpAndSettle();
 }
@@ -289,5 +327,49 @@ void main() {
       expect(find.text("Bestätigen"), findsNothing);
       expect(find.byType(TextField), findsNothing);
     });
+
+    testWidgets('a name already signed with is filled in', (tester) async {
+      // Three children, three confirmations: nobody should type their own
+      // name three times.
+      await _openMessage(
+        tester,
+        _stateWithResponse(
+          _info(type: MessageResponseInfo.typeRead, signatureRequired: true),
+        ),
+        settings: SettingsState(messageSignature: 'Max Mustermann'),
+      );
+      expect(find.text('Max Mustermann'), findsOneWidget);
+      // Nothing left to type: the button is ready straight away.
+      final button = tester.widget<FilledButton>(find.byType(FilledButton));
+      expect(button.onPressed, isNotNull);
+    });
+
+    testWidgets('an answer that does not arrive says so and can be repeated',
+        (tester) async {
+      final messages = _TestMessagesNotifier(
+        _stateWithResponse(
+          _info(type: MessageResponseInfo.typeRead, signatureRequired: true),
+        ),
+        replyResult: false,
+      );
+      await _openMessage(
+        tester,
+        messages.initialState,
+        messages: messages,
+        settings: SettingsState(messageSignature: 'Max Mustermann'),
+      );
+      await tester.tap(find.byType(FilledButton));
+      await tester.pumpAndSettle();
+
+      expect(messages.sentSignature, 'Max Mustermann');
+      expect(
+        find.text('Die Bestätigung ist nicht angekommen. '
+            'Bitte noch einmal versuchen.'),
+        findsOneWidget,
+      );
+      final button = tester.widget<FilledButton>(find.byType(FilledButton));
+      expect(button.onPressed, isNotNull, reason: 'must be repeatable');
+    });
+
   });
 }

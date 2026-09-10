@@ -104,6 +104,7 @@
   "messageDisagree": "Non accetto",
   "messageAgree": "Accetto",
   "messageConfirm": "Conferma",
+  "messageReplyFailed": "La conferma non è arrivata. Riprova.",
   "notificationsTitle": "Notifiche",
   "notificationsEmpty": "Nessuna notifica",
   "notificationsAllRead": "Tutte lette",

@@ -115,12 +115,18 @@ class MessagesNotifier extends Notifier<MessagesState> {
   /// for messages that require one.
   ///
   /// Unlike [markAsRead] this is not optimistic: the answer is binding, so the
-  /// server state wins. It replies with the full, updated message list.
-  Future<void> reply(
+  /// server state wins. The portal answers with the full, updated message
+  /// list.
+  ///
+  /// Returns whether the message counts as answered afterwards. A request that
+  /// fails, or one the server acknowledges with nothing, must not read as
+  /// success — the reader would think a binding confirmation had gone out.
+  Future<bool> reply(
     int messageId, {
     String? response,
     String? signature,
   }) async {
+    Object? failure;
     final dynamic result = await wrapper.send(
       "api/message/reply",
       args: <String, Object?>{
@@ -132,8 +138,21 @@ class MessagesNotifier extends Notifier<MessagesState> {
           if (response != null) "response": response,
         },
       },
+      onError: (error) => failure = error,
     );
-    if (result is List) state = _parseMessages(result);
+    if (failure != null) return false;
+    if (result is List) {
+      state = _parseMessages(result);
+    } else {
+      // Anything but the list — an empty body included — says nothing about
+      // whether the answer was taken. Asking the server beats guessing.
+      await load();
+    }
+    return state.messages
+            .firstWhereOrNull((message) => message.id == messageId)
+            ?.responseInfo
+            ?.answered ??
+        false;
   }
 
   void _markDownloading(MessageAttachmentFile file) {

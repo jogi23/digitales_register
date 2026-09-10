@@ -112,6 +112,11 @@ class SettingsNotifier extends Notifier<SettingsState> {
   /// Null follows the device language.
   void setLanguage(String? code) => _update(state.copyWith(language: code));
 
+  /// Remembers the name a message was signed with, so the next confirmation
+  /// starts with it already filled in.
+  void setMessageSignature(String? name) =>
+      _update(state.copyWith(messageSignature: name));
+
   // ─── Dashboard settings ───────────────────────────────────────────────────
 
   void setMarkNewOrChanged(bool value) =>

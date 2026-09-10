@@ -104,6 +104,7 @@
   "messageDisagree": "Stimme nicht zu",
   "messageAgree": "Stimme zu",
   "messageConfirm": "Bestätigen",
+  "messageReplyFailed": "Die Bestätigung ist nicht angekommen. Bitte noch einmal versuchen.",
   "notificationsTitle": "Benachrichtigungen",
   "notificationsEmpty": "Keine Benachrichtigungen",
   "notificationsAllRead": "Alle gelesen",
