@@ -202,6 +202,24 @@ void main() {
         expect(expired, 0);
       });
 
+      test('a demo answer counts as an answer from the server', () async {
+        final sm = _makeSessionManager(demoMode: true);
+        var answers = 0;
+        sm.onRequestSucceeded = () => answers++;
+
+        await sm.send('api/student/dashboard/toggle_reminder');
+        expect(answers, 1);
+      });
+
+      test('an endpoint the demo does not know is no answer', () async {
+        final sm = _makeSessionManager(demoMode: true);
+        var answers = 0;
+        sm.onRequestSucceeded = () => answers++;
+
+        expect(await sm.send('api/does/not/exist'), isNull);
+        expect(answers, 0);
+      });
+
       test('a demo answer is not mistaken for a dead session', () async {
         final sm = _makeSessionManager(demoMode: true);
         var expired = 0;

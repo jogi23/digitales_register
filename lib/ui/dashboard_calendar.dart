@@ -66,6 +66,10 @@ class DashboardCalendar extends StatefulWidget {
   /// Days the dashboard wants shown, e.g. the one a new entry sits on.
   final DashboardJumpNotifier? jumpTo;
 
+  /// Called for a day whose entries were on screen and no longer are — its
+  /// "neu" badges have been seen.
+  final void Function(DateTime date)? onDaySeen;
+
   const DashboardCalendar({
     super.key,
     required this.days,
@@ -73,6 +77,7 @@ class DashboardCalendar extends StatefulWidget {
     this.loading = false,
     required this.onLoadMissing,
     this.jumpTo,
+    this.onDaySeen,
   });
 
   @override
@@ -114,16 +119,41 @@ class _DashboardCalendarState extends State<DashboardCalendar> {
   }
 
   /// Opens the month the wanted day sits in and picks that day.
+  ///
+  /// Asked for the day already shown, the reader has had it in front of them
+  /// and asks to move on: it counts as seen.
   void _handleJump() {
     final request = widget.jumpTo?.value;
     if (request == null || !mounted) return;
     final date = dateOnly(request.date);
-    setState(() {
-      _month = _monthOf(date);
-      _pick = _DayPick(date);
-    });
+    final pick = _pick;
+    if (pick is _DayPick && pick.date == date) {
+      widget.onDaySeen?.call(date);
+      return;
+    }
+    setState(() => _month = _monthOf(date));
+    _setPick(_DayPick(date));
     _fetchIfMissing([date]);
   }
+
+  /// Changes what the area below the grid shows. The days it showed before
+  /// and no longer does count as seen: their badges were on screen.
+  void _setPick(_Pick? pick) {
+    final before = _datesOf(_pick);
+    setState(() => _pick = pick);
+    final after = _datesOf(pick);
+    for (final date in before) {
+      if (!after.contains(date)) widget.onDaySeen?.call(date);
+    }
+  }
+
+  static Set<DateTime> _datesOf(_Pick? pick) => switch (pick) {
+        _DayPick(:final date) => {date},
+        _WeekPick(:final monday) => {
+            for (var i = 0; i < 7; i++) monday.add(Duration(days: i)),
+          },
+        null => const {},
+      };
 
   /// The month of today when today is loaded, otherwise the month of the first
   /// loaded day: the dashboard shows either past or future, not both.
@@ -144,19 +174,16 @@ class _DashboardCalendarState extends State<DashboardCalendar> {
 
   /// Picking the same thing twice clears the selection.
   void _pickDay(DateTime date) {
-    setState(() {
-      final pick = _pick;
-      _pick = pick is _DayPick && pick.date == date ? null : _DayPick(date);
-    });
+    final pick = _pick;
+    _setPick(pick is _DayPick && pick.date == date ? null : _DayPick(date));
     _fetchIfMissing([date]);
   }
 
   void _pickWeek(DateTime monday) {
-    setState(() {
-      final pick = _pick;
-      _pick =
-          pick is _WeekPick && pick.monday == monday ? null : _WeekPick(monday);
-    });
+    final pick = _pick;
+    _setPick(
+      pick is _WeekPick && pick.monday == monday ? null : _WeekPick(monday),
+    );
     _fetchIfMissing([
       for (var i = 0; i < 7; i++) monday.add(Duration(days: i)),
     ]);

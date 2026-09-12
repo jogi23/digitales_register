@@ -135,7 +135,11 @@ class SessionManager {
     void Function(Object error)? onError,
   }) async {
     if (_authService.demoMode) {
-      return await getDemoResponse(url, args);
+      final dynamic response = await getDemoResponse(url, args);
+      // The demo answers the way the server would. Without reporting it the
+      // connection display waited forever for a first answer.
+      if (response != null) onRequestSucceeded?.call();
+      return response;
     }
     assert(!url.startsWith("/"));
 

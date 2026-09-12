@@ -19,6 +19,7 @@ import 'package:built_collection/built_collection.dart';
 import 'package:dr/app_state.dart' hide LoginState;
 import 'package:dr/container/days_container.dart';
 import 'package:dr/data.dart';
+import 'package:dr/providers/calendar_provider.dart';
 import 'package:dr/providers/dashboard_provider.dart';
 import 'package:dr/providers/grades_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
@@ -50,6 +51,17 @@ class _TestDashboardNotifier extends DashboardNotifier {
   Future<void> loadBothDirections() async {
     bothDirectionsLoads++;
   }
+}
+
+/// The week view loads its timetable itself. A real load would go through
+/// the global wrapper and could still be pending when the next test starts,
+/// leaving its week spinning.
+class _TestCalendarNotifier extends CalendarNotifier {
+  @override
+  CalendarState build() => CalendarState();
+
+  @override
+  Future<void> load(UtcDateTime monday) async {}
 }
 
 class _TestGradesNotifier extends GradesNotifier {
@@ -87,6 +99,9 @@ Homework _entry(int id, String title, {bool isNew = false}) => Homework(
         ..isNew = isNew
         ..type = HomeworkType.lessonHomework
         ..title = title
+        // The "neu" badge sits beside the subject label, so an entry without
+        // one would never show it.
+        ..label = "Deutsch"
         ..subtitle = "",
     );
 
@@ -121,6 +136,7 @@ void main() {
     return ProviderScope(
       overrides: [
         dashboardProvider.overrideWith(() => notifier),
+        calendarProvider.overrideWith(_TestCalendarNotifier.new),
         gradesProvider.overrideWith(_TestGradesNotifier.new),
         settingsProvider.overrideWith(
           () => _TestSettingsNotifier(
@@ -173,6 +189,51 @@ void main() {
       expect(find.text('Kommendes'), findsOneWidget);
     });
 
+  });
+
+  group('news seen in the calendar views', () {
+    testWidgets('the badge stays while the day is on screen', (tester) async {
+      await pump(tester, DashboardViewMode.month);
+      await tester.tap(find.text('Neue Einträge'));
+      await tester.pumpAndSettle();
+      expect(find.text('Kommendes'), findsOneWidget);
+      expect(find.text('neu'), findsOneWidget);
+      expect(find.text('Neue Einträge'), findsOneWidget);
+    });
+
+    testWidgets('picking another day marks the one left as seen',
+        (tester) async {
+      await pump(tester, DashboardViewMode.month);
+      await tester.tap(find.text('Neue Einträge'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('8').first);
+      await tester.pumpAndSettle();
+      expect(find.text('Neue Einträge'), findsNothing);
+    });
+
+    testWidgets('tapping the button again on the last day finishes it',
+        (tester) async {
+      await pump(tester, DashboardViewMode.month);
+      await tester.tap(find.text('Neue Einträge'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Neue Einträge'));
+      await tester.pumpAndSettle();
+      expect(find.text('Neue Einträge'), findsNothing);
+      // The day itself stays open, now without its badge.
+      expect(find.text('Kommendes'), findsOneWidget);
+      expect(find.text('neu'), findsNothing);
+    });
+
+    testWidgets('closing the day opened in the week view marks it as seen',
+        (tester) async {
+      await pump(tester, DashboardViewMode.week);
+      await tester.tap(find.text('Neue Einträge'));
+      await tester.pumpAndSettle();
+      expect(find.text('Kommendes'), findsOneWidget);
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      expect(find.text('Neue Einträge'), findsNothing);
+    });
   });
 
   group('pulling down', () {

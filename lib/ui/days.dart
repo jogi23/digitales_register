@@ -116,9 +116,9 @@ class _DaysWidgetState extends State<DaysWidget> {
   /// The day each target sits on, so the calendar views can be sent there.
   final Map<int, UtcDateTime> _targetDates = {};
 
-  /// Which target the calendar views were sent to last, so repeated taps
-  /// walk through all of them instead of returning to the first.
-  int _calendarTargetCursor = 0;
+  /// The day the calendar views were sent to last, so the next tap moves on
+  /// to another one.
+  UtcDateTime? _lastJumpDate;
   int _jumpSerial = 0;
 
   final DashboardJumpNotifier _calendarJump = DashboardJumpNotifier(null);
@@ -206,7 +206,6 @@ class _DaysWidgetState extends State<DaysWidget> {
       }
       dayIndex++;
     }
-    if (_calendarTargetCursor >= _targets.length) _calendarTargetCursor = 0;
   }
 
   void _ensureGradeCompetences() {
@@ -385,6 +384,7 @@ class _DaysWidgetState extends State<DaysWidget> {
             days: widget.vm.days,
             dayBuilder: _buildDay,
             jumpTo: _calendarJump,
+            onDaySeen: _markDaySeen,
           )
         : DashboardCalendar(
             days: widget.vm.days,
@@ -392,6 +392,7 @@ class _DaysWidgetState extends State<DaysWidget> {
             loading: widget.vm.loading,
             onLoadMissing: widget.loadBothDirections,
             jumpTo: _calendarJump,
+            onDaySeen: _markDaySeen,
           );
   }
 
@@ -405,7 +406,8 @@ class _DaysWidgetState extends State<DaysWidget> {
   ///
   /// The list scrolls to it. The calendar views are not bound to that scroll
   /// controller — there the button moved nothing at all — so they are asked
-  /// to open the day the entry sits on, one entry per tap.
+  /// to open the next day with news. A day left again counts as seen
+  /// ([_markDaySeen]), so the button goes once nothing is left.
   Future<void> _goToNextNewEntry() async {
     if (_targets.isEmpty) return;
     if (widget.vm.viewMode == DashboardViewMode.list) {
@@ -415,11 +417,37 @@ class _DaysWidgetState extends State<DaysWidget> {
       );
       return;
     }
-    final target = _targets[_calendarTargetCursor % _targets.length];
-    _calendarTargetCursor++;
-    final date = _targetDates[target];
-    if (date == null) return;
+    final dates = [for (final target in _targets) _targetDates[target]!];
+    // Another day than the one just shown; with only that one left, the same
+    // again — which the calendar takes as "seen".
+    final date = dates.firstWhere(
+      (d) => d != _lastJumpDate,
+      orElse: () => dates.first,
+    );
+    _lastJumpDate = date;
     _calendarJump.value = DashboardJumpRequest(date, _jumpSerial++);
+  }
+
+  /// Marks what [date] carried as new or changed as seen.
+  ///
+  /// The calendar views call this for a day that was on screen and is left
+  /// again — the counterpart of scrolling past an entry in the list.
+  void _markDaySeen(DateTime date) {
+    for (final day in widget.vm.days) {
+      if (day.date.year != date.year ||
+          day.date.month != date.month ||
+          day.date.day != date.day) {
+        continue;
+      }
+      // Deleted ones first: that callback matches the day as it is now, and
+      // marking its homework would change it.
+      if (day.deletedHomework.any((h) => h.isChanged)) {
+        widget.markDeletedHomeworkAsSeenCallback(day);
+      }
+      for (final hw in day.homework) {
+        if (hw.isNew || hw.isChanged) widget.markAsSeenCallback(hw);
+      }
+    }
   }
 
   @override

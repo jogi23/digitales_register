@@ -59,12 +59,17 @@ class DashboardWeekContainer extends ConsumerStatefulWidget {
   /// Days the dashboard wants shown, e.g. the one a new entry sits on.
   final DashboardJumpNotifier? jumpTo;
 
+  /// Called for a day that was opened and closed again — its "neu" badges
+  /// have been seen.
+  final void Function(DateTime date)? onDaySeen;
+
   const DashboardWeekContainer({
     super.key,
     required this.days,
     required this.dayBuilder,
     this.initialMonday,
     this.jumpTo,
+    this.onDaySeen,
   });
 
   @override
@@ -183,7 +188,7 @@ class _DashboardWeekContainerState
   /// Opens the day full screen: everything noted for it, and the way to add
   /// more — the same widget the list view builds.
   void _showDay(UtcDateTime date) {
-    Navigator.of(context).push(
+    final closed = Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (context) => Scaffold(
           appBar: AppBar(
@@ -211,6 +216,10 @@ class _DashboardWeekContainerState
         ),
       ),
     );
+    // Opened and closed again, the day was in front of the reader.
+    unawaited(closed.then((_) {
+      if (mounted) widget.onDaySeen?.call(date);
+    }));
   }
 
   /// Asks for a reminder and files it under the dashboard's own date.

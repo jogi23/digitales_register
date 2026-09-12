@@ -24,9 +24,10 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 
 - Herunterziehen zum Aktualisieren funktioniert auf allen Seiten mit Daten vom Server — Merkheft in jeder Ansicht und auch leer, Kalender, Bewertungen, Absenzen, Zeugnis, Mitteilungen, Klassenbuch, Hausaufgaben, Unterrichtsmaterialien, Benachrichtigungen und Profil. Der Kreisel bleibt stehen, bis die Daten da sind; ohne Verbindung wird sie zuerst wiederhergestellt.
 - Merkheft: Wochen- und Monatsansicht zeigen auch vergangene Einträge, ohne dass dafür erst in der Listenansicht auf die Vergangenheit getippt werden muss.
-- Merkheft: der Knopf „Neue Einträge“ führt in Wochen- und Monatsansicht zum Tag des Eintrags, statt nichts zu bewirken.
+- Merkheft: der Knopf „Neue Einträge“ führt in Wochen- und Monatsansicht zum Tag des Eintrags, statt nichts zu bewirken. Ein Tag, der wieder verlassen wird, gilt als gesehen; ist nichts Neues mehr übrig, verschwindet der Knopf.
 - Querformat: Inhalte liegen nicht mehr unter der Navigationsleiste des Geräts, die dort am rechten Rand steht.
 - Querformat: der Stundenplan in Kalender und Merkheft scrollt, statt die Stunden bis zur Unlesbarkeit zusammenzudrücken.
+- Im Demo-Konto zeigt die Verbindungsanzeige die Verbindung als hergestellt, statt dauerhaft „noch nichts geladen“.
 
 ## 1.3.0 — 2026-09-10
 
