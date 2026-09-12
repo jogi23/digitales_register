@@ -7,7 +7,8 @@
           "title": "Neue Funktionen",
           "items": [
             "Jede Seite zeigt in der Titelzeile, ob die App gerade mit dem Server spricht. Fehlendes Netz und abgelaufene Sitzung werden dabei unterschieden; ein Tippen darauf stellt die Verbindung wieder her oder meldet neu an.",
-            "Ist der letzte Abruf länger her, steht sein Zeitpunkt in der Titelzeile, statt alte Daten wie frische aussehen zu lassen."
+            "Ist der letzte Abruf länger her, steht sein Zeitpunkt in der Titelzeile, statt alte Daten wie frische aussehen zu lassen.",
+            "Mitteilungen: was noch eine Antwort verlangt, ist schon in der Liste gekennzeichnet — „Bestätigung offen“ für die Unterschrift mit Namen, „Zustimmung offen“ für Zustimmen oder Ablehnen."
           ]
         },
         {
@@ -15,7 +16,9 @@
           "items": [
             "Querformat: das Merkheft stellt Monatsraster und Tagesansicht nebeneinander, statt beides übereinander zu quetschen.",
             "Querformat: Seitenüberschrift, Kopfzeilen und Abstände fallen kleiner aus, damit mehr vom Inhalt bleibt.",
-            "Querformat: auf dem Handy bleibt die Seitenleiste eingeklappt, statt ein Drittel der Breite zu belegen."
+            "Querformat: auf dem Handy bleibt die Seitenleiste eingeklappt, statt ein Drittel der Breite zu belegen.",
+            "Mitteilungen: der Knopf zum Bestätigen steht in einem abgesetzten Bereich über die volle Breite und sagt, solange er grau ist, dass noch der Name fehlt.",
+            "Kalender-Wochenansicht: das Fach steht in jeder Kachel gleich groß, Lehrer kursiv, höchstens drei Zeilen und mit Abstand zum Rand; der Raum bleibt der Detailansicht vorbehalten."
           ]
         },
         {

@@ -23,6 +23,7 @@ import 'package:dr/data.dart';
 import 'package:dr/providers/messages_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
+import 'package:dr/ui/messages.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -217,6 +218,81 @@ void main() {
       find.byType(MaterialApp),
       matchesGoldenFile("attachment_downloaded.png"),
     );
+  });
+
+  group('open actions in the list', () {
+    testWidgets('a message to sign is marked while still closed',
+        (tester) async {
+      await tester.pumpWidget(
+        _buildWidget(
+          _stateWithResponse(
+            _info(type: MessageResponseInfo.typeRead, signatureRequired: true),
+          ),
+        ),
+      );
+      expect(find.text("Bestätigung offen"), findsOneWidget);
+      expect(find.text("Zustimmung offen"), findsNothing);
+    });
+
+    testWidgets('a message to agree to carries a mark of its own',
+        (tester) async {
+      await tester.pumpWidget(_buildWidget(_stateWithResponse(_info())));
+      expect(find.text("Zustimmung offen"), findsOneWidget);
+      expect(find.text("Bestätigung offen"), findsNothing);
+    });
+
+    testWidgets('an answered message is not marked', (tester) async {
+      await tester.pumpWidget(
+        _buildWidget(
+          _stateWithResponse(
+            _info(givenResponse: MessageResponseInfo.answerAgree),
+          ),
+        ),
+      );
+      expect(find.byType(MessageActionChip), findsNothing);
+    });
+
+    testWidgets('nothing is marked the reader cannot do in the app',
+        (tester) async {
+      await tester.pumpWidget(
+        _buildWidget(_stateWithResponse(_info(parentSignatureRequired: true))),
+      );
+      expect(find.byType(MessageActionChip), findsNothing);
+    });
+
+    testWidgets('a message without a request is not marked', (tester) async {
+      await tester.pumpWidget(_buildWidget(_stateWithResponse(null)));
+      expect(find.byType(MessageActionChip), findsNothing);
+    });
+  });
+
+  group('the confirm button', () {
+    testWidgets('spans the full width', (tester) async {
+      await _openMessage(
+        tester,
+        _stateWithResponse(
+          _info(type: MessageResponseInfo.typeRead, signatureRequired: true),
+        ),
+      );
+      final button =
+          tester.getRect(find.widgetWithText(FilledButton, "Bestätigen"));
+      final field = tester.getRect(find.byType(TextField));
+      expect(button.width, field.width);
+    });
+
+    testWidgets('says why it is grey while the name is missing',
+        (tester) async {
+      await _openMessage(
+        tester,
+        _stateWithResponse(
+          _info(type: MessageResponseInfo.typeRead, signatureRequired: true),
+        ),
+      );
+      expect(find.text("Namen eingeben, um zu bestätigen"), findsOneWidget);
+      await tester.enterText(find.byType(TextField), "Max Mustermann");
+      await tester.pumpAndSettle();
+      expect(find.text("Namen eingeben, um zu bestätigen"), findsNothing);
+    });
   });
 
   group('confirmation section', () {

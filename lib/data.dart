@@ -807,6 +807,18 @@ abstract class LessonContentSubmission
     ..downloading = false;
 }
 
+/// What a message still asks of its reader.
+enum MessageAction {
+  /// Nothing, or nothing the reader can do in the app.
+  none,
+
+  /// Sign with first and last name.
+  confirm,
+
+  /// Choose "Stimme zu" or "Stimme nicht zu".
+  agree,
+}
+
 /// The confirmation a message asks its recipient for.
 ///
 /// Two independent axes: a response ("Stimme zu" / "Stimme nicht zu") and a
@@ -858,6 +870,18 @@ abstract class MessageResponseInfo
   /// The server asks for something no control covers. Sending the user to the
   /// browser beats guessing at a confirmation that binds them for a year.
   bool get unsupported => !showAgreeButtons && !showConfirmButton;
+
+  /// What the reader still has to do here, for marking it in the list.
+  ///
+  /// [MessageAction.none] once answered — by anyone, see [answered] — and
+  /// where the reader cannot act in the app at all: a guardian-only message
+  /// on a student account, or a type the app does not support.
+  MessageAction get openAction {
+    if (answered || parentSignatureRequired || unsupported) {
+      return MessageAction.none;
+    }
+    return showAgreeButtons ? MessageAction.agree : MessageAction.confirm;
+  }
 
   static Serializer<MessageResponseInfo> get serializer =>
       _$messageResponseInfoSerializer;

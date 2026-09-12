@@ -222,6 +222,14 @@ class _MessageWidgetState extends State<MessageWidget> {
               ),
             ),
           ),
+          // Visible while the tile is closed: the section below is only
+          // built once it opens, so nothing said the message wanted anything.
+          if (widget.message.responseInfo?.openAction case final action?
+              when action != MessageAction.none)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: MessageActionChip(action: action),
+            ),
           if (widget.message.isNew)
             badge.Badge(
               badgeStyle: badge.BadgeStyle(
@@ -427,6 +435,26 @@ class _MessageResponseSectionState extends State<MessageResponseSection> {
       return _Hint(tr(context).messageUnsupported);
     }
 
+    // Set apart from the message text: this is the one place on the page
+    // that asks for something, and it looked like the rest of it.
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primaryContainer.withValues(alpha: 0.35),
+        border: Border.all(color: theme.colorScheme.primary),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: _controls(context, info, theme),
+      ),
+    );
+  }
+
+  Widget _controls(
+    BuildContext context,
+    MessageResponseInfo info,
+    ThemeData theme,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -449,6 +477,10 @@ class _MessageResponseSectionState extends State<MessageResponseSection> {
             textCapitalization: TextCapitalization.words,
             decoration: InputDecoration(
               labelText: tr(context).messageSignaturePrompt,
+              // Says why the button below is still grey.
+              helperText: _signature.text.trim().isEmpty
+                  ? tr(context).messageSignatureHelper
+                  : null,
               border: OutlineInputBorder(),
             ),
             onChanged: (_) => setState(() {}),
@@ -475,14 +507,86 @@ class _MessageResponseSectionState extends State<MessageResponseSection> {
             ],
           )
         else
-          Align(
-            alignment: Alignment.centerRight,
+          // Full width with an icon: the button that binds the reader should
+          // not weigh the same as any other on the page.
+          SizedBox(
+            width: double.infinity,
             child: FilledButton(
+              style: FilledButton.styleFrom(
+                minimumSize: const Size.fromHeight(48),
+                textStyle: theme.textTheme.titleMedium,
+              ),
               onPressed: _canSend ? () => _send(null) : null,
-              child: Text(tr(context).messageConfirm),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.draw),
+                  const SizedBox(width: 8),
+                  Text(tr(context).messageConfirm),
+                ],
+              ),
             ),
           ),
       ],
+    );
+  }
+}
+
+/// Marks a message that still waits for its reader, visible with the tile
+/// closed.
+///
+/// Two looks for the two things a message can ask: a name to sign with, or a
+/// yes or no. One shared "action needed" mark would leave the reader guessing
+/// which until the message is opened. Colour is not the only difference —
+/// icon and wording differ too — and the tile background stays free for the
+/// alternating rows.
+class MessageActionChip extends StatelessWidget {
+  final MessageAction action;
+
+  const MessageActionChip({super.key, required this.action});
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final (icon, label, background, foreground) = switch (action) {
+      MessageAction.confirm => (
+          Icons.draw_outlined,
+          tr(context).messageActionConfirm,
+          scheme.tertiaryContainer,
+          scheme.onTertiaryContainer,
+        ),
+      MessageAction.agree => (
+          Icons.thumbs_up_down_outlined,
+          tr(context).messageActionAgree,
+          scheme.secondaryContainer,
+          scheme.onSecondaryContainer,
+        ),
+      MessageAction.none => (null, null, null, null),
+    };
+    if (icon == null || label == null) return const SizedBox.shrink();
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 14, color: foreground),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: Theme.of(context)
+                  .textTheme
+                  .labelSmall
+                  ?.copyWith(color: foreground),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
