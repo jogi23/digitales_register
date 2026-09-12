@@ -2,6 +2,26 @@
 
 Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` — Änderungen bitte dort eintragen, nicht hier.
 
+## 1.3.1 — 2026-09-12
+
+### Neue Funktionen
+
+- Jede Seite zeigt in der Titelzeile, ob die App gerade mit dem Server spricht. Fehlendes Netz und abgelaufene Sitzung werden dabei unterschieden; ein Tippen darauf stellt die Verbindung wieder her oder meldet neu an.
+- Ist der letzte Abruf länger her, steht sein Zeitpunkt in der Titelzeile, statt alte Daten wie frische aussehen zu lassen.
+
+### Verbesserungen
+
+- Querformat: das Merkheft stellt Monatsraster und Tagesansicht nebeneinander, statt beides übereinander zu quetschen.
+- Querformat: Seitenüberschrift, Kopfzeilen und Abstände fallen kleiner aus, damit mehr vom Inhalt bleibt.
+- Querformat: auf dem Handy bleibt die Seitenleiste eingeklappt, statt ein Drittel der Breite zu belegen.
+
+### Fehlerbehebungen
+
+- Merkheft: Wochen- und Monatsansicht zeigen auch vergangene Einträge, ohne dass dafür erst in der Listenansicht auf die Vergangenheit getippt werden muss.
+- Merkheft: der Knopf „Neue Einträge“ führt in Wochen- und Monatsansicht zum Tag des Eintrags, statt nichts zu bewirken.
+- Querformat: Inhalte liegen nicht mehr unter der Navigationsleiste des Geräts, die dort am rechten Rand steht.
+- Querformat: der Stundenplan in Kalender und Merkheft scrollt, statt die Stunden bis zur Unlesbarkeit zusammenzudrücken.
+
 ## 1.3.0 — 2026-09-10
 
 ### Neue Funktionen
