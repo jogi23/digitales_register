@@ -27,6 +27,7 @@ import 'package:dr/ui/connection_status_button.dart';
 import 'package:dr/ui/last_fetched_overlay.dart';
 import 'package:dr/ui/layout.dart';
 import 'package:dr/ui/no_internet.dart';
+import 'package:dr/ui/pull_to_refresh.dart';
 import 'package:dr/util.dart';
 import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
@@ -80,65 +81,56 @@ class MessagesPage extends StatelessWidget {
           const AccountAvatarButton(),
         ],
       ),
-      body: state == null
-          ? noInternet
-              ? RefreshIndicator(
-                  onRefresh: onRefresh,
-                  child: const SingleChildScrollView(
-                    physics: AlwaysScrollableScrollPhysics(),
-                    child: SizedBox(
-                      height: 400,
-                      child: NoInternet(),
-                    ),
+      body: PullToRefresh(
+        onRefresh: onRefresh,
+        child: state == null
+            ? noInternet
+                ? const NoInternet()
+                : const Center(child: CircularProgressIndicator())
+            : LastFetchedOverlay(
+              lastFetched: state!.lastFetched,
+              noInternet: noInternet,
+              child: Stack(
+                children: <Widget>[
+                  AnimatedLinearProgressIndicator(
+                    show: state!.showMessage != null &&
+                        !state!.messages
+                            .any((m) => m.id == state!.showMessage),
                   ),
-                )
-              : const Center(child: CircularProgressIndicator())
-          : RefreshIndicator(
-              onRefresh: onRefresh,
-              child: LastFetchedOverlay(
-                lastFetched: state!.lastFetched,
-                noInternet: noInternet,
-                child: Stack(
-                  children: <Widget>[
-                    AnimatedLinearProgressIndicator(
-                      show: state!.showMessage != null &&
-                          !state!.messages
-                              .any((m) => m.id == state!.showMessage),
-                    ),
-                    if (state!.messages.isEmpty)
-                      Center(
-                        child: Text(
-                          tr(context).messagesEmpty,
-                          style: Theme.of(context).textTheme.headlineMedium,
-                          textAlign: TextAlign.center,
-                        ),
+                  if (state!.messages.isEmpty)
+                    Center(
+                      child: Text(
+                        tr(context).messagesEmpty,
+                        style: Theme.of(context).textTheme.headlineMedium,
+                        textAlign: TextAlign.center,
                       ),
-                    ListView.builder(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      padding: context.systemInsets,
-                      itemCount: state!.messages.length,
-                      itemBuilder: (context, i) {
-                        final altColor = Theme.of(context)
-                            .colorScheme
-                            .surfaceContainerHighest
-                            .withOpacity(0.75);
-                        return MessageWidget(
-                          message: state!.messages[i],
-                          onOpenFile: onOpenFile,
-                          onMarkAsRead: onMarkAsRead,
-                          onReply: onReply,
-                          signature: signature,
-                          onSignature: onSignature,
-                          noInternet: noInternet,
-                          expand: state!.messages[i].id == state!.showMessage,
-                          tileColor: i.isOdd ? altColor : null,
-                        );
-                      },
                     ),
-                  ],
-                ),
+                  ListView.builder(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: context.systemInsets,
+                    itemCount: state!.messages.length,
+                    itemBuilder: (context, i) {
+                      final altColor = Theme.of(context)
+                          .colorScheme
+                          .surfaceContainerHighest
+                          .withOpacity(0.75);
+                      return MessageWidget(
+                        message: state!.messages[i],
+                        onOpenFile: onOpenFile,
+                        onMarkAsRead: onMarkAsRead,
+                        onReply: onReply,
+                        signature: signature,
+                        onSignature: onSignature,
+                        noInternet: noInternet,
+                        expand: state!.messages[i].id == state!.showMessage,
+                        tileColor: i.isOdd ? altColor : null,
+                      );
+                    },
+                  ),
+                ],
               ),
             ),
+      ),
     );
   }
 }

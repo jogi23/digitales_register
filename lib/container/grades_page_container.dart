@@ -66,6 +66,7 @@ class GradesPageContainer extends ConsumerWidget {
       );
     }
     return GradesPage(
+      onRefresh: () => ref.read(gradesProvider.notifier).load(gradesState.semester),
       vm: GradesPageViewModel(
         showSemester: gradesState.semester,
         loading: gradesState.loading,

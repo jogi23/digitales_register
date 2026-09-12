@@ -30,6 +30,7 @@ class NotificationPageContainer extends ConsumerWidget {
     final noInternet = ref.watch(noInternetProvider);
     final notifier = ref.read(notificationsProvider.notifier);
     return NotificationPage(
+      onRefresh: ref.read(notificationsProvider.notifier).load,
       notifications: state.notifications,
       noInternet: noInternet,
       deleteNotification: notifier.delete,

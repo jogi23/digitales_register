@@ -23,6 +23,7 @@ import 'package:dr/container/calendar_week_container.dart';
 import 'package:dr/providers/calendar_provider.dart';
 import 'package:dr/ui/connection_status_button.dart';
 import 'package:dr/ui/layout.dart';
+import 'package:dr/ui/pull_to_refresh.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
 import 'package:dr/l10n/l10n.dart';
@@ -58,6 +59,9 @@ class Calendar extends ConsumerStatefulWidget {
 
   final DayCallback dayCallback;
   final DayCallback currentMondayCallback;
+
+  /// Loads the week shown again when it is pulled down from the top.
+  final Future<void> Function() onRefresh;
   final VoidCallback showEditSubjectNicks;
   final VoidCallback closeEditNicksBar;
 
@@ -66,6 +70,7 @@ class Calendar extends ConsumerStatefulWidget {
     required this.vm,
     required this.dayCallback,
     required this.currentMondayCallback,
+    required this.onRefresh,
     required this.showEditSubjectNicks,
     required this.closeEditNicksBar,
   });
@@ -323,19 +328,24 @@ class _CalendarState extends ConsumerState<Calendar> with TickerProviderStateMix
                       // is one of the few that can give some back.
                       SizedBox(height: context.compactGap(8)),
                       Expanded(
-                        child: NotificationListener<ScrollStartNotification>(
-                          onNotification: (n) {
-                            _chevronOpacityController.forward();
-                            _dateRangeOpacityController.forward();
-                            return false;
-                          },
-                          child: NotificationListener<ScrollEndNotification>(
-                            onNotification: (_) {
-                              _chevronOpacityController.reverse();
-                              _dateRangeOpacityController.reverse();
+                        // Outside the listeners below, so a pull does not
+                        // fade the arrows meant for swiping between weeks.
+                        child: PullToRefresh(
+                          onRefresh: widget.onRefresh,
+                          child: NotificationListener<ScrollStartNotification>(
+                            onNotification: (n) {
+                              _chevronOpacityController.forward();
+                              _dateRangeOpacityController.forward();
                               return false;
                             },
-                            child: _pageView,
+                            child: NotificationListener<ScrollEndNotification>(
+                              onNotification: (_) {
+                                _chevronOpacityController.reverse();
+                                _dateRangeOpacityController.reverse();
+                                return false;
+                              },
+                              child: _pageView,
+                            ),
                           ),
                         ),
                       ),

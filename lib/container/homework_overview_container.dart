@@ -23,6 +23,7 @@ import 'package:dr/ui/account_avatar_button.dart';
 import 'package:dr/ui/connection_status_button.dart';
 import 'package:dr/ui/homework_overview_page.dart';
 import 'package:dr/ui/lesson_entry_list.dart';
+import 'package:dr/ui/pull_to_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:responsive_scaffold/responsive_scaffold.dart';
@@ -42,17 +43,22 @@ class HomeworkOverviewContainer extends ConsumerWidget {
         title: Text(tr(context).menuHomeworkOverview),
         actions: const [ConnectionStatusButton(), AccountAvatarButton()],
       ),
-      body: LessonEntryList(
-        entries: homeworkEntries(calendar.days.values),
-        viewMode: settings.classbookViewMode,
-        selectedSubjects: settings.classbookSubjects,
-        onSelectedSubjectsChanged:
-            ref.read(settingsProvider.notifier).setClassbookSubjects,
-        subjectLabel: (subject) => appearance.nickFor(subject) ?? subject,
-        loading: calendar.loadingWeeks.isNotEmpty,
-        loadingText: tr(context).homeworkOverviewLoading,
-        emptyText: tr(context).homeworkOverviewEmpty,
-        ordinaryType: ordinaryHomeworkType,
+      body: PullToRefresh(
+        // Die Aufgaben kommen mit der Kalenderwoche: neu laden heißt die Woche neu
+        // holen, mit der die Seite auch öffnet.
+        onRefresh: ref.read(calendarProvider.notifier).loadCurrentWeek,
+        child: LessonEntryList(
+          entries: homeworkEntries(calendar.days.values),
+          viewMode: settings.classbookViewMode,
+          selectedSubjects: settings.classbookSubjects,
+          onSelectedSubjectsChanged:
+              ref.read(settingsProvider.notifier).setClassbookSubjects,
+          subjectLabel: (subject) => appearance.nickFor(subject) ?? subject,
+          loading: calendar.loadingWeeks.isNotEmpty,
+          loadingText: tr(context).homeworkOverviewLoading,
+          emptyText: tr(context).homeworkOverviewEmpty,
+          ordinaryType: ordinaryHomeworkType,
+        ),
       ),
     );
   }

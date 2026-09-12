@@ -28,6 +28,7 @@ import 'package:dr/ui/last_fetched_overlay.dart';
 import 'package:dr/ui/layout.dart';
 import 'package:dr/ui/no_internet.dart';
 import 'package:dr/l10n/l10n.dart';
+import 'package:dr/ui/pull_to_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:responsive_scaffold/responsive_scaffold.dart';
 
@@ -36,7 +37,11 @@ class GradesPage extends StatelessWidget {
   final ValueChanged<Semester> changeSemester;
   final VoidCallback showGradesSettings;
 
+  /// Loads the page again when it is pulled down from the top.
+  final Future<void> Function() onRefresh;
+
   const GradesPage({
+    required this.onRefresh,
     super.key,
     required this.vm,
     required this.changeSemester,
@@ -69,54 +74,57 @@ class GradesPage extends StatelessWidget {
           const AccountAvatarButton(),
         ],
       ),
-      body: !vm.hasData && vm.noInternet
-          ? const NoInternet()
-          : vm.loading && !vm.hasData
-              ? const Center(
-                  child: CircularProgressIndicator(),
-                )
-              : Stack(
-                  children: [
-                    AnimatedLinearProgressIndicator(show: vm.loading),
-                    RawLastFetchedOverlay(
-                      message: vm.lastFetchedMessage,
-                      child: ListView(
-                        padding: context.systemInsets,
-                        children: <Widget>[
-                          if (vm.showGradesDiagram)
-                            const SizedBox(
-                              height: 150,
-                              width: 250,
-                              child: GradesChartContainer(isFullscreen: false),
-                            ),
-                          if (vm.showAllSubjectsAverage) ...[
-                            ListTile(
-                              title: Row(
-                                children: [
-                                  Text(
-                                    vm.gradingMode == GradingMode.stars
-                                        ? tr(context).gradesAverageStars
-                                        : tr(context).gradesAverageNumeric,
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.settings),
-                                    onPressed: showGradesSettings,
-                                  ),
-                                ],
+      body: PullToRefresh(
+        onRefresh: onRefresh,
+        child: !vm.hasData && vm.noInternet
+            ? const NoInternet()
+            : vm.loading && !vm.hasData
+                ? const Center(
+                    child: CircularProgressIndicator(),
+                  )
+                : Stack(
+                    children: [
+                      AnimatedLinearProgressIndicator(show: vm.loading),
+                      RawLastFetchedOverlay(
+                        message: vm.lastFetchedMessage,
+                        child: ListView(
+                          padding: context.systemInsets,
+                          children: <Widget>[
+                            if (vm.showGradesDiagram)
+                              const SizedBox(
+                                height: 150,
+                                width: 250,
+                                child: GradesChartContainer(isFullscreen: false),
                               ),
-                              trailing: Text(vm.allSubjectsAverage),
-                            ),
-                            const Divider(
-                              height: 0,
-                            ),
+                            if (vm.showAllSubjectsAverage) ...[
+                              ListTile(
+                                title: Row(
+                                  children: [
+                                    Text(
+                                      vm.gradingMode == GradingMode.stars
+                                          ? tr(context).gradesAverageStars
+                                          : tr(context).gradesAverageNumeric,
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.settings),
+                                      onPressed: showGradesSettings,
+                                    ),
+                                  ],
+                                ),
+                                trailing: Text(vm.allSubjectsAverage),
+                              ),
+                              const Divider(
+                                height: 0,
+                              ),
+                            ],
+                            SortedGradesContainer(),
+                            const SizedBox(height: 50),
                           ],
-                          SortedGradesContainer(),
-                          const SizedBox(height: 50),
-                        ],
+                        ),
                       ),
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
+      ),
     );
   }
 }

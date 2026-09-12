@@ -24,6 +24,7 @@ import 'package:dr/ui/last_fetched_overlay.dart';
 import 'package:dr/ui/layout.dart';
 import 'package:dr/ui/no_internet.dart';
 import 'package:dr/l10n/l10n.dart';
+import 'package:dr/ui/pull_to_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:html/parser.dart' show parse;
@@ -145,17 +146,20 @@ class Certificate extends ConsumerWidget {
         title: Text(tr(context).menuCertificate),
         actions: const [ConnectionStatusButton(), AccountAvatarButton()],
       ),
-      body: certState.html == null
-          ? Center(
-              child: noInternet
-                  ? const NoInternet()
-                  : const CircularProgressIndicator(),
-            )
-          : LastFetchedOverlay(
-              lastFetched: certState.lastFetched,
-              noInternet: noInternet,
-              child: _CertificateView(html: certState.html!),
-            ),
+      body: PullToRefresh(
+        onRefresh: ref.read(certificateProvider.notifier).load,
+        child: certState.html == null
+            ? Center(
+                child: noInternet
+                    ? const NoInternet()
+                    : const CircularProgressIndicator(),
+              )
+            : LastFetchedOverlay(
+                lastFetched: certState.lastFetched,
+                noInternet: noInternet,
+                child: _CertificateView(html: certState.html!),
+              ),
+      ),
     );
   }
 }

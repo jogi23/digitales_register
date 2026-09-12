@@ -22,6 +22,7 @@ import 'package:dr/data.dart';
 import 'package:dr/providers/dashboard_provider.dart';
 import 'package:dr/providers/grades_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
+import 'package:dr/ui/pull_to_refresh.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
 import 'package:flutter/material.dart';
@@ -36,12 +37,19 @@ class _TestDashboardNotifier extends DashboardNotifier {
   @override
   DashboardState build() => _initialState;
 
+  int loads = 0;
+  int bothDirectionsLoads = 0;
+
   // The calendar views fetch on their own, which would hit the network.
   @override
-  Future<void> load(bool future) async {}
+  Future<void> load(bool future) async {
+    loads++;
+  }
 
   @override
-  Future<void> loadBothDirections() async {}
+  Future<void> loadBothDirections() async {
+    bothDirectionsLoads++;
+  }
 }
 
 class _TestGradesNotifier extends GradesNotifier {
@@ -106,11 +114,13 @@ void main() {
           ]),
       );
 
+  late _TestDashboardNotifier notifier;
+
   Widget dashboard(DashboardViewMode viewMode, {DashboardState? state}) {
+    notifier = _TestDashboardNotifier(state ?? _bothDirections());
     return ProviderScope(
       overrides: [
-        dashboardProvider
-            .overrideWith(() => _TestDashboardNotifier(state ?? _bothDirections())),
+        dashboardProvider.overrideWith(() => notifier),
         gradesProvider.overrideWith(_TestGradesNotifier.new),
         settingsProvider.overrideWith(
           () => _TestSettingsNotifier(
@@ -122,8 +132,12 @@ void main() {
     );
   }
 
-  Future<void> pump(WidgetTester tester, DashboardViewMode viewMode) async {
-    await tester.pumpWidget(dashboard(viewMode));
+  Future<void> pump(
+    WidgetTester tester,
+    DashboardViewMode viewMode, {
+    DashboardState? state,
+  }) async {
+    await tester.pumpWidget(dashboard(viewMode, state: state));
     await tester.pumpAndSettle();
   }
 
@@ -159,6 +173,55 @@ void main() {
       expect(find.text('Kommendes'), findsOneWidget);
     });
 
+  });
+
+  group('pulling down', () {
+    Future<void> pull(WidgetTester tester) async {
+      await tester.fling(
+        find.byType(PullToRefresh),
+        const Offset(0, 300),
+        1000,
+      );
+      await tester.pumpAndSettle();
+      // The list highlights new entries it passes, on a timer of its own.
+      await tester.pump(const Duration(seconds: 1));
+    }
+
+    testWidgets('reloads the list', (tester) async {
+      await pump(tester, DashboardViewMode.list);
+      final before = notifier.loads;
+      await pull(tester);
+      expect(notifier.loads, before + 1);
+    });
+
+    testWidgets('reloads both directions in the month view', (tester) async {
+      await pump(tester, DashboardViewMode.month);
+      final before = notifier.bothDirectionsLoads;
+      await pull(tester);
+      expect(notifier.bothDirectionsLoads, before + 1);
+    });
+
+    testWidgets('reloads both directions in the week view', (tester) async {
+      await pump(tester, DashboardViewMode.week);
+      final before = notifier.bothDirectionsLoads;
+      await pull(tester);
+      expect(notifier.bothDirectionsLoads, before + 1);
+    });
+
+    testWidgets('works on an empty dashboard too', (tester) async {
+      await pump(
+        tester,
+        DashboardViewMode.list,
+        state: DashboardState(
+          (b) => b
+            ..future = true
+            ..allDays = ListBuilder(),
+        ),
+      );
+      final before = notifier.loads;
+      await pull(tester);
+      expect(notifier.loads, before + 1);
+    });
   });
 
   group('sideways', () {

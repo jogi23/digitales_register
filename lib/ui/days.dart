@@ -43,6 +43,7 @@ import 'package:dr/ui/dashboard_calendar.dart';
 import 'package:dr/ui/last_fetched_overlay.dart';
 import 'package:dr/ui/layout.dart';
 import 'package:dr/ui/no_internet.dart';
+import 'package:dr/ui/pull_to_refresh.dart';
 import 'package:dr/ui/star_rating.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
@@ -72,10 +73,10 @@ class DaysWidget extends StatefulWidget {
   final VoidCallback onSwitchFuture;
 
   /// Fetches past and future at once, for the month and week views.
-  final VoidCallback loadBothDirections;
+  final Future<void> Function() loadBothDirections;
   final ToggleDoneCallback toggleDoneCallback;
   final VoidCallback setDoNotAskWhenDeleteCallback;
-  final VoidCallback refresh;
+  final Future<void> Function() refresh;
   final AttachmentCallback onOpenAttachment;
   final Map<int, BuiltList<Competence>> gradeCompetences;
   final Future<void> Function(Iterable<DashboardGradeTarget> targets)
@@ -251,7 +252,7 @@ class _DaysWidgetState extends State<DaysWidget> {
       // The month and week views navigate freely, so they need past and
       // future; with one direction the other looks empty.
       if (widget.vm.viewMode != DashboardViewMode.list) {
-        widget.loadBothDirections();
+        unawaited(widget.loadBothDirections());
       }
       _afterFirstFrame = true;
       setState(() {});
@@ -277,7 +278,7 @@ class _DaysWidgetState extends State<DaysWidget> {
     // other direction too; only the first build did so.
     if (widget.vm.viewMode != oldWidget.vm.viewMode &&
         widget.vm.viewMode != DashboardViewMode.list) {
-      widget.loadBothDirections();
+      unawaited(widget.loadBothDirections());
     }
     updateValues();
     update();
@@ -398,6 +399,12 @@ class _DaysWidgetState extends State<DaysWidget> {
           );
   }
 
+  /// What pulling down loads again: the list stands in one direction, the
+  /// calendar views show both — reloading one left the other stale.
+  Future<void> _reload() => widget.vm.viewMode == DashboardViewMode.list
+      ? widget.refresh()
+      : widget.loadBothDirections();
+
   /// Brings the next new or changed entry into view.
   ///
   /// The list scrolls to it. The calendar views are not bound to that scroll
@@ -493,15 +500,6 @@ class _DaysWidgetState extends State<DaysWidget> {
           },
         ),
       );
-      // Always in the tree, even while loading: taking it out rebuilds
-      // everything below it, and the calendar loses the week just tapped.
-      body = RefreshIndicator(
-        onRefresh: () async {
-          if (noInternet || widget.vm.loading) return;
-          widget.refresh();
-        },
-        child: body,
-      );
       body = Stack(
         children: [
           body,
@@ -509,6 +507,10 @@ class _DaysWidgetState extends State<DaysWidget> {
         ],
       );
     }
+    // Around both branches — the empty dashboard needs it most and had none —
+    // and always in the tree, even while loading: taking it out rebuilds
+    // everything below it, and the calendar loses the week just tapped.
+    body = PullToRefresh(onRefresh: _reload, child: body);
     return ResponsiveScaffold<Pages>(
       key: scaffoldKey,
       homeBody: Column(
@@ -519,7 +521,7 @@ class _DaysWidgetState extends State<DaysWidget> {
       ),
       onRouteChanged: (route) {
         if (route == Pages.homework) {
-          widget.refresh();
+          unawaited(widget.refresh());
         }
       },
       homeFloatingActionButton: Column(

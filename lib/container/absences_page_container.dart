@@ -29,6 +29,7 @@ class AbsencesPageContainer extends ConsumerWidget {
     final state = ref.watch(absencesProvider);
     final noInternet = ref.watch(noInternetProvider);
     return AbsencesPage(
+      onRefresh: ref.read(absencesProvider.notifier).load,
       state: state,
       noInternet: noInternet,
     );
