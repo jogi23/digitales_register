@@ -12,6 +12,7 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 
 ### Verbesserungen
 
+- Die Verbindungsanzeige in der Titelzeile ist jetzt immer eine Wolke, deren Form und Farbe den Zustand zeigt: verbunden, noch nichts geladen, veraltet, wird aufgebaut, kein Netz oder Sitzung abgelaufen. Ohne Netz erscheint zusätzlich für zwei Sekunden eine kurze Meldung.
 - Querformat: das Merkheft stellt Monatsraster und Tagesansicht nebeneinander, statt beides übereinander zu quetschen.
 - Querformat: Seitenüberschrift, Kopfzeilen und Abstände fallen kleiner aus, damit mehr vom Inhalt bleibt.
 - Querformat: auf dem Handy bleibt die Seitenleiste eingeklappt, statt ein Drittel der Breite zu belegen.
@@ -21,6 +22,7 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 
 ### Fehlerbehebungen
 
+- Herunterziehen zum Aktualisieren funktioniert auf allen Seiten mit Daten vom Server — Merkheft in jeder Ansicht und auch leer, Kalender, Bewertungen, Absenzen, Zeugnis, Mitteilungen, Klassenbuch, Hausaufgaben, Unterrichtsmaterialien, Benachrichtigungen und Profil. Der Kreisel bleibt stehen, bis die Daten da sind; ohne Verbindung wird sie zuerst wiederhergestellt.
 - Merkheft: Wochen- und Monatsansicht zeigen auch vergangene Einträge, ohne dass dafür erst in der Listenansicht auf die Vergangenheit getippt werden muss.
 - Merkheft: der Knopf „Neue Einträge“ führt in Wochen- und Monatsansicht zum Tag des Eintrags, statt nichts zu bewirken.
 - Querformat: Inhalte liegen nicht mehr unter der Navigationsleiste des Geräts, die dort am rechten Rand steht.

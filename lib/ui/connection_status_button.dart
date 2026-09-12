@@ -19,88 +19,123 @@ import 'dart:async';
 
 import 'package:dr/l10n/l10n.dart';
 import 'package:dr/providers/connection_provider.dart';
+import 'package:dr/ui/snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 /// Says whether the app is talking to the server, on every page that has a
-/// title bar.
+/// title bar — as a cloud whose shape and colour follow the state.
 ///
-/// Three steps, because that is what the reader needs to tell apart: all is
-/// well, what is shown is getting old, and something is in the way. Only the
-/// last one is loud — a working connection should not shout.
-///
-/// Tapping opens the way back: reloading, or a new login when the session is
-/// what ran out.
-class ConnectionStatusButton extends ConsumerWidget {
+/// No words in the bar, whatever the state. A working connection should not
+/// shout, and a lost one is announced once by a short message
+/// ([showNoConnectionToast]) while the crossed-out cloud stays. The words are
+/// in the tooltip and in the dialog a tap opens, which also offers the way
+/// back: reloading, or a new login when the session is what ran out.
+class ConnectionStatusButton extends ConsumerStatefulWidget {
   const ConnectionStatusButton({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final connection = ref.watch(connectionProvider);
-    final scheme = Theme.of(context).colorScheme;
+  ConsumerState<ConnectionStatusButton> createState() =>
+      _ConnectionStatusButtonState();
+}
 
-    if (connection.hasProblem) {
-      final label = connection.status == ConnectionStatus.offline
-          ? tr(context).noConnection
-          : tr(context).connectionSessionExpired;
-      return TextButton.icon(
-        onPressed: () => unawaited(_showDetails(context, ref)),
-        style: TextButton.styleFrom(foregroundColor: scheme.error),
-        icon: Icon(
-          connection.status == ConnectionStatus.offline
-              ? Icons.cloud_off
-              : Icons.lock_clock,
-          size: 20,
-        ),
-        label: Text(label),
-      );
-    }
+class _ConnectionStatusButtonState
+    extends ConsumerState<ConnectionStatusButton> {
+  /// Redraws once a minute, so fresh data turns stale on its own instead of
+  /// waiting for the page to be rebuilt for some other reason.
+  late final Timer _ticker;
 
-    if (connection.isStale) {
-      return TextButton(
-        onPressed: () => unawaited(_showDetails(context, ref)),
-        style: TextButton.styleFrom(foregroundColor: scheme.onSurfaceVariant),
-        child: Text(_lastUpdateLabel(context, connection)),
-      );
-    }
+  @override
+  void initState() {
+    super.initState();
+    _ticker = Timer.periodic(const Duration(minutes: 1), (_) {
+      if (mounted) setState(() {});
+    });
+  }
 
-    // Nothing is wrong, so this stays a hint rather than a message. Hollow
-    // while the server has not answered yet: the data on screen then comes
-    // from the last run, and the app bar should not claim otherwise.
+  @override
+  void dispose() {
+    _ticker.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final look = _lookOf(context, ref.watch(connectionProvider));
     return IconButton(
-      onPressed: () => unawaited(_showDetails(context, ref)),
-      tooltip: connection.neverLoaded
-          ? tr(context).connectionNeverUpdated
-          : tr(context).connectionConnected,
-      icon: Icon(
-        connection.neverLoaded ? Icons.circle_outlined : Icons.circle,
-        size: 10,
-        color: connection.neverLoaded ? scheme.outline : scheme.primary,
-      ),
+      onPressed: () => unawaited(_showDetails()),
+      tooltip: look.label,
+      icon: Icon(look.icon, color: look.color),
     );
   }
 
-  /// The time of the last answer, or that there was none yet.
-  static String _lastUpdateLabel(
-    BuildContext context,
-    ConnectionInfo connection,
-  ) {
-    final last = connection.lastSuccess;
-    if (last == null) return tr(context).connectionNeverUpdated;
-    return tr(context).connectionLastUpdate(
-      DateFormat.Hm(tr(context).localeName).format(last.toLocal()),
-    );
-  }
-
-  Future<void> _showDetails(BuildContext context, WidgetRef ref) async {
+  Future<void> _showDetails() async {
     final reconnect = await showDialog<bool>(
       context: context,
       builder: (context) => const _ConnectionDialog(),
     );
-    if (reconnect != true) return;
+    if (reconnect != true || !mounted) return;
     await ref.read(connectionProvider.notifier).reconnect();
+    if (!mounted) return;
+    // Still nothing to reach: say so, the same way going offline does.
+    if (ref.read(connectionProvider).status == ConnectionStatus.offline) {
+      showNoConnectionToast();
+    }
   }
+}
+
+/// One state as the reader sees it: the cloud, its colour, and in words.
+typedef _Look = ({IconData icon, Color color, String label});
+
+_Look _lookOf(BuildContext context, ConnectionInfo connection) {
+  final scheme = Theme.of(context).colorScheme;
+  final l = tr(context);
+  if (connection.reconnecting) {
+    return (
+      icon: Icons.cloud_sync,
+      color: scheme.primary,
+      label: l.connectionReconnecting,
+    );
+  }
+  return switch (connection.status) {
+    ConnectionStatus.offline => (
+        icon: Icons.cloud_off,
+        color: scheme.error,
+        label: l.noConnection,
+      ),
+    ConnectionStatus.sessionExpired => (
+        icon: Icons.cloud,
+        color: scheme.error,
+        label: l.connectionSessionExpired,
+      ),
+    // Hollow while nothing has come back yet: the data on screen is then
+    // from the last run, and the bar should not claim otherwise.
+    ConnectionStatus.connected when connection.neverLoaded => (
+        icon: Icons.cloud_queue,
+        color: scheme.outline,
+        label: l.connectionNeverUpdated,
+      ),
+    ConnectionStatus.connected when connection.isStale => (
+        icon: Icons.cloud_download,
+        color: scheme.tertiary,
+        label: l.connectionOutdated,
+      ),
+    ConnectionStatus.connected => (
+        icon: Icons.cloud_done,
+        color: scheme.primary,
+        label: l.connectionConnected,
+      ),
+  };
+}
+
+/// The time of the last answer, for the dialog.
+String _lastUpdateLabel(BuildContext context, ConnectionInfo connection) {
+  final last = connection.lastSuccess;
+  if (last == null) return tr(context).connectionNeverUpdated;
+  return tr(context).connectionLastUpdate(
+    DateFormat.Hm(tr(context).localeName).format(last.toLocal()),
+  );
 }
 
 /// What is known about the connection, and the one thing that can be done
@@ -111,15 +146,7 @@ class _ConnectionDialog extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final connection = ref.watch(connectionProvider);
-    final state = switch (connection.status) {
-      ConnectionStatus.connected => connection.neverLoaded
-          ? tr(context).connectionNeverUpdated
-          : connection.isStale
-              ? tr(context).connectionOutdated
-              : tr(context).connectionConnected,
-      ConnectionStatus.offline => tr(context).noConnection,
-      ConnectionStatus.sessionExpired => tr(context).connectionSessionExpired,
-    };
+    final look = _lookOf(context, connection);
     final hint = switch (connection.status) {
       ConnectionStatus.connected => null,
       ConnectionStatus.offline => tr(context).connectionOfflineHint,
@@ -127,16 +154,17 @@ class _ConnectionDialog extends ConsumerWidget {
         tr(context).connectionSessionExpiredHint,
     };
     return AlertDialog(
+      icon: Icon(look.icon, color: look.color),
       title: Text(tr(context).connectionTitle),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text(state, style: Theme.of(context).textTheme.titleMedium),
+          Text(look.label, style: Theme.of(context).textTheme.titleMedium),
           // Only when there is one — otherwise it repeats the line above.
           if (!connection.neverLoaded) ...<Widget>[
             const SizedBox(height: 8),
-            Text(ConnectionStatusButton._lastUpdateLabel(context, connection)),
+            Text(_lastUpdateLabel(context, connection)),
           ],
           if (hint != null) ...<Widget>[
             const SizedBox(height: 8),

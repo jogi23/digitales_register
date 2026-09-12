@@ -16,6 +16,7 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:dr/providers/connection_provider.dart';
+import 'package:dr/ui/snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -31,7 +32,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// - Its spinner has to wait for the reload. Handing back at once made it
 ///   vanish before anything had happened, so the pull looked ignored.
 /// - Without a connection a reload goes nowhere. The connection is restored
-///   first; if that fails, the page is left as it is.
+///   first; if that fails, the page is left as it is and a short message
+///   says why.
 class PullToRefresh extends ConsumerWidget {
   /// Loads the page's data. The spinner stays until this completes.
   final Future<void> Function() onRefresh;
@@ -66,7 +68,10 @@ class PullToRefresh extends ConsumerWidget {
   Future<void> _refresh(WidgetRef ref) async {
     if (ref.read(connectionProvider).hasProblem) {
       await ref.read(connectionProvider.notifier).reconnect();
-      if (ref.read(connectionProvider).hasProblem) return;
+      final status = ref.read(connectionProvider).status;
+      // Still nothing to reach: say so briefly, the way going offline does.
+      if (status == ConnectionStatus.offline) showNoConnectionToast();
+      if (status != ConnectionStatus.connected) return;
     }
     await onRefresh();
   }

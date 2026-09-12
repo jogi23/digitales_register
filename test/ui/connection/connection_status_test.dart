@@ -57,46 +57,77 @@ void main() {
     );
   }
 
+  /// Words inside the button itself — there should never be any.
+  Finder wordsInBar() => find.descendant(
+        of: find.byType(ConnectionStatusButton),
+        matching: find.byType(Text),
+      );
+
   setUpAll(() => initializeDateFormatting('de'));
   setUp(() => mockNow = UtcDateTime(2026, 9, 12, 10));
   tearDown(() => mockNow = null);
 
-  testWidgets('a working connection stays a dot, not a message',
+  group('every state is a cloud without words', () {
+    testWidgets('connected', (tester) async {
+      await tester.pumpWidget(
+        page(ConnectionInfo(lastSuccess: UtcDateTime(2026, 9, 12, 9, 55))),
+      );
+      expect(find.byIcon(Icons.cloud_done), findsOneWidget);
+      expect(find.byTooltip('Verbunden'), findsOneWidget);
+      expect(wordsInBar(), findsNothing);
+    });
+
+    testWidgets('nothing loaded yet', (tester) async {
+      await tester.pumpWidget(page(const ConnectionInfo()));
+      expect(find.byIcon(Icons.cloud_queue), findsOneWidget);
+      expect(find.byTooltip('Noch nichts geladen'), findsOneWidget);
+      expect(wordsInBar(), findsNothing);
+    });
+
+    testWidgets('data out of date', (tester) async {
+      await tester.pumpWidget(
+        page(ConnectionInfo(lastSuccess: UtcDateTime(2026, 9, 12, 9, 30))),
+      );
+      expect(find.byIcon(Icons.cloud_download), findsOneWidget);
+      expect(find.byTooltip('Daten nicht mehr aktuell'), findsOneWidget);
+      expect(wordsInBar(), findsNothing);
+    });
+
+    testWidgets('offline', (tester) async {
+      await tester.pumpWidget(
+        page(const ConnectionInfo(status: ConnectionStatus.offline)),
+      );
+      expect(find.byIcon(Icons.cloud_off), findsOneWidget);
+      expect(find.byTooltip('Keine Verbindung'), findsOneWidget);
+      expect(wordsInBar(), findsNothing);
+    });
+
+    testWidgets('session expired', (tester) async {
+      await tester.pumpWidget(
+        page(const ConnectionInfo(status: ConnectionStatus.sessionExpired)),
+      );
+      expect(find.byIcon(Icons.cloud), findsOneWidget);
+      expect(find.byTooltip('Sitzung abgelaufen'), findsOneWidget);
+      expect(wordsInBar(), findsNothing);
+    });
+
+    testWidgets('reconnecting', (tester) async {
+      await tester.pumpWidget(page(const ConnectionInfo(reconnecting: true)));
+      expect(find.byIcon(Icons.cloud_sync), findsOneWidget);
+      expect(wordsInBar(), findsNothing);
+    });
+  });
+
+  testWidgets('fresh data turns stale without the page being rebuilt',
       (tester) async {
     await tester.pumpWidget(
       page(ConnectionInfo(lastSuccess: UtcDateTime(2026, 9, 12, 9, 55))),
     );
-    expect(find.byIcon(Icons.circle), findsOneWidget);
-    expect(find.textContaining('Zuletzt aktualisiert'), findsNothing);
-  });
+    expect(find.byIcon(Icons.cloud_done), findsOneWidget);
 
-  testWidgets('before the first answer the dot is hollow', (tester) async {
-    await tester.pumpWidget(page(const ConnectionInfo()));
-    expect(find.byIcon(Icons.circle_outlined), findsOneWidget);
-  });
-
-  testWidgets('old data names the time it was fetched', (tester) async {
-    await tester.pumpWidget(
-      page(ConnectionInfo(lastSuccess: UtcDateTime(2026, 9, 12, 9, 30))),
-    );
-    expect(find.textContaining('Zuletzt aktualisiert'), findsOneWidget);
-  });
-
-  testWidgets('no network says so', (tester) async {
-    await tester.pumpWidget(
-      page(const ConnectionInfo(status: ConnectionStatus.offline)),
-    );
-    expect(find.text('Keine Verbindung'), findsOneWidget);
-    expect(find.byIcon(Icons.cloud_off), findsOneWidget);
-  });
-
-  testWidgets('an expired session is named as such, not as an outage',
-      (tester) async {
-    await tester.pumpWidget(
-      page(const ConnectionInfo(status: ConnectionStatus.sessionExpired)),
-    );
-    expect(find.text('Sitzung abgelaufen'), findsOneWidget);
-    expect(find.text('Keine Verbindung'), findsNothing);
+    mockNow = UtcDateTime(2026, 9, 12, 10, 11);
+    await tester.pump(const Duration(minutes: 1));
+    expect(find.byIcon(Icons.cloud_download), findsOneWidget);
   });
 
   testWidgets('tapping offers a new login when the session ran out',
@@ -104,7 +135,7 @@ void main() {
     await tester.pumpWidget(
       page(const ConnectionInfo(status: ConnectionStatus.sessionExpired)),
     );
-    await tester.tap(find.text('Sitzung abgelaufen'));
+    await tester.tap(find.byType(ConnectionStatusButton));
     await tester.pumpAndSettle();
     expect(find.text('Verbindung'), findsOneWidget);
     expect(find.text('Neu anmelden'), findsOneWidget);
@@ -120,6 +151,7 @@ void main() {
     await tester.tap(find.byType(ConnectionStatusButton));
     await tester.pumpAndSettle();
     expect(find.text('Verbunden'), findsOneWidget);
+    expect(find.textContaining('Zuletzt aktualisiert'), findsOneWidget);
     expect(find.text('Neu verbinden'), findsOneWidget);
     // Closing leaves the connection alone.
     await tester.tap(find.text('Schließen'));
