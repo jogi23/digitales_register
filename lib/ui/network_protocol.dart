@@ -19,6 +19,7 @@
 import 'package:dr/app_state.dart';
 import 'package:dr/main.dart';
 import 'package:dr/l10n/l10n.dart';
+import 'package:dr/ui/layout.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -34,8 +35,7 @@ class NetworkProtocol extends StatelessWidget {
             child: Text(tr(context).networkNothing),
           )
         : ListView.builder(
-            padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewPadding.bottom),
+            padding: context.systemInsets,
             itemCount: items.length,
             itemBuilder: (context, index) {
               return _Item(

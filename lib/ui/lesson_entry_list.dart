@@ -17,6 +17,7 @@
 
 import 'package:dr/app_state.dart';
 import 'package:dr/l10n/l10n.dart';
+import 'package:dr/ui/layout.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -161,9 +162,7 @@ class _ByDay extends StatelessWidget {
     final dates = byDate.keys.toList();
 
     return ListView.builder(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewPadding.bottom,
-      ),
+      padding: context.systemInsets,
       itemCount: dates.length,
       itemBuilder: (context, index) {
         final date = dates[index];
@@ -231,9 +230,7 @@ class _BySubject extends StatelessWidget {
     final subjects = bySubject.keys.toList()..sort();
 
     return ListView.builder(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewPadding.bottom,
-      ),
+      padding: context.systemInsets,
       itemCount: subjects.length,
       itemBuilder: (context, index) {
         final subject = subjects[index];

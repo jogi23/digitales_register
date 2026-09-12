@@ -23,7 +23,9 @@ import 'package:dr/container/grades_page_container.dart';
 import 'package:dr/container/sorted_grades_container.dart';
 import 'package:dr/data.dart';
 import 'package:dr/ui/animated_linear_progress_indicator.dart';
+import 'package:dr/ui/connection_status_button.dart';
 import 'package:dr/ui/last_fetched_overlay.dart';
+import 'package:dr/ui/layout.dart';
 import 'package:dr/ui/no_internet.dart';
 import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
@@ -63,6 +65,7 @@ class GradesPage extends StatelessWidget {
               },
             ),
           ),
+          const ConnectionStatusButton(),
           const AccountAvatarButton(),
         ],
       ),
@@ -78,8 +81,7 @@ class GradesPage extends StatelessWidget {
                     RawLastFetchedOverlay(
                       message: vm.lastFetchedMessage,
                       child: ListView(
-                        padding: EdgeInsets.only(
-                            bottom: MediaQuery.of(context).viewPadding.bottom),
+                        padding: context.systemInsets,
                         children: <Widget>[
                           if (vm.showGradesDiagram)
                             const SizedBox(

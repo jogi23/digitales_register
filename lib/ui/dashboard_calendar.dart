@@ -17,6 +17,8 @@
 
 import 'package:built_collection/built_collection.dart';
 import 'package:dr/data.dart';
+import 'package:dr/ui/dashboard_jump.dart';
+import 'package:dr/ui/layout.dart';
 import 'package:dr/util.dart';
 import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
@@ -61,12 +63,16 @@ class DashboardCalendar extends StatefulWidget {
   /// Asks for the days the dashboard does not hold yet.
   final VoidCallback onLoadMissing;
 
+  /// Days the dashboard wants shown, e.g. the one a new entry sits on.
+  final DashboardJumpNotifier? jumpTo;
+
   const DashboardCalendar({
     super.key,
     required this.days,
     required this.dayBuilder,
     this.loading = false,
     required this.onLoadMissing,
+    this.jumpTo,
   });
 
   @override
@@ -89,6 +95,34 @@ class _DashboardCalendarState extends State<DashboardCalendar> {
     _month = _startingMonth();
     // Open on today, so the view starts where the user is.
     _pick = _DayPick(dateOnly(DateTime.now()));
+    widget.jumpTo?.addListener(_handleJump);
+  }
+
+  @override
+  void didUpdateWidget(DashboardCalendar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.jumpTo != widget.jumpTo) {
+      oldWidget.jumpTo?.removeListener(_handleJump);
+      widget.jumpTo?.addListener(_handleJump);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.jumpTo?.removeListener(_handleJump);
+    super.dispose();
+  }
+
+  /// Opens the month the wanted day sits in and picks that day.
+  void _handleJump() {
+    final request = widget.jumpTo?.value;
+    if (request == null || !mounted) return;
+    final date = dateOnly(request.date);
+    setState(() {
+      _month = _monthOf(date);
+      _pick = _DayPick(date);
+    });
+    _fetchIfMissing([date]);
   }
 
   /// The month of today when today is loaded, otherwise the month of the first
@@ -149,28 +183,54 @@ class _DashboardCalendarState extends State<DashboardCalendar> {
       for (final day in widget.days) dateOnly(day.date): day,
     };
 
+    final compact = context.isCompactHeight;
+    final month = <Widget>[
+      _MonthHeader(
+        month: _month,
+        onPrevious: () => _changeMonth(-1),
+        onNext: () => _changeMonth(1),
+      ),
+      // Says that something is happening while the missing days arrive;
+      // the grid itself fills in as soon as they do.
+      SizedBox(
+        height: 2,
+        child: widget.loading ? const LinearProgressIndicator() : null,
+      ),
+      _MonthGrid(
+        month: _month,
+        byDate: byDate,
+        loaded: _loadedRange(byDate.keys),
+        pick: _pick,
+        onPickDay: _pickDay,
+        onPickWeek: _pickWeek,
+        compact: compact,
+      ),
+    ];
+
+    // Sideways there is width to spare and hardly any height: the grid above
+    // the entries left almost nothing for either. Side by side both fit.
+    if (compact) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: month,
+              ),
+            ),
+          ),
+          const VerticalDivider(width: 1),
+          Expanded(child: _detail(context, byDate)),
+        ],
+      );
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        _MonthHeader(
-          month: _month,
-          onPrevious: () => _changeMonth(-1),
-          onNext: () => _changeMonth(1),
-        ),
-        // Says that something is happening while the missing days arrive;
-        // the grid itself fills in as soon as they do.
-        SizedBox(
-          height: 2,
-          child: widget.loading ? const LinearProgressIndicator() : null,
-        ),
-        _MonthGrid(
-          month: _month,
-          byDate: byDate,
-          loaded: _loadedRange(byDate.keys),
-          pick: _pick,
-          onPickDay: _pickDay,
-          onPickWeek: _pickWeek,
-        ),
+        ...month,
         const Divider(height: 1),
         Expanded(child: _detail(context, byDate)),
       ],
@@ -256,12 +316,16 @@ class _MonthHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Sideways the two buttons alone are worth a sixth of the height.
+    final density =
+        context.isCompactHeight ? VisualDensity.compact : VisualDensity.standard;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
         IconButton(
           icon: const Icon(Icons.chevron_left),
           tooltip: tr(context).previousMonth,
+          visualDensity: density,
           onPressed: onPrevious,
         ),
         Text(
@@ -271,6 +335,7 @@ class _MonthHeader extends StatelessWidget {
         IconButton(
           icon: const Icon(Icons.chevron_right),
           tooltip: tr(context).nextMonth,
+          visualDensity: density,
           onPressed: onNext,
         ),
       ],
@@ -288,6 +353,9 @@ class _MonthGrid extends StatelessWidget {
   final void Function(DateTime date) onPickDay;
   final void Function(DateTime monday) onPickWeek;
 
+  /// Whether the frame is short on height, which the rows then give back.
+  final bool compact;
+
   const _MonthGrid({
     required this.month,
     required this.byDate,
@@ -295,6 +363,7 @@ class _MonthGrid extends StatelessWidget {
     required this.pick,
     required this.onPickDay,
     required this.onPickWeek,
+    this.compact = false,
   });
 
   static List<String> _weekdays(BuildContext context) => [
@@ -307,6 +376,9 @@ class _MonthGrid extends StatelessWidget {
         tr(context).weekdaySun,
       ];
   static const _rowHeight = 46.0;
+  /// The cell itself needs the circle, a gap and the dot; less than that
+  /// and the row overflows instead of saving room.
+  static const _compactRowHeight = 40.0;
   static const _weekColumnWidth = 28.0;
 
   @override
@@ -341,7 +413,7 @@ class _MonthGrid extends StatelessWidget {
           // weeks would otherwise overflow the screen on a phone.
           for (var week = 0; week < weeks; week++)
             SizedBox(
-              height: _rowHeight,
+              height: compact ? _compactRowHeight : _rowHeight,
               // The row always starts on a Monday, which for the first row
               // can still lie in the previous month.
               child: _week(

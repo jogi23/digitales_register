@@ -19,7 +19,9 @@
 import 'package:dr/providers/certificate_provider.dart';
 import 'package:dr/ui/account_avatar_button.dart';
 import 'package:dr/providers/no_internet_provider.dart';
+import 'package:dr/ui/connection_status_button.dart';
 import 'package:dr/ui/last_fetched_overlay.dart';
+import 'package:dr/ui/layout.dart';
 import 'package:dr/ui/no_internet.dart';
 import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
@@ -141,7 +143,7 @@ class Certificate extends ConsumerWidget {
     return Scaffold(
       appBar: ResponsiveAppBar(
         title: Text(tr(context).menuCertificate),
-        actions: [AccountAvatarButton()],
+        actions: const [ConnectionStatusButton(), AccountAvatarButton()],
       ),
       body: certState.html == null
           ? Center(
@@ -269,8 +271,7 @@ class _CertificateView extends StatelessWidget {
         }
 
         return SingleChildScrollView(
-          padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewPadding.bottom),
+          padding: context.systemInsets,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: content,

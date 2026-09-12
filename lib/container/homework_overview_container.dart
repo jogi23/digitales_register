@@ -20,6 +20,7 @@ import 'package:dr/providers/calendar_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/providers/subject_appearance_provider.dart';
 import 'package:dr/ui/account_avatar_button.dart';
+import 'package:dr/ui/connection_status_button.dart';
 import 'package:dr/ui/homework_overview_page.dart';
 import 'package:dr/ui/lesson_entry_list.dart';
 import 'package:flutter/material.dart';
@@ -39,7 +40,7 @@ class HomeworkOverviewContainer extends ConsumerWidget {
     return Scaffold(
       appBar: ResponsiveAppBar(
         title: Text(tr(context).menuHomeworkOverview),
-        actions: const [AccountAvatarButton()],
+        actions: const [ConnectionStatusButton(), AccountAvatarButton()],
       ),
       body: LessonEntryList(
         entries: homeworkEntries(calendar.days.values),

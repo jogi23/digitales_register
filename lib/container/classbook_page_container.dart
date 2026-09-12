@@ -21,6 +21,7 @@ import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/providers/subject_appearance_provider.dart';
 import 'package:dr/ui/account_avatar_button.dart';
 import 'package:dr/ui/classbook_page.dart';
+import 'package:dr/ui/connection_status_button.dart';
 import 'package:dr/ui/lesson_entry_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -42,7 +43,7 @@ class ClassbookPageContainer extends ConsumerWidget {
     return Scaffold(
       appBar: ResponsiveAppBar(
         title: Text(tr(context).menuClassbook),
-        actions: const [AccountAvatarButton()],
+        actions: const [ConnectionStatusButton(), AccountAvatarButton()],
       ),
       body: LessonEntryList(
         entries: classbookEntries(calendar.days.values),

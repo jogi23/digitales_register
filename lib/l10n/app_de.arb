@@ -73,6 +73,7 @@
   "dialogNeverAsk": "Nie fragen",
   "reminderDeleteTitle": "Erinnerung löschen?",
   "commonCancel": "Abbrechen",
+  "commonClose": "Schließen",
   "commonDelete": "Löschen",
   "homeworkVersions": "Versionen",
   "gradeWithoutMark": "ohne Note",
@@ -479,5 +480,23 @@
   "accountOthers": "Andere Konten",
   "accountAdd": "Konto hinzufügen",
   "accountSwitchDisabled": "Konto wechseln (Passwort-Speicherung deaktiviert)",
-  "colorAmber": "Gelb"
+  "colorAmber": "Gelb",
+  "connectionTitle": "Verbindung",
+  "connectionConnected": "Verbunden",
+  "connectionSessionExpired": "Sitzung abgelaufen",
+  "connectionSessionExpiredHint": "Das Gerät ist online, der Server kennt die Sitzung aber nicht mehr. Neu anmelden, um wieder Daten zu laden.",
+  "connectionOfflineHint": "Der Server ist nicht erreichbar. Angezeigt werden die zuletzt geladenen Daten.",
+  "connectionLastUpdate": "Zuletzt aktualisiert: {time}",
+  "connectionNeverUpdated": "Noch nichts geladen",
+  "connectionReconnect": "Neu verbinden",
+  "connectionRelogin": "Neu anmelden",
+  "connectionReconnecting": "Verbindung wird aufgebaut …",
+  "connectionOutdated": "Daten nicht mehr aktuell",
+  "@connectionLastUpdate": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  }
 }

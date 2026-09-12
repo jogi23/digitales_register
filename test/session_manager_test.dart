@@ -30,6 +30,17 @@ SessionManager _makeSessionManager({required bool demoMode}) {
   return SessionManager(ApiClient(), mockAuth);
 }
 
+/// An account that is not signed in and has nothing stored to sign in with:
+/// the state a session leaves behind when it runs out.
+_MockAuthService makeSignedOutAuth() {
+  final auth = _MockAuthService();
+  when(() => auth.demoMode).thenReturn(false);
+  when(() => auth.loggedIn).thenAnswer((_) async => false);
+  when(() => auth.user).thenReturn(null);
+  when(() => auth.pass).thenReturn(null);
+  return auth;
+}
+
 void main() {
   group('SessionManager', () {
     // -----------------------------------------------------------------------
@@ -161,6 +172,43 @@ void main() {
         sm.startSession(validConfig());
         await sm.ensureLoggedIn();
         verifyNever(() => auth.forceLoggedOut());
+      });
+    });
+
+    // -----------------------------------------------------------------------
+    // Reporting the state of the session
+    // -----------------------------------------------------------------------
+    group('reporting an expired session', () {
+      test('a request that cannot be sent with a working network reports it',
+          () async {
+        final auth = makeSignedOutAuth();
+        final sm = SessionManager(ApiClient(), auth);
+        var expired = 0;
+        sm.onSessionExpired = () => expired++;
+
+        // The request never goes out: nothing is logged in, and nothing is
+        // stored to log in with. That used to be silent.
+        expect(await sm.send('api/student/dashboard/dashboard'), isNull);
+        expect(expired, 1);
+      });
+
+      test('no network is not reported as an expired session', () async {
+        final auth = makeSignedOutAuth();
+        final sm = SessionManager(ApiClient(), auth)..noInternet = true;
+        var expired = 0;
+        sm.onSessionExpired = () => expired++;
+
+        expect(await sm.send('api/student/dashboard/dashboard'), isNull);
+        expect(expired, 0);
+      });
+
+      test('a demo answer is not mistaken for a dead session', () async {
+        final sm = _makeSessionManager(demoMode: true);
+        var expired = 0;
+        sm.onSessionExpired = () => expired++;
+
+        await sm.send('api/student/dashboard/toggle_reminder');
+        expect(expired, 0);
       });
     });
   });

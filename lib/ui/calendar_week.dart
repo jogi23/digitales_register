@@ -23,6 +23,7 @@ import 'package:dr/providers/calendar_provider.dart';
 import 'package:dr/providers/subject_appearance_provider.dart';
 import 'package:dr/ui/calendar_grid.dart';
 import 'package:dr/ui/last_fetched_overlay.dart';
+import 'package:dr/ui/layout.dart';
 import 'package:dr/ui/no_internet.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/l10n/l10n.dart';
@@ -35,6 +36,17 @@ const holidayIconSize = 65.0;
 
 class CalendarWeek extends StatelessWidget {
   final CalendarWeekViewModel vm;
+
+  /// Height one unit of [CalendarSlot.flex] may not fall below — a lesson is
+  /// worth two of them.
+  ///
+  /// Sideways the frame is shorter than the timetable needs; without a floor
+  /// the rows were squeezed until the time column overflowed and no lesson
+  /// could be read. Below the floor the week scrolls instead.
+  static const minSlotHeight = 24.0;
+
+  /// Room for the weekday and date above the grid.
+  static const headerHeight = 56.0;
 
   const CalendarWeek({
     super.key,
@@ -57,50 +69,72 @@ class CalendarWeek extends StatelessWidget {
         : LastFetchedOverlay(
             lastFetched: vm.days.first.lastFetched,
             noInternet: vm.noInternet,
-            child: Column(
-              children: <Widget>[
-                Expanded(
-                  child: Row(
-                    children: <Widget>[
-                      if (vm.showTimes && grid.hasTimes) _TimeAxis(grid: grid),
-                      for (final d in vm.days)
-                        Expanded(
-                          child: CalendarDayWidget(
-                            calendarDay: d,
-                            grid: grid,
-                            // A day the dashboard never loaded has nothing
-                            // due — passing null would leave it undimmed and
-                            // make past days look like they carry work.
-                            onTap: vm.onDayTap,
-                            onAddReminder: vm.onAddReminder,
-                            onEntryTap: vm.onEntryTap,
-                            hasEntries: vm.daysWithEntries.contains(
-                              UtcDateTime(
-                                  d.date.year, d.date.month, d.date.day),
-                            ),
-                            highlightedSubjects: vm.subjectsWithEntries == null
-                                ? null
-                                : vm.subjectsWithEntries![UtcDateTime(
-                                      d.date.year,
-                                      d.date.month,
-                                      d.date.day,
-                                    )] ??
-                                    const <String>{},
-                            subjectNicks: vm.subjectNicks,
-                            isSelected: vm.selection?.date == d.date,
-                            selectedHour: vm.selection?.date == d.date
-                                ? vm.selection?.hour
-                                : null,
-                            colorBackground: vm.colorBackground,
-                            subjectThemes: vm.subjectThemes,
-                          ),
+            child: _fill(
+              context,
+              minHeight: headerHeight + grid.totalFlex * minSlotHeight,
+              child: Row(
+                children: <Widget>[
+                  if (vm.showTimes && grid.hasTimes) _TimeAxis(grid: grid),
+                  for (final d in vm.days)
+                    Expanded(
+                      child: CalendarDayWidget(
+                        calendarDay: d,
+                        grid: grid,
+                        // A day the dashboard never loaded has nothing
+                        // due — passing null would leave it undimmed and
+                        // make past days look like they carry work.
+                        onTap: vm.onDayTap,
+                        onAddReminder: vm.onAddReminder,
+                        onEntryTap: vm.onEntryTap,
+                        hasEntries: vm.daysWithEntries.contains(
+                          UtcDateTime(
+                              d.date.year, d.date.month, d.date.day),
                         ),
-                    ],
-                  ),
-                ),
-              ],
+                        highlightedSubjects: vm.subjectsWithEntries == null
+                            ? null
+                            : vm.subjectsWithEntries![UtcDateTime(
+                                  d.date.year,
+                                  d.date.month,
+                                  d.date.day,
+                                )] ??
+                                const <String>{},
+                        subjectNicks: vm.subjectNicks,
+                        isSelected: vm.selection?.date == d.date,
+                        selectedHour: vm.selection?.date == d.date
+                            ? vm.selection?.hour
+                            : null,
+                        colorBackground: vm.colorBackground,
+                        subjectThemes: vm.subjectThemes,
+                      ),
+                    ),
+                ],
+              ),
             ),
           );
+  }
+
+  /// The week fills the height it is given — unless that is less than
+  /// [minHeight], in which case it keeps its size and scrolls.
+  ///
+  /// Also keeps the grid clear of the system bars, which sit at the side
+  /// when the device is held sideways.
+  Widget _fill(
+    BuildContext context, {
+    required double minHeight,
+    required Widget child,
+  }) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final padded = Padding(padding: context.systemInsets, child: child);
+        if (!constraints.hasBoundedHeight ||
+            constraints.maxHeight >= minHeight) {
+          return padded;
+        }
+        return SingleChildScrollView(
+          child: SizedBox(height: minHeight, child: padded),
+        );
+      },
+    );
   }
 }
 

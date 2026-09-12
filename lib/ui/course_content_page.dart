@@ -17,6 +17,7 @@
 
 import 'package:dr/l10n/l10n.dart';
 import 'package:dr/providers/course_content_provider.dart';
+import 'package:dr/ui/layout.dart';
 import 'package:flutter/material.dart';
 
 /// Das Material eines Fachs: Themen, darunter ihre Einträge.
@@ -94,9 +95,7 @@ class _Inhalt extends StatelessWidget {
     }
 
     return ListView.builder(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewPadding.bottom,
-      ),
+      padding: context.systemInsets,
       itemCount: course.topics.length,
       itemBuilder: (context, index) {
         final topic = course.topics[index];

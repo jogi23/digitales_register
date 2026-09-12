@@ -18,6 +18,7 @@
 
 import 'package:dr/app_state.dart';
 import 'package:dr/container/settings_page.dart';
+import 'package:dr/ui/layout.dart';
 import 'package:dr/ui/no_internet.dart';
 import 'package:dr/ui/user_profile.dart';
 import 'package:dr/l10n/l10n.dart';
@@ -51,8 +52,7 @@ class Profile extends StatelessWidget {
                   : const CircularProgressIndicator(),
             )
           : ListView(
-              padding: EdgeInsets.only(
-                  bottom: MediaQuery.of(context).viewPadding.bottom),
+              padding: context.systemInsets,
               children: <Widget>[
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 16),

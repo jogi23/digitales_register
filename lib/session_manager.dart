@@ -44,6 +44,17 @@ class SessionManager {
 
   void Function(bool)? onNoInternet;
 
+  /// Called when a request could not be sent although the network is there:
+  /// the server-side session is gone.
+  ///
+  /// Without this the app simply showed whatever it had loaded before, and a
+  /// dead session looked like a school with nothing to report.
+  void Function()? onSessionExpired;
+
+  /// Called whenever the server actually answered, so the app can say how
+  /// fresh what it shows is.
+  void Function()? onRequestSucceeded;
+
   DateTime? _serverLogoutTime;
   final _loginMutex = Mutex();
   DateTime? _lastUnexpectedLogout;
@@ -132,6 +143,9 @@ class SessionManager {
       isRetryAfterUnexpectedLogout: isRetryAfterUnexpectedLogout,
     )) {
       log("returning null for request to $url, user is not logged in");
+      // Not being logged in with a working network is a session that ran
+      // out, not an outage: it needs a new login, not another try.
+      if (!noInternet) onSessionExpired?.call();
       return null;
     }
 
@@ -167,6 +181,7 @@ class SessionManager {
             .hasMatch(responseData)) {
       if (isRetryAfterUnexpectedLogout) {
         log("retrying the request was unsuccessful, we seem to be still logged out.");
+        onSessionExpired?.call();
         throw UnexpectedLogoutException();
       }
 
@@ -177,6 +192,7 @@ class SessionManager {
         isRetryAfterUnexpectedLogout: true,
       );
     }
+    onRequestSucceeded?.call();
     return responseData;
   }
 

@@ -23,7 +23,9 @@ import 'package:dr/app_state.dart';
 import 'package:dr/ui/account_avatar_button.dart';
 import 'package:dr/data.dart';
 import 'package:dr/ui/animated_linear_progress_indicator.dart';
+import 'package:dr/ui/connection_status_button.dart';
 import 'package:dr/ui/last_fetched_overlay.dart';
+import 'package:dr/ui/layout.dart';
 import 'package:dr/ui/no_internet.dart';
 import 'package:dr/util.dart';
 import 'package:dr/l10n/l10n.dart';
@@ -74,6 +76,7 @@ class MessagesPage extends StatelessWidget {
             tooltip: tr(context).messagesMarkAllRead,
             onPressed: hasUnread ? onMarkAllAsRead : null,
           ),
+          const ConnectionStatusButton(),
           const AccountAvatarButton(),
         ],
       ),
@@ -112,8 +115,7 @@ class MessagesPage extends StatelessWidget {
                       ),
                     ListView.builder(
                       physics: const AlwaysScrollableScrollPhysics(),
-                      padding: EdgeInsets.only(
-                          bottom: MediaQuery.of(context).viewPadding.bottom),
+                      padding: context.systemInsets,
                       itemCount: state!.messages.length,
                       itemBuilder: (context, i) {
                         final altColor = Theme.of(context)

@@ -53,8 +53,14 @@ class DaysContainer extends ConsumerWidget {
     });
     final notifier = ref.read(dashboardProvider.notifier);
     final blacklist = dashboard.blacklist!;
+    // The month and week views navigate freely and load both directions, so
+    // the direction the list view happens to stand in says nothing about
+    // what they should show. Filtering by it hid every past entry until the
+    // list view had been switched to the past once.
+    final oneDirectionOnly =
+        settings.dashboardViewMode == DashboardViewMode.list;
     final unorderedDays = dashboard.allDays
-            ?.where((day) => day.future == dashboard.future)
+            ?.where((day) => !oneDirectionOnly || day.future == dashboard.future)
             .map(
               (day) => day.rebuild(
                 (b) => b
@@ -90,7 +96,6 @@ class DaysContainer extends ConsumerWidget {
       markAsSeenCallback: notifier.markAsSeen,
       markDeletedHomeworkAsSeenCallback: notifier.markDeletedHomeworkAsSeen,
       markAllAsSeenCallback: notifier.markAllAsSeen,
-      refreshNoInternet: ref.read(loginProvider.notifier).refreshNoInternet,
       onOpenAttachment: notifier.openAttachment,
       gradeCompetences: gradeCompetences,
       loadGradeCompetences: (targets) => ref
@@ -134,7 +139,13 @@ abstract class DaysViewModel
       DaysViewModel(
         (b) => b
           ..days = ListBuilder(
-            !dashboard.future ? unorderedDays.reversed : unorderedDays,
+            // Newest first while looking back — but only in the list, which
+            // reads away from today. The calendar views index by date and
+            // expect the run of days in order.
+            !dashboard.future &&
+                    settings.dashboardViewMode == DashboardViewMode.list
+                ? unorderedDays.reversed
+                : unorderedDays,
           )
           ..noInternet = noInternet
           ..future = dashboard.future

@@ -73,6 +73,7 @@
   "dialogNeverAsk": "Non chiedere più",
   "reminderDeleteTitle": "Eliminare il promemoria?",
   "commonCancel": "Annulla",
+  "commonClose": "Chiudi",
   "commonDelete": "Elimina",
   "homeworkVersions": "Versioni",
   "gradeWithoutMark": "senza voto",
@@ -479,5 +480,16 @@
   "accountOthers": "Altri account",
   "accountAdd": "Aggiungi un account",
   "accountSwitchDisabled": "Cambia account (salvataggio della password disattivato)",
-  "colorAmber": "Giallo"
+  "colorAmber": "Giallo",
+  "connectionTitle": "Connessione",
+  "connectionConnected": "Connesso",
+  "connectionSessionExpired": "Sessione scaduta",
+  "connectionSessionExpiredHint": "Il dispositivo è online, ma il server non riconosce più questa sessione. Accedi di nuovo per caricare i dati.",
+  "connectionOfflineHint": "Il server non è raggiungibile. Vengono mostrati i dati caricati per ultimi.",
+  "connectionLastUpdate": "Ultimo aggiornamento: {time}",
+  "connectionNeverUpdated": "Nessun dato caricato",
+  "connectionReconnect": "Riconnetti",
+  "connectionRelogin": "Accedi di nuovo",
+  "connectionReconnecting": "Connessione in corso …",
+  "connectionOutdated": "Dati non aggiornati"
 }

@@ -21,8 +21,10 @@ import 'package:dr/app_state.dart';
 import 'package:dr/container/settings_page.dart';
 import 'package:dr/ui/account_avatar_button.dart';
 import 'package:dr/ui/autocomplete_options.dart';
+import 'package:dr/ui/connection_status_button.dart';
 import 'package:dr/ui/dialog.dart';
 import 'package:dr/ui/debug_log_page.dart';
+import 'package:dr/ui/layout.dart';
 import 'package:dr/ui/network_protocol_page.dart';
 import 'package:dr/ui/star_rating.dart';
 import 'package:dr/ui/subject_appearance_page.dart';
@@ -152,11 +154,11 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
     return Scaffold(
       appBar: ResponsiveAppBar(
         title: Text(tr(context).settingsTitle),
+        actions: const [ConnectionStatusButton()],
       ),
       body: ListView(
         controller: controller,
-        padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewPadding.bottom),
+        padding: context.systemInsets,
         children: <Widget>[
           if (!widget.vm.demoMode) ...[
             const SizedBox(height: 8),

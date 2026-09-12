@@ -22,6 +22,7 @@ import 'package:dr/providers/course_content_provider.dart';
 import 'package:dr/providers/subject_appearance_provider.dart';
 import 'package:dr/middleware/middleware.dart' show wrapper;
 import 'package:dr/ui/account_avatar_button.dart';
+import 'package:dr/ui/connection_status_button.dart';
 import 'package:dr/ui/course_content_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -64,7 +65,7 @@ class CourseContentContainer extends ConsumerWidget {
     return Scaffold(
       appBar: ResponsiveAppBar(
         title: Text(tr(context).menuCourseContent),
-        actions: const [AccountAvatarButton()],
+        actions: const [ConnectionStatusButton(), AccountAvatarButton()],
       ),
       body: CourseContentPage(
         subjects: subjects,

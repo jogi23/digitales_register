@@ -35,10 +35,13 @@ import 'package:dr/providers/dashboard_provider.dart';
 import 'package:dr/services/changelog.dart';
 import 'package:dr/ui/animated_linear_progress_indicator.dart';
 import 'package:dr/ui/changelog_card.dart';
+import 'package:dr/ui/connection_status_button.dart';
+import 'package:dr/ui/dashboard_jump.dart';
 import 'package:dr/ui/dialog.dart';
 import 'package:dr/container/dashboard_week_container.dart';
 import 'package:dr/ui/dashboard_calendar.dart';
 import 'package:dr/ui/last_fetched_overlay.dart';
+import 'package:dr/ui/layout.dart';
 import 'package:dr/ui/no_internet.dart';
 import 'package:dr/ui/star_rating.dart';
 import 'package:dr/utc_date_time.dart';
@@ -73,7 +76,6 @@ class DaysWidget extends StatefulWidget {
   final ToggleDoneCallback toggleDoneCallback;
   final VoidCallback setDoNotAskWhenDeleteCallback;
   final VoidCallback refresh;
-  final VoidCallback refreshNoInternet;
   final AttachmentCallback onOpenAttachment;
   final Map<int, BuiltList<Competence>> gradeCompetences;
   final Future<void> Function(Iterable<DashboardGradeTarget> targets)
@@ -92,7 +94,6 @@ class DaysWidget extends StatefulWidget {
     required this.toggleDoneCallback,
     required this.setDoNotAskWhenDeleteCallback,
     required this.refresh,
-    required this.refreshNoInternet,
     required this.onOpenAttachment,
     required this.gradeCompetences,
     required this.loadGradeCompetences,
@@ -111,6 +112,16 @@ class _DaysWidgetState extends State<DaysWidget> {
   final Map<int, int> _dayStartIndices = {};
   final Map<int, Homework> _homeworkIndexes = {};
   final Map<int, Day> _dayIndexes = {};
+
+  /// The day each target sits on, so the calendar views can be sent there.
+  final Map<int, UtcDateTime> _targetDates = {};
+
+  /// Which target the calendar views were sent to last, so repeated taps
+  /// walk through all of them instead of returning to the first.
+  int _calendarTargetCursor = 0;
+  int _jumpSerial = 0;
+
+  final DashboardJumpNotifier _calendarJump = DashboardJumpNotifier(null);
 
   final ValueNotifier<bool> _showScrollUp = ValueNotifier(false);
 
@@ -174,6 +185,7 @@ class _DaysWidgetState extends State<DaysWidget> {
   void updateValues() {
     _targets.clear();
     _focused.clear();
+    _targetDates.clear();
     var index = 0;
     var dayIndex = 0;
     for (final day in widget.vm.days) {
@@ -181,17 +193,20 @@ class _DaysWidgetState extends State<DaysWidget> {
       if (day.deletedHomework.any((h) => h.isChanged)) {
         _targets.add(index);
         _dayIndexes[index] = day;
+        _targetDates[index] = day.date;
       }
       index++;
       for (final hw in day.homework) {
         if (hw.isNew || hw.isChanged) {
           _targets.add(index);
+          _targetDates[index] = day.date;
         }
         _homeworkIndexes[index] = hw;
         index++;
       }
       dayIndex++;
     }
+    if (_calendarTargetCursor >= _targets.length) _calendarTargetCursor = 0;
   }
 
   void _ensureGradeCompetences() {
@@ -245,6 +260,12 @@ class _DaysWidgetState extends State<DaysWidget> {
   }
 
   @override
+  void dispose() {
+    _calendarJump.dispose();
+    super.dispose();
+  }
+
+  @override
   void didUpdateWidget(DaysWidget oldWidget) {
     // A background refresh (e.g. returning to this tab) rebuilds the day
     // list, which can shift item positions and make the scroll offset land
@@ -252,6 +273,12 @@ class _DaysWidgetState extends State<DaysWidget> {
     // restore it once the new data is laid out, so refreshes don't visually
     // reset the view back to today.
     final anchorDate = _currentTopDayDate(oldWidget.vm.days);
+    // Switching to a calendar view after the first frame has to fetch the
+    // other direction too; only the first build did so.
+    if (widget.vm.viewMode != oldWidget.vm.viewMode &&
+        widget.vm.viewMode != DashboardViewMode.list) {
+      widget.loadBothDirections();
+    }
     updateValues();
     update();
     _ensureGradeCompetences();
@@ -360,13 +387,36 @@ class _DaysWidgetState extends State<DaysWidget> {
         ? DashboardWeekContainer(
             days: widget.vm.days,
             dayBuilder: _buildDay,
+            jumpTo: _calendarJump,
           )
         : DashboardCalendar(
             days: widget.vm.days,
             dayBuilder: _buildDay,
             loading: widget.vm.loading,
             onLoadMissing: widget.loadBothDirections,
+            jumpTo: _calendarJump,
           );
+  }
+
+  /// Brings the next new or changed entry into view.
+  ///
+  /// The list scrolls to it. The calendar views are not bound to that scroll
+  /// controller — there the button moved nothing at all — so they are asked
+  /// to open the day the entry sits on, one entry per tap.
+  Future<void> _goToNextNewEntry() async {
+    if (_targets.isEmpty) return;
+    if (widget.vm.viewMode == DashboardViewMode.list) {
+      await controller.scrollToIndex(
+        _targets.first,
+        preferPosition: AutoScrollPosition.middle,
+      );
+      return;
+    }
+    final target = _targets[_calendarTargetCursor % _targets.length];
+    _calendarTargetCursor++;
+    final date = _targetDates[target];
+    if (date == null) return;
+    _calendarJump.value = DashboardJumpRequest(date, _jumpSerial++);
   }
 
   @override
@@ -419,8 +469,7 @@ class _DaysWidgetState extends State<DaysWidget> {
             ? Padding(
                 // These views fill the height instead of scrolling, so the
                 // system navigation bar would sit on top of the last row.
-                padding: EdgeInsets.only(
-                    bottom: MediaQuery.of(context).viewPadding.bottom),
+                padding: context.systemInsets,
                 child: Column(
                   // No past/future switch here: both directions are loaded,
                   // and these views navigate by month and week instead.
@@ -430,8 +479,7 @@ class _DaysWidgetState extends State<DaysWidget> {
             : ListView.builder(
           physics: const AlwaysScrollableScrollPhysics(),
           controller: controller,
-          padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewPadding.bottom),
+          padding: context.systemInsets,
           // Times two for the divider, minus one because there's no divider after the last item.
           // The first item is the DashboardHeader, the last one a SizedBox (a spacer).
           itemCount: (widget.vm.days.length * 2 - 1) + 2,
@@ -523,29 +571,17 @@ class _DaysWidgetState extends State<DaysWidget> {
               foregroundColor: Theme.of(context).colorScheme.onError,
               icon: const Icon(Icons.arrow_drop_down),
               label: Text(tr(context).dashboardNewEntries),
-              onPressed: () async {
-                await controller.scrollToIndex(
-                  _targets.first,
-                  preferPosition: AutoScrollPosition.middle,
-                );
-              },
+              onPressed: _goToNextNewEntry,
             ),
         ],
       ),
       homeAppBar: ResponsiveAppBar(
         title: Text(tr(context).menuHomework),
         actions: <Widget>[
-          if (widget.vm.noInternet)
-            TextButton(
-              onPressed: widget.refreshNoInternet,
-              child: Row(
-                children: [
-                  Text(tr(context).noConnection),
-                  SizedBox(width: 8),
-                  Icon(Icons.refresh),
-                ],
-              ),
-            ),
+          // Says whether the app is talking to the server — on every page,
+          // not only here, and for a dead session too, which "no connection"
+          // never covered.
+          const ConnectionStatusButton(),
           if (widget.vm.showNotifications) NotificationIconContainer(),
           const AccountAvatarButton(),
         ],

@@ -20,6 +20,7 @@ import 'package:deleteable_tile/deleteable_tile.dart';
 import 'package:dr/data.dart';
 import 'package:dr/main.dart';
 import 'package:dr/ui/last_fetched_overlay.dart';
+import 'package:dr/ui/layout.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
 import 'package:dr/l10n/l10n.dart';
@@ -67,8 +68,7 @@ class NotificationPage extends StatelessWidget {
               : ListView.builder(
                   // For some reason the outgoing animation is not triggered if we don't add this key
                   key: const ValueKey("notifications list"),
-                  padding: EdgeInsets.only(
-                      bottom: MediaQuery.of(context).viewPadding.bottom),
+                  padding: context.systemInsets,
                   itemCount: notifications.length + 1,
                   itemBuilder: (_, n) {
                     if (n == 0) {

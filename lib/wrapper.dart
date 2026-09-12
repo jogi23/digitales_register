@@ -81,6 +81,12 @@ class Wrapper {
   set onNoInternet(void Function(bool)? callback) =>
       _session.onNoInternet = callback;
 
+  set onSessionExpired(void Function()? callback) =>
+      _session.onSessionExpired = callback;
+
+  set onRequestSucceeded(void Function()? callback) =>
+      _session.onRequestSucceeded = callback;
+
   bool get safeMode => _session.safeMode;
   set safeMode(bool value) => _session.safeMode = value;
 

@@ -73,6 +73,7 @@
   "dialogNeverAsk": "Never ask",
   "reminderDeleteTitle": "Delete the reminder?",
   "commonCancel": "Cancel",
+  "commonClose": "Close",
   "commonDelete": "Delete",
   "homeworkVersions": "Versions",
   "gradeWithoutMark": "no grade",
@@ -479,5 +480,16 @@
   "accountOthers": "Other accounts",
   "accountAdd": "Add an account",
   "accountSwitchDisabled": "Switch account (password saving is off)",
-  "colorAmber": "Yellow"
+  "colorAmber": "Yellow",
+  "connectionTitle": "Connection",
+  "connectionConnected": "Connected",
+  "connectionSessionExpired": "Session expired",
+  "connectionSessionExpiredHint": "The device is online, but the server no longer knows this session. Sign in again to load data.",
+  "connectionOfflineHint": "The server cannot be reached. What you see was loaded earlier.",
+  "connectionLastUpdate": "Last updated: {time}",
+  "connectionNeverUpdated": "Nothing loaded yet",
+  "connectionReconnect": "Reconnect",
+  "connectionRelogin": "Sign in again",
+  "connectionReconnecting": "Connecting …",
+  "connectionOutdated": "Data is out of date"
 }

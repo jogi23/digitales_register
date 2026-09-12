@@ -21,7 +21,9 @@ import 'package:dr/ui/account_avatar_button.dart';
 import 'package:dr/container/absence_group_container.dart';
 import 'package:dr/data.dart';
 import 'package:dr/ui/absence.dart';
+import 'package:dr/ui/connection_status_button.dart';
 import 'package:dr/ui/last_fetched_overlay.dart';
+import 'package:dr/ui/layout.dart';
 import 'package:dr/ui/no_internet.dart';
 import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
@@ -41,7 +43,7 @@ class AbsencesPage extends StatelessWidget {
     return Scaffold(
       appBar: ResponsiveAppBar(
         title: Text(tr(context).absencesTitle),
-        actions: [AccountAvatarButton()],
+        actions: const [ConnectionStatusButton(), AccountAvatarButton()],
       ),
       body: LastFetchedOverlay(
         lastFetched: state.lastFetched,
@@ -79,8 +81,7 @@ class AbsencesBody extends StatelessWidget {
                 ),
               )
             : ListView(
-                padding: EdgeInsets.only(
-                    bottom: MediaQuery.of(context).viewPadding.bottom),
+                padding: context.systemInsets,
                 children: <Widget>[
                 AbsencesStatisticWidget(
                   stat: state.statistic!,
