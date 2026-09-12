@@ -173,6 +173,8 @@
   "settingsSectionLogin": "Sign-in",
   "settingsStayLoggedIn": "Stay signed in",
   "settingsStayLoggedInSubtitle": "Your credentials are stored on this device",
+  "settingsKeepPageOnAccountSwitch": "Stay on the page when switching accounts",
+  "settingsKeepPageOnAccountSwitchSubtitle": "Otherwise Homework opens after switching",
   "settingsSectionAppearance": "Appearance",
   "settingsThemeFollowDevice": "Follow the device theme",
   "settingsThemeLight": "Light",

@@ -45,6 +45,7 @@ enum _Theme {
 
 class SettingsPageWidget extends StatefulWidget {
   final OnSettingChanged<bool> onSetNoPassSaving;
+  final OnSettingChanged<bool> onSetKeepPageOnAccountSwitch;
   final OnSettingChanged<bool> onSetAskWhenDelete;
   final OnSettingChanged<bool> onSetShowGradesDiagram;
   final OnSettingChanged<bool> onSetShowAllSubjectsAverage;
@@ -68,6 +69,7 @@ class SettingsPageWidget extends StatefulWidget {
   const SettingsPageWidget({
     super.key,
     required this.onSetNoPassSaving,
+    required this.onSetKeepPageOnAccountSwitch,
     required this.onSetAskWhenDelete,
     required this.onSetShowGradesDiagram,
     required this.onSetShowAllSubjectsAverage,
@@ -192,6 +194,16 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
             },
             value: !widget.vm.noPassSaving,
           ),
+          // Next to the account switch it is about; the demo has no second
+          // account to switch to.
+          if (!widget.vm.demoMode)
+            SwitchListTile.adaptive(
+              title: Text(tr(context).settingsKeepPageOnAccountSwitch),
+              subtitle:
+                  Text(tr(context).settingsKeepPageOnAccountSwitchSubtitle),
+              onChanged: widget.onSetKeepPageOnAccountSwitch,
+              value: widget.vm.keepPageOnAccountSwitch,
+            ),
           const Divider(),
           AutoScrollTag(
             controller: controller,

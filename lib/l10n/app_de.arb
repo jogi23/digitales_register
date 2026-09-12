@@ -173,6 +173,8 @@
   "settingsSectionLogin": "Anmeldung",
   "settingsStayLoggedIn": "Angemeldet bleiben",
   "settingsStayLoggedInSubtitle": "Deine Zugangsdaten werden lokal gespeichert",
+  "settingsKeepPageOnAccountSwitch": "Beim Kontowechsel auf der Seite bleiben",
+  "settingsKeepPageOnAccountSwitchSubtitle": "Sonst öffnet sich nach dem Wechsel das Merkheft",
   "settingsSectionAppearance": "Aussehen",
   "settingsThemeFollowDevice": "Geräte-Theme folgen",
   "settingsThemeLight": "Hell",

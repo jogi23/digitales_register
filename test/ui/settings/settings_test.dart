@@ -75,6 +75,28 @@ Future<ProviderContainer> _pumpSettingsPage(
 
 void main() {
   testWidgets(
+    'staying on the page when switching accounts can be turned on',
+    (tester) async {
+      final container = await _pumpSettingsPage(tester);
+      addTearDown(container.dispose);
+
+      const label = 'Beim Kontowechsel auf der Seite bleiben';
+      await tester.scrollUntilVisible(
+        find.text(label),
+        100,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      // Off by default: the Merkheft, as it always was.
+      expect(container.read(settingsProvider).keepPageOnAccountSwitch, isFalse);
+
+      await tester.tap(find.text(label));
+      await tester.pumpAndSettle();
+      expect(container.read(settingsProvider).keepPageOnAccountSwitch, isTrue);
+    },
+  );
+
+  testWidgets(
     'does not show items moved to the hamburger menu',
     (tester) async {
       final container = await _pumpSettingsPage(tester);

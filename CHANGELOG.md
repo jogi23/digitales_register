@@ -9,6 +9,7 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 - Jede Seite zeigt in der Titelzeile, ob die App gerade mit dem Server spricht. Fehlendes Netz und abgelaufene Sitzung werden dabei unterschieden; ein Tippen darauf stellt die Verbindung wieder her oder meldet neu an.
 - Ist der letzte Abruf länger her, steht sein Zeitpunkt in der Titelzeile, statt alte Daten wie frische aussehen zu lassen.
 - Mitteilungen: was noch eine Antwort verlangt, ist schon in der Liste gekennzeichnet — „Bestätigung offen“ für die Unterschrift mit Namen, „Zustimmung offen“ für Zustimmen oder Ablehnen.
+- Einstellungen → Anmeldung: Auf Wunsch bleibt die App beim Wechsel zwischen Konten auf der geöffneten Seite, statt jedes Mal zum Merkheft zurückzukehren. Die Einstellung gilt für alle Konten; ohne sie bleibt alles wie bisher.
 
 ### Verbesserungen
 

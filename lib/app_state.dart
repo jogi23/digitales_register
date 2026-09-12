@@ -324,6 +324,7 @@ class SettingsState {
     List<String>? ignoreForGradesAverage,
     List<String>? classbookSubjects,
     this.drawerFullyExpanded = true,
+    this.keepPageOnAccountSwitch = false,
     this.starColor = accentStarColorId,
     this.language,
     this.messageSignature,
@@ -373,6 +374,10 @@ class SettingsState {
   // Whether to fully expand the drawer if in tablet mode
   final bool drawerFullyExpanded;
 
+  /// Whether switching accounts stays on the page that is open, rather than
+  /// going back to the Merkheft as it always did.
+  final bool keepPageOnAccountSwitch;
+
   /// Id of the palette entry the competence stars are drawn in.
   /// See `starColors` in ui/star_rating.dart.
   final String starColor;
@@ -405,6 +410,7 @@ class SettingsState {
     List<String>? ignoreForGradesAverage,
     List<String>? classbookSubjects,
     bool? drawerFullyExpanded,
+    bool? keepPageOnAccountSwitch,
     String? starColor,
     Object? language = _unchanged,
     Object? messageSignature = _unchanged,
@@ -438,6 +444,8 @@ class SettingsState {
         classbookSubjects:
             classbookSubjects ?? List.of(this.classbookSubjects),
         drawerFullyExpanded: drawerFullyExpanded ?? this.drawerFullyExpanded,
+        keepPageOnAccountSwitch:
+            keepPageOnAccountSwitch ?? this.keepPageOnAccountSwitch,
         starColor: starColor ?? this.starColor,
         language: identical(language, _unchanged)
             ? this.language
@@ -467,6 +475,7 @@ class SettingsState {
         'ignoreForGradesAverage': ignoreForGradesAverage,
         'classbookSubjects': classbookSubjects,
         'drawerFullyExpanded': drawerFullyExpanded,
+        'keepPageOnAccountSwitch': keepPageOnAccountSwitch,
         'starColor': starColor,
         'language': language,
         'messageSignature': messageSignature,
@@ -505,6 +514,8 @@ class SettingsState {
         classbookSubjects:
             (json['classbookSubjects'] as List<dynamic>?)?.cast<String>(),
         drawerFullyExpanded: json['drawerFullyExpanded'] as bool? ?? true,
+        keepPageOnAccountSwitch:
+            json['keepPageOnAccountSwitch'] as bool? ?? false,
         starColor: json['starColor'] as String? ?? accentStarColorId,
         language: json['language'] as String?,
         messageSignature: json['messageSignature'] as String?,
@@ -512,7 +523,8 @@ class SettingsState {
 
   /// The settings that belong to the app rather than to one account:
   /// everything under Aussehen, Fächer, Merkheft and Noten on the settings
-  /// page. They are stored once for the whole app, so a parent with two
+  /// page, and whether switching accounts keeps the page — stored with an
+  /// account, the account switched *to* would decide it. They are stored once for the whole app, so a parent with two
   /// children does not set them twice.
   ///
   /// What stays with the account: whether its password is saved, and the view
@@ -535,6 +547,7 @@ class SettingsState {
     'starColor',
     'language',
     'ignoreForGradesAverage',
+    'keepPageOnAccountSwitch',
   };
 
   /// Only the app-wide settings, for storing them on their own.
@@ -585,6 +598,7 @@ class SettingsState {
         _listEq.equals(other.ignoreForGradesAverage, ignoreForGradesAverage) &&
         _listEq.equals(other.classbookSubjects, classbookSubjects) &&
         other.drawerFullyExpanded == drawerFullyExpanded &&
+        other.keepPageOnAccountSwitch == keepPageOnAccountSwitch &&
         other.starColor == starColor &&
         other.language == language;
   }
@@ -611,6 +625,7 @@ class SettingsState {
         ...ignoreForGradesAverage,
         ...classbookSubjects,
         drawerFullyExpanded,
+        keepPageOnAccountSwitch,
         starColor,
         language,
       ]);

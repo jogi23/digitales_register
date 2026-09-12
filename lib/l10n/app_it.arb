@@ -173,6 +173,8 @@
   "settingsSectionLogin": "Accesso",
   "settingsStayLoggedIn": "Resta connesso",
   "settingsStayLoggedInSubtitle": "I tuoi dati di accesso vengono salvati sul dispositivo",
+  "settingsKeepPageOnAccountSwitch": "Resta sulla pagina al cambio di account",
+  "settingsKeepPageOnAccountSwitchSubtitle": "Altrimenti dopo il cambio si apre l'Agenda",
   "settingsSectionAppearance": "Aspetto",
   "settingsThemeFollowDevice": "Segui il tema del dispositivo",
   "settingsThemeLight": "Chiaro",
