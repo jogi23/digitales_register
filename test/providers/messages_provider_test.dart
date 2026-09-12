@@ -31,6 +31,8 @@ class MockWrapper extends Mock implements Wrapper {}
 const _agreeOpenId = 58317; // responseType agree, unanswered
 const _signedId = 31241; // signatureRequired, already signed
 const _plainId = 39102; // read without signature -> no confirmation
+// 39102 is also the one message the demo account sent itself.
+const _sentId = _plainId;
 
 void main() {
   setUpAll(loadFixtures);
@@ -82,6 +84,17 @@ void main() {
 
     test('message without confirmation has no responseInfo', () {
       expect(messageWithId(_plainId).responseInfo, isNull);
+    });
+  });
+
+  group('parsing the direction', () {
+    test('a message this account sent is marked outgoing', () {
+      expect(messageWithId(_sentId).outgoing, isTrue);
+    });
+
+    test('a received message is not', () {
+      expect(messageWithId(_agreeOpenId).outgoing, isFalse);
+      expect(messageWithId(_signedId).outgoing, isFalse);
     });
   });
 

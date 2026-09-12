@@ -107,6 +107,7 @@
   "messageConfirm": "Confirm",
   "messageActionConfirm": "Confirmation pending",
   "messageActionAgree": "Consent pending",
+  "messageOutgoing": "Sent",
   "messageSignatureHelper": "Enter your name to confirm",
   "messageReplyFailed": "The confirmation did not go through. Please try again.",
   "notificationsTitle": "Notifications",

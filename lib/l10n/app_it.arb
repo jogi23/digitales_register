@@ -107,6 +107,7 @@
   "messageConfirm": "Conferma",
   "messageActionConfirm": "Conferma in sospeso",
   "messageActionAgree": "Consenso in sospeso",
+  "messageOutgoing": "Inviato",
   "messageSignatureHelper": "Inserisci il tuo nome per confermare",
   "messageReplyFailed": "La conferma non è arrivata. Riprova.",
   "notificationsTitle": "Notifiche",

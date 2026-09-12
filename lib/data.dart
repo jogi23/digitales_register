@@ -905,14 +905,23 @@ abstract class Message implements Built<Message, MessageBuilder> {
   /// `null` when the message asks for no confirmation.
   MessageResponseInfo? get responseInfo;
 
+  /// Sent by this account rather than received — the portal's "Ausgang".
+  ///
+  /// Taken from the server's own label, not worked out from the sender: the
+  /// list carries no user id to compare against (`fromUserId` comes back 0).
+  bool get outgoing;
+
   bool get isNew => timeRead == null;
 
   static Serializer<Message> get serializer => _$messageSerializer;
   factory Message([Function(MessageBuilder b)? updates]) = _$Message;
   Message._();
 
-  static void _initializeBuilder(MessageBuilder b) =>
-      b..attachments = ListBuilder<MessageAttachmentFile>();
+  // `outgoing` defaults to false, so state saved before the field existed
+  // still loads.
+  static void _initializeBuilder(MessageBuilder b) => b
+    ..attachments = ListBuilder<MessageAttachmentFile>()
+    ..outgoing = false;
 }
 
 abstract class MessageAttachmentFile

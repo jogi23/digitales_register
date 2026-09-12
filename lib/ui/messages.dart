@@ -222,6 +222,13 @@ class _MessageWidgetState extends State<MessageWidget> {
               ),
             ),
           ),
+          // Sent and received looked alike, so one's own message read as
+          // something to act on.
+          if (widget.message.outgoing)
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 8),
+              child: MessageSentChip(),
+            ),
           // Visible while the tile is closed: the section below is only
           // built once it opens, so nothing said the message wanted anything.
           if (widget.message.responseInfo?.openAction case final action?
@@ -565,6 +572,50 @@ class MessageActionChip extends StatelessWidget {
     };
     if (icon == null || label == null) return const SizedBox.shrink();
 
+    return _LabelChip(
+      icon: icon,
+      label: label,
+      background: background,
+      foreground: foreground,
+    );
+  }
+}
+
+/// Marks a message this account sent, so it does not pass for one received.
+///
+/// A chip beside the subject like the other marks, rather than a tile colour:
+/// the background already alternates between rows.
+class MessageSentChip extends StatelessWidget {
+  const MessageSentChip({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return _LabelChip(
+      icon: Icons.outbox_outlined,
+      label: tr(context).messageOutgoing,
+      background: scheme.primaryContainer,
+      foreground: scheme.onPrimaryContainer,
+    );
+  }
+}
+
+/// The small rounded label the message list marks tiles with.
+class _LabelChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color? background;
+  final Color? foreground;
+
+  const _LabelChip({
+    required this.icon,
+    required this.label,
+    required this.background,
+    required this.foreground,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: background,

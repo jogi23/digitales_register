@@ -137,6 +137,26 @@ MessagesState _stateWithResponse(MessageResponseInfo? info) {
   );
 }
 
+/// One message, sent by this account or received.
+MessagesState _stateWithDirection({required bool outgoing}) {
+  return MessagesState(
+    (b) => b.messages = ListBuilder(
+      <Message>[
+        Message(
+          (b) => b
+            ..fromName = "Sender"
+            ..recipientString = "Empfänger"
+            ..id = 25
+            ..subject = "Betreff"
+            ..timeSent = UtcDateTime.parse("2020-03-04 20:57:38")
+            ..text = _messageText
+            ..outgoing = outgoing,
+        )
+      ],
+    ),
+  );
+}
+
 MessageResponseInfo _info({
   String type = MessageResponseInfo.typeAgree,
   bool signatureRequired = false,
@@ -263,6 +283,23 @@ void main() {
     testWidgets('a message without a request is not marked', (tester) async {
       await tester.pumpWidget(_buildWidget(_stateWithResponse(null)));
       expect(find.byType(MessageActionChip), findsNothing);
+    });
+  });
+
+  group('sent and received', () {
+    testWidgets('a sent message is marked as such', (tester) async {
+      await tester.pumpWidget(
+        _buildWidget(_stateWithDirection(outgoing: true)),
+      );
+      expect(find.byType(MessageSentChip), findsOneWidget);
+      expect(find.text("Gesendet"), findsOneWidget);
+    });
+
+    testWidgets('a received message carries no mark', (tester) async {
+      await tester.pumpWidget(
+        _buildWidget(_stateWithDirection(outgoing: false)),
+      );
+      expect(find.byType(MessageSentChip), findsNothing);
     });
   });
 

@@ -15,6 +15,7 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 - Querformat: das Merkheft stellt Monatsraster und Tagesansicht nebeneinander, statt beides übereinander zu quetschen.
 - Querformat: Seitenüberschrift, Kopfzeilen und Abstände fallen kleiner aus, damit mehr vom Inhalt bleibt.
 - Querformat: auf dem Handy bleibt die Seitenleiste eingeklappt, statt ein Drittel der Breite zu belegen.
+- Mitteilungen: selbst gesendete Mitteilungen tragen in der Liste die Kennzeichnung „Gesendet“ und sind so von empfangenen zu unterscheiden.
 - Mitteilungen: der Knopf zum Bestätigen steht in einem abgesetzten Bereich über die volle Breite und sagt, solange er grau ist, dass noch der Name fehlt.
 - Kalender-Wochenansicht: das Fach steht in jeder Kachel gleich groß, Lehrer kursiv, höchstens drei Zeilen und mit Abstand zum Rand; der Raum bleibt der Detailansicht vorbehalten.
 
