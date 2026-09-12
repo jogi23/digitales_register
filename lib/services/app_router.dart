@@ -150,6 +150,32 @@ class AppRouter {
   }
 
   /// Slides the drawer away, for actions that show something on top of it.
+  /// Opens [page] the way the menu does, loading its data with it.
+  void showPage(Pages page) {
+    switch (page) {
+      case Pages.homework:
+        scaffoldKey!.currentState!.goHome();
+      case Pages.grades:
+        showGrades();
+      case Pages.absences:
+        showAbsences();
+      case Pages.calendar:
+        showCalendar();
+      case Pages.certificate:
+        showCertificate();
+      case Pages.classbook:
+        showClassbook();
+      case Pages.homeworkOverview:
+        showHomeworkOverview();
+      case Pages.courseContent:
+        showCourseContent();
+      case Pages.messages:
+        showMessages();
+      case Pages.settings:
+        showSettings();
+    }
+  }
+
   void closeDrawer() => scaffoldKey?.currentState?.closeDrawerIfOpen();
 
   void showAbsences() {

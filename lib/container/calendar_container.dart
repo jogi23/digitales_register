@@ -51,6 +51,7 @@ class CalendarContainer extends ConsumerWidget {
           ref.read(appRouterProvider).showEditCalendarSubjectNicks,
       closeEditNicksBar: () =>
           ref.read(settingsProvider.notifier).setShowCalendarNicksBar(false),
+      onRefresh: ref.read(calendarProvider.notifier).loadCurrentWeek,
       dayCallback: (monday) =>
           ref.read(calendarProvider.notifier).load(monday),
       currentMondayCallback: (monday) =>

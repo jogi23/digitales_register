@@ -18,11 +18,11 @@
 
 import 'package:deleteable_tile/deleteable_tile.dart';
 import 'package:dr/data.dart';
-import 'package:dr/main.dart';
-import 'package:dr/ui/last_fetched_overlay.dart';
-import 'package:dr/utc_date_time.dart';
-import 'package:dr/util.dart';
 import 'package:dr/l10n/l10n.dart';
+import 'package:dr/main.dart';
+import 'package:dr/ui/layout.dart';
+import 'package:dr/ui/pull_to_refresh.dart';
+import 'package:dr/util.dart';
 import 'package:flutter/material.dart' hide Notification;
 import 'package:intl/intl.dart';
 
@@ -33,16 +33,18 @@ class NotificationPage extends StatelessWidget {
   final SingleArgumentVoidCallback<Notification>? goToGrade;
   final VoidCallback deleteAllNotifications;
   final bool noInternet;
-  final UtcDateTime? lastFetched;
+
+  /// Loads the page again when it is pulled down from the top.
+  final Future<void> Function() onRefresh;
 
   const NotificationPage({
+    required this.onRefresh,
     super.key,
     required this.notifications,
     required this.deleteNotification,
     required this.deleteAllNotifications,
     required this.noInternet,
     required this.goToMessage,
-    required this.lastFetched,
     this.goToGrade,
   });
   @override
@@ -51,9 +53,8 @@ class NotificationPage extends StatelessWidget {
       appBar: AppBar(
         title: Text(tr(context).notificationsTitle),
       ),
-      body: LastFetchedOverlay(
-        lastFetched: lastFetched,
-        noInternet: noInternet,
+      body: PullToRefresh(
+        onRefresh: onRefresh,
         child: AnimatedSwitcher(
           duration: const Duration(milliseconds: 250),
           child: notifications.isEmpty
@@ -67,8 +68,7 @@ class NotificationPage extends StatelessWidget {
               : ListView.builder(
                   // For some reason the outgoing animation is not triggered if we don't add this key
                   key: const ValueKey("notifications list"),
-                  padding: EdgeInsets.only(
-                      bottom: MediaQuery.of(context).viewPadding.bottom),
+                  padding: context.systemInsets,
                   itemCount: notifications.length + 1,
                   itemBuilder: (_, n) {
                     if (n == 0) {
@@ -80,8 +80,8 @@ class NotificationPage extends StatelessWidget {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(tr(context).notificationsAllRead),
-                              SizedBox(width: 8),
-                              Icon(Icons.done_all),
+                              const SizedBox(width: 8),
+                              const Icon(Icons.done_all),
                             ],
                           ),
                         ),

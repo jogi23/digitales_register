@@ -45,6 +45,7 @@ class SettingsPageContainer extends ConsumerWidget {
         DynamicTheme.of(context)!.setFollowDevice(dm);
       },
       onSetNoPassSaving: notifier.setSaveNoPass,
+      onSetKeepPageOnAccountSwitch: notifier.setKeepPageOnAccountSwitch,
       onSetAskWhenDelete: notifier.setAskWhenDelete,
       onSetShowGradesDiagram: notifier.setShowGradesDiagram,
       onSetShowAllSubjectsAverage: notifier.setShowAllSubjectsAverage,
@@ -69,6 +70,9 @@ typedef OnSettingChanged<T> = void Function(T newValue);
 
 class SettingsViewModel {
   final bool noPassSaving;
+
+  /// Whether switching accounts stays on the page instead of the Merkheft.
+  final bool keepPageOnAccountSwitch;
   final bool askWhenDelete;
   final bool showGradesDiagram;
   final bool showAllSubjectsAverage;
@@ -92,6 +96,7 @@ class SettingsViewModel {
 
   const SettingsViewModel({
     required this.noPassSaving,
+    this.keepPageOnAccountSwitch = false,
     required this.askWhenDelete,
     required this.showGradesSettings,
     required this.showGradesDiagram,
@@ -116,6 +121,7 @@ class SettingsViewModel {
           SettingsState s, List<String> allSubjects, bool isDemo) =>
       SettingsViewModel(
         noPassSaving: s.noPasswordSaving,
+        keepPageOnAccountSwitch: s.keepPageOnAccountSwitch,
         askWhenDelete: s.askWhenDelete,
         showGradesSettings: s.scrollToGrades,
         showGradesDiagram: s.showGradesDiagram,

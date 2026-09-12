@@ -807,6 +807,18 @@ abstract class LessonContentSubmission
     ..downloading = false;
 }
 
+/// What a message still asks of its reader.
+enum MessageAction {
+  /// Nothing, or nothing the reader can do in the app.
+  none,
+
+  /// Sign with first and last name.
+  confirm,
+
+  /// Choose "Stimme zu" or "Stimme nicht zu".
+  agree,
+}
+
 /// The confirmation a message asks its recipient for.
 ///
 /// Two independent axes: a response ("Stimme zu" / "Stimme nicht zu") and a
@@ -859,6 +871,18 @@ abstract class MessageResponseInfo
   /// browser beats guessing at a confirmation that binds them for a year.
   bool get unsupported => !showAgreeButtons && !showConfirmButton;
 
+  /// What the reader still has to do here, for marking it in the list.
+  ///
+  /// [MessageAction.none] once answered — by anyone, see [answered] — and
+  /// where the reader cannot act in the app at all: a guardian-only message
+  /// on a student account, or a type the app does not support.
+  MessageAction get openAction {
+    if (answered || parentSignatureRequired || unsupported) {
+      return MessageAction.none;
+    }
+    return showAgreeButtons ? MessageAction.agree : MessageAction.confirm;
+  }
+
   static Serializer<MessageResponseInfo> get serializer =>
       _$messageResponseInfoSerializer;
   factory MessageResponseInfo(
@@ -881,14 +905,23 @@ abstract class Message implements Built<Message, MessageBuilder> {
   /// `null` when the message asks for no confirmation.
   MessageResponseInfo? get responseInfo;
 
+  /// Sent by this account rather than received — the portal's "Ausgang".
+  ///
+  /// Taken from the server's own label, not worked out from the sender: the
+  /// list carries no user id to compare against (`fromUserId` comes back 0).
+  bool get outgoing;
+
   bool get isNew => timeRead == null;
 
   static Serializer<Message> get serializer => _$messageSerializer;
   factory Message([Function(MessageBuilder b)? updates]) = _$Message;
   Message._();
 
-  static void _initializeBuilder(MessageBuilder b) =>
-      b..attachments = ListBuilder<MessageAttachmentFile>();
+  // `outgoing` defaults to false, so state saved before the field existed
+  // still loads.
+  static void _initializeBuilder(MessageBuilder b) => b
+    ..attachments = ListBuilder<MessageAttachmentFile>()
+    ..outgoing = false;
 }
 
 abstract class MessageAttachmentFile

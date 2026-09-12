@@ -17,6 +17,7 @@
 
 import 'package:dr/services/changelog.dart';
 import 'package:dr/l10n/l10n.dart';
+import 'package:dr/ui/layout.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -58,10 +59,7 @@ class _ChangelogPageState extends State<ChangelogPage> {
           }
           final previousSeen = notes.previousSeen;
           return ListView.builder(
-            padding: EdgeInsets.only(
-              top: 8,
-              bottom: MediaQuery.of(context).viewPadding.bottom + 24,
-            ),
+            padding: context.systemInsets + const EdgeInsets.only(top: 8, bottom: 24),
             itemCount: entries.length,
             itemBuilder: (context, index) => _Release(
               entry: entries[index],

@@ -20,6 +20,7 @@ import 'dart:async';
 import 'package:dr/app_state.dart';
 import 'package:dr/data.dart';
 import 'package:dr/providers/grades_provider.dart';
+import 'package:dr/ui/layout.dart';
 import 'package:dr/ui/star_rating.dart';
 import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
@@ -114,9 +115,7 @@ class _GradeDetail extends StatelessWidget {
         ? const TextStyle(decoration: TextDecoration.lineThrough)
         : null;
     return ListView(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewPadding.bottom + 24,
-      ),
+      padding: context.systemInsets + const EdgeInsets.only(bottom: 24),
       children: [
         ListTile(
           title: Text(

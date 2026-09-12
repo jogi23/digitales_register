@@ -21,8 +21,10 @@ import 'package:dr/app_state.dart';
 import 'package:dr/container/settings_page.dart';
 import 'package:dr/ui/account_avatar_button.dart';
 import 'package:dr/ui/autocomplete_options.dart';
+import 'package:dr/ui/connection_status_button.dart';
 import 'package:dr/ui/dialog.dart';
 import 'package:dr/ui/debug_log_page.dart';
+import 'package:dr/ui/layout.dart';
 import 'package:dr/ui/network_protocol_page.dart';
 import 'package:dr/ui/star_rating.dart';
 import 'package:dr/ui/subject_appearance_page.dart';
@@ -43,6 +45,7 @@ enum _Theme {
 
 class SettingsPageWidget extends StatefulWidget {
   final OnSettingChanged<bool> onSetNoPassSaving;
+  final OnSettingChanged<bool> onSetKeepPageOnAccountSwitch;
   final OnSettingChanged<bool> onSetAskWhenDelete;
   final OnSettingChanged<bool> onSetShowGradesDiagram;
   final OnSettingChanged<bool> onSetShowAllSubjectsAverage;
@@ -66,6 +69,7 @@ class SettingsPageWidget extends StatefulWidget {
   const SettingsPageWidget({
     super.key,
     required this.onSetNoPassSaving,
+    required this.onSetKeepPageOnAccountSwitch,
     required this.onSetAskWhenDelete,
     required this.onSetShowGradesDiagram,
     required this.onSetShowAllSubjectsAverage,
@@ -152,11 +156,11 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
     return Scaffold(
       appBar: ResponsiveAppBar(
         title: Text(tr(context).settingsTitle),
+        actions: const [ConnectionStatusButton()],
       ),
       body: ListView(
         controller: controller,
-        padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewPadding.bottom),
+        padding: context.systemInsets,
         children: <Widget>[
           if (!widget.vm.demoMode) ...[
             const SizedBox(height: 8),
@@ -190,6 +194,16 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
             },
             value: !widget.vm.noPassSaving,
           ),
+          // Next to the account switch it is about; the demo has no second
+          // account to switch to.
+          if (!widget.vm.demoMode)
+            SwitchListTile.adaptive(
+              title: Text(tr(context).settingsKeepPageOnAccountSwitch),
+              subtitle:
+                  Text(tr(context).settingsKeepPageOnAccountSwitchSubtitle),
+              onChanged: widget.onSetKeepPageOnAccountSwitch,
+              value: widget.vm.keepPageOnAccountSwitch,
+            ),
           const Divider(),
           AutoScrollTag(
             controller: controller,

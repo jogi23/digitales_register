@@ -26,8 +26,6 @@ import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/services/app_router.dart';
 import 'package:dr/ui/grades_page.dart';
-import 'package:dr/ui/last_fetched_overlay.dart';
-import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -66,6 +64,7 @@ class GradesPageContainer extends ConsumerWidget {
       );
     }
     return GradesPage(
+      onRefresh: () => ref.read(gradesProvider.notifier).load(gradesState.semester),
       vm: GradesPageViewModel(
         showSemester: gradesState.semester,
         loading: gradesState.loading,
@@ -84,7 +83,6 @@ class GradesPageContainer extends ConsumerWidget {
         noInternet: noInternet,
         showGradesDiagram: settings.showGradesDiagram,
         showAllSubjectsAverage: settings.showAllSubjectsAverage,
-        lastFetchedMessage: _lastFetchedMessage(gradesState, noInternet),
       ),
       changeSemester: ref.read(gradesProvider.notifier).setSemester,
       showGradesSettings:
@@ -97,7 +95,6 @@ class GradesPageViewModel {
   final Semester showSemester;
   final String allSubjectsAverage;
   final GradingMode gradingMode;
-  final String? lastFetchedMessage;
   final bool loading;
   final bool showGradesDiagram;
   final bool showAllSubjectsAverage;
@@ -108,7 +105,6 @@ class GradesPageViewModel {
     required this.showSemester,
     required this.allSubjectsAverage,
     required this.gradingMode,
-    required this.lastFetchedMessage,
     required this.loading,
     required this.showGradesDiagram,
     required this.showAllSubjectsAverage,
@@ -159,50 +155,4 @@ String calculateAllSubjectsAverage(
   } else {
     return gradeAverageFormat.format(sum / n / 100.0);
   }
-}
-
-String? _lastFetchedMessage(GradesState gradesState, bool noInternet) {
-  if (gradesState.subjects.isEmpty) {
-    return null;
-  }
-  final timeAgoString = formatTimeAgoPerSemester(
-    noInternet: noInternet,
-    lastFetched: gradesState.subjects.first.lastFetchedBasic,
-    semester: gradesState.semester,
-  );
-  if (timeAgoString == null) {
-    return null;
-  }
-  return "Offline-Modus aktiv. $timeAgoString.";
-}
-
-String? formatTimeAgoPerSemester({
-  required bool noInternet,
-  required BuiltMap<Semester, UtcDateTime>? lastFetched,
-  required Semester semester,
-}) {
-  if (lastFetched == null || !noInternet) {
-    return null;
-  }
-  final String lastFetchedFormatted;
-  if (semester == Semester.all) {
-    final first = lastFetched[Semester.first];
-    final second = lastFetched[Semester.second];
-    if (first == null || second == null) {
-      return null;
-    }
-    final firstFormatted = formatTimeAgo(first);
-    final secondFormatted = formatTimeAgo(second);
-    if (firstFormatted != secondFormatted) {
-      return "Zuletzt synchronisiert $firstFormatted (1. Semester) / $secondFormatted (2. Semester)";
-    }
-    lastFetchedFormatted = firstFormatted;
-  } else {
-    final last = lastFetched[semester];
-    if (last == null) {
-      return null;
-    }
-    lastFetchedFormatted = formatTimeAgo(last);
-  }
-  return "Zuletzt synchronisiert $lastFetchedFormatted";
 }

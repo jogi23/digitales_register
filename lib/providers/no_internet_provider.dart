@@ -17,7 +17,6 @@
 
 import 'dart:async';
 
-import 'package:dr/l10n/l10n.dart';
 import 'package:dr/middleware/middleware.dart' show wrapper;
 import 'package:dr/providers/dashboard_provider.dart';
 import 'package:dr/ui/snack_bar.dart';
@@ -41,7 +40,7 @@ class NoInternetNotifier extends Notifier<bool> {
 
   @protected
   void onGoingOffline() {
-    showSnackBar(trGlobal.noConnection);
+    showNoConnectionToast();
     wrapper.logout(hard: false, logoutForcedByServer: true);
   }
 

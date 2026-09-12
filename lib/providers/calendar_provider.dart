@@ -57,6 +57,10 @@ class CalendarNotifier extends Notifier<CalendarState> {
     }
   }
 
+  /// Loads the week the calendar stands on, or the current one before it has
+  /// stood anywhere — the week every page built on the calendar opens with.
+  Future<void> loadCurrentWeek() => load(state.currentMonday ?? toMonday(now));
+
   void setCurrentMonday(UtcDateTime monday) {
     final selectedDate = state.selection?.date;
     if (selectedDate != null && toMonday(selectedDate) != monday) {

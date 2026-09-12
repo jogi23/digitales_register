@@ -23,8 +23,10 @@ import 'package:dr/app_state.dart';
 import 'package:dr/ui/account_avatar_button.dart';
 import 'package:dr/data.dart';
 import 'package:dr/ui/animated_linear_progress_indicator.dart';
-import 'package:dr/ui/last_fetched_overlay.dart';
+import 'package:dr/ui/connection_status_button.dart';
+import 'package:dr/ui/layout.dart';
 import 'package:dr/ui/no_internet.dart';
+import 'package:dr/ui/pull_to_refresh.dart';
 import 'package:dr/util.dart';
 import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
@@ -74,69 +76,56 @@ class MessagesPage extends StatelessWidget {
             tooltip: tr(context).messagesMarkAllRead,
             onPressed: hasUnread ? onMarkAllAsRead : null,
           ),
+          const ConnectionStatusButton(),
           const AccountAvatarButton(),
         ],
       ),
-      body: state == null
-          ? noInternet
-              ? RefreshIndicator(
-                  onRefresh: onRefresh,
-                  child: const SingleChildScrollView(
-                    physics: AlwaysScrollableScrollPhysics(),
-                    child: SizedBox(
-                      height: 400,
-                      child: NoInternet(),
+      body: PullToRefresh(
+        onRefresh: onRefresh,
+        child: state == null
+            ? noInternet
+                ? const NoInternet()
+                : const Center(child: CircularProgressIndicator())
+            : Stack(
+              children: <Widget>[
+                AnimatedLinearProgressIndicator(
+                  show: state!.showMessage != null &&
+                      !state!.messages
+                          .any((m) => m.id == state!.showMessage),
+                ),
+                if (state!.messages.isEmpty)
+                  Center(
+                    child: Text(
+                      tr(context).messagesEmpty,
+                      style: Theme.of(context).textTheme.headlineMedium,
+                      textAlign: TextAlign.center,
                     ),
                   ),
-                )
-              : const Center(child: CircularProgressIndicator())
-          : RefreshIndicator(
-              onRefresh: onRefresh,
-              child: LastFetchedOverlay(
-                lastFetched: state!.lastFetched,
-                noInternet: noInternet,
-                child: Stack(
-                  children: <Widget>[
-                    AnimatedLinearProgressIndicator(
-                      show: state!.showMessage != null &&
-                          !state!.messages
-                              .any((m) => m.id == state!.showMessage),
-                    ),
-                    if (state!.messages.isEmpty)
-                      Center(
-                        child: Text(
-                          tr(context).messagesEmpty,
-                          style: Theme.of(context).textTheme.headlineMedium,
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ListView.builder(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      padding: EdgeInsets.only(
-                          bottom: MediaQuery.of(context).viewPadding.bottom),
-                      itemCount: state!.messages.length,
-                      itemBuilder: (context, i) {
-                        final altColor = Theme.of(context)
-                            .colorScheme
-                            .surfaceContainerHighest
-                            .withOpacity(0.75);
-                        return MessageWidget(
-                          message: state!.messages[i],
-                          onOpenFile: onOpenFile,
-                          onMarkAsRead: onMarkAsRead,
-                          onReply: onReply,
-                          signature: signature,
-                          onSignature: onSignature,
-                          noInternet: noInternet,
-                          expand: state!.messages[i].id == state!.showMessage,
-                          tileColor: i.isOdd ? altColor : null,
-                        );
-                      },
-                    ),
-                  ],
+                ListView.builder(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: context.systemInsets,
+                  itemCount: state!.messages.length,
+                  itemBuilder: (context, i) {
+                    final altColor = Theme.of(context)
+                        .colorScheme
+                        .surfaceContainerHighest
+                        .withOpacity(0.75);
+                    return MessageWidget(
+                      message: state!.messages[i],
+                      onOpenFile: onOpenFile,
+                      onMarkAsRead: onMarkAsRead,
+                      onReply: onReply,
+                      signature: signature,
+                      onSignature: onSignature,
+                      noInternet: noInternet,
+                      expand: state!.messages[i].id == state!.showMessage,
+                      tileColor: i.isOdd ? altColor : null,
+                    );
+                  },
                 ),
-              ),
+              ],
             ),
+      ),
     );
   }
 }
@@ -220,6 +209,21 @@ class _MessageWidgetState extends State<MessageWidget> {
               ),
             ),
           ),
+          // Sent and received looked alike, so one's own message read as
+          // something to act on.
+          if (widget.message.outgoing)
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 8),
+              child: MessageSentChip(),
+            ),
+          // Visible while the tile is closed: the section below is only
+          // built once it opens, so nothing said the message wanted anything.
+          if (widget.message.responseInfo?.openAction case final action?
+              when action != MessageAction.none)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: MessageActionChip(action: action),
+            ),
           if (widget.message.isNew)
             badge.Badge(
               badgeStyle: badge.BadgeStyle(
@@ -425,6 +429,26 @@ class _MessageResponseSectionState extends State<MessageResponseSection> {
       return _Hint(tr(context).messageUnsupported);
     }
 
+    // Set apart from the message text: this is the one place on the page
+    // that asks for something, and it looked like the rest of it.
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primaryContainer.withValues(alpha: 0.35),
+        border: Border.all(color: theme.colorScheme.primary),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: _controls(context, info, theme),
+      ),
+    );
+  }
+
+  Widget _controls(
+    BuildContext context,
+    MessageResponseInfo info,
+    ThemeData theme,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -447,6 +471,10 @@ class _MessageResponseSectionState extends State<MessageResponseSection> {
             textCapitalization: TextCapitalization.words,
             decoration: InputDecoration(
               labelText: tr(context).messageSignaturePrompt,
+              // Says why the button below is still grey.
+              helperText: _signature.text.trim().isEmpty
+                  ? tr(context).messageSignatureHelper
+                  : null,
               border: OutlineInputBorder(),
             ),
             onChanged: (_) => setState(() {}),
@@ -473,14 +501,130 @@ class _MessageResponseSectionState extends State<MessageResponseSection> {
             ],
           )
         else
-          Align(
-            alignment: Alignment.centerRight,
+          // Full width with an icon: the button that binds the reader should
+          // not weigh the same as any other on the page.
+          SizedBox(
+            width: double.infinity,
             child: FilledButton(
+              style: FilledButton.styleFrom(
+                minimumSize: const Size.fromHeight(48),
+                textStyle: theme.textTheme.titleMedium,
+              ),
               onPressed: _canSend ? () => _send(null) : null,
-              child: Text(tr(context).messageConfirm),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.draw),
+                  const SizedBox(width: 8),
+                  Text(tr(context).messageConfirm),
+                ],
+              ),
             ),
           ),
       ],
+    );
+  }
+}
+
+/// Marks a message that still waits for its reader, visible with the tile
+/// closed.
+///
+/// Two looks for the two things a message can ask: a name to sign with, or a
+/// yes or no. One shared "action needed" mark would leave the reader guessing
+/// which until the message is opened. Colour is not the only difference —
+/// icon and wording differ too — and the tile background stays free for the
+/// alternating rows.
+class MessageActionChip extends StatelessWidget {
+  final MessageAction action;
+
+  const MessageActionChip({super.key, required this.action});
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final (icon, label, background, foreground) = switch (action) {
+      MessageAction.confirm => (
+          Icons.draw_outlined,
+          tr(context).messageActionConfirm,
+          scheme.tertiaryContainer,
+          scheme.onTertiaryContainer,
+        ),
+      MessageAction.agree => (
+          Icons.thumbs_up_down_outlined,
+          tr(context).messageActionAgree,
+          scheme.secondaryContainer,
+          scheme.onSecondaryContainer,
+        ),
+      MessageAction.none => (null, null, null, null),
+    };
+    if (icon == null || label == null) return const SizedBox.shrink();
+
+    return _LabelChip(
+      icon: icon,
+      label: label,
+      background: background,
+      foreground: foreground,
+    );
+  }
+}
+
+/// Marks a message this account sent, so it does not pass for one received.
+///
+/// A chip beside the subject like the other marks, rather than a tile colour:
+/// the background already alternates between rows.
+class MessageSentChip extends StatelessWidget {
+  const MessageSentChip({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return _LabelChip(
+      icon: Icons.outbox_outlined,
+      label: tr(context).messageOutgoing,
+      background: scheme.primaryContainer,
+      foreground: scheme.onPrimaryContainer,
+    );
+  }
+}
+
+/// The small rounded label the message list marks tiles with.
+class _LabelChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color? background;
+  final Color? foreground;
+
+  const _LabelChip({
+    required this.icon,
+    required this.label,
+    required this.background,
+    required this.foreground,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 14, color: foreground),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: Theme.of(context)
+                  .textTheme
+                  .labelSmall
+                  ?.copyWith(color: foreground),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

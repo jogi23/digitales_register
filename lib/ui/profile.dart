@@ -18,7 +18,9 @@
 
 import 'package:dr/app_state.dart';
 import 'package:dr/container/settings_page.dart';
+import 'package:dr/ui/layout.dart';
 import 'package:dr/ui/no_internet.dart';
+import 'package:dr/ui/pull_to_refresh.dart';
 import 'package:dr/ui/user_profile.dart';
 import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
@@ -30,7 +32,11 @@ class Profile extends StatelessWidget {
   final VoidCallback changeEmail;
   final VoidCallback changePass;
 
+  /// Loads the page again when it is pulled down from the top.
+  final Future<void> Function() onRefresh;
+
   const Profile({
+    required this.onRefresh,
     super.key,
     required this.profileState,
     required this.setSendNotificationEmails,
@@ -44,44 +50,46 @@ class Profile extends StatelessWidget {
       appBar: AppBar(
         title: Text(tr(context).settingsProfile),
       ),
-      body: profileState.name == null
-          ? Center(
-              child: noInternet
-                  ? const NoInternet()
-                  : const CircularProgressIndicator(),
-            )
-          : ListView(
-              padding: EdgeInsets.only(
-                  bottom: MediaQuery.of(context).viewPadding.bottom),
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: UserProfile(
-                    name: profileState.name!,
-                    username: profileState.username!,
-                    role: profileState.roleName!,
+      body: PullToRefresh(
+        onRefresh: onRefresh,
+        child: profileState.name == null
+            ? Center(
+                child: noInternet
+                    ? const NoInternet()
+                    : const CircularProgressIndicator(),
+              )
+            : ListView(
+                padding: context.systemInsets,
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: UserProfile(
+                      name: profileState.name!,
+                      username: profileState.username!,
+                      role: profileState.roleName!,
+                    ),
                   ),
-                ),
-                SwitchListTile.adaptive(
-                  title: Text(tr(context).profileSendEmails),
-                  value: profileState.sendNotificationEmails!,
-                  onChanged: noInternet ? null : setSendNotificationEmails,
-                ),
-                ListTile(
-                  title: Text(tr(context).profileChangeEmail),
-                  subtitle: Text(profileState.email!),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: changeEmail,
-                  enabled: !noInternet,
-                ),
-                ListTile(
-                  title: Text(tr(context).profileChangePassword),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: changePass,
-                  enabled: !noInternet,
-                ),
-              ],
-            ),
+                  SwitchListTile.adaptive(
+                    title: Text(tr(context).profileSendEmails),
+                    value: profileState.sendNotificationEmails!,
+                    onChanged: noInternet ? null : setSendNotificationEmails,
+                  ),
+                  ListTile(
+                    title: Text(tr(context).profileChangeEmail),
+                    subtitle: Text(profileState.email!),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: changeEmail,
+                    enabled: !noInternet,
+                  ),
+                  ListTile(
+                    title: Text(tr(context).profileChangePassword),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: changePass,
+                    enabled: !noInternet,
+                  ),
+                ],
+              ),
+      ),
     );
   }
 }

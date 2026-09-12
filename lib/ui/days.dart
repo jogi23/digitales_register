@@ -35,11 +35,14 @@ import 'package:dr/providers/dashboard_provider.dart';
 import 'package:dr/services/changelog.dart';
 import 'package:dr/ui/animated_linear_progress_indicator.dart';
 import 'package:dr/ui/changelog_card.dart';
+import 'package:dr/ui/connection_status_button.dart';
+import 'package:dr/ui/dashboard_jump.dart';
 import 'package:dr/ui/dialog.dart';
 import 'package:dr/container/dashboard_week_container.dart';
 import 'package:dr/ui/dashboard_calendar.dart';
-import 'package:dr/ui/last_fetched_overlay.dart';
+import 'package:dr/ui/layout.dart';
 import 'package:dr/ui/no_internet.dart';
+import 'package:dr/ui/pull_to_refresh.dart';
 import 'package:dr/ui/star_rating.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
@@ -69,11 +72,10 @@ class DaysWidget extends StatefulWidget {
   final VoidCallback onSwitchFuture;
 
   /// Fetches past and future at once, for the month and week views.
-  final VoidCallback loadBothDirections;
+  final Future<void> Function() loadBothDirections;
   final ToggleDoneCallback toggleDoneCallback;
   final VoidCallback setDoNotAskWhenDeleteCallback;
-  final VoidCallback refresh;
-  final VoidCallback refreshNoInternet;
+  final Future<void> Function() refresh;
   final AttachmentCallback onOpenAttachment;
   final Map<int, BuiltList<Competence>> gradeCompetences;
   final Future<void> Function(Iterable<DashboardGradeTarget> targets)
@@ -92,7 +94,6 @@ class DaysWidget extends StatefulWidget {
     required this.toggleDoneCallback,
     required this.setDoNotAskWhenDeleteCallback,
     required this.refresh,
-    required this.refreshNoInternet,
     required this.onOpenAttachment,
     required this.gradeCompetences,
     required this.loadGradeCompetences,
@@ -111,6 +112,16 @@ class _DaysWidgetState extends State<DaysWidget> {
   final Map<int, int> _dayStartIndices = {};
   final Map<int, Homework> _homeworkIndexes = {};
   final Map<int, Day> _dayIndexes = {};
+
+  /// The day each target sits on, so the calendar views can be sent there.
+  final Map<int, UtcDateTime> _targetDates = {};
+
+  /// The day the calendar views were sent to last, so the next tap moves on
+  /// to another one.
+  UtcDateTime? _lastJumpDate;
+  int _jumpSerial = 0;
+
+  final DashboardJumpNotifier _calendarJump = DashboardJumpNotifier(null);
 
   final ValueNotifier<bool> _showScrollUp = ValueNotifier(false);
 
@@ -174,6 +185,7 @@ class _DaysWidgetState extends State<DaysWidget> {
   void updateValues() {
     _targets.clear();
     _focused.clear();
+    _targetDates.clear();
     var index = 0;
     var dayIndex = 0;
     for (final day in widget.vm.days) {
@@ -181,11 +193,13 @@ class _DaysWidgetState extends State<DaysWidget> {
       if (day.deletedHomework.any((h) => h.isChanged)) {
         _targets.add(index);
         _dayIndexes[index] = day;
+        _targetDates[index] = day.date;
       }
       index++;
       for (final hw in day.homework) {
         if (hw.isNew || hw.isChanged) {
           _targets.add(index);
+          _targetDates[index] = day.date;
         }
         _homeworkIndexes[index] = hw;
         index++;
@@ -236,12 +250,18 @@ class _DaysWidgetState extends State<DaysWidget> {
       // The month and week views navigate freely, so they need past and
       // future; with one direction the other looks empty.
       if (widget.vm.viewMode != DashboardViewMode.list) {
-        widget.loadBothDirections();
+        unawaited(widget.loadBothDirections());
       }
       _afterFirstFrame = true;
       setState(() {});
     });
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _calendarJump.dispose();
+    super.dispose();
   }
 
   @override
@@ -252,6 +272,12 @@ class _DaysWidgetState extends State<DaysWidget> {
     // restore it once the new data is laid out, so refreshes don't visually
     // reset the view back to today.
     final anchorDate = _currentTopDayDate(oldWidget.vm.days);
+    // Switching to a calendar view after the first frame has to fetch the
+    // other direction too; only the first build did so.
+    if (widget.vm.viewMode != oldWidget.vm.viewMode &&
+        widget.vm.viewMode != DashboardViewMode.list) {
+      unawaited(widget.loadBothDirections());
+    }
     updateValues();
     update();
     _ensureGradeCompetences();
@@ -307,7 +333,6 @@ class _DaysWidgetState extends State<DaysWidget> {
   Widget getItem(
     int n, {
     required bool isLast,
-    required bool showLastFetched,
   }) {
     if (n == 0) {
       return DashboardHeader(
@@ -329,13 +354,12 @@ class _DaysWidgetState extends State<DaysWidget> {
     return _buildDay(
       widget.vm.days[itemIndex],
       index: _dayStartIndices[itemIndex]!,
-      showLastFetched: showLastFetched,
     );
   }
 
   /// One day with all its entries — shared by the list and the calendar, so
   /// entries behave the same in both.
-  Widget _buildDay(Day day, {int index = 0, bool showLastFetched = false}) {
+  Widget _buildDay(Day day, {int index = 0}) {
     return DayWidget(
       day: day,
       vm: widget.vm,
@@ -349,7 +373,6 @@ class _DaysWidgetState extends State<DaysWidget> {
       colorBorders: widget.vm.colorBorders,
       colorTestsInRed: widget.vm.colorTestsInRed,
       subjectThemes: widget.vm.subjectThemes.toMap(),
-      showLastFetched: showLastFetched,
       gradeCompetences: widget.gradeCompetences,
     );
   }
@@ -360,13 +383,71 @@ class _DaysWidgetState extends State<DaysWidget> {
         ? DashboardWeekContainer(
             days: widget.vm.days,
             dayBuilder: _buildDay,
+            jumpTo: _calendarJump,
+            onDaySeen: _markDaySeen,
           )
         : DashboardCalendar(
             days: widget.vm.days,
             dayBuilder: _buildDay,
             loading: widget.vm.loading,
             onLoadMissing: widget.loadBothDirections,
+            jumpTo: _calendarJump,
+            onDaySeen: _markDaySeen,
           );
+  }
+
+  /// What pulling down loads again: the list stands in one direction, the
+  /// calendar views show both — reloading one left the other stale.
+  Future<void> _reload() => widget.vm.viewMode == DashboardViewMode.list
+      ? widget.refresh()
+      : widget.loadBothDirections();
+
+  /// Brings the next new or changed entry into view.
+  ///
+  /// The list scrolls to it. The calendar views are not bound to that scroll
+  /// controller — there the button moved nothing at all — so they are asked
+  /// to open the next day with news. A day left again counts as seen
+  /// ([_markDaySeen]), so the button goes once nothing is left.
+  Future<void> _goToNextNewEntry() async {
+    if (_targets.isEmpty) return;
+    if (widget.vm.viewMode == DashboardViewMode.list) {
+      await controller.scrollToIndex(
+        _targets.first,
+        preferPosition: AutoScrollPosition.middle,
+      );
+      return;
+    }
+    final dates = [for (final target in _targets) _targetDates[target]!];
+    // Another day than the one just shown; with only that one left, the same
+    // again — which the calendar takes as "seen".
+    final date = dates.firstWhere(
+      (d) => d != _lastJumpDate,
+      orElse: () => dates.first,
+    );
+    _lastJumpDate = date;
+    _calendarJump.value = DashboardJumpRequest(date, _jumpSerial++);
+  }
+
+  /// Marks what [date] carried as new or changed as seen.
+  ///
+  /// The calendar views call this for a day that was on screen and is left
+  /// again — the counterpart of scrolling past an entry in the list.
+  void _markDaySeen(DateTime date) {
+    for (final day in widget.vm.days) {
+      if (day.date.year != date.year ||
+          day.date.month != date.month ||
+          day.date.day != date.day) {
+        continue;
+      }
+      // Deleted ones first: that callback matches the day as it is now, and
+      // marking its homework would change it.
+      if (day.deletedHomework.any((h) => h.isChanged)) {
+        widget.markDeletedHomeworkAsSeenCallback(day);
+      }
+      for (final hw in day.homework) {
+        if (hw.isNew || hw.isChanged) widget.markAsSeenCallback(hw);
+      }
+    }
   }
 
   @override
@@ -402,57 +483,30 @@ class _DaysWidgetState extends State<DaysWidget> {
         ],
       );
     } else {
-      UtcDateTime? lastFetched;
-      // If not all days were fetched at the same time we want to show a string
-      // for each day individually.
-      bool daysShouldShowLastFetched = false;
-      if (widget.vm.days.first.lastRequested ==
-          widget.vm.days.last.lastRequested) {
-        lastFetched = widget.vm.days.first.lastRequested;
-      } else {
-        daysShouldShowLastFetched = true;
-      }
-      body = LastFetchedOverlay(
-        noInternet: widget.vm.noInternet,
-        lastFetched: lastFetched,
-        child: widget.vm.viewMode != DashboardViewMode.list
-            ? Padding(
-                // These views fill the height instead of scrolling, so the
-                // system navigation bar would sit on top of the last row.
-                padding: EdgeInsets.only(
-                    bottom: MediaQuery.of(context).viewPadding.bottom),
-                child: Column(
-                  // No past/future switch here: both directions are loaded,
-                  // and these views navigate by month and week instead.
-                  children: <Widget>[Expanded(child: _calendarBody())],
-                ),
-              )
-            : ListView.builder(
-          physics: const AlwaysScrollableScrollPhysics(),
-          controller: controller,
-          padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewPadding.bottom),
-          // Times two for the divider, minus one because there's no divider after the last item.
-          // The first item is the DashboardHeader, the last one a SizedBox (a spacer).
-          itemCount: (widget.vm.days.length * 2 - 1) + 2,
-          itemBuilder: (context, n) {
-            return getItem(
-              n,
-              isLast: n == (widget.vm.days.length * 2 - 1) + 1,
-              showLastFetched:
-                  widget.vm.noInternet && daysShouldShowLastFetched,
-            );
-          },
-        ),
-      );
-      // Always in the tree, even while loading: taking it out rebuilds
-      // everything below it, and the calendar loses the week just tapped.
-      body = RefreshIndicator(
-        onRefresh: () async {
-          if (noInternet || widget.vm.loading) return;
-          widget.refresh();
+      body = widget.vm.viewMode != DashboardViewMode.list
+          ? Padding(
+              // These views fill the height instead of scrolling, so the
+              // system navigation bar would sit on top of the last row.
+              padding: context.systemInsets,
+              child: Column(
+                // No past/future switch here: both directions are loaded,
+                // and these views navigate by month and week instead.
+                children: <Widget>[Expanded(child: _calendarBody())],
+              ),
+            )
+          : ListView.builder(
+        physics: const AlwaysScrollableScrollPhysics(),
+        controller: controller,
+        padding: context.systemInsets,
+        // Times two for the divider, minus one because there's no divider after the last item.
+        // The first item is the DashboardHeader, the last one a SizedBox (a spacer).
+        itemCount: (widget.vm.days.length * 2 - 1) + 2,
+        itemBuilder: (context, n) {
+          return getItem(
+            n,
+            isLast: n == (widget.vm.days.length * 2 - 1) + 1,
+          );
         },
-        child: body,
       );
       body = Stack(
         children: [
@@ -461,6 +515,10 @@ class _DaysWidgetState extends State<DaysWidget> {
         ],
       );
     }
+    // Around both branches — the empty dashboard needs it most and had none —
+    // and always in the tree, even while loading: taking it out rebuilds
+    // everything below it, and the calendar loses the week just tapped.
+    body = PullToRefresh(onRefresh: _reload, child: body);
     return ResponsiveScaffold<Pages>(
       key: scaffoldKey,
       homeBody: Column(
@@ -471,7 +529,7 @@ class _DaysWidgetState extends State<DaysWidget> {
       ),
       onRouteChanged: (route) {
         if (route == Pages.homework) {
-          widget.refresh();
+          unawaited(widget.refresh());
         }
       },
       homeFloatingActionButton: Column(
@@ -523,29 +581,17 @@ class _DaysWidgetState extends State<DaysWidget> {
               foregroundColor: Theme.of(context).colorScheme.onError,
               icon: const Icon(Icons.arrow_drop_down),
               label: Text(tr(context).dashboardNewEntries),
-              onPressed: () async {
-                await controller.scrollToIndex(
-                  _targets.first,
-                  preferPosition: AutoScrollPosition.middle,
-                );
-              },
+              onPressed: _goToNextNewEntry,
             ),
         ],
       ),
       homeAppBar: ResponsiveAppBar(
         title: Text(tr(context).menuHomework),
         actions: <Widget>[
-          if (widget.vm.noInternet)
-            TextButton(
-              onPressed: widget.refreshNoInternet,
-              child: Row(
-                children: [
-                  Text(tr(context).noConnection),
-                  SizedBox(width: 8),
-                  Icon(Icons.refresh),
-                ],
-              ),
-            ),
+          // Says whether the app is talking to the server — on every page,
+          // not only here, and for a dead session too, which "no connection"
+          // never covered.
+          const ConnectionStatusButton(),
           if (widget.vm.showNotifications) NotificationIconContainer(),
           const AccountAvatarButton(),
         ],
@@ -629,8 +675,6 @@ class DayWidget extends StatelessWidget {
   final AutoScrollController controller;
   final int index;
 
-  final bool showLastFetched;
-
   const DayWidget({
     super.key,
     required this.day,
@@ -646,7 +690,6 @@ class DayWidget extends StatelessWidget {
     required this.subjectThemes,
     required this.colorTestsInRed,
     required this.gradeCompetences,
-    required this.showLastFetched,
   });
 
 
@@ -669,11 +712,6 @@ class DayWidget extends StatelessWidget {
                       day.displayName,
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
-                    if (showLastFetched)
-                      Text(
-                        "Zuletzt synchronisiert ${formatTimeAgo(day.lastRequested)}.",
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
                   ],
                 ),
               ),

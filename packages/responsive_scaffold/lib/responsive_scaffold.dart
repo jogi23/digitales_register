@@ -5,6 +5,15 @@ import 'package:responsive_scaffold/size_transition.dart';
 const tabletLayoutBreakpoint = 720.0;
 const drawerWidth = 304.0;
 
+/// Below this height the frame is too short to spend the usual room on
+/// headers and padding — a phone held sideways, not a tablet in landscape.
+///
+/// Height rather than orientation: a tablet turned sideways still has room.
+const compactHeightBreakpoint = 500.0;
+
+/// Tool bar height on a frame that short. The title shrinks with it.
+const compactToolbarHeight = 40.0;
+
 class _PopObserver extends NavigatorObserver {
   final VoidCallback onReturnedToRoot;
 
@@ -177,7 +186,11 @@ class ResponsiveScaffoldState<T> extends State<ResponsiveScaffold<T>>
     return Portal(
       child: LayoutBuilder(
         builder: (context, constraints) {
-          tabletMode = constraints.maxWidth > tabletLayoutBreakpoint;
+          // Width alone made a phone held sideways a tablet: the sidebar
+          // then stood open over a third of the screen, on the third of the
+          // height that was left. A tablet has both measurements.
+          tabletMode = constraints.maxWidth > tabletLayoutBreakpoint &&
+              constraints.maxHeight >= compactHeightBreakpoint;
           if (tabletMode != previousTabletMode) {
             if (tabletMode) {
               if (isInitialized) {
@@ -414,6 +427,19 @@ class ResponsiveAppBar extends StatelessWidget implements PreferredSizeWidget {
   final List<Widget>? actions;
 
   const ResponsiveAppBar({super.key, required this.title, this.actions});
+
+  /// Whether the frame is short enough to warrant the smaller bar.
+  ///
+  /// [preferredSize] is asked without a [BuildContext], so the view has to
+  /// answer instead of a [MediaQuery]. Both are the same measurement — the
+  /// build below reads it the ordinary way.
+  static bool _isCompactView() {
+    final view = WidgetsBinding.instance.platformDispatcher.implicitView;
+    if (view == null) return false;
+    final height = view.physicalSize.height / view.devicePixelRatio;
+    return height > 0 && height < compactHeightBreakpoint;
+  }
+
   @override
   Widget build(BuildContext context) {
     final tabletMode = _InheritedTabletMode.of(context)?.tabletMode ?? false;
@@ -427,16 +453,27 @@ class ResponsiveAppBar extends StatelessWidget implements PreferredSizeWidget {
       );
     }
 
+    final compact =
+        MediaQuery.sizeOf(context).height < compactHeightBreakpoint;
+    final theme = Theme.of(context);
     return AppBar(
       actions: actions,
       title: title,
       leading: leading,
       automaticallyImplyLeading: false,
+      toolbarHeight: compact ? compactToolbarHeight : kToolbarHeight,
+      // Half the usual title: sideways the page heading costs height the
+      // content needs more than the heading does.
+      titleTextStyle: compact
+          ? (theme.appBarTheme.titleTextStyle ?? theme.textTheme.titleLarge)
+              ?.copyWith(fontSize: 14)
+          : null,
     );
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(56);
+  Size get preferredSize =>
+      Size.fromHeight(_isCompactView() ? compactToolbarHeight : kToolbarHeight);
 }
 
 class _HomePage extends StatelessWidget {

@@ -26,10 +26,12 @@ import 'package:dio/dio.dart' as dio;
 import 'package:dr/l10n/l10n.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/main.dart' hide scaffoldMessengerKey, showSnackBar;
+import 'package:dr/pages.dart';
 import 'package:dr/providers/absences_provider.dart';
 import 'package:dr/providers/all_subjects_provider.dart';
 import 'package:dr/providers/calendar_provider.dart';
 import 'package:dr/providers/certificate_provider.dart';
+import 'package:dr/providers/connection_provider.dart';
 import 'package:dr/providers/config_provider.dart';
 import 'package:dr/providers/dashboard_error_provider.dart';
 import 'package:dr/providers/dashboard_provider.dart';
@@ -174,8 +176,15 @@ Future<void> _doLoad() async {
   // However we don't want to reset the wrapper in tests
   if (wrapper is! Mock) {
     wrapper = Wrapper()
-      ..onNoInternet = (bool v) =>
-          providerContainer.read(noInternetProvider.notifier).setNoInternet(v);
+      ..onNoInternet = (bool v) {
+        providerContainer.read(noInternetProvider.notifier).setNoInternet(v);
+      }
+      ..onSessionExpired = () {
+        providerContainer.read(connectionProvider.notifier).markSessionExpired();
+      }
+      ..onRequestSucceeded = () {
+        providerContainer.read(connectionProvider.notifier).markSuccess();
+      };
   }
   if (!providerContainer.read(noInternetProvider)) _popAll();
   // Load profile photos/aliases, and subject nicknames/colors (app-wide,

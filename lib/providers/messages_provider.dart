@@ -225,6 +225,9 @@ class MessagesNotifier extends Notifier<MessagesState> {
       ..timeRead = timeRead
       ..recipientString = getString(json["recipientString"])
       ..fromName = getString(json["fromName"])
+      // The portal files every message under incoming or outgoing; this is
+      // the only field in the list that says which.
+      ..outgoing = getBool(json["label_outgoing"]) ?? false
       ..id = id
       ..responseInfo = _parseResponseInfo(json)?.toBuilder();
     final attachments = ListBuilder<MessageAttachmentFile>();

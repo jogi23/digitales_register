@@ -31,6 +31,7 @@ class ProfileContainer extends ConsumerWidget {
     final noInternet = ref.watch(noInternetProvider);
     final router = ref.read(appRouterProvider);
     return Profile(
+      onRefresh: ref.read(profileProvider.notifier).load,
       profileState: profileState,
       noInternet: noInternet,
       setSendNotificationEmails: (value) =>

@@ -49,9 +49,8 @@ class MessagesPageContainer extends ConsumerWidget {
           ref.read(settingsProvider.notifier).setMessageSignature(name),
       onMarkAllAsRead: () =>
           ref.read(messagesProvider.notifier).markAllAsRead(),
-      onRefresh: () => noInternet
-          ? ref.read(noInternetProvider.notifier).refresh()
-          : ref.read(messagesProvider.notifier).load(),
+      // Offline the pull restores the connection first (PullToRefresh).
+      onRefresh: ref.read(messagesProvider.notifier).load,
     );
   }
 }

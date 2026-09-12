@@ -22,19 +22,32 @@ import 'package:dr/data.dart';
 import 'package:dr/providers/calendar_provider.dart';
 import 'package:dr/providers/subject_appearance_provider.dart';
 import 'package:dr/ui/calendar_grid.dart';
-import 'package:dr/ui/last_fetched_overlay.dart';
+import 'package:dr/ui/layout.dart';
 import 'package:dr/ui/no_internet.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:intl/intl.dart';
+// intl has a TextDirection of its own, which shadows the one text layout
+// needs.
+import 'package:intl/intl.dart' hide TextDirection;
 
 const holidayIconSize = 65.0;
 
 class CalendarWeek extends StatelessWidget {
   final CalendarWeekViewModel vm;
+
+  /// Height one unit of [CalendarSlot.flex] may not fall below — a lesson is
+  /// worth two of them.
+  ///
+  /// Sideways the frame is shorter than the timetable needs; without a floor
+  /// the rows were squeezed until the time column overflowed and no lesson
+  /// could be read. Below the floor the week scrolls instead.
+  static const minSlotHeight = 24.0;
+
+  /// Room for the weekday and date above the grid.
+  static const headerHeight = 56.0;
 
   const CalendarWeek({
     super.key,
@@ -54,53 +67,71 @@ class CalendarWeek extends StatelessWidget {
             : vm.loading
                 ? const Center(child: CircularProgressIndicator())
                 : const _NoLessons()
-        : LastFetchedOverlay(
-            lastFetched: vm.days.first.lastFetched,
-            noInternet: vm.noInternet,
-            child: Column(
+        : _fill(
+            context,
+            minHeight: headerHeight + grid.totalFlex * minSlotHeight,
+            child: Row(
               children: <Widget>[
-                Expanded(
-                  child: Row(
-                    children: <Widget>[
-                      if (vm.showTimes && grid.hasTimes) _TimeAxis(grid: grid),
-                      for (final d in vm.days)
-                        Expanded(
-                          child: CalendarDayWidget(
-                            calendarDay: d,
-                            grid: grid,
-                            // A day the dashboard never loaded has nothing
-                            // due — passing null would leave it undimmed and
-                            // make past days look like they carry work.
-                            onTap: vm.onDayTap,
-                            onAddReminder: vm.onAddReminder,
-                            onEntryTap: vm.onEntryTap,
-                            hasEntries: vm.daysWithEntries.contains(
-                              UtcDateTime(
-                                  d.date.year, d.date.month, d.date.day),
-                            ),
-                            highlightedSubjects: vm.subjectsWithEntries == null
-                                ? null
-                                : vm.subjectsWithEntries![UtcDateTime(
-                                      d.date.year,
-                                      d.date.month,
-                                      d.date.day,
-                                    )] ??
-                                    const <String>{},
-                            subjectNicks: vm.subjectNicks,
-                            isSelected: vm.selection?.date == d.date,
-                            selectedHour: vm.selection?.date == d.date
-                                ? vm.selection?.hour
-                                : null,
-                            colorBackground: vm.colorBackground,
-                            subjectThemes: vm.subjectThemes,
-                          ),
-                        ),
-                    ],
+                if (vm.showTimes && grid.hasTimes) _TimeAxis(grid: grid),
+                for (final d in vm.days)
+                  Expanded(
+                    child: CalendarDayWidget(
+                      calendarDay: d,
+                      grid: grid,
+                      // A day the dashboard never loaded has nothing
+                      // due — passing null would leave it undimmed and
+                      // make past days look like they carry work.
+                      onTap: vm.onDayTap,
+                      onAddReminder: vm.onAddReminder,
+                      onEntryTap: vm.onEntryTap,
+                      hasEntries: vm.daysWithEntries.contains(
+                        UtcDateTime(
+                            d.date.year, d.date.month, d.date.day),
+                      ),
+                      highlightedSubjects: vm.subjectsWithEntries == null
+                          ? null
+                          : vm.subjectsWithEntries![UtcDateTime(
+                                d.date.year,
+                                d.date.month,
+                                d.date.day,
+                              )] ??
+                              const <String>{},
+                      subjectNicks: vm.subjectNicks,
+                      isSelected: vm.selection?.date == d.date,
+                      selectedHour: vm.selection?.date == d.date
+                          ? vm.selection?.hour
+                          : null,
+                      colorBackground: vm.colorBackground,
+                      subjectThemes: vm.subjectThemes,
+                    ),
                   ),
-                ),
               ],
             ),
           );
+  }
+
+  /// The week fills the height it is given — unless that is less than
+  /// [minHeight], in which case it keeps its size and scrolls.
+  ///
+  /// Also keeps the grid clear of the system bars, which sit at the side
+  /// when the device is held sideways.
+  Widget _fill(
+    BuildContext context, {
+    required double minHeight,
+    required Widget child,
+  }) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final padded = Padding(padding: context.systemInsets, child: child);
+        if (!constraints.hasBoundedHeight ||
+            constraints.maxHeight >= minHeight) {
+          return padded;
+        }
+        return SingleChildScrollView(
+          child: SizedBox(height: minHeight, child: padded),
+        );
+      },
+    );
   }
 }
 
@@ -565,54 +596,127 @@ class HourWidget extends ConsumerWidget {
         // stays comfortably readable.
         child: Opacity(
           opacity: dimmed ? 0.6 : 1,
+          // Fills the tile, so the subject colour covers all of it rather
+          // than just the width of the text.
           child: SizedBox.expand(
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    subjectNicks[hour.subject.toLowerCase()] ?? hour.subject,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    softWrap: false,
-                  ),
-                  if (hour.teachers.isNotEmpty)
-                    const SizedBox(
-                      height: 5,
-                    ),
-                  for (final teacher in hour.teachers)
-                    Text(
-                      teacher.lastName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      softWrap: false,
-                      style: DefaultTextStyle.of(context)
-                          .style
-                          .copyWith(fontSize: 11),
-                    ),
-                  if (hour.rooms.isNotEmpty)
-                    const SizedBox(
-                      height: 5,
-                    ),
-                  for (final room in hour.rooms)
-                    Text(
-                      room,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      softWrap: false,
-                      style: DefaultTextStyle.of(context)
-                          .style
-                          .copyWith(fontSize: 11),
-                    ),
-                ],
-              ),
+            child: _LessonLabel(
+              subject:
+                  subjectNicks[hour.subject.toLowerCase()] ?? hour.subject,
+              teachers: [
+                for (final teacher in hour.teachers) teacher.lastName,
+              ],
             ),
           ),
         ),
       ),
     );
+  }
+}
+
+/// Subject and teachers of one lesson tile in the week grid.
+///
+/// The subject keeps one size in every tile. The whole label used to sit in a
+/// `FittedBox`, which shrank the subject along with however many teachers and
+/// rooms came after it — three tiles in one row showed three sizes.
+///
+/// So now: at most three lines, the subject first at a fixed size, then up to
+/// two teachers in italics — as many as the tile has height for. The room is
+/// left to the detail view; in a tile this narrow it pushed out what matters.
+class _LessonLabel extends StatelessWidget {
+  final String subject;
+  final List<String> teachers;
+
+  const _LessonLabel({required this.subject, required this.teachers});
+
+  /// Room between text and tile edge, so names do not touch the border.
+  static const padding = EdgeInsets.symmetric(horizontal: 4, vertical: 2);
+  static const subjectSize = 13.0;
+  static const teacherSize = 11.0;
+
+  /// Subject plus this many teacher lines: three lines in all.
+  static const maxTeacherLines = 2;
+
+  /// The teacher lines to show, at most [lines] of them. With more teachers
+  /// than lines the last line says how many were left out.
+  static List<String> teacherLines(List<String> teachers, int lines) {
+    if (lines <= 0 || teachers.isEmpty) return const [];
+    if (teachers.length <= lines) return teachers;
+    // The last line names one more teacher, so it hides one fewer.
+    final hidden = teachers.length - lines;
+    return [
+      ...teachers.take(lines - 1),
+      "${teachers[lines - 1]} +$hidden",
+    ];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final base = DefaultTextStyle.of(context).style;
+    final subjectStyle =
+        base.copyWith(fontSize: subjectSize, fontWeight: FontWeight.w500);
+    final teacherStyle = base.copyWith(
+      fontSize: teacherSize,
+      fontStyle: FontStyle.italic,
+    );
+    final scaler = MediaQuery.textScalerOf(context);
+    final direction = Directionality.of(context);
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // A single lesson is the shortest tile, so the line budget follows
+        // the height actually there rather than a fixed count.
+        final available = constraints.maxHeight - padding.vertical;
+        final subjectHeight = _lineHeight(subjectStyle, scaler, direction);
+        final teacherHeight = _lineHeight(teacherStyle, scaler, direction);
+        final fitting = teacherHeight <= 0
+            ? 0
+            : ((available - subjectHeight) / teacherHeight).floor();
+        final lines = teacherLines(
+          teachers,
+          fitting.clamp(0, maxTeacherLines),
+        );
+
+        return Padding(
+          padding: padding,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text(
+                subject,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                softWrap: false,
+                style: subjectStyle,
+              ),
+              for (final line in lines)
+                Text(
+                  line,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  softWrap: false,
+                  style: teacherStyle,
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  static double _lineHeight(
+    TextStyle style,
+    TextScaler scaler,
+    TextDirection direction,
+  ) {
+    final painter = TextPainter(
+      text: TextSpan(text: "Hg", style: style),
+      textScaler: scaler,
+      textDirection: direction,
+      maxLines: 1,
+    )..layout();
+    final height = painter.height;
+    painter.dispose();
+    return height;
   }
 }
 

@@ -17,6 +17,7 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:dr/l10n/l10n.dart';
+import 'package:dr/ui/layout.dart';
 import 'package:flutter/material.dart';
 
 class RequestPassReset extends StatefulWidget {
@@ -51,8 +52,7 @@ class _RequestPassResetState extends State<RequestPassReset> {
           child: AutofillGroup(
             child: ListView(
               shrinkWrap: true,
-              padding: EdgeInsets.only(
-                  bottom: MediaQuery.of(context).viewPadding.bottom),
+              padding: context.systemInsets,
               children: <Widget>[
                 TextField(
                   autofillHints: const [AutofillHints.username],

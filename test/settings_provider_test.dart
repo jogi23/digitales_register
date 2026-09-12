@@ -118,6 +118,35 @@ void main() {
       // running value over anyway.
       expect(s.noPasswordSaving, isTrue);
     });
+
+    test('staying on the page is decided for the app, not per account',
+        () async {
+      // Stored with an account, the account switched to would decide whether
+      // the switch keeps the page.
+      final c = _makeContainer();
+      final notifier = c.read(settingsProvider.notifier);
+      expect(c.read(settingsProvider).keepPageOnAccountSwitch, isFalse);
+
+      notifier.setKeepPageOnAccountSwitch(true);
+      await pumpEventQueue();
+      notifier.resetForAccount();
+
+      expect(c.read(settingsProvider).keepPageOnAccountSwitch, isTrue);
+      expect(
+        c.read(settingsProvider).globalJson()['keepPageOnAccountSwitch'],
+        isTrue,
+      );
+    });
+
+    test('staying on the page survives a restart', () async {
+      final first = _makeContainer();
+      first.read(settingsProvider.notifier).setKeepPageOnAccountSwitch(true);
+      await pumpEventQueue();
+
+      final second = _makeContainer();
+      await second.read(settingsProvider.notifier).loadGlobal();
+      expect(second.read(settingsProvider).keepPageOnAccountSwitch, isTrue);
+    });
   });
 
   group('SettingsNotifier — load', () {

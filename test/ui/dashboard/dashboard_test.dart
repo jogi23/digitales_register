@@ -178,7 +178,9 @@ Future<void> main() async {
       child: MaterialApp(home: DaysContainer()),
     );
     await tester.pumpWidget(widget);
-    expect(find.text("Keine Verbindung"), findsNWidgets(2));
+    // Only the page says it in words; the title bar shows a crossed-out
+    // cloud.
+    expect(find.text("Keine Verbindung"), findsOneWidget);
     expect(find.byType(NoInternet), findsOneWidget);
     expect(find.text("Vergangenheit"), findsOneWidget);
     expect(find.text("Zukunft"), findsNothing);

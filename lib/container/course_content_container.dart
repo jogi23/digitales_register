@@ -22,7 +22,9 @@ import 'package:dr/providers/course_content_provider.dart';
 import 'package:dr/providers/subject_appearance_provider.dart';
 import 'package:dr/middleware/middleware.dart' show wrapper;
 import 'package:dr/ui/account_avatar_button.dart';
+import 'package:dr/ui/connection_status_button.dart';
 import 'package:dr/ui/course_content_page.dart';
+import 'package:dr/ui/pull_to_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:responsive_scaffold/responsive_scaffold.dart';
@@ -64,27 +66,36 @@ class CourseContentContainer extends ConsumerWidget {
     return Scaffold(
       appBar: ResponsiveAppBar(
         title: Text(tr(context).menuCourseContent),
-        actions: const [AccountAvatarButton()],
+        actions: const [ConnectionStatusButton(), AccountAvatarButton()],
       ),
-      body: CourseContentPage(
-        subjects: subjects,
-        state: state,
-        subjectLabel: (subject) => appearance.nickFor(subject) ?? subject,
-        onSubjectSelected:
-            ref.read(courseContentProvider.notifier).load,
-        onEntrySelected: (entry) => switch (entry.type) {
-          CourseEntryType.text => showCourseText(context, entry),
-          CourseEntryType.file =>
-            ref.read(courseContentProvider.notifier).openEntry(entry),
-          // Ein Link führt aus der App hinaus; ihn im Browser zu öffnen ist
-          // der einzige Weg, der die Anmeldung mitnimmt.
-          CourseEntryType.link => launchUrl(
-              Uri.parse("${wrapper.baseAddress}api/courseContent/downloadLink"
-                  "?course=${state.course?.id}&entry=${entry.id}"),
-              mode: LaunchMode.externalApplication,
-            ),
-          CourseEntryType.unknown => Future<void>.value(),
-        },
+      body: PullToRefresh(
+        // Die Fächer stammen aus der Kalenderwoche, das Material aus dem
+        // gewählten Fach — beides neu holen.
+        onRefresh: () => Future.wait([
+          ref.read(calendarProvider.notifier).loadCurrentWeek(),
+          if (state.subject case final subject?)
+            ref.read(courseContentProvider.notifier).load(subject),
+        ]),
+        child: CourseContentPage(
+          subjects: subjects,
+          state: state,
+          subjectLabel: (subject) => appearance.nickFor(subject) ?? subject,
+          onSubjectSelected:
+              ref.read(courseContentProvider.notifier).load,
+          onEntrySelected: (entry) => switch (entry.type) {
+            CourseEntryType.text => showCourseText(context, entry),
+            CourseEntryType.file =>
+              ref.read(courseContentProvider.notifier).openEntry(entry),
+            // Ein Link führt aus der App hinaus; ihn im Browser zu öffnen ist
+            // der einzige Weg, der die Anmeldung mitnimmt.
+            CourseEntryType.link => launchUrl(
+                Uri.parse("${wrapper.baseAddress}api/courseContent/downloadLink"
+                    "?course=${state.course?.id}&entry=${entry.id}"),
+                mode: LaunchMode.externalApplication,
+              ),
+            CourseEntryType.unknown => Future<void>.value(),
+          },
+        ),
       ),
     );
   }

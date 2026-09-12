@@ -84,6 +84,9 @@ class SettingsNotifier extends Notifier<SettingsState> {
   void setSaveNoPass(bool value) =>
       _update(state.copyWith(noPasswordSaving: value));
 
+  void setKeepPageOnAccountSwitch(bool value) =>
+      _update(state.copyWith(keepPageOnAccountSwitch: value));
+
   void setAskWhenDelete(bool value) =>
       _update(state.copyWith(askWhenDelete: value));
 

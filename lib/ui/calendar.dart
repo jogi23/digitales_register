@@ -21,6 +21,9 @@ import 'package:dr/ui/account_avatar_button.dart';
 import 'package:dr/container/calendar_detail_container.dart';
 import 'package:dr/container/calendar_week_container.dart';
 import 'package:dr/providers/calendar_provider.dart';
+import 'package:dr/ui/connection_status_button.dart';
+import 'package:dr/ui/layout.dart';
+import 'package:dr/ui/pull_to_refresh.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
 import 'package:dr/l10n/l10n.dart';
@@ -56,6 +59,9 @@ class Calendar extends ConsumerStatefulWidget {
 
   final DayCallback dayCallback;
   final DayCallback currentMondayCallback;
+
+  /// Loads the week shown again when it is pulled down from the top.
+  final Future<void> Function() onRefresh;
   final VoidCallback showEditSubjectNicks;
   final VoidCallback closeEditNicksBar;
 
@@ -64,6 +70,7 @@ class Calendar extends ConsumerStatefulWidget {
     required this.vm,
     required this.dayCallback,
     required this.currentMondayCallback,
+    required this.onRefresh,
     required this.showEditSubjectNicks,
     required this.closeEditNicksBar,
   });
@@ -199,7 +206,10 @@ class _CalendarState extends ConsumerState<Calendar> with TickerProviderStateMix
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
-      tabletMode = constraints.maxWidth >= tabletLayoutBreakPoint;
+      // Like the scaffold: sideways a phone is wide enough for the two-pane
+      // layout but far too short for it.
+      tabletMode = constraints.maxWidth >= tabletLayoutBreakPoint &&
+          constraints.maxHeight >= compactHeightBreakpoint;
       return Row(
         children: [
           Expanded(
@@ -227,6 +237,7 @@ class _CalendarState extends ConsumerState<Calendar> with TickerProviderStateMix
                           ],
                         ),
                       ),
+                      const ConnectionStatusButton(),
                       const AccountAvatarButton(),
                     ],
                   ),
@@ -313,23 +324,28 @@ class _CalendarState extends ConsumerState<Calendar> with TickerProviderStateMix
                           ],
                         ),
                       ),
-                      const SizedBox(
-                        height: 8,
-                      ),
+                      // Sideways every pixel of height counts, and this gap
+                      // is one of the few that can give some back.
+                      SizedBox(height: context.compactGap(8)),
                       Expanded(
-                        child: NotificationListener<ScrollStartNotification>(
-                          onNotification: (n) {
-                            _chevronOpacityController.forward();
-                            _dateRangeOpacityController.forward();
-                            return false;
-                          },
-                          child: NotificationListener<ScrollEndNotification>(
-                            onNotification: (_) {
-                              _chevronOpacityController.reverse();
-                              _dateRangeOpacityController.reverse();
+                        // Outside the listeners below, so a pull does not
+                        // fade the arrows meant for swiping between weeks.
+                        child: PullToRefresh(
+                          onRefresh: widget.onRefresh,
+                          child: NotificationListener<ScrollStartNotification>(
+                            onNotification: (n) {
+                              _chevronOpacityController.forward();
+                              _dateRangeOpacityController.forward();
                               return false;
                             },
-                            child: _pageView,
+                            child: NotificationListener<ScrollEndNotification>(
+                              onNotification: (_) {
+                                _chevronOpacityController.reverse();
+                                _dateRangeOpacityController.reverse();
+                                return false;
+                              },
+                              child: _pageView,
+                            ),
                           ),
                         ),
                       ),
@@ -440,7 +456,7 @@ class EditNickBar extends StatelessWidget {
                       ),
                     ],
                   ),
-                  SizedBox(height: MediaQuery.of(context).viewPadding.bottom),
+                  SizedBox(height: context.systemBottomInset),
                 ],
               ),
             ),
@@ -450,7 +466,7 @@ class EditNickBar extends StatelessWidget {
       secondChild: SizedBox(
         // Same job the bar does when it is out: keep the timetable, which
         // fills the height rather than scrolling, off the system bar.
-        height: 8 + MediaQuery.of(context).viewPadding.bottom,
+        height: 8 + context.systemBottomInset,
       ),
       crossFadeState:
           show ? CrossFadeState.showFirst : CrossFadeState.showSecond,

@@ -26,6 +26,8 @@ import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/providers/subject_appearance_provider.dart';
 import 'package:dr/ui/calendar_week.dart';
+import 'package:dr/ui/dashboard_jump.dart';
+import 'package:dr/ui/layout.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
 import 'package:dr/providers/dashboard_provider.dart';
@@ -54,11 +56,20 @@ class DashboardWeekContainer extends ConsumerStatefulWidget {
   @visibleForTesting
   final UtcDateTime? initialMonday;
 
+  /// Days the dashboard wants shown, e.g. the one a new entry sits on.
+  final DashboardJumpNotifier? jumpTo;
+
+  /// Called for a day that was opened and closed again — its "neu" badges
+  /// have been seen.
+  final void Function(DateTime date)? onDaySeen;
+
   const DashboardWeekContainer({
     super.key,
     required this.days,
     required this.dayBuilder,
     this.initialMonday,
+    this.jumpTo,
+    this.onDaySeen,
   });
 
   @override
@@ -81,6 +92,33 @@ class _DashboardWeekContainerState
       _ensureLoaded();
       _ensureThemes();
     });
+    widget.jumpTo?.addListener(_handleJump);
+  }
+
+  @override
+  void didUpdateWidget(DashboardWeekContainer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.jumpTo != widget.jumpTo) {
+      oldWidget.jumpTo?.removeListener(_handleJump);
+      widget.jumpTo?.addListener(_handleJump);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.jumpTo?.removeListener(_handleJump);
+    super.dispose();
+  }
+
+  /// Shows the week of the wanted day and opens that day.
+  ///
+  /// The week alone would not do: a single entry among five days is what the
+  /// button promises to point at.
+  void _handleJump() {
+    final request = widget.jumpTo?.value;
+    if (request == null || !mounted) return;
+    _goTo(toMonday(request.date));
+    _showDay(_dateOnly(request.date));
   }
 
   static UtcDateTime _dateOnly(UtcDateTime date) =>
@@ -150,7 +188,7 @@ class _DashboardWeekContainerState
   /// Opens the day full screen: everything noted for it, and the way to add
   /// more — the same widget the list view builds.
   void _showDay(UtcDateTime date) {
-    Navigator.of(context).push(
+    final closed = Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (context) => Scaffold(
           appBar: AppBar(
@@ -178,6 +216,10 @@ class _DashboardWeekContainerState
         ),
       ),
     );
+    // Opened and closed again, the day was in front of the reader.
+    unawaited(closed.then((_) {
+      if (mounted) widget.onDaySeen?.call(date);
+    }));
   }
 
   /// Asks for a reminder and files it under the dashboard's own date.
@@ -259,12 +301,16 @@ class _WeekHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final format = DateFormat("dd.MM.yy");
     final friday = monday.add(const Duration(days: 4));
+    // Sideways the header is height the timetable needs more than it does.
+    final density =
+        context.isCompactHeight ? VisualDensity.compact : VisualDensity.standard;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
         IconButton(
           icon: const Icon(Icons.chevron_left),
           tooltip: tr(context).previousWeek,
+          visualDensity: density,
           onPressed: onPrevious,
         ),
         Text(
@@ -279,11 +325,13 @@ class _WeekHeader extends StatelessWidget {
             IconButton(
               icon: const Icon(Icons.today),
               tooltip: tr(context).calendarCurrentWeek,
+              visualDensity: density,
               onPressed: isCurrentWeek ? null : onToday,
             ),
             IconButton(
               icon: const Icon(Icons.chevron_right),
               tooltip: tr(context).nextWeek,
+              visualDensity: density,
               onPressed: onNext,
             ),
           ],

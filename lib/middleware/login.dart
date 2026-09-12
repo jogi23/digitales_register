@@ -403,10 +403,37 @@ Future<void> _doSelectAccount(int index) async {
   login["url"] = selected["url"];
   await secureStorage.write(key: "login", value: json.encode(login));
   await saveStateImmediately();
+  // Remembered before anything is torn down: the logout below takes the
+  // page with it, and the login afterwards opens the Merkheft.
+  final page = scaffoldKey?.currentState?.currentSelected;
+  if (page != null &&
+      page != Pages.homework &&
+      providerContainer.read(settingsProvider).keepPageOnAccountSwitch) {
+    providerContainer
+        .read(loginProvider.notifier)
+        .addAfterLoginCallback(() => _reopenPage(page));
+  }
   providerContainer.read(loginProvider.notifier).logout(hard: true);
   providerContainer.read(loginProvider.notifier).setLoggingIn();
   _resetAllProviders();
   await _doLoad();
+}
+
+/// Opens [page] again for the account just logged into — through the
+/// router, so its data is loaded for that account and not left empty.
+///
+/// The home scaffold is rebuilt after the logout and may not stand yet when
+/// the login completes; then this waits a few frames for it. Without one it
+/// stays on the Merkheft, which is where the app would have gone anyway.
+void _reopenPage(Pages page, {int framesLeft = 10}) {
+  if (scaffoldKey?.currentState != null) {
+    providerContainer.read(appRouterProvider).showPage(page);
+    return;
+  }
+  if (framesLeft == 0) return;
+  WidgetsBinding.instance
+    ..addPostFrameCallback((_) => _reopenPage(page, framesLeft: framesLeft - 1))
+    ..scheduleFrame();
 }
 
 void _restoreProvidersFromAppState(AppState appState) {

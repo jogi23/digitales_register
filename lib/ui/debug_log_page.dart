@@ -19,6 +19,7 @@ import 'dart:io';
 
 import 'package:dr/debug_log.dart';
 import 'package:dr/l10n/l10n.dart';
+import 'package:dr/ui/layout.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
@@ -91,8 +92,7 @@ class _DebugLogPageState extends State<DebugLogPage> {
       body: entries.isEmpty
           ? Center(child: Text(tr(context).changelogEmpty))
           : ListView.separated(
-              padding: EdgeInsets.only(
-                  bottom: MediaQuery.of(context).viewPadding.bottom),
+              padding: context.systemInsets,
               itemCount: entries.length,
               separatorBuilder: (_, __) => const Divider(height: 1),
               itemBuilder: (context, i) => _EntryTile(entry: entries[i]),

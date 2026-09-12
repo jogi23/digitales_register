@@ -50,6 +50,7 @@ Widget _build({
 }) {
   return MaterialApp(
     home: Profile(
+          onRefresh: () async {},
       profileState: state,
       noInternet: noInternet,
       setSendNotificationEmails: onNotifications ?? (_) {},
