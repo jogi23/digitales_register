@@ -24,7 +24,6 @@ import 'package:dr/ui/account_avatar_button.dart';
 import 'package:dr/data.dart';
 import 'package:dr/ui/animated_linear_progress_indicator.dart';
 import 'package:dr/ui/connection_status_button.dart';
-import 'package:dr/ui/last_fetched_overlay.dart';
 import 'package:dr/ui/layout.dart';
 import 'package:dr/ui/no_internet.dart';
 import 'package:dr/ui/pull_to_refresh.dart';
@@ -87,48 +86,44 @@ class MessagesPage extends StatelessWidget {
             ? noInternet
                 ? const NoInternet()
                 : const Center(child: CircularProgressIndicator())
-            : LastFetchedOverlay(
-              lastFetched: state!.lastFetched,
-              noInternet: noInternet,
-              child: Stack(
-                children: <Widget>[
-                  AnimatedLinearProgressIndicator(
-                    show: state!.showMessage != null &&
-                        !state!.messages
-                            .any((m) => m.id == state!.showMessage),
-                  ),
-                  if (state!.messages.isEmpty)
-                    Center(
-                      child: Text(
-                        tr(context).messagesEmpty,
-                        style: Theme.of(context).textTheme.headlineMedium,
-                        textAlign: TextAlign.center,
-                      ),
+            : Stack(
+              children: <Widget>[
+                AnimatedLinearProgressIndicator(
+                  show: state!.showMessage != null &&
+                      !state!.messages
+                          .any((m) => m.id == state!.showMessage),
+                ),
+                if (state!.messages.isEmpty)
+                  Center(
+                    child: Text(
+                      tr(context).messagesEmpty,
+                      style: Theme.of(context).textTheme.headlineMedium,
+                      textAlign: TextAlign.center,
                     ),
-                  ListView.builder(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    padding: context.systemInsets,
-                    itemCount: state!.messages.length,
-                    itemBuilder: (context, i) {
-                      final altColor = Theme.of(context)
-                          .colorScheme
-                          .surfaceContainerHighest
-                          .withOpacity(0.75);
-                      return MessageWidget(
-                        message: state!.messages[i],
-                        onOpenFile: onOpenFile,
-                        onMarkAsRead: onMarkAsRead,
-                        onReply: onReply,
-                        signature: signature,
-                        onSignature: onSignature,
-                        noInternet: noInternet,
-                        expand: state!.messages[i].id == state!.showMessage,
-                        tileColor: i.isOdd ? altColor : null,
-                      );
-                    },
                   ),
-                ],
-              ),
+                ListView.builder(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: context.systemInsets,
+                  itemCount: state!.messages.length,
+                  itemBuilder: (context, i) {
+                    final altColor = Theme.of(context)
+                        .colorScheme
+                        .surfaceContainerHighest
+                        .withOpacity(0.75);
+                    return MessageWidget(
+                      message: state!.messages[i],
+                      onOpenFile: onOpenFile,
+                      onMarkAsRead: onMarkAsRead,
+                      onReply: onReply,
+                      signature: signature,
+                      onSignature: onSignature,
+                      noInternet: noInternet,
+                      expand: state!.messages[i].id == state!.showMessage,
+                      tileColor: i.isOdd ? altColor : null,
+                    );
+                  },
+                ),
+              ],
             ),
       ),
     );

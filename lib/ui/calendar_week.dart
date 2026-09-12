@@ -22,7 +22,6 @@ import 'package:dr/data.dart';
 import 'package:dr/providers/calendar_provider.dart';
 import 'package:dr/providers/subject_appearance_provider.dart';
 import 'package:dr/ui/calendar_grid.dart';
-import 'package:dr/ui/last_fetched_overlay.dart';
 import 'package:dr/ui/layout.dart';
 import 'package:dr/ui/no_internet.dart';
 import 'package:dr/utc_date_time.dart';
@@ -68,49 +67,45 @@ class CalendarWeek extends StatelessWidget {
             : vm.loading
                 ? const Center(child: CircularProgressIndicator())
                 : const _NoLessons()
-        : LastFetchedOverlay(
-            lastFetched: vm.days.first.lastFetched,
-            noInternet: vm.noInternet,
-            child: _fill(
-              context,
-              minHeight: headerHeight + grid.totalFlex * minSlotHeight,
-              child: Row(
-                children: <Widget>[
-                  if (vm.showTimes && grid.hasTimes) _TimeAxis(grid: grid),
-                  for (final d in vm.days)
-                    Expanded(
-                      child: CalendarDayWidget(
-                        calendarDay: d,
-                        grid: grid,
-                        // A day the dashboard never loaded has nothing
-                        // due — passing null would leave it undimmed and
-                        // make past days look like they carry work.
-                        onTap: vm.onDayTap,
-                        onAddReminder: vm.onAddReminder,
-                        onEntryTap: vm.onEntryTap,
-                        hasEntries: vm.daysWithEntries.contains(
-                          UtcDateTime(
-                              d.date.year, d.date.month, d.date.day),
-                        ),
-                        highlightedSubjects: vm.subjectsWithEntries == null
-                            ? null
-                            : vm.subjectsWithEntries![UtcDateTime(
-                                  d.date.year,
-                                  d.date.month,
-                                  d.date.day,
-                                )] ??
-                                const <String>{},
-                        subjectNicks: vm.subjectNicks,
-                        isSelected: vm.selection?.date == d.date,
-                        selectedHour: vm.selection?.date == d.date
-                            ? vm.selection?.hour
-                            : null,
-                        colorBackground: vm.colorBackground,
-                        subjectThemes: vm.subjectThemes,
+        : _fill(
+            context,
+            minHeight: headerHeight + grid.totalFlex * minSlotHeight,
+            child: Row(
+              children: <Widget>[
+                if (vm.showTimes && grid.hasTimes) _TimeAxis(grid: grid),
+                for (final d in vm.days)
+                  Expanded(
+                    child: CalendarDayWidget(
+                      calendarDay: d,
+                      grid: grid,
+                      // A day the dashboard never loaded has nothing
+                      // due — passing null would leave it undimmed and
+                      // make past days look like they carry work.
+                      onTap: vm.onDayTap,
+                      onAddReminder: vm.onAddReminder,
+                      onEntryTap: vm.onEntryTap,
+                      hasEntries: vm.daysWithEntries.contains(
+                        UtcDateTime(
+                            d.date.year, d.date.month, d.date.day),
                       ),
+                      highlightedSubjects: vm.subjectsWithEntries == null
+                          ? null
+                          : vm.subjectsWithEntries![UtcDateTime(
+                                d.date.year,
+                                d.date.month,
+                                d.date.day,
+                              )] ??
+                              const <String>{},
+                      subjectNicks: vm.subjectNicks,
+                      isSelected: vm.selection?.date == d.date,
+                      selectedHour: vm.selection?.date == d.date
+                          ? vm.selection?.hour
+                          : null,
+                      colorBackground: vm.colorBackground,
+                      subjectThemes: vm.subjectThemes,
                     ),
-                ],
-              ),
+                  ),
+              ],
             ),
           );
   }

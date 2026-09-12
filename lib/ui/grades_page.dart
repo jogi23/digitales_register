@@ -24,7 +24,6 @@ import 'package:dr/container/sorted_grades_container.dart';
 import 'package:dr/data.dart';
 import 'package:dr/ui/animated_linear_progress_indicator.dart';
 import 'package:dr/ui/connection_status_button.dart';
-import 'package:dr/ui/last_fetched_overlay.dart';
 import 'package:dr/ui/layout.dart';
 import 'package:dr/ui/no_internet.dart';
 import 'package:dr/l10n/l10n.dart';
@@ -85,42 +84,39 @@ class GradesPage extends StatelessWidget {
                 : Stack(
                     children: [
                       AnimatedLinearProgressIndicator(show: vm.loading),
-                      RawLastFetchedOverlay(
-                        message: vm.lastFetchedMessage,
-                        child: ListView(
-                          padding: context.systemInsets,
-                          children: <Widget>[
-                            if (vm.showGradesDiagram)
-                              const SizedBox(
-                                height: 150,
-                                width: 250,
-                                child: GradesChartContainer(isFullscreen: false),
+                      ListView(
+                        padding: context.systemInsets,
+                        children: <Widget>[
+                          if (vm.showGradesDiagram)
+                            const SizedBox(
+                              height: 150,
+                              width: 250,
+                              child: GradesChartContainer(isFullscreen: false),
+                            ),
+                          if (vm.showAllSubjectsAverage) ...[
+                            ListTile(
+                              title: Row(
+                                children: [
+                                  Text(
+                                    vm.gradingMode == GradingMode.stars
+                                        ? tr(context).gradesAverageStars
+                                        : tr(context).gradesAverageNumeric,
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.settings),
+                                    onPressed: showGradesSettings,
+                                  ),
+                                ],
                               ),
-                            if (vm.showAllSubjectsAverage) ...[
-                              ListTile(
-                                title: Row(
-                                  children: [
-                                    Text(
-                                      vm.gradingMode == GradingMode.stars
-                                          ? tr(context).gradesAverageStars
-                                          : tr(context).gradesAverageNumeric,
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(Icons.settings),
-                                      onPressed: showGradesSettings,
-                                    ),
-                                  ],
-                                ),
-                                trailing: Text(vm.allSubjectsAverage),
-                              ),
-                              const Divider(
-                                height: 0,
-                              ),
-                            ],
-                            SortedGradesContainer(),
-                            const SizedBox(height: 50),
+                              trailing: Text(vm.allSubjectsAverage),
+                            ),
+                            const Divider(
+                              height: 0,
+                            ),
                           ],
-                        ),
+                          SortedGradesContainer(),
+                          const SizedBox(height: 50),
+                        ],
                       ),
                     ],
                   ),

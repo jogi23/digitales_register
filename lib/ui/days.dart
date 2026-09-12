@@ -40,7 +40,6 @@ import 'package:dr/ui/dashboard_jump.dart';
 import 'package:dr/ui/dialog.dart';
 import 'package:dr/container/dashboard_week_container.dart';
 import 'package:dr/ui/dashboard_calendar.dart';
-import 'package:dr/ui/last_fetched_overlay.dart';
 import 'package:dr/ui/layout.dart';
 import 'package:dr/ui/no_internet.dart';
 import 'package:dr/ui/pull_to_refresh.dart';
@@ -335,7 +334,6 @@ class _DaysWidgetState extends State<DaysWidget> {
   Widget getItem(
     int n, {
     required bool isLast,
-    required bool showLastFetched,
   }) {
     if (n == 0) {
       return DashboardHeader(
@@ -357,13 +355,12 @@ class _DaysWidgetState extends State<DaysWidget> {
     return _buildDay(
       widget.vm.days[itemIndex],
       index: _dayStartIndices[itemIndex]!,
-      showLastFetched: showLastFetched,
     );
   }
 
   /// One day with all its entries — shared by the list and the calendar, so
   /// entries behave the same in both.
-  Widget _buildDay(Day day, {int index = 0, bool showLastFetched = false}) {
+  Widget _buildDay(Day day, {int index = 0}) {
     return DayWidget(
       day: day,
       vm: widget.vm,
@@ -377,7 +374,6 @@ class _DaysWidgetState extends State<DaysWidget> {
       colorBorders: widget.vm.colorBorders,
       colorTestsInRed: widget.vm.colorTestsInRed,
       subjectThemes: widget.vm.subjectThemes.toMap(),
-      showLastFetched: showLastFetched,
       gradeCompetences: widget.gradeCompetences,
     );
   }
@@ -459,46 +455,30 @@ class _DaysWidgetState extends State<DaysWidget> {
         ],
       );
     } else {
-      UtcDateTime? lastFetched;
-      // If not all days were fetched at the same time we want to show a string
-      // for each day individually.
-      bool daysShouldShowLastFetched = false;
-      if (widget.vm.days.first.lastRequested ==
-          widget.vm.days.last.lastRequested) {
-        lastFetched = widget.vm.days.first.lastRequested;
-      } else {
-        daysShouldShowLastFetched = true;
-      }
-      body = LastFetchedOverlay(
-        noInternet: widget.vm.noInternet,
-        lastFetched: lastFetched,
-        child: widget.vm.viewMode != DashboardViewMode.list
-            ? Padding(
-                // These views fill the height instead of scrolling, so the
-                // system navigation bar would sit on top of the last row.
-                padding: context.systemInsets,
-                child: Column(
-                  // No past/future switch here: both directions are loaded,
-                  // and these views navigate by month and week instead.
-                  children: <Widget>[Expanded(child: _calendarBody())],
-                ),
-              )
-            : ListView.builder(
-          physics: const AlwaysScrollableScrollPhysics(),
-          controller: controller,
-          padding: context.systemInsets,
-          // Times two for the divider, minus one because there's no divider after the last item.
-          // The first item is the DashboardHeader, the last one a SizedBox (a spacer).
-          itemCount: (widget.vm.days.length * 2 - 1) + 2,
-          itemBuilder: (context, n) {
-            return getItem(
-              n,
-              isLast: n == (widget.vm.days.length * 2 - 1) + 1,
-              showLastFetched:
-                  widget.vm.noInternet && daysShouldShowLastFetched,
-            );
-          },
-        ),
+      body = widget.vm.viewMode != DashboardViewMode.list
+          ? Padding(
+              // These views fill the height instead of scrolling, so the
+              // system navigation bar would sit on top of the last row.
+              padding: context.systemInsets,
+              child: Column(
+                // No past/future switch here: both directions are loaded,
+                // and these views navigate by month and week instead.
+                children: <Widget>[Expanded(child: _calendarBody())],
+              ),
+            )
+          : ListView.builder(
+        physics: const AlwaysScrollableScrollPhysics(),
+        controller: controller,
+        padding: context.systemInsets,
+        // Times two for the divider, minus one because there's no divider after the last item.
+        // The first item is the DashboardHeader, the last one a SizedBox (a spacer).
+        itemCount: (widget.vm.days.length * 2 - 1) + 2,
+        itemBuilder: (context, n) {
+          return getItem(
+            n,
+            isLast: n == (widget.vm.days.length * 2 - 1) + 1,
+          );
+        },
       );
       body = Stack(
         children: [
@@ -667,8 +647,6 @@ class DayWidget extends StatelessWidget {
   final AutoScrollController controller;
   final int index;
 
-  final bool showLastFetched;
-
   const DayWidget({
     super.key,
     required this.day,
@@ -684,7 +662,6 @@ class DayWidget extends StatelessWidget {
     required this.subjectThemes,
     required this.colorTestsInRed,
     required this.gradeCompetences,
-    required this.showLastFetched,
   });
 
 
@@ -707,11 +684,6 @@ class DayWidget extends StatelessWidget {
                       day.displayName,
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
-                    if (showLastFetched)
-                      Text(
-                        "Zuletzt synchronisiert ${formatTimeAgo(day.lastRequested)}.",
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
                   ],
                 ),
               ),

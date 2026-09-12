@@ -14,7 +14,7 @@
         {
           "title": "Verbesserungen",
           "items": [
-            "Die Verbindungsanzeige in der Titelzeile ist jetzt immer eine Wolke, deren Form und Farbe den Zustand zeigt: verbunden, noch nichts geladen, veraltet, wird aufgebaut, kein Netz oder Sitzung abgelaufen. Ohne Netz erscheint zusätzlich für zwei Sekunden eine kurze Meldung.",
+            "Die Verbindungsanzeige in der Titelzeile ist jetzt immer eine Wolke, deren Form und Farbe den Zustand zeigt: verbunden, noch nichts geladen, veraltet, wird aufgebaut, kein Netz oder Sitzung abgelaufen. Ohne Netz erscheint zusätzlich für zwei Sekunden eine kurze Meldung. Der dauerhafte Hinweis „Offline-Modus aktiv …“ unten auf den Seiten entfällt.",
             "Querformat: das Merkheft stellt Monatsraster und Tagesansicht nebeneinander, statt beides übereinander zu quetschen.",
             "Querformat: Seitenüberschrift, Kopfzeilen und Abstände fallen kleiner aus, damit mehr vom Inhalt bleibt.",
             "Querformat: auf dem Handy bleibt die Seitenleiste eingeklappt, statt ein Drittel der Breite zu belegen.",

@@ -43,7 +43,6 @@ class NotificationPageContainer extends ConsumerWidget {
         notifier.delete(notification);
         ref.read(appRouterProvider).revealGrade(notification.objectId!);
       },
-      lastFetched: state.lastFetched,
     );
   }
 }

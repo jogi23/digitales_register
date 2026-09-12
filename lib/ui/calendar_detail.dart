@@ -22,7 +22,6 @@ import 'package:dr/container/calendar_detail_container.dart';
 import 'package:dr/data.dart';
 import 'package:dr/providers/calendar_provider.dart';
 import 'package:dr/ui/calendar_week.dart';
-import 'package:dr/ui/last_fetched_overlay.dart';
 import 'package:dr/ui/layout.dart';
 import 'package:dr/ui/no_internet.dart';
 import 'package:dr/utc_date_time.dart';
@@ -279,13 +278,6 @@ class CalendarDetailWrapper extends StatelessWidget {
         day: day!,
         targetHour: targetHour,
         noInternet: noInternet,
-      );
-    }
-    if (day != null && !isSidebar) {
-      child = LastFetchedOverlay(
-        noInternet: noInternet,
-        lastFetched: day!.lastFetched,
-        child: child,
       );
     }
     return AnimatedSwitcher(

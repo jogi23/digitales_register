@@ -188,24 +188,6 @@ class _SubjectWidgetState extends State<SubjectWidget> {
     super.didUpdateWidget(oldWidget);
   }
 
-  Widget? _lastFetchedMessage() {
-    if (closed || !widget.noInternet) {
-      return null;
-    }
-    final formatted = formatTimeAgoPerSemester(
-      noInternet: widget.noInternet,
-      lastFetched: widget.subject.lastFetchedDetailed,
-      semester: widget.semester,
-    );
-    if (formatted == null) {
-      return null;
-    }
-    return Text(
-      "$formatted.",
-      style: Theme.of(context).textTheme.bodySmall,
-    );
-  }
-
   /// "17 Bewertungen · 18 Kompetenzen · 2 Beobachtungen", leaving out what a
   /// subject does not have. Null while nothing has been fetched yet.
   ///
@@ -229,17 +211,6 @@ class _SubjectWidgetState extends State<SubjectWidget> {
   static String? _plural(int count, String one, String many) {
     if (count == 0) return null;
     return "$count ${count == 1 ? one : many}";
-  }
-
-  Widget? _subtitle() {
-    final counts = _countsMessage();
-    final lastFetched = _lastFetchedMessage();
-    if (counts == null || lastFetched == null) return counts ?? lastFetched;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [counts, lastFetched],
-    );
   }
 
   @override
@@ -275,7 +246,7 @@ class _SubjectWidgetState extends State<SubjectWidget> {
             ],
           ),
         ),
-        subtitle: _subtitle(),
+        subtitle: _countsMessage(),
         trailing:
             widget.noInternet && entries == null ? const SizedBox() : null,
         onExpansionChanged: (expansion) {
