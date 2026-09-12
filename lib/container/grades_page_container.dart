@@ -26,7 +26,6 @@ import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/services/app_router.dart';
 import 'package:dr/ui/grades_page.dart';
-import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

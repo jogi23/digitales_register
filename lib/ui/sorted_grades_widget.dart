@@ -17,7 +17,6 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:dr/app_state.dart';
-import 'package:dr/container/grades_page_container.dart';
 import 'package:dr/container/sorted_grades_container.dart';
 import 'package:dr/data.dart';
 import 'package:dr/services/app_router.dart';
