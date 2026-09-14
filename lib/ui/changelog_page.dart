@@ -59,7 +59,8 @@ class _ChangelogPageState extends State<ChangelogPage> {
           }
           final previousSeen = notes.previousSeen;
           return ListView.builder(
-            padding: context.systemInsets + const EdgeInsets.only(top: 8, bottom: 24),
+            padding: context.systemInsets +
+                const EdgeInsets.only(top: 8, bottom: 24),
             itemCount: entries.length,
             itemBuilder: (context, index) => _Release(
               entry: entries[index],
@@ -94,13 +95,22 @@ class _Release extends StatelessWidget {
     return DateFormat.yMMMMd(tr(context).localeName).format(parsed);
   }
 
-  /// The four headings the notes are written under. Anything else — a
-  /// heading added later — gets the neutral one.
+  /// The four headings the notes are written under, in each language they
+  /// ship in. Anything else — a heading added later — gets the neutral one.
   static IconData _iconFor(String title) => switch (title) {
-        'Neue Funktionen' => Icons.auto_awesome_outlined,
-        'Verbesserungen' => Icons.trending_up,
-        'Fehlerbehebungen' => Icons.bug_report_outlined,
-        'Intern' => Icons.build_outlined,
+        'Neue Funktionen' ||
+        'New features' ||
+        'Nuove funzioni' =>
+          Icons.auto_awesome_outlined,
+        'Verbesserungen' ||
+        'Improvements' ||
+        'Miglioramenti' =>
+          Icons.trending_up,
+        'Fehlerbehebungen' ||
+        'Bug fixes' ||
+        'Correzioni' =>
+          Icons.bug_report_outlined,
+        'Intern' || 'Internal' || 'Interno' => Icons.build_outlined,
         _ => Icons.label_outline,
       };
 

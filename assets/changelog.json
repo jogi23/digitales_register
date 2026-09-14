@@ -41,6 +41,86 @@
             "Benachrichtigungen: eine gelesene Mitteilung nimmt keine Benachrichtigung zu einer Bewertung mehr mit, die zufällig dieselbe Nummer trägt."
           ]
         }
+      ],
+      "en": [
+        {
+          "title": "New features",
+          "items": [
+            "Every page shows in the title bar whether the app is currently talking to the server. A missing network and an expired session are told apart; tapping it reconnects or signs in again.",
+            "If the last update was a while ago, its time appears in the title bar instead of old data looking fresh.",
+            "Messages: anything still waiting for an answer is marked right in the list — “Confirmation pending” for signing with your name, “Consent pending” for agreeing or disagreeing.",
+            "Settings → Sign-in: if you like, the app stays on the open page when switching between accounts instead of returning to Homework every time. The setting applies to all accounts; without it everything stays as before.",
+            "Class log: two new layouts under Settings → Class log — cards with lesson, time, subject, entry and teacher, or a timeline on which past lessons are filled in green. The timeline is available when arranged by day.",
+            "The Homework page, Absences and Grades can also be shown as cards instead of a list. The Homework page has its own settings for this and, on first start, takes over the arrangement that used to apply to both pages.",
+            "Settings → Appearance: “Accent-coloured background” can be switched off. Every page is then white, or dark in dark mode; buttons, headings and markers keep the accent colour. By default the background stays as before."
+          ]
+        },
+        {
+          "title": "Improvements",
+          "items": [
+            "The connection indicator in the title bar is now always a cloud whose shape and colour show the state: connected, nothing loaded yet, out of date, connecting, no network or session expired. Without a network a short message also appears for two seconds. The permanent “Offline mode active …” notice at the bottom of the pages is gone.",
+            "Landscape: Homework shows the month grid and the day view side by side instead of squeezing them on top of each other.",
+            "Landscape: page title, headers and spacing are smaller so more of the content fits.",
+            "Landscape: on phones the sidebar stays collapsed instead of taking up a third of the width.",
+            "Messages: messages you sent yourself are labelled “Sent” in the list, so they can be told apart from received ones.",
+            "Messages: the confirm button sits in a separate full-width area and, while it is grey, says that the name is still missing.",
+            "Calendar week view: the subject is the same size in every tile, teachers in italics, at most three lines and with space to the edge; the classroom is only shown in the detail view.",
+            "Notifications: tapping a notification opens the message or grade. The tick on the right marks it as read without opening it — for messages the message itself then counts as read too.",
+            "Class log and Homework page: every second row in the list is shaded so long entries do not run into each other. Each day starts with a coloured band; its heading stays at the top while scrolling until the next day replaces it."
+          ]
+        },
+        {
+          "title": "Bug fixes",
+          "items": [
+            "Pull to refresh works on every page with data from the server — Homework in every view and even when empty, Calendar, Grades, Absences, Report card, Messages, Class log, the Homework page, Course materials, Notifications and Profile. The spinner stays until the data has arrived; without a connection it is restored first.",
+            "Homework: the week and month views also show past entries without first having to tap on the past in the list view.",
+            "Homework: the “New entries” button in the week and month views leads to the day of the entry instead of doing nothing. A day you leave again counts as seen; once nothing new is left, the button disappears.",
+            "Landscape: content no longer sits under the device's navigation bar, which is on the right edge there.",
+            "Landscape: the timetable in Calendar and Homework scrolls instead of squeezing the lessons until they are unreadable.",
+            "In the demo account the connection indicator shows the connection as established instead of permanently “Nothing loaded yet”.",
+            "Notifications: reading a message no longer removes a notification about a grade that happens to carry the same number."
+          ]
+        }
+      ],
+      "it": [
+        {
+          "title": "Nuove funzioni",
+          "items": [
+            "Ogni pagina mostra nella barra del titolo se l'app sta comunicando con il server. Rete assente e sessione scaduta sono distinte; toccandola si ristabilisce la connessione o si accede di nuovo.",
+            "Se l'ultimo aggiornamento risale a un po' di tempo fa, la sua ora compare nella barra del titolo, invece di far sembrare recenti dati vecchi.",
+            "Comunicazioni: ciò che richiede ancora una risposta è segnalato già nell'elenco — «Conferma in sospeso» per la firma con il nome, «Consenso in sospeso» per accettare o rifiutare.",
+            "Impostazioni → Accesso: a scelta, al cambio di account l'app resta sulla pagina aperta invece di tornare ogni volta all'Agenda. L'impostazione vale per tutti gli account; senza di essa tutto resta come prima.",
+            "Registro di classe: due nuove visualizzazioni in Impostazioni → Registro di classe — schede con ora di lezione, orario, materia, voce e docente, oppure una linea del tempo in cui le ore già passate sono riempite di verde. La linea del tempo è disponibile con la disposizione per giorni.",
+            "Anche Compiti, Assenze e Valutazioni si possono mostrare come schede invece che come elenco. Compiti ha impostazioni proprie e al primo avvio riprende la disposizione che finora valeva per entrambe le pagine.",
+            "Impostazioni → Aspetto: «Sfondo nel colore d'accento» si può disattivare. Tutte le pagine diventano allora bianche, scure in modalità scura; pulsanti, titoli ed evidenziazioni mantengono il colore principale. Per impostazione predefinita lo sfondo resta come prima."
+          ]
+        },
+        {
+          "title": "Miglioramenti",
+          "items": [
+            "L'indicatore di connessione nella barra del titolo è ora sempre una nuvola, la cui forma e il cui colore mostrano lo stato: connesso, nessun dato caricato, non aggiornato, connessione in corso, nessuna rete o sessione scaduta. Senza rete compare inoltre per due secondi un breve messaggio. L'avviso permanente «Modalità offline attiva …» in fondo alle pagine non c'è più.",
+            "Orizzontale: l'Agenda mostra griglia mensile e vista del giorno affiancate, invece di schiacciarle una sopra l'altra.",
+            "Orizzontale: titolo della pagina, intestazioni e spaziature sono più piccoli, così resta più spazio per il contenuto.",
+            "Orizzontale: sul telefono la barra laterale resta chiusa invece di occupare un terzo della larghezza.",
+            "Comunicazioni: le comunicazioni inviate da te sono contrassegnate nell'elenco come «Inviata» e si distinguono così da quelle ricevute.",
+            "Comunicazioni: il pulsante per confermare si trova in un'area separata a tutta larghezza e, finché è grigio, indica che manca ancora il nome.",
+            "Vista settimanale del calendario: la materia ha la stessa dimensione in ogni riquadro, i docenti in corsivo, al massimo tre righe e con distanza dal bordo; l'aula compare solo nella vista dettagliata.",
+            "Notifiche: toccando una notifica si apre la comunicazione o la valutazione. La spunta a destra la segna come letta senza aprirla — per le comunicazioni risulta letta anche la comunicazione stessa.",
+            "Registro di classe e Compiti: nell'elenco una riga sì e una no è colorata, così le voci lunghe non si confondono. Ogni giorno inizia con una fascia colorata; il suo titolo resta in alto durante lo scorrimento finché non lo sostituisce il giorno successivo."
+          ]
+        },
+        {
+          "title": "Correzioni",
+          "items": [
+            "Trascina per aggiornare funziona su tutte le pagine con dati dal server — Agenda in ogni vista e anche vuota, Calendario, Valutazioni, Assenze, Pagella, Comunicazioni, Registro di classe, Compiti, Materiali didattici, Notifiche e Profilo. L'indicatore di caricamento resta finché i dati non sono arrivati; senza connessione questa viene prima ristabilita.",
+            "Agenda: le viste settimanale e mensile mostrano anche le voci passate, senza dover prima toccare il passato nella vista a elenco.",
+            "Agenda: il pulsante «Nuove voci» nelle viste settimanale e mensile porta al giorno della voce invece di non fare nulla. Un giorno che si lascia conta come visto; quando non resta nulla di nuovo, il pulsante scompare.",
+            "Orizzontale: i contenuti non finiscono più sotto la barra di navigazione del dispositivo, che lì si trova sul bordo destro.",
+            "Orizzontale: l'orario in Calendario e Agenda scorre, invece di comprimere le ore fino a renderle illeggibili.",
+            "Nell'account demo l'indicatore di connessione mostra la connessione come stabilita, invece di «Nessun dato caricato» in modo permanente.",
+            "Notifiche: una comunicazione letta non rimuove più una notifica su una valutazione che per caso ha lo stesso numero."
+          ]
+        }
       ]
     }
   },
@@ -94,6 +174,106 @@
             "Jede Änderung wird vor dem Zusammenführen automatisch geprüft: Codeanalyse und alle Tests",
             "iOS wird unsigniert auf einem macOS-Runner mitgebaut",
             "Zeilenenden im Projekt vereinheitlicht und per .gitattributes festgehalten"
+          ]
+        }
+      ],
+      "en": [
+        {
+          "title": "New features",
+          "items": [
+            "The app speaks Italian and English. The language can be chosen in the settings; without a choice of your own it follows the device.",
+            "Class log: all lesson entries on a page of their own, by day or by subject",
+            "Class log: filter subjects with chips; the selection applies per account",
+            "Homework page: assignments and tests in one overview instead of only in the individual lesson",
+            "Course materials: topics per subject with files, links and texts; files end up in the usual folder like any other attachment"
+          ]
+        },
+        {
+          "title": "Improvements",
+          "items": [
+            "A link that reaches the app while it is already open jumps straight to the right page instead of reloading the app",
+            "Grades give visible feedback again when tapped",
+            "The app is about 39 MB smaller: the splash screen image was in the package ten times",
+            "“Share the app” is now in the menu under “About this app” instead of at the top of the settings",
+            "The account is reachable via the avatar in the title bar; the second entry at the top of the menu is gone",
+            "Homework has the same name in its heading as in the menu",
+            "The calendar week in Homework is shown in the accent colour, the selected week is also highlighted",
+            "The network log in the diagnostics records the time and the reason for failure of every request",
+            "The list of changes marks with “(new)” what came with the last update",
+            "The name a message was signed with is already in the field next time"
+          ]
+        },
+        {
+          "title": "Bug fixes",
+          "items": [
+            "An opened link no longer deletes the saved sign-in details of the account in use",
+            "Signing in to a second account keeps the first one",
+            "The app stays visible when a link brings it back from the background",
+            "Homework: the bottom row of the calendar views no longer sits under the device's navigation bar",
+            "Homework: tapping a week that is still loading no longer discards the selection",
+            "A key store that can no longer be read is reported and cleared again instead of letting sign-in fail silently",
+            "Overlooked German texts in messages and services, and a wrong quotation mark, translated",
+            "A confirmation that does not reach the server is reported as such instead of silently locking the button"
+          ]
+        },
+        {
+          "title": "Internal",
+          "items": [
+            "Flutter raised to 3.47.2 and the Android build plugin to 9.1.0; this removes the outdated calls for edge-to-edge display on Android 15 and newer",
+            "Two add-on packages that are no longer maintained replaced by their successors",
+            "Every change is checked automatically before merging: code analysis and all tests",
+            "iOS is also built, unsigned, on a macOS runner",
+            "Line endings unified across the project and fixed in .gitattributes"
+          ]
+        }
+      ],
+      "it": [
+        {
+          "title": "Nuove funzioni",
+          "items": [
+            "L'app parla italiano e inglese. La lingua si sceglie nelle impostazioni; senza una scelta propria segue il dispositivo.",
+            "Registro di classe: tutte le voci delle lezioni in una pagina propria, per giorni o per materia",
+            "Registro di classe: filtrare le materie con i chip; la selezione vale per ogni account",
+            "Compiti: compiti e verifiche in un'unica panoramica, invece che solo nella singola ora di lezione",
+            "Materiali didattici: argomenti per materia con file, link e testi; i file finiscono nella solita cartella come ogni altro allegato"
+          ]
+        },
+        {
+          "title": "Miglioramenti",
+          "items": [
+            "Un link che raggiunge l'app già aperta porta direttamente alla pagina desiderata invece di ricaricare l'app",
+            "Le valutazioni danno di nuovo un riscontro visibile quando si toccano",
+            "L'app è più leggera di circa 39 MB: l'immagine della schermata iniziale era nel pacchetto dieci volte",
+            "«Condividi l'app» si trova ora nel menu sotto «Informazioni sull'app» invece che in cima alle impostazioni",
+            "L'account si raggiunge dall'avatar nella barra del titolo; il secondo accesso in cima al menu non c'è più",
+            "L'Agenda ha nel titolo lo stesso nome del menu",
+            "La settimana del calendario nell'Agenda è nel colore principale, la settimana selezionata è anche evidenziata",
+            "Il registro di rete nella diagnostica annota ora e motivo dell'errore di ogni richiesta",
+            "L'elenco delle novità contrassegna con «(nuovo)» ciò che è arrivato con l'ultimo aggiornamento",
+            "Il nome con cui è stata firmata una comunicazione è già nel campo la volta successiva"
+          ]
+        },
+        {
+          "title": "Correzioni",
+          "items": [
+            "Un link aperto non cancella più i dati di accesso salvati dell'account in uso",
+            "Accedendo a un secondo account, il primo resta",
+            "L'app resta visibile quando un link la riporta dal background",
+            "Agenda: l'ultima riga delle viste a calendario non finisce più sotto la barra di navigazione del dispositivo",
+            "Agenda: toccare una settimana ancora in caricamento non annulla più la selezione",
+            "Un archivio delle chiavi non più leggibile viene di nuovo segnalato e svuotato, invece di far fallire l'accesso senza avviso",
+            "Tradotti testi tedeschi rimasti in messaggi e servizi, oltre a una virgoletta sbagliata",
+            "Una conferma che non raggiunge il server viene segnalata come tale, invece di bloccare il pulsante senza avviso"
+          ]
+        },
+        {
+          "title": "Interno",
+          "items": [
+            "Flutter aggiornato alla 3.47.2 e il plugin di build Android alla 9.1.0; spariscono così le chiamate obsolete per la visualizzazione a tutto schermo su Android 15 e successivi",
+            "Due pacchetti aggiuntivi non più mantenuti sostituiti dai loro successori",
+            "Ogni modifica viene controllata automaticamente prima dell'unione: analisi del codice e tutti i test",
+            "iOS viene compilato anche, senza firma, su un runner macOS",
+            "Fine riga uniformati nel progetto e fissati in .gitattributes"
           ]
         }
       ]
@@ -157,6 +337,118 @@
             "Diagramm von charts_flutter auf fl_chart umgestellt; die aufgegebene Bibliothek liegt nicht mehr im Projekt"
           ]
         }
+      ],
+      "en": [
+        {
+          "title": "New features",
+          "items": [
+            "Messages that ask for a confirmation can be accepted in the app and signed with your own name",
+            "Grades: a detail page of their own with the comment on each competence, who entered it and the date from which the grade was visible",
+            "Grades: number of entries, competences and observations per subject in the overview",
+            "Star colour selectable in the settings, with one shade each for light and dark mode",
+            "Account reachable in the settings and via the name in the menu",
+            "These changes appear in Homework right after an update",
+            "Homework: two calendar views next to the list — month calendar and weekly timetable",
+            "Homework: the calendar views load past and future weeks as needed; a button jumps to the current week",
+            "Homework: subject colours, today highlighted and calendar weeks in the new views",
+            "Homework: the day header lists the day's entries; a day can be opened full screen",
+            "Calendar: the time of each lesson, breaks are shown as such",
+            "“Share the app” in the settings and “Rate on Google Play” in the menu"
+          ]
+        },
+        {
+          "title": "Improvements",
+          "items": [
+            "The app starts in the account used last without asking",
+            "The account card slides in from the top instead of the bottom — it belongs to the avatar in the title bar",
+            "The average follows the subject name and is left out while nothing has been graded",
+            "Settings for appearance, subjects, Homework and grades apply to all accounts",
+            "Grades: grouped entries are recognisable as a sub-level of the subject",
+            "Grades: competence stars are always below their name",
+            "A lesson with homework opens its day; headings in Homework are highlighted",
+            "After repeated use the app asks once for a rating in the store",
+            "Text on coloured areas follows the actual contrast instead of a fixed rule"
+          ]
+        },
+        {
+          "title": "Bug fixes",
+          "items": [
+            "An account without a saved state no longer takes over the settings of the account used before",
+            "The stars in Homework and in Grades have the same colour again",
+            "Homework: entries in the weekly timetable are visible and can be created there",
+            "Homework: the day view follows changes to the entries",
+            "Homework: the colour follows the entries, the reminder comes from the selected week",
+            "Homework: greying out in dark mode and the hint on empty days corrected",
+            "Homework: it now says so when the server returns nothing for the period",
+            "Calendar: an empty week can be told apart from one that is loading",
+            "Calendar: the lunch break also appears when the same subject continues",
+            "Accounts: the initials come from the name instead of the student number",
+            "Accounts: the tick for confirming the alias is clearly visible",
+            "The menu opened by itself after returning from a menu page"
+          ]
+        },
+        {
+          "title": "Internal",
+          "items": [
+            "Chart switched from charts_flutter to fl_chart; the abandoned library is no longer part of the project"
+          ]
+        }
+      ],
+      "it": [
+        {
+          "title": "Nuove funzioni",
+          "items": [
+            "Le comunicazioni che richiedono una conferma si possono accettare nell'app e firmare con il proprio nome",
+            "Valutazioni: una pagina di dettaglio propria con il commento a ogni competenza, chi l'ha inserita e la data da cui la valutazione era visibile",
+            "Valutazioni: numero di voci, competenze e osservazioni per materia nella panoramica",
+            "Colore delle stelle selezionabile nelle impostazioni, con una tonalità per la modalità chiara e una per quella scura",
+            "Account raggiungibile nelle impostazioni e dal nome nel menu",
+            "Queste novità compaiono nell'Agenda subito dopo un aggiornamento",
+            "Agenda: due viste a calendario accanto all'elenco — calendario mensile e orario settimanale",
+            "Agenda: le viste a calendario caricano passato e futuro man mano; un pulsante porta alla settimana corrente",
+            "Agenda: colori delle materie, giorno di oggi evidenziato e settimane del calendario nelle nuove viste",
+            "Agenda: l'intestazione del giorno elenca le voci del giorno; un giorno si può aprire a schermo intero",
+            "Calendario: orario di ogni ora di lezione, le pause sono riconoscibili come tali",
+            "«Condividi l'app» nelle impostazioni e «Valuta su Google Play» nel menu"
+          ]
+        },
+        {
+          "title": "Miglioramenti",
+          "items": [
+            "L'app si avvia senza chiedere nell'account usato per ultimo",
+            "La scheda degli account scende dall'alto invece di salire dal basso — appartiene all'avatar nella barra del titolo",
+            "La media segue il nome della materia e manca finché non c'è nessuna valutazione",
+            "Le impostazioni di aspetto, materie, Agenda e voti valgono per tutti gli account",
+            "Valutazioni: le voci raggruppate sono riconoscibili come sottolivello della materia",
+            "Valutazioni: le stelle delle competenze stanno sempre sotto il loro nome",
+            "Un'ora di lezione con compiti apre il giorno corrispondente; i titoli nell'Agenda sono evidenziati",
+            "Dopo un uso ripetuto l'app chiede una volta una recensione nello store",
+            "Il testo su superfici colorate segue il contrasto effettivo invece di una regola fissa"
+          ]
+        },
+        {
+          "title": "Correzioni",
+          "items": [
+            "Un account senza stato salvato non riprende più le impostazioni dell'account usato in precedenza",
+            "Le stelle nell'Agenda e nelle Valutazioni hanno di nuovo lo stesso colore",
+            "Agenda: le voci nell'orario settimanale sono visibili e vi si possono creare",
+            "Agenda: la vista del giorno segue le modifiche alle voci",
+            "Agenda: il colore segue le voci, il promemoria viene dalla settimana selezionata",
+            "Agenda: corretti l'ingrigimento in modalità scura e l'avviso nei giorni vuoti",
+            "Agenda: ora viene indicato quando il server non restituisce nulla per il periodo",
+            "Calendario: una settimana vuota si distingue dal caricamento",
+            "Calendario: la pausa pranzo compare anche quando la materia continua",
+            "Account: le iniziali derivano dal nome invece che dal numero di matricola",
+            "Account: la spunta per confermare il nome breve è ben visibile",
+            "Il menu si apriva da solo dopo essere tornati da una pagina del menu"
+          ]
+        },
+        {
+          "title": "Interno",
+          "items": [
+            "Grafico passato da charts_flutter a fl_chart; la libreria abbandonata non fa più parte del progetto"
+          ]
+        }
       ]
     }
   },
@@ -186,6 +478,58 @@
           "items": [
             "Der Kalender springt beim Öffnen nicht mehr auf die aktuelle Woche zurück, sondern bleibt auf der zuletzt angesehenen",
             "Die Tagesliste springt nicht mehr an den Anfang, wenn im Hintergrund aktualisiert wird"
+          ]
+        }
+      ],
+      "en": [
+        {
+          "title": "New features",
+          "items": [
+            "Demo mode in every version, not only in test builds: try the app with sample data before signing in",
+            "New “Help and feedback” section in the menu with frequently asked questions, a form for bugs and wishes, and contact by email",
+            "A page of its own for subject short names and colours"
+          ]
+        },
+        {
+          "title": "Improvements",
+          "items": [
+            "Short names and colours apply app-wide and are kept even when an account is deleted",
+            "New subjects get colours that clearly differ from the ones already assigned",
+            "Dark mode: subject colours on cards and in calendar cells are stronger",
+            "Settings simplified: “Store data locally” and “Delete data on sign-out” are gone — data is always cached and deleted automatically on sign-out"
+          ]
+        },
+        {
+          "title": "Bug fixes",
+          "items": [
+            "The calendar no longer jumps back to the current week when opened but stays on the week viewed last",
+            "The day list no longer jumps to the top when it updates in the background"
+          ]
+        }
+      ],
+      "it": [
+        {
+          "title": "Nuove funzioni",
+          "items": [
+            "Modalità demo in tutte le versioni, non solo in quelle di prova: prova l'app con dati di esempio prima di accedere",
+            "Nuova sezione «Aiuto e feedback» nel menu con domande frequenti, un modulo per errori e richieste e contatto via email",
+            "Una pagina propria per sigle e colori delle materie"
+          ]
+        },
+        {
+          "title": "Miglioramenti",
+          "items": [
+            "Sigle e colori valgono in tutta l'app e restano anche quando un account viene eliminato",
+            "Le nuove materie ricevono colori ben distinti da quelli già assegnati",
+            "Modalità scura: colori delle materie più intensi su schede e celle del calendario",
+            "Impostazioni semplificate: «Salva i dati in locale» e «Cancella i dati all'uscita» non ci sono più — i dati vengono sempre salvati in cache e cancellati automaticamente all'uscita"
+          ]
+        },
+        {
+          "title": "Correzioni",
+          "items": [
+            "Il calendario all'apertura non torna più alla settimana corrente, ma resta sull'ultima visualizzata",
+            "L'elenco dei giorni non torna più all'inizio quando si aggiorna in background"
           ]
         }
       ]
@@ -222,6 +566,64 @@
             "Ein Konto erschien beim Start doppelt"
           ]
         }
+      ],
+      "en": [
+        {
+          "title": "New features",
+          "items": [
+            "Demo account with anonymised data for every section",
+            "Splash screen with logo animation",
+            "The list of schools is loaded from a file of its own"
+          ]
+        },
+        {
+          "title": "Improvements",
+          "items": [
+            "Absences: clear rows with status symbols and alternating backgrounds",
+            "Grades: alternating colours, highlighted headings and star ratings for primary schools",
+            "Report card: two columns and scrollable sideways",
+            "Messages: better contrast"
+          ]
+        },
+        {
+          "title": "Bug fixes",
+          "items": [
+            "The three-button navigation bar no longer covers content",
+            "“No grade” is shown correctly again",
+            "Notifications about grades lead to the right entry",
+            "Profile photos are loaded at startup",
+            "An account appeared twice at startup"
+          ]
+        }
+      ],
+      "it": [
+        {
+          "title": "Nuove funzioni",
+          "items": [
+            "Account demo con dati anonimizzati per tutte le sezioni",
+            "Schermata iniziale con animazione del logo",
+            "L'elenco delle scuole viene caricato da un file proprio"
+          ]
+        },
+        {
+          "title": "Miglioramenti",
+          "items": [
+            "Assenze: righe chiare con simboli di stato e sfondi alternati",
+            "Valutazioni: colori alternati, titoli evidenziati e valutazione a stelle per le scuole primarie",
+            "Pagella: su due colonne e scorrevole lateralmente",
+            "Comunicazioni: contrasto migliore"
+          ]
+        },
+        {
+          "title": "Correzioni",
+          "items": [
+            "La barra di navigazione a tre pulsanti non copre più i contenuti",
+            "«Senza voto» viene di nuovo mostrato correttamente",
+            "Le notifiche sulle valutazioni portano alla voce giusta",
+            "Le foto del profilo vengono caricate all'avvio",
+            "Un account compariva due volte all'avvio"
+          ]
+        }
       ]
     }
   },
@@ -245,6 +647,46 @@
             "Das Menü öffnet sich von überall, per Wischen wie über die Schaltfläche",
             "Beim Kontowechsel blitzte der Startbildschirm auf",
             "„Über diese App“: der Link zum Digitalen Register lässt sich antippen"
+          ]
+        }
+      ],
+      "en": [
+        {
+          "title": "New features",
+          "items": [
+            "Profile photo and account management: an avatar in every title bar with initials or photo, plus a card for setting photo and alias and for switching and adding accounts",
+            "Homework is kept across restarts, even without an internet connection",
+            "A notification about a grade leads straight to the subject and expands the entry"
+          ]
+        },
+        {
+          "title": "Bug fixes",
+          "items": [
+            "Without a connection the app shows the saved data instead of an empty screen and explains the missing connection clearly",
+            "The splash screen appeared as a narrow strip and now fills the whole screen",
+            "The menu opens from anywhere, by swiping or with the button",
+            "The splash screen flashed when switching accounts",
+            "“About this app”: the link to the Digital Register can be tapped"
+          ]
+        }
+      ],
+      "it": [
+        {
+          "title": "Nuove funzioni",
+          "items": [
+            "Foto del profilo e gestione degli account: avatar in ogni barra del titolo con iniziali o foto, più una scheda per impostare foto e nome breve e per cambiare e aggiungere account",
+            "L'Agenda resta disponibile dopo un riavvio, anche senza connessione a internet",
+            "Una notifica su una valutazione porta direttamente alla materia e apre la voce"
+          ]
+        },
+        {
+          "title": "Correzioni",
+          "items": [
+            "Senza connessione l'app mostra i dati salvati invece di una schermata vuota e segnala in modo comprensibile la connessione mancante",
+            "La schermata iniziale compariva come una striscia sottile e ora riempie tutto lo schermo",
+            "Il menu si apre da ovunque, con uno scorrimento o con il pulsante",
+            "Al cambio di account la schermata iniziale lampeggiava",
+            "«Informazioni sull'app»: il link al Registro Elettronico si può toccare"
           ]
         }
       ]
@@ -275,6 +717,52 @@
             "Leistungsmessung von Sentry abgeschaltet, iOS-Modus und ungenutzte Dateien entfernt"
           ]
         }
+      ],
+      "en": [
+        {
+          "title": "Improvements",
+          "items": [
+            "An app icon of its own that adapts to the device's shape, and a splash screen of its own"
+          ]
+        },
+        {
+          "title": "Bug fixes",
+          "items": [
+            "After a restart without internet, grades, calendar, messages, absences, notifications and profile are shown correctly again",
+            "Competence ratings show six stars instead of five",
+            "The splash screen fills the whole screen"
+          ]
+        },
+        {
+          "title": "Internal",
+          "items": [
+            "Link to the privacy policy in the settings",
+            "Sentry performance tracking switched off, iOS mode and unused files removed"
+          ]
+        }
+      ],
+      "it": [
+        {
+          "title": "Miglioramenti",
+          "items": [
+            "Un'icona dell'app propria che si adatta alla forma del dispositivo e una schermata iniziale propria"
+          ]
+        },
+        {
+          "title": "Correzioni",
+          "items": [
+            "Dopo un riavvio senza internet valutazioni, calendario, comunicazioni, assenze, notifiche e profilo vengono di nuovo mostrati correttamente",
+            "Le valutazioni delle competenze mostrano sei stelle invece di cinque",
+            "La schermata iniziale riempie tutto lo schermo"
+          ]
+        },
+        {
+          "title": "Interno",
+          "items": [
+            "Link all'informativa sulla privacy nelle impostazioni",
+            "Monitoraggio delle prestazioni di Sentry disattivato, modalità iOS e file inutilizzati rimossi"
+          ]
+        }
       ]
     }
   },
@@ -298,6 +786,42 @@
             "Die Neuerungen werden aus den GitHub-Releases geladen"
           ]
         }
+      ],
+      "en": [
+        {
+          "title": "Bug fixes",
+          "items": [
+            "A message from a notification opens on the first tap",
+            "The “new” label disappears as soon as the message has been read",
+            "A read message disappears from the list of notifications"
+          ]
+        },
+        {
+          "title": "Internal",
+          "items": [
+            "Android Gradle Plugin and Kotlin updated",
+            "flutter_markdown replaced by flutter_markdown_plus",
+            "The changes are loaded from the GitHub releases"
+          ]
+        }
+      ],
+      "it": [
+        {
+          "title": "Correzioni",
+          "items": [
+            "Una comunicazione da una notifica si apre al primo tocco",
+            "L'etichetta «nuovo» scompare non appena la comunicazione è stata letta",
+            "Una comunicazione letta scompare dall'elenco delle notifiche"
+          ]
+        },
+        {
+          "title": "Interno",
+          "items": [
+            "Android Gradle Plugin e Kotlin aggiornati",
+            "flutter_markdown sostituito da flutter_markdown_plus",
+            "Le novità vengono caricate dalle release di GitHub"
+          ]
+        }
       ]
     }
   },
@@ -313,6 +837,30 @@
             "Benachrichtigungen: „Mitteilung öffnen“ führt zur betreffenden Mitteilung statt zur Liste",
             "„Über diese App“: „Neuerungen“ öffnet diese Liste",
             "„Über diese App“ zeigt das App-Symbol"
+          ]
+        }
+      ],
+      "en": [
+        {
+          "title": "Improvements",
+          "items": [
+            "The menu can be pulled open from the left",
+            "Calendar: “This week” is always visible and greyed out in the current week",
+            "Notifications: “Open the message” leads to that message instead of the list",
+            "“About this app”: “What's new” opens this list",
+            "“About this app” shows the app icon"
+          ]
+        }
+      ],
+      "it": [
+        {
+          "title": "Miglioramenti",
+          "items": [
+            "Il menu si può aprire trascinando da sinistra",
+            "Calendario: «Settimana corrente» è sempre visibile e disattivato nella settimana in corso",
+            "Notifiche: «Apri la comunicazione» porta alla comunicazione stessa invece che all'elenco",
+            "«Informazioni sull'app»: «Novità» apre questo elenco",
+            "«Informazioni sull'app» mostra l'icona dell'app"
           ]
         }
       ]
@@ -335,6 +883,36 @@
             "Gelesene Mitteilungen galten nach Neustart, Seitenwechsel oder Kontowechsel wieder als ungelesen"
           ]
         }
+      ],
+      "en": [
+        {
+          "title": "New features",
+          "items": [
+            "Messages: “Mark all as read” in the title bar",
+            "Messages: pull down to refresh; without a connection a new connection attempt is started"
+          ]
+        },
+        {
+          "title": "Bug fixes",
+          "items": [
+            "Read messages were treated as unread again after a restart, a page change or an account switch"
+          ]
+        }
+      ],
+      "it": [
+        {
+          "title": "Nuove funzioni",
+          "items": [
+            "Comunicazioni: «Segna tutte come lette» nella barra del titolo",
+            "Comunicazioni: trascina verso il basso per aggiornare; senza connessione parte un nuovo tentativo di connessione"
+          ]
+        },
+        {
+          "title": "Correzioni",
+          "items": [
+            "Le comunicazioni lette risultavano di nuovo non lette dopo un riavvio, un cambio di pagina o di account"
+          ]
+        }
       ]
     }
   },
@@ -355,6 +933,36 @@
             "Einstellungen und Fächerfarben intern vereinfacht"
           ]
         }
+      ],
+      "en": [
+        {
+          "title": "Improvements",
+          "items": [
+            "Calendar and Homework get coloured backgrounds"
+          ]
+        },
+        {
+          "title": "Internal",
+          "items": [
+            "State management fully switched to Riverpod, Redux removed",
+            "Settings and subject colours simplified internally"
+          ]
+        }
+      ],
+      "it": [
+        {
+          "title": "Miglioramenti",
+          "items": [
+            "Calendario e Agenda ricevono sfondi colorati"
+          ]
+        },
+        {
+          "title": "Interno",
+          "items": [
+            "Gestione dello stato passata completamente a Riverpod, Redux rimosso",
+            "Impostazioni e colori delle materie semplificati internamente"
+          ]
+        }
       ]
     }
   },
@@ -366,6 +974,22 @@
           "title": "Intern",
           "items": [
             "Zeugnisansicht auf Riverpod umgestellt"
+          ]
+        }
+      ],
+      "en": [
+        {
+          "title": "Internal",
+          "items": [
+            "Report card view switched to Riverpod"
+          ]
+        }
+      ],
+      "it": [
+        {
+          "title": "Interno",
+          "items": [
+            "Vista della pagella passata a Riverpod"
           ]
         }
       ]
@@ -381,6 +1005,26 @@
             "Das Merkheft ist im Menü auf allen Geräten sichtbar, auch unter Android",
             "Kalender: Fächerfarben werden wieder angezeigt; der Absturz bei fehlender Farbe ist behoben",
             "Bewertungen: einheitlicher Seitentitel"
+          ]
+        }
+      ],
+      "en": [
+        {
+          "title": "Bug fixes",
+          "items": [
+            "Homework is visible in the menu on every device, including Android",
+            "Calendar: subject colours are shown again; the crash when a colour was missing is fixed",
+            "Grades: consistent page title"
+          ]
+        }
+      ],
+      "it": [
+        {
+          "title": "Correzioni",
+          "items": [
+            "L'Agenda è visibile nel menu su tutti i dispositivi, anche su Android",
+            "Calendario: i colori delle materie vengono di nuovo mostrati; risolto l'arresto anomalo quando mancava un colore",
+            "Valutazioni: titolo della pagina uniforme"
           ]
         }
       ]
@@ -410,6 +1054,54 @@
           "title": "Fehlerbehebungen",
           "items": [
             "Kalender: Darstellungsfehler im Querformat behoben"
+          ]
+        }
+      ],
+      "en": [
+        {
+          "title": "New features",
+          "items": [
+            "Continuation of the app by Michael Debertol and Simon Wachtler — many thanks for the groundwork",
+            "Accent colour selectable in the settings"
+          ]
+        },
+        {
+          "title": "Improvements",
+          "items": [
+            "In German, “Hausaufgaben” is now called “Merkheft” and “Noten” is called “Bewertungen”",
+            "The feedback button opens an email directly",
+            "Absences, error messages and the “No connection” notice take on the chosen colours",
+            "Better usability with a screen reader: loading indicator, attachments and buttons are labelled"
+          ]
+        },
+        {
+          "title": "Bug fixes",
+          "items": [
+            "Calendar: display error in landscape fixed"
+          ]
+        }
+      ],
+      "it": [
+        {
+          "title": "Nuove funzioni",
+          "items": [
+            "Prosecuzione dell'app di Michael Debertol e Simon Wachtler — grazie mille per il lavoro preparatorio",
+            "Colore principale selezionabile nelle impostazioni"
+          ]
+        },
+        {
+          "title": "Miglioramenti",
+          "items": [
+            "In tedesco «Hausaufgaben» ora si chiama «Merkheft» e «Noten» si chiama «Bewertungen»",
+            "Il pulsante per il feedback apre direttamente un'email",
+            "Assenze, messaggi di errore e l'avviso «Nessuna connessione» assumono i colori scelti",
+            "Migliore utilizzo con un lettore di schermo: indicatore di caricamento, allegati e pulsanti hanno un'etichetta"
+          ]
+        },
+        {
+          "title": "Correzioni",
+          "items": [
+            "Calendario: corretto un errore di visualizzazione in orizzontale"
           ]
         }
       ]

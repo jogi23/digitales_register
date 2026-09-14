@@ -17,6 +17,7 @@
 
 import 'dart:convert';
 
+import 'package:dr/l10n/l10n.dart';
 import 'package:dr/util.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show rootBundle;
@@ -64,8 +65,7 @@ class ChangelogEntry {
 
   /// Every line of the release, headings dropped — what the card shows, which
   /// has room for a handful of lines and none for structure.
-  List<String> get points =>
-      [for (final section in sections) ...section.items];
+  List<String> get points => [for (final section in sections) ...section.items];
 }
 
 /// Compares two dotted versions the way their numbers read.
@@ -75,7 +75,9 @@ class ChangelogEntry {
 int compareVersions(String a, String b) {
   final left = _parts(a);
   final right = _parts(b);
-  for (var i = 0; i < (left.length > right.length ? left.length : right.length); i++) {
+  for (var i = 0;
+      i < (left.length > right.length ? left.length : right.length);
+      i++) {
     final l = i < left.length ? left[i] : 0;
     final r = i < right.length ? right[i] : 0;
     if (l != r) return l.compareTo(r);
@@ -212,9 +214,23 @@ class Changelog {
     }
   }
 
+  /// The language the app is shown in: the one picked in the settings, or the
+  /// device's.
+  ///
+  /// [trGlobal] follows the settings but only exists once the app has built;
+  /// before that — and in tests that never build it — the device decides.
+  static String get _language {
+    try {
+      return trGlobal.localeName;
+    } catch (_) {
+      return PlatformDispatcher.instance.locale.languageCode;
+    }
+  }
+
   /// Every version the app ships notes for, newest first.
   ///
-  /// In the device's language where we have it, in German otherwise.
+  /// In the language the app is shown in where we have it, in German
+  /// otherwise.
   Future<List<ChangelogEntry>> load() async {
     final String raw;
     try {
@@ -225,7 +241,7 @@ class Changelog {
       return const [];
     }
     final decoded = json.decode(raw) as Map<String, dynamic>;
-    final language = PlatformDispatcher.instance.locale.languageCode;
+    final language = _language;
     final entries = <ChangelogEntry>[];
     decoded.forEach((version, dynamic value) {
       final release = (value as Map).cast<String, dynamic>();
