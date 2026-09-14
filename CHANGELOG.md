@@ -31,6 +31,10 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 - Querformat: der Stundenplan in Kalender und Merkheft scrollt, statt die Stunden bis zur Unlesbarkeit zusammenzudrücken.
 - Im Demo-Konto zeigt die Verbindungsanzeige die Verbindung als hergestellt, statt dauerhaft „noch nichts geladen“.
 - Benachrichtigungen: eine gelesene Mitteilung nimmt keine Benachrichtigung zu einer Bewertung mehr mit, die zufällig dieselbe Nummer trägt.
+- Kalender: die App stürzt nicht mehr ab, wenn der Kalender geöffnet ist, während die Daten eines Kontos neu geladen werden — etwa beim Kontowechsel. Ohne gewählte Woche zeigt er die aktuelle.
+- Nach längerer Zeit im Hintergrund beendet sich die App beim erneuten Anmelden nicht mehr, wenn der Server statt der Startseite des Kontos eine andere Seite liefert. Die Anmeldung gilt dann als fehlgeschlagen.
+- Bewertungen: die App stürzt nicht mehr ab, wenn Bewertungen geladen werden, bevor die Anmeldung abgeschlossen ist. Ein fehlgeschlagener Abruf blockiert auch nicht mehr das andere Semester.
+- Merkheft und Bewertungen: bricht das Laden ab, dreht sich die Ladeanzeige nicht mehr endlos weiter.
 
 ## 1.3.0 — 2026-09-10
 

@@ -38,7 +38,6 @@ import 'package:dr/providers/profile_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/ui/certificate.dart';
 import 'package:dr/ui/grade_detail_page.dart';
-import 'package:dr/util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -88,7 +87,7 @@ class AppRouter {
         const CourseContentContainer(), Pages.courseContent);
     // Die Fächer stehen in den Kalenderwochen; ohne eine geladene gäbe es
     // nichts zur Auswahl.
-    final monday = _ref.read(calendarProvider).currentMonday ?? toMonday(now);
+    final monday = _ref.read(calendarProvider).shownMonday;
     unawaited(_ref.read(calendarProvider.notifier).load(monday));
   }
 
@@ -96,7 +95,7 @@ class AppRouter {
     scaffoldKey!.currentState!.selectContentWidget(
         const HomeworkOverviewContainer(), Pages.homeworkOverview);
     // Wie beim Klassenbuch: Die Aufgaben kommen mit den Kalenderwochen.
-    final monday = _ref.read(calendarProvider).currentMonday ?? toMonday(now);
+    final monday = _ref.read(calendarProvider).shownMonday;
     unawaited(_ref.read(calendarProvider.notifier).load(monday));
   }
 
@@ -105,7 +104,7 @@ class AppRouter {
         .selectContentWidget(const ClassbookPageContainer(), Pages.classbook);
     // Die Einträge kommen mit den Kalenderwochen. Ohne eine geladene Woche
     // bliebe die Seite leer, ohne dass jemand wüsste warum.
-    final monday = _ref.read(calendarProvider).currentMonday ?? toMonday(now);
+    final monday = _ref.read(calendarProvider).shownMonday;
     unawaited(_ref.read(calendarProvider.notifier).load(monday));
   }
 
@@ -116,7 +115,7 @@ class AppRouter {
     // Keep whatever week the user was last looking at instead of always
     // jumping back to the current one; only default to today the very first
     // time the calendar is opened in this session.
-    final monday = _ref.read(calendarProvider).currentMonday ?? toMonday(now);
+    final monday = _ref.read(calendarProvider).shownMonday;
     _ref.read(calendarProvider.notifier).setCurrentMonday(monday);
     unawaited(_ref.read(calendarProvider.notifier).load(monday));
   }

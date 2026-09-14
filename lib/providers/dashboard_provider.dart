@@ -62,17 +62,19 @@ class DashboardNotifier extends Notifier<DashboardState> {
     state = state.rebuild((b) => b
       ..loading = true
       ..future = future);
-    final dynamic data = await wrapper.send(
-      'api/student/dashboard/dashboard',
-      args: {'viewFuture': future},
-    );
-    if (data is! List) {
+    try {
+      final dynamic data = await wrapper.send(
+        'api/student/dashboard/dashboard',
+        args: {'viewFuture': future},
+      );
+      if (data is! List) return;
+      final settings = ref.read(settingsProvider);
+      _applyLoaded(data, future, settings.dashboardMarkNewOrChangedEntries,
+          settings.dashboardDeduplicateEntries);
+    } finally {
+      // Also on failure: a Merkheft stuck in "loading" would spin forever.
       state = state.rebuild((b) => b..loading = false);
-      return;
     }
-    final settings = ref.read(settingsProvider);
-    _applyLoaded(data, future, settings.dashboardMarkNewOrChangedEntries,
-        settings.dashboardDeduplicateEntries);
   }
 
   Future<void> refresh() async {

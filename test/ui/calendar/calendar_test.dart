@@ -140,10 +140,13 @@ Future<void> main() async {
     );
   });
 
-  Widget getCalendar(
-      {required bool nicksBarEnabled, required bool hasSubjctWithoutNick}) {
+  Widget getCalendar({
+    required bool nicksBarEnabled,
+    required bool hasSubjctWithoutNick,
+    CalendarState? state,
+  }) {
     navigatorKey = GlobalKey();
-    final calendarState =
+    final calendarState = state ??
         _buildCalendarState(hasSubjectWithoutNick: hasSubjctWithoutNick);
     final container = ProviderContainer(
       overrides: [
@@ -192,6 +195,19 @@ Future<void> main() async {
       ),
     );
   }
+
+  testWidgets('opens without a week to stand on', (tester) async {
+    // After a reset or a restore currentMonday is empty; reading it with `!`
+    // crashed the page on every frame (Sentry 119970530).
+    await tester.pumpWidget(getCalendar(
+      nicksBarEnabled: false,
+      hasSubjctWithoutNick: false,
+      state: CalendarState(),
+    ));
+
+    expect(tester.takeException(), isNull);
+    expect(find.byType(CalendarContainer), findsOneWidget);
+  });
 
   group('Edit Subjects nicks bar', () {
     group('when disabled', () {
