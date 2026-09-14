@@ -79,11 +79,47 @@ void main() {
         ],
       },
     );
+    when(() => mockWrapper.ensureLoggedIn()).thenAnswer((_) async => true);
     container = ProviderContainer();
   });
 
   tearDown(() {
     container.dispose();
+  });
+
+  test('grades without a loaded configuration load nothing and do not crash',
+      () async {
+    // Loaded before a login had filled in the configuration, this threw a
+    // LateInitializationError from a lock nobody awaited.
+    when(() => mockWrapper.config).thenReturn(null);
+
+    final notifier = container.read(gradesProvider.notifier);
+    await notifier.load(Semester.first);
+    await pumpEventQueue();
+
+    verifyNever(
+      () => mockWrapper.send(
+        'api/student/all_subjects',
+        args: any(named: 'args'),
+      ),
+    );
+    expect(container.read(gradesProvider).loading, isFalse);
+  });
+
+  test('grades are not requested while the login fails', () async {
+    when(() => mockWrapper.ensureLoggedIn()).thenAnswer((_) async => false);
+
+    final notifier = container.read(gradesProvider.notifier);
+    await notifier.load(Semester.first);
+    await pumpEventQueue();
+
+    verifyNever(
+      () => mockWrapper.send(
+        'api/student/all_subjects',
+        args: any(named: 'args'),
+      ),
+    );
+    expect(container.read(gradesProvider).loading, isFalse);
   });
 
   test('requestSubjectDetail keeps subject ids as subject targets', () async {

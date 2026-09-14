@@ -24,6 +24,7 @@ import 'package:built_value/serializer.dart';
 import 'package:collection/collection.dart';
 import 'package:dr/data.dart';
 import 'package:dr/utc_date_time.dart';
+import 'package:dr/util.dart' show now, toMonday;
 
 part 'app_state.g.dart';
 
@@ -779,8 +780,13 @@ abstract class CalendarState
 
   bool isLoadingWeek(UtcDateTime monday) => loadingWeeks.contains(monday);
 
+  /// The week the calendar stands on, or the current one before it has stood
+  /// anywhere. [currentMonday] is not saved, so it is empty again after a
+  /// reset (account switch, logout) or a restore from storage.
+  UtcDateTime get shownMonday => currentMonday ?? toMonday(now);
+
   Iterable<CalendarDay> get currentDays {
-    return daysForWeek(currentMonday!);
+    return daysForWeek(shownMonday);
   }
 
   Iterable<CalendarDay> daysForWeek(UtcDateTime monday) {

@@ -15,13 +15,17 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'package:dio/dio.dart';
 import 'package:dr/api_client.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/auth_service.dart';
+import 'package:dr/config_parser.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
 class _MockApiClient extends Mock implements ApiClient {}
+
+class _MockDio extends Mock implements Dio {}
 
 void main() {
   group('AuthService', () {
@@ -66,10 +70,10 @@ void main() {
           addProtocolItem: (_) {},
         );
 
-        expect(sut.config.fullName, 'Demo User');
-        expect(sut.config.isStudentOrParent, isTrue);
-        expect(sut.config.autoLogoutSeconds, 300);
-        expect(sut.config.userId, 0);
+        expect(sut.config!.fullName, 'Demo User');
+        expect(sut.config!.isStudentOrParent, isTrue);
+        expect(sut.config!.autoLogoutSeconds, 300);
+        expect(sut.config!.userId, 0);
       });
 
       test('calls onSessionStarted with config', () async {
@@ -215,6 +219,85 @@ void main() {
         sut.onLogout = () {};
         sut.logout(hard: true, logoutForcedByServer: true);
         verify(() => mockClient.clearCookies()).called(1);
+      });
+    });
+
+    // -----------------------------------------------------------------------
+    // login — the server says yes, the home page decides
+    // -----------------------------------------------------------------------
+    group('login against a server', () {
+      const url = 'https://school.digitalesregister.it';
+      late _MockApiClient mockClient;
+      late _MockDio mockDio;
+      late AuthService sut;
+      late int configLoadedCalls;
+
+      Future<dynamic> login() => sut.login(
+            'alice',
+            's3cr3t',
+            null,
+            url,
+            logout: () {},
+            configLoaded: () => configLoadedCalls++,
+            relogin: () {},
+            addProtocolItem: (_) {},
+          );
+
+      void serveHomePage(String html) {
+        when(() => mockDio.get<String>(any())).thenAnswer(
+          (_) async =>
+              Response<String>(requestOptions: RequestOptions(), data: html),
+        );
+      }
+
+      setUp(() {
+        configLoadedCalls = 0;
+        mockClient = _MockApiClient();
+        mockDio = _MockDio();
+        when(() => mockClient.dio).thenReturn(mockDio);
+        when(() => mockClient.url).thenReturn(url);
+        when(() => mockClient.loginAddress).thenReturn('$url/v2/api/auth/login');
+        when(() => mockClient.baseAddress).thenReturn('$url/v2/');
+        when(() => mockClient.clearCookies()).thenReturn(null);
+        when(() => mockDio.post<dynamic>(any(), data: any(named: 'data')))
+            .thenAnswer(
+          (_) async => Response<dynamic>(
+            requestOptions: RequestOptions(),
+            data: {'loggedIn': true},
+          ),
+        );
+        sut = AuthService(mockClient);
+      });
+
+      test('counts as logged in once the configuration is loaded', () async {
+        serveHomePage(
+          'var currentUserId=42;'
+          'var config = { auto_logout_seconds: 60, };'
+          'navigationProfilePicture" src="https://example.com/pic.png">Alice</span>',
+        );
+
+        await login();
+
+        expect(await sut.loggedIn, isTrue);
+        expect(sut.config?.userId, 42);
+        expect(sut.error, isNull);
+        expect(configLoadedCalls, 1);
+      });
+
+      test('a home page without configuration fails the login, not the app',
+          () async {
+        // What the server sent in Sentry 118673931 after a long time in the
+        // background: a page without currentUserId.
+        serveHomePage('<!DOCTYPE html><html><body>Login</body></html>');
+
+        final result = await login();
+
+        expect(result, isNull);
+        expect(await sut.loggedIn, isFalse);
+        expect(sut.config, isNull);
+        expect(sut.error, contains('$ConfigParseException'));
+        expect(sut.noInternetDuringLogin, isFalse);
+        expect(configLoadedCalls, 0);
       });
     });
   });

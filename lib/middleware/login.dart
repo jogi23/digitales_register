@@ -108,8 +108,10 @@ Future<void> _doLogin(
       forced: true,
     ),
     configLoaded: () {
-      providerContainer.read(configProvider.notifier).state = wrapper.config;
-      providerContainer.read(gradesProvider.notifier).setConfig(wrapper.config);
+      final config = wrapper.config;
+      if (config == null) return;
+      providerContainer.read(configProvider.notifier).state = config;
+      providerContainer.read(gradesProvider.notifier).setConfig(config);
     },
     relogin: () {
       providerContainer.read(gradesProvider.notifier).resetForRelogin();
@@ -120,7 +122,7 @@ Future<void> _doLogin(
   );
 
   if (await wrapper.loggedIn) {
-    if (!wrapper.config.isStudentOrParent) {
+    if (wrapper.config?.isStudentOrParent == false) {
       wrapper.logout(hard: true);
       providerContainer.read(loginProvider.notifier).setLoginFailed(
         cause: trGlobal.loginUserTypeUnsupported,

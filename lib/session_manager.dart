@@ -229,31 +229,37 @@ class SessionManager {
   }
 
   Future<void> _updateLogout() async {
-    if (!await _authService.loggedIn) return;
-    if (_authService.demoMode) return;
-    if (_serverLogoutTime != null &&
-        DateTime.now()
-            .add(const Duration(seconds: 25))
-            .isAfter(_serverLogoutTime!)) {
-      final result = getMap(
-        await send(
-          "api/auth/extendSession",
-          args: <String, Object?>{
-            "lastAction": lastInteraction.millisecondsSinceEpoch ~/ 1000,
-          },
-        ),
-      );
-      if (result == null) {
-        _authService.logout(hard: safeMode, logoutForcedByServer: true);
-        return;
+    try {
+      if (!await _authService.loggedIn) return;
+      if (_authService.demoMode) return;
+      if (_serverLogoutTime != null &&
+          DateTime.now()
+              .add(const Duration(seconds: 25))
+              .isAfter(_serverLogoutTime!)) {
+        final result = getMap(
+          await send(
+            "api/auth/extendSession",
+            args: <String, Object?>{
+              "lastAction": lastInteraction.millisecondsSinceEpoch ~/ 1000,
+            },
+          ),
+        );
+        if (result == null) {
+          _authService.logout(hard: safeMode, logoutForcedByServer: true);
+          return;
+        }
+        if (result["forceLogout"] == true) {
+          _authService.logout(hard: safeMode, logoutForcedByServer: true);
+          return;
+        } else {
+          _serverLogoutTime = DateTime.fromMillisecondsSinceEpoch(
+              (result["newExpiration"] as int) * 1000);
+        }
       }
-      if (result["forceLogout"] == true) {
-        _authService.logout(hard: safeMode, logoutForcedByServer: true);
-        return;
-      } else {
-        _serverLogoutTime = DateTime.fromMillisecondsSinceEpoch(
-            (result["newExpiration"] as int) * 1000);
-      }
+    } on Exception catch (e) {
+      // Runs from a timer nobody awaits: an error here used to end the app.
+      // The next round checks the login again.
+      log("Error while extending the session", error: e);
     }
     Future.delayed(const Duration(seconds: 5), _updateLogout);
   }

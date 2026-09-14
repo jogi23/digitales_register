@@ -87,5 +87,55 @@ void main() {
         expect(config.currentSemesterMaybe, 1);
       });
     });
+
+    group('a page that is not the home page', () {
+      // A login or redirect page. Searching blindly cut such a page at index
+      // -1: "<!DOCTYPE html>" from character 13 is "ml>", which int.parse
+      // refused (Sentry 118673931).
+      Matcher missing(String marker) => throwsA(
+            isA<ConfigParseException>()
+                .having((e) => e.missing, 'missing', marker),
+          );
+
+      test('throws ConfigParseException for a login page', () {
+        expect(
+          () => ConfigParser.parse(
+              '<!DOCTYPE html><html><body>Login</body></html>'),
+          throwsA(isA<ConfigParseException>()),
+        );
+      });
+
+      test('names the missing user id', () {
+        expect(
+          () => ConfigParser.parse(
+              _src().replaceFirst('var currentUserId=1;', '')),
+          missing('currentUserId='),
+        );
+      });
+
+      test('throws when the user id is not a number', () {
+        expect(
+          () => ConfigParser.parse(
+              _src().replaceFirst('currentUserId=1', 'currentUserId=abc')),
+          missing('currentUserId='),
+        );
+      });
+
+      test('names the missing auto logout', () {
+        expect(
+          () => ConfigParser.parse(
+              _src().replaceFirst('auto_logout_seconds: 60, ', '')),
+          missing('auto_logout_seconds: '),
+        );
+      });
+
+      test('names the missing profile picture', () {
+        expect(
+          () => ConfigParser.parse(
+              _src().replaceFirst('navigationProfilePicture', '')),
+          missing('navigationProfilePicture'),
+        );
+      });
+    });
   });
 }
