@@ -209,8 +209,7 @@ void main() {
     });
 
     test('lists only subjects that carry entries, alphabetically', () {
-      expect(entrySubjects(classbookEntries(_tage())),
-          ['Deutsch', 'Musik']);
+      expect(entrySubjects(classbookEntries(_tage())), ['Deutsch', 'Musik']);
     });
   });
 
@@ -235,6 +234,24 @@ void main() {
       expect(find.textContaining('12. Mai 2026'), findsOneWidget);
       expect(find.textContaining('11. Mai 2026'), findsOneWidget);
       expect(find.text('Diktat'), findsOneWidget);
+    });
+
+    testWidgets('keeps each day headline pinned on a band of its own',
+        (tester) async {
+      // Ohne Band lief ein Tag, der mit einer weißen Zeile endet, in den
+      // nächsten über, der weiß beginnt.
+      await tester.pumpWidget(_seite(classbookEntries(_tage())));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(PinnedHeaderSliver), findsNWidgets(2));
+      final band = find
+          .ancestor(
+            of: find.textContaining('12. Mai 2026'),
+            matching: find.byType(ColoredBox),
+          )
+          .first;
+      final scheme = Theme.of(tester.element(band)).colorScheme;
+      expect(tester.widget<ColoredBox>(band).color, scheme.secondaryContainer);
     });
 
     testWidgets('sets off the line carrying subject, hour and teacher',

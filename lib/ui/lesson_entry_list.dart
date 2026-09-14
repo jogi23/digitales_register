@@ -221,30 +221,75 @@ class _ByDay extends StatelessWidget {
     }
     final dates = byDate.keys.toList();
 
-    return ListView.builder(
-      padding: context.systemInsets,
-      itemCount: dates.length,
-      itemBuilder: (context, index) {
-        final date = dates[index];
-        return _DaySection(
-          date: date,
-          entries: byDate[date]!,
-          ordinaryType: ordinaryType,
-          displayMode: displayMode,
-        );
-      },
+    // Jeder Tag eine eigene Gruppe: Seine Überschrift bleibt beim Scrollen
+    // oben stehen, bis der nächste Tag sie hinausschiebt - bei einem langen
+    // Tag ist so immer zu sehen, zu welchem die Zeilen gehören.
+    return CustomScrollView(
+      slivers: [
+        SliverPadding(
+          padding: context.systemInsets,
+          sliver: SliverMainAxisGroup(
+            slivers: [
+              for (final date in dates)
+                SliverMainAxisGroup(
+                  slivers: [
+                    PinnedHeaderSliver(child: _DayHeader(date: date)),
+                    SliverToBoxAdapter(
+                      child: _DaySection(
+                        entries: byDate[date]!,
+                        ordinaryType: ordinaryType,
+                        displayMode: displayMode,
+                      ),
+                    ),
+                  ],
+                ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
 
-class _DaySection extends StatelessWidget {
+/// Die Überschrift eines Tages als farbiges Band über die volle Breite.
+///
+/// Ein Band statt nur farbiger Schrift: Die Zeilen darunter wechseln zwischen
+/// weiß und grau, und ohne Band lief ein Tag, der mit einer weißen Zeile
+/// endet, in den nächsten über, der weiß beginnt.
+class _DayHeader extends StatelessWidget {
   final UtcDateTime date;
+
+  const _DayHeader({required this.date});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Semantics(
+      header: true,
+      child: ColoredBox(
+        color: theme.colorScheme.secondaryContainer,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          child: Text(
+            DateFormat("EEEE, d. MMMM y", tr(context).localeName).format(date),
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: theme.colorScheme.onSecondaryContainer,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// What one day holds, below its [_DayHeader].
+class _DaySection extends StatelessWidget {
   final List<LessonEntry> entries;
   final String ordinaryType;
   final EntryDisplayMode displayMode;
 
   const _DaySection({
-    required this.date,
     required this.entries,
     required this.ordinaryType,
     required this.displayMode,
@@ -252,19 +297,10 @@ class _DaySection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final tint = alternateRowColor(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-          child: Text(
-            DateFormat("EEEE, d. MMMM y", tr(context).localeName).format(date),
-            style: theme.textTheme.titleMedium
-                ?.copyWith(color: theme.colorScheme.primary),
-          ),
-        ),
         ...switch (displayMode) {
           EntryDisplayMode.list => [
               for (final (i, entry) in entries.indexed)
@@ -274,7 +310,6 @@ class _DaySection extends StatelessWidget {
                   ordinaryType: ordinaryType,
                   tileColor: i.isOdd ? tint : null,
                 ),
-              const Divider(height: 1),
             ],
           EntryDisplayMode.cards => [
               for (final lesson in lessonsOf(entries))

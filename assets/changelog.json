@@ -25,7 +25,7 @@
             "Mitteilungen: der Knopf zum Bestätigen steht in einem abgesetzten Bereich über die volle Breite und sagt, solange er grau ist, dass noch der Name fehlt.",
             "Kalender-Wochenansicht: das Fach steht in jeder Kachel gleich groß, Lehrer kursiv, höchstens drei Zeilen und mit Abstand zum Rand; der Raum bleibt der Detailansicht vorbehalten.",
             "Benachrichtigungen: ein Tippen auf die Benachrichtigung öffnet die Mitteilung oder Bewertung. Der Haken rechts markiert sie als gelesen, ohne sie zu öffnen — bei Mitteilungen gilt dann auch die Mitteilung selbst als gelesen.",
-            "Klassenbuch und Hausaufgaben: in der Liste ist jede zweite Zeile eingefärbt, damit lange Einträge nicht ineinanderlaufen."
+            "Klassenbuch und Hausaufgaben: in der Liste ist jede zweite Zeile eingefärbt, damit lange Einträge nicht ineinanderlaufen. Jeder Tag beginnt mit einem farbigen Band; seine Überschrift bleibt beim Scrollen oben stehen, bis der nächste Tag sie ablöst."
           ]
         },
         {
