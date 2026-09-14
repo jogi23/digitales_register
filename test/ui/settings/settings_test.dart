@@ -229,6 +229,27 @@ void main() {
     },
   );
 
+  testWidgets(
+    'switching off the accent background writes the setting',
+    (tester) async {
+      final container = await _pumpSettingsPage(tester);
+      addTearDown(container.dispose);
+
+      const label = 'Hintergrund in Akzentfarbe';
+      await tester.scrollUntilVisible(
+        find.text(label),
+        100,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      expect(container.read(settingsProvider).accentBackground, isTrue);
+
+      await tester.tap(find.text(label));
+      await tester.pumpAndSettle();
+      expect(container.read(settingsProvider).accentBackground, isFalse);
+    },
+  );
+
   group("grades average ignore-list", () {
     testWidgets(
       'adds an item',

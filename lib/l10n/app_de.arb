@@ -186,6 +186,8 @@
   "settingsThemeFollowDevice": "Geräte-Theme folgen",
   "settingsThemeLight": "Hell",
   "settingsThemeDark": "Dunkel",
+  "settingsAccentBackground": "Hintergrund in Akzentfarbe",
+  "settingsAccentBackgroundSubtitle": "Aus: Seiten weiß, im dunklen Modus dunkel",
   "settingsSectionSubjects": "Fächer",
   "settingsNicksAndColors": "Kürzel und Farben",
   "settingsColorHomework": "Hausaufgaben mit diesen Farben färben",

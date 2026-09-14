@@ -184,6 +184,26 @@ void main() {
     });
   });
 
+  group('accent background', () {
+    test('is on unless it was switched off', () {
+      expect(SettingsState().accentBackground, isTrue);
+      expect(
+        SettingsState.fromJson(<String, dynamic>{}).accentBackground,
+        isTrue,
+      );
+    });
+
+    test('is app-wide and survives a restart', () async {
+      final before = _makeContainer();
+      before.read(settingsProvider.notifier).setAccentBackground(false);
+      await pumpEventQueue();
+
+      final after = _makeContainer();
+      await after.read(settingsProvider.notifier).loadGlobal();
+      expect(after.read(settingsProvider).accentBackground, isFalse);
+    });
+  });
+
   group('display modes', () {
     test('the homework page takes over the arrangement both pages shared',
         () {

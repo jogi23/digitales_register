@@ -174,6 +174,9 @@ class SettingsNotifier extends Notifier<SettingsState> {
   void setDrawerFullyExpanded(bool value) =>
       _update(state.copyWith(drawerFullyExpanded: value));
 
+  void setAccentBackground(bool value) =>
+      _update(state.copyWith(accentBackground: value));
+
   // ─── Routing-triggered ephemeral scroll state ─────────────────────────────
 
   void scrollToGradesSection() => state = state.copyWith(scrollToGrades: true);

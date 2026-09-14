@@ -34,6 +34,7 @@ import 'package:dr/providers/login_provider.dart';
 import 'package:dr/l10n/l10n.dart';
 import 'package:dr/providers/provider_container.dart';
 import 'package:dr/providers/settings_provider.dart';
+import 'package:dr/ui/app_theme.dart';
 import 'package:dr/ui/grade_calculator.dart';
 import 'package:dr/ui/grade_detail_page.dart';
 import 'package:dr/ui/grades_chart_page.dart';
@@ -131,16 +132,18 @@ class RegisterApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Null follows the device, which is what an untouched install does.
     final language = ref.watch(settingsProvider).language;
+    final accentBackground =
+        ref.watch(settingsProvider.select((s) => s.accentBackground));
     return Listener(
       onPointerDown: (_) => wrapper.interaction(),
+      // DynamicTheme builds the theme anew whenever this widget rebuilds, so
+      // switching the background takes effect at once.
       child: DynamicTheme(
-        data: (brightness, _, seedColor) {
-          return ThemeData(
-            useMaterial3: true,
-            colorSchemeSeed: seedColor,
-            brightness: brightness,
-          );
-        },
+        data: (brightness, _, seedColor) => appTheme(
+          brightness,
+          seedColor,
+          accentBackground: accentBackground,
+        ),
         themedWidgetBuilder: (context, theme) => MaterialApp(
           onGenerateTitle: (context) => tr(context).appTitle,
           localizationsDelegates: const [

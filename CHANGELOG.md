@@ -12,6 +12,7 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 - Einstellungen → Anmeldung: Auf Wunsch bleibt die App beim Wechsel zwischen Konten auf der geöffneten Seite, statt jedes Mal zum Merkheft zurückzukehren. Die Einstellung gilt für alle Konten; ohne sie bleibt alles wie bisher.
 - Klassenbuch: zwei neue Darstellungen unter Einstellungen → Klassenbuch — Karten mit Stunde, Uhrzeit, Fach, Eintrag und Lehrperson, oder eine Zeitleiste, auf der vorbeigegangene Stunden grün gefüllt sind. Die Zeitleiste gibt es bei Anordnung nach Tagen.
 - Hausaufgaben, Absenzen und Bewertungen lassen sich ebenfalls als Karten statt als Liste zeigen. Die Hausaufgaben haben dafür eigene Einstellungen und übernehmen beim ersten Start die Anordnung, die bisher für beide Seiten galt.
+- Einstellungen → Aussehen: „Hintergrund in Akzentfarbe“ lässt sich ausschalten. Dann sind alle Seiten weiß, im dunklen Modus dunkel; Knöpfe, Überschriften und Markierungen behalten die Akzentfarbe. Voreingestellt bleibt der Hintergrund wie bisher.
 
 ### Verbesserungen
 
