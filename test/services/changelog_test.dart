@@ -15,9 +15,12 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:dr/l10n/l10n.dart';
 import 'package:dr/services/changelog.dart';
+import 'package:flutter/widgets.dart' show Locale;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -84,7 +87,8 @@ void main() {
     });
 
     test('takes everything when nothing was seen before', () {
-      final entries = entriesBetween(all: all, lastSeen: null, current: '1.3.0');
+      final entries =
+          entriesBetween(all: all, lastSeen: null, current: '1.3.0');
       expect(entries, hasLength(3));
     });
 
@@ -99,16 +103,15 @@ void main() {
   group('deciding what to show at startup', () {
     test('shows nothing on a fresh install', () async {
       // The notes would be about versions this reader never had.
-      final changelog =
-          Changelog(currentVersion: '1.2.1', freshInstall: true);
+      final changelog = Changelog(currentVersion: '1.2.1', freshInstall: true);
       expect(await changelog.pending(), isEmpty);
       expect(await _storedVersion(), '1.2.1');
     });
 
-    test('an update without a stored version counts as coming from the store '
+    test(
+        'an update without a stored version counts as coming from the store '
         'release', () async {
-      final changelog =
-          Changelog(currentVersion: '1.2.1', freshInstall: false);
+      final changelog = Changelog(currentVersion: '1.2.1', freshInstall: false);
       final entries = await changelog.pending();
       expect(entries.map((e) => e.version), ['1.2.1']);
       expect(await _storedVersion(), '1.2.1');
@@ -118,8 +121,7 @@ void main() {
       SharedPreferences.setMockInitialValues(
         {'changelog_last_seen': '1.2.1'},
       );
-      final changelog =
-          Changelog(currentVersion: '1.2.1', freshInstall: false);
+      final changelog = Changelog(currentVersion: '1.2.1', freshInstall: false);
       expect(await changelog.pending(), isEmpty);
     });
 
@@ -128,8 +130,7 @@ void main() {
       SharedPreferences.setMockInitialValues(
         {'changelog_last_seen': '1.3.0'},
       );
-      final changelog =
-          Changelog(currentVersion: '1.2.1', freshInstall: false);
+      final changelog = Changelog(currentVersion: '1.2.1', freshInstall: false);
       expect(await changelog.pending(), isEmpty);
       expect(await _storedVersion(), '1.2.1');
     });
@@ -137,8 +138,7 @@ void main() {
     test('records the version right away, so it is shown once', () async {
       // Waiting for the card to be dismissed would bring it back at every
       // start until someone closes it.
-      final changelog =
-          Changelog(currentVersion: '1.2.1', freshInstall: false);
+      final changelog = Changelog(currentVersion: '1.2.1', freshInstall: false);
       expect(await changelog.pending(), isNotEmpty);
 
       final next = Changelog(currentVersion: '1.2.1', freshInstall: false);
@@ -146,8 +146,7 @@ void main() {
     });
 
     test('decides once per start', () async {
-      final changelog =
-          Changelog(currentVersion: '1.2.1', freshInstall: false);
+      final changelog = Changelog(currentVersion: '1.2.1', freshInstall: false);
       final first = await changelog.pending();
       // The card and the review prompt both wait on this; a second decision
       // would find the version already recorded and come back empty.
@@ -160,8 +159,7 @@ void main() {
       SharedPreferences.setMockInitialValues(
         {'changelog_last_seen': '1.2.1'},
       );
-      final changelog =
-          Changelog(currentVersion: '1.3.0', freshInstall: false);
+      final changelog = Changelog(currentVersion: '1.3.0', freshInstall: false);
       await changelog.pending();
       expect(await changelog.previousSeen(), '1.2.1');
     });
@@ -180,8 +178,7 @@ void main() {
     });
 
     test('marks nothing on a fresh install', () async {
-      final changelog =
-          Changelog(currentVersion: '1.3.0', freshInstall: true);
+      final changelog = Changelog(currentVersion: '1.3.0', freshInstall: true);
       await changelog.pending();
       expect(await changelog.previousSeen(), isNull);
     });
@@ -189,14 +186,17 @@ void main() {
     test('an update without a stored version marks from the store release',
         () async {
       // The same version the card counts from, so both say the same thing.
-      final changelog =
-          Changelog(currentVersion: '1.3.0', freshInstall: false);
+      final changelog = Changelog(currentVersion: '1.3.0', freshInstall: false);
       await changelog.pending();
       expect(await changelog.previousSeen(), firstPublishedVersion);
     });
   });
 
   group('the notes shipped with the app', () {
+    // German, as a German reader would get them; otherwise the test device's
+    // English would decide which notes are read.
+    setUp(() => trGlobal = lookupL(const Locale('de')));
+
     test('cover the version being released', () async {
       // Read from pubspec so this fails at the next version bump rather than
       // shipping a release whose card stays silently empty.
@@ -265,6 +265,46 @@ void main() {
       );
       expect(entry.points.length,
           entry.sections.fold<int>(0, (n, s) => n + s.items.length));
+    });
+
+    test('come in every language the app speaks, line for line', () {
+      // A translation that drops a line leaves that reader without it, and
+      // nobody would notice from the German.
+      final releases = json.decode(
+        File('assets/changelog.json').readAsStringSync(),
+      ) as Map<String, dynamic>;
+      for (final MapEntry(key: version, value: release) in releases.entries) {
+        final points =
+            (release as Map<String, dynamic>)['points'] as Map<String, dynamic>;
+        final german = points[changelogFallbackLanguage] as List<dynamic>;
+        for (final language in supportedLanguages) {
+          final sections = points[language] as List<dynamic>?;
+          expect(sections, isNotNull, reason: '$version: $language fehlt');
+          expect(sections!.length, german.length, reason: '$version/$language');
+          for (var i = 0; i < german.length; i++) {
+            expect(
+              ((sections[i] as Map)['items'] as List).length,
+              ((german[i] as Map)['items'] as List).length,
+              reason: '$version/$language/${(german[i] as Map)['title']}',
+            );
+          }
+        }
+      }
+    });
+
+    test('follow the language the app is shown in', () async {
+      // Picked in the settings rather than the device's: an Italian reader
+      // on a German phone gets the Italian notes.
+      trGlobal = lookupL(const Locale('it'));
+      expect(
+        (await Changelog().load()).first.sections.first.title,
+        'Nuove funzioni',
+      );
+      trGlobal = lookupL(const Locale('en'));
+      expect(
+        (await Changelog().load()).first.sections.first.title,
+        'New features',
+      );
     });
   });
 }

@@ -124,7 +124,13 @@ Future<void> main() async {
     // rather than written here: a release would otherwise have to be entered
     // twice, and a longer release pushes any older heading out of the
     // viewport, where the list has not built it yet.
-    final newest = (await Changelog().load()).first.version;
+    //
+    // Loaded outside the fake clock: with three languages the file is past
+    // the 50 KB at which rootBundle decodes it in a separate isolate, and that
+    // never finishes inside testWidgets.
+    final entries = (await tester.runAsync(() => Changelog().load()))!;
+    changelog = _StubChangelog(entries);
+    final newest = entries.first.version;
     await pumpPage(tester);
     expect(find.text(newest), findsOneWidget);
     expect(find.text('Keine Einträge'), findsNothing);
@@ -167,6 +173,24 @@ Future<void> main() async {
     ]);
     await pumpPage(tester);
     expect(find.text('(neu)'), findsNothing);
+  });
+
+  testWidgets('gives translated headings their icons too', (tester) async {
+    // The notes ship in three languages; the icons must not fall back to the
+    // neutral one just because a heading is not German.
+    changelog = _StubChangelog(const [
+      ChangelogEntry(
+        version: '1.3.1',
+        sections: [
+          ChangelogSection(title: 'Nuove funzioni', items: ['Qualcosa']),
+          ChangelogSection(title: 'Bug fixes', items: ['Something']),
+        ],
+      ),
+    ]);
+    await pumpPage(tester);
+    expect(find.byIcon(Icons.auto_awesome_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.bug_report_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.label_outline), findsNothing);
   });
 
   testGoldens('reads as a list of releases', (tester) async {
