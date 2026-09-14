@@ -355,6 +355,7 @@ class SettingsState {
     List<String>? classbookSubjects,
     this.drawerFullyExpanded = true,
     this.keepPageOnAccountSwitch = false,
+    this.accentBackground = true,
     this.starColor = accentStarColorId,
     this.language,
     this.messageSignature,
@@ -425,6 +426,10 @@ class SettingsState {
   /// going back to the Merkheft as it always did.
   final bool keepPageOnAccountSwitch;
 
+  /// Whether the pages are tinted with the accent colour, as Material 3 does.
+  /// Off, they are plain white — or plain dark in dark mode.
+  final bool accentBackground;
+
   /// Id of the palette entry the competence stars are drawn in.
   /// See `starColors` in ui/star_rating.dart.
   final String starColor;
@@ -463,6 +468,7 @@ class SettingsState {
     List<String>? classbookSubjects,
     bool? drawerFullyExpanded,
     bool? keepPageOnAccountSwitch,
+    bool? accentBackground,
     String? starColor,
     Object? language = _unchanged,
     Object? messageSignature = _unchanged,
@@ -503,6 +509,7 @@ class SettingsState {
         drawerFullyExpanded: drawerFullyExpanded ?? this.drawerFullyExpanded,
         keepPageOnAccountSwitch:
             keepPageOnAccountSwitch ?? this.keepPageOnAccountSwitch,
+        accentBackground: accentBackground ?? this.accentBackground,
         starColor: starColor ?? this.starColor,
         language: identical(language, _unchanged)
             ? this.language
@@ -538,6 +545,7 @@ class SettingsState {
         'classbookSubjects': classbookSubjects,
         'drawerFullyExpanded': drawerFullyExpanded,
         'keepPageOnAccountSwitch': keepPageOnAccountSwitch,
+        'accentBackground': accentBackground,
         'starColor': starColor,
         'language': language,
         'messageSignature': messageSignature,
@@ -597,6 +605,7 @@ class SettingsState {
         drawerFullyExpanded: json['drawerFullyExpanded'] as bool? ?? true,
         keepPageOnAccountSwitch:
             json['keepPageOnAccountSwitch'] as bool? ?? false,
+        accentBackground: json['accentBackground'] as bool? ?? true,
         starColor: json['starColor'] as String? ?? accentStarColorId,
         language: json['language'] as String?,
         messageSignature: json['messageSignature'] as String?,
@@ -634,6 +643,7 @@ class SettingsState {
     'language',
     'ignoreForGradesAverage',
     'keepPageOnAccountSwitch',
+    'accentBackground',
   };
 
   /// Only the app-wide settings, for storing them on their own.
@@ -690,6 +700,7 @@ class SettingsState {
         _listEq.equals(other.classbookSubjects, classbookSubjects) &&
         other.drawerFullyExpanded == drawerFullyExpanded &&
         other.keepPageOnAccountSwitch == keepPageOnAccountSwitch &&
+        other.accentBackground == accentBackground &&
         other.starColor == starColor &&
         other.language == language;
   }
@@ -722,6 +733,7 @@ class SettingsState {
         ...classbookSubjects,
         drawerFullyExpanded,
         keepPageOnAccountSwitch,
+        accentBackground,
         starColor,
         language,
       ]);

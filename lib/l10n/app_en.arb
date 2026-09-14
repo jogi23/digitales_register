@@ -186,6 +186,8 @@
   "settingsThemeFollowDevice": "Follow the device theme",
   "settingsThemeLight": "Light",
   "settingsThemeDark": "Dark",
+  "settingsAccentBackground": "Accent-coloured background",
+  "settingsAccentBackgroundSubtitle": "Off: pages are white, or dark in dark mode",
   "settingsSectionSubjects": "Subjects",
   "settingsNicksAndColors": "Short names and colours",
   "settingsColorHomework": "Colour homework with these colours",

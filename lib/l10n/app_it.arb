@@ -186,6 +186,8 @@
   "settingsThemeFollowDevice": "Segui il tema del dispositivo",
   "settingsThemeLight": "Chiaro",
   "settingsThemeDark": "Scuro",
+  "settingsAccentBackground": "Sfondo nel colore d'accento",
+  "settingsAccentBackgroundSubtitle": "Disattivato: pagine bianche, scure in modalità scura",
   "settingsSectionSubjects": "Materie",
   "settingsNicksAndColors": "Sigle e colori",
   "settingsColorHomework": "Colora i compiti con questi colori",

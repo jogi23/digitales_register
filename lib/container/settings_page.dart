@@ -46,6 +46,7 @@ class SettingsPageContainer extends ConsumerWidget {
       },
       onSetNoPassSaving: notifier.setSaveNoPass,
       onSetKeepPageOnAccountSwitch: notifier.setKeepPageOnAccountSwitch,
+      onSetAccentBackground: notifier.setAccentBackground,
       onSetAskWhenDelete: notifier.setAskWhenDelete,
       onSetShowGradesDiagram: notifier.setShowGradesDiagram,
       onSetShowAllSubjectsAverage: notifier.setShowAllSubjectsAverage,
@@ -78,6 +79,9 @@ class SettingsViewModel {
 
   /// Whether switching accounts stays on the page instead of the Merkheft.
   final bool keepPageOnAccountSwitch;
+
+  /// Whether the pages are tinted with the accent colour.
+  final bool accentBackground;
   final bool askWhenDelete;
   final bool showGradesDiagram;
   final bool showAllSubjectsAverage;
@@ -107,6 +111,7 @@ class SettingsViewModel {
   const SettingsViewModel({
     required this.noPassSaving,
     this.keepPageOnAccountSwitch = false,
+    this.accentBackground = true,
     required this.askWhenDelete,
     required this.showGradesSettings,
     required this.showGradesDiagram,
@@ -137,6 +142,7 @@ class SettingsViewModel {
       SettingsViewModel(
         noPassSaving: s.noPasswordSaving,
         keepPageOnAccountSwitch: s.keepPageOnAccountSwitch,
+        accentBackground: s.accentBackground,
         askWhenDelete: s.askWhenDelete,
         showGradesSettings: s.scrollToGrades,
         showGradesDiagram: s.showGradesDiagram,

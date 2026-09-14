@@ -46,6 +46,7 @@ enum _Theme {
 class SettingsPageWidget extends StatefulWidget {
   final OnSettingChanged<bool> onSetNoPassSaving;
   final OnSettingChanged<bool> onSetKeepPageOnAccountSwitch;
+  final OnSettingChanged<bool> onSetAccentBackground;
   final OnSettingChanged<bool> onSetAskWhenDelete;
   final OnSettingChanged<bool> onSetShowGradesDiagram;
   final OnSettingChanged<bool> onSetShowAllSubjectsAverage;
@@ -75,6 +76,7 @@ class SettingsPageWidget extends StatefulWidget {
     super.key,
     required this.onSetNoPassSaving,
     required this.onSetKeepPageOnAccountSwitch,
+    required this.onSetAccentBackground,
     required this.onSetAskWhenDelete,
     required this.onSetShowGradesDiagram,
     required this.onSetShowAllSubjectsAverage,
@@ -333,6 +335,12 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
             title: Text(tr(context).settingsThemeDark),
           ),
           const _SeedColorPicker(),
+          SwitchListTile.adaptive(
+            title: Text(tr(context).settingsAccentBackground),
+            subtitle: Text(tr(context).settingsAccentBackgroundSubtitle),
+            value: widget.vm.accentBackground,
+            onChanged: widget.onSetAccentBackground,
+          ),
           const Divider(
             indent: 15,
             endIndent: 15,
