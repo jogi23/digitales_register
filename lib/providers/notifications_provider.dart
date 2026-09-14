@@ -90,11 +90,13 @@ class NotificationsNotifier extends Notifier<NotificationsState> {
   /// Called when a message is marked as read (cross-feature), so the
   /// corresponding notification badge is removed and the server is informed.
   Future<void> markMessageAsRead(int objectId) async {
-    final matching =
-        state.notifications.where((n) => n.objectId == objectId).toList();
+    // Only message notifications: a grade can carry the same number as its
+    // object id, and reading a message says nothing about that grade.
+    bool matches(Notification n) =>
+        n.type == "message" && n.objectId == objectId;
+    final matching = state.notifications.where(matches).toList();
     state = state.copyWith(
-      notifications:
-          state.notifications.where((n) => n.objectId != objectId).toList(),
+      notifications: state.notifications.where((n) => !matches(n)).toList(),
     );
     for (final n in matching) {
       await wrapper.send("api/notification/markAsRead", args: {"id": n.id});

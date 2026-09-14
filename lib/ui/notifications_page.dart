@@ -29,6 +29,10 @@ import 'package:intl/intl.dart';
 class NotificationPage extends StatelessWidget {
   final List<Notification> notifications;
   final SingleArgumentVoidCallback<Notification> deleteNotification;
+
+  /// Marks the message behind a notification as read, not only the
+  /// notification itself — otherwise it would stay "neu" in the list.
+  final SingleArgumentVoidCallback<Notification> markMessageAsRead;
   final SingleArgumentVoidCallback<int> goToMessage;
   final SingleArgumentVoidCallback<Notification>? goToGrade;
   final VoidCallback deleteAllNotifications;
@@ -42,6 +46,7 @@ class NotificationPage extends StatelessWidget {
     super.key,
     required this.notifications,
     required this.deleteNotification,
+    required this.markMessageAsRead,
     required this.deleteAllNotifications,
     required this.noInternet,
     required this.goToMessage,
@@ -92,6 +97,7 @@ class NotificationPage extends StatelessWidget {
                       key: ObjectKey(notifications[idx]),
                       notification: notifications[idx],
                       onDelete: deleteNotification,
+                      onMarkMessageAsRead: markMessageAsRead,
                       noInternet: noInternet,
                       goToMessage: goToMessage,
                       goToGrade: goToGrade,
@@ -109,6 +115,7 @@ class NotificationWidget extends StatelessWidget {
   final Notification notification;
   final bool? noInternet;
   final SingleArgumentVoidCallback<Notification> onDelete;
+  final SingleArgumentVoidCallback<Notification> onMarkMessageAsRead;
   final SingleArgumentVoidCallback<int> goToMessage;
   final SingleArgumentVoidCallback<Notification>? goToGrade;
   final bool isLast;
@@ -117,13 +124,29 @@ class NotificationWidget extends StatelessWidget {
     super.key,
     required this.notification,
     required this.onDelete,
+    required this.onMarkMessageAsRead,
     required this.noInternet,
     required this.goToMessage,
     required this.isLast,
     this.goToGrade,
   });
+
+  bool get _isMessage =>
+      notification.type == "message" && notification.objectId != null;
+
+  bool get _isGrade =>
+      !_isMessage && notification.objectId != null && goToGrade != null;
+
   @override
   Widget build(BuildContext context) {
+    // The whole card opens what the notification is about; the tick beside
+    // it only marks it as read, so both stay possible without a second
+    // button for opening.
+    final VoidCallback? open = _isMessage
+        ? () => goToMessage(notification.objectId!)
+        : _isGrade
+            ? () => goToGrade!(notification)
+            : null;
     return Deleteable(
       showEntryAnimation: false,
       showExitAnimation: !isLast,
@@ -134,66 +157,71 @@ class NotificationWidget extends StatelessWidget {
         ),
         color: Colors.transparent,
         elevation: 0,
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            children: <Widget>[
-              Expanded(
-                child: Column(
-                  children: [
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        notification.title,
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                    ),
-                    if (!notification.subTitle.isNullOrEmpty)
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          notification.subTitle!,
-                          style: Theme.of(context).textTheme.bodyMedium,
+        child: Semantics(
+          button: open != null,
+          hint: _isMessage
+              ? tr(context).notificationsOpenMessage
+              : _isGrade
+                  ? tr(context).notificationsOpenGrade
+                  : null,
+          child: InkWell(
+            // Rounded like the card rather than clipping the card: clipping
+            // would cut into its thin border.
+            borderRadius: BorderRadius.circular(16),
+            onTap: open,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: <Widget>[
+                  Expanded(
+                    child: Column(
+                      children: [
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            notification.title,
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
                         ),
-                      ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 2.0),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          DateFormat("d.M.yy H:mm")
-                              .format(notification.timeSent),
-                          style: Theme.of(context).textTheme.bodySmall,
+                        if (!notification.subTitle.isNullOrEmpty)
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              notification.subTitle!,
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                          ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 2.0),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              DateFormat("d.M.yy H:mm")
+                                  .format(notification.timeSent),
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                          ),
                         ),
-                      ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.done),
+                    tooltip: tr(context).notificationsRead,
+                    onPressed: noInternet!
+                        ? null
+                        : () async {
+                            await delete();
+                            if (_isMessage) {
+                              onMarkMessageAsRead(notification);
+                            } else {
+                              onDelete(notification);
+                            }
+                          },
+                  ),
+                ],
               ),
-              if (notification.type == "message")
-                IconButton(
-                  icon: const Icon(Icons.open_in_new),
-                  tooltip: tr(context).notificationsOpenMessage,
-                  onPressed: () => goToMessage(notification.objectId!),
-                )
-              else if (notification.objectId != null && goToGrade != null)
-                IconButton(
-                  icon: const Icon(Icons.open_in_new),
-                  tooltip: tr(context).notificationsOpenGrade,
-                  onPressed: () => goToGrade!(notification),
-                )
-              else
-                IconButton(
-                  icon: const Icon(Icons.done),
-                  tooltip: tr(context).notificationsRead,
-                  onPressed: noInternet!
-                      ? null
-                      : () async {
-                          await delete();
-                          onDelete(notification);
-                        },
-                )
-            ],
+            ),
           ),
         ),
       ),
