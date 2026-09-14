@@ -295,6 +295,31 @@ enum ClassbookViewMode {
       ClassbookViewMode.chronological;
 }
 
+/// How a list of entries is drawn, whatever its arrangement.
+enum EntryDisplayMode {
+  /// Rows one under the other, every second one tinted.
+  list,
+
+  /// Every entry — in the classbook every lesson — in a card of its own.
+  cards,
+
+  /// A line down the side with a circle per lesson, filled once it is over.
+  ///
+  /// Only the classbook offers it, and only arranged by day: it shows how a
+  /// day went, and a list by subject has no day to show.
+  timeline;
+
+  /// [allowTimeline] is false where the timeline is not offered; a value
+  /// stored there anyway becomes cards rather than a view the page lacks.
+  static EntryDisplayMode fromName(String? name, {bool allowTimeline = true}) {
+    final mode =
+        EntryDisplayMode.values.asNameMap()[name] ?? EntryDisplayMode.list;
+    return !allowTimeline && mode == EntryDisplayMode.timeline
+        ? EntryDisplayMode.cards
+        : mode;
+  }
+}
+
 /// Lets copyWith tell "leave it alone" from "set it back to null".
 const _unchanged = Object();
 
@@ -320,6 +345,11 @@ class SettingsState {
     this.calendarShowTimes = true,
     this.dashboardViewMode = DashboardViewMode.list,
     this.classbookViewMode = ClassbookViewMode.chronological,
+    this.classbookDisplayMode = EntryDisplayMode.list,
+    this.homeworkViewMode = ClassbookViewMode.chronological,
+    this.homeworkDisplayMode = EntryDisplayMode.list,
+    this.absencesDisplayMode = EntryDisplayMode.list,
+    this.gradesDisplayMode = EntryDisplayMode.list,
     this.dashboardColorTestsInRed = true,
     List<String>? ignoreForGradesAverage,
     List<String>? classbookSubjects,
@@ -361,6 +391,23 @@ class SettingsState {
 
   /// Wie das Klassenbuch die Einträge anordnet.
   final ClassbookViewMode classbookViewMode;
+
+  /// Wie das Klassenbuch die Einträge zeichnet: Liste, Karten oder Zeitleiste.
+  final EntryDisplayMode classbookDisplayMode;
+
+  /// Wie die Hausaufgaben-Übersicht anordnet. Früher teilte sie sich das mit
+  /// dem Klassenbuch; seit es dort eine Zeitleiste gibt, die hier keinen Sinn
+  /// hat, sind es zwei Einstellungen.
+  final ClassbookViewMode homeworkViewMode;
+
+  /// Liste oder Karten; eine Zeitleiste gibt es hier nicht.
+  final EntryDisplayMode homeworkDisplayMode;
+
+  /// Liste oder Karten.
+  final EntryDisplayMode absencesDisplayMode;
+
+  /// Liste oder Karten, für die Noten und Beobachtungen eines Fachs.
+  final EntryDisplayMode gradesDisplayMode;
   final bool dashboardColorTestsInRed;
   final List<String> ignoreForGradesAverage;
 
@@ -406,6 +453,11 @@ class SettingsState {
     bool? calendarShowTimes,
     DashboardViewMode? dashboardViewMode,
     ClassbookViewMode? classbookViewMode,
+    EntryDisplayMode? classbookDisplayMode,
+    ClassbookViewMode? homeworkViewMode,
+    EntryDisplayMode? homeworkDisplayMode,
+    EntryDisplayMode? absencesDisplayMode,
+    EntryDisplayMode? gradesDisplayMode,
     bool? dashboardColorTestsInRed,
     List<String>? ignoreForGradesAverage,
     List<String>? classbookSubjects,
@@ -437,6 +489,11 @@ class SettingsState {
         calendarShowTimes: calendarShowTimes ?? this.calendarShowTimes,
         dashboardViewMode: dashboardViewMode ?? this.dashboardViewMode,
         classbookViewMode: classbookViewMode ?? this.classbookViewMode,
+        classbookDisplayMode: classbookDisplayMode ?? this.classbookDisplayMode,
+        homeworkViewMode: homeworkViewMode ?? this.homeworkViewMode,
+        homeworkDisplayMode: homeworkDisplayMode ?? this.homeworkDisplayMode,
+        absencesDisplayMode: absencesDisplayMode ?? this.absencesDisplayMode,
+        gradesDisplayMode: gradesDisplayMode ?? this.gradesDisplayMode,
         dashboardColorTestsInRed:
             dashboardColorTestsInRed ?? this.dashboardColorTestsInRed,
         ignoreForGradesAverage:
@@ -471,6 +528,11 @@ class SettingsState {
         'calendarShowTimes': calendarShowTimes,
         'dashboardViewMode': dashboardViewMode.name,
         'classbookViewMode': classbookViewMode.name,
+        'classbookDisplayMode': classbookDisplayMode.name,
+        'homeworkViewMode': homeworkViewMode.name,
+        'homeworkDisplayMode': homeworkDisplayMode.name,
+        'absencesDisplayMode': absencesDisplayMode.name,
+        'gradesDisplayMode': gradesDisplayMode.name,
         'dashboardColorTestsInRed': dashboardColorTestsInRed,
         'ignoreForGradesAverage': ignoreForGradesAverage,
         'classbookSubjects': classbookSubjects,
@@ -506,6 +568,25 @@ class SettingsState {
                 : DashboardViewMode.list,
         classbookViewMode:
             ClassbookViewMode.fromName(json['classbookViewMode'] as String?),
+        classbookDisplayMode:
+            EntryDisplayMode.fromName(json['classbookDisplayMode'] as String?),
+        // Both pages used to share `classbookViewMode`; whoever had picked an
+        // arrangement finds it on the homework page as well.
+        homeworkViewMode: ClassbookViewMode.fromName(
+          (json['homeworkViewMode'] ?? json['classbookViewMode']) as String?,
+        ),
+        homeworkDisplayMode: EntryDisplayMode.fromName(
+          json['homeworkDisplayMode'] as String?,
+          allowTimeline: false,
+        ),
+        absencesDisplayMode: EntryDisplayMode.fromName(
+          json['absencesDisplayMode'] as String?,
+          allowTimeline: false,
+        ),
+        gradesDisplayMode: EntryDisplayMode.fromName(
+          json['gradesDisplayMode'] as String?,
+          allowTimeline: false,
+        ),
         dashboardColorTestsInRed:
             json['dashboardColorTestsInRed'] as bool? ?? true,
         ignoreForGradesAverage:
@@ -538,6 +619,11 @@ class SettingsState {
     'dashboardColorTestsInRed',
     'dashboardViewMode',
     'classbookViewMode',
+    'classbookDisplayMode',
+    'homeworkViewMode',
+    'homeworkDisplayMode',
+    'absencesDisplayMode',
+    'gradesDisplayMode',
     'dashboardMarkNewOrChangedEntries',
     'dashboardDeduplicateEntries',
     'askWhenDelete',
@@ -594,6 +680,11 @@ class SettingsState {
         other.calendarShowTimes == calendarShowTimes &&
         other.dashboardViewMode == dashboardViewMode &&
         other.classbookViewMode == classbookViewMode &&
+        other.classbookDisplayMode == classbookDisplayMode &&
+        other.homeworkViewMode == homeworkViewMode &&
+        other.homeworkDisplayMode == homeworkDisplayMode &&
+        other.absencesDisplayMode == absencesDisplayMode &&
+        other.gradesDisplayMode == gradesDisplayMode &&
         other.dashboardColorTestsInRed == dashboardColorTestsInRed &&
         _listEq.equals(other.ignoreForGradesAverage, ignoreForGradesAverage) &&
         _listEq.equals(other.classbookSubjects, classbookSubjects) &&
@@ -621,6 +712,11 @@ class SettingsState {
         calendarShowTimes,
         dashboardViewMode,
         classbookViewMode,
+        classbookDisplayMode,
+        homeworkViewMode,
+        homeworkDisplayMode,
+        absencesDisplayMode,
+        gradesDisplayMode,
         dashboardColorTestsInRed,
         ...ignoreForGradesAverage,
         ...classbookSubjects,

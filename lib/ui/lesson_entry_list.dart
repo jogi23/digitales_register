@@ -17,8 +17,10 @@
 
 import 'package:dr/app_state.dart';
 import 'package:dr/l10n/l10n.dart';
+import 'package:dr/ui/entry_card.dart';
 import 'package:dr/ui/layout.dart';
 import 'package:dr/utc_date_time.dart';
+import 'package:dr/util.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -32,6 +34,15 @@ import 'package:intl/intl.dart';
 class LessonEntry {
   final UtcDateTime date;
   final int fromHour;
+
+  /// Die letzte Stunde, wenn die Einheit über mehrere geht; sonst [fromHour].
+  final int toHour;
+
+  /// Beginn und Ende laut Stundenplan. Ältere gespeicherte Stände haben sie
+  /// nicht; dann bleibt die Uhrzeit weg.
+  final UtcDateTime? from;
+  final UtcDateTime? to;
+
   final String subject;
   final List<String> teachers;
 
@@ -45,11 +56,14 @@ class LessonEntry {
   const LessonEntry({
     required this.date,
     required this.fromHour,
+    int? toHour,
+    this.from,
+    this.to,
     required this.subject,
     required this.teachers,
     required this.title,
     required this.typeName,
-  });
+  }) : toHour = toHour ?? fromHour;
 }
 
 /// The subjects that actually carry entries, alphabetically.
@@ -59,9 +73,44 @@ List<String> entrySubjects(List<LessonEntry> entries) {
   return subjects;
 }
 
+/// Die Einträge einer Stunde beisammen: Zwei Inhalte derselben Stunde sind
+/// eine Karte und ein Punkt auf der Zeitleiste, nicht zwei.
+///
+/// Erwartet [entries] so sortiert, wie sie aus dem Kalender kommen - die
+/// Einträge einer Stunde stehen dann nebeneinander.
+List<List<LessonEntry>> lessonsOf(List<LessonEntry> entries) {
+  final lessons = <List<LessonEntry>>[];
+  for (final entry in entries) {
+    final previous = lessons.isEmpty ? null : lessons.last.first;
+    if (previous != null &&
+        previous.date == entry.date &&
+        previous.fromHour == entry.fromHour &&
+        previous.subject == entry.subject) {
+      lessons.last.add(entry);
+    } else {
+      lessons.add([entry]);
+    }
+  }
+  return lessons;
+}
+
+/// Whether [lesson] is over at [at] (default: now) — by its end time where
+/// the timetable has one, otherwise by its day.
+bool lessonIsOver(List<LessonEntry> lesson, {UtcDateTime? at}) {
+  final moment = at ?? now;
+  final end = lesson.last.to;
+  if (end != null) return end.isBefore(moment);
+  return lesson.last.date
+      .isBefore(UtcDateTime(moment.year, moment.month, moment.day));
+}
+
 class LessonEntryList extends StatelessWidget {
   final List<LessonEntry> entries;
   final ClassbookViewMode viewMode;
+
+  /// Liste, Karten oder Zeitleiste. Die Zeitleiste zeigt einen Tagesablauf
+  /// und gibt es deshalb nur nach Tagen; nach Fach werden daraus Karten.
+  final EntryDisplayMode displayMode;
   final bool loading;
 
   /// Die gewählten Fächer; leer heißt alle.
@@ -89,6 +138,7 @@ class LessonEntryList extends StatelessWidget {
     super.key,
     required this.entries,
     required this.viewMode,
+    this.displayMode = EntryDisplayMode.list,
     required this.selectedSubjects,
     required this.onSelectedSubjectsChanged,
     required this.subjectLabel,
@@ -116,8 +166,7 @@ class LessonEntryList extends StatelessWidget {
     // Ein Fach, das keine Einträge mehr hat, würde die Liste leeren, ohne
     // dass ein Grund zu sehen wäre.
     final vorhanden = entrySubjects(entries);
-    final gewaehlt =
-        selectedSubjects.where(vorhanden.contains).toList();
+    final gewaehlt = selectedSubjects.where(vorhanden.contains).toList();
 
     return switch (viewMode) {
       ClassbookViewMode.chronological => Column(
@@ -131,6 +180,7 @@ class LessonEntryList extends StatelessWidget {
             Expanded(
               child: _ByDay(
                 ordinaryType: ordinaryType,
+                displayMode: displayMode,
                 entries: gewaehlt.isEmpty
                     ? entries
                     : entries
@@ -140,8 +190,13 @@ class LessonEntryList extends StatelessWidget {
             ),
           ],
         ),
-      ClassbookViewMode.bySubject =>
-          _BySubject(entries: entries, ordinaryType: ordinaryType),
+      ClassbookViewMode.bySubject => _BySubject(
+          entries: entries,
+          ordinaryType: ordinaryType,
+          displayMode: displayMode == EntryDisplayMode.timeline
+              ? EntryDisplayMode.cards
+              : displayMode,
+        ),
     };
   }
 }
@@ -150,8 +205,13 @@ class LessonEntryList extends StatelessWidget {
 class _ByDay extends StatelessWidget {
   final List<LessonEntry> entries;
   final String ordinaryType;
+  final EntryDisplayMode displayMode;
 
-  const _ByDay({required this.entries, required this.ordinaryType});
+  const _ByDay({
+    required this.entries,
+    required this.ordinaryType,
+    required this.displayMode,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -161,54 +221,111 @@ class _ByDay extends StatelessWidget {
     }
     final dates = byDate.keys.toList();
 
-    return ListView.builder(
-      padding: context.systemInsets,
-      itemCount: dates.length,
-      itemBuilder: (context, index) {
-        final date = dates[index];
-        return _DaySection(
-          date: date,
-          entries: byDate[date]!,
-          ordinaryType: ordinaryType,
-        );
-      },
+    // Jeder Tag eine eigene Gruppe: Seine Überschrift bleibt beim Scrollen
+    // oben stehen, bis der nächste Tag sie hinausschiebt - bei einem langen
+    // Tag ist so immer zu sehen, zu welchem die Zeilen gehören.
+    return CustomScrollView(
+      slivers: [
+        SliverPadding(
+          padding: context.systemInsets,
+          sliver: SliverMainAxisGroup(
+            slivers: [
+              for (final date in dates)
+                SliverMainAxisGroup(
+                  slivers: [
+                    PinnedHeaderSliver(child: _DayHeader(date: date)),
+                    SliverToBoxAdapter(
+                      child: _DaySection(
+                        entries: byDate[date]!,
+                        ordinaryType: ordinaryType,
+                        displayMode: displayMode,
+                      ),
+                    ),
+                  ],
+                ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
 
-class _DaySection extends StatelessWidget {
+/// Die Überschrift eines Tages als farbiges Band über die volle Breite.
+///
+/// Ein Band statt nur farbiger Schrift: Die Zeilen darunter wechseln zwischen
+/// weiß und grau, und ohne Band lief ein Tag, der mit einer weißen Zeile
+/// endet, in den nächsten über, der weiß beginnt.
+class _DayHeader extends StatelessWidget {
   final UtcDateTime date;
-  final List<LessonEntry> entries;
-  final String ordinaryType;
 
-  const _DaySection({
-    required this.date,
-    required this.entries,
-    required this.ordinaryType,
-  });
+  const _DayHeader({required this.date});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    return Semantics(
+      header: true,
+      child: ColoredBox(
+        color: theme.colorScheme.secondaryContainer,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          child: Text(
+            DateFormat("EEEE, d. MMMM y", tr(context).localeName).format(date),
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: theme.colorScheme.onSecondaryContainer,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// What one day holds, below its [_DayHeader].
+class _DaySection extends StatelessWidget {
+  final List<LessonEntry> entries;
+  final String ordinaryType;
+  final EntryDisplayMode displayMode;
+
+  const _DaySection({
+    required this.entries,
+    required this.ordinaryType,
+    required this.displayMode,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final tint = alternateRowColor(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-          child: Text(
-            DateFormat("EEEE, d. MMMM y", tr(context).localeName)
-                .format(date),
-            style: theme.textTheme.titleMedium
-                ?.copyWith(color: theme.colorScheme.primary),
-          ),
-        ),
-        for (final entry in entries)
-          _EntryTile(
-            entry: entry,
-            showDate: false,
-            ordinaryType: ordinaryType,
-          ),
-        const Divider(height: 1),
+        ...switch (displayMode) {
+          EntryDisplayMode.list => [
+              for (final (i, entry) in entries.indexed)
+                _EntryTile(
+                  entry: entry,
+                  showDate: false,
+                  ordinaryType: ordinaryType,
+                  tileColor: i.isOdd ? tint : null,
+                ),
+            ],
+          EntryDisplayMode.cards => [
+              for (final lesson in lessonsOf(entries))
+                _LessonCard(
+                  lesson: lesson,
+                  showDate: false,
+                  ordinaryType: ordinaryType,
+                ),
+            ],
+          EntryDisplayMode.timeline => [
+              _Timeline(
+                lessons: lessonsOf(entries),
+                ordinaryType: ordinaryType,
+              ),
+            ],
+        },
       ],
     );
   }
@@ -219,7 +336,14 @@ class _BySubject extends StatelessWidget {
   final List<LessonEntry> entries;
   final String ordinaryType;
 
-  const _BySubject({required this.entries, required this.ordinaryType});
+  /// List or cards; the timeline has no day to show here.
+  final EntryDisplayMode displayMode;
+
+  const _BySubject({
+    required this.entries,
+    required this.ordinaryType,
+    required this.displayMode,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -228,6 +352,7 @@ class _BySubject extends StatelessWidget {
       bySubject.putIfAbsent(entry.subject, () => []).add(entry);
     }
     final subjects = bySubject.keys.toList()..sort();
+    final tint = alternateRowColor(context);
 
     return ListView.builder(
       padding: context.systemInsets,
@@ -239,12 +364,21 @@ class _BySubject extends StatelessWidget {
           title: Text(subject),
           subtitle: Text(tr(context).classbookEntryCount(own.length)),
           children: [
-            for (final entry in own)
-              _EntryTile(
-                entry: entry,
-                showDate: true,
-                ordinaryType: ordinaryType,
-              ),
+            if (displayMode == EntryDisplayMode.cards)
+              for (final lesson in lessonsOf(own))
+                _LessonCard(
+                  lesson: lesson,
+                  showDate: true,
+                  ordinaryType: ordinaryType,
+                )
+            else
+              for (final (i, entry) in own.indexed)
+                _EntryTile(
+                  entry: entry,
+                  showDate: true,
+                  ordinaryType: ordinaryType,
+                  tileColor: i.isOdd ? tint : null,
+                ),
           ],
         );
       },
@@ -314,10 +448,15 @@ class _EntryTile extends StatelessWidget {
 
   final String ordinaryType;
 
+  /// Every second row is tinted, so a long entry text does not run into the
+  /// next one.
+  final Color? tileColor;
+
   const _EntryTile({
     required this.entry,
     required this.showDate,
     required this.ordinaryType,
+    this.tileColor,
   });
 
   @override
@@ -325,20 +464,19 @@ class _EntryTile extends StatelessWidget {
     final theme = Theme.of(context);
     final untertitel = <String>[
       if (showDate)
-        DateFormat("EE d.M.yy", tr(context).localeName)
-            .format(entry.date),
+        DateFormat("EE d.M.yy", tr(context).localeName).format(entry.date),
       if (!showDate) entry.subject,
       "${entry.fromHour}. h",
       if (entry.teachers.isNotEmpty) entry.teachers.join(", "),
       // Die Art nur, wenn sie vom Regelfall abweicht: Sie steht sonst an
       // jeder einzelnen Zeile und engt den eigentlichen Eintrag ein.
-      if (entry.typeName.isNotEmpty &&
-          entry.typeName != ordinaryType)
+      if (entry.typeName.isNotEmpty && entry.typeName != ordinaryType)
         entry.typeName,
     ];
 
     return ListTile(
       dense: true,
+      tileColor: tileColor,
       leading: Icon(Icons.school, color: theme.colorScheme.primary),
       title: Text(entry.title),
       // Hervorgehoben, weil hier das Suchbare steht: Fach, Stunde,
@@ -349,6 +487,231 @@ class _EntryTile extends StatelessWidget {
         style: theme.textTheme.bodyMedium?.copyWith(
           color: theme.colorScheme.primary,
           fontWeight: FontWeight.w500,
+        ),
+      ),
+    );
+  }
+}
+
+/// "1", or "1–2" for a lesson over two hours.
+String _hours(List<LessonEntry> lesson) {
+  final from = lesson.first.fromHour, to = lesson.last.toHour;
+  return from == to ? '$from' : '$from–$to';
+}
+
+/// "07:50–08:45", or null when the timetable carried no times.
+String? _times(BuildContext context, List<LessonEntry> lesson) {
+  final from = lesson.first.from, to = lesson.last.to;
+  if (from == null || to == null) return null;
+  final format = DateFormat.Hm(tr(context).localeName);
+  return '${format.format(from)}–${format.format(to)}';
+}
+
+/// What a card and a point on the timeline say about one lesson: time,
+/// subject, every entry of it, and who taught.
+class _LessonDetails extends StatelessWidget {
+  final List<LessonEntry> lesson;
+
+  /// Grouped by subject, the date takes the place of the subject.
+  final bool showDate;
+  final String ordinaryType;
+
+  /// The timeline sets the time on a line of its own above the subject; a
+  /// card has room for both side by side.
+  final bool timeAbove;
+
+  const _LessonDetails({
+    required this.lesson,
+    required this.showDate,
+    required this.ordinaryType,
+    required this.timeAbove,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final muted = theme.colorScheme.onSurfaceVariant;
+    final first = lesson.first;
+    final times = _times(context, lesson);
+    final headline = showDate
+        ? DateFormat("EE d.M.yy", tr(context).localeName).format(first.date)
+        : first.subject;
+    final headlineStyle =
+        theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold);
+    final timeStyle = theme.textTheme.bodyMedium?.copyWith(color: muted);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (timeAbove) ...[
+          if (times != null) Text(times, style: timeStyle),
+          Text(headline, style: headlineStyle),
+        ] else
+          Text.rich(
+            TextSpan(
+              children: [
+                if (times != null)
+                  TextSpan(text: '$times   ', style: timeStyle),
+                TextSpan(text: headline, style: headlineStyle),
+              ],
+            ),
+          ),
+        for (final entry in lesson) ...[
+          const SizedBox(height: 4),
+          Text(entry.title, style: theme.textTheme.bodyLarge),
+          if (entry.typeName.isNotEmpty && entry.typeName != ordinaryType)
+            Text(
+              entry.typeName,
+              style: theme.textTheme.labelMedium
+                  ?.copyWith(color: theme.colorScheme.primary),
+            ),
+        ],
+        if (first.teachers.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Icon(Icons.how_to_reg_outlined, size: 18, color: muted),
+              const SizedBox(width: 6),
+              Flexible(
+                child: Text(
+                  first.teachers.join(', '),
+                  style: theme.textTheme.bodyMedium?.copyWith(color: muted),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _LessonCard extends StatelessWidget {
+  final List<LessonEntry> lesson;
+  final bool showDate;
+  final String ordinaryType;
+
+  const _LessonCard({
+    required this.lesson,
+    required this.showDate,
+    required this.ordinaryType,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return EntryCard(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 36,
+            child: Text(
+              _hours(lesson),
+              style: theme.textTheme.bodyLarge
+                  ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+            ),
+          ),
+          Expanded(
+            child: _LessonDetails(
+              lesson: lesson,
+              showDate: showDate,
+              ordinaryType: ordinaryType,
+              timeAbove: false,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// The lessons of one day down a line, a circle per lesson.
+class _Timeline extends StatelessWidget {
+  final List<List<LessonEntry>> lessons;
+  final String ordinaryType;
+
+  const _Timeline({required this.lessons, required this.ordinaryType});
+
+  @override
+  Widget build(BuildContext context) {
+    final line = Theme.of(context).colorScheme.outlineVariant;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+      child: Column(
+        children: [
+          for (final (i, lesson) in lessons.indexed)
+            IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SizedBox(
+                    width: 40,
+                    child: Column(
+                      children: [
+                        TimelineDot(
+                          label: _hours(lesson),
+                          over: lessonIsOver(lesson),
+                        ),
+                        if (i < lessons.length - 1)
+                          Expanded(child: Container(width: 2, color: line)),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.only(
+                        bottom: i < lessons.length - 1 ? 24 : 0,
+                      ),
+                      child: _LessonDetails(
+                        lesson: lesson,
+                        showDate: false,
+                        ordinaryType: ordinaryType,
+                        timeAbove: true,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// The circle of one lesson on the timeline: filled green once the lesson is
+/// over, an outline while it runs or is still to come.
+class TimelineDot extends StatelessWidget {
+  final String label;
+  final bool over;
+
+  const TimelineDot({super.key, required this.label, required this.over});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final green = Colors.green.shade600;
+    return Container(
+      height: 28,
+      constraints: const BoxConstraints(minWidth: 28),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      decoration: BoxDecoration(
+        color: over ? green.withValues(alpha: 0.2) : theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: over
+            ? null
+            : Border.all(color: theme.colorScheme.outline, width: 2),
+      ),
+      child: Center(
+        widthFactor: 1,
+        child: Text(
+          label,
+          style: theme.textTheme.labelMedium?.copyWith(
+            color: over ? green : theme.colorScheme.onSurface,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
     );

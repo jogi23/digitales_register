@@ -59,6 +59,11 @@ class SettingsPageContainer extends ConsumerWidget {
       onSetCalendarShowTimes: notifier.setCalendarShowTimes,
       onSetDashboardViewMode: notifier.setDashboardViewMode,
       onSetClassbookViewMode: notifier.setClassbookViewMode,
+      onSetClassbookDisplayMode: notifier.setClassbookDisplayMode,
+      onSetHomeworkViewMode: notifier.setHomeworkViewMode,
+      onSetHomeworkDisplayMode: notifier.setHomeworkDisplayMode,
+      onSetAbsencesDisplayMode: notifier.setAbsencesDisplayMode,
+      onSetGradesDisplayMode: notifier.setGradesDisplayMode,
       onSetDashboardColorTestsInRed: notifier.setDashboardColorTestsInRed,
       onSetStarColor: notifier.setStarColor,
       onSetLanguage: notifier.setLanguage,
@@ -85,6 +90,11 @@ class SettingsViewModel {
   final bool calendarShowTimes;
   final DashboardViewMode dashboardViewMode;
   final ClassbookViewMode classbookViewMode;
+  final EntryDisplayMode classbookDisplayMode;
+  final ClassbookViewMode homeworkViewMode;
+  final EntryDisplayMode homeworkDisplayMode;
+  final EntryDisplayMode absencesDisplayMode;
+  final EntryDisplayMode gradesDisplayMode;
   final bool dashboardColorTestsInRed;
   final String starColor;
 
@@ -109,6 +119,11 @@ class SettingsViewModel {
     required this.calendarShowTimes,
     required this.dashboardViewMode,
     required this.classbookViewMode,
+    this.classbookDisplayMode = EntryDisplayMode.list,
+    this.homeworkViewMode = ClassbookViewMode.chronological,
+    this.homeworkDisplayMode = EntryDisplayMode.list,
+    this.absencesDisplayMode = EntryDisplayMode.list,
+    this.gradesDisplayMode = EntryDisplayMode.list,
     required this.dashboardColorTestsInRed,
     required this.starColor,
     this.language,
@@ -134,6 +149,11 @@ class SettingsViewModel {
         calendarShowTimes: s.calendarShowTimes,
         dashboardViewMode: s.dashboardViewMode,
         classbookViewMode: s.classbookViewMode,
+        classbookDisplayMode: s.classbookDisplayMode,
+        homeworkViewMode: s.homeworkViewMode,
+        homeworkDisplayMode: s.homeworkDisplayMode,
+        absencesDisplayMode: s.absencesDisplayMode,
+        gradesDisplayMode: s.gradesDisplayMode,
         dashboardColorTestsInRed: s.dashboardColorTestsInRed,
         starColor: s.starColor,
         language: s.language,

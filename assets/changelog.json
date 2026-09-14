@@ -9,7 +9,9 @@
             "Jede Seite zeigt in der Titelzeile, ob die App gerade mit dem Server spricht. Fehlendes Netz und abgelaufene Sitzung werden dabei unterschieden; ein Tippen darauf stellt die Verbindung wieder her oder meldet neu an.",
             "Ist der letzte Abruf länger her, steht sein Zeitpunkt in der Titelzeile, statt alte Daten wie frische aussehen zu lassen.",
             "Mitteilungen: was noch eine Antwort verlangt, ist schon in der Liste gekennzeichnet — „Bestätigung offen“ für die Unterschrift mit Namen, „Zustimmung offen“ für Zustimmen oder Ablehnen.",
-            "Einstellungen → Anmeldung: Auf Wunsch bleibt die App beim Wechsel zwischen Konten auf der geöffneten Seite, statt jedes Mal zum Merkheft zurückzukehren. Die Einstellung gilt für alle Konten; ohne sie bleibt alles wie bisher."
+            "Einstellungen → Anmeldung: Auf Wunsch bleibt die App beim Wechsel zwischen Konten auf der geöffneten Seite, statt jedes Mal zum Merkheft zurückzukehren. Die Einstellung gilt für alle Konten; ohne sie bleibt alles wie bisher.",
+            "Klassenbuch: zwei neue Darstellungen unter Einstellungen → Klassenbuch — Karten mit Stunde, Uhrzeit, Fach, Eintrag und Lehrperson, oder eine Zeitleiste, auf der vorbeigegangene Stunden grün gefüllt sind. Die Zeitleiste gibt es bei Anordnung nach Tagen.",
+            "Hausaufgaben, Absenzen und Bewertungen lassen sich ebenfalls als Karten statt als Liste zeigen. Die Hausaufgaben haben dafür eigene Einstellungen und übernehmen beim ersten Start die Anordnung, die bisher für beide Seiten galt."
           ]
         },
         {
@@ -22,7 +24,8 @@
             "Mitteilungen: selbst gesendete Mitteilungen tragen in der Liste die Kennzeichnung „Gesendet“ und sind so von empfangenen zu unterscheiden.",
             "Mitteilungen: der Knopf zum Bestätigen steht in einem abgesetzten Bereich über die volle Breite und sagt, solange er grau ist, dass noch der Name fehlt.",
             "Kalender-Wochenansicht: das Fach steht in jeder Kachel gleich groß, Lehrer kursiv, höchstens drei Zeilen und mit Abstand zum Rand; der Raum bleibt der Detailansicht vorbehalten.",
-            "Benachrichtigungen: ein Tippen auf die Benachrichtigung öffnet die Mitteilung oder Bewertung. Der Haken rechts markiert sie als gelesen, ohne sie zu öffnen — bei Mitteilungen gilt dann auch die Mitteilung selbst als gelesen."
+            "Benachrichtigungen: ein Tippen auf die Benachrichtigung öffnet die Mitteilung oder Bewertung. Der Haken rechts markiert sie als gelesen, ohne sie zu öffnen — bei Mitteilungen gilt dann auch die Mitteilung selbst als gelesen.",
+            "Klassenbuch und Hausaufgaben: in der Liste ist jede zweite Zeile eingefärbt, damit lange Einträge nicht ineinanderlaufen. Jeder Tag beginnt mit einem farbigen Band; seine Überschrift bleibt beim Scrollen oben stehen, bis der nächste Tag sie ablöst."
           ]
         },
         {

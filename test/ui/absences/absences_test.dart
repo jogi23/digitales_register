@@ -22,6 +22,8 @@ import 'package:dr/container/absences_page_container.dart';
 import 'package:dr/data.dart';
 import 'package:dr/providers/absences_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
+import 'package:dr/ui/absences_page.dart';
+import 'package:dr/ui/entry_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -133,6 +135,52 @@ void main() {
         find.byType(AbsencesPageContainer),
         matchesGoldenFile('demo_absences.png'),
       );
+    });
+  });
+
+  group('display', () {
+    Widget seite(EntryDisplayMode mode) => ProviderScope(
+          overrides: [
+            absencesProvider.overrideWith(
+              () => _TestAbsencesNotifier(_demoAbsencesState),
+            ),
+            noInternetProvider.overrideWith(NoInternetNotifier.new),
+          ],
+          child: MaterialApp(
+            supportedLocales: const [Locale('de', 'DE')],
+            localizationsDelegates: const [
+              GlobalCupertinoLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+            ],
+            home: Scaffold(
+              body: AbsencesBody(
+                state: _demoAbsencesState,
+                noInternet: false,
+                displayMode: mode,
+              ),
+            ),
+          ),
+        );
+
+    testWidgets('puts the absences into cards', (tester) async {
+      await tester.pumpWidget(seite(EntryDisplayMode.cards));
+      await tester.pumpAndSettle();
+      expect(find.byType(EntryCard), findsWidgets);
+      expect(
+        find.descendant(
+          of: find.byType(EntryCard),
+          matching: find.byIcon(Icons.cancel),
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('keeps the rows in the list', (tester) async {
+      await tester.pumpWidget(seite(EntryDisplayMode.list));
+      await tester.pumpAndSettle();
+      expect(find.byType(EntryCard), findsNothing);
+      expect(find.byIcon(Icons.cancel), findsOneWidget);
     });
   });
 }

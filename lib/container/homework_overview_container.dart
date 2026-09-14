@@ -49,7 +49,8 @@ class HomeworkOverviewContainer extends ConsumerWidget {
         onRefresh: ref.read(calendarProvider.notifier).loadCurrentWeek,
         child: LessonEntryList(
           entries: homeworkEntries(calendar.days.values),
-          viewMode: settings.classbookViewMode,
+          viewMode: settings.homeworkViewMode,
+          displayMode: settings.homeworkDisplayMode,
           selectedSubjects: settings.classbookSubjects,
           onSelectedSubjectsChanged:
               ref.read(settingsProvider.notifier).setClassbookSubjects,
