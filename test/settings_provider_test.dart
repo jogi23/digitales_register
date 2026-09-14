@@ -183,4 +183,62 @@ void main() {
       expect(SettingsState.fromJson(old).starColor, accentStarColorId);
     });
   });
+
+  group('display modes', () {
+    test('the homework page takes over the arrangement both pages shared',
+        () {
+      // Bisher galt eine Einstellung für Klassenbuch und Hausaufgaben.
+      final alt = SettingsState.fromJson({'classbookViewMode': 'bySubject'});
+      expect(alt.homeworkViewMode, ClassbookViewMode.bySubject);
+
+      final getrennt = SettingsState.fromJson({
+        'classbookViewMode': 'bySubject',
+        'homeworkViewMode': 'chronological',
+      });
+      expect(getrennt.homeworkViewMode, ClassbookViewMode.chronological);
+    });
+
+    test('start as the list they always were', () {
+      final s = SettingsState.fromJson(<String, dynamic>{});
+      expect(s.classbookDisplayMode, EntryDisplayMode.list);
+      expect(s.homeworkDisplayMode, EntryDisplayMode.list);
+      expect(s.absencesDisplayMode, EntryDisplayMode.list);
+      expect(s.gradesDisplayMode, EntryDisplayMode.list);
+    });
+
+    test('a timeline stored for a page without one becomes cards', () {
+      final s = SettingsState.fromJson({
+        'classbookDisplayMode': 'timeline',
+        'homeworkDisplayMode': 'timeline',
+        'absencesDisplayMode': 'timeline',
+        'gradesDisplayMode': 'timeline',
+      });
+      expect(s.classbookDisplayMode, EntryDisplayMode.timeline);
+      expect(s.homeworkDisplayMode, EntryDisplayMode.cards);
+      expect(s.absencesDisplayMode, EntryDisplayMode.cards);
+      expect(s.gradesDisplayMode, EntryDisplayMode.cards);
+    });
+
+    test('are app-wide and survive a restart', () async {
+      final before = _makeContainer();
+      before.read(settingsProvider.notifier)
+        ..setClassbookDisplayMode(EntryDisplayMode.timeline)
+        ..setHomeworkViewMode(ClassbookViewMode.bySubject)
+        ..setHomeworkDisplayMode(EntryDisplayMode.cards)
+        ..setAbsencesDisplayMode(EntryDisplayMode.cards)
+        ..setGradesDisplayMode(EntryDisplayMode.cards);
+      await pumpEventQueue();
+
+      final after = _makeContainer();
+      await after.read(settingsProvider.notifier).loadGlobal();
+      final s = after.read(settingsProvider);
+      expect(s.classbookDisplayMode, EntryDisplayMode.timeline);
+      expect(s.homeworkViewMode, ClassbookViewMode.bySubject);
+      expect(s.homeworkDisplayMode, EntryDisplayMode.cards);
+      expect(s.absencesDisplayMode, EntryDisplayMode.cards);
+      expect(s.gradesDisplayMode, EntryDisplayMode.cards);
+      // Das Klassenbuch behält seine eigene Anordnung.
+      expect(s.classbookViewMode, ClassbookViewMode.chronological);
+    });
+  });
 }

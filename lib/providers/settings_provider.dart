@@ -151,6 +151,21 @@ class SettingsNotifier extends Notifier<SettingsState> {
   void setClassbookViewMode(ClassbookViewMode value) =>
       _update(state.copyWith(classbookViewMode: value));
 
+  void setClassbookDisplayMode(EntryDisplayMode value) =>
+      _update(state.copyWith(classbookDisplayMode: value));
+
+  void setHomeworkViewMode(ClassbookViewMode value) =>
+      _update(state.copyWith(homeworkViewMode: value));
+
+  void setHomeworkDisplayMode(EntryDisplayMode value) =>
+      _update(state.copyWith(homeworkDisplayMode: value));
+
+  void setAbsencesDisplayMode(EntryDisplayMode value) =>
+      _update(state.copyWith(absencesDisplayMode: value));
+
+  void setGradesDisplayMode(EntryDisplayMode value) =>
+      _update(state.copyWith(gradesDisplayMode: value));
+
   void setClassbookSubjects(List<String> value) =>
       _update(state.copyWith(classbookSubjects: value));
 

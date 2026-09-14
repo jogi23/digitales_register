@@ -18,6 +18,7 @@
 
 import 'package:dr/providers/absences_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
+import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/ui/absences_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -32,6 +33,8 @@ class AbsencesPageContainer extends ConsumerWidget {
       onRefresh: ref.read(absencesProvider.notifier).load,
       state: state,
       noInternet: noInternet,
+      displayMode:
+          ref.watch(settingsProvider.select((s) => s.absencesDisplayMode)),
     );
   }
 }

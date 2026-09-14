@@ -22,6 +22,7 @@ import 'package:dr/container/absence_group_container.dart';
 import 'package:dr/data.dart';
 import 'package:dr/ui/absence.dart';
 import 'package:dr/ui/connection_status_button.dart';
+import 'package:dr/ui/entry_card.dart';
 import 'package:dr/ui/layout.dart';
 import 'package:dr/ui/no_internet.dart';
 import 'package:dr/l10n/l10n.dart';
@@ -33,6 +34,9 @@ class AbsencesPage extends StatelessWidget {
   final AbsencesState state;
   final bool noInternet;
 
+  /// List or cards.
+  final EntryDisplayMode displayMode;
+
   /// Loads the page again when it is pulled down from the top.
   final Future<void> Function() onRefresh;
 
@@ -41,6 +45,7 @@ class AbsencesPage extends StatelessWidget {
     super.key,
     required this.state,
     required this.noInternet,
+    this.displayMode = EntryDisplayMode.list,
   });
   @override
   Widget build(BuildContext context) {
@@ -54,6 +59,7 @@ class AbsencesPage extends StatelessWidget {
         child: AbsencesBody(
           state: state,
           noInternet: noInternet,
+          displayMode: displayMode,
         ),
       ),
     );
@@ -63,16 +69,27 @@ class AbsencesPage extends StatelessWidget {
 class AbsencesBody extends StatelessWidget {
   final AbsencesState state;
   final bool noInternet;
+  final EntryDisplayMode displayMode;
 
-  const AbsencesBody(
-      {super.key, required this.state, required this.noInternet});
+  const AbsencesBody({
+    super.key,
+    required this.state,
+    required this.noInternet,
+    this.displayMode = EntryDisplayMode.list,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final altColor = Theme.of(context)
-        .colorScheme
-        .surfaceContainerHighest
-        .withOpacity(0.75);
+    final altColor = alternateRowColor(context);
+
+    // A row tinted every other time in the list, a card of its own otherwise.
+    Widget entry(int i, Widget Function(Color? tileColor) build) =>
+        displayMode == EntryDisplayMode.cards
+            ? EntryCard(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: build(null),
+              )
+            : build(i.isEven ? altColor : null);
 
     return state.statistic != null
         ? state.absences.isEmpty && state.futureAbsences.isEmpty
@@ -99,9 +116,12 @@ class AbsencesBody extends StatelessWidget {
                     ),
                   ),
                 for (var i = 0; i < state.futureAbsences.length; i++)
-                  FutureAbsenceWidget(
-                    absence: state.futureAbsences[i],
-                    tileColor: i.isEven ? altColor : null,
+                  entry(
+                    i,
+                    (tileColor) => FutureAbsenceWidget(
+                      absence: state.futureAbsences[i],
+                      tileColor: tileColor,
+                    ),
                   ),
                 if (state.absences.isNotEmpty)
                   Padding(
@@ -113,9 +133,12 @@ class AbsencesBody extends StatelessWidget {
                   ),
                 ...List.generate(
                   state.absences.length,
-                  (n) => AbsenceGroupContainer(
-                    group: state.absences.length - n - 1,
-                    tileColor: n.isEven ? altColor : null,
+                  (n) => entry(
+                    n,
+                    (tileColor) => AbsenceGroupContainer(
+                      group: state.absences.length - n - 1,
+                      tileColor: tileColor,
+                    ),
                   ),
                 ),
               ])

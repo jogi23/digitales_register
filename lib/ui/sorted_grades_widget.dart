@@ -21,6 +21,7 @@ import 'package:dr/container/sorted_grades_container.dart';
 import 'package:dr/data.dart';
 import 'package:dr/services/app_router.dart';
 import 'package:dr/ui/animated_linear_progress_indicator.dart';
+import 'package:dr/ui/entry_card.dart';
 import 'package:dr/ui/star_rating.dart';
 import 'package:dr/util.dart';
 import 'package:dr/l10n/l10n.dart';
@@ -75,6 +76,7 @@ class SortedGradesWidget extends StatelessWidget {
           SubjectWidget(
             subject: s,
             sortByType: vm.sortByType,
+            cards: vm.displayMode == EntryDisplayMode.cards,
             showAverage: vm.showSubjectAverage,
             viewSubjectDetail: () => viewSubjectDetail(s),
             showCancelled: vm.showCancelled!,
@@ -120,6 +122,9 @@ class SortedGradesWidget extends StatelessWidget {
 class SubjectWidget extends StatefulWidget {
   final bool sortByType, showCancelled, noInternet, ignoredForAverage;
 
+  /// Every grade and observation in a card of its own rather than a row.
+  final bool cards;
+
   /// Whether the subject's own average is shown next to its name.
   final bool showAverage;
   final Subject subject;
@@ -140,6 +145,7 @@ class SubjectWidget extends StatefulWidget {
       required this.semester,
       required this.noInternet,
       required this.ignoredForAverage,
+      this.cards = false,
       this.pendingSubjectId,
       this.pendingGradeId,
       this.clearPendingSubject,
@@ -154,22 +160,26 @@ class _SubjectWidgetState extends State<SubjectWidget> {
   final _controller = ExpansibleController();
 
   Widget _buildDetailEntry(DetailEntry entry, {Color? tileColor}) {
+    final Widget child;
     if (entry is! GradeDetail) {
-      return ObservationWidget(
+      child = ObservationWidget(
           observation: entry as Observation, tileColor: tileColor);
-    }
-    final child = GradeWidget(
-      grade: entry,
-      tileColor: tileColor,
-      subjectId: widget.subject.id,
-    );
-    if (widget.pendingGradeId == entry.id) {
-      return PendingGradeTarget(
-        onVisible: widget.clearPendingGrade,
-        child: child,
+    } else {
+      final grade = GradeWidget(
+        grade: entry,
+        tileColor: tileColor,
+        subjectId: widget.subject.id,
       );
+      child = widget.pendingGradeId == entry.id
+          ? PendingGradeTarget(
+              onVisible: widget.clearPendingGrade,
+              child: grade,
+            )
+          : grade;
     }
-    return child;
+    return widget.cards
+        ? EntryCard(padding: EdgeInsets.zero, child: child)
+        : child;
   }
 
   @override
@@ -291,6 +301,7 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                           ...Subject.sortByType(entries).entries.map(
                                 (entry) => GradeTypeWidget(
                                   typeName: entry.key,
+                                  cards: widget.cards,
                                   entries: entry.value
                                       .where((g) =>
                                           widget.showCancelled || !g.cancelled)
@@ -307,7 +318,10 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                               .indexed)
                             _buildDetailEntry(
                               entry,
-                              tileColor: i.isOdd ? altColor : null,
+                              // A card sets itself apart; tinting it as well
+                              // would only stripe the cards.
+                              tileColor:
+                                  widget.cards || i.isEven ? null : altColor,
                             )
                       ],
                     )
@@ -457,13 +471,17 @@ class GradeTypeWidget extends StatelessWidget {
   final int? pendingGradeId;
   final VoidCallback? clearPendingGrade;
 
+  /// Every grade and observation in a card of its own rather than a row.
+  final bool cards;
+
   const GradeTypeWidget(
       {super.key,
       required this.typeName,
       required this.entries,
       this.subjectId,
       this.pendingGradeId,
-      this.clearPendingGrade});
+      this.clearPendingGrade,
+      this.cards = false});
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -474,7 +492,7 @@ class GradeTypeWidget extends StatelessWidget {
         .map(
           ((int, DetailEntry) pair) {
             final (i, g) = pair;
-            final bgColor = i.isOdd ? altColor : null;
+            final bgColor = cards || i.isEven ? null : altColor;
             if (g is! GradeDetail) {
               return ObservationWidget(
                 observation: g as Observation,
@@ -493,6 +511,9 @@ class GradeTypeWidget extends StatelessWidget {
                   )
                 : gradeWidget;
           },
+        )
+        .map<Widget>(
+          (w) => cards ? EntryCard(padding: EdgeInsets.zero, child: w) : w,
         )
         .toList();
     return displayGrades.isEmpty

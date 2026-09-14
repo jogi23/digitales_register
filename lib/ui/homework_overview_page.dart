@@ -36,6 +36,9 @@ List<LessonEntry> homeworkEntries(Iterable<CalendarDay> days) {
           LessonEntry(
             date: day.date,
             fromHour: hour.fromHour,
+            toHour: hour.toHour,
+            from: hour.timeSpans.isEmpty ? null : hour.timeSpans.first.from,
+            to: hour.timeSpans.isEmpty ? null : hour.timeSpans.last.to,
             subject: hour.subject,
             teachers: [
               for (final teacher in hour.teachers) teacher.fullName,

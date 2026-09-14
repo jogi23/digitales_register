@@ -53,6 +53,7 @@ class ClassbookPageContainer extends ConsumerWidget {
         child: LessonEntryList(
           entries: classbookEntries(calendar.days.values),
           viewMode: settings.classbookViewMode,
+          displayMode: settings.classbookDisplayMode,
           selectedSubjects: settings.classbookSubjects,
           onSelectedSubjectsChanged:
               ref.read(settingsProvider.notifier).setClassbookSubjects,

@@ -59,6 +59,11 @@ class SettingsPageWidget extends StatefulWidget {
   final OnSettingChanged<bool> onSetCalendarShowTimes;
   final void Function(DashboardViewMode mode) onSetDashboardViewMode;
   final void Function(ClassbookViewMode mode) onSetClassbookViewMode;
+  final void Function(EntryDisplayMode mode) onSetClassbookDisplayMode;
+  final void Function(ClassbookViewMode mode) onSetHomeworkViewMode;
+  final void Function(EntryDisplayMode mode) onSetHomeworkDisplayMode;
+  final void Function(EntryDisplayMode mode) onSetAbsencesDisplayMode;
+  final void Function(EntryDisplayMode mode) onSetGradesDisplayMode;
   final OnSettingChanged<bool> onSetDashboardColorTestsInRed;
   final OnSettingChanged<String> onSetStarColor;
   final OnSettingChanged<String?> onSetLanguage;
@@ -86,6 +91,11 @@ class SettingsPageWidget extends StatefulWidget {
     required this.onSetCalendarShowTimes,
     required this.onSetDashboardViewMode,
     required this.onSetClassbookViewMode,
+    required this.onSetClassbookDisplayMode,
+    required this.onSetHomeworkViewMode,
+    required this.onSetHomeworkDisplayMode,
+    required this.onSetAbsencesDisplayMode,
+    required this.onSetGradesDisplayMode,
     required this.onSetDashboardColorTestsInRed,
     required this.onSetStarColor,
     required this.onSetLanguage,
@@ -145,6 +155,71 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
       }
     });
   }
+
+  Widget _heading(BuildContext context, String text) => ListTile(
+        title: Text(text, style: Theme.of(context).textTheme.headlineSmall),
+      );
+
+  Widget _subheading(BuildContext context, String text) => ListTile(
+        dense: true,
+        title: Text(text, style: Theme.of(context).textTheme.titleSmall),
+      );
+
+  /// By day or by subject — classbook and homework each have their own.
+  List<Widget> _arrangementTiles(
+    BuildContext context, {
+    required ClassbookViewMode value,
+    required void Function(ClassbookViewMode mode) onChanged,
+  }) =>
+      [
+        _subheading(context, tr(context).settingsClassbookView),
+        for (final entry in <ClassbookViewMode, String>{
+          ClassbookViewMode.chronological:
+              tr(context).classbookViewChronological,
+          ClassbookViewMode.bySubject: tr(context).classbookViewBySubject,
+        }.entries)
+          RadioListTile<ClassbookViewMode>(
+            title: Text(entry.value),
+            value: entry.key,
+            groupValue: value,
+            onChanged: (mode) {
+              if (mode != null) onChanged(mode);
+            },
+          ),
+      ];
+
+  /// List, cards and — where [offerTimeline] — the timeline. With
+  /// [timelineEnabled] false it stays visible but cannot be picked, and says
+  /// why, rather than vanishing when the arrangement changes.
+  List<Widget> _displayModeTiles(
+    BuildContext context, {
+    required EntryDisplayMode value,
+    required void Function(EntryDisplayMode mode) onChanged,
+    bool offerTimeline = false,
+    bool timelineEnabled = true,
+  }) =>
+      [
+        _subheading(context, tr(context).settingsDisplay),
+        for (final entry in <EntryDisplayMode, String>{
+          EntryDisplayMode.list: tr(context).displayList,
+          EntryDisplayMode.cards: tr(context).displayCards,
+          if (offerTimeline)
+            EntryDisplayMode.timeline: tr(context).displayTimeline,
+        }.entries)
+          RadioListTile<EntryDisplayMode>(
+            title: Text(entry.value),
+            subtitle: entry.key == EntryDisplayMode.timeline && !timelineEnabled
+                ? Text(tr(context).displayTimelineOnlyByDay)
+                : null,
+            value: entry.key,
+            groupValue: value,
+            onChanged: entry.key == EntryDisplayMode.timeline && !timelineEnabled
+                ? null
+                : (mode) {
+                    if (mode != null) onChanged(mode);
+                  },
+          ),
+      ];
 
   @override
   Widget build(BuildContext context) {
@@ -355,26 +430,38 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
               style: Theme.of(context).textTheme.headlineSmall,
             ),
           ),
-          ListTile(
-            dense: true,
-            title: Text(
-              tr(context).settingsClassbookView,
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
+          ..._arrangementTiles(
+            context,
+            value: widget.vm.classbookViewMode,
+            onChanged: widget.onSetClassbookViewMode,
           ),
-          for (final entry in <ClassbookViewMode, String>{
-            ClassbookViewMode.chronological:
-                tr(context).classbookViewChronological,
-            ClassbookViewMode.bySubject: tr(context).classbookViewBySubject,
-          }.entries)
-            RadioListTile<ClassbookViewMode>(
-              title: Text(entry.value),
-              value: entry.key,
-              groupValue: widget.vm.classbookViewMode,
-              onChanged: (mode) {
-                if (mode != null) widget.onSetClassbookViewMode(mode);
-              },
-            ),
+          ..._displayModeTiles(
+            context,
+            value: widget.vm.classbookDisplayMode,
+            onChanged: widget.onSetClassbookDisplayMode,
+            offerTimeline: true,
+            timelineEnabled:
+                widget.vm.classbookViewMode == ClassbookViewMode.chronological,
+          ),
+          const Divider(),
+          _heading(context, tr(context).settingsHomeworkOverview),
+          ..._arrangementTiles(
+            context,
+            value: widget.vm.homeworkViewMode,
+            onChanged: widget.onSetHomeworkViewMode,
+          ),
+          ..._displayModeTiles(
+            context,
+            value: widget.vm.homeworkDisplayMode,
+            onChanged: widget.onSetHomeworkDisplayMode,
+          ),
+          const Divider(),
+          _heading(context, tr(context).settingsAbsences),
+          ..._displayModeTiles(
+            context,
+            value: widget.vm.absencesDisplayMode,
+            onChanged: widget.onSetAbsencesDisplayMode,
+          ),
           const Divider(),
           SwitchListTile.adaptive(
             title: Text(tr(context).settingsAskWhenDeleting),
@@ -415,6 +502,11 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
               widget.onSetShowSubjectAverage(value);
             },
             value: widget.vm.showSubjectAverage,
+          ),
+          ..._displayModeTiles(
+            context,
+            value: widget.vm.gradesDisplayMode,
+            onChanged: widget.onSetGradesDisplayMode,
           ),
           ListTile(
             title: Text(tr(context).settingsStarColor),

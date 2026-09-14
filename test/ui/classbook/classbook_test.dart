@@ -19,8 +19,10 @@ import 'package:built_collection/built_collection.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/data.dart';
 import 'package:dr/ui/classbook_page.dart';
+import 'package:dr/ui/entry_card.dart';
 import 'package:dr/ui/lesson_entry_list.dart';
 import 'package:dr/utc_date_time.dart';
+import 'package:dr/util.dart' show mockNow;
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -31,6 +33,8 @@ CalendarHour _hour({
   required String subject,
   List<String> contents = const [],
   String teacher = 'Musterfrau',
+  UtcDateTime? from,
+  UtcDateTime? to,
 }) =>
     CalendarHour(
       (b) => b
@@ -38,7 +42,12 @@ CalendarHour _hour({
         ..toHour = fromHour
         ..subject = subject
         ..rooms = ListBuilder<String>()
-        ..timeSpans = ListBuilder<TimeSpan>()
+        ..timeSpans = ListBuilder<TimeSpan>([
+          if (from != null && to != null)
+            TimeSpan((t) => t
+              ..from = from
+              ..to = to),
+        ])
         ..homeworkExams = ListBuilder<HomeworkExam>()
         ..teachers = ListBuilder<Teacher>([
           Teacher((t) => t
@@ -79,10 +88,38 @@ List<CalendarDay> _tage() => [
       ]),
     ];
 
+/// Ein Vormittag mit Uhrzeiten, wie ihn der Stundenplan liefert.
+List<CalendarDay> _stundenplan() => [
+      _day(_dienstag, [
+        _hour(
+          fromHour: 1,
+          subject: 'Englisch',
+          contents: ['Vokabelwiederholung'],
+          from: UtcDateTime(2026, 5, 12, 7, 50),
+          to: UtcDateTime(2026, 5, 12, 8, 45),
+        ),
+        _hour(
+          fromHour: 2,
+          subject: 'Deutsch',
+          contents: ['Nomen im Zauberlehrling'],
+          from: UtcDateTime(2026, 5, 12, 8, 45),
+          to: UtcDateTime(2026, 5, 12, 9, 35),
+        ),
+        _hour(
+          fromHour: 3,
+          subject: 'Italienisch',
+          contents: ['Verbformen in drei Zeiten'],
+          from: UtcDateTime(2026, 5, 12, 9, 35),
+          to: UtcDateTime(2026, 5, 12, 10, 25),
+        ),
+      ]),
+    ];
+
 /// Haelt die Auswahl so, wie es in der App die Einstellungen tun.
 class _Huelle extends StatefulWidget {
   final List<LessonEntry> entries;
   final ClassbookViewMode mode;
+  final EntryDisplayMode display;
   final bool loading;
   final List<String> initial;
   final Map<String, String> kuerzel;
@@ -90,6 +127,7 @@ class _Huelle extends StatefulWidget {
   const _Huelle({
     required this.entries,
     required this.mode,
+    required this.display,
     required this.loading,
     required this.initial,
     required this.kuerzel,
@@ -106,6 +144,7 @@ class _HuelleState extends State<_Huelle> {
   Widget build(BuildContext context) => LessonEntryList(
         entries: widget.entries,
         viewMode: widget.mode,
+        displayMode: widget.display,
         loading: widget.loading,
         selectedSubjects: _gewaehlt,
         onSelectedSubjectsChanged: (f) => setState(() => _gewaehlt = f),
@@ -119,6 +158,7 @@ class _HuelleState extends State<_Huelle> {
 Widget _seite(
   List<LessonEntry> entries, {
   ClassbookViewMode mode = ClassbookViewMode.chronological,
+  EntryDisplayMode display = EntryDisplayMode.list,
   bool loading = false,
   List<String> selected = const [],
   Map<String, String> kuerzel = const {},
@@ -134,6 +174,7 @@ Widget _seite(
         body: _Huelle(
           entries: entries,
           mode: mode,
+          display: display,
           loading: loading,
           initial: selected,
           kuerzel: kuerzel,
@@ -384,6 +425,120 @@ void main() {
       expect(find.text('Notenlehre'), findsOneWidget);
       expect(find.text('Diktat'), findsNothing);
       expect(find.text('Silbenlesen'), findsNothing);
+    });
+  });
+
+  group('lesson times', () {
+    test('keep start and end of the lesson with each entry', () {
+      final entry = classbookEntries(_stundenplan()).first;
+      expect(entry.from, UtcDateTime(2026, 5, 12, 7, 50));
+      expect(entry.to, UtcDateTime(2026, 5, 12, 8, 45));
+      expect(entry.toHour, 1);
+    });
+
+    test('are left out where the timetable has none', () {
+      // Ältere gespeicherte Stände kennen keine Uhrzeiten.
+      final entry = classbookEntries(_tage()).first;
+      expect(entry.from, isNull);
+      expect(entry.to, isNull);
+    });
+
+    test('entries of one lesson belong together', () {
+      // Diktat und Leseübung: dieselbe Stunde, also eine Karte.
+      final lessons = lessonsOf(classbookEntries(_tage()));
+      expect(lessons.map((l) => l.map((e) => e.title).toList()), [
+        ['Diktat', 'Leseübung'],
+        ['Notenlehre'],
+        ['Silbenlesen'],
+      ]);
+    });
+  });
+
+  group('the list', () {
+    testWidgets('tints every second row', (tester) async {
+      // Lange Einträge laufen sonst ineinander.
+      await tester.pumpWidget(_seite(classbookEntries(_tage())));
+      await tester.pumpAndSettle();
+
+      ListTile zeile(String title) =>
+          tester.widget<ListTile>(find.widgetWithText(ListTile, title));
+      expect(zeile('Diktat').tileColor, isNull);
+      expect(zeile('Leseübung').tileColor, isNotNull);
+      expect(zeile('Notenlehre').tileColor, isNull);
+    });
+  });
+
+  group('cards', () {
+    testWidgets('give every lesson a card with its time and teacher',
+        (tester) async {
+      await tester.pumpWidget(_seite(
+        classbookEntries(_stundenplan()),
+        display: EntryDisplayMode.cards,
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(EntryCard), findsNWidgets(3));
+      expect(find.textContaining('07:50–08:45'), findsOneWidget);
+      expect(find.text('Anna Musterfrau'), findsNWidgets(3));
+    });
+
+    testWidgets('put two entries of one lesson into the same card',
+        (tester) async {
+      await tester.pumpWidget(_seite(
+        classbookEntries(_tage()),
+        display: EntryDisplayMode.cards,
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(EntryCard), findsNWidgets(3));
+      final karte = find.ancestor(
+        of: find.text('Diktat'),
+        matching: find.byType(EntryCard),
+      );
+      expect(
+        find.descendant(of: karte, matching: find.text('Leseübung')),
+        findsOneWidget,
+      );
+    });
+  });
+
+  group('the timeline', () {
+    tearDown(() => mockNow = null);
+
+    testWidgets('fills the lessons that are over', (tester) async {
+      // Mitten in der dritten Stunde: die ersten beiden sind vorbei.
+      mockNow = UtcDateTime(2026, 5, 12, 9, 40);
+      await tester.pumpWidget(_seite(
+        classbookEntries(_stundenplan()),
+        display: EntryDisplayMode.timeline,
+      ));
+      await tester.pumpAndSettle();
+
+      final punkte =
+          tester.widgetList<TimelineDot>(find.byType(TimelineDot)).toList();
+      expect(punkte.map((p) => p.label), ['1', '2', '3']);
+      expect(punkte.map((p) => p.over), [true, true, false]);
+    });
+
+    test('goes by the day where the timetable has no times', () {
+      final montag = [classbookEntries(_tage()).last];
+      expect(lessonIsOver(montag, at: UtcDateTime(2026, 5, 12, 7)), isTrue);
+      expect(lessonIsOver(montag, at: UtcDateTime(2026, 5, 11, 23)), isFalse);
+    });
+
+    testWidgets('becomes cards when arranged by subject', (tester) async {
+      // Nach Fach gibt es keinen Tag, dessen Ablauf sie zeigen könnte.
+      await tester.pumpWidget(_seite(
+        classbookEntries(_tage()),
+        mode: ClassbookViewMode.bySubject,
+        display: EntryDisplayMode.timeline,
+      ));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Deutsch'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(TimelineDot), findsNothing);
+      expect(find.byType(EntryCard), findsNWidgets(2));
     });
   });
 }
