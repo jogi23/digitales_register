@@ -124,21 +124,34 @@ class GradesNotifier extends Notifier<GradesState> {
     return _findSubjectById(subjectId);
   }
 
+  /// Sends a request about the logged-in student.
+  ///
+  /// The student id only exists once a login has loaded the account's
+  /// configuration, so it is read after the login — reading it up front
+  /// crashed when grades were loaded before the login was done.
+  Future<dynamic> _sendForStudent(
+    String url, [
+    Map<String, Object?> args = const {},
+  ]) async {
+    if (!await wrapper.ensureLoggedIn()) return null;
+    final studentId = wrapper.config?.userId;
+    if (studentId == null) return null;
+    return wrapper.send(url, args: {"studentId": studentId, ...args});
+  }
+
   Future<void> load(Semester semester) async {
     if (ref.read(noInternetProvider)) return;
     state = state.rebuild((b) => b..loading = true);
     _doForSemester(
       semester == Semester.all ? [Semester.first, Semester.second] : [semester],
       (s) async {
-        final dynamic data = await wrapper.send(
-          _subjects,
-          args: {"studentId": wrapper.config.userId},
-        );
-        if (data == null) {
+        try {
+          final dynamic data = await _sendForStudent(_subjects);
+          if (data != null) _applyLoaded(data, s);
+        } finally {
+          // Also on failure: a page stuck in "loading" would spin forever.
           state = state.rebuild((b) => b..loading = false);
-          return;
         }
-        _applyLoaded(data, s);
       },
     );
   }
@@ -148,12 +161,9 @@ class GradesNotifier extends Notifier<GradesState> {
     _doForSemester(
       semester == Semester.all ? [Semester.first, Semester.second] : [semester],
       (s) async {
-        dynamic data = await wrapper.send(
+        dynamic data = await _sendForStudent(
           _subjectsDetail,
-          args: {
-            "studentId": wrapper.config.userId,
-            "subjectId": subject.id,
-          },
+          {"subjectId": subject.id},
         );
         if (data == null) return;
         if (data is String) data = json.decode(data);
@@ -426,16 +436,25 @@ class _SemesterLock {
   Future<void> synchronized(
       Semester semester, Future<void> Function() f) async {
     await _mutex.acquire();
-    bool mutexAcquired = true;
-    if (usersOfCurrent == 0 || semester == current) {
-      usersOfCurrent++;
-      if (semester != current) {
-        await semesterChangeCallback(semester);
-        current = semester;
-      }
+    if (usersOfCurrent != 0 && semester != current) {
+      waitlist.putIfAbsent(semester, () => []).add(f);
       _mutex.release();
-      mutexAcquired = false;
+      return;
+    }
+    usersOfCurrent++;
+    // Released and counted down also when a request fails: a lock left held
+    // blocked the other semester for the rest of the session.
+    try {
+      try {
+        if (semester != current) {
+          await semesterChangeCallback(semester);
+          current = semester;
+        }
+      } finally {
+        _mutex.release();
+      }
       await f();
+    } finally {
       if (usersOfCurrent == 1 && waitlist.isNotEmpty) {
         final last = waitlist.entries.first;
         waitlist.remove(last.key);
@@ -444,15 +463,6 @@ class _SemesterLock {
         }
       }
       usersOfCurrent--;
-    } else {
-      if (waitlist.containsKey(semester)) {
-        waitlist[semester]!.add(f);
-      } else {
-        waitlist[semester] = [f];
-      }
-    }
-    if (mutexAcquired) {
-      _mutex.release();
     }
   }
 }

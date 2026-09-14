@@ -43,7 +43,9 @@ class AuthService {
   String? user, pass;
   bool demoMode = false;
   String? error;
-  late Config config;
+
+  /// The account's configuration; null until a login has loaded it.
+  Config? config;
 
   Future<bool> _loggedIn = Future.value(false);
   Future<bool> get loggedIn => _loggedIn;
@@ -80,7 +82,7 @@ class AuthService {
       this.user = user;
       this.pass = pass;
       final demoUserId = await _getDemoUserId();
-      config = Config(
+      final demoConfig = Config(
         (b) => b
           ..autoLogoutSeconds = 300
           ..currentSemesterMaybe = 1
@@ -90,7 +92,8 @@ class AuthService {
           ..isStudentOrParent = true
           ..userId = demoUserId,
       );
-      onSessionStarted?.call(config);
+      config = demoConfig;
+      onSessionStarted?.call(demoConfig);
       configLoaded?.call();
       return;
     } else {
@@ -136,25 +139,29 @@ class AuthService {
             .data,
       )!;
     } catch (e) {
-      loggedInCompleter.complete(false);
-      log("Error while logging in (login failed)", error: e);
-      if (e is TimeoutException || await _refreshNoInternetCheck()) {
-        noInternetDuringLogin = true;
-      }
-      error = "Unknown Error:\n$e";
+      await _failLogin(loggedInCompleter, e);
       return null;
     }
     if (getBool(response["loggedIn"]) ?? false) {
+      final Config loadedConfig;
+      try {
+        loadedConfig = await _loadConfig();
+      } catch (e) {
+        // The server said yes but did not hand over the account's home page.
+        // Counting that as logged in left the app without a user id, and the
+        // parse error ended it.
+        await _failLogin(loggedInCompleter, e);
+        return null;
+      }
       log("login succeeded");
       lastLoginInteraction = DateTime.now();
+      config = loadedConfig;
       loggedInCompleter.complete(true);
       this.user = user;
       this.pass = pass;
       error = null;
-      await _loadConfig().then((_) {
-        onSessionStarted?.call(config);
-        onConfigLoaded!();
-      });
+      onSessionStarted?.call(loadedConfig);
+      onConfigLoaded!();
     } else {
       log("login did not succeed");
       loggedInCompleter.complete(false);
@@ -184,6 +191,18 @@ class AuthService {
 
   /// Temporary flag set during login when no internet is detected.
   bool noInternetDuringLogin = false;
+
+  Future<void> _failLogin(Completer<bool> loggedIn, Object e) async {
+    loggedIn.complete(false);
+    log("Error while logging in (login failed)", error: e);
+    // A page that arrived but was the wrong one says nothing about the
+    // connection.
+    if (e is TimeoutException ||
+        (e is! ConfigParseException && await _refreshNoInternetCheck())) {
+      noInternetDuringLogin = true;
+    }
+    error = "Unknown Error:\n$e";
+  }
 
   Future<bool> _refreshNoInternetCheck() async {
     final address = _apiClient.url != null
@@ -270,9 +289,11 @@ class AuthService {
     );
   }
 
-  Future<void> _loadConfig() async {
+  /// Throws [ConfigParseException] if the server answers with a page other
+  /// than the account's home page.
+  Future<Config> _loadConfig() async {
     final source =
         (await _apiClient.dio.get<String>(_apiClient.baseAddress)).data;
-    config = ConfigParser.parse(source!);
+    return ConfigParser.parse(source ?? "");
   }
 }

@@ -17,12 +17,26 @@
 
 import 'package:dr/app_state.dart';
 
+/// Thrown when the page is not the home page of a logged-in account — a login
+/// or redirect page, for instance.
+class ConfigParseException implements Exception {
+  /// The text that was expected on the page but not found.
+  final String missing;
+
+  const ConfigParseException(this.missing);
+
+  @override
+  String toString() =>
+      "ConfigParseException: '$missing' not found on the home page";
+}
+
 /// Parses the server's HTML home page to extract user configuration.
 ///
 /// All methods are pure/static — no network calls, no side effects.
 class ConfigParser {
   ConfigParser._();
 
+  /// Throws [ConfigParseException] if [source] lacks any of the values.
   static Config parse(String source) {
     final id = _readUserId(source);
     final fullName = _readFullName(source);
@@ -54,39 +68,38 @@ class ConfigParser {
     }
   }
 
-  static int _readAutoLogoutSeconds(String source) {
-    final substringFromId = source.substring(
-        source.indexOf("auto_logout_seconds: ") +
-            "auto_logout_seconds: ".length);
-    return int.parse(
-        substringFromId.substring(0, substringFromId.indexOf(",")).trim());
+  static int _readAutoLogoutSeconds(String source) =>
+      _readInt(source, "auto_logout_seconds: ", ",");
+
+  static int _readUserId(String source) =>
+      _readInt(source, "currentUserId=", ";");
+
+  static String _readAfterImgId(String source) =>
+      _after(source, "navigationProfilePicture").trim();
+
+  static String _readFullName(String source) =>
+      _between(_readAfterImgId(source), ">", "<").trim();
+
+  static String _readImgSource(String source) =>
+      _between(_readAfterImgId(source), 'src="', '"').trim();
+
+  static int _readInt(String source, String marker, String end) {
+    final text = _between(source, marker, end).trim();
+    return int.tryParse(text) ?? (throw ConfigParseException(marker));
   }
 
-  static int _readUserId(String source) {
-    final substringFromId = source
-        .substring(source.indexOf("currentUserId=") + "currentUserId=".length);
-    return int.parse(
-        substringFromId.substring(0, substringFromId.indexOf(";")).trim());
+  /// Everything after [marker]. Searching blindly used to cut at index -1
+  /// and hand whatever came out to `int.parse`.
+  static String _after(String source, String marker) {
+    final start = source.indexOf(marker);
+    if (start == -1) throw ConfigParseException(marker);
+    return source.substring(start + marker.length);
   }
 
-  static String _readAfterImgId(String source) {
-    return source
-        .substring(source.indexOf("navigationProfilePicture") +
-            "navigationProfilePicture".length)
-        .trim();
-  }
-
-  static String _readFullName(String source) {
-    final afterImgId = _readAfterImgId(source);
-    return afterImgId
-        .substring(afterImgId.indexOf(">") + 1, afterImgId.indexOf("<"))
-        .trim();
-  }
-
-  static String _readImgSource(String source) {
-    final afterImgId = _readAfterImgId(source);
-    final afterStart =
-        afterImgId.substring(afterImgId.indexOf('src="') + "src='".length);
-    return afterStart.substring(0, afterStart.indexOf('"')).trim();
+  static String _between(String source, String marker, String end) {
+    final rest = _after(source, marker);
+    final stop = rest.indexOf(end);
+    if (stop == -1) throw ConfigParseException(end);
+    return rest.substring(0, stop);
   }
 }

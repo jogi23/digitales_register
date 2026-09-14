@@ -37,7 +37,7 @@ class CalendarContainer extends ConsumerWidget {
       vm: CalendarViewModel(
         first: currentDays.isEmpty ? null : currentDays.first.date,
         last: currentDays.isEmpty ? null : currentDays.last.date,
-        currentMonday: calendarState.currentMonday!,
+        currentMonday: calendarState.shownMonday,
         showEditNicksBar: currentDays.any(
               (day) => day.hours.any(
                 (hour) => subjectAppearance.nickFor(hour.subject) == null,

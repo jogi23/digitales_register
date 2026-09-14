@@ -68,7 +68,7 @@ class Wrapper {
 
   String? get user => _auth.user;
   String? get pass => _auth.pass;
-  Config get config => _auth.config;
+  Config? get config => _auth.config;
   String? get error => _auth.error;
   Future<bool> get loggedIn => _auth.loggedIn;
   bool get demoMode => _auth.demoMode;
