@@ -16,6 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'package:dr/providers/messages_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/providers/notifications_provider.dart';
 import 'package:dr/services/app_router.dart';
@@ -34,6 +35,11 @@ class NotificationPageContainer extends ConsumerWidget {
       notifications: state.notifications,
       noInternet: noInternet,
       deleteNotification: notifier.delete,
+      // Through the messages: they mark the message and remove its
+      // notifications in one go.
+      markMessageAsRead: (notification) => ref
+          .read(messagesProvider.notifier)
+          .markAsRead(notification.objectId!),
       deleteAllNotifications: notifier.deleteAll,
       goToMessage: (id) {
         ref.read(notificationsProvider.notifier).markMessageAsRead(id);

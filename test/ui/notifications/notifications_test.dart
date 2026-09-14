@@ -383,10 +383,123 @@ void main() {
     );
 
     expect(find.text("Neue Bewertung"), findsOneWidget);
-    await tester.tap(find.byTooltip("Bewertung öffnen"));
+    await tester.tap(find.text("Neue Bewertung"));
     await tester.pumpAndSettle();
 
     verify(() => appRouter.revealGrade(17)).called(1);
     expect(container.read(notificationsProvider).notifications, isEmpty);
+  });
+
+  group('message notification', () {
+    late MockAppRouter appRouter;
+    late ProviderContainer container;
+
+    final notification = Notification(
+      (b) => b
+        ..id = 2
+        ..title = "Neue Mitteilung"
+        ..timeSent = UtcDateTime(2021, 3, 12)
+        ..objectId = 25
+        ..type = "message",
+    );
+
+    Future<void> pumpPage(WidgetTester tester) async {
+      wrapper = MockWrapper();
+      appRouter = MockAppRouter();
+      when(
+        () => wrapper.send("api/notification/markAsRead", args: {"id": 2}),
+      ).thenAnswer((_) async => "");
+      when(
+        () => wrapper.send("api/message/markAsRead", args: {"messageId": 25}),
+      ).thenAnswer((_) async => "");
+      when(() => appRouter.showMessage(25)).thenReturn(null);
+
+      container = ProviderContainer(
+        overrides: [
+          notificationsProvider.overrideWith(
+            () => _TestNotificationsNotifier(
+              NotificationsState(notifications: [notification]),
+            ),
+          ),
+          appRouterProvider.overrideWith((ref) => appRouter),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(
+            home: NotificationPageContainer(),
+            theme: ThemeData(primarySwatch: Colors.deepOrange),
+          ),
+        ),
+      );
+    }
+
+    testWidgets('opens the message when tapped', (tester) async {
+      await pumpPage(tester);
+      // Opening is the card itself now, no separate button for it.
+      expect(find.byIcon(Icons.open_in_new), findsNothing);
+
+      await tester.tap(find.text("Neue Mitteilung"));
+      await tester.pumpAndSettle();
+
+      verify(() => appRouter.showMessage(25)).called(1);
+    });
+
+    testWidgets('the tick marks the message itself as read without opening it',
+        (tester) async {
+      await pumpPage(tester);
+
+      await tester.tap(find.byIcon(Icons.done));
+      await tester.pumpAndSettle();
+
+      verify(
+        () => wrapper.send("api/message/markAsRead", args: {"messageId": 25}),
+      ).called(1);
+      verifyNever(() => appRouter.showMessage(any()));
+      expect(find.text("Neue Mitteilung"), findsNothing);
+      expect(container.read(notificationsProvider).notifications, isEmpty);
+    });
+  });
+
+  test('reading a message leaves a grade notification with the same id',
+      () async {
+    wrapper = MockWrapper();
+    when(
+      () => wrapper.send("api/notification/markAsRead", args: {"id": 1}),
+    ).thenAnswer((_) async => "");
+
+    final message = Notification(
+      (b) => b
+        ..id = 1
+        ..title = "Mitteilung"
+        ..timeSent = UtcDateTime(2021, 3, 12)
+        ..objectId = 17
+        ..type = "message",
+    );
+    final grade = Notification(
+      (b) => b
+        ..id = 2
+        ..title = "Bewertung"
+        ..timeSent = UtcDateTime(2021, 3, 12)
+        ..objectId = 17
+        ..type = "grade",
+    );
+    final container = ProviderContainer(
+      overrides: [
+        notificationsProvider.overrideWith(
+          () => _TestNotificationsNotifier(
+            NotificationsState(notifications: [message, grade]),
+          ),
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    await container.read(notificationsProvider.notifier).markMessageAsRead(17);
+
+    expect(container.read(notificationsProvider).notifications, [grade]);
   });
 }

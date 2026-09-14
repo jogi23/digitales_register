@@ -20,6 +20,7 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 - Mitteilungen: selbst gesendete Mitteilungen tragen in der Liste die Kennzeichnung „Gesendet“ und sind so von empfangenen zu unterscheiden.
 - Mitteilungen: der Knopf zum Bestätigen steht in einem abgesetzten Bereich über die volle Breite und sagt, solange er grau ist, dass noch der Name fehlt.
 - Kalender-Wochenansicht: das Fach steht in jeder Kachel gleich groß, Lehrer kursiv, höchstens drei Zeilen und mit Abstand zum Rand; der Raum bleibt der Detailansicht vorbehalten.
+- Benachrichtigungen: ein Tippen auf die Benachrichtigung öffnet die Mitteilung oder Bewertung. Der Haken rechts markiert sie als gelesen, ohne sie zu öffnen — bei Mitteilungen gilt dann auch die Mitteilung selbst als gelesen.
 
 ### Fehlerbehebungen
 
@@ -29,6 +30,7 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 - Querformat: Inhalte liegen nicht mehr unter der Navigationsleiste des Geräts, die dort am rechten Rand steht.
 - Querformat: der Stundenplan in Kalender und Merkheft scrollt, statt die Stunden bis zur Unlesbarkeit zusammenzudrücken.
 - Im Demo-Konto zeigt die Verbindungsanzeige die Verbindung als hergestellt, statt dauerhaft „noch nichts geladen“.
+- Benachrichtigungen: eine gelesene Mitteilung nimmt keine Benachrichtigung zu einer Bewertung mehr mit, die zufällig dieselbe Nummer trägt.
 
 ## 1.3.0 — 2026-09-10
 
