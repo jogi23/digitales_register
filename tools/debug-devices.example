@@ -1,0 +1,12 @@
+# Phones tools/install-debug.sh expects every time.
+#
+# Every phone paired for wireless debugging and on the network gets the debug
+# build anyway; a phone listed here is also reported when it cannot be reached,
+# and the run fails. The name is used in the output.
+#
+# Copy to tools/debug-devices.local (not committed) and list one phone per
+# line: its serial, then a name. `tools/install-debug.sh --list` shows the
+# serial of every reachable phone.
+
+SERIAL_OF_PHONE_1  Phone 1
+SERIAL_OF_PHONE_2  Phone 2
