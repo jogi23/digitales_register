@@ -214,15 +214,21 @@ abstract class GradesState implements Built<GradesState, GradesStateBuilder> {
   @BuiltValueField(serialize: false)
   int? get pendingSubjectId;
 
+  /// Ids of the grades the reader marked. Saved with the account's other
+  /// data; the register knows nothing of it.
+  BuiltSet<int> get marked;
+
   static Serializer<GradesState> get serializer => _$gradesStateSerializer;
 
   factory GradesState([Function(GradesStateBuilder b)? updates]) =
       _$GradesState;
   GradesState._();
+  // `marked` starts empty, so state saved before it existed still loads.
   static void _initializeBuilder(GradesStateBuilder builder) {
     builder
       ..semester = Semester.all.toBuilder()
       ..subjects = ListBuilder()
+      ..marked = SetBuilder<int>()
       ..loading = false;
   }
 }

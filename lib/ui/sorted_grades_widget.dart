@@ -36,6 +36,8 @@ class SortedGradesWidget extends StatelessWidget {
   final SortedGradesViewModel vm;
   final ViewSubjectDetailCallback viewSubjectDetail;
   final SetBoolCallback sortByTypeCallback, showCancelledCallback;
+  final SetBoolCallback markedOnlyCallback;
+  final void Function(int gradeId) toggleMark;
   final VoidCallback showGradeCalculator;
   final int? pendingSubjectId;
   final int? pendingGradeId;
@@ -48,14 +50,27 @@ class SortedGradesWidget extends StatelessWidget {
     required this.viewSubjectDetail,
     required this.sortByTypeCallback,
     required this.showCancelledCallback,
+    required this.markedOnlyCallback,
+    required this.toggleMark,
     required this.showGradeCalculator,
     this.pendingSubjectId,
     this.pendingGradeId,
     this.clearPendingSubject,
     this.clearPendingGrade,
   });
+
+  /// Whether a marked grade of the shown semester belongs to [subject]. Only
+  /// loaded grades count — a grade can only be marked once it was loaded.
+  bool _hasMarked(Subject subject) =>
+      subject
+          .detailEntries(vm.semester)
+          ?.any((e) => e is GradeDetail && vm.marked.contains(e.id)) ??
+      false;
+
   @override
   Widget build(BuildContext context) {
+    final subjects =
+        vm.markedOnly ? vm.subjects.where(_hasMarked).toList() : vm.subjects;
     return Column(
       key: ValueKey(vm.semester),
       children: <Widget>[
@@ -69,12 +84,25 @@ class SortedGradesWidget extends StatelessWidget {
           onChanged: showCancelledCallback,
           value: vm.showCancelled!,
         ),
+        SwitchListTile.adaptive(
+          title: Text(tr(context).gradesMarkedOnly),
+          onChanged: markedOnlyCallback,
+          value: vm.markedOnly,
+        ),
         const Divider(
           height: 0,
         ),
-        for (final s in vm.subjects)
+        if (vm.markedOnly && subjects.isEmpty)
+          ListTile(title: Text(tr(context).gradesNoneMarked)),
+        for (final s in subjects)
           SubjectWidget(
+            // The filter moves subjects up the list; without a key an opened
+            // subject would hand its state to whichever one took its place.
+            key: ValueKey(s.id ?? s.name),
             subject: s,
+            marked: vm.marked.asSet(),
+            markedOnly: vm.markedOnly,
+            onToggleMark: toggleMark,
             sortByType: vm.sortByType,
             cards: vm.displayMode == EntryDisplayMode.cards,
             showAverage: vm.showSubjectAverage,
@@ -135,8 +163,20 @@ class SubjectWidget extends StatefulWidget {
   final VoidCallback? clearPendingSubject;
   final VoidCallback? clearPendingGrade;
 
+  /// Ids of the grades the reader marked.
+  final Set<int> marked;
+
+  /// Whether only marked grades are shown.
+  final bool markedOnly;
+
+  /// Marks or unmarks a grade; null leaves out the button.
+  final void Function(int gradeId)? onToggleMark;
+
   const SubjectWidget(
       {super.key,
+      this.marked = const {},
+      this.markedOnly = false,
+      this.onToggleMark,
       required this.sortByType,
       required this.showAverage,
       required this.subject,
@@ -169,6 +209,10 @@ class _SubjectWidgetState extends State<SubjectWidget> {
         grade: entry,
         tileColor: tileColor,
         subjectId: widget.subject.id,
+        marked: widget.marked.contains(entry.id),
+        onToggleMark: widget.onToggleMark == null
+            ? null
+            : () => widget.onToggleMark!(entry.id),
       );
       child = widget.pendingGradeId == entry.id
           ? PendingGradeTarget(
@@ -232,6 +276,11 @@ class _SubjectWidgetState extends State<SubjectWidget> {
         : null;
     final altColor =
         theme.colorScheme.surfaceContainerHighest.withOpacity(0.75);
+    // Observations cannot be marked, so the filter leaves them out.
+    bool shown(DetailEntry e) =>
+        (widget.showCancelled || !e.cancelled) &&
+        (!widget.markedOnly ||
+            e is GradeDetail && widget.marked.contains(e.id));
     return AbsorbPointer(
       absorbing: widget.noInternet && entries == null,
       child: ExpansionTile(
@@ -302,20 +351,16 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                                 (entry) => GradeTypeWidget(
                                   typeName: entry.key,
                                   cards: widget.cards,
-                                  entries: entry.value
-                                      .where((g) =>
-                                          widget.showCancelled || !g.cancelled)
-                                      .toList(),
+                                  entries: entry.value.where(shown).toList(),
                                   subjectId: widget.subject.id,
+                                  marked: widget.marked,
+                                  onToggleMark: widget.onToggleMark,
                                   pendingGradeId: widget.pendingGradeId,
                                   clearPendingGrade: widget.clearPendingGrade,
                                 ),
                               )
                         else
-                          for (final (i, entry) in entries
-                              .where(
-                                  (g) => widget.showCancelled || !g.cancelled)
-                              .indexed)
+                          for (final (i, entry) in entries.where(shown).indexed)
                             _buildDetailEntry(
                               entry,
                               // A card sets itself apart; tinting it as well
@@ -344,11 +389,19 @@ class GradeWidget extends ConsumerWidget {
   /// open, so the tile stays inert.
   final int? subjectId;
 
+  /// Whether the reader marked this grade.
+  final bool marked;
+
+  /// Marks or unmarks the grade; null leaves out the button.
+  final VoidCallback? onToggleMark;
+
   const GradeWidget({
     super.key,
     required this.grade,
     this.tileColor,
     this.subjectId,
+    this.marked = false,
+    this.onToggleMark,
   });
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -389,9 +442,16 @@ class GradeWidget extends ConsumerWidget {
                 ),
             ],
           ),
-          trailing: Text(
-            grade.gradeFormatted,
-            style: grade.cancelled ? lineThrough : null,
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Text(
+                grade.gradeFormatted,
+                style: grade.cancelled ? lineThrough : null,
+              ),
+              if (onToggleMark != null)
+                MarkGradeButton(marked: marked, onPressed: onToggleMark!),
+            ],
           ),
           isThreeLine: true,
         ),
@@ -411,6 +471,34 @@ class GradeWidget extends ConsumerWidget {
       return Material(color: tileColor!, child: column);
     }
     return column;
+  }
+}
+
+/// The bookmark that marks a grade.
+///
+/// A bookmark rather than a star as on the messages: on the grades page the
+/// stars are the competence ratings, and one more star read as another one.
+class MarkGradeButton extends StatelessWidget {
+  final bool marked;
+  final VoidCallback onPressed;
+
+  const MarkGradeButton({
+    super.key,
+    required this.marked,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: Icon(
+        marked ? Icons.bookmark : Icons.bookmark_border,
+        color: marked ? Theme.of(context).colorScheme.primary : null,
+      ),
+      tooltip: marked ? tr(context).gradeUnmark : tr(context).gradeMark,
+      visualDensity: VisualDensity.compact,
+      onPressed: onPressed,
+    );
   }
 }
 
@@ -471,6 +559,12 @@ class GradeTypeWidget extends StatelessWidget {
   final int? pendingGradeId;
   final VoidCallback? clearPendingGrade;
 
+  /// Ids of the grades the reader marked.
+  final Set<int> marked;
+
+  /// Marks or unmarks a grade; null leaves out the button.
+  final void Function(int gradeId)? onToggleMark;
+
   /// Every grade and observation in a card of its own rather than a row.
   final bool cards;
 
@@ -478,6 +572,8 @@ class GradeTypeWidget extends StatelessWidget {
       {super.key,
       required this.typeName,
       required this.entries,
+      this.marked = const {},
+      this.onToggleMark,
       this.subjectId,
       this.pendingGradeId,
       this.clearPendingGrade,
@@ -503,6 +599,9 @@ class GradeTypeWidget extends StatelessWidget {
               grade: g,
               tileColor: bgColor,
               subjectId: subjectId,
+              marked: marked.contains(g.id),
+              onToggleMark:
+                  onToggleMark == null ? null : () => onToggleMark!(g.id),
             );
             return pendingGradeId == g.id
                 ? PendingGradeTarget(

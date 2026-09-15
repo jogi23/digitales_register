@@ -256,6 +256,23 @@ void main() {
     }
   });
 
+  testWidgets('the bookmark marks the grade and takes the mark away again',
+      (tester) async {
+    await pumpPage(tester, _state(grade: _grade()));
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(GradeDetailPage)),
+    );
+
+    await tester.tap(find.byTooltip("Markieren"));
+    await tester.pumpAndSettle();
+    expect(container.read(gradesProvider).marked.asSet(), {_gradeId});
+    expect(find.byIcon(Icons.bookmark), findsOneWidget);
+
+    await tester.tap(find.byTooltip("Markierung entfernen"));
+    await tester.pumpAndSettle();
+    expect(container.read(gradesProvider).marked, isEmpty);
+  });
+
   testWidgets('says so when the grade is gone', (tester) async {
     // A semester switch or a refresh can take it away while the page is open.
     await pumpPage(tester, _state());

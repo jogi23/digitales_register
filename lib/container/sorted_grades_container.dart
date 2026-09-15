@@ -34,6 +34,7 @@ class SortedGradesContainer extends ConsumerWidget {
     final pendingGradeId = ref.watch(pendingGradeIdProvider);
     final settings = ref.watch(settingsProvider);
     final noInternet = ref.watch(noInternetProvider);
+    final markedOnly = ref.watch(gradesMarkedOnlyProvider);
     return SortedGradesWidget(
       vm: SortedGradesViewModel(
         subjects: gradesState.subjects,
@@ -44,9 +45,14 @@ class SortedGradesContainer extends ConsumerWidget {
         ignoredSubjectsForAverage: settings.ignoreForGradesAverage,
         showSubjectAverage: settings.showSubjectAverage,
         displayMode: settings.gradesDisplayMode,
+        marked: gradesState.marked,
+        markedOnly: markedOnly,
       ),
       showCancelledCallback:
           ref.read(settingsProvider.notifier).setShowCancelledGrades,
+      markedOnlyCallback: (on) =>
+          ref.read(gradesMarkedOnlyProvider.notifier).state = on,
+      toggleMark: ref.read(gradesProvider.notifier).toggleMark,
       sortByTypeCallback:
           ref.read(settingsProvider.notifier).setGradesTypeSorted,
       showGradeCalculator: ref.read(appRouterProvider).showGradeCalculator,
@@ -79,6 +85,12 @@ class SortedGradesViewModel {
   /// Grades and observations as tinted rows or as cards.
   final EntryDisplayMode displayMode;
 
+  /// Ids of the grades the reader marked.
+  final BuiltSet<int> marked;
+
+  /// Whether only marked grades are shown.
+  final bool markedOnly;
+
   const SortedGradesViewModel({
     required this.subjects,
     required this.ignoredSubjectsForAverage,
@@ -88,5 +100,7 @@ class SortedGradesViewModel {
     required this.noInternet,
     required this.showSubjectAverage,
     this.displayMode = EntryDisplayMode.list,
+    required this.marked,
+    this.markedOnly = false,
   });
 }

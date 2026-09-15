@@ -74,6 +74,13 @@ class GradesNotifier extends Notifier<GradesState> {
   void clearPendingGrade() =>
       ref.read(pendingGradeIdProvider.notifier).state = null;
 
+  /// Marks the grade, or takes the mark away again.
+  void toggleMark(int gradeId) {
+    state = state.rebuild((b) {
+      if (!b.marked.remove(gradeId)) b.marked.add(gradeId);
+    });
+  }
+
   Future<void> requestSubjectDetail(int objectId) async {
     ref.read(pendingGradeIdProvider.notifier).state = null;
     var subject = await _findSubjectById(objectId);
@@ -471,3 +478,7 @@ final gradesProvider =
     NotifierProvider<GradesNotifier, GradesState>(GradesNotifier.new);
 
 final pendingGradeIdProvider = StateProvider<int?>((ref) => null);
+
+/// Whether the grades page shows only marked grades. A look at the page, not
+/// a setting: it is off again after a restart.
+final gradesMarkedOnlyProvider = StateProvider<bool>((ref) => false);
