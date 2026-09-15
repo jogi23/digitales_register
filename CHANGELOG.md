@@ -20,6 +20,8 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 
 - Mitteilungen: selbst gesendete Mitteilungen gelten nicht mehr als neu. Sie tragen kein „neu“ mehr und halten „Alle als gelesen markieren“ nicht mehr aktiv.
 - Meldet der Server eine abgelaufene Sitzung mit einem Fehlercode statt mit einer Weiterleitung zur Anmeldung, meldet sich die App neu an und wiederholt den Abruf. Gelingt das nicht, zeigt die Verbindungsanzeige die Sitzung als abgelaufen, statt die Seiten still leer zu lassen.
+- Anmeldung: die Sitzung richtet sich nach der Uhr des Servers. Geht die Uhr des Geräts falsch, meldet die App nicht mehr zu früh ab oder arbeitet mit einer schon abgelaufenen Sitzung weiter.
+- Anmeldung: ein kurzes Funkloch meldet nicht mehr ab. Kennt der Server die Sitzung nicht mehr, meldet die App still neu an.
 
 ## 1.3.1 — 2026-09-14
 

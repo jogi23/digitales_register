@@ -37,7 +37,13 @@ class SessionManager {
   final ApiClient _apiClient;
   final AuthService _authService;
 
-  SessionManager(this._apiClient, this._authService);
+  SessionManager(
+    this._apiClient,
+    this._authService, {
+    DateTime Function() clock = DateTime.now,
+  }) : _clock = clock;
+
+  final DateTime Function() _clock;
 
   bool safeMode = false;
   bool noInternet = false;
@@ -56,9 +62,22 @@ class SessionManager {
   /// fresh what it shows is.
   void Function()? onRequestSucceeded;
 
+  /// When the session runs out, by the server's clock.
   DateTime? _serverLogoutTime;
+
+  /// How far the server's clock is ahead of the device's. The server hands
+  /// out expiration times by its own clock; comparing them with a device
+  /// clock that is off ended sessions too early or kept dead ones.
+  Duration _clockOffset = Duration.zero;
+
+  /// The next session check. Every login starts the checks anew; without
+  /// cancelling, each one left its own chain of checks behind.
+  Timer? _sessionTimer;
+
   final _loginMutex = Mutex();
   DateTime? _lastUnexpectedLogout;
+
+  DateTime get _serverNow => _clock().add(_clockOffset);
 
   void interaction() {
     lastInteraction = DateTime.now();
@@ -74,8 +93,8 @@ class SessionManager {
   /// Called by [Wrapper] when login completes and config is available.
   void startSession(Config config) {
     _serverLogoutTime =
-        DateTime.now().add(Duration(seconds: config.autoLogoutSeconds));
-    _updateLogout();
+        _serverNow.add(Duration(seconds: config.autoLogoutSeconds));
+    _checkSession();
   }
 
   Future<bool> ensureLoggedIn({
@@ -84,7 +103,7 @@ class SessionManager {
     await _loginMutex.acquire();
     try {
       if (_serverLogoutTime != null &&
-          DateTime.now().isAfter(_serverLogoutTime!)) {
+          _serverNow.isAfter(_serverLogoutTime!)) {
         _authService.forceLoggedOut();
       }
       if (isRetryAfterUnexpectedLogout) {
@@ -253,39 +272,63 @@ class SessionManager {
     }
   }
 
-  Future<void> _updateLogout() async {
+  /// Extends the session shortly before it runs out and checks again in a
+  /// few seconds, for as long as the account stays logged in.
+  Future<void> _checkSession() async {
+    _sessionTimer?.cancel();
     try {
       if (!await _authService.loggedIn) return;
       if (_authService.demoMode) return;
       if (_serverLogoutTime != null &&
-          DateTime.now()
+          _serverNow
               .add(const Duration(seconds: 25))
               .isAfter(_serverLogoutTime!)) {
-        final result = getMap(
-          await send(
-            "api/auth/extendSession",
-            args: <String, Object?>{
-              "lastAction": lastInteraction.millisecondsSinceEpoch ~/ 1000,
-            },
-          ),
-        );
-        if (result == null) {
-          _authService.logout(hard: safeMode, logoutForcedByServer: true);
-          return;
-        }
-        if (result["forceLogout"] == true) {
-          _authService.logout(hard: safeMode, logoutForcedByServer: true);
-          return;
-        } else {
-          _serverLogoutTime = DateTime.fromMillisecondsSinceEpoch(
-              (result["newExpiration"] as int) * 1000);
-        }
+        await _extendSession();
       }
     } on Exception catch (e) {
       // Runs from a timer nobody awaits: an error here used to end the app.
       // The next round checks the login again.
       log("Error while extending the session", error: e);
     }
-    Future.delayed(const Duration(seconds: 5), _updateLogout);
+    // Checks may overlap while one waits for the server; whichever finishes
+    // last leaves the only timer.
+    _sessionTimer?.cancel();
+    _sessionTimer = Timer(const Duration(seconds: 5), _checkSession);
+  }
+
+  Future<void> _extendSession() async {
+    final result = getMap(
+      await send(
+        "api/auth/extendSession",
+        args: <String, Object?>{
+          "lastAction":
+              lastInteraction.add(_clockOffset).millisecondsSinceEpoch ~/ 1000,
+        },
+      ),
+    );
+    if (result == null) {
+      // Without network there is no answer either, and no reason to log out:
+      // the next request signs in again once the network is back.
+      if (!noInternet) {
+        _authService.logout(hard: safeMode, logoutForcedByServer: true);
+      }
+      return;
+    }
+    final serverTime = result["serverTime"];
+    if (serverTime is int) {
+      _clockOffset = DateTime.fromMillisecondsSinceEpoch(serverTime * 1000)
+          .difference(_clock());
+    }
+    final newExpiration = result["newExpiration"];
+    if (result["forceLogout"] == true) {
+      _authService.logout(hard: safeMode, logoutForcedByServer: true);
+    } else if (result["noSession"] == true) {
+      // The server no longer knows the session but did not ask to log out:
+      // the next request signs in again with the stored login.
+      _authService.forceLoggedOut();
+    } else if (newExpiration is int) {
+      _serverLogoutTime =
+          DateTime.fromMillisecondsSinceEpoch(newExpiration * 1000);
+    }
   }
 }
