@@ -15,6 +15,9 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'dart:typed_data';
+
+import 'package:dio/dio.dart';
 import 'package:dr/api_client.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/auth_service.dart';
@@ -39,6 +42,68 @@ _MockAuthService makeSignedOutAuth() {
   when(() => auth.user).thenReturn(null);
   when(() => auth.pass).thenReturn(null);
   return auth;
+}
+
+/// Answers every request with the next status code in [statusCodes]; the
+/// last one repeats.
+class _StatusAdapter implements HttpClientAdapter {
+  _StatusAdapter(this.statusCodes);
+
+  final List<int> statusCodes;
+  int requests = 0;
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    final index =
+        requests < statusCodes.length ? requests : statusCodes.length - 1;
+    final statusCode = statusCodes[index];
+    requests++;
+    return ResponseBody.fromString(
+      '{"status":$statusCode}',
+      statusCode,
+      headers: {
+        Headers.contentTypeHeader: [Headers.jsonContentType],
+      },
+    );
+  }
+
+  @override
+  void close({bool force = false}) {}
+}
+
+/// An account that is signed in and can sign in again with what it stored.
+/// Counts the logins in [logins].
+class _SignedInAuth {
+  final auth = _MockAuthService();
+  bool loggedIn = true;
+  int logins = 0;
+
+  _SignedInAuth() {
+    when(() => auth.demoMode).thenReturn(false);
+    when(() => auth.loggedIn).thenAnswer((_) async => loggedIn);
+    when(() => auth.forceLoggedOut()).thenAnswer((_) => loggedIn = false);
+    when(() => auth.user).thenReturn('user');
+    when(() => auth.pass).thenReturn('pass');
+    when(() => auth.login(any(), any(), any(), any())).thenAnswer((_) async {
+      logins++;
+      loggedIn = true;
+    });
+    when(() => auth.onRelogin).thenReturn(() {});
+    when(() => auth.onAddProtocolItem).thenReturn((_) {});
+  }
+}
+
+SessionManager _sessionAnswering(
+  _SignedInAuth signedIn,
+  _StatusAdapter adapter,
+) {
+  final apiClient = ApiClient()..url = 'https://schule.digitalesregister.it';
+  apiClient.dio.httpClientAdapter = adapter;
+  return SessionManager(apiClient, signedIn.auth);
 }
 
 void main() {
@@ -227,6 +292,92 @@ void main() {
 
         await sm.send('api/student/dashboard/toggle_reminder');
         expect(expired, 0);
+      });
+    });
+
+    // -----------------------------------------------------------------------
+    // send() — the server answers 401
+    // -----------------------------------------------------------------------
+    group('send() when the server answers 401', () {
+      test('signs in again and repeats the request', () async {
+        final signedIn = _SignedInAuth();
+        final adapter = _StatusAdapter([401, 200]);
+        final sm = _sessionAnswering(signedIn, adapter);
+        var expired = 0;
+        final errors = <Object>[];
+        sm.onSessionExpired = () => expired++;
+
+        final result = await sm.send(
+          'api/message/getMyMessages',
+          onError: errors.add,
+        );
+
+        expect(result, {'status': 200});
+        expect(adapter.requests, 2);
+        expect(signedIn.logins, 1);
+        expect(expired, 0);
+        expect(errors, isEmpty);
+      });
+
+      test('a second 401 reports the session as expired', () async {
+        final signedIn = _SignedInAuth();
+        final adapter = _StatusAdapter([401]);
+        final sm = _sessionAnswering(signedIn, adapter);
+        var expired = 0;
+        final errors = <Object>[];
+        sm.onSessionExpired = () => expired++;
+
+        final result = await sm.send(
+          'api/message/getTypes',
+          onError: errors.add,
+        );
+
+        expect(result, isNull);
+        expect(adapter.requests, 2);
+        expect(expired, 1);
+        expect(errors, hasLength(1));
+        expect(
+          (errors.single as DioException).response?.statusCode,
+          401,
+        );
+      });
+
+      test('a 401 is not taken for a missing network', () async {
+        final signedIn = _SignedInAuth();
+        final sm = _sessionAnswering(signedIn, _StatusAdapter([401]));
+        var noInternetReports = 0;
+        sm.onNoInternet = (_) => noInternetReports++;
+
+        await sm.send('api/message/getMyMessages');
+
+        expect(sm.noInternet, isFalse);
+        expect(noInternetReports, 0);
+      });
+
+      test('a retry that cannot sign in again still reports the failure',
+          () async {
+        final signedIn = _SignedInAuth();
+        when(() => signedIn.auth.login(any(), any(), any(), any()))
+            .thenAnswer((_) async {});
+        when(() => signedIn.auth.logout(
+              hard: any(named: 'hard'),
+              logoutForcedByServer: any(named: 'logoutForcedByServer'),
+            )).thenAnswer((_) {});
+        final adapter = _StatusAdapter([401]);
+        final sm = _sessionAnswering(signedIn, adapter);
+        var expired = 0;
+        final errors = <Object>[];
+        sm.onSessionExpired = () => expired++;
+
+        final result = await sm.send(
+          'api/message/getMyMessages',
+          onError: errors.add,
+        );
+
+        expect(result, isNull);
+        expect(adapter.requests, 1);
+        expect(expired, 1);
+        expect(errors.single, isA<UnexpectedLogoutException>());
       });
     });
   });

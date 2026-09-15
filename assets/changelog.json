@@ -22,7 +22,8 @@
         {
           "title": "Fehlerbehebungen",
           "items": [
-            "Mitteilungen: selbst gesendete Mitteilungen gelten nicht mehr als neu. Sie tragen kein „neu“ mehr und halten „Alle als gelesen markieren“ nicht mehr aktiv."
+            "Mitteilungen: selbst gesendete Mitteilungen gelten nicht mehr als neu. Sie tragen kein „neu“ mehr und halten „Alle als gelesen markieren“ nicht mehr aktiv.",
+            "Meldet der Server eine abgelaufene Sitzung mit einem Fehlercode statt mit einer Weiterleitung zur Anmeldung, meldet sich die App neu an und wiederholt den Abruf. Gelingt das nicht, zeigt die Verbindungsanzeige die Sitzung als abgelaufen, statt die Seiten still leer zu lassen."
           ]
         }
       ],
@@ -46,7 +47,8 @@
         {
           "title": "Bug fixes",
           "items": [
-            "Messages: messages you sent yourself no longer count as new. They no longer carry the “neu” badge or keep “Mark all as read” active."
+            "Messages: messages you sent yourself no longer count as new. They no longer carry the “neu” badge or keep “Mark all as read” active.",
+            "If the server reports an expired session with an error code instead of redirecting to the sign-in page, the app signs in again and repeats the request. If that fails, the connection indicator shows the session as expired instead of leaving the pages silently empty."
           ]
         }
       ],
@@ -70,7 +72,8 @@
         {
           "title": "Correzioni",
           "items": [
-            "Comunicazioni: le comunicazioni inviate da te non risultano più nuove. Non portano più l'etichetta «neu» e non tengono più attivo «Segna tutte come lette»."
+            "Comunicazioni: le comunicazioni inviate da te non risultano più nuove. Non portano più l'etichetta «neu» e non tengono più attivo «Segna tutte come lette».",
+            "Se il server segnala una sessione scaduta con un codice di errore invece di rimandare alla pagina di accesso, l'app accede di nuovo e ripete la richiesta. Se non ci riesce, l'indicatore di connessione mostra la sessione come scaduta, invece di lasciare le pagine vuote senza avviso."
           ]
         }
       ]
