@@ -15,14 +15,34 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'dart:async';
+
+import 'package:dio/dio.dart';
 import 'package:dr/api_client.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/auth_service.dart';
 import 'package:dr/session_manager.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:quiver/testing/async.dart';
 
 class _MockAuthService extends Mock implements AuthService {}
+
+class _MockApiClient extends Mock implements ApiClient {}
+
+class _MockDio extends Mock implements Dio {}
+
+Config _config({required int autoLogoutSeconds}) => Config(
+      (b) => b
+        ..autoLogoutSeconds = autoLogoutSeconds
+        ..userId = 1
+        ..fullName = 'Test'
+        ..imgSource = ''
+        ..currentSemesterMaybe = 1
+        ..isStudentOrParent = true,
+    );
+
+int _seconds(DateTime time) => time.millisecondsSinceEpoch ~/ 1000;
 
 SessionManager _makeSessionManager({required bool demoMode}) {
   final mockAuth = _MockAuthService();
@@ -227,6 +247,138 @@ void main() {
 
         await sm.send('api/student/dashboard/toggle_reminder');
         expect(expired, 0);
+      });
+    });
+
+    // -----------------------------------------------------------------------
+    // Extending the session (#231)
+    // -----------------------------------------------------------------------
+    group('extending the session', () {
+      const url = 'https://school.digitalesregister.it';
+      // The device clock runs 30 minutes ahead of the server.
+      final deviceNow = DateTime(2026, 9, 15, 9, 30);
+      final serverNow = DateTime(2026, 9, 15, 9);
+      late _MockAuthService auth;
+      late _MockDio dio;
+      late SessionManager sm;
+
+      /// A session that runs out within the next check, so it is extended
+      /// right away.
+      Config runningOut() => _config(autoLogoutSeconds: 10);
+
+      void serverAnswers({
+        bool forceLogout = false,
+        bool noSession = false,
+        Duration extendedBy = const Duration(minutes: 20),
+      }) {
+        when(() => dio.post<dynamic>(any(), data: any(named: 'data')))
+            .thenAnswer(
+          (_) async => Response<dynamic>(
+            requestOptions: RequestOptions(),
+            data: <String, Object?>{
+              'forceLogout': forceLogout,
+              'newExpiration': _seconds(serverNow.add(extendedBy)),
+              'serverTime': _seconds(serverNow),
+              'noSession': noSession,
+            },
+          ),
+        );
+      }
+
+      /// Starts the session and lets the first check finish. Runs in fake
+      /// time, so the next check waits instead of polling the mocks forever.
+      void startSession(Config config, [void Function(FakeAsync)? then]) {
+        FakeAsync().run((async) {
+          sm.startSession(config);
+          async.flushMicrotasks();
+          then?.call(async);
+        });
+      }
+
+      void verifyNoLogout() => verifyNever(
+            () => auth.logout(
+              hard: any(named: 'hard'),
+              logoutForcedByServer: any(named: 'logoutForcedByServer'),
+            ),
+          );
+
+      setUp(() {
+        auth = _MockAuthService();
+        when(() => auth.demoMode).thenReturn(false);
+        when(() => auth.loggedIn).thenAnswer((_) async => true);
+        when(() => auth.onAddProtocolItem).thenReturn((_) {});
+        final client = _MockApiClient();
+        dio = _MockDio();
+        when(() => client.dio).thenReturn(dio);
+        when(() => client.url).thenReturn(url);
+        when(() => client.baseAddress).thenReturn('$url/v2/');
+        sm = SessionManager(client, auth, clock: () => deviceNow);
+      });
+
+      test('judges the new expiration by the server clock', () async {
+        // 20 more minutes by the server's clock — by the device clock that
+        // is already ten minutes past.
+        serverAnswers();
+        startSession(runningOut());
+
+        await sm.ensureLoggedIn();
+        verifyNever(() => auth.forceLoggedOut());
+      });
+
+      test('reports the last action by the server clock', () {
+        serverAnswers(extendedBy: const Duration(seconds: 10));
+        sm.lastInteraction = deviceNow.subtract(const Duration(minutes: 1));
+
+        // The first answer reveals the offset, the second extension uses it.
+        startSession(runningOut(), (async) {
+          async.elapse(const Duration(seconds: 5));
+        });
+
+        final sent = verify(
+          () => dio.post<dynamic>(any(), data: captureAny(named: 'data')),
+        ).captured;
+        expect(sent, hasLength(2));
+        expect(
+          (sent.last as Map)['lastAction'],
+          _seconds(serverNow.subtract(const Duration(minutes: 1))),
+        );
+      });
+
+      test('logs out when the server asks for it', () {
+        serverAnswers(forceLogout: true);
+        startSession(runningOut());
+
+        verify(() => auth.logout(hard: false, logoutForcedByServer: true))
+            .called(1);
+      });
+
+      test('a session the server no longer knows signs in again quietly', () {
+        serverAnswers(noSession: true);
+        startSession(runningOut());
+
+        verify(() => auth.forceLoggedOut()).called(1);
+        verifyNoLogout();
+      });
+
+      test('a missing network does not log out', () {
+        when(() => dio.post<dynamic>(any(), data: any(named: 'data')))
+            .thenThrow(TimeoutException('no network'));
+        startSession(runningOut());
+
+        expect(sm.noInternet, isTrue);
+        verifyNoLogout();
+      });
+
+      test('a new login leaves exactly one check waiting', () {
+        startSession(_config(autoLogoutSeconds: 3600), (async) {
+          sm.startSession(_config(autoLogoutSeconds: 3600));
+          sm.startSession(_config(autoLogoutSeconds: 3600));
+          async.flushMicrotasks();
+          expect(async.nonPeriodicTimerCount, 1);
+
+          async.elapse(const Duration(seconds: 5));
+          expect(async.nonPeriodicTimerCount, 1);
+        });
       });
     });
   });
