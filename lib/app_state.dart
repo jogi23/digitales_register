@@ -85,14 +85,21 @@ abstract class MessagesState
 
   UtcDateTime? get lastFetched;
 
+  /// Ids of the messages the reader marked with a star. Saved with the
+  /// account's other data; the portal knows nothing of it.
+  BuiltSet<int> get starred;
+
   static Serializer<MessagesState> get serializer => _$messagesStateSerializer;
 
   factory MessagesState([Function(MessagesStateBuilder b)? updates]) =
       _$MessagesState;
   MessagesState._();
 
+  // `starred` starts empty, so state saved before it existed still loads.
   static void _initializeBuilder(MessagesStateBuilder builder) {
-    builder.messages = ListBuilder();
+    builder
+      ..messages = ListBuilder()
+      ..starred = SetBuilder<int>();
   }
 }
 

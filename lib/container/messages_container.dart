@@ -20,6 +20,7 @@ import 'package:dr/providers/messages_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/ui/messages.dart';
+import 'package:dr/ui/star_rating.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -30,11 +31,22 @@ class MessagesPageContainer extends ConsumerWidget {
     final noInternet = ref.watch(noInternetProvider);
     final signature =
         ref.watch(settingsProvider.select((s) => s.messageSignature));
-    final category = ref.watch(messageCategoryProvider);
+    final view = ref.watch(messageListProvider);
+    final list = ref.read(messageListProvider.notifier);
     return MessagesPage(
       state: messagesState,
-      category: category,
-      onCategory: ref.read(messageCategoryProvider.notifier).show,
+      view: view,
+      onCategory: list.showCategory,
+      onSort: list.sortBy,
+      onUnreadOnly: list.showUnreadOnly,
+      onStarredOnly: list.showStarredOnly,
+      // The same colour as the stars of the competence ratings.
+      starColor: resolveStarColor(
+        context,
+        ref.watch(settingsProvider.select((s) => s.starColor)),
+      ),
+      onToggleStar: (message) =>
+          ref.read(messagesProvider.notifier).toggleStar(message.id),
       noInternet: noInternet,
       hasUnread: messagesState.messages.any((m) => m.isNew),
       onOpenFile: (file) =>

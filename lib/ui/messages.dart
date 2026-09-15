@@ -22,6 +22,8 @@ import 'package:badges/badges.dart' as badge;
 import 'package:dr/app_state.dart';
 import 'package:dr/ui/account_avatar_button.dart';
 import 'package:dr/data.dart';
+import 'package:dr/providers/messages_provider.dart'
+    show MessageListView, MessageSort;
 import 'package:dr/ui/animated_linear_progress_indicator.dart';
 import 'package:dr/ui/connection_status_button.dart';
 import 'package:dr/ui/layout.dart';
@@ -38,9 +40,16 @@ import 'package:responsive_scaffold/responsive_scaffold.dart';
 class MessagesPage extends StatelessWidget {
   final MessagesState? state;
 
-  /// The folder shown; the list holds only its messages.
-  final MessageCategory category;
+  /// Folder, order and filters; the list shows what this lets through.
+  final MessageListView view;
   final ValueChanged<MessageCategory> onCategory;
+  final ValueChanged<MessageSort> onSort;
+  final ValueChanged<bool> onUnreadOnly;
+  final ValueChanged<bool> onStarredOnly;
+
+  /// The colour a set star is drawn in.
+  final Color starColor;
+  final void Function(Message message) onToggleStar;
   final bool noInternet;
   final bool hasUnread;
   final void Function(MessageAttachmentFile message) onOpenFile;
@@ -59,8 +68,13 @@ class MessagesPage extends StatelessWidget {
   const MessagesPage({
     super.key,
     required this.state,
-    required this.category,
+    required this.view,
     required this.onCategory,
+    required this.onSort,
+    required this.onUnreadOnly,
+    required this.onStarredOnly,
+    required this.starColor,
+    required this.onToggleStar,
     required this.noInternet,
     required this.hasUnread,
     required this.onOpenFile,
@@ -77,6 +91,24 @@ class MessagesPage extends StatelessWidget {
       appBar: ResponsiveAppBar(
         title: Text(tr(context).messagesTitle),
         actions: [
+          PopupMenuButton<MessageSort>(
+            icon: const Icon(Icons.sort),
+            tooltip: tr(context).messagesSort,
+            initialValue: view.sort,
+            onSelected: onSort,
+            itemBuilder: (context) => [
+              for (final sort in MessageSort.values)
+                CheckedPopupMenuItem(
+                  value: sort,
+                  checked: sort == view.sort,
+                  child: Text(switch (sort) {
+                    MessageSort.newest => tr(context).messagesSortNewest,
+                    MessageSort.oldest => tr(context).messagesSortOldest,
+                    MessageSort.sender => tr(context).messagesSortSender,
+                  }),
+                ),
+            ],
+          ),
           IconButton(
             icon: const Icon(Icons.done_all),
             tooltip: tr(context).messagesMarkAllRead,
@@ -98,7 +130,7 @@ class MessagesPage extends StatelessWidget {
   }
 
   Widget _list(BuildContext context, MessagesState state) {
-    final visible = state.messages.where(category.includes).toList();
+    final visible = view.apply(state.messages, state.starred);
     final altColor = Theme.of(context)
         .colorScheme
         .surfaceContainerHighest
@@ -106,7 +138,12 @@ class MessagesPage extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        MessageCategoryBar(selected: category, onSelected: onCategory),
+        MessageListBar(
+          view: view,
+          onCategory: onCategory,
+          onUnreadOnly: onUnreadOnly,
+          onStarredOnly: onStarredOnly,
+        ),
         const Divider(),
         Expanded(
           child: Stack(
@@ -136,6 +173,9 @@ class MessagesPage extends StatelessWidget {
                     // rows, and each tile keeps whether it started open.
                     key: ValueKey(message.id),
                     message: message,
+                    starred: state.starred.contains(message.id),
+                    starColor: starColor,
+                    onToggleStar: () => onToggleStar(message),
                     onOpenFile: onOpenFile,
                     onMarkAsRead: onMarkAsRead,
                     onReply: onReply,
@@ -156,15 +196,19 @@ class MessagesPage extends StatelessWidget {
 }
 
 /// Picks the folder the message list shows, the way the portal sorts its
-/// messages.
-class MessageCategoryBar extends StatelessWidget {
-  final MessageCategory selected;
-  final ValueChanged<MessageCategory> onSelected;
+/// messages, and narrows it to unread or starred ones.
+class MessageListBar extends StatelessWidget {
+  final MessageListView view;
+  final ValueChanged<MessageCategory> onCategory;
+  final ValueChanged<bool> onUnreadOnly;
+  final ValueChanged<bool> onStarredOnly;
 
-  const MessageCategoryBar({
+  const MessageListBar({
     super.key,
-    required this.selected,
-    required this.onSelected,
+    required this.view,
+    required this.onCategory,
+    required this.onUnreadOnly,
+    required this.onStarredOnly,
   });
 
   @override
@@ -178,10 +222,26 @@ class MessageCategoryBar extends StatelessWidget {
           for (final category in MessageCategory.values)
             ChoiceChip(
               label: Text(_label(context, category)),
-              selected: category == selected,
+              selected: category == view.category,
               showCheckmark: false,
-              onSelected: (_) => onSelected(category),
+              onSelected: (_) => onCategory(category),
             ),
+          // Filters apply on top of the folder; their icons set them apart
+          // from the folders, of which only one can be picked.
+          FilterChip(
+            avatar: const Icon(Icons.mark_email_unread_outlined),
+            label: Text(tr(context).messagesFilterUnread),
+            selected: view.unreadOnly,
+            showCheckmark: false,
+            onSelected: onUnreadOnly,
+          ),
+          FilterChip(
+            avatar: const Icon(Icons.star_border),
+            label: Text(tr(context).messagesFilterStarred),
+            selected: view.starredOnly,
+            showCheckmark: false,
+            onSelected: onStarredOnly,
+          ),
         ],
       ),
     );
@@ -198,6 +258,9 @@ class MessageCategoryBar extends StatelessWidget {
 
 class MessageWidget extends StatefulWidget {
   final Message message;
+  final bool starred;
+  final Color starColor;
+  final VoidCallback onToggleStar;
   final void Function(MessageAttachmentFile message) onOpenFile;
   final void Function(Message message) onMarkAsRead;
   final Future<bool> Function(Message message,
@@ -211,6 +274,9 @@ class MessageWidget extends StatefulWidget {
   const MessageWidget({
     super.key,
     required this.message,
+    required this.starred,
+    required this.starColor,
+    required this.onToggleStar,
     required this.onOpenFile,
     required this.noInternet,
     required this.onMarkAsRead,
@@ -304,7 +370,20 @@ class _MessageWidgetState extends State<MessageWidget> {
                 "neu",
                 style: TextStyle(color: Colors.white),
               ),
-            )
+            ),
+          // In the title rather than the opened message: marking should not
+          // take opening, and so marking as read, first.
+          IconButton(
+            icon: Icon(
+              widget.starred ? Icons.star : Icons.star_border,
+              color: widget.starred ? widget.starColor : null,
+            ),
+            tooltip: widget.starred
+                ? tr(context).messageUnstar
+                : tr(context).messageStar,
+            visualDensity: VisualDensity.compact,
+            onPressed: widget.onToggleStar,
+          ),
         ],
       ),
       children: [

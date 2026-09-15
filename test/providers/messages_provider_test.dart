@@ -15,9 +15,15 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'dart:convert';
+
+import 'package:built_collection/built_collection.dart';
+import 'package:dr/app_state.dart';
 import 'package:dr/data.dart';
 import 'package:dr/middleware/middleware.dart';
 import 'package:dr/providers/messages_provider.dart';
+import 'package:dr/serializers.dart';
+import 'package:dr/utc_date_time.dart';
 import 'package:dr/wrapper.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -112,7 +118,8 @@ void main() {
   });
 
   group('folders', () {
-    MessageCategory category() => container.read(messageCategoryProvider);
+    MessageCategory category() =>
+        container.read(messageListProvider).category;
 
     test('an archived message is marked archived', () {
       expect(messageWithId(_archivedId).archived, isTrue);
@@ -150,6 +157,113 @@ void main() {
       expect(category(), MessageCategory.incoming);
       await notifier.load();
       expect(category(), MessageCategory.archived);
+    });
+  });
+
+  group('stars', () {
+    BuiltSet<int> starred() => container.read(messagesProvider).starred;
+
+    test('toggling sets a star and takes it away again', () {
+      final notifier = container.read(messagesProvider.notifier)
+        ..toggleStar(_agreeOpenId);
+      expect(starred().asSet(), {_agreeOpenId});
+      notifier.toggleStar(_agreeOpenId);
+      expect(starred(), isEmpty);
+    });
+
+    test('a reload keeps the stars', () async {
+      final notifier = container.read(messagesProvider.notifier)
+        ..toggleStar(_signedId);
+      await notifier.load();
+      expect(starred().asSet(), {_signedId});
+    });
+
+    test('a message gone from the portal takes its star along', () async {
+      final notifier = container.read(messagesProvider.notifier)
+        ..toggleStar(1);
+      await notifier.load();
+      expect(starred(), isEmpty);
+    });
+
+    test('stars are saved with the account', () {
+      final state = AppState((b) => b.messagesState.starred.add(_signedId));
+      final decoded = serializers.deserialize(
+        json.decode(json.encode(serializers.serialize(state))) as Object,
+      )! as AppState;
+      expect(decoded.messagesState.starred.asSet(), {_signedId});
+    });
+  });
+
+  group('order and filters', () {
+    Message message(int id, String from, String sent, {bool read = true}) =>
+        Message(
+          (b) => b
+            ..id = id
+            ..subject = 'Mitteilung $id'
+            ..text = ''
+            ..fromName = from
+            ..recipientString = ''
+            ..timeSent = UtcDateTime.parse(sent)
+            ..timeRead = read ? UtcDateTime.parse(sent) : null,
+        );
+    final oldest = message(1, 'berger', '2026-09-01 08:00:00');
+    final unread = message(2, 'Amort', '2026-09-10 08:00:00', read: false);
+    final newest = message(3, 'Berger', '2026-09-12 08:00:00');
+
+    List<int> ids(MessageListView view, [Iterable<int> starred = const []]) =>
+        view
+            .apply([oldest, unread, newest], BuiltSet<int>(starred))
+            .map((m) => m.id)
+            .toList();
+
+    test('newest first by default', () {
+      expect(ids(const MessageListView()), [3, 2, 1]);
+    });
+
+    test('oldest first on request', () {
+      expect(ids(const MessageListView(sort: MessageSort.oldest)), [1, 2, 3]);
+    });
+
+    test('by sender ignores case, newest first within one sender', () {
+      expect(ids(const MessageListView(sort: MessageSort.sender)), [2, 3, 1]);
+    });
+
+    test('unread only', () {
+      expect(ids(MessageListView(keptUnread: BuiltSet<int>())), [2]);
+    });
+
+    test('starred only', () {
+      expect(ids(const MessageListView(starredOnly: true), [1]), [1]);
+    });
+
+    test('a message read under "unread only" stays in the list', () async {
+      final notifier = container.read(messagesProvider.notifier)
+        ..restore(MessagesState((b) => b.messages.add(unread)));
+      container.read(messageListProvider.notifier).showUnreadOnly(true);
+      await notifier.markAsRead(unread.id);
+
+      final state = container.read(messagesProvider);
+      expect(state.messages.single.isNew, isFalse);
+      expect(
+        container.read(messageListProvider).apply(state.messages, state.starred),
+        hasLength(1),
+      );
+    });
+
+    test('switching the folder keeps order and filters', () {
+      container.read(messageListProvider.notifier)
+        ..sortBy(MessageSort.sender)
+        ..showStarredOnly(true)
+        ..showCategory(MessageCategory.all);
+      final view = container.read(messageListProvider);
+      expect(view.sort, MessageSort.sender);
+      expect(view.starredOnly, isTrue);
+    });
+
+    test('opening a message a filter hides drops the filter', () {
+      container.read(messageListProvider.notifier).showStarredOnly(true);
+      container.read(messagesProvider.notifier).select(_agreeOpenId);
+      expect(container.read(messageListProvider).starredOnly, isFalse);
     });
   });
 
