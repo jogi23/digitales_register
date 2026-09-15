@@ -43,15 +43,66 @@ class MessagesNotifier extends Notifier<MessagesState> {
     final dynamic response = await wrapper.send("api/message/getMyMessages");
     if (response != null) {
       state = _parseMessages(response as List);
+      _revealSelected();
     }
   }
 
   void select(int messageId) {
     state = state.rebuild((b) => b..showMessage = messageId);
+    _revealSelected();
+  }
+
+  /// Makes the list show the message about to open: a notification can point
+  /// to a sent or archived message, or to one a filter hides. Before the list
+  /// has loaded there is nothing to go by; [load] asks again.
+  void _revealSelected() {
+    final message =
+        state.messages.firstWhereOrNull((m) => m.id == state.showMessage);
+    if (message == null) return;
+    ref.read(messageListProvider.notifier).reveal(message, state.starred);
   }
 
   void clearSelection() {
     state = state.rebuild((b) => b..showMessage = null);
+  }
+
+  /// Marks [messageId] with a star, or takes the star away.
+  ///
+  /// Kept on this device only: the portal has no such mark.
+  void toggleStar(int messageId) {
+    state = state.rebuild((b) {
+      if (!b.starred.remove(messageId)) b.starred.add(messageId);
+    });
+  }
+
+  /// Moves the messages in [messageIds] into the archive, or back out with
+  /// [archived] false, then loads the list again: the portal answers with
+  /// nothing. Messages that do not allow the move are left alone.
+  ///
+  /// Returns whether every request went through.
+  Future<bool> setArchived(
+    Iterable<int> messageIds, {
+    required bool archived,
+  }) async {
+    final type =
+        archived ? Message.archiveTypeArchive : Message.archiveTypeRestore;
+    final ids = messageIds.toSet();
+    var allSent = true;
+    for (final message in state.messages
+        .where((m) => ids.contains(m.id) && m.archiveType == type)) {
+      Object? failure;
+      await wrapper.send(
+        "api/message/archiveMessage",
+        args: <String, Object?>{
+          "messageId": message.id,
+          "archiveType": type,
+        },
+        onError: (error) => failure = error,
+      );
+      if (failure != null) allSent = false;
+    }
+    await load();
+    return allSent;
   }
 
   Future<void> openMessageFile(MessageAttachmentFile file) async {
@@ -74,6 +125,9 @@ class MessagesNotifier extends Notifier<MessagesState> {
   Future<void> markAllAsRead() async {
     final unread = state.messages.where((m) => m.isNew).toList();
     if (unread.isEmpty) return;
+    ref
+        .read(messageListProvider.notifier)
+        .keepUnread(unread.map((m) => m.id));
     state = state.rebuild(
       (b) => b.messages.map(
         (m) => m.isNew ? m.rebuild((b) => b..timeRead = now) : m,
@@ -91,6 +145,7 @@ class MessagesNotifier extends Notifier<MessagesState> {
   }
 
   Future<void> markAsRead(int messageId) async {
+    ref.read(messageListProvider.notifier).keepUnread([messageId]);
     state = state.rebuild((b) {
       if (messageId == b.showMessage) {
         b.showMessage = null;
@@ -199,11 +254,15 @@ class MessagesNotifier extends Notifier<MessagesState> {
             tryParse(getMap(m), (Map? m) => _parseMessage(m!, state)))
         .whereType<Message>()
         .toList();
+    final ids = {for (final m in messages) m.id};
     return MessagesState(
       (b) => b
         ..messages = ListBuilder<Message>(messages)
         ..lastFetched = UtcDateTime.now()
-        ..showMessage = state.showMessage,
+        ..showMessage = state.showMessage
+        // Stars exist only on this device, so a reload must not drop them.
+        // A message gone from the portal takes its star along.
+        ..starred = SetBuilder<int>(state.starred.where(ids.contains)),
     );
   }
 
@@ -228,6 +287,11 @@ class MessagesNotifier extends Notifier<MessagesState> {
       // The portal files every message under incoming or outgoing; this is
       // the only field in the list that says which.
       ..outgoing = getBool(json["label_outgoing"]) ?? false
+      ..archived = getBool(json["label_archived"]) ?? false
+      ..archiveType = getInt(json["archiveMessageEnabled"]) ?? 0
+      ..fromUserId = getInt(json["fromUserId"]) ?? 0
+      ..canReply = getBool(json["canBeReplied"]) == true &&
+          getBool(json["answerMessageEnabled"]) == true
       ..id = id
       ..responseInfo = _parseResponseInfo(json)?.toBuilder();
     final attachments = ListBuilder<MessageAttachmentFile>();
@@ -304,3 +368,129 @@ class MessagesNotifier extends Notifier<MessagesState> {
 
 final messagesProvider =
     NotifierProvider<MessagesNotifier, MessagesState>(MessagesNotifier.new);
+
+/// The orders the message list offers.
+enum MessageSort { newest, oldest, sender }
+
+/// What the message list shows and in which order — everything about it but
+/// the messages themselves.
+class MessageListView {
+  final MessageCategory category;
+  final MessageSort sort;
+
+  /// While "unread only" is on: the messages that were unread when it was
+  /// switched on, plus those read since. `null` while it is off.
+  ///
+  /// Opening a message marks it read. Filtering on [Message.isNew] alone would
+  /// make it vanish from the list the moment it opens.
+  final BuiltSet<int>? keptUnread;
+
+  final bool starredOnly;
+
+  const MessageListView({
+    this.category = MessageCategory.incoming,
+    this.sort = MessageSort.newest,
+    this.keptUnread,
+    this.starredOnly = false,
+  });
+
+  bool get unreadOnly => keptUnread != null;
+
+  /// The messages to show, filtered and in order. [starred] holds the ids
+  /// the reader marked.
+  List<Message> apply(Iterable<Message> messages, BuiltSet<int> starred) {
+    final shown = messages
+        .where((m) =>
+            category.includes(m) &&
+            (!unreadOnly || m.isNew || keptUnread!.contains(m.id)) &&
+            (!starredOnly || starred.contains(m.id)))
+        .toList();
+    int newestFirst(Message a, Message b) => b.timeSent.compareTo(a.timeSent);
+    shown.sort(switch (sort) {
+      MessageSort.newest => newestFirst,
+      MessageSort.oldest => (a, b) => newestFirst(b, a),
+      // Newest first within one sender.
+      MessageSort.sender => (a, b) {
+          final bySender =
+              a.fromName.toLowerCase().compareTo(b.fromName.toLowerCase());
+          return bySender != 0 ? bySender : newestFirst(a, b);
+        },
+    });
+    return shown;
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is MessageListView &&
+      other.category == category &&
+      other.sort == sort &&
+      other.keptUnread == keptUnread &&
+      other.starredOnly == starredOnly;
+
+  @override
+  int get hashCode => Object.hash(category, sort, keptUnread, starredOnly);
+}
+
+/// Folder, order and filters of the message list. Not saved: the app starts
+/// on the received messages, newest first, unfiltered.
+class MessageListNotifier extends Notifier<MessageListView> {
+  @override
+  MessageListView build() => const MessageListView();
+
+  void showCategory(MessageCategory category) => state = MessageListView(
+        category: category,
+        sort: state.sort,
+        keptUnread: state.keptUnread,
+        starredOnly: state.starredOnly,
+      );
+
+  void sortBy(MessageSort sort) => state = MessageListView(
+        category: state.category,
+        sort: sort,
+        keptUnread: state.keptUnread,
+        starredOnly: state.starredOnly,
+      );
+
+  void showUnreadOnly(bool on) => state = MessageListView(
+        category: state.category,
+        sort: state.sort,
+        keptUnread: on ? BuiltSet<int>() : null,
+        starredOnly: state.starredOnly,
+      );
+
+  void showStarredOnly(bool on) => state = MessageListView(
+        category: state.category,
+        sort: state.sort,
+        keptUnread: state.keptUnread,
+        starredOnly: on,
+      );
+
+  /// Keeps [messageIds] under "unread only" once they are read. Called just
+  /// before they are marked read; does nothing while the filter is off.
+  void keepUnread(Iterable<int> messageIds) {
+    final kept = state.keptUnread;
+    if (kept == null) return;
+    state = MessageListView(
+      category: state.category,
+      sort: state.sort,
+      keptUnread: kept.rebuild((b) => b.addAll(messageIds)),
+      starredOnly: state.starredOnly,
+    );
+  }
+
+  /// Makes sure [message] is in the list: switches to its folder and drops
+  /// the filters, if they hide it.
+  void reveal(Message message, BuiltSet<int> starred) {
+    if (state.apply([message], starred).isNotEmpty) return;
+    state = MessageListView(
+      category: state.category.includes(message)
+          ? state.category
+          : MessageCategory.of(message),
+      sort: state.sort,
+    );
+  }
+}
+
+final messageListProvider =
+    NotifierProvider<MessageListNotifier, MessageListView>(
+        MessageListNotifier.new);

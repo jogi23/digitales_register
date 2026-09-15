@@ -18,6 +18,7 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:dio/dio.dart';
 import 'package:dr/api_client.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/auth_service.dart';
@@ -169,6 +170,10 @@ class SessionManager {
       // Not being logged in with a working network is a session that ran
       // out, not an outage: it needs a new login, not another try.
       if (!noInternet) onSessionExpired?.call();
+      // A retry that cannot sign in again is where the first failure ends.
+      if (isRetryAfterUnexpectedLogout) {
+        onError?.call(UnexpectedLogoutException());
+      }
       return null;
     }
 
@@ -187,6 +192,26 @@ class SessionManager {
                   "invalid method: $method; expected POST or GET"));
       responseData = response.data;
     } on Exception catch (e) {
+      // 401 is the server saying the session is gone, the same as the login
+      // redirect below. Treated like any other error it left every page
+      // empty without a word, and the connection display never noticed.
+      if (e is DioException && e.response?.statusCode == 401) {
+        _record(url, args, e.response?.data, error: e);
+        if (isRetryAfterUnexpectedLogout) {
+          log("retrying the request was unsuccessful, the server still answers 401.");
+          _authService.error = e.toString();
+          onSessionExpired?.call();
+          onError?.call(e);
+          return null;
+        }
+        return send(
+          url,
+          args: args,
+          method: method,
+          isRetryAfterUnexpectedLogout: true,
+          onError: onError,
+        );
+      }
       await _handleError(e);
       _record(url, args, responseData, error: e);
       onError?.call(e);

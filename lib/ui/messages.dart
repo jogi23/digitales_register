@@ -22,11 +22,15 @@ import 'package:badges/badges.dart' as badge;
 import 'package:dr/app_state.dart';
 import 'package:dr/ui/account_avatar_button.dart';
 import 'package:dr/data.dart';
+import 'package:dr/providers/messages_provider.dart'
+    show MessageListView, MessageSort;
+import 'package:dr/services/message_export.dart' show MessageExportFormat;
 import 'package:dr/ui/animated_linear_progress_indicator.dart';
 import 'package:dr/ui/connection_status_button.dart';
 import 'package:dr/ui/layout.dart';
 import 'package:dr/ui/no_internet.dart';
 import 'package:dr/ui/pull_to_refresh.dart';
+import 'package:dr/ui/snack_bar.dart';
 import 'package:dr/util.dart';
 import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
@@ -35,8 +39,34 @@ import 'package:quill_delta/quill_delta.dart';
 import 'package:quill_delta_viewer/quill_delta_viewer.dart';
 import 'package:responsive_scaffold/responsive_scaffold.dart';
 
-class MessagesPage extends StatelessWidget {
+class MessagesPage extends StatefulWidget {
   final MessagesState? state;
+
+  /// Folder, order and filters; the list shows what this lets through.
+  final MessageListView view;
+  final ValueChanged<MessageCategory> onCategory;
+  final ValueChanged<MessageSort> onSort;
+  final ValueChanged<bool> onUnreadOnly;
+  final ValueChanged<bool> onStarredOnly;
+
+  /// The colour a set star is drawn in.
+  final Color starColor;
+  final void Function(Message message) onToggleStar;
+
+  /// Shares the messages as one file, or saves it with `share` false.
+  final Future<void> Function(
+    List<Message> messages,
+    MessageExportFormat format, {
+    required bool share,
+  }) onExport;
+
+  /// Moves the messages into the archive, or back out with `archived` false.
+  /// False means not every move went through.
+  final Future<bool> Function(List<Message> messages, {required bool archived})
+      onArchive;
+
+  /// Opens a new message, or an answer to the message given.
+  final void Function(Message? answerTo) onCompose;
   final bool noInternet;
   final bool hasUnread;
   final void Function(MessageAttachmentFile message) onOpenFile;
@@ -55,6 +85,16 @@ class MessagesPage extends StatelessWidget {
   const MessagesPage({
     super.key,
     required this.state,
+    required this.view,
+    required this.onCategory,
+    required this.onSort,
+    required this.onUnreadOnly,
+    required this.onStarredOnly,
+    required this.starColor,
+    required this.onToggleStar,
+    required this.onExport,
+    required this.onArchive,
+    required this.onCompose,
     required this.noInternet,
     required this.hasUnread,
     required this.onOpenFile,
@@ -65,73 +105,353 @@ class MessagesPage extends StatelessWidget {
     required this.signature,
     required this.onSignature,
   });
+
+  @override
+  State<MessagesPage> createState() => _MessagesPageState();
+}
+
+class _MessagesPageState extends State<MessagesPage> {
+  /// The ids picked for a common action. The page is in selection mode while
+  /// any of them is in the list.
+  var _selected = <int>{};
+
+  @override
+  void didUpdateWidget(MessagesPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final before = oldWidget.view;
+    final now = widget.view;
+    // Another folder or filter shows other messages: an action would reach
+    // ones the reader no longer sees.
+    if (now.category != before.category ||
+        now.unreadOnly != before.unreadOnly ||
+        now.starredOnly != before.starredOnly) {
+      _selected = {};
+    }
+  }
+
+  void _toggle(Message message) => setState(() {
+        if (!_selected.remove(message.id)) _selected.add(message.id);
+      });
+
+  void _endSelection() => setState(() => _selected = {});
+
+  Future<void> _export(
+    List<Message> messages,
+    MessageExportFormat format, {
+    required bool share,
+  }) async {
+    _endSelection();
+    await widget.onExport(messages, format, share: share);
+  }
+
+  Future<void> _archive(
+    List<Message> messages, {
+    required bool archived,
+  }) async {
+    final failed = tr(context).messagesArchiveFailed;
+    _endSelection();
+    if (!await widget.onArchive(messages, archived: archived)) {
+      showSnackBar(failed);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: ResponsiveAppBar(
-        title: Text(tr(context).messagesTitle),
-        actions: [
+    final state = widget.state;
+    final visible = state == null
+        ? const <Message>[]
+        : widget.view.apply(state.messages, state.starred);
+    // Only what is in the list counts: a message archived or filtered away
+    // drops out of the selection.
+    final selected = [
+      for (final message in visible)
+        if (_selected.contains(message.id)) message,
+    ];
+    return PopScope(
+      // Back ends a selection before it leaves the page.
+      canPop: selected.isEmpty,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _endSelection();
+      },
+      child: Scaffold(
+        appBar: selected.isEmpty
+            ? _appBar(context)
+            : _selectionBar(context, visible, selected),
+        // Not while picking: then the bar holds the actions.
+        floatingActionButton: selected.isEmpty && state != null
+            ? FloatingActionButton.extended(
+                onPressed: () => widget.onCompose(null),
+                icon: const Icon(Icons.edit_outlined),
+                label: Text(tr(context).messageComposeTitle),
+              )
+            : null,
+        body: PullToRefresh(
+          onRefresh: widget.onRefresh,
+          child: state == null
+              ? widget.noInternet
+                  ? const NoInternet()
+                  : const Center(child: CircularProgressIndicator())
+              : _list(
+                  context,
+                  state,
+                  visible,
+                  selecting: selected.isNotEmpty,
+                ),
+        ),
+      ),
+    );
+  }
+
+  PreferredSizeWidget _appBar(BuildContext context) {
+    return ResponsiveAppBar(
+      title: Text(tr(context).messagesTitle),
+      actions: [
+        PopupMenuButton<MessageSort>(
+          icon: const Icon(Icons.sort),
+          tooltip: tr(context).messagesSort,
+          initialValue: widget.view.sort,
+          onSelected: widget.onSort,
+          itemBuilder: (context) => [
+            for (final sort in MessageSort.values)
+              CheckedPopupMenuItem(
+                value: sort,
+                checked: sort == widget.view.sort,
+                child: Text(switch (sort) {
+                  MessageSort.newest => tr(context).messagesSortNewest,
+                  MessageSort.oldest => tr(context).messagesSortOldest,
+                  MessageSort.sender => tr(context).messagesSortSender,
+                }),
+              ),
+          ],
+        ),
+        IconButton(
+          icon: const Icon(Icons.done_all),
+          tooltip: tr(context).messagesMarkAllRead,
+          onPressed: widget.hasUnread ? widget.onMarkAllAsRead : null,
+        ),
+        const ConnectionStatusButton(),
+        const AccountAvatarButton(),
+      ],
+    );
+  }
+
+  PreferredSizeWidget _selectionBar(
+    BuildContext context,
+    List<Message> visible,
+    List<Message> selected,
+  ) {
+    final l = tr(context);
+    Widget exportMenu({required bool share}) =>
+        PopupMenuButton<MessageExportFormat>(
+          icon: Icon(share ? Icons.share : Icons.download),
+          tooltip: share ? l.commonShare : l.commonSave,
+          onSelected: (format) => _export(selected, format, share: share),
+          itemBuilder: (context) => [
+            for (final format in MessageExportFormat.values)
+              PopupMenuItem(
+                value: format,
+                child: Text(switch (format) {
+                  MessageExportFormat.pdf => l.messagesExportPdf,
+                  MessageExportFormat.text => l.messagesExportText,
+                  MessageExportFormat.markdown => l.messagesExportMarkdown,
+                }),
+              ),
+          ],
+        );
+    return ResponsiveAppBar(
+      leading: IconButton(
+        icon: const Icon(Icons.close),
+        tooltip: l.messagesEndSelection,
+        onPressed: _endSelection,
+      ),
+      title: Text(l.messagesSelected(selected.length)),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.select_all),
+          tooltip: l.messagesSelectAll,
+          onPressed: selected.length == visible.length
+              ? null
+              : () => setState(() => _selected = {for (final m in visible) m.id}),
+        ),
+        exportMenu(share: true),
+        exportMenu(share: false),
+        // Only the moves a picked message allows. Both go to the server.
+        if (selected.any((m) => m.canArchive))
           IconButton(
-            icon: const Icon(Icons.done_all),
-            tooltip: tr(context).messagesMarkAllRead,
-            onPressed: hasUnread ? onMarkAllAsRead : null,
+            icon: const Icon(Icons.archive_outlined),
+            tooltip: l.messagesArchive,
+            onPressed: widget.noInternet
+                ? null
+                : () => _archive(selected, archived: true),
           ),
-          const ConnectionStatusButton(),
-          const AccountAvatarButton(),
-        ],
-      ),
-      body: PullToRefresh(
-        onRefresh: onRefresh,
-        child: state == null
-            ? noInternet
-                ? const NoInternet()
-                : const Center(child: CircularProgressIndicator())
-            : Stack(
-              children: <Widget>[
-                AnimatedLinearProgressIndicator(
-                  show: state!.showMessage != null &&
-                      !state!.messages
-                          .any((m) => m.id == state!.showMessage),
-                ),
-                if (state!.messages.isEmpty)
-                  Center(
-                    child: Text(
-                      tr(context).messagesEmpty,
-                      style: Theme.of(context).textTheme.headlineMedium,
-                      textAlign: TextAlign.center,
-                    ),
+        if (selected.any((m) => m.canRestore))
+          IconButton(
+            icon: const Icon(Icons.unarchive_outlined),
+            tooltip: l.messagesRestore,
+            onPressed: widget.noInternet
+                ? null
+                : () => _archive(selected, archived: false),
+          ),
+      ],
+    );
+  }
+
+  Widget _list(
+    BuildContext context,
+    MessagesState state,
+    List<Message> visible, {
+    required bool selecting,
+  }) {
+    final altColor = Theme.of(context)
+        .colorScheme
+        .surfaceContainerHighest
+        .withValues(alpha: 0.75);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        MessageListBar(
+          view: widget.view,
+          onCategory: widget.onCategory,
+          onUnreadOnly: widget.onUnreadOnly,
+          onStarredOnly: widget.onStarredOnly,
+        ),
+        const Divider(),
+        Expanded(
+          child: Stack(
+            children: <Widget>[
+              AnimatedLinearProgressIndicator(
+                show: state.showMessage != null &&
+                    !state.messages.any((m) => m.id == state.showMessage),
+              ),
+              if (visible.isEmpty)
+                Center(
+                  child: Text(
+                    state.messages.isEmpty
+                        ? tr(context).messagesEmpty
+                        : tr(context).messagesCategoryEmpty,
+                    style: Theme.of(context).textTheme.headlineMedium,
+                    textAlign: TextAlign.center,
                   ),
-                ListView.builder(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  padding: context.systemInsets,
-                  itemCount: state!.messages.length,
-                  itemBuilder: (context, i) {
-                    final altColor = Theme.of(context)
-                        .colorScheme
-                        .surfaceContainerHighest
-                        .withOpacity(0.75);
-                    return MessageWidget(
-                      message: state!.messages[i],
-                      onOpenFile: onOpenFile,
-                      onMarkAsRead: onMarkAsRead,
-                      onReply: onReply,
-                      signature: signature,
-                      onSignature: onSignature,
-                      noInternet: noInternet,
-                      expand: state!.messages[i].id == state!.showMessage,
-                      tileColor: i.isOdd ? altColor : null,
-                    );
-                  },
                 ),
-              ],
-            ),
-      ),
+              ListView.builder(
+                physics: const AlwaysScrollableScrollPhysics(),
+                // Room below the last message for the new-message button.
+                padding: context.systemInsets.copyWith(
+                  bottom: context.systemInsets.bottom + 88,
+                ),
+                itemCount: visible.length,
+                itemBuilder: (context, i) {
+                  final message = visible[i];
+                  return MessageWidget(
+                    // Keyed by id: switching folders moves messages to other
+                    // rows, and each tile keeps whether it started open.
+                    key: ValueKey(message.id),
+                    message: message,
+                    selecting: selecting,
+                    selected: _selected.contains(message.id),
+                    onSelect: () => _toggle(message),
+                    onAnswer: message.canReply && !message.outgoing
+                        ? () => widget.onCompose(message)
+                        : null,
+                    starred: state.starred.contains(message.id),
+                    starColor: widget.starColor,
+                    onToggleStar: () => widget.onToggleStar(message),
+                    onOpenFile: widget.onOpenFile,
+                    onMarkAsRead: widget.onMarkAsRead,
+                    onReply: widget.onReply,
+                    signature: widget.signature,
+                    onSignature: widget.onSignature,
+                    noInternet: widget.noInternet,
+                    expand: message.id == state.showMessage,
+                    tileColor: i.isOdd ? altColor : null,
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
 
+/// Picks the folder the message list shows, the way the portal sorts its
+/// messages, and narrows it to unread or starred ones.
+class MessageListBar extends StatelessWidget {
+  final MessageListView view;
+  final ValueChanged<MessageCategory> onCategory;
+  final ValueChanged<bool> onUnreadOnly;
+  final ValueChanged<bool> onStarredOnly;
+
+  const MessageListBar({
+    super.key,
+    required this.view,
+    required this.onCategory,
+    required this.onUnreadOnly,
+    required this.onStarredOnly,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 4,
+        children: [
+          for (final category in MessageCategory.values)
+            ChoiceChip(
+              label: Text(_label(context, category)),
+              selected: category == view.category,
+              showCheckmark: false,
+              onSelected: (_) => onCategory(category),
+            ),
+          // Filters apply on top of the folder; their icons set them apart
+          // from the folders, of which only one can be picked.
+          FilterChip(
+            avatar: const Icon(Icons.mark_email_unread_outlined),
+            label: Text(tr(context).messagesFilterUnread),
+            selected: view.unreadOnly,
+            showCheckmark: false,
+            onSelected: onUnreadOnly,
+          ),
+          FilterChip(
+            avatar: const Icon(Icons.star_border),
+            label: Text(tr(context).messagesFilterStarred),
+            selected: view.starredOnly,
+            showCheckmark: false,
+            onSelected: onStarredOnly,
+          ),
+        ],
+      ),
+    );
+  }
+
+  static String _label(BuildContext context, MessageCategory category) =>
+      switch (category) {
+        MessageCategory.incoming => tr(context).messagesCategoryIncoming,
+        MessageCategory.outgoing => tr(context).messagesCategoryOutgoing,
+        MessageCategory.archived => tr(context).messagesCategoryArchived,
+        MessageCategory.all => tr(context).messagesCategoryAll,
+      };
+}
+
 class MessageWidget extends StatefulWidget {
   final Message message;
+
+  /// While messages are being picked, a tap picks this one instead of
+  /// opening it.
+  final bool selecting;
+  final bool selected;
+
+  /// Picks or unpicks the message; a long press starts picking.
+  final VoidCallback onSelect;
+
+  /// Starts an answer; `null` when the portal allows none.
+  final VoidCallback? onAnswer;
+  final bool starred;
+  final Color starColor;
+  final VoidCallback onToggleStar;
   final void Function(MessageAttachmentFile message) onOpenFile;
   final void Function(Message message) onMarkAsRead;
   final Future<bool> Function(Message message,
@@ -145,6 +465,13 @@ class MessageWidget extends StatefulWidget {
   const MessageWidget({
     super.key,
     required this.message,
+    required this.selecting,
+    required this.selected,
+    required this.onSelect,
+    this.onAnswer,
+    required this.starred,
+    required this.starColor,
+    required this.onToggleStar,
     required this.onOpenFile,
     required this.noInternet,
     required this.onMarkAsRead,
@@ -186,9 +513,82 @@ class _MessageWidgetState extends State<MessageWidget> {
     }
   }
 
+  Widget _title(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return Row(
+      children: <Widget>[
+        Expanded(
+          child: Text(
+            widget.message.subject,
+            // Italic and a size down for one's own messages: under "All"
+            // they should not catch the eye like the ones received.
+            style: (widget.message.outgoing
+                    ? textTheme.titleSmall
+                        ?.copyWith(fontStyle: FontStyle.italic)
+                    : textTheme.titleMedium)
+                ?.copyWith(color: Theme.of(context).colorScheme.primary),
+          ),
+        ),
+        // Sent and received looked alike, so one's own message read as
+        // something to act on.
+        if (widget.message.outgoing)
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8),
+            child: MessageSentChip(),
+          ),
+        // Visible while the tile is closed: the section below is only
+        // built once it opens, so nothing said the message wanted anything.
+        if (widget.message.responseInfo?.openAction case final action?
+            when action != MessageAction.none)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: MessageActionChip(action: action),
+          ),
+        if (widget.message.isNew)
+          badge.Badge(
+            badgeStyle: badge.BadgeStyle(
+              shape: badge.BadgeShape.square,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            badgeContent: const Text(
+              "neu",
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        // In the title rather than the opened message: marking should not
+        // take opening, and so marking as read, first.
+        IconButton(
+          icon: Icon(
+            widget.starred ? Icons.star : Icons.star_border,
+            color: widget.starred ? widget.starColor : null,
+          ),
+          tooltip: widget.starred
+              ? tr(context).messageUnstar
+              : tr(context).messageStar,
+          visualDensity: VisualDensity.compact,
+          onPressed: widget.onToggleStar,
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
+    if (widget.selecting) {
+      // While picking, a tap picks: the tile neither opens nor marks the
+      // message read.
+      return ListTile(
+        tileColor: widget.tileColor,
+        selected: widget.selected,
+        leading: Checkbox(
+          value: widget.selected,
+          onChanged: (_) => widget.onSelect(),
+        ),
+        title: _title(context),
+        onTap: widget.onSelect,
+        onLongPress: widget.onSelect,
+      );
+    }
     return ExpansionTile(
       controller: _controller,
       initiallyExpanded: initiallyExpanded,
@@ -199,43 +599,11 @@ class _MessageWidgetState extends State<MessageWidget> {
           widget.onMarkAsRead(widget.message);
         }
       },
-      title: Row(
-        children: <Widget>[
-          Expanded(
-            child: Text(
-              widget.message.subject,
-              style: textTheme.titleMedium?.copyWith(
-                color: Theme.of(context).colorScheme.primary,
-              ),
-            ),
-          ),
-          // Sent and received looked alike, so one's own message read as
-          // something to act on.
-          if (widget.message.outgoing)
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8),
-              child: MessageSentChip(),
-            ),
-          // Visible while the tile is closed: the section below is only
-          // built once it opens, so nothing said the message wanted anything.
-          if (widget.message.responseInfo?.openAction case final action?
-              when action != MessageAction.none)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: MessageActionChip(action: action),
-            ),
-          if (widget.message.isNew)
-            badge.Badge(
-              badgeStyle: badge.BadgeStyle(
-                shape: badge.BadgeShape.square,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              badgeContent: const Text(
-                "neu",
-                style: TextStyle(color: Colors.white),
-              ),
-            )
-        ],
+      // A long press starts picking messages for a common action; a tap still
+      // reaches the tile and opens it.
+      title: GestureDetector(
+        onLongPress: widget.onSelect,
+        child: _title(context),
       ),
       children: [
         Padding(
@@ -328,6 +696,17 @@ class _MessageWidgetState extends State<MessageWidget> {
                     widget.message,
                     response: response,
                     signature: signature,
+                  ),
+                ),
+              ],
+              if (widget.onAnswer case final onAnswer?) ...[
+                const Divider(),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: OutlinedButton.icon(
+                    onPressed: widget.noInternet ? null : onAnswer,
+                    icon: const Icon(Icons.reply),
+                    label: Text(tr(context).messageAnswer),
                   ),
                 ),
               ],

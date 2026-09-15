@@ -907,9 +907,35 @@ abstract class Message implements Built<Message, MessageBuilder> {
 
   /// Sent by this account rather than received — the portal's "Ausgang".
   ///
-  /// Taken from the server's own label, not worked out from the sender: the
-  /// list carries no user id to compare against (`fromUserId` comes back 0).
+  /// Taken from the server's own label, the way the portal files its
+  /// messages, rather than worked out by comparing [fromUserId] with the
+  /// account.
   bool get outgoing;
+
+  /// The sender's user id, which an answer goes to. 0 when unknown: the demo
+  /// capture has it blanked.
+  int get fromUserId;
+
+  /// Whether the portal lets this account answer the message: it shows its
+  /// answer button only with `canBeReplied` and `answerMessageEnabled`.
+  bool get canReply;
+
+  /// Filed under the portal's "Archiv". The portal counts an archived message
+  /// neither as received nor as sent.
+  bool get archived;
+
+  /// What the portal expects as `archiveType` to move this message:
+  /// [archiveTypeArchive] into the archive, [archiveTypeRestore] back out.
+  ///
+  /// Read from `archiveMessageEnabled`, which carries exactly these values;
+  /// anything else allows neither.
+  int get archiveType;
+
+  static const archiveTypeArchive = 1;
+  static const archiveTypeRestore = 2;
+
+  bool get canArchive => archiveType == archiveTypeArchive;
+  bool get canRestore => archiveType == archiveTypeRestore;
 
   /// Unread and received. A sent message carries no `timeRead` at all, so
   /// without the direction check one's own message would count as new.
@@ -919,11 +945,39 @@ abstract class Message implements Built<Message, MessageBuilder> {
   factory Message([Function(MessageBuilder b)? updates]) = _$Message;
   Message._();
 
-  // `outgoing` defaults to false, so state saved before the field existed
-  // still loads.
+  // Defaults so that state saved before these fields existed still loads.
   static void _initializeBuilder(MessageBuilder b) => b
     ..attachments = ListBuilder<MessageAttachmentFile>()
-    ..outgoing = false;
+    ..outgoing = false
+    ..archived = false
+    ..archiveType = 0
+    ..fromUserId = 0
+    ..canReply = false;
+}
+
+/// The folders the message list offers, as the portal files messages.
+enum MessageCategory {
+  incoming,
+  outgoing,
+  archived,
+  all;
+
+  /// Received is whatever is neither sent nor archived, rather than the
+  /// server's `label_incoming`: messages cached before the folders were read
+  /// then still show up where they did before.
+  bool includes(Message message) => switch (this) {
+        incoming => !message.outgoing && !message.archived,
+        outgoing => message.outgoing && !message.archived,
+        archived => message.archived,
+        all => true,
+      };
+
+  /// The one folder besides [all] that holds [message].
+  static MessageCategory of(Message message) => message.archived
+      ? archived
+      : message.outgoing
+          ? outgoing
+          : incoming;
 }
 
 abstract class MessageAttachmentFile

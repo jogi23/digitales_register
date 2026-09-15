@@ -15,9 +15,15 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'dart:convert';
+
+import 'package:built_collection/built_collection.dart';
+import 'package:dr/app_state.dart';
 import 'package:dr/data.dart';
 import 'package:dr/middleware/middleware.dart';
 import 'package:dr/providers/messages_provider.dart';
+import 'package:dr/serializers.dart';
+import 'package:dr/utc_date_time.dart';
 import 'package:dr/wrapper.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -33,6 +39,7 @@ const _signedId = 31241; // signatureRequired, already signed
 const _plainId = 39102; // read without signature -> no confirmation
 // 39102 is also the one message the demo account sent itself.
 const _sentId = _plainId;
+const _archivedId = 47363; // the one archived message
 
 void main() {
   setUpAll(loadFixtures);
@@ -107,6 +114,204 @@ void main() {
       final received = messageWithId(_agreeOpenId)
           .rebuild((b) => b..timeRead = null);
       expect(received.isNew, isTrue);
+    });
+  });
+
+  group('folders', () {
+    MessageCategory category() =>
+        container.read(messageListProvider).category;
+
+    test('an archived message is marked archived', () {
+      expect(messageWithId(_archivedId).archived, isTrue);
+      expect(messageWithId(_agreeOpenId).archived, isFalse);
+    });
+
+    test('received holds neither sent nor archived messages', () {
+      expect(MessageCategory.incoming.includes(messageWithId(_agreeOpenId)),
+          isTrue);
+      expect(
+          MessageCategory.incoming.includes(messageWithId(_sentId)), isFalse);
+      expect(MessageCategory.incoming.includes(messageWithId(_archivedId)),
+          isFalse);
+    });
+
+    test('the list starts on received messages', () {
+      expect(category(), MessageCategory.incoming);
+    });
+
+    test('opening a sent message switches to sent', () {
+      container.read(messagesProvider.notifier).select(_sentId);
+      expect(category(), MessageCategory.outgoing);
+    });
+
+    test('opening a received message keeps the folder', () {
+      container.read(messagesProvider.notifier).select(_agreeOpenId);
+      expect(category(), MessageCategory.incoming);
+    });
+
+    test('a message opened before the list loads is revealed by the load',
+        () async {
+      final notifier = container.read(messagesProvider.notifier)
+        ..reset()
+        ..select(_archivedId);
+      expect(category(), MessageCategory.incoming);
+      await notifier.load();
+      expect(category(), MessageCategory.archived);
+    });
+  });
+
+  group('archive', () {
+    void verifyArchiveRequest(int messageId, int archiveType,
+            {int times = 1}) =>
+        verify(() => wrapper.send('api/message/archiveMessage',
+            args: {'messageId': messageId, 'archiveType': archiveType},
+            onError: any(named: 'onError'))).called(times);
+
+    test('the move a message allows comes from archiveMessageEnabled', () {
+      expect(messageWithId(_agreeOpenId).canArchive, isTrue);
+      expect(messageWithId(_agreeOpenId).canRestore, isFalse);
+      expect(messageWithId(_archivedId).canRestore, isTrue);
+    });
+
+    test('archiving sends archiveType 1 and loads the list again', () async {
+      final allSent = await container
+          .read(messagesProvider.notifier)
+          .setArchived([_agreeOpenId, _archivedId], archived: true);
+      expect(allSent, isTrue);
+      verifyArchiveRequest(_agreeOpenId, 1);
+      // Already archived: nothing to do for it.
+      verifyNever(() => wrapper.send('api/message/archiveMessage',
+          args: {'messageId': _archivedId, 'archiveType': 1},
+          onError: any(named: 'onError')));
+      verify(() => wrapper.send('api/message/getMyMessages')).called(2);
+    });
+
+    test('taking out of the archive sends archiveType 2', () async {
+      await container
+          .read(messagesProvider.notifier)
+          .setArchived([_archivedId], archived: false);
+      verifyArchiveRequest(_archivedId, 2);
+    });
+
+    test('a request that fails is reported', () async {
+      when(() => wrapper.send('api/message/archiveMessage',
+              args: any(named: 'args'), onError: any(named: 'onError')))
+          .thenAnswer((invocation) async {
+        (invocation.namedArguments[#onError] as void Function(Object))
+            .call(Exception('offline'));
+        return null;
+      });
+      final allSent = await container
+          .read(messagesProvider.notifier)
+          .setArchived([_agreeOpenId], archived: true);
+      expect(allSent, isFalse);
+    });
+  });
+
+  group('stars', () {
+    BuiltSet<int> starred() => container.read(messagesProvider).starred;
+
+    test('toggling sets a star and takes it away again', () {
+      final notifier = container.read(messagesProvider.notifier)
+        ..toggleStar(_agreeOpenId);
+      expect(starred().asSet(), {_agreeOpenId});
+      notifier.toggleStar(_agreeOpenId);
+      expect(starred(), isEmpty);
+    });
+
+    test('a reload keeps the stars', () async {
+      final notifier = container.read(messagesProvider.notifier)
+        ..toggleStar(_signedId);
+      await notifier.load();
+      expect(starred().asSet(), {_signedId});
+    });
+
+    test('a message gone from the portal takes its star along', () async {
+      final notifier = container.read(messagesProvider.notifier)
+        ..toggleStar(1);
+      await notifier.load();
+      expect(starred(), isEmpty);
+    });
+
+    test('stars are saved with the account', () {
+      final state = AppState((b) => b.messagesState.starred.add(_signedId));
+      final decoded = serializers.deserialize(
+        json.decode(json.encode(serializers.serialize(state))) as Object,
+      )! as AppState;
+      expect(decoded.messagesState.starred.asSet(), {_signedId});
+    });
+  });
+
+  group('order and filters', () {
+    Message message(int id, String from, String sent, {bool read = true}) =>
+        Message(
+          (b) => b
+            ..id = id
+            ..subject = 'Mitteilung $id'
+            ..text = ''
+            ..fromName = from
+            ..recipientString = ''
+            ..timeSent = UtcDateTime.parse(sent)
+            ..timeRead = read ? UtcDateTime.parse(sent) : null,
+        );
+    final oldest = message(1, 'berger', '2026-09-01 08:00:00');
+    final unread = message(2, 'Amort', '2026-09-10 08:00:00', read: false);
+    final newest = message(3, 'Berger', '2026-09-12 08:00:00');
+
+    List<int> ids(MessageListView view, [Iterable<int> starred = const []]) =>
+        view
+            .apply([oldest, unread, newest], BuiltSet<int>(starred))
+            .map((m) => m.id)
+            .toList();
+
+    test('newest first by default', () {
+      expect(ids(const MessageListView()), [3, 2, 1]);
+    });
+
+    test('oldest first on request', () {
+      expect(ids(const MessageListView(sort: MessageSort.oldest)), [1, 2, 3]);
+    });
+
+    test('by sender ignores case, newest first within one sender', () {
+      expect(ids(const MessageListView(sort: MessageSort.sender)), [2, 3, 1]);
+    });
+
+    test('unread only', () {
+      expect(ids(MessageListView(keptUnread: BuiltSet<int>())), [2]);
+    });
+
+    test('starred only', () {
+      expect(ids(const MessageListView(starredOnly: true), [1]), [1]);
+    });
+
+    test('a message read under "unread only" stays in the list', () async {
+      final notifier = container.read(messagesProvider.notifier)
+        ..restore(MessagesState((b) => b.messages.add(unread)));
+      container.read(messageListProvider.notifier).showUnreadOnly(true);
+      await notifier.markAsRead(unread.id);
+
+      final state = container.read(messagesProvider);
+      expect(state.messages.single.isNew, isFalse);
+      expect(
+        container.read(messageListProvider).apply(state.messages, state.starred),
+        hasLength(1),
+      );
+    });
+
+    test('switching the folder keeps order and filters', () {
+      container.read(messageListProvider.notifier)
+        ..sortBy(MessageSort.sender)
+        ..showStarredOnly(true)
+        ..showCategory(MessageCategory.all);
+      final view = container.read(messageListProvider);
+      expect(view.sort, MessageSort.sender);
+      expect(view.starredOnly, isTrue);
+    });
+
+    test('opening a message a filter hides drops the filter', () {
+      container.read(messageListProvider.notifier).showStarredOnly(true);
+      container.read(messagesProvider.notifier).select(_agreeOpenId);
+      expect(container.read(messageListProvider).starredOnly, isFalse);
     });
   });
 
