@@ -127,6 +127,10 @@ class MessageComposeState {
   /// Whether `getTypes` has answered.
   final bool ready;
 
+  /// `getTypes` brought nothing usable: a request that went wrong — an
+  /// expired session, say — and not a refusal.
+  final bool failed;
+
   /// The kind of message this account sends, from `getTypes`; `null` when it
   /// may send none. Parents are offered exactly one.
   final Map<String, Object?>? type;
@@ -138,6 +142,7 @@ class MessageComposeState {
 
   const MessageComposeState({
     this.ready = false,
+    this.failed = false,
     this.type,
     this.permission,
     this.recipients = const [],
@@ -163,6 +168,7 @@ class MessageComposeState {
   }) =>
       MessageComposeState(
         ready: ready,
+        failed: failed,
         type: type,
         permission: permission,
         recipients: recipients ?? this.recipients,
@@ -190,8 +196,17 @@ class MessageComposeNotifier extends AutoDisposeNotifier<MessageComposeState> {
   /// Asks what this account may send and, for an answer to [answerTo], puts
   /// that user in as the first recipient.
   Future<void> start({int? answerTo}) async {
+    // Back to loading, for a second try after a failed one.
+    state = MessageComposeState(
+      recipients: state.recipients,
+      groups: state.groups,
+    );
+    Object? failure;
     // No arguments: the portal posts an empty object, as for any call.
-    final types = await wrapper.send('api/message/getTypes');
+    final types = await wrapper.send(
+      'api/message/getTypes',
+      onError: (error) => failure = error,
+    );
     if (_disposed) return;
     final type = switch (types) {
       {'types': [final Map first, ...]} => first.cast<String, Object?>(),
@@ -203,6 +218,8 @@ class MessageComposeNotifier extends AutoDisposeNotifier<MessageComposeState> {
     };
     state = MessageComposeState(
       ready: true,
+      // Only an answer listing no kind of message is a refusal.
+      failed: failure != null || types is! Map,
       type: type,
       permission: permission,
       recipients: state.recipients,
@@ -357,19 +374,23 @@ class MessageComposeNotifier extends AutoDisposeNotifier<MessageComposeState> {
           for (final person in group.people) person.id: person.selected,
         },
     };
-    state = state.copyWith(
-      loadingDetails: false,
-      groups: [
-        for (final (i, group) in details.indexed)
-          if (group is Map)
-            _group(
-              group.cast<String, Object?>(),
-              // The answer lists the groups in the order they were asked for.
-              i < requested.length ? requested[i].key : '$i',
-              before,
-            ),
-      ],
-    );
+    final unmatched = [...requested];
+    final groups = <RecipientGroup>[];
+    for (final group in details) {
+      if (group is! Map) continue;
+      final json = group.cast<String, Object?>();
+      // The answer names no id and may leave recipients out — the account
+      // itself, for one — so a group is matched by type and name, each
+      // recipient once, rather than by its position.
+      final index = unmatched.indexWhere(
+        (r) => r.type == json['type'] && r.name == _name(json['name']),
+      );
+      final key = index == -1
+          ? '${json['type']}:${_name(json['name'])}'
+          : unmatched.removeAt(index).key;
+      groups.add(_group(json, key, before));
+    }
+    state = state.copyWith(loadingDetails: false, groups: groups);
   }
 
   static RecipientGroup _group(

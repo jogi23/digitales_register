@@ -57,7 +57,10 @@ class _MessageComposeContainerState
     return MessageComposePage(
       state: state,
       noInternet: ref.watch(noInternetProvider),
+      isAnswer: answerTo != null,
       initialSubject: answerTo == null ? '' : answerSubject(answerTo.subject),
+      onRetry: () =>
+          unawaited(notifier.start(answerTo: answerTo?.fromUserId)),
       onSearch: notifier.search,
       onAdd: (recipient) => unawaited(notifier.add(recipient)),
       onRemove: (recipient) => unawaited(notifier.remove(recipient)),

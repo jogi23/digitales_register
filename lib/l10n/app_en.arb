@@ -182,6 +182,8 @@
     }
   },
   "messageComposeNotAllowed": "This account may not send messages.",
+  "messageComposeLoadFailed": "The portal did not answer. The session may have expired.",
+  "messageComposeRetry": "Try again",
   "messageComposeDiscardTitle": "Discard draft?",
   "messageComposeDiscard": "Discard",
   "messageRecipientTeacher": "Teacher",

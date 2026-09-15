@@ -182,6 +182,8 @@
     }
   },
   "messageComposeNotAllowed": "Dieses Konto darf keine Mitteilungen senden.",
+  "messageComposeLoadFailed": "Das Portal hat nicht geantwortet. Vielleicht ist die Sitzung abgelaufen.",
+  "messageComposeRetry": "Erneut versuchen",
   "messageComposeDiscardTitle": "Entwurf verwerfen?",
   "messageComposeDiscard": "Verwerfen",
   "messageRecipientTeacher": "Lehrperson",

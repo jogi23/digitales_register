@@ -45,9 +45,14 @@ const _otherTeacherJson = <String, Object?>{
 };
 
 /// Ready to write, with one teacher as recipient — ticked or not.
-MessageComposeState _state({bool ticked = true, bool allowed = true}) =>
+MessageComposeState _state({
+  bool ticked = true,
+  bool allowed = true,
+  bool failed = false,
+}) =>
     MessageComposeState(
       ready: true,
+      failed: failed,
       type: allowed ? const {'typeId': 'read'} : null,
       permission: 'me',
       recipients: const [MessageRecipient(_teacherJson)],
@@ -69,6 +74,7 @@ class _Calls {
   final List<String> searches = [];
   final List<MessageRecipient> added = [];
   int sends = 0;
+  int retries = 0;
 }
 
 Widget _page(
@@ -76,6 +82,7 @@ Widget _page(
   _Calls calls, {
   String? sendResult,
   List<MessageRecipient> hits = const [],
+  bool isAnswer = false,
 }) {
   scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
   return MaterialApp(
@@ -89,7 +96,9 @@ Widget _page(
                 builder: (_) => MessageComposePage(
                   state: state,
                   noInternet: false,
+                  isAnswer: isAnswer,
                   initialSubject: '',
+                  onRetry: () => calls.retries++,
                   onSearch: (filter) async {
                     calls.searches.add(filter);
                     return hits;
@@ -227,6 +236,23 @@ void main() {
     await tester.tap(find.text('Verwerfen'));
     await tester.pumpAndSettle();
     expect(find.byType(MessageComposePage), findsNothing);
+  });
+
+  testWidgets('a portal that did not answer is no refusal', (tester) async {
+    final calls = _Calls();
+    await _open(tester, _page(_state(allowed: false, failed: true), calls));
+    expect(find.textContaining('nicht geantwortet'), findsOneWidget);
+    expect(
+      find.text('Dieses Konto darf keine Mitteilungen senden.'),
+      findsNothing,
+    );
+    await tester.tap(find.text('Erneut versuchen'));
+    expect(calls.retries, 1);
+  });
+
+  testWidgets('an answer is titled as one', (tester) async {
+    await _open(tester, _page(_state(), _Calls(), isAnswer: true));
+    expect(find.widgetWithText(AppBar, 'Antworten'), findsOneWidget);
   });
 
   testWidgets('an account that may not send is told', (tester) async {

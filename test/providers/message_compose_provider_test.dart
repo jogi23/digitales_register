@@ -26,6 +26,10 @@ import 'package:mocktail/mocktail.dart';
 
 class MockWrapper extends Mock implements Wrapper {}
 
+/// The account itself: the portal leaves it out of `getRecipientsDetails`
+/// (live capture), so the answer holds fewer groups than asked for.
+const _ownAccountId = 9637;
+
 /// What `getTypes` gives a parent account (live capture).
 const _types = {
   'types': [
@@ -92,6 +96,7 @@ Map<String, Object?> _details(List<Object?> groups) => {
       'recipientsNumber': 0,
       'recipientsDetails': [
         for (final group in groups.cast<Map<String, Object?>>())
+          if (group['id'] != _ownAccountId)
           {
             'type': group['type'],
             'name': group['name'],
@@ -163,6 +168,26 @@ void main() {
       expect(state().allowed, isFalse);
     });
 
+    test('a request that fails is no refusal', () async {
+      // What an expired session looks like: every call ends in a 401.
+      when(() => wrapper.send('api/message/getTypes',
+              args: any(named: 'args'), onError: any(named: 'onError')))
+          .thenAnswer((invocation) async {
+        (invocation.namedArguments[#onError] as void Function(Object))
+            .call(Exception('401'));
+        return null;
+      });
+      await notifier().start();
+      expect(state().ready, isTrue);
+      expect(state().failed, isTrue);
+
+      // Asking again, once the session is back, recovers.
+      stub('api/message/getTypes', (_) => _types);
+      await notifier().start();
+      expect(state().failed, isFalse);
+      expect(state().allowed, isTrue);
+    });
+
     test('an answer starts with the sender as recipient', () async {
       await notifier().start(answerTo: 10630);
       expect(lastArgs('api/message/getInitialRecipients'), {
@@ -213,6 +238,28 @@ void main() {
       await notifier().remove(teacher);
       expect(state().groups, isEmpty);
       expect(state().selectedCount, 0);
+    });
+  });
+
+  group('an answer leaving a recipient out', () {
+    test('matches the groups by type and name, not by position', () async {
+      await notifier().add(MessageRecipient(_teacher(_ownAccountId)));
+      await notifier().add(MessageRecipient(_teacher(7330)));
+      final group = state().groups.single;
+      expect(group.recipientKey, 'user:7330');
+      expect(group.people.single.id, 7330);
+    });
+
+    test('ticks reach the person meant, before and after removal', () async {
+      final own = MessageRecipient(_teacher(_ownAccountId));
+      final teacher = MessageRecipient(_teacher(7330));
+      await notifier().add(own);
+      await notifier().add(teacher);
+      notifier().toggle(teacher.key, 7330);
+      expect(state().selectedCount, 0);
+
+      await notifier().remove(own);
+      expect(state().groups.single.people.single.selected, isFalse);
     });
   });
 

@@ -36,13 +36,46 @@ String recipientRole(L l, List<ContextFragment> context) => [
           },
     ].where((role) => role.isNotEmpty).join(', ');
 
+/// A sentence in the middle of the page, with a way on when there is one.
+class _Notice extends StatelessWidget {
+  final String text;
+  final Widget? action;
+
+  const _Notice({required this.text, this.action});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(text, textAlign: TextAlign.center),
+            if (action case final action?) ...[
+              const SizedBox(height: 12),
+              action,
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 /// Writes a message: recipients, the people behind them, subject and text.
 class MessageComposePage extends StatefulWidget {
   final MessageComposeState state;
   final bool noInternet;
 
+  /// An answer rather than a new message; only the title differs.
+  final bool isAnswer;
+
   /// The subject to start with, for an answer.
   final String initialSubject;
+
+  /// Asks the portal again after [MessageComposeState.failed].
+  final VoidCallback onRetry;
 
   final Future<List<MessageRecipient>> Function(String filter) onSearch;
   final ValueChanged<MessageRecipient> onAdd;
@@ -61,7 +94,9 @@ class MessageComposePage extends StatefulWidget {
     super.key,
     required this.state,
     required this.noInternet,
+    required this.isAnswer,
     required this.initialSubject,
+    required this.onRetry,
     required this.onSearch,
     required this.onAdd,
     required this.onRemove,
@@ -210,20 +245,26 @@ class _MessageComposePageState extends State<MessageComposePage> {
         if (!didPop) _confirmDiscard();
       },
       child: Scaffold(
-        appBar: AppBar(title: Text(l.messageComposeTitle)),
+        appBar: AppBar(
+          title: Text(
+            widget.isAnswer ? l.messageAnswer : l.messageComposeTitle,
+          ),
+        ),
         body: !state.ready
             ? const Center(child: CircularProgressIndicator())
-            : !state.allowed
-                ? Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Text(
-                        l.messageComposeNotAllowed,
-                        textAlign: TextAlign.center,
-                      ),
+            // Checked before the refusal: a failed request says nothing
+            // about what the account may do.
+            : state.failed
+                ? _Notice(
+                    text: l.messageComposeLoadFailed,
+                    action: TextButton(
+                      onPressed: widget.noInternet ? null : widget.onRetry,
+                      child: Text(l.messageComposeRetry),
                     ),
                   )
-                : _form(context, l, state),
+                : !state.allowed
+                    ? _Notice(text: l.messageComposeNotAllowed)
+                    : _form(context, l, state),
       ),
     );
   }
