@@ -21,6 +21,7 @@ import 'package:dr/app_state.dart';
 import 'package:dr/data.dart';
 import 'package:dr/providers/grades_provider.dart';
 import 'package:dr/ui/layout.dart';
+import 'package:dr/ui/sorted_grades_widget.dart' show MarkGradeButton;
 import 'package:dr/ui/star_rating.dart';
 import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
@@ -85,9 +86,21 @@ class _GradeDetailPageState extends ConsumerState<GradeDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    final found = _find(ref.watch(gradesProvider));
+    final state = ref.watch(gradesProvider);
+    final found = _find(state);
     return Scaffold(
-      appBar: AppBar(title: Text(found?.subject.name ?? tr(context).gradeDetailTitle)),
+      appBar: AppBar(
+        title: Text(found?.subject.name ?? tr(context).gradeDetailTitle),
+        actions: [
+          if (found != null)
+            MarkGradeButton(
+              marked: state.marked.contains(found.grade.id),
+              onPressed: () => ref
+                  .read(gradesProvider.notifier)
+                  .toggleMark(found.grade.id),
+            ),
+        ],
+      ),
       body: found == null
           ? Center(
               child: Padding(

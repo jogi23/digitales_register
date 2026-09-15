@@ -16,6 +16,8 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'dart:convert';
+
 import 'package:built_collection/built_collection.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/container/grades_page_container.dart';
@@ -24,6 +26,7 @@ import 'package:dr/providers/grades_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/services/app_router.dart';
 import 'package:dr/providers/subject_appearance_provider.dart';
+import 'package:dr/serializers.dart';
 import 'package:dr/ui/sorted_grades_widget.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:flutter/material.dart';
@@ -527,6 +530,8 @@ void main() {
     await tester.tap(_subjectRow("Fach1"));
     await tester.pumpAndSettle();
 
+    await tester.ensureVisible(find.text("Dritte Schularbeit"));
+    await tester.pumpAndSettle();
     await tester.tap(find.text("Dritte Schularbeit"));
     await tester.pumpAndSettle();
 
@@ -631,6 +636,99 @@ void main() {
         find.byType(GradesPageContainer),
         matchesGoldenFile('demo_expanded.png'),
       );
+    });
+  });
+
+  group('marking grades', () {
+    Widget page(GradesState state) => ProviderScope(
+          overrides: [
+            gradesProvider.overrideWith(() => _TestGradesNotifier(state)),
+            settingsProvider
+                .overrideWith(() => _TestSettingsNotifier(SettingsState())),
+            subjectAppearanceProvider.overrideWith(
+              () => _TestSubjectAppearanceNotifier(_gradesSettings),
+            ),
+          ],
+          child: MaterialApp(
+            home: const GradesPageContainer(),
+            theme: ThemeData(primarySwatch: Colors.deepOrange),
+          ),
+        );
+
+    /// "Dritte Schularbeit" is grade 2.
+    GradesState thirdMarked() =>
+        _getGradesState().gradesState.rebuild((b) => b.marked.add(2));
+
+    Finder bookmarkOf(String grade, IconData icon) => find.descendant(
+          of: find.ancestor(
+            of: find.text(grade),
+            matching: find.byType(GradeWidget),
+          ),
+          matching: find.byIcon(icon),
+        );
+
+    testWidgets('a bookmark marks a grade and takes the mark away again',
+        (tester) async {
+      await tester.pumpWidget(page(_getGradesState().gradesState));
+      await tester.tap(_subjectRow("Fach1"));
+      await tester.pumpAndSettle();
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(GradesPageContainer)),
+      );
+
+      await tester.ensureVisible(find.text("Dritte Schularbeit"));
+      await tester.pumpAndSettle();
+      await tester.tap(bookmarkOf("Dritte Schularbeit", Icons.bookmark_border));
+      await tester.pumpAndSettle();
+      expect(container.read(gradesProvider).marked.asSet(), {2});
+      expect(bookmarkOf("Dritte Schularbeit", Icons.bookmark), findsOneWidget);
+
+      await tester.tap(bookmarkOf("Dritte Schularbeit", Icons.bookmark));
+      await tester.pumpAndSettle();
+      expect(container.read(gradesProvider).marked, isEmpty);
+    });
+
+    testWidgets('the bookmark does not count as a competence star',
+        (tester) async {
+      await tester.pumpWidget(page(thirdMarked()));
+      await tester.tap(_subjectRow("Fach1"));
+      await tester.pumpAndSettle();
+      expect(find.byIcon(Icons.star), findsNWidgets(3));
+      expect(find.byIcon(Icons.bookmark), findsOneWidget);
+    });
+
+    testWidgets('the filter keeps only marked grades and their subjects',
+        (tester) async {
+      await tester.pumpWidget(page(thirdMarked()));
+      await tester.tap(find.text("Nur markierte Noten anzeigen"));
+      await tester.pumpAndSettle();
+      expect(_subjectRow("Fach2"), findsNothing);
+
+      await tester.tap(_subjectRow("Fach1"));
+      await tester.pumpAndSettle();
+      expect(find.text("Dritte Schularbeit"), findsOneWidget);
+      expect(find.text("Erste Schularbeit"), findsNothing);
+      // Observations cannot be marked.
+      expect(find.text("Beobachtung"), findsNothing);
+    });
+
+    testWidgets('with nothing marked the filter says so', (tester) async {
+      await tester.pumpWidget(page(_getGradesState().gradesState));
+      await tester.tap(find.text("Nur markierte Noten anzeigen"));
+      await tester.pumpAndSettle();
+      expect(
+        find.text("In diesem Zeitraum ist keine Note markiert."),
+        findsOneWidget,
+      );
+      expect(_subjectRow("Fach1"), findsNothing);
+    });
+
+    test('marks are saved with the account', () {
+      final state = AppState((b) => b.gradesState.marked.add(2));
+      final decoded = serializers.deserialize(
+        json.decode(json.encode(serializers.serialize(state))) as Object,
+      )! as AppState;
+      expect(decoded.gradesState.marked.asSet(), {2});
     });
   });
 }
