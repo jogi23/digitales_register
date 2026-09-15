@@ -27,6 +27,12 @@
             "Anmeldung: die Sitzung richtet sich nach der Uhr des Servers. Geht die Uhr des Geräts falsch, meldet die App nicht mehr zu früh ab oder arbeitet mit einer schon abgelaufenen Sitzung weiter.",
             "Anmeldung: ein kurzes Funkloch meldet nicht mehr ab. Kennt der Server die Sitzung nicht mehr, meldet die App still neu an."
           ]
+        },
+        {
+          "title": "Intern",
+          "items": [
+            "Android-Build auf das im Android-Build-Plugin eingebaute Kotlin umgestellt; dafür Sentry sowie die Android-Teile von Bildauswahl und Einstellungsspeicher auf Fassungen angehoben, die das unterstützen"
+          ]
         }
       ],
       "en": [
@@ -54,6 +60,12 @@
             "Login: the session follows the server's clock. If the device clock is wrong, the app no longer logs out too early or keeps working with a session that has already expired.",
             "Login: a brief loss of signal no longer logs you out. If the server no longer knows the session, the app quietly logs in again."
           ]
+        },
+        {
+          "title": "Internal",
+          "items": [
+            "Android build switched to the Kotlin support built into the Android Gradle Plugin; Sentry and the Android parts of the image picker and the settings storage updated to versions that support it"
+          ]
         }
       ],
       "it": [
@@ -80,6 +92,12 @@
             "Se il server segnala una sessione scaduta con un codice di errore invece di rimandare alla pagina di accesso, l'app accede di nuovo e ripete la richiesta. Se non ci riesce, l'indicatore di connessione mostra la sessione come scaduta, invece di lasciare le pagine vuote senza avviso.",
             "Accesso: la sessione segue l'orologio del server. Se l'orologio del dispositivo è sbagliato, l'app non esce più troppo presto e non continua a lavorare con una sessione già scaduta.",
             "Accesso: una breve assenza di segnale non fa più uscire. Se il server non riconosce più la sessione, l'app accede di nuovo in silenzio."
+          ]
+        },
+        {
+          "title": "Interno",
+          "items": [
+            "Build Android passata al supporto Kotlin integrato nel plugin Gradle di Android; Sentry e le parti Android del selettore di immagini e dell'archivio delle impostazioni aggiornati a versioni che lo supportano"
           ]
         }
       ]
