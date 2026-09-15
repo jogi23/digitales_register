@@ -1,4 +1,33 @@
 {
+  "1.4.0": {
+    "date": "2026-09-15",
+    "points": {
+      "de": [
+        {
+          "title": "Fehlerbehebungen",
+          "items": [
+            "Meldet der Server eine abgelaufene Sitzung mit einem Fehlercode statt mit einer Weiterleitung zur Anmeldung, meldet sich die App neu an und wiederholt den Abruf. Gelingt das nicht, zeigt die Verbindungsanzeige die Sitzung als abgelaufen, statt die Seiten still leer zu lassen."
+          ]
+        }
+      ],
+      "en": [
+        {
+          "title": "Bug fixes",
+          "items": [
+            "If the server reports an expired session with an error code instead of redirecting to the sign-in page, the app signs in again and repeats the request. If that fails, the connection indicator shows the session as expired instead of leaving the pages silently empty."
+          ]
+        }
+      ],
+      "it": [
+        {
+          "title": "Correzioni",
+          "items": [
+            "Se il server segnala una sessione scaduta con un codice di errore invece di rimandare alla pagina di accesso, l'app accede di nuovo e ripete la richiesta. Se non ci riesce, l'indicatore di connessione mostra la sessione come scaduta, invece di lasciare le pagine vuote senza avviso."
+          ]
+        }
+      ]
+    }
+  },
   "1.3.1": {
     "date": "2026-09-14",
     "points": {
@@ -42,8 +71,7 @@
             "Kalender: die App stürzt nicht mehr ab, wenn der Kalender geöffnet ist, während die Daten eines Kontos neu geladen werden — etwa beim Kontowechsel. Ohne gewählte Woche zeigt er die aktuelle.",
             "Nach längerer Zeit im Hintergrund beendet sich die App beim erneuten Anmelden nicht mehr, wenn der Server statt der Startseite des Kontos eine andere Seite liefert. Die Anmeldung gilt dann als fehlgeschlagen.",
             "Bewertungen: die App stürzt nicht mehr ab, wenn Bewertungen geladen werden, bevor die Anmeldung abgeschlossen ist. Ein fehlgeschlagener Abruf blockiert auch nicht mehr das andere Semester.",
-            "Merkheft und Bewertungen: bricht das Laden ab, dreht sich die Ladeanzeige nicht mehr endlos weiter.",
-            "Meldet der Server eine abgelaufene Sitzung mit einem Fehlercode statt mit einer Weiterleitung zur Anmeldung, meldet sich die App neu an und wiederholt den Abruf. Gelingt das nicht, zeigt die Verbindungsanzeige die Sitzung als abgelaufen, statt die Seiten still leer zu lassen."
+            "Merkheft und Bewertungen: bricht das Laden ab, dreht sich die Ladeanzeige nicht mehr endlos weiter."
           ]
         }
       ],
@@ -87,8 +115,7 @@
             "Calendar: the app no longer crashes when the calendar is open while an account's data is being reloaded — for example when switching accounts. Without a selected week it shows the current one.",
             "After a long time in the background the app no longer quits when signing in again if the server returns a different page instead of the account's start page. The sign-in then counts as failed.",
             "Grades: the app no longer crashes when grades are loaded before signing in has finished. A failed request also no longer blocks the other semester.",
-            "Homework and Grades: if loading breaks off, the loading indicator no longer keeps spinning forever.",
-            "If the server reports an expired session with an error code instead of redirecting to the sign-in page, the app signs in again and repeats the request. If that fails, the connection indicator shows the session as expired instead of leaving the pages silently empty."
+            "Homework and Grades: if loading breaks off, the loading indicator no longer keeps spinning forever."
           ]
         }
       ],
@@ -132,8 +159,7 @@
             "Calendario: l'app non si chiude più in modo anomalo se il calendario è aperto mentre i dati di un account vengono ricaricati — ad esempio al cambio di account. Senza una settimana selezionata mostra quella corrente.",
             "Dopo molto tempo in background l'app non si chiude più al nuovo accesso se il server restituisce un'altra pagina invece della pagina iniziale dell'account. L'accesso risulta allora non riuscito.",
             "Valutazioni: l'app non si chiude più in modo anomalo se le valutazioni vengono caricate prima che l'accesso sia completato. Una richiesta non riuscita non blocca più nemmeno l'altro semestre.",
-            "Agenda e Valutazioni: se il caricamento si interrompe, l'indicatore di caricamento non continua più a girare all'infinito.",
-            "Se il server segnala una sessione scaduta con un codice di errore invece di rimandare alla pagina di accesso, l'app accede di nuovo e ripete la richiesta. Se non ci riesce, l'indicatore di connessione mostra la sessione come scaduta, invece di lasciare le pagine vuote senza avviso."
+            "Agenda e Valutazioni: se il caricamento si interrompe, l'indicatore di caricamento non continua più a girare all'infinito."
           ]
         }
       ]

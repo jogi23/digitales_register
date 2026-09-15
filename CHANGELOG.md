@@ -2,6 +2,12 @@
 
 Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` — Änderungen bitte dort eintragen, nicht hier.
 
+## 1.4.0 — 2026-09-15
+
+### Fehlerbehebungen
+
+- Meldet der Server eine abgelaufene Sitzung mit einem Fehlercode statt mit einer Weiterleitung zur Anmeldung, meldet sich die App neu an und wiederholt den Abruf. Gelingt das nicht, zeigt die Verbindungsanzeige die Sitzung als abgelaufen, statt die Seiten still leer zu lassen.
+
 ## 1.3.1 — 2026-09-14
 
 ### Neue Funktionen
@@ -39,7 +45,6 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 - Nach längerer Zeit im Hintergrund beendet sich die App beim erneuten Anmelden nicht mehr, wenn der Server statt der Startseite des Kontos eine andere Seite liefert. Die Anmeldung gilt dann als fehlgeschlagen.
 - Bewertungen: die App stürzt nicht mehr ab, wenn Bewertungen geladen werden, bevor die Anmeldung abgeschlossen ist. Ein fehlgeschlagener Abruf blockiert auch nicht mehr das andere Semester.
 - Merkheft und Bewertungen: bricht das Laden ab, dreht sich die Ladeanzeige nicht mehr endlos weiter.
-- Meldet der Server eine abgelaufene Sitzung mit einem Fehlercode statt mit einer Weiterleitung zur Anmeldung, meldet sich die App neu an und wiederholt den Abruf. Gelingt das nicht, zeigt die Verbindungsanzeige die Sitzung als abgelaufen, statt die Seiten still leer zu lassen.
 
 ## 1.3.0 — 2026-09-10
 
