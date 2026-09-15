@@ -58,6 +58,7 @@ class SettingsPageWidget extends StatefulWidget {
   final OnSettingChanged<bool> onSetDashboardColorBorders;
   final OnSettingChanged<bool> onSetCalenderColorBackground;
   final OnSettingChanged<bool> onSetCalendarShowTimes;
+  final OnSettingChanged<bool> onSetCalendarShowAllDetails;
   final void Function(DashboardViewMode mode) onSetDashboardViewMode;
   final void Function(ClassbookViewMode mode) onSetClassbookViewMode;
   final void Function(EntryDisplayMode mode) onSetClassbookDisplayMode;
@@ -91,6 +92,7 @@ class SettingsPageWidget extends StatefulWidget {
     required this.onSetDashboardColorBorders,
     required this.onSetCalenderColorBackground,
     required this.onSetCalendarShowTimes,
+    required this.onSetCalendarShowAllDetails,
     required this.onSetDashboardViewMode,
     required this.onSetClassbookViewMode,
     required this.onSetClassbookDisplayMode,
@@ -384,6 +386,12 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
             ),
             value: widget.vm.calendarShowTimes,
             onChanged: widget.onSetCalendarShowTimes,
+          ),
+          SwitchListTile.adaptive(
+            title: Text(tr(context).settingsShowAllDetails),
+            subtitle: Text(tr(context).settingsShowAllDetailsHint),
+            value: widget.vm.calendarShowAllDetails,
+            onChanged: widget.onSetCalendarShowAllDetails,
           ),
           SwitchListTile.adaptive(
             title: Text(

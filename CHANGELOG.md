@@ -11,6 +11,8 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 - Mitteilungen: die Liste lässt sich nach Datum (neueste oder älteste zuerst) oder nach Absender sortieren. „Ungelesen“ zeigt nur ungelesene Mitteilungen; wer eine davon öffnet, verliert sie nicht aus der Liste, bis der Filter wieder aus ist.
 - Mitteilungen: ein langer Druck auf eine Mitteilung startet die Auswahl. Ausgewählte Mitteilungen lassen sich gemeinsam als PDF, Text oder Markdown teilen oder speichern, archivieren und wieder aus dem Archiv holen.
 - Mitteilungen: neue Mitteilungen schreiben und auf empfangene antworten. Empfänger lassen sich nach Namen, Klasse oder Gruppe suchen; bei einer Gruppe lässt sich jede Person einzeln abwählen. Vor dem Senden sagt die App, an wie viele Personen die Mitteilung geht. Beim Antworten steht die ursprüngliche Mitteilung wie im Portal kursiv darunter; das Zitat lässt sich abschalten. Anhänge gehen noch nicht.
+- Kalender: eine Stunde außerhalb des eigenen Klassenzimmers trägt oben rechts ein kleines Dreieck, auch in der Wochenansicht des Merkhefts. Ein langer Druck auf die Stunde nennt den Raum; eine gebuchte Präsentationskamera gilt nicht als Raum.
+- Einstellungen → Fächer: „Alle Details im Kalender anzeigen“ nennt in der Stunde auch den Raum, soweit Platz ist. Der Ortsname, den alle Räume der Woche tragen, entfällt; bei mehreren Räumen steht „+1“ dahinter. Lehrpersonen und Raum werden dafür bei Bedarf etwas kleiner, das Fach nie. Voreingestellt bleibt alles wie bisher.
 
 ### Verbesserungen
 

@@ -138,6 +138,21 @@ void main() {
       );
     });
 
+    test('all details in the calendar is decided for the app', () async {
+      final c = _makeContainer();
+      final notifier = c.read(settingsProvider.notifier);
+      expect(c.read(settingsProvider).calendarShowAllDetails, isFalse);
+
+      notifier.setCalendarShowAllDetails(true);
+      await pumpEventQueue();
+      notifier.resetForAccount();
+
+      expect(c.read(settingsProvider).calendarShowAllDetails, isTrue);
+      final second = _makeContainer();
+      await second.read(settingsProvider.notifier).loadGlobal();
+      expect(second.read(settingsProvider).calendarShowAllDetails, isTrue);
+    });
+
     test('staying on the page survives a restart', () async {
       final first = _makeContainer();
       first.read(settingsProvider.notifier).setKeepPageOnAccountSwitch(true);

@@ -59,6 +59,12 @@ class CalendarWeek extends StatelessWidget {
     final latestHour =
         vm.days.fold<int>(0, (a, b) => a < b.toHour ? b.toHour : a);
     final grid = CalendarGrid.fromDays(vm.days, latestHour);
+    // Shortened across the whole week: a room alone does not show which of
+    // its words are the location every room carries.
+    final roomNames = shortRoomNames([
+      for (final day in vm.days)
+        for (final hour in day.hours) ...tileRooms(hour.rooms),
+    ]);
     return vm.days.isEmpty
         ? vm.noInternet
             ? const NoInternet()
@@ -85,8 +91,7 @@ class CalendarWeek extends StatelessWidget {
                       onAddReminder: vm.onAddReminder,
                       onEntryTap: vm.onEntryTap,
                       hasEntries: vm.daysWithEntries.contains(
-                        UtcDateTime(
-                            d.date.year, d.date.month, d.date.day),
+                        UtcDateTime(d.date.year, d.date.month, d.date.day),
                       ),
                       highlightedSubjects: vm.subjectsWithEntries == null
                           ? null
@@ -103,6 +108,8 @@ class CalendarWeek extends StatelessWidget {
                           : null,
                       colorBackground: vm.colorBackground,
                       subjectThemes: vm.subjectThemes,
+                      showAllDetails: vm.showAllDetails,
+                      roomNames: roomNames,
                     ),
                   ),
               ],
@@ -305,6 +312,8 @@ class _HoursChunk extends StatelessWidget {
   final bool isSelected;
   final bool colorBackground;
   final Map<String, SubjectTheme> subjectThemes;
+  final bool showAllDetails;
+  final Map<String, String> roomNames;
 
   const _HoursChunk({
     this.highlightedSubjects,
@@ -316,6 +325,8 @@ class _HoursChunk extends StatelessWidget {
     required this.isSelected,
     required this.colorBackground,
     required this.subjectThemes,
+    required this.showAllDetails,
+    required this.roomNames,
   });
 
   @override
@@ -363,6 +374,8 @@ class _HoursChunk extends StatelessWidget {
                           ? null
                           : onEntryTap,
                       subjectNicks: subjectNicks,
+                      showAllDetails: showAllDetails,
+                      roomNames: roomNames,
                       day: day,
                       isSelected: selectedHour == hours[n ~/ 2].fromHour,
                       backgroundColor: colorBackground &&
@@ -421,6 +434,12 @@ class CalendarDayWidget extends StatelessWidget {
   final bool colorBackground;
   final Map<String, SubjectTheme> subjectThemes;
 
+  /// Whether the lesson tiles also name the room.
+  final bool showAllDetails;
+
+  /// Shortened room names, keyed by the name the register sends.
+  final Map<String, String> roomNames;
+
   const CalendarDayWidget({
     super.key,
     required this.grid,
@@ -435,6 +454,8 @@ class CalendarDayWidget extends StatelessWidget {
     required this.selectedHour,
     required this.colorBackground,
     required this.subjectThemes,
+    this.showAllDetails = false,
+    this.roomNames = const {},
   });
 
   /// Whether this column is the day the user is living through.
@@ -495,6 +516,8 @@ class CalendarDayWidget extends StatelessWidget {
                 isSelected: isSelected,
                 colorBackground: colorBackground,
                 subjectThemes: subjectThemes,
+                showAllDetails: showAllDetails,
+                roomNames: roomNames,
               ),
             )
           ],
@@ -545,11 +568,19 @@ class HourWidget extends ConsumerWidget {
   final Color backgroundColor;
   final Color selectedBackgroundColor;
 
+  /// Whether the tile names the room, not only marks that there is one.
+  final bool showAllDetails;
+
+  /// Shortened room names, keyed by the name the register sends.
+  final Map<String, String> roomNames;
+
   const HourWidget({
     super.key,
     required this.hour,
     this.dimmed = false,
     this.onEntryTap,
+    this.showAllDetails = false,
+    this.roomNames = const {},
     required this.subjectNicks,
     required this.day,
     required this.isSelected,
@@ -565,7 +596,8 @@ class HourWidget extends ConsumerWidget {
   }
 
   Widget _lesson(BuildContext context, WidgetRef ref) {
-    return InkWell(
+    final rooms = tileRooms(hour.rooms);
+    final tile = InkWell(
       onTap: onEntryTap ??
           () {
             ref.read(calendarProvider.notifier).select(
@@ -599,41 +631,116 @@ class HourWidget extends ConsumerWidget {
           // Fills the tile, so the subject colour covers all of it rather
           // than just the width of the text.
           child: SizedBox.expand(
-            child: _LessonLabel(
-              subject:
-                  subjectNicks[hour.subject.toLowerCase()] ?? hour.subject,
-              teachers: [
-                for (final teacher in hour.teachers) teacher.lastName,
+            child: Stack(
+              children: <Widget>[
+                Positioned.fill(
+                  child: _LessonLabel(
+                    subject: subjectNicks[hour.subject.toLowerCase()] ??
+                        hour.subject,
+                    teachers: [
+                      for (final teacher in hour.teachers) teacher.lastName,
+                    ],
+                    rooms: showAllDetails
+                        ? [for (final room in rooms) roomNames[room] ?? room]
+                        : const [],
+                  ),
+                ),
+                // Whatever the setting: that the class is not in its own
+                // room matters even where the tile has no line to spare.
+                if (rooms.isNotEmpty)
+                  const Positioned(top: 0, right: 0, child: RoomCorner()),
               ],
             ),
           ),
         ),
       ),
     );
+    if (rooms.isEmpty) return tile;
+    // The corner does not explain itself: a long press names the room, and
+    // screen readers read the same.
+    return Tooltip(
+      message: rooms.length == 1
+          ? tr(context).calendarRoomTooltip(rooms.single)
+          : tr(context).calendarRoomsTooltip(rooms.join(", ")),
+      child: tile,
+    );
   }
 }
 
-/// Subject and teachers of one lesson tile in the week grid.
+/// The triangle in the top right corner of a lesson held outside the class's
+/// own room.
+///
+/// A corner rather than an icon: it takes no width from the text, reads on
+/// every subject colour and is told apart by its shape, not only its colour.
+/// The left edge already belongs to the warning.
+class RoomCorner extends StatelessWidget {
+  const RoomCorner({super.key});
+
+  static const size = 12.0;
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      size: const Size.square(size),
+      painter: _CornerPainter(Theme.of(context).colorScheme.tertiary),
+    );
+  }
+}
+
+class _CornerPainter extends CustomPainter {
+  final Color color;
+
+  const _CornerPainter(this.color);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final path = Path()
+      ..moveTo(0, 0)
+      ..lineTo(size.width, 0)
+      ..lineTo(size.width, size.height)
+      ..close();
+    canvas.drawPath(path, Paint()..color = color);
+  }
+
+  @override
+  bool shouldRepaint(_CornerPainter oldDelegate) => oldDelegate.color != color;
+}
+
+/// Subject, teachers and, if asked for, the room of one lesson tile in the
+/// week grid.
 ///
 /// The subject keeps one size in every tile. The whole label used to sit in a
 /// `FittedBox`, which shrank the subject along with however many teachers and
 /// rooms came after it — three tiles in one row showed three sizes.
 ///
-/// So now: at most three lines, the subject first at a fixed size, then up to
-/// two teachers in italics — as many as the tile has height for. The room is
-/// left to the detail view; in a tile this narrow it pushed out what matters.
+/// So now: the subject first at a fixed size, then up to two teachers in
+/// italics and the room — as many lines as the tile has height for, four at
+/// most (see [allotLessonLines]). To fit them all, teachers and room may
+/// shrink a little; the subject never does. Without „Alle Details anzeigen“
+/// the room is left to the detail view and [RoomCorner] only says there is
+/// one: in a tile this narrow it pushes out what matters.
 class _LessonLabel extends StatelessWidget {
   final String subject;
   final List<String> teachers;
 
-  const _LessonLabel({required this.subject, required this.teachers});
+  /// The rooms to name, already shortened. Empty leaves out the room line.
+  final List<String> rooms;
+
+  const _LessonLabel({
+    required this.subject,
+    required this.teachers,
+    this.rooms = const [],
+  });
 
   /// Room between text and tile edge, so names do not touch the border.
   static const padding = EdgeInsets.symmetric(horizontal: 4, vertical: 2);
   static const subjectSize = 13.0;
   static const teacherSize = 11.0;
 
-  /// Subject plus this many teacher lines: three lines in all.
+  /// How far teachers and room may shrink to make room for the room line.
+  static const minDetailSize = 10.0;
+
+  /// Up to this many teacher lines below the subject.
   static const maxTeacherLines = 2;
 
   /// The teacher lines to show, at most [lines] of them. With more teachers
@@ -654,10 +761,7 @@ class _LessonLabel extends StatelessWidget {
     final base = DefaultTextStyle.of(context).style;
     final subjectStyle =
         base.copyWith(fontSize: subjectSize, fontWeight: FontWeight.w500);
-    final teacherStyle = base.copyWith(
-      fontSize: teacherSize,
-      fontStyle: FontStyle.italic,
-    );
+    final roomColor = Theme.of(context).colorScheme.tertiary;
     final scaler = MediaQuery.textScalerOf(context);
     final direction = Directionality.of(context);
 
@@ -665,16 +769,35 @@ class _LessonLabel extends StatelessWidget {
       builder: (context, constraints) {
         // A single lesson is the shortest tile, so the line budget follows
         // the height actually there rather than a fixed count.
-        final available = constraints.maxHeight - padding.vertical;
-        final subjectHeight = _lineHeight(subjectStyle, scaler, direction);
-        final teacherHeight = _lineHeight(teacherStyle, scaler, direction);
-        final fitting = teacherHeight <= 0
-            ? 0
-            : ((available - subjectHeight) / teacherHeight).floor();
-        final lines = teacherLines(
-          teachers,
-          fitting.clamp(0, maxTeacherLines),
+        final available = constraints.maxHeight -
+            padding.vertical -
+            _lineHeight(subjectStyle, scaler, direction);
+        final hasRoom = rooms.isNotEmpty;
+        final wanted =
+            teachers.length.clamp(0, maxTeacherLines) + (hasRoom ? 1 : 0);
+
+        var detailSize = teacherSize;
+        var fitting = _linesFitting(
+            available, base.copyWith(fontSize: detailSize), scaler, direction);
+        if (hasRoom && fitting < wanted) {
+          final smaller = _linesFitting(available,
+              base.copyWith(fontSize: minDetailSize), scaler, direction);
+          if (smaller > fitting) {
+            detailSize = minDetailSize;
+            fitting = smaller;
+          }
+        }
+        final allotted = allotLessonLines(
+          budget: fitting,
+          teachers: teachers.length,
+          hasRoom: hasRoom,
         );
+        final lines = teacherLines(teachers, allotted.teachers);
+        final teacherStyle = base.copyWith(
+          fontSize: detailSize,
+          fontStyle: FontStyle.italic,
+        );
+        final roomStyle = base.copyWith(fontSize: detailSize, color: roomColor);
 
         return Padding(
           padding: padding,
@@ -696,11 +819,49 @@ class _LessonLabel extends StatelessWidget {
                   softWrap: false,
                   style: teacherStyle,
                 ),
+              if (allotted.room) _roomLine(roomStyle),
             ],
           ),
         );
       },
     );
+  }
+
+  /// The first room, and how many more there are. The count sits outside the
+  /// ellipsis, so a long name cannot cut it off.
+  Widget _roomLine(TextStyle style) => Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Flexible(
+            child: Text(
+              rooms.first,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              softWrap: false,
+              style: style,
+            ),
+          ),
+          if (rooms.length > 1)
+            Padding(
+              padding: const EdgeInsets.only(left: 2),
+              child: Text(
+                "+${rooms.length - 1}",
+                maxLines: 1,
+                softWrap: false,
+                style: style,
+              ),
+            ),
+        ],
+      );
+
+  static int _linesFitting(
+    double height,
+    TextStyle style,
+    TextScaler scaler,
+    TextDirection direction,
+  ) {
+    final line = _lineHeight(style, scaler, direction);
+    return line <= 0 ? 0 : (height / line).floor();
   }
 
   static double _lineHeight(
@@ -718,6 +879,69 @@ class _LessonLabel extends StatelessWidget {
     painter.dispose();
     return height;
   }
+}
+
+/// How the lines below the subject are shared out: [budget] lines for
+/// [teachers] teachers and, if [hasRoom], one room.
+///
+/// The first teacher comes first, then the room, then the second teacher —
+/// a second name adds less than knowing where the lesson takes place.
+@visibleForTesting
+({int teachers, bool room}) allotLessonLines({
+  required int budget,
+  required int teachers,
+  required bool hasRoom,
+}) {
+  const maxTeachers = _LessonLabel.maxTeacherLines;
+  if (budget <= 0) return (teachers: 0, room: false);
+  if (!hasRoom) return (teachers: budget.clamp(0, maxTeachers), room: false);
+  if (teachers == 0) return (teachers: 0, room: true);
+  if (budget == 1) return (teachers: 1, room: false);
+  return (teachers: (budget - 1).clamp(0, maxTeachers), room: true);
+}
+
+/// Words that name a piece of equipment rather than a place. The register
+/// books a presentation camera like a room, but a lesson that has one has
+/// not moved anywhere.
+const _equipment = ['kamera'];
+
+/// The rooms of a lesson that say where it takes place, without equipment.
+///
+/// The register only names a room when the class is not in its own, so any
+/// room left means the lesson is held elsewhere.
+List<String> tileRooms(Iterable<String> rooms) => [
+      for (final room in rooms)
+        if (room.trim().isNotEmpty &&
+            !_equipment.any((word) => room.toLowerCase().contains(word)))
+          room,
+    ];
+
+/// Display names for [rooms], without the words all of them start with.
+///
+/// The register puts the location in front of every room („Schlanders
+/// Küche“, „Schlanders PC Raum“), which in a narrow tile leaves no space for
+/// the part that differs. A single room keeps its name: with nothing to
+/// compare it to, there is no telling where the location ends. Every room
+/// keeps at least one word.
+Map<String, String> shortRoomNames(Iterable<String> rooms) {
+  final words = {
+    for (final room in rooms) room: room.trim().split(RegExp(r"\s+")),
+  };
+  if (words.length < 2) return {for (final room in words.keys) room: room};
+
+  final first = words.values.first;
+  final limit = words.values
+          .fold<int>(first.length, (a, w) => w.length < a ? w.length : a) -
+      1;
+  var common = 0;
+  while (
+      common < limit && words.values.every((w) => w[common] == first[common])) {
+    common++;
+  }
+  return {
+    for (final entry in words.entries)
+      entry.key: common == 0 ? entry.key : entry.value.skip(common).join(" "),
+  };
 }
 
 bool _dateIsNear(UtcDateTime date1, UtcDateTime date2) {

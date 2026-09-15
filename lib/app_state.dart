@@ -351,6 +351,7 @@ class SettingsState {
     this.dashboardColorBorders = false,
     this.calendarColorBackground = false,
     this.calendarShowTimes = true,
+    this.calendarShowAllDetails = false,
     this.dashboardViewMode = DashboardViewMode.list,
     this.classbookViewMode = ClassbookViewMode.chronological,
     this.classbookDisplayMode = EntryDisplayMode.list,
@@ -394,6 +395,10 @@ class SettingsState {
 
   /// Show a time axis next to the week grid.
   final bool calendarShowTimes;
+
+  /// Whether the lesson tiles of the week grid also name the room, next to
+  /// the subject and teachers. Off, the room is left to the detail view.
+  final bool calendarShowAllDetails;
 
   /// Whether the dashboard shows a list, a month grid or a week.
   final DashboardViewMode dashboardViewMode;
@@ -464,6 +469,7 @@ class SettingsState {
     bool? dashboardColorBorders,
     bool? calendarColorBackground,
     bool? calendarShowTimes,
+    bool? calendarShowAllDetails,
     DashboardViewMode? dashboardViewMode,
     ClassbookViewMode? classbookViewMode,
     EntryDisplayMode? classbookDisplayMode,
@@ -501,6 +507,8 @@ class SettingsState {
         calendarColorBackground:
             calendarColorBackground ?? this.calendarColorBackground,
         calendarShowTimes: calendarShowTimes ?? this.calendarShowTimes,
+        calendarShowAllDetails:
+            calendarShowAllDetails ?? this.calendarShowAllDetails,
         dashboardViewMode: dashboardViewMode ?? this.dashboardViewMode,
         classbookViewMode: classbookViewMode ?? this.classbookViewMode,
         classbookDisplayMode: classbookDisplayMode ?? this.classbookDisplayMode,
@@ -541,6 +549,7 @@ class SettingsState {
         'dashboardColorBorders': dashboardColorBorders,
         'calendarColorBackground': calendarColorBackground,
         'calendarShowTimes': calendarShowTimes,
+        'calendarShowAllDetails': calendarShowAllDetails,
         'dashboardViewMode': dashboardViewMode.name,
         'classbookViewMode': classbookViewMode.name,
         'classbookDisplayMode': classbookDisplayMode.name,
@@ -576,6 +585,8 @@ class SettingsState {
         calendarColorBackground:
             json['calendarColorBackground'] as bool? ?? false,
         calendarShowTimes: json['calendarShowTimes'] as bool? ?? true,
+        calendarShowAllDetails:
+            json['calendarShowAllDetails'] as bool? ?? false,
         // Migrates the earlier boolean, which only knew list and month.
         dashboardViewMode: json['dashboardViewMode'] != null
             ? DashboardViewMode.fromName(json['dashboardViewMode'] as String?)
@@ -633,6 +644,7 @@ class SettingsState {
     'dashboardColorBorders',
     'calendarColorBackground',
     'calendarShowTimes',
+    'calendarShowAllDetails',
     'dashboardColorTestsInRed',
     'dashboardViewMode',
     'classbookViewMode',
@@ -696,6 +708,7 @@ class SettingsState {
         other.dashboardColorBorders == dashboardColorBorders &&
         other.calendarColorBackground == calendarColorBackground &&
         other.calendarShowTimes == calendarShowTimes &&
+        other.calendarShowAllDetails == calendarShowAllDetails &&
         other.dashboardViewMode == dashboardViewMode &&
         other.classbookViewMode == classbookViewMode &&
         other.classbookDisplayMode == classbookDisplayMode &&
@@ -729,6 +742,7 @@ class SettingsState {
         dashboardColorBorders,
         calendarColorBackground,
         calendarShowTimes,
+        calendarShowAllDetails,
         dashboardViewMode,
         classbookViewMode,
         classbookDisplayMode,

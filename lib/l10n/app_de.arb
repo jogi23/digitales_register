@@ -281,6 +281,24 @@
   "settingsColorHomework": "Hausaufgaben mit diesen Farben färben",
   "settingsColorLessons": "Stunden im Kalender mit diesen Farben färben",
   "settingsShowTimes": "Uhrzeiten im Kalender anzeigen",
+  "settingsShowAllDetails": "Alle Details im Kalender anzeigen",
+  "settingsShowAllDetailsHint": "Lehrpersonen und Raum direkt in der Stunde, soweit Platz ist",
+  "calendarRoomTooltip": "Raum: {room}",
+  "@calendarRoomTooltip": {
+    "placeholders": {
+      "room": {
+        "type": "String"
+      }
+    }
+  },
+  "calendarRoomsTooltip": "Räume: {rooms}",
+  "@calendarRoomsTooltip": {
+    "placeholders": {
+      "rooms": {
+        "type": "String"
+      }
+    }
+  },
   "settingsFrameTestsRed": "Tests immer rot umrahmen",
   "settingsSectionHomework": "Merkheft",
   "settingsViewList": "Als Liste anzeigen",
