@@ -99,12 +99,12 @@ MessagesState _buildState({
 }
 
 /// Starts the list on a folder other than received.
-class _TestCategoryNotifier extends MessageCategoryNotifier {
+class _TestListNotifier extends MessageListNotifier {
   final MessageCategory initialCategory;
-  _TestCategoryNotifier(this.initialCategory);
+  _TestListNotifier(this.initialCategory);
 
   @override
-  MessageCategory build() => initialCategory;
+  MessageListView build() => MessageListView(category: initialCategory);
 }
 
 Widget _buildWidget(
@@ -121,8 +121,7 @@ Widget _buildWidget(
       if (settings != null)
         settingsProvider.overrideWith(() => _TestSettingsNotifier(settings)),
       if (category != null)
-        messageCategoryProvider
-            .overrideWith(() => _TestCategoryNotifier(category)),
+        messageListProvider.overrideWith(() => _TestListNotifier(category)),
     ],
     child: MaterialApp(
       home: MessagesPageContainer(),
@@ -403,6 +402,66 @@ void main() {
       );
       expect(find.text("Hier liegen keine Mitteilungen"), findsOneWidget);
       expect(find.text("Noch keine Mitteilungen"), findsNothing);
+    });
+  });
+
+  group('stars, order and filters', () {
+    // "Erste" is older, unread and from Amort; "Zweite" newer and from Berger.
+    MessagesState twoMessages() => MessagesState(
+          (b) => b.messages = ListBuilder(<Message>[
+            for (final id in [1, 2])
+              Message(
+                (b) => b
+                  ..fromName = id == 1 ? "Amort" : "Berger"
+                  ..recipientString = "Empfänger"
+                  ..id = id
+                  ..subject = id == 1 ? "Erste" : "Zweite"
+                  ..timeSent = UtcDateTime.parse("2020-03-0$id 20:57:38")
+                  ..timeRead =
+                      id == 1 ? null : UtcDateTime.parse("2020-03-02 21:00:00")
+                  ..text = _messageText,
+              ),
+          ]),
+        );
+
+    double top(WidgetTester tester, String text) =>
+        tester.getTopLeft(find.text(text)).dy;
+
+    testWidgets('a star marks the message, "Markiert" shows only those',
+        (tester) async {
+      await tester.pumpWidget(_buildWidget(twoMessages()));
+      // Newest first: the first star belongs to "Zweite".
+      await tester.tap(find.byTooltip("Markieren").first);
+      await tester.pumpAndSettle();
+      expect(find.byTooltip("Markierung entfernen"), findsOneWidget);
+
+      await tester.tap(find.widgetWithText(FilterChip, "Markiert"));
+      await tester.pumpAndSettle();
+      expect(find.text("Zweite"), findsOneWidget);
+      expect(find.text("Erste"), findsNothing);
+    });
+
+    testWidgets('newest first, by sender on request', (tester) async {
+      await tester.pumpWidget(_buildWidget(twoMessages()));
+      expect(top(tester, "Zweite"), lessThan(top(tester, "Erste")));
+
+      await tester.tap(find.byTooltip("Sortieren"));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text("Nach Absender"));
+      await tester.pumpAndSettle();
+      expect(top(tester, "Erste"), lessThan(top(tester, "Zweite")));
+    });
+
+    testWidgets('a message opened under "Ungelesen" stays', (tester) async {
+      await tester.pumpWidget(_buildWidget(twoMessages()));
+      await tester.tap(find.widgetWithText(FilterChip, "Ungelesen"));
+      await tester.pumpAndSettle();
+      expect(find.text("Zweite"), findsNothing);
+
+      await tester.tap(find.text("Erste"));
+      await tester.pumpAndSettle();
+      expect(find.text("Erste"), findsOneWidget);
+      expect(find.textContaining("Sehr geehrte Eltern"), findsOneWidget);
     });
   });
 

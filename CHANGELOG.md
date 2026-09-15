@@ -7,6 +7,8 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 ### Neue Funktionen
 
 - Mitteilungen: die Liste ist in Empfangen, Gesendet, Archiviert und Alle aufgeteilt. Beim Öffnen stehen die empfangenen Mitteilungen; führt eine Benachrichtigung zu einer gesendeten oder archivierten Mitteilung, wechselt die Liste dorthin.
+- Mitteilungen: ein Stern markiert wichtige Mitteilungen, „Markiert“ zeigt nur diese. Die Markierung bleibt auf dem Gerät; das Portal kennt sie nicht.
+- Mitteilungen: die Liste lässt sich nach Datum (neueste oder älteste zuerst) oder nach Absender sortieren. „Ungelesen“ zeigt nur ungelesene Mitteilungen; wer eine davon öffnet, verliert sie nicht aus der Liste, bis der Filter wieder aus ist.
 
 ### Verbesserungen
 
