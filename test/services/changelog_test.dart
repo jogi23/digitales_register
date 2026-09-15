@@ -295,15 +295,22 @@ void main() {
     test('follow the language the app is shown in', () async {
       // Picked in the settings rather than the device's: an Italian reader
       // on a German phone gets the Italian notes.
+      // Any of the language's headings: which sections the newest version
+      // has so far is up to the release, not to this test.
+      Future<Iterable<String>> newestTitles() async =>
+          (await Changelog().load()).first.sections.map((s) => s.title);
+
       trGlobal = lookupL(const Locale('it'));
       expect(
-        (await Changelog().load()).first.sections.first.title,
-        'Nuove funzioni',
+        await newestTitles(),
+        everyElement(
+            isIn(['Nuove funzioni', 'Miglioramenti', 'Correzioni', 'Interno'])),
       );
       trGlobal = lookupL(const Locale('en'));
       expect(
-        (await Changelog().load()).first.sections.first.title,
-        'New features',
+        await newestTitles(),
+        everyElement(
+            isIn(['New features', 'Improvements', 'Bug fixes', 'Internal'])),
       );
     });
   });

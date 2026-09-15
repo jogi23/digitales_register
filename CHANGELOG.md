@@ -2,6 +2,12 @@
 
 Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` — Änderungen bitte dort eintragen, nicht hier.
 
+## 1.4.0 — 2026-09-15
+
+### Fehlerbehebungen
+
+- Mitteilungen: selbst gesendete Mitteilungen gelten nicht mehr als neu. Sie tragen kein „neu“ mehr und halten „Alle als gelesen markieren“ nicht mehr aktiv.
+
 ## 1.3.1 — 2026-09-14
 
 ### Neue Funktionen
