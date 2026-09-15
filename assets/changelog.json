@@ -4,6 +4,18 @@
     "points": {
       "de": [
         {
+          "title": "Neue Funktionen",
+          "items": [
+            "Mitteilungen: die Liste ist in Empfangen, Gesendet, Archiviert und Alle aufgeteilt. Beim Öffnen stehen die empfangenen Mitteilungen; führt eine Benachrichtigung zu einer gesendeten oder archivierten Mitteilung, wechselt die Liste dorthin."
+          ]
+        },
+        {
+          "title": "Verbesserungen",
+          "items": [
+            "Mitteilungen: der Betreff selbst gesendeter Mitteilungen steht kursiv und etwas kleiner, damit sie sich unter „Alle“ von empfangenen abheben."
+          ]
+        },
+        {
           "title": "Fehlerbehebungen",
           "items": [
             "Mitteilungen: selbst gesendete Mitteilungen gelten nicht mehr als neu. Sie tragen kein „neu“ mehr und halten „Alle als gelesen markieren“ nicht mehr aktiv."
@@ -12,6 +24,18 @@
       ],
       "en": [
         {
+          "title": "New features",
+          "items": [
+            "Messages: the list is split into Received, Sent, Archived and All. It opens on the received messages; when a notification leads to a sent or archived message, the list switches there."
+          ]
+        },
+        {
+          "title": "Improvements",
+          "items": [
+            "Messages: the subject of messages you sent yourself is set in italics and slightly smaller, so they stand apart from received ones under “All”."
+          ]
+        },
+        {
           "title": "Bug fixes",
           "items": [
             "Messages: messages you sent yourself no longer count as new. They no longer carry the “neu” badge or keep “Mark all as read” active."
@@ -19,6 +43,18 @@
         }
       ],
       "it": [
+        {
+          "title": "Nuove funzioni",
+          "items": [
+            "Comunicazioni: l'elenco è suddiviso in Ricevute, Inviate, Archiviate e Tutte. All'apertura compaiono le comunicazioni ricevute; se una notifica porta a una comunicazione inviata o archiviata, l'elenco passa lì."
+          ]
+        },
+        {
+          "title": "Miglioramenti",
+          "items": [
+            "Comunicazioni: l'oggetto delle comunicazioni inviate da te è in corsivo e un po' più piccolo, così sotto «Tutte» si distinguono da quelle ricevute."
+          ]
+        },
         {
           "title": "Correzioni",
           "items": [

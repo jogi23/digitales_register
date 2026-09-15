@@ -30,8 +30,11 @@ class MessagesPageContainer extends ConsumerWidget {
     final noInternet = ref.watch(noInternetProvider);
     final signature =
         ref.watch(settingsProvider.select((s) => s.messageSignature));
+    final category = ref.watch(messageCategoryProvider);
     return MessagesPage(
       state: messagesState,
+      category: category,
+      onCategory: ref.read(messageCategoryProvider.notifier).show,
       noInternet: noInternet,
       hasUnread: messagesState.messages.any((m) => m.isNew),
       onOpenFile: (file) =>

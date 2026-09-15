@@ -4,6 +4,14 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 
 ## 1.4.0 — 2026-09-15
 
+### Neue Funktionen
+
+- Mitteilungen: die Liste ist in Empfangen, Gesendet, Archiviert und Alle aufgeteilt. Beim Öffnen stehen die empfangenen Mitteilungen; führt eine Benachrichtigung zu einer gesendeten oder archivierten Mitteilung, wechselt die Liste dorthin.
+
+### Verbesserungen
+
+- Mitteilungen: der Betreff selbst gesendeter Mitteilungen steht kursiv und etwas kleiner, damit sie sich unter „Alle“ von empfangenen abheben.
+
 ### Fehlerbehebungen
 
 - Mitteilungen: selbst gesendete Mitteilungen gelten nicht mehr als neu. Sie tragen kein „neu“ mehr und halten „Alle als gelesen markieren“ nicht mehr aktiv.

@@ -911,6 +911,10 @@ abstract class Message implements Built<Message, MessageBuilder> {
   /// list carries no user id to compare against (`fromUserId` comes back 0).
   bool get outgoing;
 
+  /// Filed under the portal's "Archiv". The portal counts an archived message
+  /// neither as received nor as sent.
+  bool get archived;
+
   /// Unread and received. A sent message carries no `timeRead` at all, so
   /// without the direction check one's own message would count as new.
   bool get isNew => !outgoing && timeRead == null;
@@ -919,11 +923,37 @@ abstract class Message implements Built<Message, MessageBuilder> {
   factory Message([Function(MessageBuilder b)? updates]) = _$Message;
   Message._();
 
-  // `outgoing` defaults to false, so state saved before the field existed
-  // still loads.
+  // `outgoing` and `archived` default to false, so state saved before the
+  // fields existed still loads.
   static void _initializeBuilder(MessageBuilder b) => b
     ..attachments = ListBuilder<MessageAttachmentFile>()
-    ..outgoing = false;
+    ..outgoing = false
+    ..archived = false;
+}
+
+/// The folders the message list offers, as the portal files messages.
+enum MessageCategory {
+  incoming,
+  outgoing,
+  archived,
+  all;
+
+  /// Received is whatever is neither sent nor archived, rather than the
+  /// server's `label_incoming`: messages cached before the folders were read
+  /// then still show up where they did before.
+  bool includes(Message message) => switch (this) {
+        incoming => !message.outgoing && !message.archived,
+        outgoing => message.outgoing && !message.archived,
+        archived => message.archived,
+        all => true,
+      };
+
+  /// The one folder besides [all] that holds [message].
+  static MessageCategory of(Message message) => message.archived
+      ? archived
+      : message.outgoing
+          ? outgoing
+          : incoming;
 }
 
 abstract class MessageAttachmentFile

@@ -98,10 +98,20 @@ MessagesState _buildState({
   );
 }
 
+/// Starts the list on a folder other than received.
+class _TestCategoryNotifier extends MessageCategoryNotifier {
+  final MessageCategory initialCategory;
+  _TestCategoryNotifier(this.initialCategory);
+
+  @override
+  MessageCategory build() => initialCategory;
+}
+
 Widget _buildWidget(
   MessagesState state, {
   _TestMessagesNotifier? messages,
   SettingsState? settings,
+  MessageCategory? category,
 }) {
   return ProviderScope(
     overrides: [
@@ -110,6 +120,9 @@ Widget _buildWidget(
       noInternetProvider.overrideWith(NoInternetNotifier.new),
       if (settings != null)
         settingsProvider.overrideWith(() => _TestSettingsNotifier(settings)),
+      if (category != null)
+        messageCategoryProvider
+            .overrideWith(() => _TestCategoryNotifier(category)),
     ],
     child: MaterialApp(
       home: MessagesPageContainer(),
@@ -289,10 +302,49 @@ void main() {
   group('sent and received', () {
     testWidgets('a sent message is marked as such', (tester) async {
       await tester.pumpWidget(
-        _buildWidget(_stateWithDirection(outgoing: true)),
+        _buildWidget(
+          _stateWithDirection(outgoing: true),
+          category: MessageCategory.all,
+        ),
       );
       expect(find.byType(MessageSentChip), findsOneWidget);
-      expect(find.text("Gesendet"), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(MessageSentChip),
+          matching: find.text("Gesendet"),
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('a sent subject is italic and a size down', (tester) async {
+      // Both in one list: a second pumpWidget would keep the first notifier.
+      await tester.pumpWidget(
+        _buildWidget(
+          MessagesState(
+            (b) => b.messages = ListBuilder(<Message>[
+              for (final outgoing in [true, false])
+                Message(
+                  (b) => b
+                    ..fromName = "Sender"
+                    ..recipientString = "Empfänger"
+                    ..id = outgoing ? 2 : 1
+                    ..subject = outgoing ? "Ausgang" : "Eingang"
+                    ..timeSent = UtcDateTime.parse("2020-03-04 20:57:38")
+                    ..text = _messageText
+                    ..outgoing = outgoing,
+                ),
+            ]),
+          ),
+          category: MessageCategory.all,
+        ),
+      );
+      final sent = tester.widget<Text>(find.text("Ausgang")).style!;
+      final received = tester.widget<Text>(find.text("Eingang")).style!;
+
+      expect(sent.fontStyle, FontStyle.italic);
+      expect(received.fontStyle, isNot(FontStyle.italic));
+      expect(sent.fontSize, lessThan(received.fontSize!));
     });
 
     testWidgets('a received message carries no mark', (tester) async {
@@ -300,6 +352,57 @@ void main() {
         _buildWidget(_stateWithDirection(outgoing: false)),
       );
       expect(find.byType(MessageSentChip), findsNothing);
+    });
+  });
+
+  group('folders', () {
+    MessagesState receivedAndSent() => MessagesState(
+          (b) => b.messages = ListBuilder(<Message>[
+            for (final outgoing in [false, true])
+              Message(
+                (b) => b
+                  ..fromName = "Sender"
+                  ..recipientString = "Empfänger"
+                  ..id = outgoing ? 2 : 1
+                  ..subject = outgoing ? "Ausgang" : "Eingang"
+                  ..timeSent = UtcDateTime.parse("2020-03-04 20:57:38")
+                  ..text = _messageText
+                  ..outgoing = outgoing,
+              ),
+          ]),
+        );
+
+    testWidgets('the list starts on received messages', (tester) async {
+      await tester.pumpWidget(_buildWidget(receivedAndSent()));
+      expect(find.text("Eingang"), findsOneWidget);
+      expect(find.text("Ausgang"), findsNothing);
+      final selected = tester.widget<ChoiceChip>(
+          find.widgetWithText(ChoiceChip, "Empfangen"));
+      expect(selected.selected, isTrue);
+    });
+
+    testWidgets('picking sent shows the sent messages only', (tester) async {
+      await tester.pumpWidget(_buildWidget(receivedAndSent()));
+      await tester.tap(find.widgetWithText(ChoiceChip, "Gesendet"));
+      await tester.pumpAndSettle();
+      expect(find.text("Ausgang"), findsOneWidget);
+      expect(find.text("Eingang"), findsNothing);
+    });
+
+    testWidgets('all shows both', (tester) async {
+      await tester.pumpWidget(_buildWidget(receivedAndSent()));
+      await tester.tap(find.widgetWithText(ChoiceChip, "Alle"));
+      await tester.pumpAndSettle();
+      expect(find.text("Ausgang"), findsOneWidget);
+      expect(find.text("Eingang"), findsOneWidget);
+    });
+
+    testWidgets('an empty folder says so', (tester) async {
+      await tester.pumpWidget(
+        _buildWidget(receivedAndSent(), category: MessageCategory.archived),
+      );
+      expect(find.text("Hier liegen keine Mitteilungen"), findsOneWidget);
+      expect(find.text("Noch keine Mitteilungen"), findsNothing);
     });
   });
 
@@ -471,6 +574,9 @@ void main() {
         messages: messages,
         settings: SettingsState(messageSignature: 'Max Mustermann'),
       );
+      // The folder bar pushes the button below the test window's edge.
+      await tester.ensureVisible(find.byType(FilledButton));
+      await tester.pumpAndSettle();
       await tester.tap(find.byType(FilledButton));
       await tester.pumpAndSettle();
 
