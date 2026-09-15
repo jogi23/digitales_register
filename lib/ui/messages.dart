@@ -24,11 +24,13 @@ import 'package:dr/ui/account_avatar_button.dart';
 import 'package:dr/data.dart';
 import 'package:dr/providers/messages_provider.dart'
     show MessageListView, MessageSort;
+import 'package:dr/services/message_export.dart' show MessageExportFormat;
 import 'package:dr/ui/animated_linear_progress_indicator.dart';
 import 'package:dr/ui/connection_status_button.dart';
 import 'package:dr/ui/layout.dart';
 import 'package:dr/ui/no_internet.dart';
 import 'package:dr/ui/pull_to_refresh.dart';
+import 'package:dr/ui/snack_bar.dart';
 import 'package:dr/util.dart';
 import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
@@ -37,7 +39,7 @@ import 'package:quill_delta/quill_delta.dart';
 import 'package:quill_delta_viewer/quill_delta_viewer.dart';
 import 'package:responsive_scaffold/responsive_scaffold.dart';
 
-class MessagesPage extends StatelessWidget {
+class MessagesPage extends StatefulWidget {
   final MessagesState? state;
 
   /// Folder, order and filters; the list shows what this lets through.
@@ -50,6 +52,18 @@ class MessagesPage extends StatelessWidget {
   /// The colour a set star is drawn in.
   final Color starColor;
   final void Function(Message message) onToggleStar;
+
+  /// Shares the messages as one file, or saves it with `share` false.
+  final Future<void> Function(
+    List<Message> messages,
+    MessageExportFormat format, {
+    required bool share,
+  }) onExport;
+
+  /// Moves the messages into the archive, or back out with `archived` false.
+  /// False means not every move went through.
+  final Future<bool> Function(List<Message> messages, {required bool archived})
+      onArchive;
   final bool noInternet;
   final bool hasUnread;
   final void Function(MessageAttachmentFile message) onOpenFile;
@@ -75,6 +89,8 @@ class MessagesPage extends StatelessWidget {
     required this.onStarredOnly,
     required this.starColor,
     required this.onToggleStar,
+    required this.onExport,
+    required this.onArchive,
     required this.noInternet,
     required this.hasUnread,
     required this.onOpenFile,
@@ -85,52 +101,195 @@ class MessagesPage extends StatelessWidget {
     required this.signature,
     required this.onSignature,
   });
+
+  @override
+  State<MessagesPage> createState() => _MessagesPageState();
+}
+
+class _MessagesPageState extends State<MessagesPage> {
+  /// The ids picked for a common action. The page is in selection mode while
+  /// any of them is in the list.
+  var _selected = <int>{};
+
+  @override
+  void didUpdateWidget(MessagesPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final before = oldWidget.view;
+    final now = widget.view;
+    // Another folder or filter shows other messages: an action would reach
+    // ones the reader no longer sees.
+    if (now.category != before.category ||
+        now.unreadOnly != before.unreadOnly ||
+        now.starredOnly != before.starredOnly) {
+      _selected = {};
+    }
+  }
+
+  void _toggle(Message message) => setState(() {
+        if (!_selected.remove(message.id)) _selected.add(message.id);
+      });
+
+  void _endSelection() => setState(() => _selected = {});
+
+  Future<void> _export(
+    List<Message> messages,
+    MessageExportFormat format, {
+    required bool share,
+  }) async {
+    _endSelection();
+    await widget.onExport(messages, format, share: share);
+  }
+
+  Future<void> _archive(
+    List<Message> messages, {
+    required bool archived,
+  }) async {
+    final failed = tr(context).messagesArchiveFailed;
+    _endSelection();
+    if (!await widget.onArchive(messages, archived: archived)) {
+      showSnackBar(failed);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: ResponsiveAppBar(
-        title: Text(tr(context).messagesTitle),
-        actions: [
-          PopupMenuButton<MessageSort>(
-            icon: const Icon(Icons.sort),
-            tooltip: tr(context).messagesSort,
-            initialValue: view.sort,
-            onSelected: onSort,
-            itemBuilder: (context) => [
-              for (final sort in MessageSort.values)
-                CheckedPopupMenuItem(
-                  value: sort,
-                  checked: sort == view.sort,
-                  child: Text(switch (sort) {
-                    MessageSort.newest => tr(context).messagesSortNewest,
-                    MessageSort.oldest => tr(context).messagesSortOldest,
-                    MessageSort.sender => tr(context).messagesSortSender,
-                  }),
+    final state = widget.state;
+    final visible = state == null
+        ? const <Message>[]
+        : widget.view.apply(state.messages, state.starred);
+    // Only what is in the list counts: a message archived or filtered away
+    // drops out of the selection.
+    final selected = [
+      for (final message in visible)
+        if (_selected.contains(message.id)) message,
+    ];
+    return PopScope(
+      // Back ends a selection before it leaves the page.
+      canPop: selected.isEmpty,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _endSelection();
+      },
+      child: Scaffold(
+        appBar: selected.isEmpty
+            ? _appBar(context)
+            : _selectionBar(context, visible, selected),
+        body: PullToRefresh(
+          onRefresh: widget.onRefresh,
+          child: state == null
+              ? widget.noInternet
+                  ? const NoInternet()
+                  : const Center(child: CircularProgressIndicator())
+              : _list(
+                  context,
+                  state,
+                  visible,
+                  selecting: selected.isNotEmpty,
                 ),
-            ],
-          ),
-          IconButton(
-            icon: const Icon(Icons.done_all),
-            tooltip: tr(context).messagesMarkAllRead,
-            onPressed: hasUnread ? onMarkAllAsRead : null,
-          ),
-          const ConnectionStatusButton(),
-          const AccountAvatarButton(),
-        ],
-      ),
-      body: PullToRefresh(
-        onRefresh: onRefresh,
-        child: state == null
-            ? noInternet
-                ? const NoInternet()
-                : const Center(child: CircularProgressIndicator())
-            : _list(context, state!),
+        ),
       ),
     );
   }
 
-  Widget _list(BuildContext context, MessagesState state) {
-    final visible = view.apply(state.messages, state.starred);
+  PreferredSizeWidget _appBar(BuildContext context) {
+    return ResponsiveAppBar(
+      title: Text(tr(context).messagesTitle),
+      actions: [
+        PopupMenuButton<MessageSort>(
+          icon: const Icon(Icons.sort),
+          tooltip: tr(context).messagesSort,
+          initialValue: widget.view.sort,
+          onSelected: widget.onSort,
+          itemBuilder: (context) => [
+            for (final sort in MessageSort.values)
+              CheckedPopupMenuItem(
+                value: sort,
+                checked: sort == widget.view.sort,
+                child: Text(switch (sort) {
+                  MessageSort.newest => tr(context).messagesSortNewest,
+                  MessageSort.oldest => tr(context).messagesSortOldest,
+                  MessageSort.sender => tr(context).messagesSortSender,
+                }),
+              ),
+          ],
+        ),
+        IconButton(
+          icon: const Icon(Icons.done_all),
+          tooltip: tr(context).messagesMarkAllRead,
+          onPressed: widget.hasUnread ? widget.onMarkAllAsRead : null,
+        ),
+        const ConnectionStatusButton(),
+        const AccountAvatarButton(),
+      ],
+    );
+  }
+
+  PreferredSizeWidget _selectionBar(
+    BuildContext context,
+    List<Message> visible,
+    List<Message> selected,
+  ) {
+    final l = tr(context);
+    Widget exportMenu({required bool share}) =>
+        PopupMenuButton<MessageExportFormat>(
+          icon: Icon(share ? Icons.share : Icons.download),
+          tooltip: share ? l.commonShare : l.commonSave,
+          onSelected: (format) => _export(selected, format, share: share),
+          itemBuilder: (context) => [
+            for (final format in MessageExportFormat.values)
+              PopupMenuItem(
+                value: format,
+                child: Text(switch (format) {
+                  MessageExportFormat.pdf => l.messagesExportPdf,
+                  MessageExportFormat.text => l.messagesExportText,
+                  MessageExportFormat.markdown => l.messagesExportMarkdown,
+                }),
+              ),
+          ],
+        );
+    return ResponsiveAppBar(
+      leading: IconButton(
+        icon: const Icon(Icons.close),
+        tooltip: l.messagesEndSelection,
+        onPressed: _endSelection,
+      ),
+      title: Text(l.messagesSelected(selected.length)),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.select_all),
+          tooltip: l.messagesSelectAll,
+          onPressed: selected.length == visible.length
+              ? null
+              : () => setState(() => _selected = {for (final m in visible) m.id}),
+        ),
+        exportMenu(share: true),
+        exportMenu(share: false),
+        // Only the moves a picked message allows. Both go to the server.
+        if (selected.any((m) => m.canArchive))
+          IconButton(
+            icon: const Icon(Icons.archive_outlined),
+            tooltip: l.messagesArchive,
+            onPressed: widget.noInternet
+                ? null
+                : () => _archive(selected, archived: true),
+          ),
+        if (selected.any((m) => m.canRestore))
+          IconButton(
+            icon: const Icon(Icons.unarchive_outlined),
+            tooltip: l.messagesRestore,
+            onPressed: widget.noInternet
+                ? null
+                : () => _archive(selected, archived: false),
+          ),
+      ],
+    );
+  }
+
+  Widget _list(
+    BuildContext context,
+    MessagesState state,
+    List<Message> visible, {
+    required bool selecting,
+  }) {
     final altColor = Theme.of(context)
         .colorScheme
         .surfaceContainerHighest
@@ -139,10 +298,10 @@ class MessagesPage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         MessageListBar(
-          view: view,
-          onCategory: onCategory,
-          onUnreadOnly: onUnreadOnly,
-          onStarredOnly: onStarredOnly,
+          view: widget.view,
+          onCategory: widget.onCategory,
+          onUnreadOnly: widget.onUnreadOnly,
+          onStarredOnly: widget.onStarredOnly,
         ),
         const Divider(),
         Expanded(
@@ -173,15 +332,18 @@ class MessagesPage extends StatelessWidget {
                     // rows, and each tile keeps whether it started open.
                     key: ValueKey(message.id),
                     message: message,
+                    selecting: selecting,
+                    selected: _selected.contains(message.id),
+                    onSelect: () => _toggle(message),
                     starred: state.starred.contains(message.id),
-                    starColor: starColor,
-                    onToggleStar: () => onToggleStar(message),
-                    onOpenFile: onOpenFile,
-                    onMarkAsRead: onMarkAsRead,
-                    onReply: onReply,
-                    signature: signature,
-                    onSignature: onSignature,
-                    noInternet: noInternet,
+                    starColor: widget.starColor,
+                    onToggleStar: () => widget.onToggleStar(message),
+                    onOpenFile: widget.onOpenFile,
+                    onMarkAsRead: widget.onMarkAsRead,
+                    onReply: widget.onReply,
+                    signature: widget.signature,
+                    onSignature: widget.onSignature,
+                    noInternet: widget.noInternet,
                     expand: message.id == state.showMessage,
                     tileColor: i.isOdd ? altColor : null,
                   );
@@ -258,6 +420,14 @@ class MessageListBar extends StatelessWidget {
 
 class MessageWidget extends StatefulWidget {
   final Message message;
+
+  /// While messages are being picked, a tap picks this one instead of
+  /// opening it.
+  final bool selecting;
+  final bool selected;
+
+  /// Picks or unpicks the message; a long press starts picking.
+  final VoidCallback onSelect;
   final bool starred;
   final Color starColor;
   final VoidCallback onToggleStar;
@@ -274,6 +444,9 @@ class MessageWidget extends StatefulWidget {
   const MessageWidget({
     super.key,
     required this.message,
+    required this.selecting,
+    required this.selected,
+    required this.onSelect,
     required this.starred,
     required this.starColor,
     required this.onToggleStar,
@@ -318,9 +491,82 @@ class _MessageWidgetState extends State<MessageWidget> {
     }
   }
 
+  Widget _title(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return Row(
+      children: <Widget>[
+        Expanded(
+          child: Text(
+            widget.message.subject,
+            // Italic and a size down for one's own messages: under "All"
+            // they should not catch the eye like the ones received.
+            style: (widget.message.outgoing
+                    ? textTheme.titleSmall
+                        ?.copyWith(fontStyle: FontStyle.italic)
+                    : textTheme.titleMedium)
+                ?.copyWith(color: Theme.of(context).colorScheme.primary),
+          ),
+        ),
+        // Sent and received looked alike, so one's own message read as
+        // something to act on.
+        if (widget.message.outgoing)
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8),
+            child: MessageSentChip(),
+          ),
+        // Visible while the tile is closed: the section below is only
+        // built once it opens, so nothing said the message wanted anything.
+        if (widget.message.responseInfo?.openAction case final action?
+            when action != MessageAction.none)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: MessageActionChip(action: action),
+          ),
+        if (widget.message.isNew)
+          badge.Badge(
+            badgeStyle: badge.BadgeStyle(
+              shape: badge.BadgeShape.square,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            badgeContent: const Text(
+              "neu",
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        // In the title rather than the opened message: marking should not
+        // take opening, and so marking as read, first.
+        IconButton(
+          icon: Icon(
+            widget.starred ? Icons.star : Icons.star_border,
+            color: widget.starred ? widget.starColor : null,
+          ),
+          tooltip: widget.starred
+              ? tr(context).messageUnstar
+              : tr(context).messageStar,
+          visualDensity: VisualDensity.compact,
+          onPressed: widget.onToggleStar,
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
+    if (widget.selecting) {
+      // While picking, a tap picks: the tile neither opens nor marks the
+      // message read.
+      return ListTile(
+        tileColor: widget.tileColor,
+        selected: widget.selected,
+        leading: Checkbox(
+          value: widget.selected,
+          onChanged: (_) => widget.onSelect(),
+        ),
+        title: _title(context),
+        onTap: widget.onSelect,
+        onLongPress: widget.onSelect,
+      );
+    }
     return ExpansionTile(
       controller: _controller,
       initiallyExpanded: initiallyExpanded,
@@ -331,60 +577,11 @@ class _MessageWidgetState extends State<MessageWidget> {
           widget.onMarkAsRead(widget.message);
         }
       },
-      title: Row(
-        children: <Widget>[
-          Expanded(
-            child: Text(
-              widget.message.subject,
-              // Italic and a size down for one's own messages: under "All"
-              // they should not catch the eye like the ones received.
-              style: (widget.message.outgoing
-                      ? textTheme.titleSmall
-                          ?.copyWith(fontStyle: FontStyle.italic)
-                      : textTheme.titleMedium)
-                  ?.copyWith(color: Theme.of(context).colorScheme.primary),
-            ),
-          ),
-          // Sent and received looked alike, so one's own message read as
-          // something to act on.
-          if (widget.message.outgoing)
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8),
-              child: MessageSentChip(),
-            ),
-          // Visible while the tile is closed: the section below is only
-          // built once it opens, so nothing said the message wanted anything.
-          if (widget.message.responseInfo?.openAction case final action?
-              when action != MessageAction.none)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: MessageActionChip(action: action),
-            ),
-          if (widget.message.isNew)
-            badge.Badge(
-              badgeStyle: badge.BadgeStyle(
-                shape: badge.BadgeShape.square,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              badgeContent: const Text(
-                "neu",
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-          // In the title rather than the opened message: marking should not
-          // take opening, and so marking as read, first.
-          IconButton(
-            icon: Icon(
-              widget.starred ? Icons.star : Icons.star_border,
-              color: widget.starred ? widget.starColor : null,
-            ),
-            tooltip: widget.starred
-                ? tr(context).messageUnstar
-                : tr(context).messageStar,
-            visualDensity: VisualDensity.compact,
-            onPressed: widget.onToggleStar,
-          ),
-        ],
+      // A long press starts picking messages for a common action; a tap still
+      // reaches the tile and opens it.
+      title: GestureDetector(
+        onLongPress: widget.onSelect,
+        child: _title(context),
       ),
       children: [
         Padding(

@@ -160,6 +160,54 @@ void main() {
     });
   });
 
+  group('archive', () {
+    void verifyArchiveRequest(int messageId, int archiveType,
+            {int times = 1}) =>
+        verify(() => wrapper.send('api/message/archiveMessage',
+            args: {'messageId': messageId, 'archiveType': archiveType},
+            onError: any(named: 'onError'))).called(times);
+
+    test('the move a message allows comes from archiveMessageEnabled', () {
+      expect(messageWithId(_agreeOpenId).canArchive, isTrue);
+      expect(messageWithId(_agreeOpenId).canRestore, isFalse);
+      expect(messageWithId(_archivedId).canRestore, isTrue);
+    });
+
+    test('archiving sends archiveType 1 and loads the list again', () async {
+      final allSent = await container
+          .read(messagesProvider.notifier)
+          .setArchived([_agreeOpenId, _archivedId], archived: true);
+      expect(allSent, isTrue);
+      verifyArchiveRequest(_agreeOpenId, 1);
+      // Already archived: nothing to do for it.
+      verifyNever(() => wrapper.send('api/message/archiveMessage',
+          args: {'messageId': _archivedId, 'archiveType': 1},
+          onError: any(named: 'onError')));
+      verify(() => wrapper.send('api/message/getMyMessages')).called(2);
+    });
+
+    test('taking out of the archive sends archiveType 2', () async {
+      await container
+          .read(messagesProvider.notifier)
+          .setArchived([_archivedId], archived: false);
+      verifyArchiveRequest(_archivedId, 2);
+    });
+
+    test('a request that fails is reported', () async {
+      when(() => wrapper.send('api/message/archiveMessage',
+              args: any(named: 'args'), onError: any(named: 'onError')))
+          .thenAnswer((invocation) async {
+        (invocation.namedArguments[#onError] as void Function(Object))
+            .call(Exception('offline'));
+        return null;
+      });
+      final allSent = await container
+          .read(messagesProvider.notifier)
+          .setArchived([_agreeOpenId], archived: true);
+      expect(allSent, isFalse);
+    });
+  });
+
   group('stars', () {
     BuiltSet<int> starred() => container.read(messagesProvider).starred;
 

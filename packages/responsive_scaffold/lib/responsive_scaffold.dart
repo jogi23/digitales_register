@@ -426,7 +426,16 @@ class ResponsiveAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Widget title;
   final List<Widget>? actions;
 
-  const ResponsiveAppBar({super.key, required this.title, this.actions});
+  /// Replaces the menu button, for a page that puts the bar into a mode of
+  /// its own — a selection that needs a way out, say.
+  final Widget? leading;
+
+  const ResponsiveAppBar({
+    super.key,
+    required this.title,
+    this.actions,
+    this.leading,
+  });
 
   /// Whether the frame is short enough to warrant the smaller bar.
   ///
@@ -444,8 +453,8 @@ class ResponsiveAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     final tabletMode = _InheritedTabletMode.of(context)?.tabletMode ?? false;
     final homePage = _InheritedHomePage.of(context);
-    Widget? leading;
-    if (!tabletMode) {
+    var leading = this.leading;
+    if (leading == null && !tabletMode) {
       leading = IconButton(
         icon: const Icon(Icons.menu),
         tooltip: 'Menü öffnen',

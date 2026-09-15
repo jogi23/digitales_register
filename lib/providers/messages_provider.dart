@@ -75,6 +75,36 @@ class MessagesNotifier extends Notifier<MessagesState> {
     });
   }
 
+  /// Moves the messages in [messageIds] into the archive, or back out with
+  /// [archived] false, then loads the list again: the portal answers with
+  /// nothing. Messages that do not allow the move are left alone.
+  ///
+  /// Returns whether every request went through.
+  Future<bool> setArchived(
+    Iterable<int> messageIds, {
+    required bool archived,
+  }) async {
+    final type =
+        archived ? Message.archiveTypeArchive : Message.archiveTypeRestore;
+    final ids = messageIds.toSet();
+    var allSent = true;
+    for (final message in state.messages
+        .where((m) => ids.contains(m.id) && m.archiveType == type)) {
+      Object? failure;
+      await wrapper.send(
+        "api/message/archiveMessage",
+        args: <String, Object?>{
+          "messageId": message.id,
+          "archiveType": type,
+        },
+        onError: (error) => failure = error,
+      );
+      if (failure != null) allSent = false;
+    }
+    await load();
+    return allSent;
+  }
+
   Future<void> openMessageFile(MessageAttachmentFile file) async {
     if (!file.fileAvailable || !await canOpenFile(file.uniqueName)) {
       _markDownloading(file);
@@ -258,6 +288,7 @@ class MessagesNotifier extends Notifier<MessagesState> {
       // the only field in the list that says which.
       ..outgoing = getBool(json["label_outgoing"]) ?? false
       ..archived = getBool(json["label_archived"]) ?? false
+      ..archiveType = getInt(json["archiveMessageEnabled"]) ?? 0
       ..id = id
       ..responseInfo = _parseResponseInfo(json)?.toBuilder();
     final attachments = ListBuilder<MessageAttachmentFile>();

@@ -115,6 +115,31 @@
   "messagesSortSender": "By sender",
   "messageStar": "Star",
   "messageUnstar": "Remove star",
+  "messagesSelected": "{count} selected",
+  "@messagesSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "messagesEndSelection": "End selection",
+  "messagesSelectAll": "Select all",
+  "messagesExportPdf": "PDF (.pdf)",
+  "messagesExportText": "Text (.txt)",
+  "messagesExportMarkdown": "Markdown (.md)",
+  "messagesExportSaved": "Saved to {path}",
+  "@messagesExportSaved": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "messagesExportFailed": "The file could not be created.",
+  "messagesArchive": "Archive",
+  "messagesRestore": "Move out of the archive",
+  "messagesArchiveFailed": "Not all messages could be moved. Please try again.",
   "messagesSent": "Sent: ",
   "messagesFrom": "From: ",
   "messagesTo": "To: ",

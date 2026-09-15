@@ -115,6 +115,31 @@
   "messagesSortSender": "Nach Absender",
   "messageStar": "Markieren",
   "messageUnstar": "Markierung entfernen",
+  "messagesSelected": "{count} ausgewählt",
+  "@messagesSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "messagesEndSelection": "Auswahl beenden",
+  "messagesSelectAll": "Alle auswählen",
+  "messagesExportPdf": "PDF (.pdf)",
+  "messagesExportText": "Text (.txt)",
+  "messagesExportMarkdown": "Markdown (.md)",
+  "messagesExportSaved": "Gespeichert unter {path}",
+  "@messagesExportSaved": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "messagesExportFailed": "Die Datei ließ sich nicht erstellen.",
+  "messagesArchive": "Archivieren",
+  "messagesRestore": "Aus dem Archiv holen",
+  "messagesArchiveFailed": "Nicht alle Mitteilungen ließen sich verschieben. Bitte noch einmal versuchen.",
   "messagesSent": "Gesendet: ",
   "messagesFrom": "Von: ",
   "messagesTo": "An: ",
