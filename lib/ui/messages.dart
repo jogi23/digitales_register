@@ -37,6 +37,10 @@ import 'package:responsive_scaffold/responsive_scaffold.dart';
 
 class MessagesPage extends StatelessWidget {
   final MessagesState? state;
+
+  /// The folder shown; the list holds only its messages.
+  final MessageCategory category;
+  final ValueChanged<MessageCategory> onCategory;
   final bool noInternet;
   final bool hasUnread;
   final void Function(MessageAttachmentFile message) onOpenFile;
@@ -55,6 +59,8 @@ class MessagesPage extends StatelessWidget {
   const MessagesPage({
     super.key,
     required this.state,
+    required this.category,
+    required this.onCategory,
     required this.noInternet,
     required this.hasUnread,
     required this.onOpenFile,
@@ -86,48 +92,108 @@ class MessagesPage extends StatelessWidget {
             ? noInternet
                 ? const NoInternet()
                 : const Center(child: CircularProgressIndicator())
-            : Stack(
-              children: <Widget>[
-                AnimatedLinearProgressIndicator(
-                  show: state!.showMessage != null &&
-                      !state!.messages
-                          .any((m) => m.id == state!.showMessage),
-                ),
-                if (state!.messages.isEmpty)
-                  Center(
-                    child: Text(
-                      tr(context).messagesEmpty,
-                      style: Theme.of(context).textTheme.headlineMedium,
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ListView.builder(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  padding: context.systemInsets,
-                  itemCount: state!.messages.length,
-                  itemBuilder: (context, i) {
-                    final altColor = Theme.of(context)
-                        .colorScheme
-                        .surfaceContainerHighest
-                        .withOpacity(0.75);
-                    return MessageWidget(
-                      message: state!.messages[i],
-                      onOpenFile: onOpenFile,
-                      onMarkAsRead: onMarkAsRead,
-                      onReply: onReply,
-                      signature: signature,
-                      onSignature: onSignature,
-                      noInternet: noInternet,
-                      expand: state!.messages[i].id == state!.showMessage,
-                      tileColor: i.isOdd ? altColor : null,
-                    );
-                  },
-                ),
-              ],
-            ),
+            : _list(context, state!),
       ),
     );
   }
+
+  Widget _list(BuildContext context, MessagesState state) {
+    final visible = state.messages.where(category.includes).toList();
+    final altColor = Theme.of(context)
+        .colorScheme
+        .surfaceContainerHighest
+        .withValues(alpha: 0.75);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        MessageCategoryBar(selected: category, onSelected: onCategory),
+        const Divider(),
+        Expanded(
+          child: Stack(
+            children: <Widget>[
+              AnimatedLinearProgressIndicator(
+                show: state.showMessage != null &&
+                    !state.messages.any((m) => m.id == state.showMessage),
+              ),
+              if (visible.isEmpty)
+                Center(
+                  child: Text(
+                    state.messages.isEmpty
+                        ? tr(context).messagesEmpty
+                        : tr(context).messagesCategoryEmpty,
+                    style: Theme.of(context).textTheme.headlineMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ListView.builder(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: context.systemInsets,
+                itemCount: visible.length,
+                itemBuilder: (context, i) {
+                  final message = visible[i];
+                  return MessageWidget(
+                    // Keyed by id: switching folders moves messages to other
+                    // rows, and each tile keeps whether it started open.
+                    key: ValueKey(message.id),
+                    message: message,
+                    onOpenFile: onOpenFile,
+                    onMarkAsRead: onMarkAsRead,
+                    onReply: onReply,
+                    signature: signature,
+                    onSignature: onSignature,
+                    noInternet: noInternet,
+                    expand: message.id == state.showMessage,
+                    tileColor: i.isOdd ? altColor : null,
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Picks the folder the message list shows, the way the portal sorts its
+/// messages.
+class MessageCategoryBar extends StatelessWidget {
+  final MessageCategory selected;
+  final ValueChanged<MessageCategory> onSelected;
+
+  const MessageCategoryBar({
+    super.key,
+    required this.selected,
+    required this.onSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 4,
+        children: [
+          for (final category in MessageCategory.values)
+            ChoiceChip(
+              label: Text(_label(context, category)),
+              selected: category == selected,
+              showCheckmark: false,
+              onSelected: (_) => onSelected(category),
+            ),
+        ],
+      ),
+    );
+  }
+
+  static String _label(BuildContext context, MessageCategory category) =>
+      switch (category) {
+        MessageCategory.incoming => tr(context).messagesCategoryIncoming,
+        MessageCategory.outgoing => tr(context).messagesCategoryOutgoing,
+        MessageCategory.archived => tr(context).messagesCategoryArchived,
+        MessageCategory.all => tr(context).messagesCategoryAll,
+      };
 }
 
 class MessageWidget extends StatefulWidget {
@@ -204,9 +270,13 @@ class _MessageWidgetState extends State<MessageWidget> {
           Expanded(
             child: Text(
               widget.message.subject,
-              style: textTheme.titleMedium?.copyWith(
-                color: Theme.of(context).colorScheme.primary,
-              ),
+              // Italic and a size down for one's own messages: under "All"
+              // they should not catch the eye like the ones received.
+              style: (widget.message.outgoing
+                      ? textTheme.titleSmall
+                          ?.copyWith(fontStyle: FontStyle.italic)
+                      : textTheme.titleMedium)
+                  ?.copyWith(color: Theme.of(context).colorScheme.primary),
             ),
           ),
           // Sent and received looked alike, so one's own message read as

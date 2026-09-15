@@ -43,11 +43,28 @@ class MessagesNotifier extends Notifier<MessagesState> {
     final dynamic response = await wrapper.send("api/message/getMyMessages");
     if (response != null) {
       state = _parseMessages(response as List);
+      _revealSelected();
     }
   }
 
   void select(int messageId) {
     state = state.rebuild((b) => b..showMessage = messageId);
+    _revealSelected();
+  }
+
+  /// Switches the list to the folder of the message about to open, if the
+  /// folder shown does not hold it: a notification can point to a sent or
+  /// archived message. Before the list has loaded there is nothing to go by;
+  /// [load] asks again.
+  void _revealSelected() {
+    final message =
+        state.messages.firstWhereOrNull((m) => m.id == state.showMessage);
+    if (message == null) return;
+    if (!ref.read(messageCategoryProvider).includes(message)) {
+      ref
+          .read(messageCategoryProvider.notifier)
+          .show(MessageCategory.of(message));
+    }
   }
 
   void clearSelection() {
@@ -228,6 +245,7 @@ class MessagesNotifier extends Notifier<MessagesState> {
       // The portal files every message under incoming or outgoing; this is
       // the only field in the list that says which.
       ..outgoing = getBool(json["label_outgoing"]) ?? false
+      ..archived = getBool(json["label_archived"]) ?? false
       ..id = id
       ..responseInfo = _parseResponseInfo(json)?.toBuilder();
     final attachments = ListBuilder<MessageAttachmentFile>();
@@ -304,3 +322,17 @@ class MessagesNotifier extends Notifier<MessagesState> {
 
 final messagesProvider =
     NotifierProvider<MessagesNotifier, MessagesState>(MessagesNotifier.new);
+
+/// The folder the message list shows. Not saved: the app starts on the
+/// received messages.
+class MessageCategoryNotifier extends Notifier<MessageCategory> {
+  @override
+  MessageCategory build() => MessageCategory.incoming;
+
+  // ignore: use_setters_to_change_properties
+  void show(MessageCategory category) => state = category;
+}
+
+final messageCategoryProvider =
+    NotifierProvider<MessageCategoryNotifier, MessageCategory>(
+        MessageCategoryNotifier.new);

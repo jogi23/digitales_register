@@ -33,6 +33,7 @@ const _signedId = 31241; // signatureRequired, already signed
 const _plainId = 39102; // read without signature -> no confirmation
 // 39102 is also the one message the demo account sent itself.
 const _sentId = _plainId;
+const _archivedId = 47363; // the one archived message
 
 void main() {
   setUpAll(loadFixtures);
@@ -107,6 +108,48 @@ void main() {
       final received = messageWithId(_agreeOpenId)
           .rebuild((b) => b..timeRead = null);
       expect(received.isNew, isTrue);
+    });
+  });
+
+  group('folders', () {
+    MessageCategory category() => container.read(messageCategoryProvider);
+
+    test('an archived message is marked archived', () {
+      expect(messageWithId(_archivedId).archived, isTrue);
+      expect(messageWithId(_agreeOpenId).archived, isFalse);
+    });
+
+    test('received holds neither sent nor archived messages', () {
+      expect(MessageCategory.incoming.includes(messageWithId(_agreeOpenId)),
+          isTrue);
+      expect(
+          MessageCategory.incoming.includes(messageWithId(_sentId)), isFalse);
+      expect(MessageCategory.incoming.includes(messageWithId(_archivedId)),
+          isFalse);
+    });
+
+    test('the list starts on received messages', () {
+      expect(category(), MessageCategory.incoming);
+    });
+
+    test('opening a sent message switches to sent', () {
+      container.read(messagesProvider.notifier).select(_sentId);
+      expect(category(), MessageCategory.outgoing);
+    });
+
+    test('opening a received message keeps the folder', () {
+      container.read(messagesProvider.notifier).select(_agreeOpenId);
+      expect(category(), MessageCategory.incoming);
+    });
+
+    test('a message opened before the list loads is revealed by the load',
+        () async {
+      final notifier = container.read(messagesProvider.notifier)
+        ..reset()
+        ..select(_archivedId);
+      expect(category(), MessageCategory.incoming);
+      await notifier.load();
+      expect(category(), MessageCategory.archived);
     });
   });
 
