@@ -327,6 +327,43 @@ void main() {
       expect(state().sending, isFalse);
     });
 
+    test('an answer carries the original below, in italics, as the portal',
+        () async {
+      await notifier().start();
+      await notifier().add(MessageRecipient(_teacher(7330)));
+      await notifier().send(
+        subject: 'RE: Elternabend',
+        text: 'Danke',
+        quote: (
+          label: 'Antwort auf die Mitteilung:',
+          text: 'Guten Tag,\n\nam Donnerstag',
+        ),
+      );
+      final message = lastArgs('api/message/sendMessage')['message']! as Map;
+      expect(jsonDecode(message['text']! as String), {
+        'ops': [
+          {'insert': 'Danke\n\n\n\n'},
+          {
+            'insert': 'Antwort auf die Mitteilung:',
+            'attributes': {'italic': true},
+          },
+          {'insert': '\n'},
+          {'insert': '\n'},
+          {
+            'insert': 'Guten Tag,',
+            'attributes': {'italic': true},
+          },
+          {'insert': '\n'},
+          {'insert': '\n'},
+          {
+            'insert': 'am Donnerstag',
+            'attributes': {'italic': true},
+          },
+          {'insert': '\n'},
+        ],
+      });
+    });
+
     test('a rejected message returns the portal error key', () async {
       stub('api/message/sendMessage', (_) => {'error': 'no_recipients'});
       await notifier().start();

@@ -20,6 +20,7 @@ import 'dart:async';
 import 'package:dr/data.dart';
 import 'package:dr/providers/message_compose_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
+import 'package:dr/services/message_export.dart' show plainTextOf;
 import 'package:dr/ui/message_compose.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -61,6 +62,7 @@ class _MessageComposeContainerState
       initialSubject: answerTo == null ? '' : answerSubject(answerTo.subject),
       onRetry: () =>
           unawaited(notifier.start(answerTo: answerTo?.fromUserId)),
+      quotedText: answerTo == null ? null : plainTextOf(answerTo.text),
       onSearch: notifier.search,
       onAdd: (recipient) => unawaited(notifier.add(recipient)),
       onRemove: (recipient) => unawaited(notifier.remove(recipient)),

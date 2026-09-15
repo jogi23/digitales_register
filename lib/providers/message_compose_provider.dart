@@ -36,6 +36,31 @@ List<ContextFragment> parseContext(Object? source) => [
 String answerSubject(String subject) =>
     subject.toLowerCase().startsWith('re:') ? subject : 'RE: $subject';
 
+/// The message an answer quotes: the label put above it ("Antwort auf die
+/// Mitteilung:") and its text without formatting.
+typedef MessageQuote = ({String label, String text});
+
+/// The Quill delta a message text goes out as.
+///
+/// An answer carries the original below it the way the portal lays it out:
+/// the answer, three empty lines, the label, an empty line, the original —
+/// label and original in italics, the original's own formatting dropped.
+String messageDelta(String text, {MessageQuote? quote}) => jsonEncode({
+      'ops': [
+        // The portal's editor ends every text with a line break.
+        {'insert': quote == null ? '$text\n' : '$text\n\n\n\n'},
+        if (quote != null)
+          for (final line in [quote.label, '', ...quote.text.split('\n')]) ...[
+            if (line.isNotEmpty)
+              {
+                'insert': line,
+                'attributes': {'italic': true},
+              },
+            {'insert': '\n'},
+          ],
+      ],
+    });
+
 /// Names as the portal shows them, without the double spaces some carry.
 String _name(Object? source) => switch (source) {
       final String name => name.replaceAll(RegExp(r'\s+'), ' ').trim(),
@@ -304,9 +329,15 @@ class MessageComposeNotifier extends AutoDisposeNotifier<MessageComposeState> {
 
   /// Sends the message to everyone ticked.
   ///
+  /// An answer passes the original as [quote]; it goes out below [text].
+  ///
   /// Returns `null` once the portal took it, otherwise the portal's error
   /// key — empty when there is none, as for a request that never arrived.
-  Future<String?> send({required String subject, required String text}) async {
+  Future<String?> send({
+    required String subject,
+    required String text,
+    MessageQuote? quote,
+  }) async {
     final type = state.type;
     if (type == null) return '';
     state = state.copyWith(sending: true);
@@ -317,13 +348,8 @@ class MessageComposeNotifier extends AutoDisposeNotifier<MessageComposeState> {
         'recipientsDetails': [for (final group in state.groups) group.toJson()],
         'message': <String, Object?>{
           'subject': subject,
-          // The portal keeps message texts as Quill deltas, and its editor
-          // ends every text with a line break.
-          'text': jsonEncode({
-            'ops': [
-              {'insert': '$text\n'},
-            ],
-          }),
+          // The portal keeps message texts as Quill deltas.
+          'text': messageDelta(text, quote: quote),
           'signatureRequired': type['signatureRequired'] == true,
           'responseRequired': type['responseRequired'] == true,
           'responseType': type['typeId'] ?? 'read',

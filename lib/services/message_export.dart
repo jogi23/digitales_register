@@ -142,6 +142,10 @@ List<DeltaLine> parseDelta(String source) {
   return lines;
 }
 
+/// The text of a Quill delta without its formatting, one line per line.
+String plainTextOf(String source) =>
+    parseDelta(source).map((line) => line.plainText).join('\n');
+
 /// Turns messages into one file to share or keep: plain text, Markdown or
 /// PDF.
 ///

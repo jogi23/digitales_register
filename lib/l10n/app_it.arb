@@ -184,6 +184,8 @@
   "messageComposeNotAllowed": "Questo account non può inviare comunicazioni.",
   "messageComposeLoadFailed": "Il portale non ha risposto. Forse la sessione è scaduta.",
   "messageComposeRetry": "Riprova",
+  "messageComposeQuote": "Cita la comunicazione originale",
+  "messageAnswerQuoteLabel": "Risposta alla comunicazione:",
   "messageComposeDiscardTitle": "Eliminare la bozza?",
   "messageComposeDiscard": "Elimina",
   "messageRecipientTeacher": "Docente",

@@ -75,6 +75,7 @@ class _Calls {
   final List<MessageRecipient> added = [];
   int sends = 0;
   int retries = 0;
+  MessageQuote? quote;
 }
 
 Widget _page(
@@ -83,6 +84,7 @@ Widget _page(
   String? sendResult,
   List<MessageRecipient> hits = const [],
   bool isAnswer = false,
+  String? quotedText,
 }) {
   scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
   return MaterialApp(
@@ -99,6 +101,7 @@ Widget _page(
                   isAnswer: isAnswer,
                   initialSubject: '',
                   onRetry: () => calls.retries++,
+                  quotedText: quotedText,
                   onSearch: (filter) async {
                     calls.searches.add(filter);
                     return hits;
@@ -107,8 +110,10 @@ Widget _page(
                   onRemove: (_) {},
                   onToggle: (_, __) {},
                   onTickAll: (_) {},
-                  onSend: ({required subject, required text}) async {
-                    calls.sends++;
+                  onSend: ({required subject, required text, quote}) async {
+                    calls
+                      ..sends += 1
+                      ..quote = quote;
                     return sendResult;
                   },
                 ),
@@ -248,6 +253,51 @@ void main() {
     );
     await tester.tap(find.text('Erneut versuchen'));
     expect(calls.retries, 1);
+  });
+
+  testWidgets('a new message quotes nothing', (tester) async {
+    await _open(tester, _page(_state(), _Calls()));
+    expect(find.byType(SwitchListTile), findsNothing);
+    expect(find.textContaining('Antwort auf die Mitteilung:'), findsNothing);
+  });
+
+  testWidgets('an answer quotes the original, unless switched off',
+      (tester) async {
+    final calls = _Calls();
+    // Rejected, so the page stays open for a second try.
+    await _open(
+      tester,
+      _page(
+        _state(),
+        calls,
+        isAnswer: true,
+        quotedText: 'Elternabend am Donnerstag',
+        sendResult: 'x',
+      ),
+    );
+    expect(find.textContaining('Antwort auf die Mitteilung:'), findsOneWidget);
+    await _write(tester);
+
+    Future<void> send() async {
+      await tester.ensureVisible(find.text('Senden'));
+      await tester.tap(find.text('Senden'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, 'Senden').last);
+      await tester.pumpAndSettle();
+    }
+
+    await send();
+    expect(calls.quote, (
+      label: 'Antwort auf die Mitteilung:',
+      text: 'Elternabend am Donnerstag',
+    ));
+
+    await tester.tap(find.text('Ursprüngliche Mitteilung zitieren'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Antwort auf die Mitteilung:'), findsNothing);
+    await send();
+    expect(calls.sends, 2);
+    expect(calls.quote, isNull);
   });
 
   testWidgets('an answer is titled as one', (tester) async {

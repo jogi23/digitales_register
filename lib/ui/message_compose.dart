@@ -77,6 +77,10 @@ class MessageComposePage extends StatefulWidget {
   /// Asks the portal again after [MessageComposeState.failed].
   final VoidCallback onRetry;
 
+  /// The text of the message being answered, quoted below the answer as the
+  /// portal does; `null` for a new message.
+  final String? quotedText;
+
   final Future<List<MessageRecipient>> Function(String filter) onSearch;
   final ValueChanged<MessageRecipient> onAdd;
   final ValueChanged<MessageRecipient> onRemove;
@@ -88,6 +92,7 @@ class MessageComposePage extends StatefulWidget {
   final Future<String?> Function({
     required String subject,
     required String text,
+    MessageQuote? quote,
   }) onSend;
 
   const MessageComposePage({
@@ -97,6 +102,7 @@ class MessageComposePage extends StatefulWidget {
     required this.isAnswer,
     required this.initialSubject,
     required this.onRetry,
+    this.quotedText,
     required this.onSearch,
     required this.onAdd,
     required this.onRemove,
@@ -117,6 +123,9 @@ class _MessageComposePageState extends State<MessageComposePage> {
   var _hits = const <MessageRecipient>[];
   var _searchedFor = '';
   String? _error;
+
+  /// Whether an answer carries the original below it, as in the portal.
+  var _quote = true;
 
   /// Set once the page is on its way out, so the draft guard lets it go.
   var _leaving = false;
@@ -202,6 +211,13 @@ class _MessageComposePageState extends State<MessageComposePage> {
     final error = await widget.onSend(
       subject: _subject.text.trim(),
       text: _text.text.trim(),
+      quote: switch (widget.quotedText) {
+        final original? when _quote => (
+            label: l.messageAnswerQuoteLabel,
+            text: original,
+          ),
+        _ => null,
+      },
     );
     if (!mounted) return;
     if (error == null) {
@@ -402,6 +418,26 @@ class _MessageComposePageState extends State<MessageComposePage> {
           ),
           onChanged: (_) => setState(() {}),
         ),
+        if (widget.quotedText case final original?) ...[
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text(l.messageComposeQuote),
+            value: _quote,
+            onChanged:
+                state.sending ? null : (on) => setState(() => _quote = on),
+          ),
+          if (_quote)
+            // As it goes out: in italics below the answer.
+            Text(
+              '${l.messageAnswerQuoteLabel}\n\n$original',
+              maxLines: 12,
+              overflow: TextOverflow.fade,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontStyle: FontStyle.italic,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+        ],
         if (_error case final error?)
           Padding(
             padding: const EdgeInsets.only(top: 12),
