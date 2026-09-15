@@ -31,7 +31,8 @@
         {
           "title": "Intern",
           "items": [
-            "Die Versionshinweise veröffentlichter Versionen sind festgeschrieben: ein Test schlägt fehl, sobald sich ihr Text nachträglich ändert."
+            "Die Versionshinweise veröffentlichter Versionen sind festgeschrieben: ein Test schlägt fehl, sobald sich ihr Text nachträglich ändert.",
+            "Android-Build auf das im Android-Build-Plugin eingebaute Kotlin umgestellt; dafür Sentry sowie die Android-Teile von Bildauswahl und Einstellungsspeicher auf Fassungen angehoben, die das unterstützen."
           ]
         }
       ],
@@ -64,7 +65,8 @@
         {
           "title": "Internal",
           "items": [
-            "The release notes of published versions are locked: a test fails as soon as their text is changed afterwards."
+            "The release notes of published versions are locked: a test fails as soon as their text is changed afterwards.",
+            "Android build switched to the Kotlin support built into the Android Gradle Plugin; Sentry and the Android parts of the image picker and the settings storage updated to versions that support it."
           ]
         }
       ],
@@ -97,7 +99,8 @@
         {
           "title": "Interno",
           "items": [
-            "Le note delle versioni pubblicate sono bloccate: un test fallisce non appena il loro testo viene modificato in seguito."
+            "Le note delle versioni pubblicate sono bloccate: un test fallisce non appena il loro testo viene modificato in seguito.",
+            "Build Android passata al supporto Kotlin integrato nel plugin Gradle di Android; Sentry e le parti Android del selettore di immagini e dell'archivio delle impostazioni aggiornati a versioni che lo supportano."
           ]
         }
       ]

@@ -26,6 +26,7 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 ### Intern
 
 - Die Versionshinweise veröffentlichter Versionen sind festgeschrieben: ein Test schlägt fehl, sobald sich ihr Text nachträglich ändert.
+- Android-Build auf das im Android-Build-Plugin eingebaute Kotlin umgestellt; dafür Sentry sowie die Android-Teile von Bildauswahl und Einstellungsspeicher auf Fassungen angehoben, die das unterstützen.
 
 ## 1.3.1 — 2026-09-14
 
