@@ -140,6 +140,56 @@
   "messagesArchive": "Archivieren",
   "messagesRestore": "Aus dem Archiv holen",
   "messagesArchiveFailed": "Nicht alle Mitteilungen ließen sich verschieben. Bitte noch einmal versuchen.",
+  "messageComposeTitle": "Neue Mitteilung",
+  "messageAnswer": "Antworten",
+  "messageComposeRecipients": "Empfänger",
+  "messageComposeSearch": "Empfänger suchen",
+  "messageComposeSearchHelper": "Name, Klasse oder Gruppe – ab 2 Zeichen",
+  "messageComposeNoHits": "Niemand gefunden",
+  "messageComposeSelected": "{selected} von {total} ausgewählt",
+  "@messageComposeSelected": {
+    "placeholders": {
+      "selected": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "messageComposeTickAll": "Alle",
+  "messageComposeTickNone": "Keine",
+  "messageComposeSubject": "Betreff",
+  "messageComposeText": "Mitteilung",
+  "messageSend": "Senden",
+  "messageSendConfirmTitle": "Mitteilung senden?",
+  "messageSendConfirm": "{count, plural, =1{Die Mitteilung geht an 1 Person.} other{Die Mitteilung geht an {count} Personen.}}",
+  "@messageSendConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "messageSent": "Mitteilung gesendet",
+  "messageSendFailed": "Die Mitteilung ist nicht angekommen. Bitte noch einmal versuchen.",
+  "messageSendRejected": "Das Portal hat die Mitteilung abgelehnt ({reason}).",
+  "@messageSendRejected": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "messageComposeNotAllowed": "Dieses Konto darf keine Mitteilungen senden.",
+  "messageComposeLoadFailed": "Das Portal hat nicht geantwortet. Vielleicht ist die Sitzung abgelaufen.",
+  "messageComposeRetry": "Erneut versuchen",
+  "messageComposeQuote": "Ursprüngliche Mitteilung zitieren",
+  "messageAnswerQuoteLabel": "Antwort auf die Mitteilung:",
+  "messageComposeDiscardTitle": "Entwurf verwerfen?",
+  "messageComposeDiscard": "Verwerfen",
+  "messageRecipientTeacher": "Lehrperson",
+  "messageRecipientSecretary": "Sekretär/in",
   "messagesSent": "Gesendet: ",
   "messagesFrom": "Von: ",
   "messagesTo": "An: ",

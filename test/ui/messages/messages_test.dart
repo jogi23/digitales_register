@@ -475,6 +475,44 @@ void main() {
     });
   });
 
+  group('writing', () {
+    testWidgets('the list offers a new message', (tester) async {
+      await tester.pumpWidget(
+        _buildWidget(_stateWithDirection(outgoing: false)),
+      );
+      expect(
+        find.widgetWithText(FloatingActionButton, "Neue Mitteilung"),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('a message the portal lets answer offers it', (tester) async {
+      await _openMessage(
+        tester,
+        MessagesState(
+          (b) => b.messages = ListBuilder(<Message>[
+            Message(
+              (b) => b
+                ..fromName = "Sender"
+                ..recipientString = "Empfänger"
+                ..id = 25
+                ..subject = "Betreff"
+                ..timeSent = UtcDateTime.parse("2020-03-04 20:57:38")
+                ..text = _messageText
+                ..canReply = true,
+            ),
+          ]),
+        ),
+      );
+      expect(find.text("Antworten"), findsOneWidget);
+    });
+
+    testWidgets('one it does not, offers no answer', (tester) async {
+      await _openMessage(tester, _stateWithDirection(outgoing: false));
+      expect(find.text("Antworten"), findsNothing);
+    });
+  });
+
   group('selection', () {
     // Newest first: "Zweite" above "Erste". Both may be archived.
     MessagesState twoMessages() => MessagesState(

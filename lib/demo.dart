@@ -82,6 +82,7 @@ Future<dynamic> getDemoResponse(String url, dynamic args) async {
   if (synthetic.containsKey(url)) return synthetic[url];
 
   if (url == _replyUrl) return _demoReply(args);
+  if (_composeUrls.contains(url)) return _demoCompose(url, args);
 
   final matches = _capture
       .where((item) => _pathOf(item['address'] as String) == url)
@@ -170,6 +171,148 @@ dynamic _demoReply(dynamic args) {
     };
   }
   return _withDemoReplies(stored);
+}
+
+// ---------------------------------------------------------------------------
+// Writing messages
+// ---------------------------------------------------------------------------
+
+const _composeUrls = {
+  'api/message/getTypes',
+  'api/message/getRecipients',
+  'api/message/getInitialRecipients',
+  'api/message/getRecipientsDetails',
+  'api/message/sendMessage',
+};
+
+/// People and a group the demo account can write to, in the portal's format.
+const _demoRecipients = <Map<String, Object?>>[
+  {
+    'type': 'user',
+    'id': 9001,
+    'name': 'Muster Maria',
+    'picture': null,
+    'firstname': 'Maria',
+    'lastname': 'Muster',
+    'classname': null,
+    'rolle': 2,
+    'contextstr': [
+      {'f': 'txt', 'key': 'Muster Maria ('},
+      {'f': 't', 'key': 'message.recipients.teacher'},
+      {'f': 'txt', 'key': ')'},
+    ],
+  },
+  {
+    'type': 'user',
+    'id': 9002,
+    'name': 'Beispiel Berta',
+    'picture': null,
+    'firstname': 'Berta',
+    'lastname': 'Beispiel',
+    'classname': null,
+    'rolle': 3,
+    'contextstr': [
+      {'f': 'txt', 'key': 'Beispiel Berta ('},
+      {'f': 't', 'key': 'message.recipients.secretary'},
+      {'f': 'txt', 'key': ')'},
+    ],
+  },
+  {
+    'type': 'parents',
+    'id': 500,
+    'name': '1A Erziehungsberechtigte',
+    'contextstr': [
+      {'f': 'txt', 'key': '1A '},
+    ],
+  },
+];
+
+/// The people behind the demo group.
+const _demoParents = ['Huber Anna', 'Moser Paul', 'Gruber Lena'];
+
+/// Answers the calls of the message form. The demo takes a message without
+/// keeping it: the list stays as captured.
+dynamic _demoCompose(String url, dynamic args) {
+  Map<String, Object?> person(int id, String name, int rolle) => {
+        'id': id,
+        'firstName': name.split(' ').last,
+        'lastName': name.split(' ').first,
+        'rolle': rolle,
+        'className': null,
+        'picture': null,
+        'activeFrom': null,
+        'activeTo': null,
+        'name': name,
+        'contextstr': const <Object?>[],
+        'canSignSignatureMessages': true,
+        'signatureRequiresGuardian': false,
+        'selected': true,
+        'disabled': false,
+      };
+
+  switch (url) {
+    case 'api/message/getTypes':
+      return {
+        'types': [
+          {
+            'id': 'none',
+            'typeId': 'read',
+            'name': 'Keine',
+            'signatureRequired': false,
+            'responseRequired': false,
+          },
+        ],
+        'permissions': [
+          {'id': 'me', 'name': 'Nur ich'},
+        ],
+      };
+    case 'api/message/getRecipients':
+      final filter = args is Map ? '${args['filter']}'.toLowerCase() : '';
+      return [
+        for (final recipient in _demoRecipients)
+          if ('${recipient['name']}'.toLowerCase().contains(filter)) recipient,
+      ];
+    case 'api/message/getInitialRecipients':
+      // The capture has its senders blanked, so every answer goes to the
+      // demo teacher.
+      return [_demoRecipients.first];
+    case 'api/message/getRecipientsDetails':
+      final groups = switch (args) {
+        {'recipientGroups': final List groups} => groups,
+        _ => const <Object?>[],
+      };
+      final details = [
+        for (final group in groups)
+          if (group is Map)
+            {
+              'type': group['type'],
+              'name': group['name'],
+              'contextstr': group['contextstr'],
+              'details': group['type'] == 'user'
+                  ? [
+                      person(
+                        switch (group['id']) { final int id => id, _ => 0 },
+                        '${group['name']}',
+                        switch (group['rolle']) { final int r => r, _ => 2 },
+                      ),
+                    ]
+                  : [
+                      for (final (i, name) in _demoParents.indexed)
+                        person(9100 + i, name, 8),
+                    ],
+            },
+      ];
+      return {
+        'recipientsNumber': details.fold<int>(
+          0,
+          (n, group) => n + ((group['details'] as List?)?.length ?? 0),
+        ),
+        'recipientsDetails': details,
+      };
+    case 'api/message/sendMessage':
+      return {'success': true};
+  }
+  return null;
 }
 
 // ---------------------------------------------------------------------------

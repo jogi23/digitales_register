@@ -107,6 +107,16 @@ void main() {
       expect(lines.single.plainText, 'Bild:');
     });
 
+    test('plain text keeps the lines and drops the formatting', () {
+      expect(
+        plainTextOf(_delta([
+          {'insert': 'fett', 'attributes': {'bold': true}},
+          {'insert': '\n\nZeile\n'},
+        ])),
+        'fett\n\nZeile',
+      );
+    });
+
     test('takes a text that is no delta as plain text', () {
       expect(
         parseDelta('Hallo\nWelt').map((l) => l.plainText),

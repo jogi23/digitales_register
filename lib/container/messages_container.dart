@@ -16,6 +16,9 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'dart:async';
+
+import 'package:dr/container/message_compose_container.dart';
 import 'package:dr/l10n/l10n.dart';
 import 'package:dr/providers/messages_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
@@ -54,6 +57,14 @@ class MessagesPageContainer extends ConsumerWidget {
       onArchive: (messages, {required bool archived}) => ref
           .read(messagesProvider.notifier)
           .setArchived(messages.map((m) => m.id), archived: archived),
+      onCompose: (answerTo) => unawaited(
+        Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => MessageComposeContainer(answerTo: answerTo),
+            fullscreenDialog: true,
+          ),
+        ),
+      ),
       noInternet: noInternet,
       hasUnread: messagesState.messages.any((m) => m.isNew),
       onOpenFile: (file) =>

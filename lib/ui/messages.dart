@@ -64,6 +64,9 @@ class MessagesPage extends StatefulWidget {
   /// False means not every move went through.
   final Future<bool> Function(List<Message> messages, {required bool archived})
       onArchive;
+
+  /// Opens a new message, or an answer to the message given.
+  final void Function(Message? answerTo) onCompose;
   final bool noInternet;
   final bool hasUnread;
   final void Function(MessageAttachmentFile message) onOpenFile;
@@ -91,6 +94,7 @@ class MessagesPage extends StatefulWidget {
     required this.onToggleStar,
     required this.onExport,
     required this.onArchive,
+    required this.onCompose,
     required this.noInternet,
     required this.hasUnread,
     required this.onOpenFile,
@@ -173,6 +177,14 @@ class _MessagesPageState extends State<MessagesPage> {
         appBar: selected.isEmpty
             ? _appBar(context)
             : _selectionBar(context, visible, selected),
+        // Not while picking: then the bar holds the actions.
+        floatingActionButton: selected.isEmpty && state != null
+            ? FloatingActionButton.extended(
+                onPressed: () => widget.onCompose(null),
+                icon: const Icon(Icons.edit_outlined),
+                label: Text(tr(context).messageComposeTitle),
+              )
+            : null,
         body: PullToRefresh(
           onRefresh: widget.onRefresh,
           child: state == null
@@ -323,7 +335,10 @@ class _MessagesPageState extends State<MessagesPage> {
                 ),
               ListView.builder(
                 physics: const AlwaysScrollableScrollPhysics(),
-                padding: context.systemInsets,
+                // Room below the last message for the new-message button.
+                padding: context.systemInsets.copyWith(
+                  bottom: context.systemInsets.bottom + 88,
+                ),
                 itemCount: visible.length,
                 itemBuilder: (context, i) {
                   final message = visible[i];
@@ -335,6 +350,9 @@ class _MessagesPageState extends State<MessagesPage> {
                     selecting: selecting,
                     selected: _selected.contains(message.id),
                     onSelect: () => _toggle(message),
+                    onAnswer: message.canReply && !message.outgoing
+                        ? () => widget.onCompose(message)
+                        : null,
                     starred: state.starred.contains(message.id),
                     starColor: widget.starColor,
                     onToggleStar: () => widget.onToggleStar(message),
@@ -428,6 +446,9 @@ class MessageWidget extends StatefulWidget {
 
   /// Picks or unpicks the message; a long press starts picking.
   final VoidCallback onSelect;
+
+  /// Starts an answer; `null` when the portal allows none.
+  final VoidCallback? onAnswer;
   final bool starred;
   final Color starColor;
   final VoidCallback onToggleStar;
@@ -447,6 +468,7 @@ class MessageWidget extends StatefulWidget {
     required this.selecting,
     required this.selected,
     required this.onSelect,
+    this.onAnswer,
     required this.starred,
     required this.starColor,
     required this.onToggleStar,
@@ -674,6 +696,17 @@ class _MessageWidgetState extends State<MessageWidget> {
                     widget.message,
                     response: response,
                     signature: signature,
+                  ),
+                ),
+              ],
+              if (widget.onAnswer case final onAnswer?) ...[
+                const Divider(),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: OutlinedButton.icon(
+                    onPressed: widget.noInternet ? null : onAnswer,
+                    icon: const Icon(Icons.reply),
+                    label: Text(tr(context).messageAnswer),
                   ),
                 ),
               ],

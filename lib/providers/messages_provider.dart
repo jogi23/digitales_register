@@ -289,6 +289,9 @@ class MessagesNotifier extends Notifier<MessagesState> {
       ..outgoing = getBool(json["label_outgoing"]) ?? false
       ..archived = getBool(json["label_archived"]) ?? false
       ..archiveType = getInt(json["archiveMessageEnabled"]) ?? 0
+      ..fromUserId = getInt(json["fromUserId"]) ?? 0
+      ..canReply = getBool(json["canBeReplied"]) == true &&
+          getBool(json["answerMessageEnabled"]) == true
       ..id = id
       ..responseInfo = _parseResponseInfo(json)?.toBuilder();
     final attachments = ListBuilder<MessageAttachmentFile>();
