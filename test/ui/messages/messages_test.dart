@@ -53,6 +53,16 @@ class _TestMessagesNotifier extends MessagesNotifier {
     sentSignature = signature;
     return replyResult;
   }
+
+  /// The last move [setArchived] was asked for.
+  (List<int>, bool)? archiveRequest;
+
+  @override
+  Future<bool> setArchived(Iterable<int> messageIds,
+      {required bool archived}) async {
+    archiveRequest = (messageIds.toList(), archived);
+    return true;
+  }
 }
 
 /// Settings with one field set, everything else left at its default.
@@ -462,6 +472,95 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text("Erste"), findsOneWidget);
       expect(find.textContaining("Sehr geehrte Eltern"), findsOneWidget);
+    });
+  });
+
+  group('selection', () {
+    // Newest first: "Zweite" above "Erste". Both may be archived.
+    MessagesState twoMessages() => MessagesState(
+          (b) => b.messages = ListBuilder(<Message>[
+            for (final id in [1, 2])
+              Message(
+                (b) => b
+                  ..fromName = "Sender"
+                  ..recipientString = "Empfänger"
+                  ..id = id
+                  ..subject = id == 1 ? "Erste" : "Zweite"
+                  ..timeSent = UtcDateTime.parse("2020-03-0$id 20:57:38")
+                  ..timeRead = UtcDateTime.parse("2020-03-0$id 21:00:00")
+                  ..text = _messageText
+                  ..archiveType = Message.archiveTypeArchive,
+              ),
+          ]),
+        );
+
+    testWidgets('a long press starts it', (tester) async {
+      await tester.pumpWidget(_buildWidget(twoMessages()));
+      await tester.longPress(find.text("Zweite"));
+      await tester.pumpAndSettle();
+      expect(find.text("1 ausgewählt"), findsOneWidget);
+      expect(find.byType(Checkbox), findsNWidgets(2));
+    });
+
+    testWidgets('a tap picks instead of opening', (tester) async {
+      await tester.pumpWidget(_buildWidget(twoMessages()));
+      await tester.longPress(find.text("Zweite"));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text("Erste"));
+      await tester.pumpAndSettle();
+      expect(find.text("2 ausgewählt"), findsOneWidget);
+      expect(find.textContaining("Sehr geehrte Eltern"), findsNothing);
+    });
+
+    testWidgets('select all, then end it', (tester) async {
+      await tester.pumpWidget(_buildWidget(twoMessages()));
+      await tester.longPress(find.text("Zweite"));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip("Alle auswählen"));
+      await tester.pumpAndSettle();
+      expect(find.text("2 ausgewählt"), findsOneWidget);
+
+      await tester.tap(find.byTooltip("Auswahl beenden"));
+      await tester.pumpAndSettle();
+      expect(find.byType(Checkbox), findsNothing);
+      expect(find.text("Mitteilungen"), findsOneWidget);
+    });
+
+    testWidgets('share and save offer PDF, text and Markdown',
+        (tester) async {
+      await tester.pumpWidget(_buildWidget(twoMessages()));
+      await tester.longPress(find.text("Zweite"));
+      await tester.pumpAndSettle();
+      for (final action in ["Teilen", "Speichern"]) {
+        await tester.tap(find.byTooltip(action));
+        await tester.pumpAndSettle();
+        expect(find.text("PDF (.pdf)"), findsOneWidget);
+        expect(find.text("Text (.txt)"), findsOneWidget);
+        expect(find.text("Markdown (.md)"), findsOneWidget);
+        // Close the menu without picking.
+        await tester.tapAt(Offset.zero);
+        await tester.pumpAndSettle();
+      }
+    });
+
+    testWidgets('archiving moves the picked messages and ends the selection',
+        (tester) async {
+      final messages = _TestMessagesNotifier(twoMessages());
+      await tester.pumpWidget(
+        _buildWidget(messages.initialState, messages: messages),
+      );
+      await tester.longPress(find.text("Zweite"));
+      await tester.pumpAndSettle();
+      // Only what the picked messages allow is offered.
+      expect(find.byTooltip("Aus dem Archiv holen"), findsNothing);
+
+      await tester.tap(find.byTooltip("Archivieren"));
+      await tester.pumpAndSettle();
+      // Field by field: a record holding a list compares that list by identity.
+      final (ids, archived) = messages.archiveRequest!;
+      expect(ids, [2]);
+      expect(archived, isTrue);
+      expect(find.byType(Checkbox), findsNothing);
     });
   });
 

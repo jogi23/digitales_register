@@ -8,7 +8,8 @@
           "items": [
             "Mitteilungen: die Liste ist in Empfangen, Gesendet, Archiviert und Alle aufgeteilt. Beim Öffnen stehen die empfangenen Mitteilungen; führt eine Benachrichtigung zu einer gesendeten oder archivierten Mitteilung, wechselt die Liste dorthin.",
             "Mitteilungen: ein Stern markiert wichtige Mitteilungen, „Markiert“ zeigt nur diese. Die Markierung bleibt auf dem Gerät; das Portal kennt sie nicht.",
-            "Mitteilungen: die Liste lässt sich nach Datum (neueste oder älteste zuerst) oder nach Absender sortieren. „Ungelesen“ zeigt nur ungelesene Mitteilungen; wer eine davon öffnet, verliert sie nicht aus der Liste, bis der Filter wieder aus ist."
+            "Mitteilungen: die Liste lässt sich nach Datum (neueste oder älteste zuerst) oder nach Absender sortieren. „Ungelesen“ zeigt nur ungelesene Mitteilungen; wer eine davon öffnet, verliert sie nicht aus der Liste, bis der Filter wieder aus ist.",
+            "Mitteilungen: ein langer Druck auf eine Mitteilung startet die Auswahl. Ausgewählte Mitteilungen lassen sich gemeinsam als PDF, Text oder Markdown teilen oder speichern, archivieren und wieder aus dem Archiv holen."
           ]
         },
         {
@@ -30,7 +31,8 @@
           "items": [
             "Messages: the list is split into Received, Sent, Archived and All. It opens on the received messages; when a notification leads to a sent or archived message, the list switches there.",
             "Messages: a star marks important messages, and “Starred” shows only those. The star stays on the device; the portal does not know about it.",
-            "Messages: the list can be sorted by date (newest or oldest first) or by sender. “Unread” shows only unread messages; opening one does not drop it from the list until the filter is switched off again."
+            "Messages: the list can be sorted by date (newest or oldest first) or by sender. “Unread” shows only unread messages; opening one does not drop it from the list until the filter is switched off again.",
+            "Messages: a long press on a message starts a selection. Selected messages can be shared or saved together as PDF, text or Markdown, archived, and moved out of the archive again."
           ]
         },
         {
@@ -52,7 +54,8 @@
           "items": [
             "Comunicazioni: l'elenco è suddiviso in Ricevute, Inviate, Archiviate e Tutte. All'apertura compaiono le comunicazioni ricevute; se una notifica porta a una comunicazione inviata o archiviata, l'elenco passa lì.",
             "Comunicazioni: una stella contrassegna le comunicazioni importanti e «Contrassegnate» mostra solo quelle. Il contrassegno resta sul dispositivo; il portale non lo conosce.",
-            "Comunicazioni: l'elenco si può ordinare per data (più recenti o meno recenti prima) o per mittente. «Non lette» mostra solo le comunicazioni non lette; aprirne una non la toglie dall'elenco finché il filtro non viene disattivato."
+            "Comunicazioni: l'elenco si può ordinare per data (più recenti o meno recenti prima) o per mittente. «Non lette» mostra solo le comunicazioni non lette; aprirne una non la toglie dall'elenco finché il filtro non viene disattivato.",
+            "Comunicazioni: una pressione prolungata su una comunicazione avvia la selezione. Le comunicazioni selezionate si possono condividere o salvare insieme come PDF, testo o Markdown, archiviare e togliere di nuovo dall'archivio."
           ]
         },
         {

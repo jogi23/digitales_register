@@ -115,6 +115,31 @@
   "messagesSortSender": "Per mittente",
   "messageStar": "Contrassegna",
   "messageUnstar": "Rimuovi contrassegno",
+  "messagesSelected": "{count} selezionate",
+  "@messagesSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "messagesEndSelection": "Termina selezione",
+  "messagesSelectAll": "Seleziona tutte",
+  "messagesExportPdf": "PDF (.pdf)",
+  "messagesExportText": "Testo (.txt)",
+  "messagesExportMarkdown": "Markdown (.md)",
+  "messagesExportSaved": "Salvato in {path}",
+  "@messagesExportSaved": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "messagesExportFailed": "Non è stato possibile creare il file.",
+  "messagesArchive": "Archivia",
+  "messagesRestore": "Togli dall'archivio",
+  "messagesArchiveFailed": "Non è stato possibile spostare tutte le comunicazioni. Riprova.",
   "messagesSent": "Inviata: ",
   "messagesFrom": "Da: ",
   "messagesTo": "A: ",

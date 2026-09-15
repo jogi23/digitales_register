@@ -16,9 +16,11 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'package:dr/l10n/l10n.dart';
 import 'package:dr/providers/messages_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
+import 'package:dr/services/message_export.dart';
 import 'package:dr/ui/messages.dart';
 import 'package:dr/ui/star_rating.dart';
 import 'package:flutter/material.dart';
@@ -47,6 +49,11 @@ class MessagesPageContainer extends ConsumerWidget {
       ),
       onToggleStar: (message) =>
           ref.read(messagesProvider.notifier).toggleStar(message.id),
+      onExport: (messages, format, {required bool share}) =>
+          exportMessages(tr(context), messages, format, share: share),
+      onArchive: (messages, {required bool archived}) => ref
+          .read(messagesProvider.notifier)
+          .setArchived(messages.map((m) => m.id), archived: archived),
       noInternet: noInternet,
       hasUnread: messagesState.messages.any((m) => m.isNew),
       onOpenFile: (file) =>

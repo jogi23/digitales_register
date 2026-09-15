@@ -551,6 +551,14 @@ Future<bool> downloadFile(
   return success;
 }
 
+/// Writes [bytes] next to the downloaded attachments, where [openFile] finds
+/// them, and returns the full path. A file of the same name is replaced.
+Future<String> saveToDownloads(String fileName, List<int> bytes) async {
+  final file = File("${await _getAttachmentDownloadDirectory()}/$fileName");
+  await file.writeAsBytes(bytes, flush: true);
+  return file.path;
+}
+
 Future<bool> canOpenFile(String fileName) async {
   return File(
     "${await _getAttachmentDownloadDirectory()}/$fileName",

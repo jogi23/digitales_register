@@ -915,6 +915,19 @@ abstract class Message implements Built<Message, MessageBuilder> {
   /// neither as received nor as sent.
   bool get archived;
 
+  /// What the portal expects as `archiveType` to move this message:
+  /// [archiveTypeArchive] into the archive, [archiveTypeRestore] back out.
+  ///
+  /// Read from `archiveMessageEnabled`, which carries exactly these values;
+  /// anything else allows neither.
+  int get archiveType;
+
+  static const archiveTypeArchive = 1;
+  static const archiveTypeRestore = 2;
+
+  bool get canArchive => archiveType == archiveTypeArchive;
+  bool get canRestore => archiveType == archiveTypeRestore;
+
   /// Unread and received. A sent message carries no `timeRead` at all, so
   /// without the direction check one's own message would count as new.
   bool get isNew => !outgoing && timeRead == null;
@@ -923,12 +936,12 @@ abstract class Message implements Built<Message, MessageBuilder> {
   factory Message([Function(MessageBuilder b)? updates]) = _$Message;
   Message._();
 
-  // `outgoing` and `archived` default to false, so state saved before the
-  // fields existed still loads.
+  // Defaults so that state saved before these fields existed still loads.
   static void _initializeBuilder(MessageBuilder b) => b
     ..attachments = ListBuilder<MessageAttachmentFile>()
     ..outgoing = false
-    ..archived = false;
+    ..archived = false
+    ..archiveType = 0;
 }
 
 /// The folders the message list offers, as the portal files messages.
