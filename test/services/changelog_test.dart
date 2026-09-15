@@ -24,6 +24,9 @@ import 'package:flutter/widgets.dart' show Locale;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../tools/changelog_lock.dart'
+    show fingerprints, isClosed, lockPath, pubspecVersion, readLock;
+
 ChangelogEntry _entry(String version) => ChangelogEntry(
       version: version,
       sections: [
@@ -34,13 +37,10 @@ ChangelogEntry _entry(String version) => ChangelogEntry(
 Future<String?> _storedVersion() async =>
     (await SharedPreferences.getInstance()).getString('changelog_last_seen');
 
-/// The version this build would be released as, without its build number.
-String _pubspecVersion() {
-  final line = File('pubspec.yaml')
-      .readAsLinesSync()
-      .firstWhere((line) => line.startsWith('version:'));
-  return line.split(':')[1].split('+').first.trim();
-}
+/// Every release in `assets/changelog.json`, as written there.
+Map<String, dynamic> _releases() =>
+    json.decode(File('assets/changelog.json').readAsStringSync())
+        as Map<String, dynamic>;
 
 void main() {
   setUp(() {
@@ -200,7 +200,7 @@ void main() {
     test('cover the version being released', () async {
       // Read from pubspec so this fails at the next version bump rather than
       // shipping a release whose card stays silently empty.
-      final released = _pubspecVersion();
+      final released = pubspecVersion();
       final entries = await Changelog(
         currentVersion: released,
         freshInstall: false,
@@ -219,7 +219,7 @@ void main() {
       expect(entries.length, greaterThan(1));
       // Against the pubspec rather than a fixed number, which would have to
       // be raised by hand at every release.
-      expect(entries.first.version, _pubspecVersion());
+      expect(entries.first.version, pubspecVersion());
       expect(entries.last.version, '1.0.0');
       for (var i = 1; i < entries.length; i++) {
         expect(
@@ -270,10 +270,8 @@ void main() {
     test('come in every language the app speaks, line for line', () {
       // A translation that drops a line leaves that reader without it, and
       // nobody would notice from the German.
-      final releases = json.decode(
-        File('assets/changelog.json').readAsStringSync(),
-      ) as Map<String, dynamic>;
-      for (final MapEntry(key: version, value: release) in releases.entries) {
+      for (final MapEntry(key: version, value: release)
+          in _releases().entries) {
         final points =
             (release as Map<String, dynamic>)['points'] as Map<String, dynamic>;
         final german = points[changelogFallbackLanguage] as List<dynamic>;
@@ -312,6 +310,84 @@ void main() {
         everyElement(
             isIn(['New features', 'Improvements', 'Bug fixes', 'Internal'])),
       );
+    });
+  });
+
+  group('the notes of released versions', () {
+    // Once released, the notes were read in the app and in the store. They
+    // change only when that was explicitly agreed to, and then with
+    // `dart tools/generate_changelog.dart --refreeze <version>`.
+
+    test('stay as they were published', () {
+      final releases = _releases();
+      for (final MapEntry(key: version, value: locked) in readLock().entries) {
+        final release = releases[version] as Map<String, dynamic>?;
+        expect(release, isNotNull,
+            reason: '$version fehlt in assets/changelog.json');
+        final current = fingerprints(release!);
+        for (final MapEntry(key: language, value: fingerprint)
+            in locked.entries) {
+          expect(
+            current[language],
+            fingerprint,
+            reason: '$version/$language wurde nach der Veröffentlichung '
+                'geändert. Nur mit Freigabe: '
+                'dart tools/generate_changelog.dart --refreeze $version',
+          );
+        }
+      }
+    });
+
+    test('are all recorded in the lock', () {
+      // A version nobody froze could otherwise change unnoticed. Fails at the
+      // version bump until the version left behind is frozen.
+      final current = pubspecVersion();
+      final lock = readLock();
+      for (final MapEntry(key: version, value: release)
+          in _releases().entries) {
+        if (!isClosed(version, current)) continue;
+        for (final language
+            in fingerprints(release as Map<String, dynamic>).keys) {
+          expect(
+            lock[version]?.containsKey(language),
+            isTrue,
+            reason: '$version/$language fehlt in $lockPath — '
+                'dart tools/generate_changelog.dart --freeze',
+          );
+        }
+      }
+    });
+
+    test('leave the version being released open', () {
+      final current = pubspecVersion();
+      expect(readLock().keys.where((version) => !isClosed(version, current)),
+          isEmpty);
+    });
+
+    test('are told apart by their words and date, not by the file layout', () {
+      Map<String, dynamic> release({
+        String date = '2026-09-14',
+        String line = 'Neu',
+      }) =>
+          {
+            'date': date,
+            'points': {
+              'de': [
+                {
+                  'title': 'Neue Funktionen',
+                  'items': [line],
+                },
+              ],
+            },
+          };
+      final published = fingerprints(release())['de'];
+
+      final reindented = json.decode(
+        const JsonEncoder.withIndent('    ').convert(release()),
+      ) as Map<String, dynamic>;
+      expect(fingerprints(reindented)['de'], published);
+      expect(fingerprints(release(line: 'Neu.'))['de'], isNot(published));
+      expect(fingerprints(release(date: '2026-09-15'))['de'], isNot(published));
     });
   });
 }

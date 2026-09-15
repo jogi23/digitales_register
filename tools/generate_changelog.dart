@@ -25,9 +25,19 @@
 //
 // `--check` writes nothing and exits non-zero when the file on disk differs
 // from what the notes would produce — for a release check or CI.
+//
+// `--freeze` records the notes of every version pubspec.yaml has moved past in
+// `tools/changelog.lock.json` (see `tools/changelog_lock.dart`). Versions and
+// languages already there keep their fingerprint. Run it with the version bump
+// that starts a new release.
+//
+// `--refreeze <version>` takes that version's notes as they are now. Only for
+// a correction to published notes that was explicitly agreed to.
 
 import 'dart:convert';
 import 'dart:io';
+
+import 'changelog_lock.dart';
 
 /// The language the repository's changelog is written in.
 const language = 'de';
@@ -43,10 +53,18 @@ void main(List<String> args) {
     stderr.writeln('$jsonPath not found — run from the project root.');
     exit(2);
   }
+  final entries = jsonDecode(source.readAsStringSync()) as Map<String, dynamic>;
 
-  final markdown = render(
-    jsonDecode(source.readAsStringSync()) as Map<String, dynamic>,
-  );
+  final refreeze = {
+    for (var i = 0; i < args.length - 1; i++)
+      if (args[i] == '--refreeze') args[i + 1],
+  };
+  if (args.contains('--freeze') || refreeze.isNotEmpty) {
+    freeze(entries, refreeze: refreeze);
+    return;
+  }
+
+  final markdown = render(entries);
 
   final target = File(markdownPath);
   if (check) {
@@ -63,6 +81,39 @@ void main(List<String> args) {
 
   target.writeAsStringSync(markdown);
   stdout.writeln('Wrote $markdownPath.');
+}
+
+/// Adds what is missing from the lock; replaces the fingerprints of the
+/// versions in [refreeze] with their notes as they are now.
+void freeze(Map<String, dynamic> entries, {Set<String> refreeze = const {}}) {
+  final current = pubspecVersion();
+  for (final version in refreeze) {
+    if (!entries.containsKey(version) || !isClosed(version, current)) {
+      stderr.writeln('$version is not a released version in $jsonPath.');
+      exit(2);
+    }
+  }
+
+  final lock = readLock();
+  final added = <String>[];
+  for (final MapEntry(key: version, value: entry) in entries.entries) {
+    if (!isClosed(version, current)) continue;
+    final locked = lock[version] ??= {};
+    if (refreeze.contains(version)) locked.clear();
+    for (final MapEntry(key: language, value: fingerprint)
+        in fingerprints(entry as Map<String, dynamic>).entries) {
+      if (locked.containsKey(language)) continue;
+      locked[language] = fingerprint;
+      added.add('$version/$language');
+    }
+  }
+
+  writeLock(lock);
+  stdout.writeln(
+    added.isEmpty
+        ? '$lockPath is up to date.'
+        : 'Recorded in $lockPath: ${added.join(', ')}.',
+  );
 }
 
 /// The whole file: newest release first, headings as written in the notes.
@@ -95,20 +146,3 @@ String render(Map<String, dynamic> entries) {
 
   return '${blocks.join('\n\n')}\n';
 }
-
-/// Compares two dotted versions the way their numbers read, so that 1.2.10
-/// sorts after 1.2.9. Mirrors `compareVersions` in `lib/services/changelog.dart`.
-int compareVersions(String a, String b) {
-  final left = _parts(a);
-  final right = _parts(b);
-  final length = left.length > right.length ? left.length : right.length;
-  for (var i = 0; i < length; i++) {
-    final l = i < left.length ? left[i] : 0;
-    final r = i < right.length ? right[i] : 0;
-    if (l != r) return l < r ? -1 : 1;
-  }
-  return 0;
-}
-
-List<int> _parts(String version) =>
-    version.split('.').map((part) => int.tryParse(part) ?? 0).toList();
