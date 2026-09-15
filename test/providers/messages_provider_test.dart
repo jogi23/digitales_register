@@ -96,6 +96,27 @@ void main() {
       expect(messageWithId(_agreeOpenId).outgoing, isFalse);
       expect(messageWithId(_signedId).outgoing, isFalse);
     });
+
+    test('a sent message is never new, though it carries no timeRead', () {
+      final sent = messageWithId(_sentId);
+      expect(sent.timeRead, isNull);
+      expect(sent.isNew, isFalse);
+    });
+
+    test('an unread received message is new', () {
+      final received = messageWithId(_agreeOpenId)
+          .rebuild((b) => b..timeRead = null);
+      expect(received.isNew, isTrue);
+    });
+  });
+
+  group('markAllAsRead', () {
+    test('leaves sent messages alone', () async {
+      await container.read(messagesProvider.notifier).markAllAsRead();
+      verifyNever(() => wrapper.send('api/message/markAsRead',
+          args: {'messageId': _sentId}, onError: any(named: 'onError')));
+      expect(messageWithId(_sentId).timeRead, isNull);
+    });
   });
 
   group('reply', () {

@@ -72,11 +72,11 @@ class MessagesNotifier extends Notifier<MessagesState> {
   }
 
   Future<void> markAllAsRead() async {
-    final unread = state.messages.where((m) => m.timeRead == null).toList();
+    final unread = state.messages.where((m) => m.isNew).toList();
     if (unread.isEmpty) return;
     state = state.rebuild(
       (b) => b.messages.map(
-        (m) => m.timeRead == null ? m.rebuild((b) => b..timeRead = now) : m,
+        (m) => m.isNew ? m.rebuild((b) => b..timeRead = now) : m,
       ),
     );
     for (final m in unread) {

@@ -911,7 +911,9 @@ abstract class Message implements Built<Message, MessageBuilder> {
   /// list carries no user id to compare against (`fromUserId` comes back 0).
   bool get outgoing;
 
-  bool get isNew => timeRead == null;
+  /// Unread and received. A sent message carries no `timeRead` at all, so
+  /// without the direction check one's own message would count as new.
+  bool get isNew => !outgoing && timeRead == null;
 
   static Serializer<Message> get serializer => _$messageSerializer;
   factory Message([Function(MessageBuilder b)? updates]) = _$Message;
