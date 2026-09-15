@@ -4,24 +4,75 @@
     "points": {
       "de": [
         {
+          "title": "Neue Funktionen",
+          "items": [
+            "Mitteilungen: die Liste ist in Empfangen, Gesendet, Archiviert und Alle aufgeteilt. Beim Öffnen stehen die empfangenen Mitteilungen; führt eine Benachrichtigung zu einer gesendeten oder archivierten Mitteilung, wechselt die Liste dorthin.",
+            "Mitteilungen: ein Stern markiert wichtige Mitteilungen, „Markiert“ zeigt nur diese. Die Markierung bleibt auf dem Gerät; das Portal kennt sie nicht.",
+            "Mitteilungen: die Liste lässt sich nach Datum (neueste oder älteste zuerst) oder nach Absender sortieren. „Ungelesen“ zeigt nur ungelesene Mitteilungen; wer eine davon öffnet, verliert sie nicht aus der Liste, bis der Filter wieder aus ist.",
+            "Mitteilungen: ein langer Druck auf eine Mitteilung startet die Auswahl. Ausgewählte Mitteilungen lassen sich gemeinsam als PDF, Text oder Markdown teilen oder speichern, archivieren und wieder aus dem Archiv holen.",
+            "Mitteilungen: neue Mitteilungen schreiben und auf empfangene antworten. Empfänger lassen sich nach Namen, Klasse oder Gruppe suchen; bei einer Gruppe lässt sich jede Person einzeln abwählen. Vor dem Senden sagt die App, an wie viele Personen die Mitteilung geht. Beim Antworten steht die ursprüngliche Mitteilung wie im Portal kursiv darunter; das Zitat lässt sich abschalten. Anhänge gehen noch nicht."
+          ]
+        },
+        {
+          "title": "Verbesserungen",
+          "items": [
+            "Mitteilungen: der Betreff selbst gesendeter Mitteilungen steht kursiv und etwas kleiner, damit sie sich unter „Alle“ von empfangenen abheben."
+          ]
+        },
+        {
           "title": "Fehlerbehebungen",
           "items": [
+            "Mitteilungen: selbst gesendete Mitteilungen gelten nicht mehr als neu. Sie tragen kein „neu“ mehr und halten „Alle als gelesen markieren“ nicht mehr aktiv.",
             "Meldet der Server eine abgelaufene Sitzung mit einem Fehlercode statt mit einer Weiterleitung zur Anmeldung, meldet sich die App neu an und wiederholt den Abruf. Gelingt das nicht, zeigt die Verbindungsanzeige die Sitzung als abgelaufen, statt die Seiten still leer zu lassen."
           ]
         }
       ],
       "en": [
         {
+          "title": "New features",
+          "items": [
+            "Messages: the list is split into Received, Sent, Archived and All. It opens on the received messages; when a notification leads to a sent or archived message, the list switches there.",
+            "Messages: a star marks important messages, and “Starred” shows only those. The star stays on the device; the portal does not know about it.",
+            "Messages: the list can be sorted by date (newest or oldest first) or by sender. “Unread” shows only unread messages; opening one does not drop it from the list until the filter is switched off again.",
+            "Messages: a long press on a message starts a selection. Selected messages can be shared or saved together as PDF, text or Markdown, archived, and moved out of the archive again.",
+            "Messages: write new messages and reply to received ones. Recipients can be searched by name, class or group; in a group, each person can be deselected. Before sending, the app says how many people the message goes to. When replying, the original message is quoted below in italics, as in the portal; the quote can be switched off. Attachments are not supported yet."
+          ]
+        },
+        {
+          "title": "Improvements",
+          "items": [
+            "Messages: the subject of messages you sent yourself is set in italics and slightly smaller, so they stand apart from received ones under “All”."
+          ]
+        },
+        {
           "title": "Bug fixes",
           "items": [
+            "Messages: messages you sent yourself no longer count as new. They no longer carry the “neu” badge or keep “Mark all as read” active.",
             "If the server reports an expired session with an error code instead of redirecting to the sign-in page, the app signs in again and repeats the request. If that fails, the connection indicator shows the session as expired instead of leaving the pages silently empty."
           ]
         }
       ],
       "it": [
         {
+          "title": "Nuove funzioni",
+          "items": [
+            "Comunicazioni: l'elenco è suddiviso in Ricevute, Inviate, Archiviate e Tutte. All'apertura compaiono le comunicazioni ricevute; se una notifica porta a una comunicazione inviata o archiviata, l'elenco passa lì.",
+            "Comunicazioni: una stella contrassegna le comunicazioni importanti e «Contrassegnate» mostra solo quelle. Il contrassegno resta sul dispositivo; il portale non lo conosce.",
+            "Comunicazioni: l'elenco si può ordinare per data (più recenti o meno recenti prima) o per mittente. «Non lette» mostra solo le comunicazioni non lette; aprirne una non la toglie dall'elenco finché il filtro non viene disattivato.",
+            "Comunicazioni: una pressione prolungata su una comunicazione avvia la selezione. Le comunicazioni selezionate si possono condividere o salvare insieme come PDF, testo o Markdown, archiviare e togliere di nuovo dall'archivio.",
+            "Comunicazioni: scrivere nuove comunicazioni e rispondere a quelle ricevute. I destinatari si cercano per nome, classe o gruppo; in un gruppo ogni persona si può deselezionare. Prima dell'invio l'app dice a quante persone va la comunicazione. Rispondendo, la comunicazione originale viene citata sotto in corsivo, come nel portale; la citazione si può disattivare. Gli allegati non sono ancora supportati."
+          ]
+        },
+        {
+          "title": "Miglioramenti",
+          "items": [
+            "Comunicazioni: l'oggetto delle comunicazioni inviate da te è in corsivo e un po' più piccolo, così sotto «Tutte» si distinguono da quelle ricevute."
+          ]
+        },
+        {
           "title": "Correzioni",
           "items": [
+            "Comunicazioni: le comunicazioni inviate da te non risultano più nuove. Non portano più l'etichetta «neu» e non tengono più attivo «Segna tutte come lette».",
             "Se il server segnala una sessione scaduta con un codice di errore invece di rimandare alla pagina di accesso, l'app accede di nuovo e ripete la richiesta. Se non ci riesce, l'indicatore di connessione mostra la sessione come scaduta, invece di lasciare le pagine vuote senza avviso."
           ]
         }

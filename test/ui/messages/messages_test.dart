@@ -53,6 +53,16 @@ class _TestMessagesNotifier extends MessagesNotifier {
     sentSignature = signature;
     return replyResult;
   }
+
+  /// The last move [setArchived] was asked for.
+  (List<int>, bool)? archiveRequest;
+
+  @override
+  Future<bool> setArchived(Iterable<int> messageIds,
+      {required bool archived}) async {
+    archiveRequest = (messageIds.toList(), archived);
+    return true;
+  }
 }
 
 /// Settings with one field set, everything else left at its default.
@@ -98,10 +108,20 @@ MessagesState _buildState({
   );
 }
 
+/// Starts the list on a folder other than received.
+class _TestListNotifier extends MessageListNotifier {
+  final MessageCategory initialCategory;
+  _TestListNotifier(this.initialCategory);
+
+  @override
+  MessageListView build() => MessageListView(category: initialCategory);
+}
+
 Widget _buildWidget(
   MessagesState state, {
   _TestMessagesNotifier? messages,
   SettingsState? settings,
+  MessageCategory? category,
 }) {
   return ProviderScope(
     overrides: [
@@ -110,6 +130,8 @@ Widget _buildWidget(
       noInternetProvider.overrideWith(NoInternetNotifier.new),
       if (settings != null)
         settingsProvider.overrideWith(() => _TestSettingsNotifier(settings)),
+      if (category != null)
+        messageListProvider.overrideWith(() => _TestListNotifier(category)),
     ],
     child: MaterialApp(
       home: MessagesPageContainer(),
@@ -289,10 +311,49 @@ void main() {
   group('sent and received', () {
     testWidgets('a sent message is marked as such', (tester) async {
       await tester.pumpWidget(
-        _buildWidget(_stateWithDirection(outgoing: true)),
+        _buildWidget(
+          _stateWithDirection(outgoing: true),
+          category: MessageCategory.all,
+        ),
       );
       expect(find.byType(MessageSentChip), findsOneWidget);
-      expect(find.text("Gesendet"), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(MessageSentChip),
+          matching: find.text("Gesendet"),
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('a sent subject is italic and a size down', (tester) async {
+      // Both in one list: a second pumpWidget would keep the first notifier.
+      await tester.pumpWidget(
+        _buildWidget(
+          MessagesState(
+            (b) => b.messages = ListBuilder(<Message>[
+              for (final outgoing in [true, false])
+                Message(
+                  (b) => b
+                    ..fromName = "Sender"
+                    ..recipientString = "Empfänger"
+                    ..id = outgoing ? 2 : 1
+                    ..subject = outgoing ? "Ausgang" : "Eingang"
+                    ..timeSent = UtcDateTime.parse("2020-03-04 20:57:38")
+                    ..text = _messageText
+                    ..outgoing = outgoing,
+                ),
+            ]),
+          ),
+          category: MessageCategory.all,
+        ),
+      );
+      final sent = tester.widget<Text>(find.text("Ausgang")).style!;
+      final received = tester.widget<Text>(find.text("Eingang")).style!;
+
+      expect(sent.fontStyle, FontStyle.italic);
+      expect(received.fontStyle, isNot(FontStyle.italic));
+      expect(sent.fontSize, lessThan(received.fontSize!));
     });
 
     testWidgets('a received message carries no mark', (tester) async {
@@ -300,6 +361,244 @@ void main() {
         _buildWidget(_stateWithDirection(outgoing: false)),
       );
       expect(find.byType(MessageSentChip), findsNothing);
+    });
+  });
+
+  group('folders', () {
+    MessagesState receivedAndSent() => MessagesState(
+          (b) => b.messages = ListBuilder(<Message>[
+            for (final outgoing in [false, true])
+              Message(
+                (b) => b
+                  ..fromName = "Sender"
+                  ..recipientString = "Empfänger"
+                  ..id = outgoing ? 2 : 1
+                  ..subject = outgoing ? "Ausgang" : "Eingang"
+                  ..timeSent = UtcDateTime.parse("2020-03-04 20:57:38")
+                  ..text = _messageText
+                  ..outgoing = outgoing,
+              ),
+          ]),
+        );
+
+    testWidgets('the list starts on received messages', (tester) async {
+      await tester.pumpWidget(_buildWidget(receivedAndSent()));
+      expect(find.text("Eingang"), findsOneWidget);
+      expect(find.text("Ausgang"), findsNothing);
+      final selected = tester.widget<ChoiceChip>(
+          find.widgetWithText(ChoiceChip, "Empfangen"));
+      expect(selected.selected, isTrue);
+    });
+
+    testWidgets('picking sent shows the sent messages only', (tester) async {
+      await tester.pumpWidget(_buildWidget(receivedAndSent()));
+      await tester.tap(find.widgetWithText(ChoiceChip, "Gesendet"));
+      await tester.pumpAndSettle();
+      expect(find.text("Ausgang"), findsOneWidget);
+      expect(find.text("Eingang"), findsNothing);
+    });
+
+    testWidgets('all shows both', (tester) async {
+      await tester.pumpWidget(_buildWidget(receivedAndSent()));
+      await tester.tap(find.widgetWithText(ChoiceChip, "Alle"));
+      await tester.pumpAndSettle();
+      expect(find.text("Ausgang"), findsOneWidget);
+      expect(find.text("Eingang"), findsOneWidget);
+    });
+
+    testWidgets('an empty folder says so', (tester) async {
+      await tester.pumpWidget(
+        _buildWidget(receivedAndSent(), category: MessageCategory.archived),
+      );
+      expect(find.text("Hier liegen keine Mitteilungen"), findsOneWidget);
+      expect(find.text("Noch keine Mitteilungen"), findsNothing);
+    });
+  });
+
+  group('stars, order and filters', () {
+    // "Erste" is older, unread and from Amort; "Zweite" newer and from Berger.
+    MessagesState twoMessages() => MessagesState(
+          (b) => b.messages = ListBuilder(<Message>[
+            for (final id in [1, 2])
+              Message(
+                (b) => b
+                  ..fromName = id == 1 ? "Amort" : "Berger"
+                  ..recipientString = "Empfänger"
+                  ..id = id
+                  ..subject = id == 1 ? "Erste" : "Zweite"
+                  ..timeSent = UtcDateTime.parse("2020-03-0$id 20:57:38")
+                  ..timeRead =
+                      id == 1 ? null : UtcDateTime.parse("2020-03-02 21:00:00")
+                  ..text = _messageText,
+              ),
+          ]),
+        );
+
+    double top(WidgetTester tester, String text) =>
+        tester.getTopLeft(find.text(text)).dy;
+
+    testWidgets('a star marks the message, "Markiert" shows only those',
+        (tester) async {
+      await tester.pumpWidget(_buildWidget(twoMessages()));
+      // Newest first: the first star belongs to "Zweite".
+      await tester.tap(find.byTooltip("Markieren").first);
+      await tester.pumpAndSettle();
+      expect(find.byTooltip("Markierung entfernen"), findsOneWidget);
+
+      await tester.tap(find.widgetWithText(FilterChip, "Markiert"));
+      await tester.pumpAndSettle();
+      expect(find.text("Zweite"), findsOneWidget);
+      expect(find.text("Erste"), findsNothing);
+    });
+
+    testWidgets('newest first, by sender on request', (tester) async {
+      await tester.pumpWidget(_buildWidget(twoMessages()));
+      expect(top(tester, "Zweite"), lessThan(top(tester, "Erste")));
+
+      await tester.tap(find.byTooltip("Sortieren"));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text("Nach Absender"));
+      await tester.pumpAndSettle();
+      expect(top(tester, "Erste"), lessThan(top(tester, "Zweite")));
+    });
+
+    testWidgets('a message opened under "Ungelesen" stays', (tester) async {
+      await tester.pumpWidget(_buildWidget(twoMessages()));
+      await tester.tap(find.widgetWithText(FilterChip, "Ungelesen"));
+      await tester.pumpAndSettle();
+      expect(find.text("Zweite"), findsNothing);
+
+      await tester.tap(find.text("Erste"));
+      await tester.pumpAndSettle();
+      expect(find.text("Erste"), findsOneWidget);
+      expect(find.textContaining("Sehr geehrte Eltern"), findsOneWidget);
+    });
+  });
+
+  group('writing', () {
+    testWidgets('the list offers a new message', (tester) async {
+      await tester.pumpWidget(
+        _buildWidget(_stateWithDirection(outgoing: false)),
+      );
+      expect(
+        find.widgetWithText(FloatingActionButton, "Neue Mitteilung"),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('a message the portal lets answer offers it', (tester) async {
+      await _openMessage(
+        tester,
+        MessagesState(
+          (b) => b.messages = ListBuilder(<Message>[
+            Message(
+              (b) => b
+                ..fromName = "Sender"
+                ..recipientString = "Empfänger"
+                ..id = 25
+                ..subject = "Betreff"
+                ..timeSent = UtcDateTime.parse("2020-03-04 20:57:38")
+                ..text = _messageText
+                ..canReply = true,
+            ),
+          ]),
+        ),
+      );
+      expect(find.text("Antworten"), findsOneWidget);
+    });
+
+    testWidgets('one it does not, offers no answer', (tester) async {
+      await _openMessage(tester, _stateWithDirection(outgoing: false));
+      expect(find.text("Antworten"), findsNothing);
+    });
+  });
+
+  group('selection', () {
+    // Newest first: "Zweite" above "Erste". Both may be archived.
+    MessagesState twoMessages() => MessagesState(
+          (b) => b.messages = ListBuilder(<Message>[
+            for (final id in [1, 2])
+              Message(
+                (b) => b
+                  ..fromName = "Sender"
+                  ..recipientString = "Empfänger"
+                  ..id = id
+                  ..subject = id == 1 ? "Erste" : "Zweite"
+                  ..timeSent = UtcDateTime.parse("2020-03-0$id 20:57:38")
+                  ..timeRead = UtcDateTime.parse("2020-03-0$id 21:00:00")
+                  ..text = _messageText
+                  ..archiveType = Message.archiveTypeArchive,
+              ),
+          ]),
+        );
+
+    testWidgets('a long press starts it', (tester) async {
+      await tester.pumpWidget(_buildWidget(twoMessages()));
+      await tester.longPress(find.text("Zweite"));
+      await tester.pumpAndSettle();
+      expect(find.text("1 ausgewählt"), findsOneWidget);
+      expect(find.byType(Checkbox), findsNWidgets(2));
+    });
+
+    testWidgets('a tap picks instead of opening', (tester) async {
+      await tester.pumpWidget(_buildWidget(twoMessages()));
+      await tester.longPress(find.text("Zweite"));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text("Erste"));
+      await tester.pumpAndSettle();
+      expect(find.text("2 ausgewählt"), findsOneWidget);
+      expect(find.textContaining("Sehr geehrte Eltern"), findsNothing);
+    });
+
+    testWidgets('select all, then end it', (tester) async {
+      await tester.pumpWidget(_buildWidget(twoMessages()));
+      await tester.longPress(find.text("Zweite"));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip("Alle auswählen"));
+      await tester.pumpAndSettle();
+      expect(find.text("2 ausgewählt"), findsOneWidget);
+
+      await tester.tap(find.byTooltip("Auswahl beenden"));
+      await tester.pumpAndSettle();
+      expect(find.byType(Checkbox), findsNothing);
+      expect(find.text("Mitteilungen"), findsOneWidget);
+    });
+
+    testWidgets('share and save offer PDF, text and Markdown',
+        (tester) async {
+      await tester.pumpWidget(_buildWidget(twoMessages()));
+      await tester.longPress(find.text("Zweite"));
+      await tester.pumpAndSettle();
+      for (final action in ["Teilen", "Speichern"]) {
+        await tester.tap(find.byTooltip(action));
+        await tester.pumpAndSettle();
+        expect(find.text("PDF (.pdf)"), findsOneWidget);
+        expect(find.text("Text (.txt)"), findsOneWidget);
+        expect(find.text("Markdown (.md)"), findsOneWidget);
+        // Close the menu without picking.
+        await tester.tapAt(Offset.zero);
+        await tester.pumpAndSettle();
+      }
+    });
+
+    testWidgets('archiving moves the picked messages and ends the selection',
+        (tester) async {
+      final messages = _TestMessagesNotifier(twoMessages());
+      await tester.pumpWidget(
+        _buildWidget(messages.initialState, messages: messages),
+      );
+      await tester.longPress(find.text("Zweite"));
+      await tester.pumpAndSettle();
+      // Only what the picked messages allow is offered.
+      expect(find.byTooltip("Aus dem Archiv holen"), findsNothing);
+
+      await tester.tap(find.byTooltip("Archivieren"));
+      await tester.pumpAndSettle();
+      // Field by field: a record holding a list compares that list by identity.
+      final (ids, archived) = messages.archiveRequest!;
+      expect(ids, [2]);
+      expect(archived, isTrue);
+      expect(find.byType(Checkbox), findsNothing);
     });
   });
 
@@ -471,6 +770,9 @@ void main() {
         messages: messages,
         settings: SettingsState(messageSignature: 'Max Mustermann'),
       );
+      // The folder bar pushes the button below the test window's edge.
+      await tester.ensureVisible(find.byType(FilledButton));
+      await tester.pumpAndSettle();
       await tester.tap(find.byType(FilledButton));
       await tester.pumpAndSettle();
 
