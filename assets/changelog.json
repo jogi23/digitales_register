@@ -1,4 +1,33 @@
 {
+  "1.4.0": {
+    "date": "2026-09-15",
+    "points": {
+      "de": [
+        {
+          "title": "Fehlerbehebungen",
+          "items": [
+            "Mitteilungen: selbst gesendete Mitteilungen gelten nicht mehr als neu. Sie tragen kein „neu“ mehr und halten „Alle als gelesen markieren“ nicht mehr aktiv."
+          ]
+        }
+      ],
+      "en": [
+        {
+          "title": "Bug fixes",
+          "items": [
+            "Messages: messages you sent yourself no longer count as new. They no longer carry the “neu” badge or keep “Mark all as read” active."
+          ]
+        }
+      ],
+      "it": [
+        {
+          "title": "Correzioni",
+          "items": [
+            "Comunicazioni: le comunicazioni inviate da te non risultano più nuove. Non portano più l'etichetta «neu» e non tengono più attivo «Segna tutte come lette»."
+          ]
+        }
+      ]
+    }
+  },
   "1.3.1": {
     "date": "2026-09-14",
     "points": {
