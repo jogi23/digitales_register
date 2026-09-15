@@ -140,6 +140,52 @@
   "messagesArchive": "Archivia",
   "messagesRestore": "Togli dall'archivio",
   "messagesArchiveFailed": "Non è stato possibile spostare tutte le comunicazioni. Riprova.",
+  "messageComposeTitle": "Nuova comunicazione",
+  "messageAnswer": "Rispondi",
+  "messageComposeRecipients": "Destinatari",
+  "messageComposeSearch": "Cerca destinatari",
+  "messageComposeSearchHelper": "Nome, classe o gruppo – almeno 2 caratteri",
+  "messageComposeNoHits": "Nessun risultato",
+  "messageComposeSelected": "{selected} di {total} selezionati",
+  "@messageComposeSelected": {
+    "placeholders": {
+      "selected": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "messageComposeTickAll": "Tutti",
+  "messageComposeTickNone": "Nessuno",
+  "messageComposeSubject": "Oggetto",
+  "messageComposeText": "Comunicazione",
+  "messageSend": "Invia",
+  "messageSendConfirmTitle": "Inviare la comunicazione?",
+  "messageSendConfirm": "{count, plural, =1{La comunicazione va a 1 persona.} other{La comunicazione va a {count} persone.}}",
+  "@messageSendConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "messageSent": "Comunicazione inviata",
+  "messageSendFailed": "La comunicazione non è arrivata. Riprova.",
+  "messageSendRejected": "Il portale ha rifiutato la comunicazione ({reason}).",
+  "@messageSendRejected": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "messageComposeNotAllowed": "Questo account non può inviare comunicazioni.",
+  "messageComposeDiscardTitle": "Eliminare la bozza?",
+  "messageComposeDiscard": "Elimina",
+  "messageRecipientTeacher": "Docente",
+  "messageRecipientSecretary": "Segreteria",
   "messagesSent": "Inviata: ",
   "messagesFrom": "Da: ",
   "messagesTo": "A: ",

@@ -140,6 +140,52 @@
   "messagesArchive": "Archive",
   "messagesRestore": "Move out of the archive",
   "messagesArchiveFailed": "Not all messages could be moved. Please try again.",
+  "messageComposeTitle": "New message",
+  "messageAnswer": "Reply",
+  "messageComposeRecipients": "Recipients",
+  "messageComposeSearch": "Search recipients",
+  "messageComposeSearchHelper": "Name, class or group – at least 2 characters",
+  "messageComposeNoHits": "No one found",
+  "messageComposeSelected": "{selected} of {total} selected",
+  "@messageComposeSelected": {
+    "placeholders": {
+      "selected": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "messageComposeTickAll": "All",
+  "messageComposeTickNone": "None",
+  "messageComposeSubject": "Subject",
+  "messageComposeText": "Message",
+  "messageSend": "Send",
+  "messageSendConfirmTitle": "Send message?",
+  "messageSendConfirm": "{count, plural, =1{The message goes to 1 person.} other{The message goes to {count} people.}}",
+  "@messageSendConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "messageSent": "Message sent",
+  "messageSendFailed": "The message did not go through. Please try again.",
+  "messageSendRejected": "The portal rejected the message ({reason}).",
+  "@messageSendRejected": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "messageComposeNotAllowed": "This account may not send messages.",
+  "messageComposeDiscardTitle": "Discard draft?",
+  "messageComposeDiscard": "Discard",
+  "messageRecipientTeacher": "Teacher",
+  "messageRecipientSecretary": "Secretary",
   "messagesSent": "Sent: ",
   "messagesFrom": "From: ",
   "messagesTo": "To: ",

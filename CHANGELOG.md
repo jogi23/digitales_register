@@ -10,6 +10,7 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 - Mitteilungen: ein Stern markiert wichtige Mitteilungen, „Markiert“ zeigt nur diese. Die Markierung bleibt auf dem Gerät; das Portal kennt sie nicht.
 - Mitteilungen: die Liste lässt sich nach Datum (neueste oder älteste zuerst) oder nach Absender sortieren. „Ungelesen“ zeigt nur ungelesene Mitteilungen; wer eine davon öffnet, verliert sie nicht aus der Liste, bis der Filter wieder aus ist.
 - Mitteilungen: ein langer Druck auf eine Mitteilung startet die Auswahl. Ausgewählte Mitteilungen lassen sich gemeinsam als PDF, Text oder Markdown teilen oder speichern, archivieren und wieder aus dem Archiv holen.
+- Mitteilungen: neue Mitteilungen schreiben und auf empfangene antworten. Empfänger lassen sich nach Namen, Klasse oder Gruppe suchen; bei einer Gruppe lässt sich jede Person einzeln abwählen. Vor dem Senden sagt die App, an wie viele Personen die Mitteilung geht. Anhänge gehen noch nicht.
 
 ### Verbesserungen
 

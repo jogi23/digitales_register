@@ -907,9 +907,18 @@ abstract class Message implements Built<Message, MessageBuilder> {
 
   /// Sent by this account rather than received — the portal's "Ausgang".
   ///
-  /// Taken from the server's own label, not worked out from the sender: the
-  /// list carries no user id to compare against (`fromUserId` comes back 0).
+  /// Taken from the server's own label, the way the portal files its
+  /// messages, rather than worked out by comparing [fromUserId] with the
+  /// account.
   bool get outgoing;
+
+  /// The sender's user id, which an answer goes to. 0 when unknown: the demo
+  /// capture has it blanked.
+  int get fromUserId;
+
+  /// Whether the portal lets this account answer the message: it shows its
+  /// answer button only with `canBeReplied` and `answerMessageEnabled`.
+  bool get canReply;
 
   /// Filed under the portal's "Archiv". The portal counts an archived message
   /// neither as received nor as sent.
@@ -941,7 +950,9 @@ abstract class Message implements Built<Message, MessageBuilder> {
     ..attachments = ListBuilder<MessageAttachmentFile>()
     ..outgoing = false
     ..archived = false
-    ..archiveType = 0;
+    ..archiveType = 0
+    ..fromUserId = 0
+    ..canReply = false;
 }
 
 /// The folders the message list offers, as the portal files messages.
