@@ -48,6 +48,7 @@ class CalendarWeekContainer extends ConsumerWidget {
       selection: calendarState.selection,
       colorBackground: settings.calendarColorBackground,
       showTimes: settings.calendarShowTimes,
+      showAllDetails: settings.calendarShowAllDetails,
       loading: calendarState.isLoadingWeek(monday),
       subjectThemes: subjectAppearance.themes,
     );
@@ -62,6 +63,10 @@ class CalendarWeekViewModel {
   final CalendarSelection? selection;
   final bool colorBackground;
   final bool showTimes;
+
+  /// Whether the lesson tiles also name the room. The corner that marks a
+  /// lesson outside the class's own room is there either way.
+  final bool showAllDetails;
 
   /// Whether this week is still being fetched.
   final bool loading;
@@ -93,6 +98,7 @@ class CalendarWeekViewModel {
     required this.selection,
     required this.colorBackground,
     required this.showTimes,
+    this.showAllDetails = false,
     this.loading = false,
     this.onDayTap,
     this.onAddReminder,

@@ -267,6 +267,7 @@ class _DashboardWeekContainerState
               // due", so it is on regardless of the calendar setting.
               colorBackground: true,
               showTimes: settings.calendarShowTimes,
+              showAllDetails: settings.calendarShowAllDetails,
               subjectThemes: subjectAppearance.themes,
               subjectsWithEntries: _subjectsWithEntries(),
               loading: calendarState.isLoadingWeek(_monday),

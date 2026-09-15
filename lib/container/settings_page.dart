@@ -58,6 +58,7 @@ class SettingsPageContainer extends ConsumerWidget {
       onSetDashboardColorBorders: notifier.setDashboardColorBorders,
       onSetCalenderColorBackground: notifier.setCalendarColorBackground,
       onSetCalendarShowTimes: notifier.setCalendarShowTimes,
+      onSetCalendarShowAllDetails: notifier.setCalendarShowAllDetails,
       onSetDashboardViewMode: notifier.setDashboardViewMode,
       onSetClassbookViewMode: notifier.setClassbookViewMode,
       onSetClassbookDisplayMode: notifier.setClassbookDisplayMode,
@@ -92,6 +93,7 @@ class SettingsViewModel {
   final bool dashboardColorBorders;
   final bool calendarColorBackground;
   final bool calendarShowTimes;
+  final bool calendarShowAllDetails;
   final DashboardViewMode dashboardViewMode;
   final ClassbookViewMode classbookViewMode;
   final EntryDisplayMode classbookDisplayMode;
@@ -122,6 +124,7 @@ class SettingsViewModel {
     required this.dashboardColorBorders,
     required this.calendarColorBackground,
     required this.calendarShowTimes,
+    this.calendarShowAllDetails = false,
     required this.dashboardViewMode,
     required this.classbookViewMode,
     this.classbookDisplayMode = EntryDisplayMode.list,
@@ -153,6 +156,7 @@ class SettingsViewModel {
         dashboardColorBorders: s.dashboardColorBorders,
         calendarColorBackground: s.calendarColorBackground,
         calendarShowTimes: s.calendarShowTimes,
+        calendarShowAllDetails: s.calendarShowAllDetails,
         dashboardViewMode: s.dashboardViewMode,
         classbookViewMode: s.classbookViewMode,
         classbookDisplayMode: s.classbookDisplayMode,
