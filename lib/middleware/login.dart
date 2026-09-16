@@ -92,6 +92,25 @@ List<Object?> accountsWithCurrent(Map<dynamic, dynamic> login) {
   return accounts;
 }
 
+/// The credentials of the account in use, straight from storage.
+///
+/// The session reads them when its own are gone, so a session that ran out
+/// signs in again instead of ending on the login form.
+Future<StoredLogin?> readStoredLogin() async {
+  try {
+    final dynamic login =
+        json.decode(await secureStorage.read(key: "login") ?? "{}");
+    final user = getString(login["user"]);
+    final pass = getString(login["pass"]);
+    final url = getString(login["url"]);
+    if (user == null || pass == null || url == null) return null;
+    return (user: user, pass: pass, url: url);
+  } catch (e) {
+    log("Failed to read the stored credentials", error: e);
+    return null;
+  }
+}
+
 Future<void> _doLogin(
   String user,
   String pass,

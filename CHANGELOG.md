@@ -26,6 +26,7 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 - Anmeldung: die Sitzung richtet sich nach der Uhr des Servers. Geht die Uhr des Geräts falsch, meldet die App nicht mehr zu früh ab oder arbeitet mit einer schon abgelaufenen Sitzung weiter.
 - Anmeldung: ein kurzes Funkloch meldet nicht mehr ab. Kennt der Server die Sitzung nicht mehr, meldet die App still neu an.
 - Verbindung von Hand wiederherstellen führt nicht mehr auf den Anmeldebildschirm, solange nur das Netz fehlt. Und ein Tippen auf Anmelden ohne Passwort löscht nicht länger die Zugangsdaten des Kontos: der Knopf bleibt grau, bis Benutzername und Passwort da sind, und ein Konto bleibt auch ohne gespeichertes Passwort in der Kontoliste.
+- Lief die Sitzung ab, während das Handy gesperrt war, half auch mehrfaches Neuverbinden nicht mehr und irgendwann stand der Anmeldebildschirm da. Die App meldet sich jetzt mit den gespeicherten Zugangsdaten neu an, so wie es bisher nur der Wechsel auf ein anderes Konto und zurück tat.
 
 ### Intern
 
