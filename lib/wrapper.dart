@@ -117,6 +117,21 @@ class Wrapper {
           isRetryAfterUnexpectedLogout: isRetryAfterUnexpectedLogout,
           onError: onError);
 
+  Future<dynamic> upload(
+    String url, {
+    required String path,
+    required String filename,
+    Map<String, Object?> fields = const <String, Object?>{},
+    void Function(Object error)? onError,
+  }) =>
+      _session.upload(
+        url,
+        path: path,
+        filename: filename,
+        fields: fields,
+        onError: onError,
+      );
+
   Future<dynamic> login(
     String? user,
     String? pass,

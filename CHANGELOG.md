@@ -14,6 +14,7 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 - Kalender: eine Stunde außerhalb des eigenen Klassenzimmers trägt oben rechts ein kleines Dreieck, auch in der Wochenansicht des Merkhefts. Ein langer Druck auf die Stunde nennt den Raum; eine gebuchte Präsentationskamera gilt nicht als Raum.
 - Einstellungen → Fächer: „Alle Details im Kalender anzeigen“ nennt in der Stunde auch den Raum, soweit Platz ist. Der Ortsname, den alle Räume der Woche tragen, entfällt; bei mehreren Räumen steht „+1“ dahinter. Lehrpersonen und Raum werden dafür bei Bedarf etwas kleiner, das Fach nie. Voreingestellt bleibt alles wie bisher.
 - Bewertungen: ein Lesezeichen markiert einzelne Noten, in der Liste und auf der Seite der Note. „Nur markierte Noten anzeigen“ blendet alles andere aus. Die Markierung bleibt auf dem Gerät und gilt je Konto; das Portal kennt sie nicht.
+- Mitteilungen: beim Schreiben und Antworten lassen sich Dateien anhängen. Jeder Anhang zeigt Name, Größe und ob er schon beim Portal ist; gesendet wird erst, wenn alle oben sind. Wie viele Anhänge erlaubt sind, sagt die Schule.
 
 ### Verbesserungen
 

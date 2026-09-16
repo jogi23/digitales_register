@@ -78,6 +78,10 @@ Future<dynamic> getDemoResponse(String url, dynamic args) async {
       'type': 'homework',
     },
     'api/student/dashboard/toggle_reminder': {'success': true},
+    // Attachments go nowhere in the demo, but the wizard needs an id to
+    // carry on with.
+    'api/message/messageSubmissionCreateTemporaryEntry': {'submissionId': -1},
+    'api/message/messageSubmissionUpload': {'success': true},
   };
   if (synthetic.containsKey(url)) return synthetic[url];
 

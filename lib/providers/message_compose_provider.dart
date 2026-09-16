@@ -17,7 +17,9 @@
 
 import 'dart:convert';
 
+import 'package:dr/app_state.dart';
 import 'package:dr/middleware/middleware.dart' show wrapper;
+import 'package:dr/providers/config_provider.dart';
 import 'package:dr/providers/messages_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -146,6 +148,47 @@ class RecipientGroup {
       };
 }
 
+/// A file picked for a message, on its way to the portal.
+///
+/// The portal takes an attachment in two steps: it hands out an id for a
+/// temporary entry, and the file follows. Only an attachment that made it
+/// through both carries a [submissionId] and goes out with the message.
+class ComposeAttachment {
+  final String name;
+
+  /// The file's size in bytes, for showing next to its name.
+  final int size;
+  final String path;
+  final int? submissionId;
+  final bool uploading;
+  final bool failed;
+
+  const ComposeAttachment({
+    required this.name,
+    required this.size,
+    required this.path,
+    this.submissionId,
+    this.uploading = false,
+    this.failed = false,
+  });
+
+  bool get sendable => submissionId != null && !failed;
+
+  ComposeAttachment copyWith({
+    int? submissionId,
+    bool? uploading,
+    bool? failed,
+  }) =>
+      ComposeAttachment(
+        name: name,
+        size: size,
+        path: path,
+        submissionId: submissionId ?? this.submissionId,
+        uploading: uploading ?? this.uploading,
+        failed: failed ?? this.failed,
+      );
+}
+
 /// What is known while a message is being written. Subject and text stay in
 /// the page's fields until it is sent.
 class MessageComposeState {
@@ -165,6 +208,12 @@ class MessageComposeState {
   final bool loadingDetails;
   final bool sending;
 
+  /// The files picked for this message.
+  final List<ComposeAttachment> attachments;
+
+  /// How many attachments the school allows on one message.
+  final int maxAttachments;
+
   const MessageComposeState({
     this.ready = false,
     this.failed = false,
@@ -174,15 +223,23 @@ class MessageComposeState {
     this.groups = const [],
     this.loadingDetails = false,
     this.sending = false,
+    this.attachments = const [],
+    this.maxAttachments = Config.defaultSubmissionMaxItems,
   });
 
   bool get allowed => type != null;
+
+  /// Whether a file is still on its way; sending would leave it behind.
+  bool get uploading => attachments.any((a) => a.uploading);
+
+  bool get canAttach => attachments.length < maxAttachments;
 
   int get peopleCount => groups.fold(0, (n, group) => n + group.people.length);
 
   int get selectedCount => groups.fold(
         0,
-        (n, group) => n + group.people.where((person) => person.selected).length,
+        (n, group) =>
+            n + group.people.where((person) => person.selected).length,
       );
 
   MessageComposeState copyWith({
@@ -190,6 +247,7 @@ class MessageComposeState {
     List<RecipientGroup>? groups,
     bool? loadingDetails,
     bool? sending,
+    List<ComposeAttachment>? attachments,
   }) =>
       MessageComposeState(
         ready: ready,
@@ -200,6 +258,8 @@ class MessageComposeState {
         groups: groups ?? this.groups,
         loadingDetails: loadingDetails ?? this.loadingDetails,
         sending: sending ?? this.sending,
+        attachments: attachments ?? this.attachments,
+        maxAttachments: maxAttachments,
       );
 }
 
@@ -249,6 +309,9 @@ class MessageComposeNotifier extends AutoDisposeNotifier<MessageComposeState> {
       permission: permission,
       recipients: state.recipients,
       groups: state.groups,
+      attachments: state.attachments,
+      maxAttachments: ref.read(configProvider)?.submissionMaxItems ??
+          Config.defaultSubmissionMaxItems,
     );
     if (answerTo == null || type == null) return;
 
@@ -261,7 +324,8 @@ class MessageComposeNotifier extends AutoDisposeNotifier<MessageComposeState> {
     if (_disposed || initial is! List) return;
     state = state.copyWith(recipients: [
       for (final recipient in initial)
-        if (recipient is Map) MessageRecipient(recipient.cast<String, Object?>()),
+        if (recipient is Map)
+          MessageRecipient(recipient.cast<String, Object?>()),
     ]);
     await _loadDetails();
   }
@@ -295,6 +359,82 @@ class MessageComposeNotifier extends AutoDisposeNotifier<MessageComposeState> {
         if (r.key != recipient.key) r,
     ]);
     await _loadDetails();
+  }
+
+  /// Puts a file on the message: the portal hands out an id, then takes the
+  /// file itself.
+  ///
+  /// Both steps are undocumented — the field names come from the portal's
+  /// uploader — so a failure is shown on the attachment rather than swept up.
+  Future<void> attach({
+    required String path,
+    required String name,
+    required int size,
+  }) async {
+    if (!state.canAttach) return;
+    final attachment = ComposeAttachment(
+      name: name,
+      size: size,
+      path: path,
+      uploading: true,
+    );
+    state = state.copyWith(attachments: [...state.attachments, attachment]);
+
+    final created = await wrapper.send(
+      'api/message/messageSubmissionCreateTemporaryEntry',
+      args: <String, Object?>{
+        'entry': <String, Object?>{
+          'id': 0,
+          'messageId': 0,
+          'categoryId': 0,
+          'type': 'file',
+          'title': name,
+          'originalName': name,
+        },
+      },
+    );
+    if (_disposed) return;
+    final id = switch (created) {
+      {'submissionId': final int id} => id,
+      _ => null,
+    };
+    if (id == null) {
+      _replace(attachment, attachment.copyWith(uploading: false, failed: true));
+      return;
+    }
+
+    final uploaded = await wrapper.upload(
+      'api/message/messageSubmissionUpload',
+      path: path,
+      filename: name,
+      fields: <String, Object?>{
+        'title': name,
+        'categoryId': 0,
+        'submissionId': id,
+      },
+    );
+    if (_disposed) return;
+    _replace(
+      attachment,
+      uploaded == null
+          ? attachment.copyWith(uploading: false, failed: true)
+          : attachment.copyWith(uploading: false, submissionId: id),
+    );
+  }
+
+  /// Takes a file off the message again.
+  void detach(ComposeAttachment attachment) {
+    state = state.copyWith(attachments: [
+      for (final a in state.attachments)
+        if (!identical(a, attachment)) a,
+    ]);
+  }
+
+  void _replace(ComposeAttachment before, ComposeAttachment after) {
+    state = state.copyWith(attachments: [
+      for (final a in state.attachments)
+        if (identical(a, before)) after else a,
+    ]);
   }
 
   /// Ticks or unticks one person of the recipient [recipientKey].
@@ -354,7 +494,14 @@ class MessageComposeNotifier extends AutoDisposeNotifier<MessageComposeState> {
           'responseRequired': type['responseRequired'] == true,
           'responseType': type['typeId'] ?? 'read',
           'permission': state.permission ?? 'me',
-          'submissions': const <Object?>[],
+          'submissions': <Object?>[
+            for (final attachment in state.attachments)
+              if (attachment.sendable)
+                <String, Object?>{
+                  'kind': 'temporary',
+                  'submissionId': attachment.submissionId,
+                },
+          ],
         },
       },
       onError: (error) => failure = error,

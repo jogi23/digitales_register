@@ -51,8 +51,22 @@ class ConfigParser {
         ..fullName = fullName
         ..imgSource = imgSource
         ..currentSemesterMaybe = currentSemesterMaybe
-        ..isStudentOrParent = isStudentOrParent,
+        ..isStudentOrParent = isStudentOrParent
+        ..submissionMaxItems = _readSubmissionMaxItems(source),
     );
+  }
+
+  /// How many attachments a message may carry. The page carries it as
+  /// `submission_maximum_number_items_allowed: 8,`; where it does not, the
+  /// portal's own default stands.
+  static int _readSubmissionMaxItems(String source) {
+    final match = RegExp(r"submission_maximum_number_items_allowed\s*:\s*(\d+)")
+        .firstMatch(source);
+    final value = int.tryParse(match?.group(1) ?? "");
+    if (value == null || value <= 0) {
+      return Config.defaultSubmissionMaxItems;
+    }
+    return value;
   }
 
   static bool _readIsStudentOrParent(String source) {

@@ -22,6 +22,7 @@ import 'package:dr/providers/message_compose_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/services/message_export.dart' show plainTextOf;
 import 'package:dr/ui/message_compose.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -50,6 +51,18 @@ class _MessageComposeContainerState
     });
   }
 
+  /// Asks the system for a file and hands it to the provider.
+  ///
+  /// Anything goes: the portal takes pictures as readily as PDFs, and what a
+  /// school allows is its own business.
+  Future<void> _pickAttachment(MessageComposeNotifier notifier) async {
+    final picked = await FilePicker.pickFiles();
+    final file = picked?.files.firstOrNull;
+    final path = file?.path;
+    if (file == null || path == null) return;
+    await notifier.attach(path: path, name: file.name, size: file.size);
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(messageComposeProvider);
@@ -60,12 +73,13 @@ class _MessageComposeContainerState
       noInternet: ref.watch(noInternetProvider),
       isAnswer: answerTo != null,
       initialSubject: answerTo == null ? '' : answerSubject(answerTo.subject),
-      onRetry: () =>
-          unawaited(notifier.start(answerTo: answerTo?.fromUserId)),
+      onRetry: () => unawaited(notifier.start(answerTo: answerTo?.fromUserId)),
       quotedText: answerTo == null ? null : plainTextOf(answerTo.text),
       onSearch: notifier.search,
       onAdd: (recipient) => unawaited(notifier.add(recipient)),
       onRemove: (recipient) => unawaited(notifier.remove(recipient)),
+      onAttach: () => unawaited(_pickAttachment(notifier)),
+      onDetach: notifier.detach,
       onToggle: (group, person) =>
           notifier.toggle(group.recipientKey, person.id),
       onTickAll: notifier.tickAll,

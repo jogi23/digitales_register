@@ -64,6 +64,13 @@ class _Notice extends StatelessWidget {
 }
 
 /// Writes a message: recipients, the people behind them, subject and text.
+/// A file's size in units a reader recognises: "812 B", "34 kB", "2,1 MB".
+String fileSizeLabel(int bytes) {
+  if (bytes < 1024) return "$bytes B";
+  if (bytes < 1024 * 1024) return "${(bytes / 1024).round()} kB";
+  return "${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB";
+}
+
 class MessageComposePage extends StatefulWidget {
   final MessageComposeState state;
   final bool noInternet;
@@ -87,6 +94,12 @@ class MessageComposePage extends StatefulWidget {
   final void Function(RecipientGroup group, RecipientPerson person) onToggle;
   final ValueChanged<bool> onTickAll;
 
+  /// Picks a file and puts it on the message; null leaves the section out.
+  final VoidCallback? onAttach;
+
+  /// Takes a file off the message again.
+  final ValueChanged<ComposeAttachment>? onDetach;
+
   /// Sends; `null` when the portal took the message, otherwise its error key,
   /// empty without one.
   final Future<String?> Function({
@@ -109,6 +122,8 @@ class MessageComposePage extends StatefulWidget {
     required this.onToggle,
     required this.onTickAll,
     required this.onSend,
+    this.onAttach,
+    this.onDetach,
   });
 
   @override
@@ -149,6 +164,8 @@ class _MessageComposePageState extends State<MessageComposePage> {
     return state.allowed &&
         !state.sending &&
         !state.loadingDetails &&
+        // A file still on its way would be left behind.
+        !state.uploading &&
         !widget.noInternet &&
         state.selectedCount > 0 &&
         _subject.text.trim().isNotEmpty &&
@@ -418,6 +435,64 @@ class _MessageComposePageState extends State<MessageComposePage> {
           ),
           onChanged: (_) => setState(() {}),
         ),
+        if (widget.onAttach case final attach?) ...[
+          const SizedBox(height: 16),
+          Row(
+            children: <Widget>[
+              Expanded(
+                child: Text(
+                  l.messagesAttachments,
+                  style: theme.textTheme.labelLarge,
+                ),
+              ),
+              TextButton.icon(
+                onPressed: state.canAttach && !state.sending ? attach : null,
+                icon: const Icon(Icons.attach_file),
+                label: Text(l.messageComposeAttach),
+              ),
+            ],
+          ),
+          for (final attachment in state.attachments)
+            ListTile(
+              dense: true,
+              contentPadding: EdgeInsets.zero,
+              leading: attachment.uploading
+                  ? const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Icon(
+                      attachment.failed
+                          ? Icons.error_outline
+                          : Icons.insert_drive_file_outlined,
+                      color: attachment.failed ? theme.colorScheme.error : null,
+                    ),
+              title: Text(attachment.name),
+              subtitle: Text(
+                attachment.uploading
+                    ? l.messageComposeAttachUploading
+                    : attachment.failed
+                        ? l.messageComposeAttachFailed
+                        : fileSizeLabel(attachment.size),
+                style: attachment.failed
+                    ? TextStyle(color: theme.colorScheme.error)
+                    : null,
+              ),
+              trailing: IconButton(
+                icon: const Icon(Icons.close),
+                tooltip: l.commonDelete,
+                onPressed: state.sending || widget.onDetach == null
+                    ? null
+                    : () => widget.onDetach!(attachment),
+              ),
+            ),
+          if (!state.canAttach)
+            Text(
+              l.messageComposeAttachLimit(state.maxAttachments),
+              style: theme.textTheme.bodySmall,
+            ),
+        ],
         if (widget.quotedText case final original?) ...[
           SwitchListTile(
             contentPadding: EdgeInsets.zero,

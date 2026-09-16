@@ -184,6 +184,17 @@
   "messageComposeNotAllowed": "Dieses Konto darf keine Mitteilungen senden.",
   "messageComposeLoadFailed": "Das Portal hat nicht geantwortet. Vielleicht ist die Sitzung abgelaufen.",
   "messageComposeRetry": "Erneut versuchen",
+  "messageComposeAttach": "Anhang hinzufügen",
+  "messageComposeAttachLimit": "Höchstens {count} Anhänge",
+  "@messageComposeAttachLimit": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "messageComposeAttachUploading": "Wird hochgeladen …",
+  "messageComposeAttachFailed": "Nicht hochgeladen — noch einmal versuchen",
   "messageComposeQuote": "Ursprüngliche Mitteilung zitieren",
   "messageAnswerQuoteLabel": "Antwort auf die Mitteilung:",
   "messageComposeDiscardTitle": "Entwurf verwerfen?",

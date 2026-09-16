@@ -29,6 +29,19 @@ allprojects {
     }
 }
 
+// file_picker 11 verlaesst sich ab AGP 9 darauf, dass Kotlin vom Build
+// mitgebracht wird, und wendet KGP nicht mehr selbst an. Global bleibt
+// android.builtInKotlin aus (biometric_storage und in_app_review wenden KGP
+// selbst an), also bekommt nur dieses Modul das eingebaute Kotlin - sonst
+// wird sein Kotlin nie kompiliert und FilePickerPlugin fehlt beim Linken.
+subprojects {
+    if (project.name == 'file_picker') {
+        project.beforeEvaluate {
+            project.pluginManager.apply('com.android.built-in-kotlin')
+        }
+    }
+}
+
 rootProject.buildDir = '../build'
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
