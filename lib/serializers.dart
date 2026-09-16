@@ -55,7 +55,10 @@ final Serializers serializers = (_$serializers.toBuilder()
       ..addBuilderFactory(const FullType(BuiltList, [FullType(GradeDetail)]),
           () => ListBuilder<GradeDetail>())
       ..addBuilderFactory(const FullType(BuiltList, [FullType(Observation)]),
-          () => ListBuilder<Observation>()))
+          () => ListBuilder<Observation>())
+      ..addBuilderFactory(
+          const FullType(BuiltList, [FullType(SelfDeclaration)]),
+          () => ListBuilder<SelfDeclaration>()))
     //
     .build();
 

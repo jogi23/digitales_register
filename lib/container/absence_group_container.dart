@@ -28,32 +28,21 @@ class AbsenceGroupContainer extends ConsumerWidget {
   final int group;
   final Color? tileColor;
 
+  /// Gives a reason for this absence; null leaves out the button.
+  final void Function(int group)? onJustify;
+
   const AbsenceGroupContainer({
     super.key,
     required this.group,
     this.tileColor,
+    this.onJustify,
   });
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final absenceGroup =
         ref.watch(absencesProvider.select((s) => s.absences[group]));
     final l = tr(context);
-    final first = absenceGroup.absences.last; //<--- flip is intentional
-    final last = absenceGroup.absences.first; //<---
-    var fromTo = "";
-    if (first.date == last.date) {
-      fromTo +=
-          "${DateFormat("EE d.M.yyyy", l.localeName).format(first.date)}, ";
-      if (first == last) {
-        fromTo += "${first.hour}. h";
-      } else {
-        fromTo += "${first.hour}. - ${last.hour}. h";
-      }
-    } else {
-      fromTo +=
-          "${DateFormat("EE d.M.yyyy", l.localeName).format(first.date)} ${first.hour}. h - "
-              "${DateFormat("EE d.M.yyyy", l.localeName).format(last.date)} ${last.hour}. h ";
-    }
+    final fromTo = absenceGroupRange(context, absenceGroup);
     var duration = "";
     if (absenceGroup.hours != 0) {
       duration += l.absenceHours(absenceGroup.hours);
@@ -81,8 +70,12 @@ class AbsenceGroupContainer extends ConsumerWidget {
       default:
         justifiedString = l.absenceNotYetJustified;
     }
+    // Absences the register has settled are not up for a reason any more.
+    final settled = absenceGroup.justified == AbsenceJustified.justified ||
+        absenceGroup.justified == AbsenceJustified.forSchool;
     return AbsenceGroupWidget(
       tileColor: tileColor,
+      onJustify: onJustify == null || settled ? null : () => onJustify!(group),
       vm: AbsencesViewModel(
         fromTo,
         duration,
@@ -93,6 +86,31 @@ class AbsenceGroupContainer extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// The days and lessons an absence covers, e.g. "Mo 5.2.2026, 3. - 5. h".
+///
+/// Also what the reason dialog shows above its fields, so the reader can see
+/// which absence they are about to sign for.
+String absenceGroupRange(BuildContext context, AbsenceGroup group) {
+  final l = tr(context);
+  if (group.absences.isEmpty) return "";
+  final first = group.absences.last; //<--- flip is intentional
+  final last = group.absences.first; //<---
+  var fromTo = "";
+  if (first.date == last.date) {
+    fromTo += "${DateFormat("EE d.M.yyyy", l.localeName).format(first.date)}, ";
+    if (first == last) {
+      fromTo += "${first.hour}. h";
+    } else {
+      fromTo += "${first.hour}. - ${last.hour}. h";
+    }
+  } else {
+    fromTo +=
+        "${DateFormat("EE d.M.yyyy", l.localeName).format(first.date)} ${first.hour}. h - "
+        "${DateFormat("EE d.M.yyyy", l.localeName).format(last.date)} ${last.hour}. h ";
+  }
+  return fromTo;
 }
 
 class AbsencesViewModel {
