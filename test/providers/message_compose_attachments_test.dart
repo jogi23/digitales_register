@@ -29,7 +29,6 @@ import '../fixtures/api_fixtures.dart';
 
 class MockWrapper extends Mock implements Wrapper {}
 
-const _createUrl = 'api/message/messageSubmissionCreateTemporaryEntry';
 const _uploadUrl = 'api/message/messageSubmissionUpload';
 const _sendUrl = 'api/message/sendMessage';
 
@@ -61,8 +60,8 @@ void main() {
     ],
   };
 
-  /// Ids the temporary entries hand out, one per call.
-  late List<Object?> creations;
+  /// What the uploader answers, one per call.
+  late List<Object?> uploadAnswers;
 
   MessageComposeNotifier notifier() =>
       container.read(messageComposeProvider.notifier);
@@ -91,9 +90,9 @@ void main() {
   setUp(() {
     sent.clear();
     uploads.clear();
-    creations = [
-      <String, Object?>{'submissionId': 7},
-      <String, Object?>{'submissionId': 8},
+    uploadAnswers = [
+      <String, Object?>{'success': true, 'submissionId': 7},
+      <String, Object?>{'success': true, 'submissionId': 8},
     ];
     mock = MockWrapper();
     wrapper = mock;
@@ -108,7 +107,6 @@ void main() {
       sent.add((url: url, args: args));
       return switch (url) {
         'api/message/getTypes' => types,
-        _createUrl => creations.isEmpty ? null : creations.removeAt(0),
         _sendUrl => <String, Object?>{'success': true},
         'api/message/getMyMessages' => fixtureFor('api/message/getMyMessages'),
         _ => null,
@@ -125,14 +123,14 @@ void main() {
         filename: invocation.namedArguments[#filename] as String,
         fields: invocation.namedArguments[#fields] as Map<String, Object?>,
       ));
-      return <String, Object?>{'success': true};
+      return uploadAnswers.isEmpty ? null : uploadAnswers.removeAt(0);
     });
   });
 
   tearDown(() => container.dispose());
 
   group('putting a file on a message', () {
-    test('asks for an id first, then sends the file', () async {
+    test('goes straight to the uploader, which hands out the id', () async {
       await start();
       await notifier().attach(
         path: '/tmp/zeugnis.pdf',
@@ -140,15 +138,18 @@ void main() {
         size: 2048,
       );
 
-      final created = sent.lastWhere((r) => r.url == _createUrl);
-      expect((created.args['entry'] as Map)['type'], 'file');
-      expect((created.args['entry'] as Map)['title'], 'zeugnis.pdf');
+      // The portal asks for a temporary entry only for text and link
+      // entries; for a file the upload makes it.
+      expect(
+        sent.where((r) => r.url.contains('CreateTemporaryEntry')),
+        isEmpty,
+      );
 
       expect(uploads, hasLength(1));
       expect(uploads.single.url, _uploadUrl);
       expect(uploads.single.path, '/tmp/zeugnis.pdf');
       expect(uploads.single.filename, 'zeugnis.pdf');
-      expect(uploads.single.fields['submissionId'], 7);
+      expect(uploads.single.fields, {'title': 'zeugnis.pdf', 'categoryId': 0});
 
       final attachment = read().attachments.single;
       expect(attachment.submissionId, 7);
@@ -192,22 +193,28 @@ void main() {
   });
 
   group('when it does not work', () {
-    test('no id, no upload', () async {
-      creations = [null];
+    test('an answer without an id marks the file failed', () async {
+      uploadAnswers = [
+        <String, Object?>{'success': true},
+      ];
       await start();
       await notifier().attach(path: '/tmp/a.pdf', name: 'a.pdf', size: 10);
-      expect(uploads, isEmpty);
       final attachment = read().attachments.single;
       expect(attachment.failed, isTrue);
       expect(attachment.sendable, isFalse);
     });
 
+    test('a refused file is failed even with an id', () async {
+      uploadAnswers = [
+        <String, Object?>{'submissionId': 7, 'error': 'too_large'},
+      ];
+      await start();
+      await notifier().attach(path: '/tmp/a.pdf', name: 'a.pdf', size: 10);
+      expect(read().attachments.single.failed, isTrue);
+    });
+
     test('a failed upload keeps the file out of the message', () async {
-      when(() => mock.upload(any(),
-          path: any(named: 'path'),
-          filename: any(named: 'filename'),
-          fields: any(named: 'fields'),
-          onError: any(named: 'onError'))).thenAnswer((_) async => null);
+      uploadAnswers = [null];
       await start();
       await notifier().attach(path: '/tmp/a.pdf', name: 'a.pdf', size: 10);
       expect(read().attachments.single.failed, isTrue);
@@ -217,6 +224,17 @@ void main() {
           .lastWhere((r) => r.url == _sendUrl)
           .args['message'] as Map)['submissions'] as List;
       expect(submissions, isEmpty);
+    });
+  });
+
+  group('the id in the portal answers with', () {
+    test('comes from submissionId, or entryId in its place', () {
+      expect(uploadedId(<String, Object?>{'submissionId': 7}), 7);
+      expect(uploadedId(<String, Object?>{'entryId': 9}), 9);
+      expect(uploadedId(<String, Object?>{'submissionId': 0, 'entryId': 9}), 9);
+      expect(uploadedId(<String, Object?>{'submissionId': 0}), isNull);
+      expect(uploadedId(null), isNull);
+      expect(uploadedId('nope'), isNull);
     });
   });
 

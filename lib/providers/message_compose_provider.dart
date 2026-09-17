@@ -21,6 +21,7 @@ import 'package:dr/app_state.dart';
 import 'package:dr/middleware/middleware.dart' show wrapper;
 import 'package:dr/providers/config_provider.dart';
 import 'package:dr/providers/messages_provider.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// One piece of the portal's `contextstr`: literal text, or a key the portal
@@ -70,6 +71,20 @@ String _name(Object? source) => switch (source) {
     };
 
 int? _id(Object? source) => switch (source) { final int id => id, _ => null };
+
+/// The id the portal's uploader hands back for an uploaded file, or `null`
+/// when the upload did not work.
+///
+/// The answer names the new submission `submissionId` or, for some entries,
+/// `entryId`; an `error` in it means the file was refused even though the
+/// request itself got through.
+@visibleForTesting
+int? uploadedId(Object? response) => switch (response) {
+      {'error': final Object? error} when error != null => null,
+      {'submissionId': final int id} when id != 0 => id,
+      {'entryId': final int id} when id != 0 => id,
+      _ => null,
+    };
 
 /// Someone or some group a message can go to, as the recipient search
 /// returns it.
@@ -150,9 +165,9 @@ class RecipientGroup {
 
 /// A file picked for a message, on its way to the portal.
 ///
-/// The portal takes an attachment in two steps: it hands out an id for a
-/// temporary entry, and the file follows. Only an attachment that made it
-/// through both carries a [submissionId] and goes out with the message.
+/// The upload itself makes the portal's temporary entry and answers with its
+/// id. Only an attachment that got one carries a [submissionId] and goes out
+/// with the message.
 class ComposeAttachment {
   final String name;
 
@@ -361,11 +376,13 @@ class MessageComposeNotifier extends AutoDisposeNotifier<MessageComposeState> {
     await _loadDetails();
   }
 
-  /// Puts a file on the message: the portal hands out an id, then takes the
-  /// file itself.
+  /// Puts a file on the message: it goes straight to the portal's uploader,
+  /// which makes the temporary entry and answers with its id.
   ///
-  /// Both steps are undocumented — the field names come from the portal's
-  /// uploader — so a failure is shown on the attachment rather than swept up.
+  /// The portal only asks for a temporary entry up front for text and link
+  /// entries; for a file that call has no id to give. The step is
+  /// undocumented — the field names come from the portal's uploader — so a
+  /// failure is shown on the attachment rather than swept up.
   Future<void> attach({
     required String path,
     required String name,
@@ -380,45 +397,21 @@ class MessageComposeNotifier extends AutoDisposeNotifier<MessageComposeState> {
     );
     state = state.copyWith(attachments: [...state.attachments, attachment]);
 
-    final created = await wrapper.send(
-      'api/message/messageSubmissionCreateTemporaryEntry',
-      args: <String, Object?>{
-        'entry': <String, Object?>{
-          'id': 0,
-          'messageId': 0,
-          'categoryId': 0,
-          'type': 'file',
-          'title': name,
-          'originalName': name,
-        },
-      },
-    );
-    if (_disposed) return;
-    final id = switch (created) {
-      {'submissionId': final int id} => id,
-      _ => null,
-    };
-    if (id == null) {
-      _replace(attachment, attachment.copyWith(uploading: false, failed: true));
-      return;
-    }
-
     final uploaded = await wrapper.upload(
       'api/message/messageSubmissionUpload',
       path: path,
       filename: name,
-      fields: <String, Object?>{
-        'title': name,
-        'categoryId': 0,
-        'submissionId': id,
-      },
+      // The portal's uploader sends the title and the category, nothing else;
+      // the file goes under `file`.
+      fields: <String, Object?>{'title': name, 'categoryId': 0},
     );
     if (_disposed) return;
     _replace(
       attachment,
-      uploaded == null
-          ? attachment.copyWith(uploading: false, failed: true)
-          : attachment.copyWith(uploading: false, submissionId: id),
+      switch (uploadedId(uploaded)) {
+        final int id => attachment.copyWith(uploading: false, submissionId: id),
+        _ => attachment.copyWith(uploading: false, failed: true),
+      },
     );
   }
 
