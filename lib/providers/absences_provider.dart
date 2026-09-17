@@ -39,6 +39,19 @@ const _removeAbsenceFutureUrl = "api/student/dashboard/remove_absence_future";
 
 final _dateFormat = DateFormat("yyyy-MM-dd");
 
+/// What the register made of a write: `true` when it took it, `false` when it
+/// refused, and `null` when it said nothing to go by.
+///
+/// `absence_future` and `remove_absence_future` both answer `{"success":
+/// true}` -- verified against the register on 2026-09-17. A request that never
+/// arrived, or an endpoint that stays silent, gives `null`, and then only the
+/// reloaded list can say whether the write landed.
+@visibleForTesting
+bool? wroteOk(dynamic response) => switch (response) {
+      {'success': final bool ok} => ok,
+      _ => null,
+    };
+
 class AbsencesNotifier extends Notifier<AbsencesState> {
   @override
   AbsencesState build() => AbsencesState();
@@ -84,9 +97,11 @@ class AbsencesNotifier extends Notifier<AbsencesState> {
       args: {"absenceGroup": payload},
     );
     await load();
-    // What the register answers here is undocumented and the portal throws it
-    // away, so the reloaded list is what decides whether it worked.
-    return result != null || _groupFor(group)?.reason == reason;
+    // This one's answer is still unverified -- the portal throws it away, and
+    // the test account had no absence to give a reason for. Its siblings say
+    // `success`, so that is taken when it comes; otherwise the reloaded list
+    // decides.
+    return wroteOk(result) ?? (_groupFor(group)?.reason == reason);
   }
 
   /// Reports an absence that is still to come.
@@ -110,12 +125,14 @@ class AbsencesNotifier extends Notifier<AbsencesState> {
           "endTime": endHour,
           "reason": reason,
           "reason_signature": signature,
-          "note": note,
+          // The portal leaves the note out and the register stores null for
+          // it, so an empty one is left out here too.
+          if (note.isNotEmpty) "note": note,
         },
       },
     );
     await load();
-    return result != null ||
+    return wroteOk(result) ??
         state.futureAbsences.any(
           (a) =>
               a.startDate == startDate &&
@@ -134,7 +151,7 @@ class AbsencesNotifier extends Notifier<AbsencesState> {
       args: {"futureAbsence": json.decode(raw)},
     );
     await load();
-    return result != null ||
+    return wroteOk(result) ??
         !state.futureAbsences.any(
           (a) =>
               a.startDate == absence.startDate &&
