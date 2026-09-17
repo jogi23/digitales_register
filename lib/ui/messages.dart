@@ -27,6 +27,7 @@ import 'package:dr/providers/messages_provider.dart'
 import 'package:dr/services/message_export.dart' show MessageExportFormat;
 import 'package:dr/ui/animated_linear_progress_indicator.dart';
 import 'package:dr/ui/connection_status_button.dart';
+import 'package:dr/ui/entry_card.dart';
 import 'package:dr/ui/layout.dart';
 import 'package:dr/ui/no_internet.dart';
 import 'package:dr/ui/pull_to_refresh.dart';
@@ -302,10 +303,7 @@ class _MessagesPageState extends State<MessagesPage> {
     List<Message> visible, {
     required bool selecting,
   }) {
-    final altColor = Theme.of(context)
-        .colorScheme
-        .surfaceContainerHighest
-        .withValues(alpha: 0.75);
+    final altColor = alternateRowColor(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -577,16 +575,18 @@ class _MessageWidgetState extends State<MessageWidget> {
     if (widget.selecting) {
       // While picking, a tap picks: the tile neither opens nor marks the
       // message read.
-      return ListTile(
-        tileColor: widget.tileColor,
-        selected: widget.selected,
-        leading: Checkbox(
-          value: widget.selected,
-          onChanged: (_) => widget.onSelect(),
+      return AlternateRowTint(
+        color: widget.tileColor,
+        child: ListTile(
+          selected: widget.selected,
+          leading: Checkbox(
+            value: widget.selected,
+            onChanged: (_) => widget.onSelect(),
+          ),
+          title: _title(context),
+          onTap: widget.onSelect,
+          onLongPress: widget.onSelect,
         ),
-        title: _title(context),
-        onTap: widget.onSelect,
-        onLongPress: widget.onSelect,
       );
     }
     return ExpansionTile(

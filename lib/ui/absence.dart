@@ -19,6 +19,7 @@
 import 'package:dr/container/absence_group_container.dart';
 import 'package:dr/data.dart';
 import 'package:dr/l10n/l10n.dart';
+import 'package:dr/ui/entry_card.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -65,23 +66,25 @@ class AbsenceGroupWidget extends StatelessWidget {
       if (vm.note?.isNotEmpty == true) vm.note!,
     ];
 
-    return ListTile(
-      tileColor: tileColor,
-      leading: Icon(iconData, color: iconColor),
-      title: Text(
-        title,
-        style: TextStyle(color: theme.colorScheme.primary),
+    return AlternateRowTint(
+      color: tileColor,
+      child: ListTile(
+        leading: Icon(iconData, color: iconColor),
+        title: Text(
+          title,
+          style: TextStyle(color: theme.colorScheme.primary),
+        ),
+        subtitle: subtitleParts.isNotEmpty
+            ? Text(subtitleParts.join(' · '))
+            : null,
+        trailing: onJustify == null
+            ? null
+            : IconButton(
+                icon: const Icon(Icons.edit_note),
+                tooltip: tr(context).absenceJustifyAction,
+                onPressed: onJustify,
+              ),
       ),
-      subtitle: subtitleParts.isNotEmpty
-          ? Text(subtitleParts.join(' · '))
-          : null,
-      trailing: onJustify == null
-          ? null
-          : IconButton(
-              icon: const Icon(Icons.edit_note),
-              tooltip: tr(context).absenceJustifyAction,
-              onPressed: onJustify,
-            ),
     );
   }
 }
@@ -161,28 +164,30 @@ class FutureAbsenceWidget extends StatelessWidget {
         ),
     ];
 
-    return ListTile(
-      tileColor: tileColor,
-      // The symbol alone only tells approved, rejected and pending apart by
-      // colour, so it carries the wording as well.
-      leading: Tooltip(
-        message: justifiedString,
-        child: Icon(iconData, color: iconColor),
+    return AlternateRowTint(
+      color: tileColor,
+      child: ListTile(
+        // The symbol alone only tells approved, rejected and pending apart by
+        // colour, so it carries the wording as well.
+        leading: Tooltip(
+          message: justifiedString,
+          child: Icon(iconData, color: iconColor),
+        ),
+        title: Text(
+          fromTo,
+          style: TextStyle(color: theme.colorScheme.primary),
+        ),
+        subtitle: subtitleParts.isNotEmpty
+            ? Text(subtitleParts.join('\n'))
+            : null,
+        trailing: onDelete == null
+            ? null
+            : IconButton(
+                icon: const Icon(Icons.delete_outline),
+                tooltip: l.absenceReportDelete,
+                onPressed: onDelete,
+              ),
       ),
-      title: Text(
-        fromTo,
-        style: TextStyle(color: theme.colorScheme.primary),
-      ),
-      subtitle: subtitleParts.isNotEmpty
-          ? Text(subtitleParts.join('\n'))
-          : null,
-      trailing: onDelete == null
-          ? null
-          : IconButton(
-              icon: const Icon(Icons.delete_outline),
-              tooltip: l.absenceReportDelete,
-              onPressed: onDelete,
-            ),
     );
   }
 }
