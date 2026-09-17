@@ -105,8 +105,7 @@ int isoWeekNumber(DateTime date) {
   // hour, which inDays would swallow as a whole day.
   final day = DateTime.utc(date.year, date.month, date.day);
   final thursday = day.add(Duration(days: 4 - day.weekday));
-  final dayOfYear =
-      thursday.difference(DateTime.utc(thursday.year)).inDays + 1;
+  final dayOfYear = thursday.difference(DateTime.utc(thursday.year)).inDays + 1;
   return ((dayOfYear - 1) ~/ 7) + 1;
 }
 
@@ -128,7 +127,6 @@ String stringifyMaybeJson(dynamic param) {
       JsonEncoder.withIndent("  ", (dynamic object) => object.toString());
   return encoder.convert(param);
 }
-
 
 NumberFormat gradeAverageFormat = NumberFormat("#0.##", "de");
 
@@ -307,3 +305,11 @@ Future<bool> cannotConnectTo(String url) async {
   }
   return noInternet;
 }
+
+/// Whether there is anything to send to the server at all.
+///
+/// Both the login form and the login middleware go by this: an attempt with
+/// an empty field is not one the server ever sees, and it used to cost the
+/// saved password.
+bool credentialsComplete(String user, String pass) =>
+    user.trim().isNotEmpty && pass.isNotEmpty;

@@ -67,18 +67,64 @@ Future<void> _doLogout({required bool hard, bool forced = false}) async {
   }
 }
 
+/// The stored accounts with the one in use in front of them.
+///
+/// An account without a saved password belongs in the list as well — it only
+/// asks for the password the next time. Leaving it out lost the account
+/// whenever the password was gone, which is what happened after a login
+/// attempt with an empty field.
+@visibleForTesting
+List<Object?> accountsWithCurrent(Map<dynamic, dynamic> login) {
+  final accounts = <Object?>[...?login["otherAccounts"] as List?];
+  final user = login["user"];
+  final url = login["url"];
+  if (user == null || url == null) return accounts;
+  final alreadySaved = accounts.any(
+    (dynamic a) => a is Map && a['user'] == user && a['url'] == url,
+  );
+  if (!alreadySaved) {
+    accounts.insert(0, <String, Object?>{
+      "user": user,
+      "pass": login["pass"],
+      "url": url,
+    });
+  }
+  return accounts;
+}
+
+/// The credentials of the account in use, straight from storage.
+///
+/// The session reads them when its own are gone, so a session that ran out
+/// signs in again instead of ending on the login form.
+Future<StoredLogin?> readStoredLogin() async {
+  try {
+    final dynamic login =
+        json.decode(await secureStorage.read(key: "login") ?? "{}");
+    final user = getString(login["user"]);
+    final pass = getString(login["pass"]);
+    final url = getString(login["url"]);
+    if (user == null || pass == null || url == null) return null;
+    return (user: user, pass: pass, url: url);
+  } catch (e) {
+    log("Failed to read the stored credentials", error: e);
+    return null;
+  }
+}
+
 Future<void> _doLogin(
   String user,
   String pass,
   String url, {
   bool fromStorage = false,
 }) async {
-  if (user == "" || pass == "") {
+  if (!credentialsComplete(user, pass)) {
     providerContainer.read(loginProvider.notifier).setLoginFailed(
-      cause: trGlobal.loginEnterSomething,
-      username: user,
-    );
-    await _doDeletePass();
+          cause: trGlobal.loginEnterSomething,
+          username: user,
+        );
+    // Deliberately no _doDeletePass(): an empty form is not the server
+    // refusing the password, and dropping the saved one took the whole
+    // account with it.
     providerContainer.read(appRouterProvider).showLogin();
     return;
   }
@@ -125,8 +171,8 @@ Future<void> _doLogin(
     if (wrapper.config?.isStudentOrParent == false) {
       wrapper.logout(hard: true);
       providerContainer.read(loginProvider.notifier).setLoginFailed(
-        cause: trGlobal.loginUserTypeUnsupported,
-      );
+            cause: trGlobal.loginUserTypeUnsupported,
+          );
       await _doDeletePass();
       providerContainer.read(appRouterProvider).showLogin();
       _showUserTypeNotSupported(fixedUrl);
@@ -155,9 +201,9 @@ Future<void> _doLogin(
       return;
     }
     providerContainer.read(loginProvider.notifier).setLoginFailed(
-      cause: wrapper.error ?? "Unknown error",
-      username: user,
-    );
+          cause: wrapper.error ?? "Unknown error",
+          username: user,
+        );
     await _doDeletePass();
     providerContainer.read(appRouterProvider).showLogin();
   }
@@ -179,19 +225,23 @@ Future<void> _doLoggedIn({
   }
   deletedData = false;
   final key = getStorageKey(username, wrapper.loginAddress);
-  if (!providerContainer.read(loginProvider).loggedIn && !secondaryOnlineLogin) {
+  if (!providerContainer.read(loginProvider).loggedIn &&
+      !secondaryOnlineLogin) {
     log("loading state");
     final state = await _readFromStorage(key);
     if (state != null) {
       try {
         final decoded = json.decode(state);
         if (decoded is Map && decoded['v'] == 2) {
-          final restoredSettings =
-              SettingsState.fromJson(decoded['settings'] as Map<dynamic, dynamic>)
-                  .copyWith(noPasswordSaving: currentSettings.noPasswordSaving);
-          providerContainer.read(settingsProvider.notifier).load(restoredSettings);
+          final restoredSettings = SettingsState.fromJson(
+                  decoded['settings'] as Map<dynamic, dynamic>)
+              .copyWith(noPasswordSaving: currentSettings.noPasswordSaving);
+          providerContainer
+              .read(settingsProvider.notifier)
+              .load(restoredSettings);
           if (decoded.containsKey('state')) {
-            final appState = serializers.deserialize(decoded['state'] as Object);
+            final appState =
+                serializers.deserialize(decoded['state'] as Object);
             if (appState is AppState) {
               _restoreProvidersFromAppState(appState);
             }
@@ -200,7 +250,9 @@ Future<void> _doLoggedIn({
           if (decoded[0] == 'SettingsState') {
             final restoredSettings = _parseSettingsFromLegacyList(decoded)
                 .copyWith(noPasswordSaving: currentSettings.noPasswordSaving);
-            providerContainer.read(settingsProvider.notifier).load(restoredSettings);
+            providerContainer
+                .read(settingsProvider.notifier)
+                .load(restoredSettings);
           } else if (decoded[0] == 'AppState') {
             final legacySettings = _extractSettingsFromLegacyAppState(decoded);
             if (legacySettings != null) {
@@ -227,9 +279,9 @@ Future<void> _doLoggedIn({
   }
 
   providerContainer.read(loginProvider.notifier).setLoggedIn(
-    username: username,
-    keepLoading: keepShowingLoadingIndicator,
-  );
+        username: username,
+        keepLoading: keepShowingLoadingIndicator,
+      );
   final loggedInState = providerContainer.read(loginProvider);
   providerContainer.read(isDemoProvider.notifier).state =
       isDemoUser(url: loggedInState.url, username: loggedInState.username);
@@ -258,9 +310,9 @@ Future<void> _doChangePass(
   if (result == null) return;
   if (result["error"] != null) {
     providerContainer.read(loginProvider.notifier).setLoginFailed(
-      cause: wrapper.error ?? "Unknown error",
-      username: user,
-    );
+          cause: wrapper.error ?? "Unknown error",
+          username: user,
+        );
     await _doDeletePass();
     providerContainer.read(appRouterProvider).showLogin();
   } else {
@@ -356,20 +408,7 @@ Future<void> _doAddAccount() async {
   if (loginStorage != null) {
     // Move the current default user credentials into `otherAccounts`
     final dynamic login = json.decode(loginStorage);
-    final otherAccounts = login["otherAccounts"] as List? ?? <Object?>[];
-    if (login["user"] != null &&
-        login["pass"] != null &&
-        login["url"] != null) {
-      final alreadySaved = otherAccounts.any((dynamic a) =>
-          a['user'] == login['user'] && a['url'] == login['url']);
-      if (!alreadySaved) {
-        otherAccounts.insert(0, <String, Object?>{
-          "user": login["user"],
-          "pass": login["pass"],
-          "url": login["url"],
-        });
-      }
-    }
+    final otherAccounts = accountsWithCurrent(login as Map<dynamic, dynamic>);
     await secureStorage.write(
       key: "login",
       value: json.encode(
@@ -386,19 +425,13 @@ Future<void> _doAddAccount() async {
 }
 
 Future<void> _doSelectAccount(int index) async {
-  final dynamic login =
-      json.decode((await secureStorage.read(key: "login"))!);
+  final dynamic login = json.decode((await secureStorage.read(key: "login"))!);
   login["otherAccounts"] ??= <Object?>[];
-  final otherAccounts = login["otherAccounts"] as List<Object?>;
-  var selectedIndex = index;
-  if (login["user"] != null && login["pass"] != null && login["url"] != null) {
-    otherAccounts.insert(0, <String, Object?>{
-      "user": login["user"],
-      "pass": login["pass"],
-      "url": login["url"],
-    });
-    selectedIndex += 1;
-  }
+  final stored = login["otherAccounts"] as List<Object?>;
+  final otherAccounts = accountsWithCurrent(login as Map<dynamic, dynamic>);
+  // The account in use went in front, so the index of the picked one moved.
+  final selectedIndex = index + (otherAccounts.length - stored.length);
+  login["otherAccounts"] = otherAccounts;
   final dynamic selected = otherAccounts.removeAt(selectedIndex);
   login["user"] = selected["user"];
   login["pass"] = selected["pass"];
@@ -478,9 +511,8 @@ SettingsState _parseSettingsFromLegacyList(List<dynamic> list) {
     typeSorted: fields['typeSorted'] as bool? ?? false,
     showGradesDiagram: fields['showGradesDiagram'] as bool? ?? true,
     showAllSubjectsAverage: fields['showAllSubjectsAverage'] as bool? ?? false,
-    ignoreForGradesAverage: rawIgnore != null
-        ? (rawIgnore as List<dynamic>).cast<String>()
-        : [],
+    ignoreForGradesAverage:
+        rawIgnore != null ? (rawIgnore as List<dynamic>).cast<String>() : [],
     dashboardMarkNewOrChangedEntries:
         fields['dashboardMarkNewOrChangedEntries'] as bool? ?? true,
     dashboardDeduplicateEntries:
@@ -489,7 +521,8 @@ SettingsState _parseSettingsFromLegacyList(List<dynamic> list) {
     dashboardColorTestsInRed:
         fields['dashboardColorTestsInRed'] as bool? ?? true,
     showCalendarNicksBar: fields['showCalendarNicksBar'] as bool? ?? true,
-    calendarColorBackground: fields['calendarColorBackground'] as bool? ?? false,
+    calendarColorBackground:
+        fields['calendarColorBackground'] as bool? ?? false,
     drawerFullyExpanded: fields['drawerFullyExpanded'] as bool? ?? false,
   );
 }

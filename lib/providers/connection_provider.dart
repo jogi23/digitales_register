@@ -104,7 +104,8 @@ class ConnectionNotifier extends Notifier<ConnectionInfo> {
   ConnectionInfo build() {
     // Whether the device has a network is already tracked; this provider
     // adds the second reason and the freshness on top of it.
-    ref.listen<bool>(noInternetProvider, (_, offline) => _applyOffline(offline));
+    ref.listen<bool>(
+        noInternetProvider, (_, offline) => _applyOffline(offline));
     return ConnectionInfo(
       status: ref.read(noInternetProvider)
           ? ConnectionStatus.offline
@@ -163,6 +164,13 @@ class ConnectionNotifier extends Notifier<ConnectionInfo> {
         return;
       }
       if (!await wrapper.ensureLoggedIn()) {
+        // A login that fails for want of a network is not an expired
+        // session: sending the reader to the login form there asked for a
+        // password they did not need, on a page they could not leave.
+        if (ref.read(noInternetProvider) || wrapper.noInternet) {
+          state = state.copyWith(status: ConnectionStatus.offline);
+          return;
+        }
         state = state.copyWith(status: ConnectionStatus.sessionExpired);
         ref.read(appRouterProvider).showLogin();
         return;
@@ -175,7 +183,6 @@ class ConnectionNotifier extends Notifier<ConnectionInfo> {
   }
 }
 
-final connectionProvider =
-    NotifierProvider<ConnectionNotifier, ConnectionInfo>(
+final connectionProvider = NotifierProvider<ConnectionNotifier, ConnectionInfo>(
   ConnectionNotifier.new,
 );
