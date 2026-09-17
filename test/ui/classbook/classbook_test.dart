@@ -477,11 +477,16 @@ void main() {
       await tester.pumpWidget(_seite(classbookEntries(_tage())));
       await tester.pumpAndSettle();
 
-      ListTile zeile(String title) =>
-          tester.widget<ListTile>(find.widgetWithText(ListTile, title));
-      expect(zeile('Diktat').tileColor, isNull);
-      expect(zeile('Leseübung').tileColor, isNotNull);
-      expect(zeile('Notenlehre').tileColor, isNull);
+      // Die Tönung liegt in der Zeile selbst, nicht in `tileColor`: Flutter
+      // malte die auf das Material des Gerüsts, wo sie der Liste entkam.
+      Color? toenung(String title) => tester
+          .widget<AlternateRowTint>(
+            find.widgetWithText(AlternateRowTint, title),
+          )
+          .color;
+      expect(toenung('Diktat'), isNull);
+      expect(toenung('Leseübung'), isNotNull);
+      expect(toenung('Notenlehre'), isNull);
     });
   });
 

@@ -308,7 +308,7 @@ class _DaySection extends StatelessWidget {
                   entry: entry,
                   showDate: false,
                   ordinaryType: ordinaryType,
-                  tileColor: i.isOdd ? tint : null,
+                  tint: i.isOdd ? tint : null,
                 ),
             ],
           EntryDisplayMode.cards => [
@@ -377,7 +377,7 @@ class _BySubject extends StatelessWidget {
                   entry: entry,
                   showDate: true,
                   ordinaryType: ordinaryType,
-                  tileColor: i.isOdd ? tint : null,
+                  tint: i.isOdd ? tint : null,
                 ),
           ],
         );
@@ -450,13 +450,13 @@ class _EntryTile extends StatelessWidget {
 
   /// Every second row is tinted, so a long entry text does not run into the
   /// next one.
-  final Color? tileColor;
+  final Color? tint;
 
   const _EntryTile({
     required this.entry,
     required this.showDate,
     required this.ordinaryType,
-    this.tileColor,
+    this.tint,
   });
 
   @override
@@ -474,19 +474,21 @@ class _EntryTile extends StatelessWidget {
         entry.typeName,
     ];
 
-    return ListTile(
-      dense: true,
-      tileColor: tileColor,
-      leading: Icon(Icons.school, color: theme.colorScheme.primary),
-      title: Text(entry.title),
-      // Hervorgehoben, weil hier das Suchbare steht: Fach, Stunde,
-      // Lehrperson. Der Eintragstext darüber ist oft lang, und ohne
-      // Absetzung verschwimmt die Zuordnung zwischen den Zeilen.
-      subtitle: Text(
-        untertitel.join(" · "),
-        style: theme.textTheme.bodyMedium?.copyWith(
-          color: theme.colorScheme.primary,
-          fontWeight: FontWeight.w500,
+    return AlternateRowTint(
+      color: tint,
+      child: ListTile(
+        dense: true,
+        leading: Icon(Icons.school, color: theme.colorScheme.primary),
+        title: Text(entry.title),
+        // Hervorgehoben, weil hier das Suchbare steht: Fach, Stunde,
+        // Lehrperson. Der Eintragstext darüber ist oft lang, und ohne
+        // Absetzung verschwimmt die Zuordnung zwischen den Zeilen.
+        subtitle: Text(
+          untertitel.join(" · "),
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.primary,
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ),
     );

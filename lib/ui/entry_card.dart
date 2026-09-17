@@ -64,3 +64,28 @@ Color alternateRowColor(BuildContext context) => Theme.of(context)
     .colorScheme
     .surfaceContainerHighest
     .withValues(alpha: 0.75);
+
+/// Legt [color] hinter [child] - die Tönung jeder zweiten Zeile.
+///
+/// Ein eigenes [Material] statt `ListTile.tileColor`: Flutter malt
+/// `tileColor` und die Wischspuren auf das nächste Material der Umgebung,
+/// und das ist das des Gerüsts, außerhalb des Scroll-Viewports. Die Tönung
+/// entkommt damit der Liste und erscheint über ihr - im Klassenbuch hinter
+/// den Fächer-Chips. Das eigene Material liegt in der Zeile und wird mit ihr
+/// beschnitten; eine [ColoredBox] täte es nicht, sie verdeckte die
+/// Wischspuren.
+class AlternateRowTint extends StatelessWidget {
+  /// Null lässt die Zeile ungetönt; jede zweite bleibt so, wie die Seite ist.
+  final Color? color;
+
+  final Widget child;
+
+  const AlternateRowTint({super.key, required this.color, required this.child});
+
+  @override
+  Widget build(BuildContext context) => Material(
+        type: color == null ? MaterialType.transparency : MaterialType.canvas,
+        color: color,
+        child: child,
+      );
+}
