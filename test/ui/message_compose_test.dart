@@ -76,6 +76,8 @@ class _Calls {
   int sends = 0;
   int retries = 0;
   MessageQuote? quote;
+  int attachs = 0;
+  final detached = <ComposeAttachment>[];
 }
 
 Widget _page(
@@ -85,6 +87,7 @@ Widget _page(
   List<MessageRecipient> hits = const [],
   bool isAnswer = false,
   String? quotedText,
+  bool withAttachments = false,
 }) {
   scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
   return MaterialApp(
@@ -110,6 +113,8 @@ Widget _page(
                   onRemove: (_) {},
                   onToggle: (_, __) {},
                   onTickAll: (_) {},
+                  onAttach: withAttachments ? () => calls.attachs++ : null,
+                  onDetach: calls.detached.add,
                   onSend: ({required subject, required text, quote}) async {
                     calls
                       ..sends += 1
@@ -127,7 +132,8 @@ Widget _page(
   );
 }
 
-Future<void> _open(WidgetTester tester, Widget page) async {
+Future<void> _open(WidgetTester tester, Widget page,
+    {bool settle = true}) async {
   // Tall enough for the whole form: a ListView does not build what lies
   // beyond the screen, and the send button sits at its end.
   tester.view
@@ -136,7 +142,13 @@ Future<void> _open(WidgetTester tester, Widget page) async {
   addTearDown(tester.view.reset);
   await tester.pumpWidget(page);
   await tester.tap(find.text('open'));
-  await tester.pumpAndSettle();
+  if (settle) {
+    await tester.pumpAndSettle();
+  } else {
+    // A spinner never settles; a few frames are enough to see the page.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+  }
 }
 
 /// The send button on the page. By predicate: `FilledButton.icon` builds a
@@ -311,5 +323,93 @@ void main() {
       find.text('Dieses Konto darf keine Mitteilungen senden.'),
       findsOneWidget,
     );
+  });
+
+  group('Anhänge', () {
+    ComposeAttachment file(
+      String name, {
+      int? submissionId,
+      bool uploading = false,
+      bool failed = false,
+    }) =>
+        ComposeAttachment(
+          name: name,
+          size: 2048,
+          path: '/tmp/$name',
+          submissionId: submissionId,
+          uploading: uploading,
+          failed: failed,
+        );
+
+    MessageComposeState stateWith(
+      List<ComposeAttachment> attachments, {
+      int max = 8,
+    }) =>
+        MessageComposeState(
+          ready: true,
+          type: const {'typeId': 'read'},
+          permission: 'me',
+          attachments: attachments,
+          maxAttachments: max,
+        );
+
+    testWidgets('ohne Anhang-Funktion fehlt der Abschnitt', (tester) async {
+      final calls = _Calls();
+      await _open(tester, _page(stateWith(const []), calls));
+      expect(find.text('Anhang hinzufügen'), findsNothing);
+    });
+
+    testWidgets('listet Dateien mit Größe und Zustand', (tester) async {
+      final calls = _Calls();
+      await _open(
+        tester,
+        _page(
+          stateWith([
+            file('zeugnis.pdf', submissionId: 7),
+            file('foto.jpg', uploading: true),
+            file('gross.zip', failed: true),
+          ]),
+          calls,
+          withAttachments: true,
+        ),
+        settle: false,
+      );
+      expect(find.text('zeugnis.pdf'), findsOneWidget);
+      expect(find.text('2 kB'), findsOneWidget);
+      expect(find.text('Wird hochgeladen …'), findsOneWidget);
+      expect(
+        find.text('Nicht hochgeladen — noch einmal versuchen'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('an der Grenze ist Hinzufügen gesperrt', (tester) async {
+      final calls = _Calls();
+      await _open(
+        tester,
+        _page(
+          stateWith([file('a.pdf', submissionId: 1)], max: 1),
+          calls,
+          withAttachments: true,
+        ),
+      );
+      final add = find.widgetWithText(TextButton, 'Anhang hinzufügen');
+      expect(tester.widget<TextButton>(add).enabled, isFalse);
+      expect(find.text('Höchstens 1 Anhänge'), findsOneWidget);
+    });
+
+    testWidgets('solange etwas hochlädt, wird nicht gesendet', (tester) async {
+      final calls = _Calls();
+      await _open(
+        tester,
+        _page(
+          stateWith([file('foto.jpg', uploading: true)]),
+          calls,
+          withAttachments: true,
+        ),
+        settle: false,
+      );
+      expect(_sendButton(tester).enabled, isFalse);
+    });
   });
 }

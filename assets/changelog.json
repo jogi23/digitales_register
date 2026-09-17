@@ -14,6 +14,7 @@
             "Kalender: eine Stunde außerhalb des eigenen Klassenzimmers trägt oben rechts ein kleines Dreieck, auch in der Wochenansicht des Merkhefts. Ein langer Druck auf die Stunde nennt den Raum; eine gebuchte Präsentationskamera gilt nicht als Raum.",
             "Einstellungen → Fächer: „Alle Details im Kalender anzeigen“ nennt in der Stunde auch den Raum, soweit Platz ist. Der Ortsname, den alle Räume der Woche tragen, entfällt; bei mehreren Räumen steht „+1“ dahinter. Lehrpersonen und Raum werden dafür bei Bedarf etwas kleiner, das Fach nie. Voreingestellt bleibt alles wie bisher.",
             "Bewertungen: ein Lesezeichen markiert einzelne Noten, in der Liste und auf der Seite der Note. „Nur markierte Noten anzeigen“ blendet alles andere aus. Die Markierung bleibt auf dem Gerät und gilt je Konto; das Portal kennt sie nicht.",
+            "Mitteilungen: beim Schreiben und Antworten lassen sich Dateien anhängen. Jeder Anhang zeigt Name, Größe und ob er schon beim Portal ist; gesendet wird erst, wenn alle oben sind. Wie viele Anhänge erlaubt sind, sagt die Schule.",
             "Absenzen: Absenzen lassen sich in der App begründen und unterschreiben, künftige Absenzen im Voraus melden und wieder löschen. Verlangt die Schule eine Selbsterklärung, steht sie zur Auswahl. Ob ein Konto das darf, entscheidet das Portal; bereits entschuldigte Absenzen bleiben unverändert."
           ]
         },
@@ -54,6 +55,7 @@
             "Calendar: a lesson held outside the class's own room carries a small triangle in the top right corner, in the homework week view as well. A long press on the lesson names the room; a booked presentation camera does not count as a room.",
             "Settings → Subjects: “Show all details in the calendar” also names the room in the lesson, as far as there is space. The location name shared by all rooms of the week is left out; with several rooms, “+1” follows. Teachers and room get slightly smaller if needed, the subject never does. By default nothing changes.",
             "Grades: a bookmark marks single grades, in the list and on the grade's own page. “Show only marked grades” hides everything else. The mark stays on the device and applies per account; the portal does not know about it.",
+            "Messages: files can be attached when writing and replying. Every attachment shows its name, its size and whether it reached the portal; the message goes out only once they all did. How many are allowed is up to the school.",
             "Absences: absences can be given a reason and signed in the app, absences still to come reported in advance and taken back again. Where a school asks for a self-declaration, it can be picked. Whether an account may do this is the portal's call; absences already settled stay as they are."
           ]
         },
@@ -94,6 +96,7 @@
             "Calendario: una lezione che si svolge fuori dall'aula della classe porta un piccolo triangolo nell'angolo in alto a destra, anche nella vista settimanale dell'agenda. Una pressione prolungata sulla lezione indica l'aula; una fotocamera per presentazioni prenotata non conta come aula.",
             "Impostazioni → Materie: «Mostra tutti i dettagli nel calendario» indica nella lezione anche l'aula, se c'è spazio. Il nome della sede comune a tutte le aule della settimana viene omesso; con più aule segue «+1». Se serve, docenti e aula diventano un po' più piccoli, la materia mai. Di default non cambia nulla.",
             "Valutazioni: un segnalibro contrassegna i singoli voti, nell'elenco e nella pagina del voto. «Mostra solo i voti contrassegnati» nasconde tutto il resto. Il contrassegno resta sul dispositivo e vale per ogni account; il portale non lo conosce.",
+            "Comunicazioni: scrivendo e rispondendo si possono allegare file. Ogni allegato mostra nome, dimensione e se è già arrivato al portale; l'invio avviene solo quando sono tutti caricati. Quanti allegati siano ammessi lo decide la scuola.",
             "Assenze: le assenze si possono motivare e firmare nell'app, quelle future si segnalano in anticipo e si possono eliminare. Se la scuola richiede un'autocertificazione, si può scegliere. Se un account possa farlo lo decide il portale; le assenze già giustificate restano invariate."
           ]
         },

@@ -161,6 +161,44 @@ class SessionManager {
     return true;
   }
 
+  /// Sends one file as a multipart request, the way the portal's uploader
+  /// does: the file under `file`, everything else as plain fields.
+  ///
+  /// Returns the server's answer, or null when the request never got through.
+  Future<dynamic> upload(
+    String url, {
+    required String path,
+    required String filename,
+    Map<String, Object?> fields = const <String, Object?>{},
+    void Function(Object error)? onError,
+  }) async {
+    if (_authService.demoMode) {
+      final dynamic response = await getDemoResponse(url, fields);
+      if (response != null) onRequestSucceeded?.call();
+      return response;
+    }
+    if (!await ensureLoggedIn()) {
+      if (!noInternet) onSessionExpired?.call();
+      return null;
+    }
+    try {
+      final form = FormData.fromMap(<String, dynamic>{
+        ...fields,
+        'file': await MultipartFile.fromFile(path, filename: filename),
+      });
+      final response = await _apiClient.dio.post<dynamic>(
+        _apiClient.baseAddress + url,
+        data: form,
+      );
+      onRequestSucceeded?.call();
+      return response.data;
+    } on Exception catch (e) {
+      log("upload to $url failed: $e");
+      onError?.call(e);
+      return null;
+    }
+  }
+
   /// How long a failed sign-in from storage keeps the next one waiting.
   ///
   /// Every request that finds no session tries again, and a wrong password

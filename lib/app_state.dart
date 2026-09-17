@@ -60,7 +60,7 @@ abstract class AppState implements Built<AppState, AppStateBuilder> {
 
   bool get isDemo => isDemoUser(url: url, username: loginState.username);
 
-factory AppState([Function(AppStateBuilder b)? updates]) = _$AppState;
+  factory AppState([Function(AppStateBuilder b)? updates]) = _$AppState;
   AppState._();
   static void _initializeBuilder(AppStateBuilder builder) {
     builder
@@ -113,7 +113,8 @@ abstract class DashboardState
 
   BuiltList<Day>? get allDays;
 
-  static Serializer<DashboardState> get serializer => _$dashboardStateSerializer;
+  static Serializer<DashboardState> get serializer =>
+      _$dashboardStateSerializer;
 
   factory DashboardState([Function(DashboardStateBuilder b)? updates]) =
       _$DashboardState;
@@ -192,11 +193,22 @@ abstract class Config implements Built<Config, ConfigBuilder> {
 
   int? get currentSemesterMaybe;
   bool get isStudentOrParent;
+
+  /// How many attachments one message may carry, from the school's
+  /// `submission_maximum_number_items_allowed`.
+  int get submissionMaxItems;
   static Serializer<Config> get serializer => _$configSerializer;
 
   factory Config([Function(ConfigBuilder b)? updates]) = _$Config;
   // ignore: prefer_const_constructors_in_immutables
   Config._();
+
+  /// What the portal falls back to where the page does not say.
+  static const defaultSubmissionMaxItems = 8;
+
+  static void _initializeBuilder(ConfigBuilder builder) {
+    builder.submissionMaxItems = defaultSubmissionMaxItems;
+  }
 }
 
 abstract class GradesState implements Built<GradesState, GradesStateBuilder> {
@@ -526,8 +538,7 @@ class SettingsState {
             dashboardColorTestsInRed ?? this.dashboardColorTestsInRed,
         ignoreForGradesAverage:
             ignoreForGradesAverage ?? List.of(this.ignoreForGradesAverage),
-        classbookSubjects:
-            classbookSubjects ?? List.of(this.classbookSubjects),
+        classbookSubjects: classbookSubjects ?? List.of(this.classbookSubjects),
         drawerFullyExpanded: drawerFullyExpanded ?? this.drawerFullyExpanded,
         keepPageOnAccountSwitch:
             keepPageOnAccountSwitch ?? this.keepPageOnAccountSwitch,
@@ -623,8 +634,7 @@ class SettingsState {
         dashboardColorTestsInRed:
             json['dashboardColorTestsInRed'] as bool? ?? true,
         ignoreForGradesAverage:
-            (json['ignoreForGradesAverage'] as List<dynamic>?)
-                ?.cast<String>(),
+            (json['ignoreForGradesAverage'] as List<dynamic>?)?.cast<String>(),
         classbookSubjects:
             (json['classbookSubjects'] as List<dynamic>?)?.cast<String>(),
         drawerFullyExpanded: json['drawerFullyExpanded'] as bool? ?? true,

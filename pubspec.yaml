@@ -63,6 +63,7 @@ dependencies:
   in_app_review: ^2.0.12
   fl_chart: ^1.2.0
   pdf: ^3.13.0
+  file_picker: ^11.0.3
 
 dependency_overrides:
   file: ^6.1.4
