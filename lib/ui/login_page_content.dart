@@ -57,7 +57,6 @@ class LoginPageContent extends StatefulWidget {
 }
 
 class _LoginPageContentState extends State<LoginPageContent> {
-
   late final _usernameController = TextEditingController(),
       _passwordController = TextEditingController(),
       _newPassword1Controller = TextEditingController(),
@@ -254,8 +253,7 @@ class _LoginPageContentState extends State<LoginPageContent> {
                         TextButton(
                           style: TextButton.styleFrom(
                             foregroundColor: Colors.grey,
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 16),
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
                           ),
                           onPressed: () async {
                             await launchUrl(
@@ -273,8 +271,7 @@ class _LoginPageContentState extends State<LoginPageContent> {
                         TextButton(
                           style: TextButton.styleFrom(
                             foregroundColor: Colors.grey,
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 16),
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
                           ),
                           onPressed: () {
                             setState(() {
@@ -321,6 +318,7 @@ class _LoginPageContentState extends State<LoginPageContent> {
                                 labelText: 'Benutzername'),
                             controller: _usernameController,
                             enabled: !widget.vm.loading,
+                            onChanged: (_) => setState(() {}),
                           ),
                           TextField(
                             autofillHints: widget.vm.loading
@@ -333,6 +331,7 @@ class _LoginPageContentState extends State<LoginPageContent> {
                             controller: _passwordController,
                             obscureText: true,
                             enabled: !widget.vm.loading,
+                            onChanged: (_) => setState(() {}),
                           ),
                           Align(
                             alignment: Alignment.centerLeft,
@@ -369,7 +368,7 @@ class _LoginPageContentState extends State<LoginPageContent> {
                               ),
                               padding: const EdgeInsets.all(8),
                               child: Text(
-tr(context).passwordRules,
+                                tr(context).passwordRules,
                               ),
                             ),
                             TextField(
@@ -413,7 +412,15 @@ tr(context).passwordRules,
                           ],
                           const SizedBox(height: 8),
                           ElevatedButton(
-                            onPressed: widget.vm.loading || !newPasswordsMatch
+                            // Nothing to send without name and password, and
+                            // an attempt with an empty field used to cost the
+                            // saved password.
+                            onPressed: widget.vm.loading ||
+                                    !newPasswordsMatch ||
+                                    !credentialsComplete(
+                                      _usernameController.text,
+                                      _passwordController.text,
+                                    )
                                 ? null
                                 : () {
                                     widget.setSaveNoPass(safeMode);
@@ -445,8 +452,7 @@ tr(context).passwordRules,
                   ),
                   SwitchListTile.adaptive(
                     title: Text(tr(context).settingsStayLoggedIn),
-                    subtitle: Text(
-                        tr(context).settingsStayLoggedInSubtitle),
+                    subtitle: Text(tr(context).settingsStayLoggedInSubtitle),
                     value: !safeMode,
                     onChanged: widget.vm.loading
                         ? null

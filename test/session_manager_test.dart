@@ -531,4 +531,63 @@ void main() {
       });
     });
   });
+
+  group('signing in again from storage', () {
+    /// An account whose session ran out: nothing is signed in and the
+    /// credentials this session held are gone, but storage still has them.
+    ({_MockAuthService auth, SessionManager sm, List<List<String?>> logins})
+        signedOut({bool loginWorks = true}) {
+      final auth = makeSignedOutAuth();
+      final logins = <List<String?>>[];
+      var loggedIn = false;
+      when(() => auth.loggedIn).thenAnswer((_) async => loggedIn);
+      when(() => auth.login(any(), any(), any(), any()))
+          .thenAnswer((invocation) async {
+        logins.add([
+          for (final argument in invocation.positionalArguments)
+            argument as String?,
+        ]);
+        loggedIn = loginWorks;
+        return null;
+      });
+      final sm = SessionManager(ApiClient(), auth)
+        ..storedLogin = () async => (
+              user: 'anna',
+              pass: 'geheim',
+              url: 'https://schule.digitalesregister.it',
+            );
+      return (auth: auth, sm: sm, logins: logins);
+    }
+
+    test('takes the password storage still has', () async {
+      // The account switch worked for exactly this reason: it reads the
+      // password from storage. Reconnecting did not, and ended on the login
+      // form.
+      final setup = signedOut();
+      expect(await setup.sm.ensureLoggedIn(), isTrue);
+      expect(setup.logins, hasLength(1));
+      expect(setup.logins.single.first, 'anna');
+      expect(setup.logins.single[1], 'geheim');
+    });
+
+    test('without stored credentials it gives up as before', () async {
+      final auth = makeSignedOutAuth();
+      final sm = SessionManager(ApiClient(), auth);
+      expect(await sm.ensureLoggedIn(), isFalse);
+    });
+
+    test('nothing stored for this account is no login attempt', () async {
+      final setup = signedOut();
+      setup.sm.storedLogin = () async => null;
+      expect(await setup.sm.ensureLoggedIn(), isFalse);
+      expect(setup.logins, isEmpty);
+    });
+
+    test('a password the server refuses is not sent again and again', () async {
+      final setup = signedOut(loginWorks: false);
+      expect(await setup.sm.ensureLoggedIn(), isFalse);
+      expect(await setup.sm.ensureLoggedIn(), isFalse);
+      expect(setup.logins, hasLength(1));
+    });
+  });
 }

@@ -95,7 +95,9 @@ void wireLoginDispatchers(LoginNotifier notifier) {
     showRequestPassReset: (url) => unawaited(() async {
       providerContainer.read(loginProvider.notifier).setUrl(url);
       await navigatorKey?.currentState?.pushNamed("/request_pass_reset");
-      providerContainer.read(loginProvider.notifier).updatePassResetState(const PassResetState());
+      providerContainer
+          .read(loginProvider.notifier)
+          .updatePassResetState(const PassResetState());
     }()),
   );
 }
@@ -180,11 +182,14 @@ Future<void> _doLoad() async {
         providerContainer.read(noInternetProvider.notifier).setNoInternet(v);
       }
       ..onSessionExpired = () {
-        providerContainer.read(connectionProvider.notifier).markSessionExpired();
+        providerContainer
+            .read(connectionProvider.notifier)
+            .markSessionExpired();
       }
       ..onRequestSucceeded = () {
         providerContainer.read(connectionProvider.notifier).markSuccess();
-      };
+      }
+      ..storedLogin = readStoredLogin;
   }
   if (!providerContainer.read(noInternetProvider)) _popAll();
   // Load profile photos/aliases, and subject nicknames/colors (app-wide,
@@ -213,15 +218,16 @@ Future<void> _doLoad() async {
   final pass = getString(login["pass"]);
   final url = getString(login["url"]);
   final List<OtherAccount> otherAccounts = [
-    for (final dynamic entry
-        in (login["otherAccounts"] as List?) ?? const [])
+    for (final dynamic entry in (login["otherAccounts"] as List?) ?? const [])
       if (getString(entry["user"]) != null && getString(entry["url"]) != null)
         OtherAccount(
           username: getString(entry["user"])!,
           url: getString(entry["url"])!,
         ),
   ];
-  providerContainer.read(loginProvider.notifier).setOtherAccounts(otherAccounts);
+  providerContainer
+      .read(loginProvider.notifier)
+      .setOtherAccounts(otherAccounts);
   final currentLogin = providerContainer.read(loginProvider);
   // Der Zweig greift, wenn die App über einen Link gestartet wurde, der auf
   // einen anderen Server oder Benutzer zeigt als das gespeicherte Konto -
@@ -268,8 +274,7 @@ Future<void> _doSaveState({bool immediately = false}) async {
         ..profileState = providerContainer.read(profileProvider).toBuilder()
         ..notificationState = NotificationState(
           (b) => b
-            ..notifications =
-                BuiltList.of(notifState.notifications).toBuilder()
+            ..notifications = BuiltList.of(notifState.notifications).toBuilder()
             ..lastFetched = notifState.lastFetched,
         ).toBuilder(),
     );
@@ -387,16 +392,16 @@ Future<void> _doStart(Uri? uri) async {
     switch (parameters["semesterWechsel"]) {
       case "1":
         providerContainer.read(loginProvider.notifier).addAfterLoginCallback(
-          () => providerContainer
-              .read(gradesProvider.notifier)
-              .setSemester(Semester.first),
-        );
+              () => providerContainer
+                  .read(gradesProvider.notifier)
+                  .setSemester(Semester.first),
+            );
       case "2":
         providerContainer.read(loginProvider.notifier).addAfterLoginCallback(
-          () => providerContainer
-              .read(gradesProvider.notifier)
-              .setSemester(Semester.second),
-        );
+              () => providerContainer
+                  .read(gradesProvider.notifier)
+                  .setSemester(Semester.second),
+            );
     }
     switch (uri.path) {
       case "":
@@ -445,24 +450,24 @@ Future<void> redirectAfterLogin(String location) async {
       break;
     case "student/absences":
       providerContainer.read(loginProvider.notifier).addAfterLoginCallback(
-        () => providerContainer.read(appRouterProvider).showAbsences(),
-      );
+            () => providerContainer.read(appRouterProvider).showAbsences(),
+          );
     case "calendar/student":
       providerContainer.read(loginProvider.notifier).addAfterLoginCallback(
-        () => providerContainer.read(appRouterProvider).showCalendar(),
-      );
+            () => providerContainer.read(appRouterProvider).showCalendar(),
+          );
     case "student/subjects":
       providerContainer.read(loginProvider.notifier).addAfterLoginCallback(
-        () => providerContainer.read(appRouterProvider).showGrades(),
-      );
+            () => providerContainer.read(appRouterProvider).showGrades(),
+          );
     case "student/certificate":
       providerContainer.read(loginProvider.notifier).addAfterLoginCallback(
-        () => providerContainer.read(appRouterProvider).showCertificate(),
-      );
+            () => providerContainer.read(appRouterProvider).showCertificate(),
+          );
     case "message/list":
       providerContainer.read(loginProvider.notifier).addAfterLoginCallback(
-        () => providerContainer.read(appRouterProvider).showMessages(),
-      );
+            () => providerContainer.read(appRouterProvider).showMessages(),
+          );
     default:
       showSnackBar(trGlobal.errorLinkNotOpened);
   }
