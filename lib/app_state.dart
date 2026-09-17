@@ -792,12 +792,34 @@ abstract class AbsencesState
   BuiltList<AbsenceGroup> get absences;
   BuiltList<FutureAbsence> get futureAbsences;
 
+  /// Whether this account may give reasons and report absences. The register
+  /// decides it; there is nothing else to tell a pupil from a parent.
+  bool get canEdit;
+
+  /// Every self-declaration form of the school, for naming the one an
+  /// absence was given with.
+  BuiltList<SelfDeclaration> get selfDeclarations;
+
+  /// The forms that may be picked right now.
+  BuiltList<SelfDeclaration> get activeSelfDeclarations;
+
+  /// Whether the school works with self-declarations at all, and whether
+  /// giving a reason insists on one.
+  bool get selfDeclarationActive;
+  bool get selfDeclarationMandatory;
+
   UtcDateTime? get lastFetched;
 
+  /// The new fields start empty, so state saved before them still loads.
   static void _initializeBuilder(AbsencesStateBuilder builder) {
     builder
       ..absences = ListBuilder<AbsenceGroup>()
-      ..futureAbsences = ListBuilder<FutureAbsence>();
+      ..futureAbsences = ListBuilder<FutureAbsence>()
+      ..selfDeclarations = ListBuilder<SelfDeclaration>()
+      ..activeSelfDeclarations = ListBuilder<SelfDeclaration>()
+      ..canEdit = false
+      ..selfDeclarationActive = false
+      ..selfDeclarationMandatory = false;
   }
 }
 

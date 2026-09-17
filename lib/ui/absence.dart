@@ -26,7 +26,16 @@ class AbsenceGroupWidget extends StatelessWidget {
   final AbsencesViewModel vm;
   final Color? tileColor;
 
-  const AbsenceGroupWidget({super.key, required this.vm, this.tileColor});
+  /// Gives a reason for this absence; null leaves out the button, which is
+  /// what an account without the right to edit gets.
+  final VoidCallback? onJustify;
+
+  const AbsenceGroupWidget({
+    super.key,
+    required this.vm,
+    this.tileColor,
+    this.onJustify,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -66,6 +75,13 @@ class AbsenceGroupWidget extends StatelessWidget {
       subtitle: subtitleParts.isNotEmpty
           ? Text(subtitleParts.join(' · '))
           : null,
+      trailing: onJustify == null
+          ? null
+          : IconButton(
+              icon: const Icon(Icons.edit_note),
+              tooltip: tr(context).absenceJustifyAction,
+              onPressed: onJustify,
+            ),
     );
   }
 }
@@ -74,10 +90,14 @@ class FutureAbsenceWidget extends StatelessWidget {
   final FutureAbsence absence;
   final Color? tileColor;
 
+  /// Takes this report back; null leaves out the button.
+  final VoidCallback? onDelete;
+
   const FutureAbsenceWidget({
     super.key,
     required this.absence,
     this.tileColor,
+    this.onDelete,
   });
 
   @override
@@ -156,6 +176,13 @@ class FutureAbsenceWidget extends StatelessWidget {
       subtitle: subtitleParts.isNotEmpty
           ? Text(subtitleParts.join('\n'))
           : null,
+      trailing: onDelete == null
+          ? null
+          : IconButton(
+              icon: const Icon(Icons.delete_outline),
+              tooltip: l.absenceReportDelete,
+              onPressed: onDelete,
+            ),
     );
   }
 }

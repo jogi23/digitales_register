@@ -22,6 +22,7 @@ import 'package:dr/container/absences_page_container.dart';
 import 'package:dr/data.dart';
 import 'package:dr/providers/absences_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
+import 'package:dr/ui/absence_entry.dart';
 import 'package:dr/ui/absences_page.dart';
 import 'package:dr/ui/entry_card.dart';
 import 'package:flutter/material.dart';
@@ -181,6 +182,217 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(EntryCard), findsNothing);
       expect(find.byIcon(Icons.cancel), findsOneWidget);
+    });
+  });
+
+  group('Absenzen eintragen', () {
+    AbsencesState withRight({required bool canEdit}) =>
+        _demoAbsencesState.rebuild((b) => b..canEdit = canEdit);
+
+    /// Absences the register has settled are not up for a reason any more.
+    int openAbsences() => _demoAbsencesState.absences
+        .where((g) =>
+            g.justified != AbsenceJustified.justified &&
+            g.justified != AbsenceJustified.forSchool)
+        .length;
+
+    testWidgets('mit Schreibrecht führt die Titelzeile zum Melden',
+        (tester) async {
+      await tester
+          .pumpWidget(_buildTestWidget(initialState: withRight(canEdit: true)));
+      await tester.pumpAndSettle();
+      expect(find.byTooltip('Absenz melden'), findsOneWidget);
+    });
+
+    testWidgets('ohne Schreibrecht gibt es keine Knöpfe', (tester) async {
+      await tester.pumpWidget(
+          _buildTestWidget(initialState: withRight(canEdit: false)));
+      await tester.pumpAndSettle();
+      expect(find.byTooltip('Absenz melden'), findsNothing);
+      expect(find.byIcon(Icons.edit_note), findsNothing);
+    });
+
+    testWidgets('nur offene Absenzen bieten eine Begründung an',
+        (tester) async {
+      await tester
+          .pumpWidget(_buildTestWidget(initialState: withRight(canEdit: true)));
+      await tester.pumpAndSettle();
+      expect(openAbsences(), greaterThan(0));
+      expect(find.byIcon(Icons.edit_note), findsNWidgets(openAbsences()));
+    });
+
+    testWidgets('der Dialog verlangt Grund und Unterschrift', (tester) async {
+      await tester
+          .pumpWidget(_buildTestWidget(initialState: withRight(canEdit: true)));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(Icons.edit_note).first);
+      await tester.pumpAndSettle();
+      expect(find.text('Absenz begründen'), findsOneWidget);
+
+      final save = find.widgetWithText(TextButton, 'Speichern');
+      final fields = find.byType(TextField);
+      await tester.enterText(fields.at(0), '');
+      await tester.enterText(fields.at(1), '');
+      await tester.pump();
+      expect(tester.widget<TextButton>(save).enabled, isFalse);
+
+      await tester.enterText(fields.at(0), 'Grippe');
+      await tester.enterText(fields.at(1), 'Demo Elternteil');
+      await tester.pump();
+      expect(tester.widget<TextButton>(save).enabled, isTrue);
+    });
+  });
+
+  group('Melde-Formular', () {
+    Widget formular({int hourCount = 6, String? signature}) => MaterialApp(
+          supportedLocales: const [Locale('de', 'DE')],
+          localizationsDelegates: const [
+            GlobalCupertinoLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          home: FutureAbsencePage(hourCount: hourCount, signature: signature),
+        );
+
+    testWidgets('übernimmt die zuletzt genutzte Unterschrift', (tester) async {
+      await tester.pumpWidget(formular(signature: 'Demo Elternteil'));
+      await tester.pumpAndSettle();
+      expect(find.text('Demo Elternteil'), findsOneWidget);
+    });
+
+    testWidgets('meldet erst mit Grund und Unterschrift', (tester) async {
+      await tester.pumpWidget(formular());
+      await tester.pumpAndSettle();
+      final send = find.widgetWithText(TextButton, 'Melden');
+      expect(tester.widget<TextButton>(send).enabled, isFalse);
+
+      await tester.enterText(find.byType(TextField).at(0), 'Turnier');
+      await tester.enterText(find.byType(TextField).at(1), 'Demo Elternteil');
+      await tester.pump();
+      expect(tester.widget<TextButton>(send).enabled, isTrue);
+    });
+  });
+
+  group('was gesendet werden darf', () {
+    test('ohne Grund oder Unterschrift nicht', () {
+      expect(
+        absenceReasonComplete(
+          reason: '  ',
+          signature: 'Demo Elternteil',
+          declarationActive: false,
+          declarationMandatory: false,
+          declarationInput: '',
+        ),
+        isFalse,
+      );
+      expect(
+        absenceReasonComplete(
+          reason: 'Grippe',
+          signature: '',
+          declarationActive: false,
+          declarationMandatory: false,
+          declarationInput: '',
+        ),
+        isFalse,
+      );
+    });
+
+    test('eine verlangte Selbsterklärung muss gewählt sein', () {
+      expect(
+        absenceReasonComplete(
+          reason: 'Grippe',
+          signature: 'Demo Elternteil',
+          declarationActive: true,
+          declarationMandatory: true,
+          declarationInput: '',
+        ),
+        isFalse,
+      );
+    });
+
+    test('ein Formular mit Pflichtfeld braucht die Angabe', () {
+      final declaration = SelfDeclaration(
+        (b) => b
+          ..id = 4
+          ..title = 'Krankheit ab 4 Tagen'
+          ..text = ''
+          ..inputMandatory = true
+          ..inputExplain = 'Name Arzt/Ärztin',
+      );
+      expect(
+        absenceReasonComplete(
+          reason: 'Grippe',
+          signature: 'Demo Elternteil',
+          declarationActive: true,
+          declarationMandatory: true,
+          declaration: declaration,
+          declarationInput: '',
+        ),
+        isFalse,
+      );
+      expect(
+        absenceReasonComplete(
+          reason: 'Grippe',
+          signature: 'Demo Elternteil',
+          declarationActive: true,
+          declarationMandatory: true,
+          declaration: declaration,
+          declarationInput: 'Dr. Muster',
+        ),
+        isTrue,
+      );
+    });
+
+    test('sind die Formulare aus, zählen sie nicht', () {
+      expect(
+        absenceReasonComplete(
+          reason: 'Grippe',
+          signature: 'Demo Elternteil',
+          declarationActive: false,
+          declarationMandatory: true,
+          declarationInput: '',
+        ),
+        isTrue,
+      );
+    });
+
+    test('eine Meldung endet nicht vor ihrem Beginn', () {
+      expect(
+        futureAbsenceComplete(
+          startDate: DateTime(2026, 9, 22),
+          endDate: DateTime(2026, 9, 21),
+          startHour: 1,
+          endHour: 6,
+          reason: 'Turnier',
+          signature: 'Demo Elternteil',
+        ),
+        isFalse,
+      );
+    });
+
+    test('am selben Tag muss die Stunde passen', () {
+      expect(
+        futureAbsenceComplete(
+          startDate: DateTime(2026, 9, 21),
+          endDate: DateTime(2026, 9, 21),
+          startHour: 5,
+          endHour: 3,
+          reason: 'Turnier',
+          signature: 'Demo Elternteil',
+        ),
+        isFalse,
+      );
+      expect(
+        futureAbsenceComplete(
+          startDate: DateTime(2026, 9, 21),
+          endDate: DateTime(2026, 9, 21),
+          startHour: 3,
+          endHour: 5,
+          reason: 'Turnier',
+          signature: 'Demo Elternteil',
+        ),
+        isTrue,
+      );
     });
   });
 }

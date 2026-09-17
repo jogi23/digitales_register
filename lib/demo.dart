@@ -83,6 +83,9 @@ Future<dynamic> getDemoResponse(String url, dynamic args) async {
 
   if (url == _replyUrl) return _demoReply(args);
   if (_composeUrls.contains(url)) return _demoCompose(url, args);
+  if (url == _absenceReasonUrl) return _demoAbsenceReason(args);
+  if (url == _absenceFutureUrl) return _demoFutureAbsence(args);
+  if (url == _removeAbsenceFutureUrl) return _demoRemoveFutureAbsence(args);
 
   final matches = _capture
       .where((item) => _pathOf(item['address'] as String) == url)
@@ -94,6 +97,12 @@ Future<dynamic> getDemoResponse(String url, dynamic args) async {
   if (url == _myMessagesUrl) {
     final stored = matches.first['response'];
     return stored is List ? _withDemoReplies(stored) : stored;
+  }
+
+  // Absences carry the reasons and reports entered during this demo session.
+  if (url == _absencesUrl) {
+    final stored = matches.first['response'];
+    return stored is Map ? _withDemoAbsences(stored) : stored;
   }
 
   if (matches.length == 1) return matches.first['response'];
@@ -116,17 +125,103 @@ Future<dynamic> getDemoResponse(String url, dynamic args) async {
   return matches.last['response'];
 }
 
-
 // ---------------------------------------------------------------------------
 // Message confirmations
 // ---------------------------------------------------------------------------
+
+const _absencesUrl = 'api/student/dashboard/absences';
+const _absenceReasonUrl = 'api/student/dashboard/absence_reason';
+const _absenceFutureUrl = 'api/student/dashboard/absence_future';
+const _removeAbsenceFutureUrl = 'api/student/dashboard/remove_absence_future';
+
+/// The reasons the demo account gave in this session, by absence.
+final _demoAbsenceReasons = <String, Map<String, dynamic>>{};
+
+/// The absences the demo account reported in advance in this session.
+final _demoFutureAbsences = <Map<String, dynamic>>[];
+
+/// The captured absences with what the demo account entered on top: a reason
+/// keeps showing after it was given, a report stays in the list.
+Map<String, dynamic> _withDemoAbsences(Map<dynamic, dynamic> stored) {
+  final copy = json.decode(json.encode(stored)) as Map<String, dynamic>;
+  for (final group in ((copy['absences'] as List?) ?? const [])
+      .whereType<Map<String, dynamic>>()) {
+    final key = _demoAbsenceKey(group);
+    final entered = key == null ? null : _demoAbsenceReasons[key];
+    if (entered == null) continue;
+    group.addAll(entered);
+    // The register repeats the reason on every single absence of a group.
+    for (final absence in ((group['group'] as List?) ?? const [])
+        .whereType<Map<String, dynamic>>()) {
+      absence.addAll(entered);
+    }
+  }
+  copy['futureAbsences'] = <dynamic>[
+    ...((copy['futureAbsences'] as List?) ?? const []),
+    ..._demoFutureAbsences,
+  ];
+  return copy;
+}
+
+/// Day and lesson of a group's first absence — enough to find it again.
+String? _demoAbsenceKey(Map<String, dynamic> group) {
+  final first = ((group['group'] as List?) ?? const [])
+      .whereType<Map<String, dynamic>>()
+      .firstOrNull;
+  if (first == null) return null;
+  return '${first['date']}#${first['hour']}';
+}
+
+dynamic _demoAbsenceReason(dynamic args) {
+  final group = args is Map ? args['absenceGroup'] : null;
+  if (group is Map) {
+    final key = _demoAbsenceKey(group.cast<String, dynamic>());
+    if (key != null) {
+      _demoAbsenceReasons[key] = <String, dynamic>{
+        'reason': group['reason'],
+        'reason_signature': group['reason_signature'],
+        'reason_timestamp':
+            DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
+        'selfdecl_id': group['selfdecl_id'],
+        'selfdecl_input': group['selfdecl_input'],
+        // Given, but nobody at the school has approved it yet.
+        'justified': 1,
+      };
+    }
+  }
+  return {'success': true};
+}
+
+dynamic _demoFutureAbsence(dynamic args) {
+  final absence = args is Map ? args['futureAbsence'] : null;
+  if (absence is Map) {
+    _demoFutureAbsences.add(<String, dynamic>{
+      ...absence.cast<String, dynamic>(),
+      // Negative ids cannot clash with anything the capture holds.
+      'id': -(_demoFutureAbsences.length + 1),
+      'justified': 1,
+      'reason_timestamp':
+          DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
+    });
+  }
+  return {'success': true};
+}
+
+dynamic _demoRemoveFutureAbsence(dynamic args) {
+  final absence = args is Map ? args['futureAbsence'] : null;
+  if (absence is Map) {
+    _demoFutureAbsences.removeWhere((a) => a['id'] == absence['id']);
+  }
+  return {'success': true};
+}
 
 const _myMessagesUrl = 'api/message/getMyMessages';
 const _replyUrl = 'api/message/reply';
 
 /// Confirmations sent while the demo runs. The capture is read-only, so the
 /// answers live here and are merged into every message list.
-final Map<int, Map<String, dynamic>> _demoReplies = <int, Map<String, dynamic>>{};
+final Map<int, Map<String, dynamic>> _demoReplies =
+    <int, Map<String, dynamic>>{};
 
 /// Applies [_demoReplies] on top of the captured messages.
 List<dynamic> _withDemoReplies(List<dynamic> messages) {
@@ -336,10 +431,8 @@ bool _paramsMatch(
 
 /// Returns calendar data for the requested week.
 /// Picks the closest captured week and shifts all date strings by the offset.
-dynamic _calendarForWeek(
-    List<Map<String, dynamic>> matches, dynamic args) {
-  final requestedStart =
-      args is Map ? args['startDate'] as String? : null;
+dynamic _calendarForWeek(List<Map<String, dynamic>> matches, dynamic args) {
+  final requestedStart = args is Map ? args['startDate'] as String? : null;
   if (requestedStart == null) return matches.first['response'];
 
   final requested = DateTime.parse(requestedStart);
@@ -362,18 +455,16 @@ dynamic _calendarForWeek(
   }
   best ??= matches.first;
 
-  final capturedStart =
-      (best['parameters'] as Map)['startDate'] as String;
+  final capturedStart = (best['parameters'] as Map)['startDate'] as String;
   if (capturedStart == requestedStart) return best['response'];
 
   // Shift date strings: replace each captured day with the corresponding requested day
   final fmt = DateFormat('yyyy-MM-dd');
   var text = json.encode(best['response']);
   for (var d = 0; d < 7; d++) {
-    final from = fmt.format(
-        DateTime.parse(capturedStart).add(Duration(days: d)));
-    final to =
-        fmt.format(requested.add(Duration(days: d)));
+    final from =
+        fmt.format(DateTime.parse(capturedStart).add(Duration(days: d)));
+    final to = fmt.format(requested.add(Duration(days: d)));
     text = text.replaceAll('"$from"', '"$to"');
   }
   return json.decode(text);

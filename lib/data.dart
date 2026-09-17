@@ -604,6 +604,18 @@ abstract class AbsenceGroup
   int get hours;
   int get minutes;
   BuiltList<Absence> get absences;
+
+  /// The group as the register sent it, JSON encoded.
+  ///
+  /// Giving a reason posts the whole object back, so nothing it carries may
+  /// get lost on the way through the app.
+  String? get raw;
+
+  /// The self-declaration picked for this absence; 0 or null for none.
+  int? get selfDeclarationId;
+
+  /// What was filled into the picked form's free text.
+  String? get selfDeclarationInput;
   factory AbsenceGroup([Function(AbsenceGroupBuilder b)? updates]) =
       _$AbsenceGroup;
   AbsenceGroup._();
@@ -625,10 +637,39 @@ abstract class FutureAbsence
   int get startHour;
   int get endHour;
 
+  /// The reported absence as the register sent it, JSON encoded: deleting one
+  /// posts the whole object back.
+  String? get raw;
+
   factory FutureAbsence([void Function(FutureAbsenceBuilder) updates]) =
       _$FutureAbsence;
   FutureAbsence._();
   static Serializer<FutureAbsence> get serializer => _$futureAbsenceSerializer;
+}
+
+/// One of the forms a school offers for giving a reason — „Krankheit bis zu
+/// 3 Tagen“ and the like.
+abstract class SelfDeclaration
+    implements Built<SelfDeclaration, SelfDeclarationBuilder> {
+  int get id;
+  String get title;
+
+  /// The form's wording, HTML as the register stores it.
+  String get text;
+
+  String? get version;
+
+  /// Whether this form insists on its free text being filled in.
+  bool get inputMandatory;
+
+  /// What the school wants in that free text, e.g. the doctor's name.
+  String? get inputExplain;
+
+  factory SelfDeclaration([void Function(SelfDeclarationBuilder) updates]) =
+      _$SelfDeclaration;
+  SelfDeclaration._();
+  static Serializer<SelfDeclaration> get serializer =>
+      _$selfDeclarationSerializer;
 }
 
 abstract class AbsenceStatistic
