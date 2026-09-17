@@ -42,6 +42,10 @@ void main() {
   late ProviderContainer container;
   final sent = <({String url, Map<String, Object?> args})>[];
 
+  /// What the mocked register answers a write with. Verified against the real
+  /// one: `absence_future` and `remove_absence_future` say `success`.
+  late dynamic writeAnswer;
+
   AbsencesState read() => container.read(absencesProvider);
 
   /// The payload of the last request to [url].
@@ -52,6 +56,7 @@ void main() {
 
   setUp(() async {
     sent.clear();
+    writeAnswer = <String, dynamic>{'success': true};
     wrapper = MockWrapper();
     when(() => wrapper.noInternet).thenReturn(false);
     when(() => wrapper.send(any(),
@@ -63,9 +68,7 @@ void main() {
               const <String, Object?>{};
       sent.add((url: url, args: args));
       if (url == _absencesUrl) return fixtureFor(_absencesUrl);
-      // What the register really answers here is unknown; the portal throws
-      // it away.
-      return <String, dynamic>{'success': true};
+      return writeAnswer;
     });
     container = ProviderContainer();
     await container.read(absencesProvider.notifier).load();
@@ -203,6 +206,58 @@ void main() {
             signature: 'Demo Elternteil',
           );
       expect(sent.last.url, _absencesUrl);
+    });
+
+    test('leaves an empty note out, the way the portal does', () async {
+      await container.read(absencesProvider.notifier).addFutureAbsence(
+            startDate: UtcDateTime(2026, 9, 21),
+            endDate: UtcDateTime(2026, 9, 21),
+            startHour: 1,
+            endHour: 6,
+            reason: 'Turnier',
+            signature: 'Demo Elternteil',
+          );
+      expect(payload(_futureUrl, 'futureAbsence'), isNot(contains('note')));
+    });
+  });
+
+  group('what the register says about a write', () {
+    test('a refusal is a refusal, however the list looks', () async {
+      writeAnswer = <String, dynamic>{'success': false};
+      final done =
+          await container.read(absencesProvider.notifier).addFutureAbsence(
+                startDate: UtcDateTime(2026, 9, 21),
+                endDate: UtcDateTime(2026, 9, 21),
+                startHour: 1,
+                endHour: 6,
+                reason: 'Turnier',
+                signature: 'Demo Elternteil',
+              );
+      expect(done, isFalse);
+    });
+
+    test('an error object counts as a refusal, not as success', () async {
+      writeAnswer = <String, dynamic>{'error': 'unknown'};
+      final done =
+          await container.read(absencesProvider.notifier).addFutureAbsence(
+                startDate: UtcDateTime(2026, 9, 21),
+                endDate: UtcDateTime(2026, 9, 21),
+                startHour: 1,
+                endHour: 6,
+                reason: 'Turnier',
+                signature: 'Demo Elternteil',
+              );
+      // Nothing the register said can be taken for a yes, and the reloaded
+      // fixture does not hold this report either.
+      expect(done, isFalse);
+    });
+
+    test('reads success, refusal and silence apart', () {
+      expect(wroteOk(<String, dynamic>{'success': true}), isTrue);
+      expect(wroteOk(<String, dynamic>{'success': false}), isFalse);
+      expect(wroteOk(<String, dynamic>{'error': 'unknown'}), isNull);
+      expect(wroteOk(null), isNull);
+      expect(wroteOk('nope'), isNull);
     });
   });
 
