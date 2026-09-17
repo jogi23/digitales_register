@@ -15,12 +15,29 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'package:dr/middleware/middleware.dart' show wrapper;
 import 'package:dr/providers/connection_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
+import 'package:dr/services/app_router.dart';
+import 'package:dr/wrapper.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
+
+class _MockWrapper extends Mock implements Wrapper {}
+
+/// Counts the trips to the login form instead of navigating anywhere.
+class _SpyAppRouter implements AppRouter {
+  int loginShown = 0;
+
+  @override
+  void showLogin() => loginShown++;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => null;
+}
 
 /// A no-internet notifier that changes nothing else: the real one talks to
 /// the server and shows a snack bar.
@@ -133,5 +150,56 @@ void main() {
       container.read(connectionProvider).status,
       ConnectionStatus.connected,
     );
+  });
+
+  group('reconnecting by hand', () {
+    late _SpyAppRouter router;
+
+    /// A container whose login attempts fail, the way they do while the
+    /// network is not really back. The check before says the network is
+    /// there; [stillOffline] is what the failed login reports afterwards.
+    ProviderContainer offlineContainer({required bool stillOffline}) {
+      router = _SpyAppRouter();
+      final mock = _MockWrapper();
+      wrapper = mock;
+      when(() => mock.noInternet).thenReturn(stillOffline);
+      // false: the check before the login found a network.
+      when(() => mock.refreshNoInternet()).thenAnswer((_) async => false);
+      when(() => mock.ensureLoggedIn(
+              isRetryAfterUnexpectedLogout:
+                  any(named: 'isRetryAfterUnexpectedLogout')))
+          .thenAnswer((_) async => false);
+      return ProviderContainer(
+        overrides: [
+          noInternetProvider
+              .overrideWith(() => _QuietNoInternetNotifier(initial: false)),
+          appRouterProvider.overrideWith((ref) => router),
+        ],
+      );
+    }
+
+    test('without a network it stays offline instead of asking to log in',
+        () async {
+      container.dispose();
+      container = offlineContainer(stillOffline: true);
+      await container.read(connectionProvider.notifier).reconnect();
+      expect(
+        container.read(connectionProvider).status,
+        ConnectionStatus.offline,
+      );
+      // The login form would ask for a password that is not the problem.
+      expect(router.loginShown, 0);
+    });
+
+    test('with a network but no session it leads to the login form', () async {
+      container.dispose();
+      container = offlineContainer(stillOffline: false);
+      await container.read(connectionProvider.notifier).reconnect();
+      expect(
+        container.read(connectionProvider).status,
+        ConnectionStatus.sessionExpired,
+      );
+      expect(router.loginShown, 1);
+    });
   });
 }

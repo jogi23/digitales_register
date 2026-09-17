@@ -26,7 +26,8 @@ import 'package:flutter/foundation.dart';
 
 export 'package:dr/auth_service.dart' show AddNetworkProtocolItem;
 // Re-export so existing `import wrapper.dart` callers still resolve the type.
-export 'package:dr/session_manager.dart' show UnexpectedLogoutException;
+export 'package:dr/session_manager.dart'
+    show StoredLogin, UnexpectedLogoutException;
 
 /// Facade that composes [ApiClient], [AuthService], and [SessionManager].
 ///
@@ -83,6 +84,9 @@ class Wrapper {
 
   set onSessionExpired(void Function()? callback) =>
       _session.onSessionExpired = callback;
+
+  set storedLogin(Future<StoredLogin?> Function()? value) =>
+      _session.storedLogin = value;
 
   set onRequestSucceeded(void Function()? callback) =>
       _session.onRequestSucceeded = callback;

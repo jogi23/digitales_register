@@ -105,4 +105,44 @@ void main() {
     expect(find.text('Andere Accounts'), findsOneWidget);
     expect(find.text('eltern2'), findsOneWidget);
   });
+
+  testWidgets('login stays out of reach until name and password are there',
+      (tester) async {
+    // An attempt with an empty field used to wipe the saved password and with
+    // it the whole account.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: LoginPageContent(
+          vm: buildVm(
+            servers: const {},
+            url: 'https://vinzentinum.digitalesregister.it',
+          ),
+          onLogin: (_, __, ___) {},
+          setSaveNoPass: (_) {},
+          onReload: () {},
+          onChangePass: (_, __, ___, ____) {},
+          onRequestPassReset: (_) {},
+          onSelectAccount: (_) {},
+        ),
+      ),
+    );
+
+    final login = find.widgetWithText(ElevatedButton, 'Login');
+    expect(tester.widget<ElevatedButton>(login).enabled, isFalse);
+
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Benutzername'),
+      'anna',
+    );
+    await tester.pump();
+    // Still no password.
+    expect(tester.widget<ElevatedButton>(login).enabled, isFalse);
+
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Passwort'),
+      'geheim',
+    );
+    await tester.pump();
+    expect(tester.widget<ElevatedButton>(login).enabled, isTrue);
+  });
 }

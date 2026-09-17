@@ -14,7 +14,8 @@
             "Kalender: eine Stunde außerhalb des eigenen Klassenzimmers trägt oben rechts ein kleines Dreieck, auch in der Wochenansicht des Merkhefts. Ein langer Druck auf die Stunde nennt den Raum; eine gebuchte Präsentationskamera gilt nicht als Raum.",
             "Einstellungen → Fächer: „Alle Details im Kalender anzeigen“ nennt in der Stunde auch den Raum, soweit Platz ist. Der Ortsname, den alle Räume der Woche tragen, entfällt; bei mehreren Räumen steht „+1“ dahinter. Lehrpersonen und Raum werden dafür bei Bedarf etwas kleiner, das Fach nie. Voreingestellt bleibt alles wie bisher.",
             "Bewertungen: ein Lesezeichen markiert einzelne Noten, in der Liste und auf der Seite der Note. „Nur markierte Noten anzeigen“ blendet alles andere aus. Die Markierung bleibt auf dem Gerät und gilt je Konto; das Portal kennt sie nicht.",
-            "Mitteilungen: beim Schreiben und Antworten lassen sich Dateien anhängen. Jeder Anhang zeigt Name, Größe und ob er schon beim Portal ist; gesendet wird erst, wenn alle oben sind. Wie viele Anhänge erlaubt sind, sagt die Schule."
+            "Mitteilungen: beim Schreiben und Antworten lassen sich Dateien anhängen. Jeder Anhang zeigt Name, Größe und ob er schon beim Portal ist; gesendet wird erst, wenn alle oben sind. Wie viele Anhänge erlaubt sind, sagt die Schule.",
+            "Absenzen: Absenzen lassen sich in der App begründen und unterschreiben, künftige Absenzen im Voraus melden und wieder löschen. Verlangt die Schule eine Selbsterklärung, steht sie zur Auswahl. Ob ein Konto das darf, entscheidet das Portal; bereits entschuldigte Absenzen bleiben unverändert."
           ]
         },
         {
@@ -29,7 +30,9 @@
             "Mitteilungen: selbst gesendete Mitteilungen gelten nicht mehr als neu. Sie tragen kein „neu“ mehr und halten „Alle als gelesen markieren“ nicht mehr aktiv.",
             "Meldet der Server eine abgelaufene Sitzung mit einem Fehlercode statt mit einer Weiterleitung zur Anmeldung, meldet sich die App neu an und wiederholt den Abruf. Gelingt das nicht, zeigt die Verbindungsanzeige die Sitzung als abgelaufen, statt die Seiten still leer zu lassen.",
             "Anmeldung: die Sitzung richtet sich nach der Uhr des Servers. Geht die Uhr des Geräts falsch, meldet die App nicht mehr zu früh ab oder arbeitet mit einer schon abgelaufenen Sitzung weiter.",
-            "Anmeldung: ein kurzes Funkloch meldet nicht mehr ab. Kennt der Server die Sitzung nicht mehr, meldet die App still neu an."
+            "Anmeldung: ein kurzes Funkloch meldet nicht mehr ab. Kennt der Server die Sitzung nicht mehr, meldet die App still neu an.",
+            "Verbindung von Hand wiederherstellen führt nicht mehr auf den Anmeldebildschirm, solange nur das Netz fehlt. Und ein Tippen auf Anmelden ohne Passwort löscht nicht länger die Zugangsdaten des Kontos: der Knopf bleibt grau, bis Benutzername und Passwort da sind, und ein Konto bleibt auch ohne gespeichertes Passwort in der Kontoliste.",
+            "Lief die Sitzung ab, während das Handy gesperrt war, half auch mehrfaches Neuverbinden nicht mehr und irgendwann stand der Anmeldebildschirm da. Die App meldet sich jetzt mit den gespeicherten Zugangsdaten neu an, so wie es bisher nur der Wechsel auf ein anderes Konto und zurück tat."
           ]
         },
         {
@@ -52,7 +55,8 @@
             "Calendar: a lesson held outside the class's own room carries a small triangle in the top right corner, in the homework week view as well. A long press on the lesson names the room; a booked presentation camera does not count as a room.",
             "Settings → Subjects: “Show all details in the calendar” also names the room in the lesson, as far as there is space. The location name shared by all rooms of the week is left out; with several rooms, “+1” follows. Teachers and room get slightly smaller if needed, the subject never does. By default nothing changes.",
             "Grades: a bookmark marks single grades, in the list and on the grade's own page. “Show only marked grades” hides everything else. The mark stays on the device and applies per account; the portal does not know about it.",
-            "Messages: files can be attached when writing and replying. Every attachment shows its name, its size and whether it reached the portal; the message goes out only once they all did. How many are allowed is up to the school."
+            "Messages: files can be attached when writing and replying. Every attachment shows its name, its size and whether it reached the portal; the message goes out only once they all did. How many are allowed is up to the school.",
+            "Absences: absences can be given a reason and signed in the app, absences still to come reported in advance and taken back again. Where a school asks for a self-declaration, it can be picked. Whether an account may do this is the portal's call; absences already settled stay as they are."
           ]
         },
         {
@@ -67,7 +71,9 @@
             "Messages: messages you sent yourself no longer count as new. They no longer carry the “neu” badge or keep “Mark all as read” active.",
             "If the server reports an expired session with an error code instead of redirecting to the sign-in page, the app signs in again and repeats the request. If that fails, the connection indicator shows the session as expired instead of leaving the pages silently empty.",
             "Login: the session follows the server's clock. If the device clock is wrong, the app no longer logs out too early or keeps working with a session that has already expired.",
-            "Login: a brief loss of signal no longer logs you out. If the server no longer knows the session, the app quietly logs in again."
+            "Login: a brief loss of signal no longer logs you out. If the server no longer knows the session, the app quietly logs in again.",
+            "Restoring the connection by hand no longer leads to the sign-in screen while only the network is missing. And tapping Login without a password no longer deletes the account's credentials: the button stays greyed out until name and password are there, and an account stays in the list even without a saved password.",
+            "When the session ran out while the phone was locked, reconnecting stopped helping however often it was tried, and the sign-in screen turned up. The app now signs in again with the saved credentials, which until now only a switch to another account and back did."
           ]
         },
         {
@@ -90,7 +96,8 @@
             "Calendario: una lezione che si svolge fuori dall'aula della classe porta un piccolo triangolo nell'angolo in alto a destra, anche nella vista settimanale dell'agenda. Una pressione prolungata sulla lezione indica l'aula; una fotocamera per presentazioni prenotata non conta come aula.",
             "Impostazioni → Materie: «Mostra tutti i dettagli nel calendario» indica nella lezione anche l'aula, se c'è spazio. Il nome della sede comune a tutte le aule della settimana viene omesso; con più aule segue «+1». Se serve, docenti e aula diventano un po' più piccoli, la materia mai. Di default non cambia nulla.",
             "Valutazioni: un segnalibro contrassegna i singoli voti, nell'elenco e nella pagina del voto. «Mostra solo i voti contrassegnati» nasconde tutto il resto. Il contrassegno resta sul dispositivo e vale per ogni account; il portale non lo conosce.",
-            "Comunicazioni: scrivendo e rispondendo si possono allegare file. Ogni allegato mostra nome, dimensione e se è già arrivato al portale; l'invio avviene solo quando sono tutti caricati. Quanti allegati siano ammessi lo decide la scuola."
+            "Comunicazioni: scrivendo e rispondendo si possono allegare file. Ogni allegato mostra nome, dimensione e se è già arrivato al portale; l'invio avviene solo quando sono tutti caricati. Quanti allegati siano ammessi lo decide la scuola.",
+            "Assenze: le assenze si possono motivare e firmare nell'app, quelle future si segnalano in anticipo e si possono eliminare. Se la scuola richiede un'autocertificazione, si può scegliere. Se un account possa farlo lo decide il portale; le assenze già giustificate restano invariate."
           ]
         },
         {
@@ -105,7 +112,9 @@
             "Comunicazioni: le comunicazioni inviate da te non risultano più nuove. Non portano più l'etichetta «neu» e non tengono più attivo «Segna tutte come lette».",
             "Se il server segnala una sessione scaduta con un codice di errore invece di rimandare alla pagina di accesso, l'app accede di nuovo e ripete la richiesta. Se non ci riesce, l'indicatore di connessione mostra la sessione come scaduta, invece di lasciare le pagine vuote senza avviso.",
             "Accesso: la sessione segue l'orologio del server. Se l'orologio del dispositivo è sbagliato, l'app non esce più troppo presto e non continua a lavorare con una sessione già scaduta.",
-            "Accesso: una breve assenza di segnale non fa più uscire. Se il server non riconosce più la sessione, l'app accede di nuovo in silenzio."
+            "Accesso: una breve assenza di segnale non fa più uscire. Se il server non riconosce più la sessione, l'app accede di nuovo in silenzio.",
+            "Ripristinare la connessione a mano non porta più alla schermata di accesso quando manca solo la rete. E premere Accedi senza password non cancella più le credenziali dell'account: il pulsante resta grigio finché nome e password non ci sono, e un account resta nell'elenco anche senza password salvata.",
+            "Se la sessione scadeva mentre il telefono era bloccato, riconnettersi non serviva più e prima o poi compariva la schermata di accesso. Ora l'app accede di nuovo con le credenziali salvate, come finora faceva solo il passaggio a un altro account e ritorno."
           ]
         },
         {

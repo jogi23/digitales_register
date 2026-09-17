@@ -15,6 +15,7 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 - Einstellungen → Fächer: „Alle Details im Kalender anzeigen“ nennt in der Stunde auch den Raum, soweit Platz ist. Der Ortsname, den alle Räume der Woche tragen, entfällt; bei mehreren Räumen steht „+1“ dahinter. Lehrpersonen und Raum werden dafür bei Bedarf etwas kleiner, das Fach nie. Voreingestellt bleibt alles wie bisher.
 - Bewertungen: ein Lesezeichen markiert einzelne Noten, in der Liste und auf der Seite der Note. „Nur markierte Noten anzeigen“ blendet alles andere aus. Die Markierung bleibt auf dem Gerät und gilt je Konto; das Portal kennt sie nicht.
 - Mitteilungen: beim Schreiben und Antworten lassen sich Dateien anhängen. Jeder Anhang zeigt Name, Größe und ob er schon beim Portal ist; gesendet wird erst, wenn alle oben sind. Wie viele Anhänge erlaubt sind, sagt die Schule.
+- Absenzen: Absenzen lassen sich in der App begründen und unterschreiben, künftige Absenzen im Voraus melden und wieder löschen. Verlangt die Schule eine Selbsterklärung, steht sie zur Auswahl. Ob ein Konto das darf, entscheidet das Portal; bereits entschuldigte Absenzen bleiben unverändert.
 
 ### Verbesserungen
 
@@ -26,6 +27,8 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 - Meldet der Server eine abgelaufene Sitzung mit einem Fehlercode statt mit einer Weiterleitung zur Anmeldung, meldet sich die App neu an und wiederholt den Abruf. Gelingt das nicht, zeigt die Verbindungsanzeige die Sitzung als abgelaufen, statt die Seiten still leer zu lassen.
 - Anmeldung: die Sitzung richtet sich nach der Uhr des Servers. Geht die Uhr des Geräts falsch, meldet die App nicht mehr zu früh ab oder arbeitet mit einer schon abgelaufenen Sitzung weiter.
 - Anmeldung: ein kurzes Funkloch meldet nicht mehr ab. Kennt der Server die Sitzung nicht mehr, meldet die App still neu an.
+- Verbindung von Hand wiederherstellen führt nicht mehr auf den Anmeldebildschirm, solange nur das Netz fehlt. Und ein Tippen auf Anmelden ohne Passwort löscht nicht länger die Zugangsdaten des Kontos: der Knopf bleibt grau, bis Benutzername und Passwort da sind, und ein Konto bleibt auch ohne gespeichertes Passwort in der Kontoliste.
+- Lief die Sitzung ab, während das Handy gesperrt war, half auch mehrfaches Neuverbinden nicht mehr und irgendwann stand der Anmeldebildschirm da. Die App meldet sich jetzt mit den gespeicherten Zugangsdaten neu an, so wie es bisher nur der Wechsel auf ein anderes Konto und zurück tat.
 
 ### Intern
 

@@ -40,19 +40,41 @@ class AbsencesPage extends StatelessWidget {
   /// Loads the page again when it is pulled down from the top.
   final Future<void> Function() onRefresh;
 
+  /// Reports an absence still to come; null leaves out the button, which is
+  /// what an account without the right to edit gets.
+  final VoidCallback? onReport;
+
+  /// Takes a report back; null leaves out the button.
+  final void Function(FutureAbsence absence)? onRemoveFuture;
+
+  /// Gives a reason for one of the absences; null leaves out the button.
+  final void Function(int group)? onJustify;
+
   const AbsencesPage({
     required this.onRefresh,
     super.key,
     required this.state,
     required this.noInternet,
     this.displayMode = EntryDisplayMode.list,
+    this.onReport,
+    this.onRemoveFuture,
+    this.onJustify,
   });
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: ResponsiveAppBar(
         title: Text(tr(context).absencesTitle),
-        actions: const [ConnectionStatusButton(), AccountAvatarButton()],
+        actions: <Widget>[
+          if (onReport != null)
+            IconButton(
+              icon: const Icon(Icons.add),
+              tooltip: tr(context).absenceReportTitle,
+              onPressed: onReport,
+            ),
+          const ConnectionStatusButton(),
+          const AccountAvatarButton(),
+        ],
       ),
       body: PullToRefresh(
         onRefresh: onRefresh,
@@ -60,6 +82,8 @@ class AbsencesPage extends StatelessWidget {
           state: state,
           noInternet: noInternet,
           displayMode: displayMode,
+          onRemoveFuture: onRemoveFuture,
+          onJustify: onJustify,
         ),
       ),
     );
@@ -71,11 +95,19 @@ class AbsencesBody extends StatelessWidget {
   final bool noInternet;
   final EntryDisplayMode displayMode;
 
+  /// Takes a report back; null leaves out the button.
+  final void Function(FutureAbsence absence)? onRemoveFuture;
+
+  /// Gives a reason for one of the absences; null leaves out the button.
+  final void Function(int group)? onJustify;
+
   const AbsencesBody({
     super.key,
     required this.state,
     required this.noInternet,
     this.displayMode = EntryDisplayMode.list,
+    this.onRemoveFuture,
+    this.onJustify,
   });
 
   @override
@@ -121,6 +153,9 @@ class AbsencesBody extends StatelessWidget {
                     (tileColor) => FutureAbsenceWidget(
                       absence: state.futureAbsences[i],
                       tileColor: tileColor,
+                      onDelete: onRemoveFuture == null
+                          ? null
+                          : () => onRemoveFuture!(state.futureAbsences[i]),
                     ),
                   ),
                 if (state.absences.isNotEmpty)
@@ -138,6 +173,7 @@ class AbsencesBody extends StatelessWidget {
                     (tileColor) => AbsenceGroupContainer(
                       group: state.absences.length - n - 1,
                       tileColor: tileColor,
+                      onJustify: onJustify,
                     ),
                   ),
                 ),

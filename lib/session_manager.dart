@@ -33,6 +33,9 @@ class UnexpectedLogoutException implements Exception {}
 ///
 /// All middleware HTTP calls go through [send]. Authentication is enforced
 /// by [ensureLoggedIn] before each request.
+/// The credentials of the account in use, as they lie in storage.
+typedef StoredLogin = ({String user, String pass, String url});
+
 class SessionManager {
   final ApiClient _apiClient;
   final AuthService _authService;
@@ -50,6 +53,16 @@ class SessionManager {
   DateTime lastInteraction = DateTime.now();
 
   void Function(bool)? onNoInternet;
+
+  /// Reads the stored credentials of the account in use.
+
+  ///
+
+  /// A logout forced by the server clears what this session held; the ones
+
+  /// in storage are still good.
+
+  Future<StoredLogin?> Function()? storedLogin;
 
   /// Called when a request could not be sent although the network is there:
   /// the server-side session is gone.
@@ -133,6 +146,8 @@ class SessionManager {
           } else {
             _authService.onRelogin!();
           }
+        } else if (await _signInFromStorage()) {
+          // Signed in again with what storage still holds.
         } else {
           if (noInternet) {
             onNoInternet?.call(true);
@@ -182,6 +197,43 @@ class SessionManager {
       onError?.call(e);
       return null;
     }
+  }
+
+  /// How long a failed sign-in from storage keeps the next one waiting.
+  ///
+  /// Every request that finds no session tries again, and a wrong password
+  /// would otherwise be sent over and over.
+  static const _storedLoginCooldown = Duration(seconds: 30);
+
+  DateTime? _lastStoredLoginTry;
+
+  /// Signs in again with the credentials in storage.
+  ///
+  /// A session forced out clears the credentials this session held, and with
+  /// nothing to sign in with every later attempt ended on the login form —
+  /// while switching to another account and back worked, because that reads
+  /// the password from storage. So this reads it too.
+  Future<bool> _signInFromStorage() async {
+    final read = storedLogin;
+    if (read == null) return false;
+    final last = _lastStoredLoginTry;
+    if (last != null &&
+        DateTime.now().difference(last) < _storedLoginCooldown) {
+      log("not signing in from storage again: last try was just now");
+      return false;
+    }
+    final stored = await read();
+    if (stored == null) return false;
+    _lastStoredLoginTry = DateTime.now();
+    log("signing in again with the stored credentials");
+    await _authService.login(stored.user, stored.pass, null, stored.url);
+    if (!await _authService.loggedIn) {
+      if (noInternet) onNoInternet?.call(true);
+      return false;
+    }
+    _lastStoredLoginTry = null;
+    _authService.onRelogin?.call();
+    return true;
   }
 
   Future<dynamic> send(

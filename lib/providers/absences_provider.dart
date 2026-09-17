@@ -15,6 +15,8 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'dart:convert';
+
 import 'package:built_collection/built_collection.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/data.dart';
@@ -24,10 +26,18 @@ import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 @visibleForTesting
 AbsencesState parseAbsencesFromJson(dynamic json) =>
     tryParse(getMap(json)!, _parseAbsencesMap);
+
+const _absencesUrl = "api/student/dashboard/absences";
+const _absenceReasonUrl = "api/student/dashboard/absence_reason";
+const _absenceFutureUrl = "api/student/dashboard/absence_future";
+const _removeAbsenceFutureUrl = "api/student/dashboard/remove_absence_future";
+
+final _dateFormat = DateFormat("yyyy-MM-dd");
 
 class AbsencesNotifier extends Notifier<AbsencesState> {
   @override
@@ -41,13 +51,113 @@ class AbsencesNotifier extends Notifier<AbsencesState> {
 
   Future<void> load() async {
     if (ref.read(noInternetProvider)) return;
-    final dynamic response =
-        await wrapper.send("api/student/dashboard/absences");
+    final dynamic response = await wrapper.send(_absencesUrl);
     if (response != null) {
       state = tryParse(getMap(response)!, _parseAbsencesMap);
     }
   }
 
+  /// Gives a reason for an absence, and signs it.
+  ///
+  /// The whole group goes back to the register the way it came, with only the
+  /// reason fields replaced -- that is what the portal sends, and the
+  /// register may well insist on the rest being there.
+  Future<bool> saveReason(
+    AbsenceGroup group, {
+    required String reason,
+    required String signature,
+    SelfDeclaration? selfDeclaration,
+    String selfDeclarationInput = "",
+  }) async {
+    final raw = group.raw;
+    if (raw == null) return false;
+    final payload = json.decode(raw) as Map<String, dynamic>
+      ..["reason"] = reason
+      ..["reason_signature"] = signature
+      // The portal sends the device's clock along; the register keeps its own
+      // record of when the request came in.
+      ..["reason_timestamp"] = DateTime.now().toUtc().toIso8601String()
+      ..["selfdecl_id"] = selfDeclaration?.id ?? 0
+      ..["selfdecl_input"] = selfDeclarationInput;
+    final dynamic result = await wrapper.send(
+      _absenceReasonUrl,
+      args: {"absenceGroup": payload},
+    );
+    await load();
+    // What the register answers here is undocumented and the portal throws it
+    // away, so the reloaded list is what decides whether it worked.
+    return result != null || _groupFor(group)?.reason == reason;
+  }
+
+  /// Reports an absence that is still to come.
+  Future<bool> addFutureAbsence({
+    required UtcDateTime startDate,
+    required UtcDateTime endDate,
+    required int startHour,
+    required int endHour,
+    required String reason,
+    required String signature,
+    String note = "",
+  }) async {
+    final dynamic result = await wrapper.send(
+      _absenceFutureUrl,
+      args: {
+        "futureAbsence": {
+          "startDate": _dateFormat.format(startDate),
+          "endDate": _dateFormat.format(endDate),
+          // Lesson numbers of the school's time grid, not times of day.
+          "startTime": startHour,
+          "endTime": endHour,
+          "reason": reason,
+          "reason_signature": signature,
+          "note": note,
+        },
+      },
+    );
+    await load();
+    return result != null ||
+        state.futureAbsences.any(
+          (a) =>
+              a.startDate == startDate &&
+              a.endDate == endDate &&
+              a.startHour == startHour &&
+              a.endHour == endHour,
+        );
+  }
+
+  /// Takes a reported absence back.
+  Future<bool> removeFutureAbsence(FutureAbsence absence) async {
+    final raw = absence.raw;
+    if (raw == null) return false;
+    final dynamic result = await wrapper.send(
+      _removeAbsenceFutureUrl,
+      args: {"futureAbsence": json.decode(raw)},
+    );
+    await load();
+    return result != null ||
+        !state.futureAbsences.any(
+          (a) =>
+              a.startDate == absence.startDate &&
+              a.startHour == absence.startHour &&
+              a.endDate == absence.endDate &&
+              a.endHour == absence.endHour,
+        );
+  }
+
+  /// [group] in the state as it is now: the same absence, the way the
+  /// register sees it after the reload.
+  AbsenceGroup? _groupFor(AbsenceGroup group) {
+    if (group.absences.isEmpty) return null;
+    final first = group.absences.first;
+    for (final candidate in state.absences) {
+      if (candidate.absences.isEmpty) continue;
+      final other = candidate.absences.first;
+      if (other.date == first.date && other.hour == first.hour) {
+        return candidate;
+      }
+    }
+    return null;
+  }
 }
 
 final absencesProvider =
@@ -67,18 +177,45 @@ AbsencesState _parseAbsencesMap(Map json) {
   final absences = (json["absences"] as List).map(_parseAbsence);
   final futureAbsences =
       (json["futureAbsences"] as List).map(_parseFutureAbsence);
+  final declarations = (json["selfDeclarationsList"] as List? ?? const [])
+      .map(_parseSelfDeclaration);
+  final activeDeclarations =
+      (json["selfDeclarationsActiveList"] as List? ?? const [])
+          .map(_parseSelfDeclaration);
   return AbsencesState(
     (b) => b
       ..statistic = stats
       ..absences = ListBuilder(absences)
       ..futureAbsences = ListBuilder(futureAbsences)
+      ..canEdit = json["canEdit"] == true
+      ..selfDeclarations = ListBuilder(declarations)
+      ..activeSelfDeclarations = ListBuilder(activeDeclarations)
+      ..selfDeclarationActive = json["isAbsencesSelfDeclarationActive"] == true
+      ..selfDeclarationMandatory =
+          json["isAbsencesSelfDeclarationMandatory"] == true
       ..lastFetched = UtcDateTime.now(),
+  );
+}
+
+/// One of the school's forms. `inputmandatory` arrives as 0 or 1.
+SelfDeclaration _parseSelfDeclaration(dynamic d) {
+  return SelfDeclaration(
+    (b) => b
+      ..id = getInt(d["id"]) ?? 0
+      ..title = getString(d["title"]) ?? ""
+      ..text = getString(d["text"]) ?? ""
+      ..version = getString(d["version"])
+      ..inputMandatory = getInt(d["inputmandatory"]) == 1
+      ..inputExplain = getString(d["inputexplain"]),
   );
 }
 
 AbsenceGroup _parseAbsence(dynamic g) {
   return AbsenceGroup(
     (b) => b
+      ..raw = json.encode(g)
+      ..selfDeclarationId = getInt(g["selfdecl_id"])
+      ..selfDeclarationInput = getString(g["selfdecl_input"])
       ..justified = AbsenceJustified.fromInt(getInt(g["justified"])!)
       ..reasonSignature = getString(g["reason_signature"])
       ..reasonTimestamp = g["reason_timestamp"] is String
@@ -116,6 +253,7 @@ AbsenceGroup _parseAbsence(dynamic g) {
 FutureAbsence _parseFutureAbsence(dynamic absence) {
   return FutureAbsence(
     (b) => b
+      ..raw = json.encode(absence)
       ..note = getString(absence["note"])
       ..startDate = UtcDateTime.parse(getString(absence["startDate"])!)
       ..endDate = UtcDateTime.parse(getString(absence["endDate"])!)
