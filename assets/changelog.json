@@ -10,7 +10,7 @@
             "Mitteilungen: ein Stern markiert wichtige Mitteilungen, „Markiert“ zeigt nur diese. Die Markierung bleibt auf dem Gerät; das Portal kennt sie nicht.",
             "Mitteilungen: die Liste lässt sich nach Datum (neueste oder älteste zuerst) oder nach Absender sortieren. „Ungelesen“ zeigt nur ungelesene Mitteilungen; wer eine davon öffnet, verliert sie nicht aus der Liste, bis der Filter wieder aus ist.",
             "Mitteilungen: ein langer Druck auf eine Mitteilung startet die Auswahl. Ausgewählte Mitteilungen lassen sich gemeinsam als PDF, Text oder Markdown teilen oder speichern, archivieren und wieder aus dem Archiv holen.",
-            "Mitteilungen: neue Mitteilungen schreiben und auf empfangene antworten. Empfänger lassen sich nach Namen, Klasse oder Gruppe suchen; bei einer Gruppe lässt sich jede Person einzeln abwählen. Vor dem Senden sagt die App, an wie viele Personen die Mitteilung geht. Beim Antworten steht die ursprüngliche Mitteilung wie im Portal kursiv darunter; das Zitat lässt sich abschalten. Anhänge gehen noch nicht.",
+            "Mitteilungen: neue Mitteilungen schreiben und auf empfangene antworten. Empfänger lassen sich nach Namen, Klasse oder Gruppe suchen; bei einer Gruppe lässt sich jede Person einzeln abwählen. Vor dem Senden sagt die App, an wie viele Personen die Mitteilung geht. Beim Antworten steht die ursprüngliche Mitteilung wie im Portal kursiv darunter; das Zitat lässt sich abschalten.",
             "Kalender: eine Stunde außerhalb des eigenen Klassenzimmers trägt oben rechts ein kleines Dreieck, auch in der Wochenansicht des Merkhefts. Ein langer Druck auf die Stunde nennt den Raum; eine gebuchte Präsentationskamera gilt nicht als Raum.",
             "Einstellungen → Fächer: „Alle Details im Kalender anzeigen“ nennt in der Stunde auch den Raum, soweit Platz ist. Der Ortsname, den alle Räume der Woche tragen, entfällt; bei mehreren Räumen steht „+1“ dahinter. Lehrpersonen und Raum werden dafür bei Bedarf etwas kleiner, das Fach nie. Voreingestellt bleibt alles wie bisher.",
             "Bewertungen: ein Lesezeichen markiert einzelne Noten, in der Liste und auf der Seite der Note. „Nur markierte Noten anzeigen“ blendet alles andere aus. Die Markierung bleibt auf dem Gerät und gilt je Konto; das Portal kennt sie nicht.",
@@ -40,7 +40,8 @@
           "title": "Intern",
           "items": [
             "Die Versionshinweise veröffentlichter Versionen sind festgeschrieben: ein Test schlägt fehl, sobald sich ihr Text nachträglich ändert.",
-            "Android-Build auf das im Android-Build-Plugin eingebaute Kotlin umgestellt; dafür Sentry sowie die Android-Teile von Bildauswahl und Einstellungsspeicher auf Fassungen angehoben, die das unterstützen."
+            "Android-Build auf das im Android-Build-Plugin eingebaute Kotlin umgestellt; dafür Sentry sowie die Android-Teile von Bildauswahl und Einstellungsspeicher auf Fassungen angehoben, die das unterstützen.",
+            "Debug-Builds gehen per WLAN in einem Lauf auf alle gekoppelten Geräte, ohne die App vorher zu löschen; Anmeldung und gespeicherter Stand bleiben dabei erhalten."
           ]
         }
       ],
@@ -52,7 +53,7 @@
             "Messages: a star marks important messages, and “Starred” shows only those. The star stays on the device; the portal does not know about it.",
             "Messages: the list can be sorted by date (newest or oldest first) or by sender. “Unread” shows only unread messages; opening one does not drop it from the list until the filter is switched off again.",
             "Messages: a long press on a message starts a selection. Selected messages can be shared or saved together as PDF, text or Markdown, archived, and moved out of the archive again.",
-            "Messages: write new messages and reply to received ones. Recipients can be searched by name, class or group; in a group, each person can be deselected. Before sending, the app says how many people the message goes to. When replying, the original message is quoted below in italics, as in the portal; the quote can be switched off. Attachments are not supported yet.",
+            "Messages: write new messages and reply to received ones. Recipients can be searched by name, class or group; in a group, each person can be deselected. Before sending, the app says how many people the message goes to. When replying, the original message is quoted below in italics, as in the portal; the quote can be switched off.",
             "Calendar: a lesson held outside the class's own room carries a small triangle in the top right corner, in the homework week view as well. A long press on the lesson names the room; a booked presentation camera does not count as a room.",
             "Settings → Subjects: “Show all details in the calendar” also names the room in the lesson, as far as there is space. The location name shared by all rooms of the week is left out; with several rooms, “+1” follows. Teachers and room get slightly smaller if needed, the subject never does. By default nothing changes.",
             "Grades: a bookmark marks single grades, in the list and on the grade's own page. “Show only marked grades” hides everything else. The mark stays on the device and applies per account; the portal does not know about it.",
@@ -82,7 +83,8 @@
           "title": "Internal",
           "items": [
             "The release notes of published versions are locked: a test fails as soon as their text is changed afterwards.",
-            "Android build switched to the Kotlin support built into the Android Gradle Plugin; Sentry and the Android parts of the image picker and the settings storage updated to versions that support it."
+            "Android build switched to the Kotlin support built into the Android Gradle Plugin; Sentry and the Android parts of the image picker and the settings storage updated to versions that support it.",
+            "Debug builds go to every paired phone over Wi-Fi in one run, without uninstalling the app first; the sign-in and the saved state survive."
           ]
         }
       ],
@@ -94,7 +96,7 @@
             "Comunicazioni: una stella contrassegna le comunicazioni importanti e «Contrassegnate» mostra solo quelle. Il contrassegno resta sul dispositivo; il portale non lo conosce.",
             "Comunicazioni: l'elenco si può ordinare per data (più recenti o meno recenti prima) o per mittente. «Non lette» mostra solo le comunicazioni non lette; aprirne una non la toglie dall'elenco finché il filtro non viene disattivato.",
             "Comunicazioni: una pressione prolungata su una comunicazione avvia la selezione. Le comunicazioni selezionate si possono condividere o salvare insieme come PDF, testo o Markdown, archiviare e togliere di nuovo dall'archivio.",
-            "Comunicazioni: scrivere nuove comunicazioni e rispondere a quelle ricevute. I destinatari si cercano per nome, classe o gruppo; in un gruppo ogni persona si può deselezionare. Prima dell'invio l'app dice a quante persone va la comunicazione. Rispondendo, la comunicazione originale viene citata sotto in corsivo, come nel portale; la citazione si può disattivare. Gli allegati non sono ancora supportati.",
+            "Comunicazioni: scrivere nuove comunicazioni e rispondere a quelle ricevute. I destinatari si cercano per nome, classe o gruppo; in un gruppo ogni persona si può deselezionare. Prima dell'invio l'app dice a quante persone va la comunicazione. Rispondendo, la comunicazione originale viene citata sotto in corsivo, come nel portale; la citazione si può disattivare.",
             "Calendario: una lezione che si svolge fuori dall'aula della classe porta un piccolo triangolo nell'angolo in alto a destra, anche nella vista settimanale dell'agenda. Una pressione prolungata sulla lezione indica l'aula; una fotocamera per presentazioni prenotata non conta come aula.",
             "Impostazioni → Materie: «Mostra tutti i dettagli nel calendario» indica nella lezione anche l'aula, se c'è spazio. Il nome della sede comune a tutte le aule della settimana viene omesso; con più aule segue «+1». Se serve, docenti e aula diventano un po' più piccoli, la materia mai. Di default non cambia nulla.",
             "Valutazioni: un segnalibro contrassegna i singoli voti, nell'elenco e nella pagina del voto. «Mostra solo i voti contrassegnati» nasconde tutto il resto. Il contrassegno resta sul dispositivo e vale per ogni account; il portale non lo conosce.",
@@ -124,7 +126,8 @@
           "title": "Interno",
           "items": [
             "Le note delle versioni pubblicate sono bloccate: un test fallisce non appena il loro testo viene modificato in seguito.",
-            "Build Android passata al supporto Kotlin integrato nel plugin Gradle di Android; Sentry e le parti Android del selettore di immagini e dell'archivio delle impostazioni aggiornati a versioni che lo supportano."
+            "Build Android passata al supporto Kotlin integrato nel plugin Gradle di Android; Sentry e le parti Android del selettore di immagini e dell'archivio delle impostazioni aggiornati a versioni che lo supportano.",
+            "Le build di debug arrivano via Wi-Fi a tutti i dispositivi accoppiati in un solo passaggio, senza disinstallare prima l'app; accesso e dati salvati restano."
           ]
         }
       ]
