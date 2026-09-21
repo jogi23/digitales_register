@@ -219,6 +219,36 @@ void main() {
     });
   });
 
+  group('subject colours', () {
+    test('a new installation starts with them on', () {
+      // Die Funktion war da, nur eingeschaltet hat sie kaum jemand (#261).
+      expect(SettingsState().dashboardColorBorders, isTrue);
+      expect(SettingsState().calendarColorBackground, isTrue);
+    });
+
+    test('an installation that had them off keeps them off', () {
+      // Was gespeichert ist, entscheidet - die Voreinstellung gilt nur für
+      // ein Gerät, auf dem noch nichts steht.
+      final stored = SettingsState(
+        dashboardColorBorders: false,
+        calendarColorBackground: false,
+      ).globalJson();
+      final restored = SettingsState().withGlobalJson(stored);
+      expect(restored.dashboardColorBorders, isFalse);
+      expect(restored.calendarColorBackground, isFalse);
+    });
+
+    test('are app-wide and survive a restart', () async {
+      final before = _makeContainer();
+      before.read(settingsProvider.notifier).setCalendarColorBackground(false);
+      await pumpEventQueue();
+
+      final after = _makeContainer();
+      await after.read(settingsProvider.notifier).loadGlobal();
+      expect(after.read(settingsProvider).calendarColorBackground, isFalse);
+    });
+  });
+
   group('display modes', () {
     test('the homework page takes over the arrangement both pages shared',
         () {

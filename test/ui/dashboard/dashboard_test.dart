@@ -1044,6 +1044,13 @@ Future<void> main() async {
             ),
           ),
         ),
+        // Spelled out: colouring is on by default since 1.4.1, and this test
+        // is about what the page looks like without it.
+        settingsProvider.overrideWith(
+          () => _TestSettingsNotifier(
+            SettingsState(dashboardColorBorders: false),
+          ),
+        ),
       ],
       child: MaterialApp(
         home: DaysContainer(),
