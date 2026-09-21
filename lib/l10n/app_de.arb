@@ -639,6 +639,7 @@
   "accountAdd": "Konto hinzufügen",
   "accountSwitchDisabled": "Konto wechseln (Passwort-Speicherung deaktiviert)",
   "weekLessonHasEntry": "Etwas eingetragen",
+  "weekLessonFinished": "Alles erledigt",
   "accountPhotoChange": "Foto ändern",
   "accountPhotoRemove": "Foto entfernen",
   "photoCropTitle": "Ausschnitt wählen",

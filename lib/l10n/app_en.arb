@@ -618,6 +618,7 @@
   "accountAdd": "Add an account",
   "accountSwitchDisabled": "Switch account (password saving is off)",
   "weekLessonHasEntry": "Something noted",
+  "weekLessonFinished": "All done",
   "accountPhotoChange": "Change the photo",
   "accountPhotoRemove": "Remove the photo",
   "photoCropTitle": "Choose the section",
