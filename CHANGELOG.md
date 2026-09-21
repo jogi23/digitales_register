@@ -8,11 +8,13 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 
 - Profilfoto: Vor dem Speichern lässt sich der Ausschnitt wählen. Das Bild lässt sich im Fenster ziehen und zoomen; was im Kreis steht, wird das Foto.
 - Profilfoto: Ein Tippen auf das Foto fragt, ob es gewechselt oder entfernt werden soll. Entfernt stehen wieder die Initialen im Kreis.
+- Mitteilungen: eine selbst gesendete Mitteilung lässt sich zurücknehmen, solange das Portal es erlaubt — vier Stunden nach dem Senden. Nach einer Rückfrage; bei den Empfängern verschwindet sie mit.
 
 ### Verbesserungen
 
 - Fächerfarben sind auf einem neu eingerichteten Gerät von Anfang an eingeschaltet. Wer sie ausgeschaltet hat, behält sie aus.
 - Merkheft-Wochenansicht: Sind die Fächerfarben aus, tragen Stunden mit Einträgen einen ruhigen Hintergrund und unten rechts ein kleines Zeichen. Bisher färbte die Wochenansicht auch dann ein, wenn die Farben abbestellt waren.
+- Merkheft-Wochenansicht: Sind alle Einträge eines Fachs an diesem Tag abgehakt, trägt die Stunde unten rechts einen Haken. Noten und Beobachtungen zählen nicht mit — sie sind nichts zum Abarbeiten.
 
 ### Fehlerbehebungen
 
