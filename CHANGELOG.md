@@ -2,6 +2,23 @@
 
 Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` — Änderungen bitte dort eintragen, nicht hier.
 
+## 1.4.1 — 2026-09-21
+
+### Neue Funktionen
+
+- Profilfoto: Vor dem Speichern lässt sich der Ausschnitt wählen. Das Bild lässt sich im Fenster ziehen und zoomen; was im Kreis steht, wird das Foto.
+- Profilfoto: Ein Tippen auf das Foto fragt, ob es gewechselt oder entfernt werden soll. Entfernt stehen wieder die Initialen im Kreis.
+
+### Verbesserungen
+
+- Fächerfarben sind auf einem neu eingerichteten Gerät von Anfang an eingeschaltet. Wer sie ausgeschaltet hat, behält sie aus.
+- Merkheft-Wochenansicht: Sind die Fächerfarben aus, tragen Stunden mit Einträgen einen ruhigen Hintergrund und unten rechts ein kleines Zeichen. Bisher färbte die Wochenansicht auch dann ein, wenn die Farben abbestellt waren.
+
+### Fehlerbehebungen
+
+- Das Profilfoto ließ sich nach der ersten Auswahl nicht mehr ändern: Das neue Bild lag unter demselben Namen, und die App zeigte weiter das alte.
+- Kalender: Bei einem neuen Konto hatten nur einige Fächer eine Farbe. Jedes Fach bekommt seine Farbe jetzt, sobald es auftaucht — auch wenn es nur im Stundenplan vorkommt.
+
 ## 1.4.0 — 2026-09-15
 
 ### Neue Funktionen
