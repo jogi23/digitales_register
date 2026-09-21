@@ -267,7 +267,10 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
           if (!widget.vm.demoMode) const AccountSettingsTile(),
           SwitchListTile.adaptive(
             title: Text(tr(context).settingsStayLoggedIn),
-            subtitle: Text(tr(context).settingsStayLoggedInSubtitle),
+            subtitle: Text(
+              '${tr(context).settingsStayLoggedInSubtitle}\n'
+              '${tr(context).settingsStayLoggedInBackgroundHint}',
+            ),
             onChanged: (bool value) {
               widget.onSetNoPassSaving(!value);
             },

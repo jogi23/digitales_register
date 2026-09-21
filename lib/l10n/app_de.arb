@@ -663,5 +663,6 @@
         "type": "String"
       }
     }
-  }
+  },
+  "settingsStayLoggedInBackgroundHint": "Hintergrund-Benachrichtigungen funktionieren nur bei stiller Anmeldung mit Passwort; bei 2FA sowie SPID/CIE nur manuelles Nachsehen."
 }

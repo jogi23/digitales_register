@@ -106,7 +106,13 @@ class _SignedInAuth {
     when(() => auth.forceLoggedOut()).thenAnswer((_) => loggedIn = false);
     when(() => auth.user).thenReturn('user');
     when(() => auth.pass).thenReturn('pass');
-    when(() => auth.login(any(), any(), any(), any())).thenAnswer((_) async {
+    when(() => auth.login(
+          any(),
+          any(),
+          any(),
+          any(),
+          allowInteractive2fa: any(named: 'allowInteractive2fa'),
+        )).thenAnswer((_) async {
       logins++;
       loggedIn = true;
     });
@@ -507,7 +513,13 @@ void main() {
       test('a retry that cannot sign in again still reports the failure',
           () async {
         final signedIn = _SignedInAuth();
-        when(() => signedIn.auth.login(any(), any(), any(), any()))
+        when(() => signedIn.auth.login(
+              any(),
+              any(),
+              any(),
+              any(),
+              allowInteractive2fa: any(named: 'allowInteractive2fa'),
+            ))
             .thenAnswer((_) async {});
         when(() => signedIn.auth.logout(
               hard: any(named: 'hard'),
@@ -541,7 +553,13 @@ void main() {
       final logins = <List<String?>>[];
       var loggedIn = false;
       when(() => auth.loggedIn).thenAnswer((_) async => loggedIn);
-      when(() => auth.login(any(), any(), any(), any()))
+      when(() => auth.login(
+            any(),
+            any(),
+            any(),
+            any(),
+            allowInteractive2fa: any(named: 'allowInteractive2fa'),
+          ))
           .thenAnswer((invocation) async {
         logins.add([
           for (final argument in invocation.positionalArguments)

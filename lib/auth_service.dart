@@ -71,6 +71,7 @@ class AuthService {
     String? pass,
     String? tfaCode,
     String? url, {
+    bool allowInteractive2fa = true,
     VoidCallback? logout,
     VoidCallback? configLoaded,
     VoidCallback? relogin,
@@ -168,15 +169,35 @@ class AuthService {
       error = "[${response["error"]}] ${response["message"]}";
       switch (getString(response["error"])) {
         case "two_factor_needed":
+          if (!allowInteractive2fa) {
+            log("2FA needed, but this login attempt is non-interactive.");
+            return response;
+          }
           final tfaCode = await _request2FA();
           if (tfaCode != null) {
-            return login(user, pass, tfaCode, url);
+            return login(
+              user,
+              pass,
+              tfaCode,
+              url,
+              allowInteractive2fa: allowInteractive2fa,
+            );
           }
           return;
         case "two_factor_wrong":
+          if (!allowInteractive2fa) {
+            log("2FA code wrong, but this login attempt is non-interactive.");
+            return response;
+          }
           final tfaCode = await _request2FA(wasWrong: true);
           if (tfaCode != null) {
-            return login(user, pass, tfaCode, url);
+            return login(
+              user,
+              pass,
+              tfaCode,
+              url,
+              allowInteractive2fa: allowInteractive2fa,
+            );
           }
           return;
       }
@@ -259,8 +280,13 @@ class AuthService {
   }
 
   Future<String?> _request2FA({bool wasWrong = false}) {
+    final context = navigatorKey?.currentContext;
+    if (context == null) {
+      log("2FA dialog requested without UI context; aborting.");
+      return Future.value(null);
+    }
     return showDialog(
-      context: navigatorKey!.currentContext!,
+      context: context,
       builder: (context) {
         final textInputController = TextEditingController();
         return StatefulBuilder(

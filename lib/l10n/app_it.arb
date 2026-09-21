@@ -635,5 +635,6 @@
   "connectionReconnect": "Riconnetti",
   "connectionRelogin": "Accedi di nuovo",
   "connectionReconnecting": "Connessione in corso …",
-  "connectionOutdated": "Dati non aggiornati"
+  "connectionOutdated": "Dati non aggiornati",
+  "settingsStayLoggedInBackgroundHint": "Le notifiche in background funzionano solo con accesso silenzioso con password; con 2FA e SPID/CIE è possibile solo il controllo manuale."
 }

@@ -135,7 +135,12 @@ class SessionManager {
       if (!await _authService.loggedIn) {
         if (_authService.user != null && _authService.pass != null) {
           await _authService.login(
-              _authService.user, _authService.pass, null, _apiClient.url);
+            _authService.user,
+            _authService.pass,
+            null,
+            _apiClient.url,
+            allowInteractive2fa: false,
+          );
           if (!await _authService.loggedIn) {
             if (noInternet) {
               onNoInternet?.call(true);
@@ -226,7 +231,13 @@ class SessionManager {
     if (stored == null) return false;
     _lastStoredLoginTry = DateTime.now();
     log("signing in again with the stored credentials");
-    await _authService.login(stored.user, stored.pass, null, stored.url);
+    await _authService.login(
+      stored.user,
+      stored.pass,
+      null,
+      stored.url,
+      allowInteractive2fa: false,
+    );
     if (!await _authService.loggedIn) {
       if (noInternet) onNoInternet?.call(true);
       return false;

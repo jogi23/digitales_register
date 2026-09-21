@@ -635,5 +635,6 @@
   "connectionReconnect": "Reconnect",
   "connectionRelogin": "Sign in again",
   "connectionReconnecting": "Connecting …",
-  "connectionOutdated": "Data is out of date"
+  "connectionOutdated": "Data is out of date",
+  "settingsStayLoggedInBackgroundHint": "Background notifications work only with silent password sign-in; with 2FA and SPID/CIE you can only check manually."
 }
