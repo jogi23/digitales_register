@@ -410,4 +410,95 @@ void main() {
       verify(() => wrapper.send('api/message/getMyMessages')).called(1);
     });
   });
+
+  group('taking a sent message back', () {
+    /// What `getMessage` answers for a sent message.
+    Map<String, Object?> detail({int enabled = 1, int deleted = 0}) =>
+        <String, Object?>{
+          'message': <String, Object?>{
+            'id': _sentId,
+            'deleteMessageEnabled': enabled,
+            'deleted': deleted,
+          },
+          'userMessage': null,
+          'replies': <Object?>[],
+        };
+
+    void answerDetail(Object? answer) {
+      when(() => wrapper.send('api/message/getMessage',
+              args: any(named: 'args'), onError: any(named: 'onError')))
+          .thenAnswer((_) async => answer);
+    }
+
+    /// The captured list without the message this account sent.
+    List<dynamic> listWithoutSent() => (fixtureFor(
+          'api/message/getMyMessages',
+        ) as List)
+            .where((dynamic m) => (m as Map)['id'] != _sentId)
+            .toList();
+
+    test('a message inside the window can be taken back', () async {
+      answerDetail(detail());
+      await container.read(messagesProvider.notifier).loadDetails(_sentId);
+      expect(messageWithId(_sentId).canDelete, isTrue);
+    });
+
+    test('outside the window it cannot', () async {
+      // 2 is what the portal sends once the four hours are up.
+      answerDetail(detail(enabled: 2));
+      await container.read(messagesProvider.notifier).loadDetails(_sentId);
+      expect(messageWithId(_sentId).canDelete, isFalse);
+    });
+
+    test('one already taken back is not offered again', () async {
+      // The flag stays at 1 after the deletion; only `deleted` says it went.
+      answerDetail(detail(deleted: 1));
+      await container.read(messagesProvider.notifier).loadDetails(_sentId);
+      expect(messageWithId(_sentId).canDelete, isFalse);
+    });
+
+    test('a plain sentence instead of JSON is not read as an answer',
+        () async {
+      // What the portal sends for a message it has nothing to add about.
+      answerDetail('glossary.no_need_to_fetch_message');
+      await container.read(messagesProvider.notifier).loadDetails(_sentId);
+      expect(messageWithId(_sentId).canDelete, isFalse);
+    });
+
+    test('a received message is not asked about at all', () async {
+      await container.read(messagesProvider.notifier).loadDetails(_agreeOpenId);
+      verifyNever(() => wrapper.send('api/message/getMessage',
+          args: any(named: 'args'), onError: any(named: 'onError')));
+      expect(messageWithId(_agreeOpenId).canDelete, isFalse);
+    });
+
+    test('gone from the list is what counts as deleted', () async {
+      // The portal answers with an empty body, so the list is the proof.
+      when(() => wrapper.send('api/message/deleteMessage',
+              args: any(named: 'args'), onError: any(named: 'onError')))
+          .thenAnswer((_) async => '');
+      when(() => wrapper.send('api/message/getMyMessages',
+              args: any(named: 'args'), onError: any(named: 'onError')))
+          .thenAnswer((_) async => listWithoutSent());
+
+      final deleted =
+          await container.read(messagesProvider.notifier).deleteMessage(_sentId);
+      expect(deleted, isTrue);
+      expect(
+        container.read(messagesProvider).messages.any((m) => m.id == _sentId),
+        isFalse,
+      );
+    });
+
+    test('still in the list means it did not happen', () async {
+      when(() => wrapper.send('api/message/deleteMessage',
+              args: any(named: 'args'), onError: any(named: 'onError')))
+          .thenAnswer((_) async => '');
+
+      final deleted =
+          await container.read(messagesProvider.notifier).deleteMessage(_sentId);
+      expect(deleted, isFalse);
+      expect(messageWithId(_sentId).id, _sentId);
+    });
+  });
 }

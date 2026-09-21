@@ -105,6 +105,65 @@ class MessagesNotifier extends Notifier<MessagesState> {
     return allSent;
   }
 
+  /// Asks the portal what else it knows about a sent message.
+  ///
+  /// Only this answer says whether the message can still be taken back; the
+  /// list does not carry the flag. A received message has no detail of its
+  /// own — the portal answers with the plain text
+  /// `glossary.no_need_to_fetch_message` rather than with JSON, so anything
+  /// that is not a map is simply nothing to learn from (#235).
+  Future<void> loadDetails(int messageId) async {
+    if (wrapper.noInternet) return;
+    final message =
+        state.messages.firstWhereOrNull((m) => m.id == messageId);
+    if (message == null || !message.outgoing) return;
+    final dynamic response = await wrapper.send(
+      "api/message/getMessage",
+      args: <String, Object?>{"messageId": messageId},
+    );
+    // Deliberately no getMap: it runs a string through the JSON parser, and
+    // the refusal is not JSON — it would throw instead of saying "nothing".
+    if (response is! Map) return;
+    final detail = response["message"];
+    if (detail is! Map) return;
+    // 1 means inside the four hour window, 2 outside it. The flag stays on
+    // after the message was taken back, so whether it is still there decides
+    // as well — otherwise the app would offer to delete it twice.
+    final gone = getBool(detail["deleted"]) == true;
+    _updateMessage(
+      messageId,
+      (b) =>
+          b..canDelete = getInt(detail["deleteMessageEnabled"]) == 1 && !gone,
+    );
+  }
+
+  /// Takes a sent message back, within the window the portal allows.
+  ///
+  /// The portal answers with an empty body: there is nothing in it to read
+  /// success from, and an HTTP 200 on its own proves nothing. So the list
+  /// decides — the message is gone from it, or the deletion did not happen
+  /// (#235).
+  Future<bool> deleteMessage(int messageId) async {
+    Object? failure;
+    await wrapper.send(
+      "api/message/deleteMessage",
+      args: <String, Object?>{"messageId": messageId},
+      onError: (error) => failure = error,
+    );
+    if (failure != null) return false;
+    await load();
+    return state.messages.every((m) => m.id != messageId);
+  }
+
+  /// Applies [updates] to the message with [messageId], if it is still there.
+  void _updateMessage(int messageId, void Function(MessageBuilder) updates) {
+    final index = state.messages.indexWhere((m) => m.id == messageId);
+    if (index == -1) return;
+    state = state.rebuild(
+      (b) => b.messages[index] = b.messages[index].rebuild(updates),
+    );
+  }
+
   Future<void> openMessageFile(MessageAttachmentFile file) async {
     if (!file.fileAvailable || !await canOpenFile(file.uniqueName)) {
       _markDownloading(file);
