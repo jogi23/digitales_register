@@ -15,9 +15,12 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'dart:async';
+
 import 'package:dr/providers/calendar_provider.dart';
 import 'package:dr/providers/dashboard_provider.dart';
 import 'package:dr/providers/grades_provider.dart';
+import 'package:dr/providers/subject_appearance_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Computed list of all known subject names across grades, calendar and dashboard.
@@ -45,3 +48,28 @@ final allSubjectsProvider = Provider<List<String>>((ref) {
   }
   return subjects.toList();
 });
+
+/// Containers that already assign colours on their own.
+final _listening = Expando<bool>('subject themes');
+
+/// Gives every subject the app learns about a colour, as it learns about it.
+///
+/// Colours used to be assigned at a few fixed moments — after logging in,
+/// when the grades arrived, when the week view opened. The timetable arrives
+/// later than any of them, so a subject that shows up nowhere but there
+/// stayed colourless: a new account saw a calendar in which some lessons were
+/// coloured and some were not (#259).
+///
+/// Called once per container at startup; assigning a colour that is already
+/// there costs nothing.
+void keepSubjectThemesUpToDate(ProviderContainer container) {
+  if (_listening[container] ?? false) return;
+  _listening[container] = true;
+  container.listen<List<String>>(
+    allSubjectsProvider,
+    (previous, next) => unawaited(
+      container.read(subjectAppearanceProvider.notifier).ensureThemesFor(next),
+    ),
+    fireImmediately: true,
+  );
+}
