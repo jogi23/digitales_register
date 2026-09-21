@@ -1,4 +1,78 @@
 {
+  "1.4.1": {
+    "date": "2026-09-21",
+    "points": {
+      "de": [
+        {
+          "title": "Neue Funktionen",
+          "items": [
+            "Profilfoto: Vor dem Speichern lässt sich der Ausschnitt wählen. Das Bild lässt sich im Fenster ziehen und zoomen; was im Kreis steht, wird das Foto.",
+            "Profilfoto: Ein Tippen auf das Foto fragt, ob es gewechselt oder entfernt werden soll. Entfernt stehen wieder die Initialen im Kreis."
+          ]
+        },
+        {
+          "title": "Verbesserungen",
+          "items": [
+            "Fächerfarben sind auf einem neu eingerichteten Gerät von Anfang an eingeschaltet. Wer sie ausgeschaltet hat, behält sie aus.",
+            "Merkheft-Wochenansicht: Sind die Fächerfarben aus, tragen Stunden mit Einträgen einen ruhigen Hintergrund und unten rechts ein kleines Zeichen. Bisher färbte die Wochenansicht auch dann ein, wenn die Farben abbestellt waren."
+          ]
+        },
+        {
+          "title": "Fehlerbehebungen",
+          "items": [
+            "Das Profilfoto ließ sich nach der ersten Auswahl nicht mehr ändern: Das neue Bild lag unter demselben Namen, und die App zeigte weiter das alte.",
+            "Kalender: Bei einem neuen Konto hatten nur einige Fächer eine Farbe. Jedes Fach bekommt seine Farbe jetzt, sobald es auftaucht — auch wenn es nur im Stundenplan vorkommt."
+          ]
+        }
+      ],
+      "en": [
+        {
+          "title": "New features",
+          "items": [
+            "Account photo: the section can be chosen before it is saved. Drag and zoom the picture in the window; what is inside the circle becomes the photo.",
+            "Account photo: tapping it asks whether to change or remove it. Removed, the initials are back in the circle."
+          ]
+        },
+        {
+          "title": "Improvements",
+          "items": [
+            "Subject colours are on from the start on a newly set up device. Whoever switched them off keeps them off.",
+            "Merkheft week view: with the subject colours off, lessons that carry an entry get a quiet background and a small mark in the bottom right corner. Until now the week view coloured them anyway."
+          ]
+        },
+        {
+          "title": "Bug fixes",
+          "items": [
+            "The account photo could not be changed after the first time: the new picture went to the same file name, and the app kept showing the old one.",
+            "Calendar: on a new account only some subjects had a colour. Every subject is given one as soon as it turns up now — even one that appears nowhere but in the timetable."
+          ]
+        }
+      ],
+      "it": [
+        {
+          "title": "Nuove funzioni",
+          "items": [
+            "Foto del profilo: prima di salvarla si può scegliere l'inquadratura. L'immagine si trascina e si ingrandisce nella finestra; diventa foto ciò che sta nel cerchio.",
+            "Foto del profilo: toccandola si sceglie se cambiarla o rimuoverla. Rimossa, nel cerchio tornano le iniziali."
+          ]
+        },
+        {
+          "title": "Miglioramenti",
+          "items": [
+            "I colori delle materie sono attivi fin dall'inizio su un dispositivo appena configurato. Chi li ha disattivati li mantiene disattivati.",
+            "Vista settimanale del Merkheft: con i colori delle materie disattivati, le ore con annotazioni hanno uno sfondo discreto e un piccolo segno in basso a destra. Finora la vista settimanale le colorava comunque."
+          ]
+        },
+        {
+          "title": "Correzioni",
+          "items": [
+            "La foto del profilo non si poteva più cambiare dopo la prima scelta: la nuova immagine finiva con lo stesso nome di file e l'app mostrava ancora quella vecchia.",
+            "Calendario: con un account nuovo solo alcune materie avevano un colore. Ora ogni materia riceve il suo colore appena compare, anche se esiste solo nell'orario."
+          ]
+        }
+      ]
+    }
+  },
   "1.4.0": {
     "date": "2026-09-15",
     "points": {

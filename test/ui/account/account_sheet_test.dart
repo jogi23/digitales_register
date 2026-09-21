@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'package:dr/providers/account_profile_provider.dart';
 import 'package:dr/providers/login_provider.dart';
 import 'package:dr/ui/account_avatar_button.dart';
 import 'package:dr/ui/account_sheet.dart';
@@ -27,6 +28,13 @@ class _TestLoginNotifier extends LoginNotifier {
   _TestLoginNotifier(this.initial);
   @override
   LoginState build() => initial;
+}
+
+class _TestProfileNotifier extends AccountProfileNotifier {
+  final Map<String, AccountProfile> initial;
+  _TestProfileNotifier(this.initial);
+  @override
+  Map<String, AccountProfile> build() => initial;
 }
 
 const _login = LoginState(
@@ -102,5 +110,56 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(AccountSheet), findsNothing);
+  });
+
+  group('the account photo', () {
+    final key = accountProfileKey(_login.username!, _login.url!);
+
+    /// The card, opened, with [photo] filed for the current account.
+    Future<ProviderContainer> pumpWithPhoto(
+      WidgetTester tester,
+      String? photo,
+    ) async {
+      final container = ProviderContainer(
+        overrides: [
+          loginProvider.overrideWith(() => _TestLoginNotifier(_login)),
+          accountProfileProvider.overrideWith(
+            () => _TestProfileNotifier({key: AccountProfile(photoPath: photo)}),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: const MaterialApp(
+            home: Scaffold(body: Center(child: AccountAvatarButton())),
+          ),
+        ),
+      );
+      await tester.tap(find.byType(AccountAvatarButton));
+      await tester.pumpAndSettle();
+      return container;
+    }
+
+    testWidgets('offers changing and removing once there is one',
+        (tester) async {
+      await pumpWithPhoto(tester, '/nirgends/foto.png');
+      await tester.tap(find.byIcon(Icons.edit));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Foto ändern'), findsOneWidget);
+      expect(find.text('Foto entfernen'), findsOneWidget);
+    });
+
+    testWidgets('removing it goes back to the initials', (tester) async {
+      final container = await pumpWithPhoto(tester, '/nirgends/foto.png');
+      await tester.tap(find.byIcon(Icons.edit));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Foto entfernen'));
+      await tester.pumpAndSettle();
+
+      expect(container.read(accountProfileProvider)[key]?.photoPath, isNull);
+    });
   });
 }

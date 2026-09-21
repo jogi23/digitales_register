@@ -198,6 +198,9 @@ Future<void> _doLoad() async {
   await providerContainer.read(accountProfileProvider.notifier).load();
   await providerContainer.read(subjectAppearanceProvider.notifier).load();
   await providerContainer.read(settingsProvider.notifier).loadGlobal();
+  // From here on every subject that turns up — in the grades, in the
+  // timetable, in the Merkheft — is given a colour of its own.
+  keepSubjectThemesUpToDate(providerContainer);
   dynamic login;
   try {
     login = json.decode(await secureStorage.read(key: "login") ?? "{}");

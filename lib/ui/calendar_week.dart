@@ -107,6 +107,7 @@ class CalendarWeek extends StatelessWidget {
                           ? vm.selection?.hour
                           : null,
                       colorBackground: vm.colorBackground,
+                      markEntries: vm.markEntries,
                       subjectThemes: vm.subjectThemes,
                       showAllDetails: vm.showAllDetails,
                       roomNames: roomNames,
@@ -311,6 +312,9 @@ class _HoursChunk extends StatelessWidget {
   final int? selectedHour;
   final bool isSelected;
   final bool colorBackground;
+
+  /// Whether a lesson that carries an entry is marked as such.
+  final bool markEntries;
   final Map<String, SubjectTheme> subjectThemes;
   final bool showAllDetails;
   final Map<String, String> roomNames;
@@ -324,14 +328,22 @@ class _HoursChunk extends StatelessWidget {
     required this.selectedHour,
     required this.isSelected,
     required this.colorBackground,
+    required this.markEntries,
     required this.subjectThemes,
     required this.showAllDetails,
     required this.roomNames,
   });
 
+  /// Whether something is noted for [hour]. Nothing is noted for any of them
+  /// on the calendar page, which dims none and marks none.
+  bool _hasEntry(CalendarHour hour) =>
+      highlightedSubjects == null ||
+      highlightedSubjects!.contains(normalizeSubject(hour.subject));
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final scheme = Theme.of(context).colorScheme;
     return Stack(
       children: <Widget>[
         Card(
@@ -359,45 +371,7 @@ class _HoursChunk extends StatelessWidget {
             children: List.generate(
               hours.length * 2 - 1,
               (n) => n.isEven
-                  ? HourWidget(
-                      hour: hours[n ~/ 2],
-                      dimmed: highlightedSubjects != null &&
-                          !highlightedSubjects!.contains(
-                            normalizeSubject(hours[n ~/ 2].subject),
-                          ),
-                      // Only lessons that carry an entry lead anywhere; a
-                      // dimmed one has nothing to show.
-                      onEntryTap: highlightedSubjects != null &&
-                              !highlightedSubjects!.contains(
-                                normalizeSubject(hours[n ~/ 2].subject),
-                              )
-                          ? null
-                          : onEntryTap,
-                      subjectNicks: subjectNicks,
-                      showAllDetails: showAllDetails,
-                      roomNames: roomNames,
-                      day: day,
-                      isSelected: selectedHour == hours[n ~/ 2].fromHour,
-                      backgroundColor: colorBackground &&
-                              subjectThemes.containsKey(
-                                  normalizeSubject(hours[n ~/ 2].subject))
-                          ? Color(subjectThemes[
-                                      normalizeSubject(hours[n ~/ 2].subject)]!
-                                  .color)
-                              .withOpacity(isDark ? 0.4 : 0.25)
-                          : Colors.transparent,
-                      selectedBackgroundColor: colorBackground &&
-                              subjectThemes.containsKey(
-                                  normalizeSubject(hours[n ~/ 2].subject))
-                          ? Color(subjectThemes[
-                                      normalizeSubject(hours[n ~/ 2].subject)]!
-                                  .color)
-                              .withOpacity(isDark ? 0.65 : 0.5)
-                          : Theme.of(context)
-                              .colorScheme
-                              .secondary
-                              .withAlpha(35),
-                    )
+                  ? _tile(hours[n ~/ 2], isDark: isDark, scheme: scheme)
                   : const Divider(
                       height: 0,
                     ),
@@ -405,6 +379,46 @@ class _HoursChunk extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  /// One lesson of the chunk.
+  ///
+  /// A lesson nothing is noted for steps back; one that carries an entry is
+  /// tinted in the colour of its subject. With the colours switched off that
+  /// tint is gone, and then the mark is what is left to tell the two apart
+  /// (#260).
+  Widget _tile(
+    CalendarHour hour, {
+    required bool isDark,
+    required ColorScheme scheme,
+  }) {
+    final subject = normalizeSubject(hour.subject);
+    final hasEntry = _hasEntry(hour);
+    final theme = colorBackground ? subjectThemes[subject] : null;
+    final marked = markEntries && hasEntry && highlightedSubjects != null;
+    return HourWidget(
+      hour: hour,
+      dimmed: !hasEntry,
+      // Only lessons that carry an entry lead anywhere; a dimmed one has
+      // nothing to show.
+      onEntryTap: hasEntry ? onEntryTap : null,
+      subjectNicks: subjectNicks,
+      showAllDetails: showAllDetails,
+      roomNames: roomNames,
+      day: day,
+      marked: marked,
+      isSelected: selectedHour == hour.fromHour,
+      backgroundColor: theme != null
+          ? Color(theme.color).withOpacity(isDark ? 0.4 : 0.25)
+          : marked
+              // Not a colour of a subject's own: it says no more than that
+              // there is something here, and reads the same in both themes.
+              ? scheme.secondaryContainer.withOpacity(isDark ? 0.45 : 0.7)
+              : Colors.transparent,
+      selectedBackgroundColor: theme != null
+          ? Color(theme.color).withOpacity(isDark ? 0.65 : 0.5)
+          : scheme.secondary.withAlpha(35),
     );
   }
 }
@@ -432,6 +446,11 @@ class CalendarDayWidget extends StatelessWidget {
   final bool isSelected;
   final int? selectedHour;
   final bool colorBackground;
+
+  /// Whether a lesson that carries an entry is marked as such. What the
+  /// colour says where there is one, and the only thing left to say it where
+  /// there is not.
+  final bool markEntries;
   final Map<String, SubjectTheme> subjectThemes;
 
   /// Whether the lesson tiles also name the room.
@@ -453,6 +472,7 @@ class CalendarDayWidget extends StatelessWidget {
     required this.isSelected,
     required this.selectedHour,
     required this.colorBackground,
+    this.markEntries = false,
     required this.subjectThemes,
     this.showAllDetails = false,
     this.roomNames = const {},
@@ -515,6 +535,7 @@ class CalendarDayWidget extends StatelessWidget {
                 selectedHour: selectedHour,
                 isSelected: isSelected,
                 colorBackground: colorBackground,
+                markEntries: markEntries,
                 subjectThemes: subjectThemes,
                 showAllDetails: showAllDetails,
                 roomNames: roomNames,
@@ -559,6 +580,10 @@ class HourWidget extends ConsumerWidget {
   /// Pushes the lesson into the background because nothing is due in it.
   final bool dimmed;
 
+  /// Marks the lesson as one that carries an entry. Set where the subject
+  /// colours are switched off and the tint cannot say it (#260).
+  final bool marked;
+
   /// Opens the day this lesson belongs to. Null falls back to selecting the
   /// lesson, which is what the calendar page does.
   final VoidCallback? onEntryTap;
@@ -578,6 +603,7 @@ class HourWidget extends ConsumerWidget {
     super.key,
     required this.hour,
     this.dimmed = false,
+    this.marked = false,
     this.onEntryTap,
     this.showAllDetails = false,
     this.roomNames = const {},
@@ -649,6 +675,19 @@ class HourWidget extends ConsumerWidget {
                 // room matters even where the tile has no line to spare.
                 if (rooms.isNotEmpty)
                   const Positioned(top: 0, right: 0, child: RoomCorner()),
+                // The bottom right corner, because the top right belongs to
+                // the room and the left edge to the warning.
+                if (marked)
+                  Positioned(
+                    bottom: 1,
+                    right: 1,
+                    child: Icon(
+                      Icons.assignment_outlined,
+                      size: 12,
+                      color: Theme.of(context).colorScheme.primary,
+                      semanticLabel: tr(context).weekLessonHasEntry,
+                    ),
+                  ),
               ],
             ),
           ),

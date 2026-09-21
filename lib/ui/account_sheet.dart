@@ -16,11 +16,13 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:dr/providers/account_profile_provider.dart';
 import 'package:dr/providers/config_provider.dart';
 import 'package:dr/providers/login_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
+import 'package:dr/ui/photo_crop_page.dart';
 import 'package:dr/util.dart';
 import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
@@ -84,10 +86,17 @@ class _AccountSheetState extends ConsumerState<AccountSheet> {
     return accountProfileKey(login.username ?? '', login.url ?? '');
   }
 
+  /// Picks a picture, lets the reader choose the section, and files it.
   Future<void> _pickPhoto() async {
-    final picker = ImagePicker();
-    final picked = await picker.pickImage(source: ImageSource.gallery);
+    final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
     if (picked == null || !mounted) return;
+
+    final cropped = await Navigator.of(context).push<Uint8List>(
+      MaterialPageRoute<Uint8List>(
+        builder: (_) => PhotoCropPage(source: File(picked.path)),
+      ),
+    );
+    if (cropped == null || !mounted) return;
 
     final docsDir = await getApplicationDocumentsDirectory();
     final photosDir = Directory('${docsDir.path}/account_photos');
@@ -95,11 +104,64 @@ class _AccountSheetState extends ConsumerState<AccountSheet> {
 
     // Sanitize key so it's safe as a filename on all platforms.
     final safeKey = _currentKey.replaceAll(RegExp(r'[^\w.-]'), '_');
-    final ext = picked.path.split('.').last;
-    final dest = '${photosDir.path}/$safeKey.$ext';
-    await File(picked.path).copy(dest);
+    // A name of its own for every picture. Written back to the one the
+    // account already used, the photo stayed as it was: the path is what the
+    // image cache keys on, and it had that path in memory (#262).
+    final dest = '${photosDir.path}/${safeKey}_'
+        '${DateTime.now().millisecondsSinceEpoch}.png';
+    await File(dest).writeAsBytes(cropped);
 
+    final previous = ref.read(accountProfileProvider)[_currentKey]?.photoPath;
     await ref.read(accountProfileProvider.notifier).setPhoto(_currentKey, dest);
+    await _discard(previous);
+  }
+
+  /// Back to the initials.
+  Future<void> _removePhoto() async {
+    final previous = ref.read(accountProfileProvider)[_currentKey]?.photoPath;
+    await ref.read(accountProfileProvider.notifier).setPhoto(_currentKey, null);
+    await _discard(previous);
+  }
+
+  /// Drops a photo that is not in use any more, file and cached image alike.
+  Future<void> _discard(String? path) async {
+    if (path == null) return;
+    await FileImage(File(path)).evict();
+    try {
+      final file = File(path);
+      if (file.existsSync()) await file.delete();
+    } on FileSystemException {
+      // Nothing to do about it: the entry is gone either way, and a photo
+      // left behind is a few kilobytes, not an error worth a message.
+    }
+  }
+
+  /// The photo is the avatar itself, so tapping it offers what can be done
+  /// with it. Without one there is nothing to choose between.
+  Future<void> _editPhoto(bool hasPhoto) async {
+    if (!hasPhoto) return _pickPhoto();
+    final change = await showModalBottomSheet<bool>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            ListTile(
+              leading: const Icon(Icons.photo_library_outlined),
+              title: Text(tr(context).accountPhotoChange),
+              onTap: () => Navigator.pop(context, true),
+            ),
+            ListTile(
+              leading: const Icon(Icons.delete_outline),
+              title: Text(tr(context).accountPhotoRemove),
+              onTap: () => Navigator.pop(context, false),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (change == null || !mounted) return;
+    await (change ? _pickPhoto() : _removePhoto());
   }
 
   Future<void> _saveAlias(String value) async {
@@ -195,7 +257,7 @@ class _AccountSheetState extends ConsumerState<AccountSheet> {
       Column(
         children: [
           GestureDetector(
-            onTap: _pickPhoto,
+            onTap: () => _editPhoto(profile.photoPath != null),
             child: Stack(
               alignment: Alignment.bottomRight,
               children: [

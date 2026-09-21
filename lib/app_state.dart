@@ -366,8 +366,11 @@ class SettingsState {
     this.showSubjectAverage = true,
     this.dashboardMarkNewOrChangedEntries = true,
     this.dashboardDeduplicateEntries = true,
-    this.dashboardColorBorders = false,
-    this.calendarColorBackground = false,
+    // On for a fresh install: the colours are what makes a subject
+    // recognisable at a glance, and hardly anyone went looking for the switch
+    // (#261). An account that has settings stored keeps what it had.
+    this.dashboardColorBorders = true,
+    this.calendarColorBackground = true,
     this.calendarShowTimes = true,
     this.calendarShowAllDetails = false,
     this.dashboardViewMode = DashboardViewMode.list,

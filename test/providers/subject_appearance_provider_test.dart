@@ -1,8 +1,13 @@
 // Copyright (C) 2026 Johannes Feichter
+import 'package:built_collection/built_collection.dart';
 import 'package:dr/app_state.dart';
+import 'package:dr/providers/all_subjects_provider.dart';
+import 'package:dr/providers/calendar_provider.dart';
 import 'package:dr/providers/subject_appearance_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../fixtures/api_fixtures.dart';
 
 ProviderContainer _makeContainer() {
   final c = ProviderContainer();
@@ -108,6 +113,57 @@ void main() {
       final c = _makeContainer();
       final theme = c.read(subjectAppearanceProvider).themeFor('Unbekannt');
       expect(theme, const SubjectTheme());
+    });
+  });
+
+  group('keeping up with the subjects the app learns about', () {
+    setUpAll(loadFixtures);
+
+    /// One week of the timetable, as the register sends it.
+    CalendarState weekOfTimetable(ProviderContainer c) {
+      final raw = fixtureFor(
+        'api/calendar/student',
+        params: {'startDate': '2026-05-11'},
+      ) as Map<String, dynamic>;
+      return CalendarState(
+        (b) => b..days = MapBuilder(c.read(calendarProvider.notifier).parseLoaded(raw)),
+      );
+    }
+
+    test('a subject only the timetable knows still gets a colour', () async {
+      // The timetable arrives long after the login, which used to be where
+      // colours were handed out — those lessons stayed grey (#259).
+      final c = _makeContainer();
+      keepSubjectThemesUpToDate(c);
+      expect(c.read(subjectAppearanceProvider).themes, isEmpty);
+
+      c.read(calendarProvider.notifier).restore(weekOfTimetable(c));
+      c.read(allSubjectsProvider);
+      await pumpEventQueue();
+
+      final themes = c.read(subjectAppearanceProvider).themes;
+      expect(themes.containsKey(normalizeSubject('Mathematik')), isTrue);
+      expect(themes.containsKey(normalizeSubject('Religion')), isTrue);
+    });
+
+    test('every lesson of the week has one, not just the first', () async {
+      final c = _makeContainer();
+      keepSubjectThemesUpToDate(c);
+      final week = weekOfTimetable(c);
+      c.read(calendarProvider.notifier).restore(week);
+      c.read(allSubjectsProvider);
+      await pumpEventQueue();
+
+      final themes = c.read(subjectAppearanceProvider).themes;
+      for (final day in week.days.values) {
+        for (final hour in day.hours) {
+          expect(
+            themes.containsKey(normalizeSubject(hour.subject)),
+            isTrue,
+            reason: hour.subject,
+          );
+        }
+      }
     });
   });
 }

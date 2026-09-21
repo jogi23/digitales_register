@@ -62,6 +62,11 @@ class CalendarWeekViewModel {
   final bool noInternet;
   final CalendarSelection? selection;
   final bool colorBackground;
+
+  /// Whether a lesson that carries an entry is marked as such, rather than
+  /// left to the subject colour. The Merkheft sets it where the colours are
+  /// switched off; the calendar page marks nothing (#260).
+  final bool markEntries;
   final bool showTimes;
 
   /// Whether the lesson tiles also name the room. The corner that marks a
@@ -97,6 +102,7 @@ class CalendarWeekViewModel {
     required this.noInternet,
     required this.selection,
     required this.colorBackground,
+    this.markEntries = false,
     required this.showTimes,
     this.showAllDetails = false,
     this.loading = false,

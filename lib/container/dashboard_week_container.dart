@@ -263,9 +263,11 @@ class _DashboardWeekContainerState
               subjectNicks: subjectAppearance.nicks,
               noInternet: noInternet,
               selection: calendarState.selection,
-              // Here the subject colour carries the meaning "something is
-              // due", so it is on regardless of the calendar setting.
-              colorBackground: true,
+              // The colour is what says "something is due" here — so it
+              // follows the Merkheft's own colour switch, and where that is
+              // off, a mark takes over (#260).
+              colorBackground: settings.dashboardColorBorders,
+              markEntries: !settings.dashboardColorBorders,
               showTimes: settings.calendarShowTimes,
               showAllDetails: settings.calendarShowAllDetails,
               subjectThemes: subjectAppearance.themes,
