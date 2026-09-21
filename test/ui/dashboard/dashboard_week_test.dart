@@ -197,6 +197,7 @@ Future<void> main() async {
     WidgetTester tester, {
     Brightness brightness = Brightness.light,
     BuiltList<Day>? days,
+    bool colours = true,
   }) async {
     weekNotifier = _TestDashboardNotifier(
       days == null
@@ -211,7 +212,10 @@ Future<void> main() async {
               .overrideWith(() => _TestCalendarNotifier(_calendarState)),
           settingsProvider.overrideWith(
             () => _TestSettingsNotifier(
-              SettingsState(dashboardViewMode: DashboardViewMode.week),
+              SettingsState(
+                dashboardViewMode: DashboardViewMode.week,
+                dashboardColorBorders: colours,
+              ),
             ),
           ),
           subjectAppearanceProvider.overrideWith(
@@ -244,15 +248,16 @@ Future<void> main() async {
     await tester.pumpAndSettle();
   }
 
-  /// Whether the lesson of [subject] on Monday is pushed into the background.
-  bool dimmedOnMonday(WidgetTester tester, String subject) {
-    return tester
-        .widgetList<HourWidget>(find.byType(HourWidget))
-        .firstWhere(
+  /// The lesson of [subject] on Monday.
+  HourWidget hourOnMonday(WidgetTester tester, String subject) {
+    return tester.widgetList<HourWidget>(find.byType(HourWidget)).firstWhere(
           (w) => w.hour.subject == subject && w.day.date == _monday,
-        )
-        .dimmed;
+        );
   }
+
+  /// Whether the lesson of [subject] on Monday is pushed into the background.
+  bool dimmedOnMonday(WidgetTester tester, String subject) =>
+      hourOnMonday(tester, subject).dimmed;
 
   group('showing the week', () {
     testWidgets('the setting turns the timetable on', (tester) async {
@@ -569,6 +574,37 @@ Future<void> main() async {
       await tester.tap(find.byTooltip('Vorige Woche'));
       await tester.pump();
       expect(find.text('11.05.26 - 15.05.26'), findsOneWidget);
+    });
+  });
+
+  group('without the subject colours', () {
+    // Switched off, the tint that says "something is due" is gone, and
+    // dimming alone was not enough to tell the lessons apart (#260).
+    testWidgets('a lesson with entries is marked instead', (tester) async {
+      await pumpWeek(tester, colours: false);
+      expect(hourOnMonday(tester, 'Mathematik').marked, isTrue);
+      expect(hourOnMonday(tester, 'Deutsch').marked, isTrue);
+      expect(find.byIcon(Icons.assignment_outlined), findsWidgets);
+    });
+
+    testWidgets('a lesson without entries is not', (tester) async {
+      await pumpWeek(tester, colours: false);
+      expect(hourOnMonday(tester, 'Religion').marked, isFalse);
+    });
+
+    testWidgets('the marked lesson still stands out from the quiet one',
+        (tester) async {
+      await pumpWeek(tester, colours: false);
+      expect(tintOnMonday(tester, 'Mathematik'), isNotNull);
+      expect(tintOnMonday(tester, 'Religion'), isNull);
+    });
+  });
+
+  group('with the subject colours', () {
+    testWidgets('the colour says it, so nothing is marked', (tester) async {
+      await pumpWeek(tester);
+      expect(hourOnMonday(tester, 'Mathematik').marked, isFalse);
+      expect(find.byIcon(Icons.assignment_outlined), findsNothing);
     });
   });
 

@@ -638,6 +638,7 @@
   "accountOthers": "Andere Konten",
   "accountAdd": "Konto hinzufügen",
   "accountSwitchDisabled": "Konto wechseln (Passwort-Speicherung deaktiviert)",
+  "weekLessonHasEntry": "Etwas eingetragen",
   "accountPhotoChange": "Foto ändern",
   "accountPhotoRemove": "Foto entfernen",
   "photoCropTitle": "Ausschnitt wählen",
