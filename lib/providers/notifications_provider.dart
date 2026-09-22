@@ -53,15 +53,7 @@ class NotificationsNotifier extends Notifier<NotificationsState> {
   NotificationsState build() {
     ref.listen(
       settingsProvider.select(
-        (s) => (
-          s.notificationsEnabled,
-          s.notificationPollMinutes,
-          s.notifyClassbook,
-          s.notifyMessages,
-          s.notifyGrades,
-          s.notifyObservations,
-          s.notifyHomework,
-        ),
+        (s) => (s.notificationsEnabled, s.notificationPollMinutes),
       ),
       (_, __) => _restartPolling(),
     );
