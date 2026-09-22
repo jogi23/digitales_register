@@ -48,7 +48,6 @@ void main() {
     passDio = MockDio();
 
     pc.providerContainer = ProviderContainer();
-    addTearDown(pc.providerContainer.dispose);
     wireLoginDispatchers(pc.providerContainer.read(loginProvider.notifier));
     await tester.pumpWidget(
       UncontrolledProviderScope(
@@ -137,6 +136,10 @@ void main() {
         },
       ),
     ).called(1);
+    // The framework checks for pending timers right after the test body
+    // returns, before any addTearDown callback runs — disposal has to
+    // happen here to cancel the notification poll timer login started.
+    pc.providerContainer.dispose();
   });
 
   testGoldens("Change pass", (WidgetTester tester) async {
@@ -193,7 +196,6 @@ void main() {
     ).thenAnswer((_) async => null);
 
     pc.providerContainer = ProviderContainer();
-    addTearDown(pc.providerContainer.dispose);
     wireLoginDispatchers(pc.providerContainer.read(loginProvider.notifier));
     await tester.pumpWidget(
       UncontrolledProviderScope(
@@ -339,5 +341,9 @@ void main() {
     await tester.pump(const Duration(seconds: 10));
     await tester.pumpAndSettle();
     expect(find.text("Passwort erfolgreich geändert"), findsNothing);
+    // The framework checks for pending timers right after the test body
+    // returns, before any addTearDown callback runs — disposal has to
+    // happen here to cancel the notification poll timer login started.
+    pc.providerContainer.dispose();
   });
 }
