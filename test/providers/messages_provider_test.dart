@@ -22,6 +22,7 @@ import 'package:dr/app_state.dart';
 import 'package:dr/data.dart';
 import 'package:dr/middleware/middleware.dart';
 import 'package:dr/providers/messages_provider.dart';
+import 'package:dr/providers/notifications_provider.dart';
 import 'package:dr/serializers.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/wrapper.dart';
@@ -114,6 +115,27 @@ void main() {
       final received = messageWithId(_agreeOpenId)
           .rebuild((b) => b..timeRead = null);
       expect(received.isNew, isTrue);
+    });
+
+    test(
+        'a message with an open notification counts as new even though the '
+        'server already marked it read (#268)', () async {
+      container.read(notificationsProvider.notifier).restore(
+        NotificationsState(
+          notifications: [
+            Notification(
+              (b) => b
+                ..id = 1
+                ..title = 'x'
+                ..type = 'message'
+                ..objectId = _agreeOpenId
+                ..timeSent = UtcDateTime.now(),
+            ),
+          ],
+        ),
+      );
+      await container.read(messagesProvider.notifier).load();
+      expect(messageWithId(_agreeOpenId).isNew, isTrue);
     });
   });
 
