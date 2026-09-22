@@ -16,6 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'package:dr/data.dart' hide Notification;
 import 'package:dr/providers/messages_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/providers/notifications_provider.dart';
@@ -38,7 +39,7 @@ class NotificationPageContainer extends ConsumerWidget {
         ? state.notifications
             .where((n) => isNotificationTypeEnabled(n, settings))
             .toList()
-        : const [];
+        : <Notification>[];
     return NotificationPage(
       onRefresh: ref.read(notificationsProvider.notifier).load,
       notifications: visibleNotifications,
