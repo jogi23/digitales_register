@@ -223,6 +223,8 @@ class NotificationsNotifier extends Notifier<NotificationsState> {
       }).length;
     } on Exception {
       return 0;
+    } finally {
+      temp.logout(hard: true);
     }
   }
 

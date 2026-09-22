@@ -25,8 +25,10 @@ import 'package:dr/ui/account_avatar_button.dart';
 import 'package:dr/ui/account_sheet.dart';
 import 'package:dr/ui/dialog.dart';
 import 'package:dr/ui/subject_appearance_page.dart';
+import 'package:dr/l10n/l10n.dart';
 import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
@@ -55,6 +57,18 @@ Future<ProviderContainer> _pumpSettingsPage(
   final widget = UncontrolledProviderScope(
     container: container,
     child: MaterialApp(
+      locale: const Locale('de'),
+      localizationsDelegates: const [
+        L.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('de'),
+        Locale('it'),
+        Locale('en'),
+      ],
       home: SettingsPageContainer(),
     ),
   );
