@@ -94,7 +94,9 @@ void main() {
       final container = await _pumpSettingsPage(tester);
       addTearDown(container.dispose);
 
-      const enableLabel = 'Benachrichtigungen aktivieren';
+      final context = tester.element(find.byType(MaterialApp));
+      final l = tr(context);
+      final enableLabel = l.settingsNotificationsEnable;
       await tester.scrollUntilVisible(
         find.text(enableLabel),
         100,
@@ -109,9 +111,9 @@ void main() {
 
       await tester.tap(find.text(enableLabel));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Alle 30 Minuten'));
+      await tester.tap(find.text(l.notificationsEveryMinutes(30)));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Alle 3 Stunden').last);
+      await tester.tap(find.text(l.notificationsEveryHours(3)).last);
       await tester.pumpAndSettle();
       expect(container.read(settingsProvider).notificationPollMinutes, 180);
     },

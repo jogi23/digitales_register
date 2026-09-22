@@ -22,7 +22,6 @@ import 'package:dr/data.dart';
 import 'package:dr/l10n/l10n.dart';
 import 'package:dr/middleware/middleware.dart' show secureStorage, wrapper;
 import 'package:dr/notification_type.dart';
-import 'package:dr/notification_visibility.dart';
 import 'package:dr/providers/login_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
@@ -269,9 +268,6 @@ class NotificationsNotifier extends Notifier<NotificationsState> {
           for (final dynamic entry in others) {
             if (entry is Map) entries.add(entry);
           }
-
-          int _syntheticIdForAccount(String accountKey) =>
-              -((accountKey.hashCode & 0x3fffffff) + 1);
         }
       }
       final seen = <String>{};
@@ -290,6 +286,9 @@ class NotificationsNotifier extends Notifier<NotificationsState> {
       return const [];
     }
   }
+
+  int _syntheticIdForAccount(String accountKey) =>
+      -((accountKey.hashCode & 0x3fffffff) + 1);
 }
 
 final notificationsProvider =
