@@ -16,9 +16,13 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'package:dr/data.dart';
+import 'package:dr/notification_visibility.dart';
 import 'package:dr/providers/messages_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/providers/notifications_provider.dart';
+import 'package:dr/providers/login_provider.dart';
+import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/services/app_router.dart';
 import 'package:dr/ui/notifications_page.dart';
 import 'package:flutter/material.dart' hide Notification;
@@ -29,10 +33,18 @@ class NotificationPageContainer extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(notificationsProvider);
     final noInternet = ref.watch(noInternetProvider);
+    final accountLabel = ref.watch(loginProvider.select((s) => s.username));
+    final settings = ref.watch(settingsProvider);
     final notifier = ref.read(notificationsProvider.notifier);
+    final visibleNotifications = settings.notificationsEnabled
+        ? state.notifications
+            .where((n) => isNotificationTypeEnabled(n, settings))
+            .toList()
+        : <Notification>[];
     return NotificationPage(
       onRefresh: ref.read(notificationsProvider.notifier).load,
-      notifications: state.notifications,
+      notifications: visibleNotifications,
+      accountLabel: accountLabel,
       noInternet: noInternet,
       deleteNotification: notifier.delete,
       // Through the messages: they mark the message and remove its

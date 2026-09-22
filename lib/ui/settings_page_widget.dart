@@ -70,6 +70,13 @@ class SettingsPageWidget extends StatefulWidget {
   final OnSettingChanged<String> onSetStarColor;
   final OnSettingChanged<String?> onSetLanguage;
   final OnSettingChanged<List<String>> onSetIgnoreForGradesAverage;
+  final OnSettingChanged<bool> onSetNotificationsEnabled;
+  final OnSettingChanged<int> onSetNotificationPollMinutes;
+  final OnSettingChanged<bool> onSetNotifyClassbook;
+  final OnSettingChanged<bool> onSetNotifyMessages;
+  final OnSettingChanged<bool> onSetNotifyGrades;
+  final OnSettingChanged<bool> onSetNotifyObservations;
+  final OnSettingChanged<bool> onSetNotifyHomework;
   final VoidCallback onShowProfile;
   final SettingsViewModel vm;
 
@@ -103,6 +110,13 @@ class SettingsPageWidget extends StatefulWidget {
     required this.onSetDashboardColorTestsInRed,
     required this.onSetStarColor,
     required this.onSetLanguage,
+    required this.onSetNotificationsEnabled,
+    required this.onSetNotificationPollMinutes,
+    required this.onSetNotifyClassbook,
+    required this.onSetNotifyMessages,
+    required this.onSetNotifyGrades,
+    required this.onSetNotifyObservations,
+    required this.onSetNotifyHomework,
   });
 
   @override
@@ -168,6 +182,12 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
         dense: true,
         title: Text(text, style: Theme.of(context).textTheme.titleSmall),
       );
+
+  String _intervalLabel(BuildContext context, int minutes) {
+    if (minutes < 60) return tr(context).notificationsEveryMinutes(minutes);
+    final hours = minutes ~/ 60;
+    return tr(context).notificationsEveryHours(hours);
+  }
 
   /// By day or by subject — classbook and homework each have their own.
   List<Widget> _arrangementTiles(
@@ -267,11 +287,74 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
           if (!widget.vm.demoMode) const AccountSettingsTile(),
           SwitchListTile.adaptive(
             title: Text(tr(context).settingsStayLoggedIn),
-            subtitle: Text(tr(context).settingsStayLoggedInSubtitle),
+            subtitle: Text(
+              '${tr(context).settingsStayLoggedInSubtitle}\n'
+              '${tr(context).settingsStayLoggedInBackgroundHint}',
+            ),
             onChanged: (bool value) {
               widget.onSetNoPassSaving(!value);
             },
             value: !widget.vm.noPassSaving,
+          ),
+          SwitchListTile.adaptive(
+            title: Text(tr(context).settingsNotificationsEnable),
+            subtitle: Text(tr(context).settingsNotificationsEnableSubtitle),
+            onChanged: widget.onSetNotificationsEnabled,
+            value: widget.vm.notificationsEnabled,
+          ),
+          ListTile(
+            enabled: widget.vm.notificationsEnabled,
+            title: Text(tr(context).settingsNotificationsInterval),
+            subtitle: Text(tr(context).settingsNotificationsIntervalSubtitle),
+            trailing: DropdownButton<int>(
+              value: widget.vm.notificationPollMinutes,
+              onChanged: !widget.vm.notificationsEnabled
+                  ? null
+                  : (value) {
+                      if (value != null) {
+                        widget.onSetNotificationPollMinutes(value);
+                      }
+                    },
+              items: [
+                for (final minutes in allowedNotificationPollMinutes)
+                  DropdownMenuItem(
+                    value: minutes,
+                    child: Text(_intervalLabel(context, minutes)),
+                  ),
+              ],
+            ),
+          ),
+          _subheading(context, tr(context).settingsNotificationsTypes),
+          SwitchListTile.adaptive(
+            title: Text(tr(context).settingsNotificationsTypeClassbook),
+            onChanged:
+                widget.vm.notificationsEnabled ? widget.onSetNotifyClassbook : null,
+            value: widget.vm.notifyClassbook,
+          ),
+          SwitchListTile.adaptive(
+            title: Text(tr(context).settingsNotificationsTypeMessages),
+            onChanged:
+                widget.vm.notificationsEnabled ? widget.onSetNotifyMessages : null,
+            value: widget.vm.notifyMessages,
+          ),
+          SwitchListTile.adaptive(
+            title: Text(tr(context).settingsNotificationsTypeGrades),
+            onChanged:
+                widget.vm.notificationsEnabled ? widget.onSetNotifyGrades : null,
+            value: widget.vm.notifyGrades,
+          ),
+          SwitchListTile.adaptive(
+            title: Text(tr(context).settingsNotificationsTypeObservations),
+            onChanged: widget.vm.notificationsEnabled
+                ? widget.onSetNotifyObservations
+                : null,
+            value: widget.vm.notifyObservations,
+          ),
+          SwitchListTile.adaptive(
+            title: Text(tr(context).settingsNotificationsTypeHomework),
+            onChanged:
+                widget.vm.notificationsEnabled ? widget.onSetNotifyHomework : null,
+            value: widget.vm.notifyHomework,
           ),
           // Next to the account switch it is about; the demo has no second
           // account to switch to.

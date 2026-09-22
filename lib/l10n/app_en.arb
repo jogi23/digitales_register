@@ -643,5 +643,56 @@
   "connectionReconnect": "Reconnect",
   "connectionRelogin": "Sign in again",
   "connectionReconnecting": "Connecting …",
-  "connectionOutdated": "Data is out of date"
+  "connectionOutdated": "Data is out of date",
+  "settingsStayLoggedInBackgroundHint": "Background notifications work only with silent password sign-in; with 2FA and SPID/CIE you can only check manually.",
+  "settingsNotificationsEnable": "Enable notifications",
+  "settingsNotificationsEnableSubtitle": "Check regularly for new entries",
+  "settingsNotificationsInterval": "Check interval",
+  "settingsNotificationsIntervalSubtitle": "How often the app checks for new notifications",
+  "settingsNotificationsTypes": "Notification types to check",
+  "settingsNotificationsTypeClassbook": "Classbook",
+  "settingsNotificationsTypeMessages": "Messages",
+  "settingsNotificationsTypeGrades": "Grades",
+  "settingsNotificationsTypeObservations": "Observations",
+  "settingsNotificationsTypeHomework": "Homework",
+  "notificationsEveryMinutes": "{minutes, plural, one {Every {minutes} minute} other {Every {minutes} minutes}}",
+  "@notificationsEveryMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "notificationsEveryHours": "{hours, plural, one {Every {hours} hour} other {Every {hours} hours}}",
+  "@notificationsEveryHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "notificationsAccount": "Account: {name}",
+  "@notificationsAccount": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsMessagesInAccount": "Messages in {account}",
+  "@notificationsMessagesInAccount": {
+    "placeholders": {
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsUnreadCount": "{count, plural, one {{count} unread message} other {{count} unread messages}}",
+  "@notificationsUnreadCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

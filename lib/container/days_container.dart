@@ -21,6 +21,7 @@ import 'package:built_value/built_value.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/data.dart';
 import 'package:dr/main.dart' show showSnackBar;
+import 'package:dr/notification_visibility.dart';
 import 'package:dr/providers/dashboard_error_provider.dart';
 import 'package:dr/providers/dashboard_provider.dart';
 import 'package:dr/providers/login_provider.dart';
@@ -43,8 +44,11 @@ class DaysContainer extends ConsumerWidget {
     final settings = ref.watch(settingsProvider);
     final subjectThemes = ref.watch(subjectAppearanceProvider).themes;
     final loginLoading = ref.watch(loginProvider.select((s) => s.loading));
-    final showNotifications = ref
-        .watch(notificationsProvider.select((s) => s.notifications.isNotEmpty));
+    final showNotifications = ref.watch(notificationsProvider.select((s) {
+      if (!settings.notificationsEnabled) return false;
+      return s.notifications
+          .any((n) => isNotificationTypeEnabled(n, settings));
+    }));
     ref.listen<String?>(dashboardErrorProvider, (_, error) {
       if (error != null) {
         showSnackBar(error);

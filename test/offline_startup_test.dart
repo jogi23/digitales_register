@@ -65,6 +65,18 @@ void main() {
     skipUnmaintainedAlert = true;
     mockWrapper = MockWrapper();
     wrapper = mockWrapper;
+    // Logging in starts notification polling in the background; this file
+    // does not care about it, but an unstubbed call would crash the mock.
+    when(
+      () => mockWrapper.send(
+        any(),
+        args: any(named: "args"),
+        method: any(named: "method"),
+        isRetryAfterUnexpectedLogout:
+            any(named: "isRetryAfterUnexpectedLogout"),
+        onError: any(named: "onError"),
+      ),
+    ).thenAnswer((_) async => null);
     navigatorKey = GlobalKey();
     scaffoldMessengerKey = GlobalKey();
     secureStorage = FakeSecureStorage(storage: {...initialLoggedInStorage});

@@ -352,6 +352,7 @@ const _unchanged = Object();
 /// Star colour setting meaning "follow the app's accent colour".
 /// The palette itself lives in ui/star_rating.dart.
 const accentStarColorId = 'accent';
+const allowedNotificationPollMinutes = <int>[30, 60, 120, 180, 360, 720];
 
 class SettingsState {
   SettingsState({
@@ -389,6 +390,13 @@ class SettingsState {
     this.starColor = accentStarColorId,
     this.language,
     this.messageSignature,
+    this.notificationsEnabled = true,
+    this.notificationPollMinutes = 30,
+    this.notifyClassbook = true,
+    this.notifyMessages = true,
+    this.notifyGrades = true,
+    this.notifyObservations = true,
+    this.notifyHomework = true,
   })  : ignoreForGradesAverage = ignoreForGradesAverage ?? [],
         classbookSubjects = classbookSubjects ?? [];
 
@@ -475,6 +483,18 @@ class SettingsState {
   /// again. Bound to the account: who signs hangs on whose register it is.
   final String? messageSignature;
 
+  /// Global switch for notification polling.
+  final bool notificationsEnabled;
+
+  /// How often notifications are fetched, in minutes.
+  final int notificationPollMinutes;
+
+  final bool notifyClassbook;
+  final bool notifyMessages;
+  final bool notifyGrades;
+  final bool notifyObservations;
+  final bool notifyHomework;
+
   SettingsState copyWith({
     bool? noPasswordSaving,
     bool? typeSorted,
@@ -507,6 +527,13 @@ class SettingsState {
     String? starColor,
     Object? language = _unchanged,
     Object? messageSignature = _unchanged,
+    bool? notificationsEnabled,
+    int? notificationPollMinutes,
+    bool? notifyClassbook,
+    bool? notifyMessages,
+    bool? notifyGrades,
+    bool? notifyObservations,
+    bool? notifyHomework,
   }) =>
       SettingsState(
         noPasswordSaving: noPasswordSaving ?? this.noPasswordSaving,
@@ -553,6 +580,14 @@ class SettingsState {
         messageSignature: identical(messageSignature, _unchanged)
             ? this.messageSignature
             : messageSignature as String?,
+        notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
+        notificationPollMinutes:
+            notificationPollMinutes ?? this.notificationPollMinutes,
+        notifyClassbook: notifyClassbook ?? this.notifyClassbook,
+        notifyMessages: notifyMessages ?? this.notifyMessages,
+        notifyGrades: notifyGrades ?? this.notifyGrades,
+        notifyObservations: notifyObservations ?? this.notifyObservations,
+        notifyHomework: notifyHomework ?? this.notifyHomework,
       );
 
   Map<String, dynamic> toJson() => {
@@ -586,6 +621,13 @@ class SettingsState {
         'starColor': starColor,
         'language': language,
         'messageSignature': messageSignature,
+        'notificationsEnabled': notificationsEnabled,
+        'notificationPollMinutes': notificationPollMinutes,
+        'notifyClassbook': notifyClassbook,
+        'notifyMessages': notifyMessages,
+        'notifyGrades': notifyGrades,
+        'notifyObservations': notifyObservations,
+        'notifyHomework': notifyHomework,
       };
 
   factory SettingsState.fromJson(Map<dynamic, dynamic> json) => SettingsState(
@@ -647,6 +689,18 @@ class SettingsState {
         starColor: json['starColor'] as String? ?? accentStarColorId,
         language: json['language'] as String?,
         messageSignature: json['messageSignature'] as String?,
+        notificationsEnabled: json['notificationsEnabled'] as bool? ?? true,
+        notificationPollMinutes: (() {
+          final value = json['notificationPollMinutes'];
+          return value is int && allowedNotificationPollMinutes.contains(value)
+              ? value
+              : 30;
+        })(),
+        notifyClassbook: json['notifyClassbook'] as bool? ?? true,
+        notifyMessages: json['notifyMessages'] as bool? ?? true,
+        notifyGrades: json['notifyGrades'] as bool? ?? true,
+        notifyObservations: json['notifyObservations'] as bool? ?? true,
+        notifyHomework: json['notifyHomework'] as bool? ?? true,
       );
 
   /// The settings that belong to the app rather than to one account:
@@ -683,6 +737,13 @@ class SettingsState {
     'ignoreForGradesAverage',
     'keepPageOnAccountSwitch',
     'accentBackground',
+    'notificationsEnabled',
+    'notificationPollMinutes',
+    'notifyClassbook',
+    'notifyMessages',
+    'notifyGrades',
+    'notifyObservations',
+    'notifyHomework',
   };
 
   /// Only the app-wide settings, for storing them on their own.
@@ -742,7 +803,14 @@ class SettingsState {
         other.keepPageOnAccountSwitch == keepPageOnAccountSwitch &&
         other.accentBackground == accentBackground &&
         other.starColor == starColor &&
-        other.language == language;
+        other.language == language &&
+        other.notificationsEnabled == notificationsEnabled &&
+        other.notificationPollMinutes == notificationPollMinutes &&
+        other.notifyClassbook == notifyClassbook &&
+        other.notifyMessages == notifyMessages &&
+        other.notifyGrades == notifyGrades &&
+        other.notifyObservations == notifyObservations &&
+        other.notifyHomework == notifyHomework;
   }
 
   @override
@@ -777,6 +845,13 @@ class SettingsState {
         accentBackground,
         starColor,
         language,
+        notificationsEnabled,
+        notificationPollMinutes,
+        notifyClassbook,
+        notifyMessages,
+        notifyGrades,
+        notifyObservations,
+        notifyHomework,
       ]);
 }
 

@@ -20,6 +20,7 @@ import 'package:deleteable_tile/deleteable_tile.dart';
 import 'package:dr/data.dart';
 import 'package:dr/l10n/l10n.dart';
 import 'package:dr/main.dart';
+import 'package:dr/notification_type.dart';
 import 'package:dr/ui/layout.dart';
 import 'package:dr/ui/pull_to_refresh.dart';
 import 'package:dr/util.dart';
@@ -37,6 +38,7 @@ class NotificationPage extends StatelessWidget {
   final SingleArgumentVoidCallback<Notification>? goToGrade;
   final VoidCallback deleteAllNotifications;
   final bool noInternet;
+  final String? accountLabel;
 
   /// Loads the page again when it is pulled down from the top.
   final Future<void> Function() onRefresh;
@@ -51,6 +53,7 @@ class NotificationPage extends StatelessWidget {
     required this.noInternet,
     required this.goToMessage,
     this.goToGrade,
+    this.accountLabel,
   });
   @override
   Widget build(BuildContext context) {
@@ -77,19 +80,30 @@ class NotificationPage extends StatelessWidget {
                   itemCount: notifications.length + 1,
                   itemBuilder: (_, n) {
                     if (n == 0) {
-                      return Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton(
-                          onPressed: noInternet ? null : deleteAllNotifications,
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(tr(context).notificationsAllRead),
-                              const SizedBox(width: 8),
-                              const Icon(Icons.done_all),
-                            ],
+                      return Column(
+                        children: [
+                          if (accountLabel != null && accountLabel!.isNotEmpty)
+                            ListTile(
+                              leading: const Icon(Icons.person_outline),
+                              title: Text(tr(context)
+                                  .notificationsAccount(accountLabel!)),
+                            ),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton(
+                              onPressed:
+                                  noInternet ? null : deleteAllNotifications,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(tr(context).notificationsAllRead),
+                                  const SizedBox(width: 8),
+                                  const Icon(Icons.done_all),
+                                ],
+                              ),
+                            ),
                           ),
-                        ),
+                        ],
                       );
                     }
                     final idx = n - 1;
@@ -137,6 +151,14 @@ class NotificationWidget extends StatelessWidget {
   bool get _isGrade =>
       !_isMessage && notification.objectId != null && goToGrade != null;
 
+  IconData get _typeIcon => switch (normalizedNotificationType(notification.type)) {
+        notificationTypeMessage => Icons.mail_outline,
+        notificationTypeGrade => Icons.grading_outlined,
+        notificationTypeObservation => Icons.visibility_outlined,
+        notificationTypeHomework => Icons.assignment_outlined,
+        _ => Icons.notifications_outlined,
+      };
+
   @override
   Widget build(BuildContext context) {
     // The whole card opens what the notification is about; the tick beside
@@ -173,6 +195,10 @@ class NotificationWidget extends StatelessWidget {
               padding: const EdgeInsets.all(8.0),
               child: Row(
                 children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.only(right: 12),
+                    child: Icon(_typeIcon),
+                  ),
                   Expanded(
                     child: Column(
                       children: [
@@ -181,6 +207,8 @@ class NotificationWidget extends StatelessWidget {
                           child: Text(
                             notification.title,
                             style: Theme.of(context).textTheme.titleMedium,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         if (!notification.subTitle.isNullOrEmpty)
@@ -189,6 +217,8 @@ class NotificationWidget extends StatelessWidget {
                             child: Text(
                               notification.subTitle!,
                               style: Theme.of(context).textTheme.bodyMedium,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         Padding(

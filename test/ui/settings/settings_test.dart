@@ -25,8 +25,10 @@ import 'package:dr/ui/account_avatar_button.dart';
 import 'package:dr/ui/account_sheet.dart';
 import 'package:dr/ui/dialog.dart';
 import 'package:dr/ui/subject_appearance_page.dart';
+import 'package:dr/l10n/l10n.dart';
 import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
@@ -55,6 +57,18 @@ Future<ProviderContainer> _pumpSettingsPage(
   final widget = UncontrolledProviderScope(
     container: container,
     child: MaterialApp(
+      locale: const Locale('de'),
+      localizationsDelegates: const [
+        L.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('de'),
+        Locale('it'),
+        Locale('en'),
+      ],
       home: SettingsPageContainer(),
     ),
   );
@@ -74,6 +88,37 @@ Future<ProviderContainer> _pumpSettingsPage(
 }
 
 void main() {
+  testWidgets(
+    'notification settings can be changed',
+    (tester) async {
+      final container = await _pumpSettingsPage(tester);
+      addTearDown(container.dispose);
+
+      final context = tester.element(find.byType(MaterialApp));
+      final l = tr(context);
+      final enableLabel = l.settingsNotificationsEnable;
+      await tester.scrollUntilVisible(
+        find.text(enableLabel),
+        100,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      expect(container.read(settingsProvider).notificationsEnabled, isTrue);
+
+      await tester.tap(find.text(enableLabel));
+      await tester.pumpAndSettle();
+      expect(container.read(settingsProvider).notificationsEnabled, isFalse);
+
+      await tester.tap(find.text(enableLabel));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(l.notificationsEveryMinutes(30)));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(l.notificationsEveryHours(3)).last);
+      await tester.pumpAndSettle();
+      expect(container.read(settingsProvider).notificationPollMinutes, 180);
+    },
+  );
+
   testWidgets(
     'staying on the page when switching accounts can be turned on',
     (tester) async {

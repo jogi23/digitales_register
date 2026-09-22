@@ -141,6 +141,7 @@ class Wrapper {
     String? pass,
     String? tfaCode,
     String? url, {
+    bool allowInteractive2fa = true,
     VoidCallback? logout,
     VoidCallback? configLoaded,
     VoidCallback? relogin,
@@ -151,6 +152,7 @@ class Wrapper {
         pass,
         tfaCode,
         url,
+        allowInteractive2fa: allowInteractive2fa,
         logout: logout,
         configLoaded: configLoaded,
         relogin: relogin,

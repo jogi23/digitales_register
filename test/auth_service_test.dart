@@ -299,6 +299,37 @@ void main() {
         expect(sut.noInternetDuringLogin, isFalse);
         expect(configLoadedCalls, 0);
       });
+
+      test('non-interactive login does not try to open a 2FA dialog', () async {
+        when(() => mockDio.post<dynamic>(any(), data: any(named: 'data')))
+            .thenAnswer(
+          (_) async => Response<dynamic>(
+            requestOptions: RequestOptions(),
+            data: {
+              'loggedIn': false,
+              'error': 'two_factor_needed',
+              'message': '2FA required',
+            },
+          ),
+        );
+
+        final result = await sut.login(
+          'alice',
+          's3cr3t',
+          null,
+          url,
+          allowInteractive2fa: false,
+          logout: () {},
+          configLoaded: () => configLoadedCalls++,
+          relogin: () {},
+          addProtocolItem: (_) {},
+        );
+
+        expect(result, isA<Map>());
+        expect((result as Map)['error'], 'two_factor_needed');
+        expect(await sut.loggedIn, isFalse);
+        expect(configLoadedCalls, 0);
+      });
     });
   });
 }
