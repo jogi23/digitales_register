@@ -885,6 +885,13 @@ void main() {
       MessagesState state, {
       GlobalKey<ScaffoldMessengerState>? messengerKey,
     }) async {
+      // Tall enough that the delete button, right at the bottom of a short
+      // opened message, does not sit under the "new message" FAB — both are
+      // anchored to the same bottom-right corner (#235).
+      tester.view
+        ..physicalSize = const Size(800, 2000)
+        ..devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
       final messages = _TestMessagesNotifier(state);
       await tester.pumpWidget(_buildWidget(
         state,
