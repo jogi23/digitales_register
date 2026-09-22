@@ -679,7 +679,7 @@
       }
     }
   },
-  "notificationsUnreadCount": "{count, plural, one {# non letta} other {# non lette}}",
+  "notificationsUnreadCount": "{count, plural, one {# messaggio non letto} other {# messaggi non letti}}",
   "@notificationsUnreadCount": {
     "placeholders": {
       "count": {

@@ -707,7 +707,7 @@
       }
     }
   },
-  "notificationsUnreadCount": "{count, plural, one {# ungelesen} other {# ungelesen}}",
+  "notificationsUnreadCount": "{count, plural, one {# ungelesene Nachricht} other {# ungelesene Nachrichten}}",
   "@notificationsUnreadCount": {
     "placeholders": {
       "count": {

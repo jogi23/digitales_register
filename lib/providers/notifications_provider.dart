@@ -181,8 +181,12 @@ class NotificationsNotifier extends Notifier<NotificationsState> {
         .toList();
     final List<Notification> out = [];
     var syntheticId = -1;
-    for (final account in otherAccounts) {
-      final count = await _unreadMessageCountFor(account);
+    final counts = await Future.wait(
+      otherAccounts.map(_unreadMessageCountFor),
+    );
+    for (var i = 0; i < otherAccounts.length; i++) {
+      final account = otherAccounts[i];
+      final count = counts[i];
       if (count <= 0) continue;
       out.add(
         Notification(
@@ -224,6 +228,14 @@ class NotificationsNotifier extends Notifier<NotificationsState> {
     } on Exception {
       return 0;
     } finally {
+      try {
+        if (temp.url != null) {
+          await temp.dio.get<dynamic>("${temp.baseAddress}logout");
+        }
+      } on Exception {
+        // No action needed; best-effort cleanup.
+      }
+      temp.url = null;
       temp.logout(hard: true);
     }
   }

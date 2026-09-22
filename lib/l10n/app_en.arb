@@ -679,7 +679,7 @@
       }
     }
   },
-  "notificationsUnreadCount": "{count, plural, one {# unread} other {# unread}}",
+  "notificationsUnreadCount": "{count, plural, one {# unread message} other {# unread messages}}",
   "@notificationsUnreadCount": {
     "placeholders": {
       "count": {
