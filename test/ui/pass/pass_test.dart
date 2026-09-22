@@ -48,6 +48,7 @@ void main() {
     passDio = MockDio();
 
     pc.providerContainer = ProviderContainer();
+    addTearDown(pc.providerContainer.dispose);
     wireLoginDispatchers(pc.providerContainer.read(loginProvider.notifier));
     await tester.pumpWidget(
       UncontrolledProviderScope(
@@ -192,6 +193,7 @@ void main() {
     ).thenAnswer((_) async => null);
 
     pc.providerContainer = ProviderContainer();
+    addTearDown(pc.providerContainer.dispose);
     wireLoginDispatchers(pc.providerContainer.read(loginProvider.notifier));
     await tester.pumpWidget(
       UncontrolledProviderScope(
