@@ -670,5 +670,21 @@
         "type": "String"
       }
     }
+  },
+  "notificationsMessagesInAccount": "Messages in {account}",
+  "@notificationsMessagesInAccount": {
+    "placeholders": {
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsUnreadCount": "{count, plural, one {# unread} other {# unread}}",
+  "@notificationsUnreadCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

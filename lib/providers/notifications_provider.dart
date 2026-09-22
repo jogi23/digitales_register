@@ -16,15 +16,18 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:dr/data.dart';
-import 'package:dr/middleware/middleware.dart' show wrapper;
+import 'package:dr/l10n/l10n.dart';
+import 'package:dr/middleware/middleware.dart' show secureStorage, wrapper;
 import 'package:dr/notification_visibility.dart';
 import 'package:dr/providers/login_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
+import 'package:dr/wrapper.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class NotificationsState {
@@ -48,6 +51,7 @@ class NotificationsState {
 
 class NotificationsNotifier extends Notifier<NotificationsState> {
   Timer? _pollTimer;
+  bool _loading = false;
 
   @override
   NotificationsState build() {
@@ -73,17 +77,24 @@ class NotificationsNotifier extends Notifier<NotificationsState> {
   void restore(NotificationsState saved) => state = saved;
 
   Future<void> load() async {
-    if (ref.read(noInternetProvider)) return;
-    final settings = ref.read(settingsProvider);
-    if (!settings.notificationsEnabled) return;
-    final dynamic data = await wrapper.send("api/notification/unread");
-    if (data is List) {
-      final parsed = _parseNotifications(data)
+    if (_loading) return;
+    _loading = true;
+    try {
+      if (ref.read(noInternetProvider)) return;
+      final settings = ref.read(settingsProvider);
+      if (!settings.notificationsEnabled) return;
+      final dynamic data = await wrapper.send("api/notification/unread");
+      final fromCurrent =
+          data is List ? _parseNotifications(data) : <Notification>[];
+      final fromOthers = await _otherAccountMessageNotifications();
+      final parsed = [...fromCurrent, ...fromOthers]
         ..sort((a, b) => b.timeSent.compareTo(a.timeSent));
       state = state.copyWith(
         notifications: parsed,
         lastFetched: UtcDateTime.now(),
       );
+    } finally {
+      _loading = false;
     }
   }
 
@@ -92,6 +103,7 @@ class NotificationsNotifier extends Notifier<NotificationsState> {
       notifications:
           state.notifications.where((n) => n != notification).toList(),
     );
+    if (notification.id < 0) return;
     await wrapper.send(
       "api/notification/markAsRead",
       args: {"id": notification.id},
@@ -158,6 +170,91 @@ class NotificationsNotifier extends Notifier<NotificationsState> {
       Duration(minutes: settings.notificationPollMinutes),
       (_) => unawaited(load()),
     );
+  }
+
+  Future<List<Notification>> _otherAccountMessageNotifications() async {
+    final currentUser = wrapper.user;
+    final currentUrl = wrapper.url;
+    final accounts = await _storedLogins();
+    final otherAccounts = accounts
+        .where((a) => a.user != currentUser || a.url != currentUrl)
+        .toList();
+    final List<Notification> out = [];
+    var syntheticId = -1;
+    for (final account in otherAccounts) {
+      final count = await _unreadMessageCountFor(account);
+      if (count <= 0) continue;
+      out.add(
+        Notification(
+          (b) => b
+            ..id = syntheticId--
+            ..title = trGlobal.notificationsMessagesInAccount(account.user)
+            ..subTitle = trGlobal.notificationsUnreadCount(count)
+            ..type = 'message'
+            ..timeSent = UtcDateTime.now(),
+        ),
+      );
+    }
+    return out;
+  }
+
+  Future<int> _unreadMessageCountFor(
+    ({String user, String pass, String url}) account,
+  ) async {
+    final temp = Wrapper();
+    try {
+      await temp.login(
+        account.user,
+        account.pass,
+        null,
+        account.url,
+        allowInteractive2fa: false,
+        logout: () {},
+        configLoaded: () {},
+        relogin: () {},
+        addProtocolItem: (_) {},
+      );
+      if (!await temp.loggedIn) return 0;
+      final dynamic data = await temp.send("api/notification/unread");
+      if (data is! List) return 0;
+      return data.where((dynamic n) {
+        final type = getString(getMap(n)?["type"])?.toLowerCase();
+        return type == 'message';
+      }).length;
+    } on Exception {
+      return 0;
+    }
+  }
+
+  Future<List<({String user, String pass, String url})>> _storedLogins() async {
+    try {
+      final raw = await secureStorage.read(key: "login");
+      final decoded = json.decode(raw ?? "{}");
+      final entries = <Map<dynamic, dynamic>>[];
+      if (decoded is Map) {
+        entries.add(decoded);
+        final others = decoded["otherAccounts"];
+        if (others is List) {
+          for (final dynamic entry in others) {
+            if (entry is Map) entries.add(entry);
+          }
+        }
+      }
+      final seen = <String>{};
+      final out = <({String user, String pass, String url})>[];
+      for (final e in entries) {
+        final user = getString(e["user"]);
+        final pass = getString(e["pass"]);
+        final url = getString(e["url"]);
+        if (user == null || pass == null || url == null) continue;
+        final key = '$user|$url';
+        if (!seen.add(key)) continue;
+        out.add((user: user, pass: pass, url: url));
+      }
+      return out;
+    } catch (_) {
+      return const [];
+    }
   }
 }
 
