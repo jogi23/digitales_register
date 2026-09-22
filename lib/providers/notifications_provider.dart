@@ -21,6 +21,7 @@ import 'dart:convert';
 import 'package:dr/data.dart';
 import 'package:dr/l10n/l10n.dart';
 import 'package:dr/middleware/middleware.dart' show secureStorage, wrapper;
+import 'package:dr/notification_type.dart';
 import 'package:dr/notification_visibility.dart';
 import 'package:dr/providers/login_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
@@ -186,9 +187,7 @@ class NotificationsNotifier extends Notifier<NotificationsState> {
     final otherAccounts = accounts
         .where((a) => a.user != currentUser || a.url != currentUrl)
         .toList();
-    _syntheticAccountById.clear();
     final List<Notification> out = [];
-    var syntheticId = -1;
     final summaries = await Future.wait(
       otherAccounts.map(_unreadMessageSummaryFor),
     );
@@ -204,7 +203,7 @@ class NotificationsNotifier extends Notifier<NotificationsState> {
       }
       if (count <= 0) continue;
       if (_dismissedSyntheticAccounts.contains(accountKey)) continue;
-      final id = syntheticId--;
+      final id = _syntheticIdForAccount(accountKey);
       _syntheticAccountById[id] = accountKey;
       out.add(
         Notification(
@@ -241,7 +240,9 @@ class NotificationsNotifier extends Notifier<NotificationsState> {
       if (data is! List) return (count: 0, latest: null);
       final parsed = _parseNotifications(data);
       final messages = parsed
-          .where((n) => (n.type ?? '').toLowerCase() == 'message')
+          .where(
+            (n) => normalizedNotificationType(n.type) == notificationTypeMessage,
+          )
           .toList();
       final latest = messages.isEmpty
           ? null
@@ -252,7 +253,7 @@ class NotificationsNotifier extends Notifier<NotificationsState> {
     } on Exception {
       return (count: 0, latest: null);
     } finally {
-      temp.logout(hard: true);
+      await Future<void>.sync(() => temp.logout(hard: true));
     }
   }
 
@@ -268,6 +269,9 @@ class NotificationsNotifier extends Notifier<NotificationsState> {
           for (final dynamic entry in others) {
             if (entry is Map) entries.add(entry);
           }
+
+          int _syntheticIdForAccount(String accountKey) =>
+              -((accountKey.hashCode & 0x3fffffff) + 1);
         }
       }
       final seen = <String>{};
