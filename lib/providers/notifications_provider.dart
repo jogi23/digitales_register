@@ -52,6 +52,9 @@ class NotificationsState {
 class NotificationsNotifier extends Notifier<NotificationsState> {
   Timer? _pollTimer;
   bool _loading = false;
+  final _syntheticAccountById = <int, String>{};
+  final _lastSyntheticCounts = <String, int>{};
+  final _dismissedSyntheticAccounts = <String>{};
 
   @override
   NotificationsState build() {
@@ -103,7 +106,11 @@ class NotificationsNotifier extends Notifier<NotificationsState> {
       notifications:
           state.notifications.where((n) => n != notification).toList(),
     );
-    if (notification.id < 0) return;
+    if (notification.id < 0) {
+      final accountKey = _syntheticAccountById[notification.id];
+      if (accountKey != null) _dismissedSyntheticAccounts.add(accountKey);
+      return;
+    }
     await wrapper.send(
       "api/notification/markAsRead",
       args: {"id": notification.id},
@@ -179,30 +186,41 @@ class NotificationsNotifier extends Notifier<NotificationsState> {
     final otherAccounts = accounts
         .where((a) => a.user != currentUser || a.url != currentUrl)
         .toList();
+    _syntheticAccountById.clear();
     final List<Notification> out = [];
     var syntheticId = -1;
-    final counts = await Future.wait(
-      otherAccounts.map(_unreadMessageCountFor),
+    final summaries = await Future.wait(
+      otherAccounts.map(_unreadMessageSummaryFor),
     );
     for (var i = 0; i < otherAccounts.length; i++) {
       final account = otherAccounts[i];
-      final count = counts[i];
+      final summary = summaries[i];
+      final count = summary.count;
+      final accountKey = '${account.user}|${account.url}';
+      final previousCount = _lastSyntheticCounts[accountKey];
+      _lastSyntheticCounts[accountKey] = count;
+      if (count != previousCount) {
+        _dismissedSyntheticAccounts.remove(accountKey);
+      }
       if (count <= 0) continue;
+      if (_dismissedSyntheticAccounts.contains(accountKey)) continue;
+      final id = syntheticId--;
+      _syntheticAccountById[id] = accountKey;
       out.add(
         Notification(
           (b) => b
-            ..id = syntheticId--
+            ..id = id
             ..title = trGlobal.notificationsMessagesInAccount(account.user)
             ..subTitle = trGlobal.notificationsUnreadCount(count)
             ..type = 'message'
-            ..timeSent = UtcDateTime.now(),
+            ..timeSent = summary.latest ?? UtcDateTime.now(),
         ),
       );
     }
     return out;
   }
 
-  Future<int> _unreadMessageCountFor(
+  Future<({int count, UtcDateTime? latest})> _unreadMessageSummaryFor(
     ({String user, String pass, String url}) account,
   ) async {
     final temp = Wrapper();
@@ -218,24 +236,22 @@ class NotificationsNotifier extends Notifier<NotificationsState> {
         relogin: () {},
         addProtocolItem: (_) {},
       );
-      if (!await temp.loggedIn) return 0;
+      if (!await temp.loggedIn) return (count: 0, latest: null);
       final dynamic data = await temp.send("api/notification/unread");
-      if (data is! List) return 0;
-      return data.where((dynamic n) {
-        final type = getString(getMap(n)?["type"])?.toLowerCase();
-        return type == 'message';
-      }).length;
+      if (data is! List) return (count: 0, latest: null);
+      final parsed = _parseNotifications(data);
+      final messages = parsed
+          .where((n) => (n.type ?? '').toLowerCase() == 'message')
+          .toList();
+      final latest = messages.isEmpty
+          ? null
+          : messages
+              .map((n) => n.timeSent)
+              .reduce((a, b) => a.compareTo(b) >= 0 ? a : b);
+      return (count: messages.length, latest: latest);
     } on Exception {
-      return 0;
+      return (count: 0, latest: null);
     } finally {
-      try {
-        if (temp.url != null) {
-          await temp.dio.get<dynamic>("${temp.baseAddress}logout");
-        }
-      } on Exception {
-        // No action needed; best-effort cleanup.
-      }
-      temp.url = null;
       temp.logout(hard: true);
     }
   }
