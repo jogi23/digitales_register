@@ -252,7 +252,7 @@ class NotificationsNotifier extends Notifier<NotificationsState> {
     } on Exception {
       return (count: 0, latest: null);
     } finally {
-      await Future<void>.sync(() => temp.logout(hard: true));
+      temp.logout(hard: true);
     }
   }
 

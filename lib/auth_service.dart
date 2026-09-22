@@ -266,7 +266,17 @@ class AuthService {
 
   void logout({required bool hard, bool logoutForcedByServer = false}) {
     if (!logoutForcedByServer && _apiClient.url != null) {
-      _apiClient.dio.get<dynamic>("${_apiClient.baseAddress}logout");
+      // Best-effort: local state clears below regardless of whether the
+      // server ever hears about it, so a failure here (e.g. a session that
+      // never actually logged in, or the network being down) must not
+      // become an unhandled error.
+      unawaited(() async {
+        try {
+          await _apiClient.dio.get<dynamic>("${_apiClient.baseAddress}logout");
+        } on Exception {
+          // Ignored, see above.
+        }
+      }());
     }
     if (hard) {
       if (logoutForcedByServer) {
