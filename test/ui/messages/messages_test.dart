@@ -320,18 +320,18 @@ void main() {
           ),
         ),
       );
-      expect(find.text("Bestätigung offen"), findsOneWidget);
-      expect(find.text("Zustimmung offen"), findsNothing);
+      expect(find.byTooltip("Bestätigung offen"), findsOneWidget);
+      expect(find.byTooltip("Zustimmung offen"), findsNothing);
     });
 
     testWidgets('a message to agree to carries a mark of its own',
         (tester) async {
       await tester.pumpWidget(_buildWidget(_stateWithResponse(_info())));
-      expect(find.text("Zustimmung offen"), findsOneWidget);
-      expect(find.text("Bestätigung offen"), findsNothing);
+      expect(find.byTooltip("Zustimmung offen"), findsOneWidget);
+      expect(find.byTooltip("Bestätigung offen"), findsNothing);
     });
 
-    testWidgets('an answered message is not marked', (tester) async {
+    testWidgets('an agreed message is marked as agreed', (tester) async {
       await tester.pumpWidget(
         _buildWidget(
           _stateWithResponse(
@@ -339,7 +339,49 @@ void main() {
           ),
         ),
       );
-      expect(find.byType(MessageActionChip), findsNothing);
+      expect(find.byTooltip("Zugestimmt"), findsOneWidget);
+    });
+
+    testWidgets('a rejected message is marked as rejected', (tester) async {
+      await tester.pumpWidget(
+        _buildWidget(
+          _stateWithResponse(
+            _info(givenResponse: MessageResponseInfo.answerNotAgree),
+          ),
+        ),
+      );
+      expect(find.byTooltip("Abgelehnt"), findsOneWidget);
+    });
+
+    testWidgets('a signed message is marked as signed', (tester) async {
+      await tester.pumpWidget(
+        _buildWidget(
+          _stateWithResponse(
+            _info(
+              type: MessageResponseInfo.typeRead,
+              signatureRequired: true,
+              givenSignature: "Max Mustermann",
+            ),
+          ),
+        ),
+      );
+      expect(find.byTooltip("Unterschrieben"), findsOneWidget);
+    });
+
+    testWidgets(
+        'an answered message is marked even where the reader could not act',
+        (tester) async {
+      await tester.pumpWidget(
+        _buildWidget(
+          _stateWithResponse(
+            _info(
+              givenResponse: MessageResponseInfo.answerAgree,
+              parentSignatureRequired: true,
+            ),
+          ),
+        ),
+      );
+      expect(find.byTooltip("Zugestimmt"), findsOneWidget);
     });
 
     testWidgets('nothing is marked the reader cannot do in the app',
@@ -843,6 +885,13 @@ void main() {
       MessagesState state, {
       GlobalKey<ScaffoldMessengerState>? messengerKey,
     }) async {
+      // Tall enough that the delete button, right at the bottom of a short
+      // opened message, does not sit under the "new message" FAB — both are
+      // anchored to the same bottom-right corner (#235).
+      tester.view
+        ..physicalSize = const Size(800, 2000)
+        ..devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
       final messages = _TestMessagesNotifier(state);
       await tester.pumpWidget(_buildWidget(
         state,

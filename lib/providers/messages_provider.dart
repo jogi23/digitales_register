@@ -308,9 +308,22 @@ class MessagesNotifier extends Notifier<MessagesState> {
   }
 
   MessagesState _parseMessages(List json) {
+    // The portal tracks a message's own timeRead and its notification's read
+    // state independently: opening the message elsewhere (or the portal
+    // marking it seen on its own) does not clear the notification, and vice
+    // versa (#268). Treat a message as still new for as long as either says
+    // so, rather than trusting timeRead alone.
+    final notifiedMessageIds = ref
+        .read(notificationsProvider)
+        .notifications
+        .where((n) => n.type == "message" && n.objectId != null)
+        .map((n) => n.objectId!)
+        .toSet();
     final messages = json
-        .map((dynamic m) =>
-            tryParse(getMap(m), (Map? m) => _parseMessage(m!, state)))
+        .map((dynamic m) => tryParse(
+              getMap(m),
+              (Map? m) => _parseMessage(m!, state, notifiedMessageIds),
+            ))
         .whereType<Message>()
         .toList();
     final ids = {for (final m in messages) m.id};
@@ -325,17 +338,26 @@ class MessagesNotifier extends Notifier<MessagesState> {
     );
   }
 
-  Message _parseMessage(Map json, MessagesState currentState) {
+  Message _parseMessage(
+    Map json,
+    MessagesState currentState,
+    Set<int> notifiedMessageIds,
+  ) {
     final id = getInt(json["id"]);
     final oldMessage = currentState.messages.firstWhereOrNull(
       (m) => m.id == id,
     );
-    // Preserve optimistic local read: if the server hasn't caught up yet
-    // (timeRead still null) but we already marked it locally, keep the
-    // local timestamp so the message doesn't flash back to "neu".
-    final timeRead = json["timeRead"] != null
-        ? UtcDateTime.parse(getString(json["timeRead"])!)
-        : oldMessage?.timeRead;
+    final UtcDateTime? timeRead;
+    if (notifiedMessageIds.contains(id)) {
+      timeRead = null;
+    } else {
+      // Preserve optimistic local read: if the server hasn't caught up yet
+      // (timeRead still null) but we already marked it locally, keep the
+      // local timestamp so the message doesn't flash back to "neu".
+      timeRead = json["timeRead"] != null
+          ? UtcDateTime.parse(getString(json["timeRead"])!)
+          : oldMessage?.timeRead;
+    }
     final message = MessageBuilder()
       ..subject = getString(json["subject"])
       ..text = getString(json["text"])

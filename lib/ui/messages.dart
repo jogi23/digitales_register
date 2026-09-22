@@ -986,14 +986,14 @@ class _MessageResponseSectionState extends State<MessageResponseSection> {
   }
 }
 
-/// Marks a message that still waits for its reader, visible with the tile
-/// closed.
+/// Marks what a message asks of its reader, or how that was settled, visible
+/// with the tile closed.
 ///
-/// Two looks for the two things a message can ask: a name to sign with, or a
-/// yes or no. One shared "action needed" mark would leave the reader guessing
-/// which until the message is opened. Colour is not the only difference —
-/// icon and wording differ too — and the tile background stays free for the
-/// alternating rows.
+/// Distinct looks for pending and settled, and for the two things a message
+/// can ask — a name to sign with, or a yes or no — so the reader is not left
+/// guessing which until the message is opened. Colour is not the only
+/// difference — icon and wording differ too — and the tile background stays
+/// free for the alternating rows.
 class MessageActionChip extends StatelessWidget {
   final MessageAction action;
 
@@ -1002,6 +1002,12 @@ class MessageActionChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    // Green has no themed container: the app's palette gives success no
+    // counterpart to [scheme.error], so agreement borrows a fixed shade
+    // instead, picked per brightness like the rest of the app does.
+    final agreedBackground = isDark ? Colors.green.shade900 : Colors.green.shade50;
+    final agreedForeground = isDark ? Colors.green.shade200 : Colors.green.shade800;
     final (icon, label, background, foreground) = switch (action) {
       MessageAction.confirm => (
           Icons.draw_outlined,
@@ -1015,15 +1021,65 @@ class MessageActionChip extends StatelessWidget {
           scheme.secondaryContainer,
           scheme.onSecondaryContainer,
         ),
+      MessageAction.signed => (
+          Icons.draw,
+          tr(context).messageActionSigned,
+          scheme.tertiaryContainer,
+          scheme.onTertiaryContainer,
+        ),
+      MessageAction.agreed => (
+          Icons.thumb_up,
+          tr(context).messageActionAgreed,
+          agreedBackground,
+          agreedForeground,
+        ),
+      MessageAction.rejected => (
+          Icons.thumb_down,
+          tr(context).messageActionRejected,
+          scheme.errorContainer,
+          scheme.onErrorContainer,
+        ),
       MessageAction.none => (null, null, null, null),
     };
     if (icon == null || label == null) return const SizedBox.shrink();
 
-    return _LabelChip(
+    return _IconMark(
       icon: icon,
       label: label,
       background: background,
       foreground: foreground,
+    );
+  }
+}
+
+/// A single icon marking the tile, its meaning carried by shape and colour
+/// alone — the label survives as a tooltip / semantics label rather than
+/// printed text, since several of these can sit side by side in the title
+/// row without crowding it.
+class _IconMark extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color? background;
+  final Color? foreground;
+
+  const _IconMark({
+    required this.icon,
+    required this.label,
+    required this.background,
+    required this.foreground,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: label,
+      child: DecoratedBox(
+        decoration: BoxDecoration(color: background, shape: BoxShape.circle),
+        child: Padding(
+          padding: const EdgeInsets.all(4),
+          child: Icon(icon, size: 16, color: foreground, semanticLabel: label),
+        ),
+      ),
     );
   }
 }
