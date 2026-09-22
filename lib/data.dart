@@ -848,7 +848,7 @@ abstract class LessonContentSubmission
     ..downloading = false;
 }
 
-/// What a message still asks of its reader.
+/// What a message still asks of its reader, or how that was settled.
 enum MessageAction {
   /// Nothing, or nothing the reader can do in the app.
   none,
@@ -858,6 +858,15 @@ enum MessageAction {
 
   /// Choose "Stimme zu" or "Stimme nicht zu".
   agree,
+
+  /// Answered with "Stimme zu".
+  agreed,
+
+  /// Answered with "Stimme nicht zu".
+  rejected,
+
+  /// Signed with first and last name.
+  signed,
 }
 
 /// The confirmation a message asks its recipient for.
@@ -912,15 +921,20 @@ abstract class MessageResponseInfo
   /// browser beats guessing at a confirmation that binds them for a year.
   bool get unsupported => !showAgreeButtons && !showConfirmButton;
 
-  /// What the reader still has to do here, for marking it in the list.
+  /// What to mark in the list: still asked of the reader, already settled —
+  /// by anyone, see [answered] — or nothing worth a mark at all.
   ///
-  /// [MessageAction.none] once answered — by anyone, see [answered] — and
-  /// where the reader cannot act in the app at all: a guardian-only message
-  /// on a student account, or a type the app does not support.
+  /// A settled outcome takes priority over the pending mark: once either
+  /// axis is fulfilled, that is the more useful thing to show, even where
+  /// [parentSignatureRequired] or [unsupported] would have hidden a pending
+  /// mark. [MessageAction.none] otherwise, where the reader cannot act in the
+  /// app at all: a guardian-only message on a student account, or a type the
+  /// app does not support.
   MessageAction get openAction {
-    if (answered || parentSignatureRequired || unsupported) {
-      return MessageAction.none;
-    }
+    if (givenResponse == answerAgree) return MessageAction.agreed;
+    if (givenResponse == answerNotAgree) return MessageAction.rejected;
+    if (givenSignature != null) return MessageAction.signed;
+    if (parentSignatureRequired || unsupported) return MessageAction.none;
     return showAgreeButtons ? MessageAction.agree : MessageAction.confirm;
   }
 
@@ -975,6 +989,14 @@ abstract class Message implements Built<Message, MessageBuilder> {
   static const archiveTypeArchive = 1;
   static const archiveTypeRestore = 2;
 
+  /// Whether the portal still lets this account take the sent message back.
+  ///
+  /// The portal keeps a sent message deletable for four hours, and the app
+  /// does not work that window out on its own: the device clock has no say in
+  /// it. Only `getMessage` carries the flag, so it is false until the message
+  /// was opened — the list does not know (#235).
+  bool get canDelete;
+
   bool get canArchive => archiveType == archiveTypeArchive;
   bool get canRestore => archiveType == archiveTypeRestore;
 
@@ -993,7 +1015,8 @@ abstract class Message implements Built<Message, MessageBuilder> {
     ..archived = false
     ..archiveType = 0
     ..fromUserId = 0
-    ..canReply = false;
+    ..canReply = false
+    ..canDelete = false;
 }
 
 /// The folders the message list offers, as the portal files messages.

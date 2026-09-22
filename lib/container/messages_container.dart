@@ -71,6 +71,11 @@ class MessagesPageContainer extends ConsumerWidget {
           ref.read(messagesProvider.notifier).openMessageFile(file),
       onMarkAsRead: (message) =>
           ref.read(messagesProvider.notifier).markAsRead(message.id),
+      onOpenDetails: (message) => unawaited(
+        ref.read(messagesProvider.notifier).loadDetails(message.id),
+      ),
+      onDelete: (message) =>
+          ref.read(messagesProvider.notifier).deleteMessage(message.id),
       onReply: (message, {String? response, String? signature}) =>
           ref.read(messagesProvider.notifier).reply(
                 message.id,

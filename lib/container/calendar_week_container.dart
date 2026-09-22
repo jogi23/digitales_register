@@ -94,6 +94,11 @@ class CalendarWeekViewModel {
   /// Subjects that carry dashboard entries, per day. Lessons outside this are
   /// dimmed; `null` dims nothing, which is what the calendar page wants.
   final Map<UtcDateTime, Set<String>>? subjectsWithEntries;
+
+  /// Subjects whose entries are worked through, per day. Their lessons carry
+  /// a tick, so a day of ticked off homework reads as done at a glance
+  /// (#264). Empty on the calendar page, which knows of no entries.
+  final Map<UtcDateTime, Set<String>> subjectsFinished;
   final Map<String, SubjectTheme> subjectThemes;
 
   CalendarWeekViewModel({
@@ -111,6 +116,7 @@ class CalendarWeekViewModel {
     this.onEntryTap,
     this.daysWithEntries = const {},
     this.subjectsWithEntries,
+    this.subjectsFinished = const {},
     required this.subjectThemes,
   });
 }
