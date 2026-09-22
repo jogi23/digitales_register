@@ -320,15 +320,15 @@ void main() {
           ),
         ),
       );
-      expect(find.text("Bestätigung offen"), findsOneWidget);
-      expect(find.text("Zustimmung offen"), findsNothing);
+      expect(find.byTooltip("Bestätigung offen"), findsOneWidget);
+      expect(find.byTooltip("Zustimmung offen"), findsNothing);
     });
 
     testWidgets('a message to agree to carries a mark of its own',
         (tester) async {
       await tester.pumpWidget(_buildWidget(_stateWithResponse(_info())));
-      expect(find.text("Zustimmung offen"), findsOneWidget);
-      expect(find.text("Bestätigung offen"), findsNothing);
+      expect(find.byTooltip("Zustimmung offen"), findsOneWidget);
+      expect(find.byTooltip("Bestätigung offen"), findsNothing);
     });
 
     testWidgets('an agreed message is marked as agreed', (tester) async {
@@ -339,7 +339,7 @@ void main() {
           ),
         ),
       );
-      expect(find.text("Zugestimmt"), findsOneWidget);
+      expect(find.byTooltip("Zugestimmt"), findsOneWidget);
     });
 
     testWidgets('a rejected message is marked as rejected', (tester) async {
@@ -350,7 +350,7 @@ void main() {
           ),
         ),
       );
-      expect(find.text("Abgelehnt"), findsOneWidget);
+      expect(find.byTooltip("Abgelehnt"), findsOneWidget);
     });
 
     testWidgets('a signed message is marked as signed', (tester) async {
@@ -365,7 +365,7 @@ void main() {
           ),
         ),
       );
-      expect(find.text("Unterschrieben"), findsOneWidget);
+      expect(find.byTooltip("Unterschrieben"), findsOneWidget);
     });
 
     testWidgets(
@@ -381,7 +381,7 @@ void main() {
           ),
         ),
       );
-      expect(find.text("Zugestimmt"), findsOneWidget);
+      expect(find.byTooltip("Zugestimmt"), findsOneWidget);
     });
 
     testWidgets('nothing is marked the reader cannot do in the app',

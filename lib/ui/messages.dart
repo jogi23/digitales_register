@@ -1043,11 +1043,43 @@ class MessageActionChip extends StatelessWidget {
     };
     if (icon == null || label == null) return const SizedBox.shrink();
 
-    return _LabelChip(
+    return _IconMark(
       icon: icon,
       label: label,
       background: background,
       foreground: foreground,
+    );
+  }
+}
+
+/// A single icon marking the tile, its meaning carried by shape and colour
+/// alone — the label survives as a tooltip / semantics label rather than
+/// printed text, since several of these can sit side by side in the title
+/// row without crowding it.
+class _IconMark extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color? background;
+  final Color? foreground;
+
+  const _IconMark({
+    required this.icon,
+    required this.label,
+    required this.background,
+    required this.foreground,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: label,
+      child: DecoratedBox(
+        decoration: BoxDecoration(color: background, shape: BoxShape.circle),
+        child: Padding(
+          padding: const EdgeInsets.all(4),
+          child: Icon(icon, size: 16, color: foreground, semanticLabel: label),
+        ),
+      ),
     );
   }
 }
