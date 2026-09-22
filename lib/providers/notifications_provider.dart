@@ -148,13 +148,12 @@ class NotificationsNotifier extends Notifier<NotificationsState> {
   }
 
   void _restartPolling() {
-    final wasRunning = _pollTimer?.isActive ?? false;
     _pollTimer?.cancel();
     final settings = ref.read(settingsProvider);
     final loggedIn = ref.read(loginProvider).loggedIn;
     if (!settings.notificationsEnabled) return;
     if (!loggedIn) return;
-    if (!wasRunning) unawaited(load());
+    unawaited(load());
     _pollTimer = Timer.periodic(
       Duration(minutes: settings.notificationPollMinutes),
       (_) => unawaited(load()),

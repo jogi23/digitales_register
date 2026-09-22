@@ -27,13 +27,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class NotificationIconContainer extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final notifications = ref.watch(
+      notificationsProvider.select((s) => s.notifications),
+    );
     final settings = ref.watch(settingsProvider);
-    final count = ref.watch(notificationsProvider.select((s) {
-      if (!settings.notificationsEnabled) return 0;
-      return s.notifications
-          .where((n) => isNotificationTypeEnabled(n, settings))
-          .length;
-    }));
+    final count = !settings.notificationsEnabled
+        ? 0
+        : notifications.where((n) => isNotificationTypeEnabled(n, settings)).length;
     return NotificationIcon(
       notifications: count,
       onTap: ref.read(appRouterProvider).showNotifications,
