@@ -675,7 +675,7 @@
   "settingsNotificationsTypeGrades": "Bewertungen",
   "settingsNotificationsTypeObservations": "Beobachtungen",
   "settingsNotificationsTypeHomework": "Hausaufgaben",
-  "notificationsEveryMinutes": "Alle {minutes, plural, one {# Minute} other {# Minuten}}",
+  "notificationsEveryMinutes": "Alle {minutes, plural, one {{minutes} Minute} other {{minutes} Minuten}}",
   "@notificationsEveryMinutes": {
     "placeholders": {
       "minutes": {
@@ -683,7 +683,7 @@
       }
     }
   },
-  "notificationsEveryHours": "Alle {hours, plural, one {# Stunde} other {# Stunden}}",
+  "notificationsEveryHours": "Alle {hours, plural, one {{hours} Stunde} other {{hours} Stunden}}",
   "@notificationsEveryHours": {
     "placeholders": {
       "hours": {
@@ -707,7 +707,7 @@
       }
     }
   },
-  "notificationsUnreadCount": "{count, plural, one {# ungelesene Nachricht} other {# ungelesene Nachrichten}}",
+  "notificationsUnreadCount": "{count, plural, one {{count} ungelesene Nachricht} other {{count} ungelesene Nachrichten}}",
   "@notificationsUnreadCount": {
     "placeholders": {
       "count": {

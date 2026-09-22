@@ -647,7 +647,7 @@
   "settingsNotificationsTypeGrades": "Valutazioni",
   "settingsNotificationsTypeObservations": "Osservazioni",
   "settingsNotificationsTypeHomework": "Compiti",
-  "notificationsEveryMinutes": "{minutes, plural, one {Ogni # minuto} other {Ogni # minuti}}",
+  "notificationsEveryMinutes": "{minutes, plural, one {Ogni {minutes} minuto} other {Ogni {minutes} minuti}}",
   "@notificationsEveryMinutes": {
     "placeholders": {
       "minutes": {
@@ -655,7 +655,7 @@
       }
     }
   },
-  "notificationsEveryHours": "{hours, plural, one {Ogni # ora} other {Ogni # ore}}",
+  "notificationsEveryHours": "{hours, plural, one {Ogni {hours} ora} other {Ogni {hours} ore}}",
   "@notificationsEveryHours": {
     "placeholders": {
       "hours": {
@@ -679,7 +679,7 @@
       }
     }
   },
-  "notificationsUnreadCount": "{count, plural, one {# messaggio non letto} other {# messaggi non letti}}",
+  "notificationsUnreadCount": "{count, plural, one {{count} messaggio non letto} other {{count} messaggi non letti}}",
   "@notificationsUnreadCount": {
     "placeholders": {
       "count": {
