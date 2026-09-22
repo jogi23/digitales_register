@@ -17,6 +17,7 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:dr/providers/notifications_provider.dart';
+import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/services/app_router.dart';
 import 'package:dr/ui/notification_icon.dart';
 import 'package:flutter/material.dart';
@@ -25,9 +26,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class NotificationIconContainer extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final count = ref.watch(
-      notificationsProvider.select((s) => s.notifications.length),
-    );
+    final settings = ref.watch(settingsProvider);
+    final count = ref.watch(notificationsProvider.select((s) {
+      if (!settings.notificationsEnabled) return 0;
+      return s.notifications
+          .where((n) => isNotificationTypeEnabled(n, settings))
+          .length;
+    }));
     return NotificationIcon(
       notifications: count,
       onTap: ref.read(appRouterProvider).showNotifications,

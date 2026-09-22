@@ -675,7 +675,7 @@
   "settingsNotificationsTypeGrades": "Bewertungen",
   "settingsNotificationsTypeObservations": "Beobachtungen",
   "settingsNotificationsTypeHomework": "Hausaufgaben",
-  "notificationsEveryMinutes": "Alle {minutes} Minuten",
+  "notificationsEveryMinutes": "Alle {minutes, plural, one {# Minute} other {# Minuten}}",
   "@notificationsEveryMinutes": {
     "placeholders": {
       "minutes": {
@@ -683,7 +683,7 @@
       }
     }
   },
-  "notificationsEveryHours": "Alle {hours} Stunden",
+  "notificationsEveryHours": "Alle {hours, plural, one {# Stunde} other {# Stunden}}",
   "@notificationsEveryHours": {
     "placeholders": {
       "hours": {

@@ -647,7 +647,7 @@
   "settingsNotificationsTypeGrades": "Valutazioni",
   "settingsNotificationsTypeObservations": "Osservazioni",
   "settingsNotificationsTypeHomework": "Compiti",
-  "notificationsEveryMinutes": "Ogni {minutes} minuti",
+  "notificationsEveryMinutes": "{minutes, plural, one {Ogni # minuto} other {Ogni # minuti}}",
   "@notificationsEveryMinutes": {
     "placeholders": {
       "minutes": {
@@ -655,7 +655,7 @@
       }
     }
   },
-  "notificationsEveryHours": "Ogni {hours} ore",
+  "notificationsEveryHours": "{hours, plural, one {Ogni # ora} other {Ogni # ore}}",
   "@notificationsEveryHours": {
     "placeholders": {
       "hours": {

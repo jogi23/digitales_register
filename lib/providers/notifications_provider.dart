@@ -28,6 +28,24 @@ import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+bool isNotificationTypeEnabled(Notification n, SettingsState settings) {
+  switch (normalizedNotificationType(n.type)) {
+    case notificationTypeMessage:
+      return settings.notifyMessages;
+    case notificationTypeGrade:
+      return settings.notifyGrades;
+    case notificationTypeObservation:
+      return settings.notifyObservations;
+    case notificationTypeHomework:
+      return settings.notifyHomework;
+    case notificationTypeEntry:
+    case notificationTypeClassbook:
+      return settings.notifyClassbook;
+    default:
+      return true;
+  }
+}
+
 class NotificationsState {
   final List<Notification> notifications;
   final UtcDateTime? lastFetched;
@@ -87,16 +105,10 @@ class NotificationsNotifier extends Notifier<NotificationsState> {
     if (!settings.notificationsEnabled) return;
     final dynamic data = await wrapper.send("api/notification/unread");
     if (data is List) {
-      final enabledNow = _parseNotifications(data)
-          .where((n) => _isEnabledType(n, settings))
-          .toList();
-      final keptDisabled = state.notifications
-          .where((n) => !_isEnabledType(n, settings))
-          .toList();
-      final merged = [...keptDisabled, ...enabledNow]
+      final parsed = _parseNotifications(data)
         ..sort((a, b) => b.timeSent.compareTo(a.timeSent));
       state = state.copyWith(
-        notifications: merged,
+        notifications: parsed,
         lastFetched: UtcDateTime.now(),
       );
     }
@@ -160,24 +172,6 @@ class NotificationsNotifier extends Notifier<NotificationsState> {
           ),
         )
         .toList();
-  }
-
-  bool _isEnabledType(Notification n, SettingsState settings) {
-    switch (normalizedNotificationType(n.type)) {
-      case notificationTypeMessage:
-        return settings.notifyMessages;
-      case notificationTypeGrade:
-        return settings.notifyGrades;
-      case notificationTypeObservation:
-        return settings.notifyObservations;
-      case notificationTypeHomework:
-        return settings.notifyHomework;
-      case notificationTypeEntry:
-      case notificationTypeClassbook:
-        return settings.notifyClassbook;
-      default:
-        return true;
-    }
   }
 
   void _restartPolling() {

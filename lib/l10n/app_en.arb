@@ -647,7 +647,7 @@
   "settingsNotificationsTypeGrades": "Grades",
   "settingsNotificationsTypeObservations": "Observations",
   "settingsNotificationsTypeHomework": "Homework",
-  "notificationsEveryMinutes": "Every {minutes} minutes",
+  "notificationsEveryMinutes": "{minutes, plural, one {Every # minute} other {Every # minutes}}",
   "@notificationsEveryMinutes": {
     "placeholders": {
       "minutes": {
@@ -655,7 +655,7 @@
       }
     }
   },
-  "notificationsEveryHours": "Every {hours} hours",
+  "notificationsEveryHours": "{hours, plural, one {Every # hour} other {Every # hours}}",
   "@notificationsEveryHours": {
     "placeholders": {
       "hours": {
