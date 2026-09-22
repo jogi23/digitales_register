@@ -69,6 +69,13 @@ class SettingsPageContainer extends ConsumerWidget {
       onSetDashboardColorTestsInRed: notifier.setDashboardColorTestsInRed,
       onSetStarColor: notifier.setStarColor,
       onSetLanguage: notifier.setLanguage,
+      onSetNotificationsEnabled: notifier.setNotificationsEnabled,
+      onSetNotificationPollMinutes: notifier.setNotificationPollMinutes,
+      onSetNotifyClassbook: notifier.setNotifyClassbook,
+      onSetNotifyMessages: notifier.setNotifyMessages,
+      onSetNotifyGrades: notifier.setNotifyGrades,
+      onSetNotifyObservations: notifier.setNotifyObservations,
+      onSetNotifyHomework: notifier.setNotifyHomework,
     );
   }
 }
@@ -103,6 +110,13 @@ class SettingsViewModel {
   final EntryDisplayMode gradesDisplayMode;
   final bool dashboardColorTestsInRed;
   final String starColor;
+  final bool notificationsEnabled;
+  final int notificationPollMinutes;
+  final bool notifyClassbook;
+  final bool notifyMessages;
+  final bool notifyGrades;
+  final bool notifyObservations;
+  final bool notifyHomework;
 
   /// Null follows the device language.
   final String? language;
@@ -134,6 +148,13 @@ class SettingsViewModel {
     this.gradesDisplayMode = EntryDisplayMode.list,
     required this.dashboardColorTestsInRed,
     required this.starColor,
+    this.notificationsEnabled = true,
+    this.notificationPollMinutes = 30,
+    this.notifyClassbook = true,
+    this.notifyMessages = true,
+    this.notifyGrades = true,
+    this.notifyObservations = true,
+    this.notifyHomework = true,
     this.language,
     required this.allSubjects,
     required this.ignoreForGradesAverage,
@@ -166,6 +187,13 @@ class SettingsViewModel {
         gradesDisplayMode: s.gradesDisplayMode,
         dashboardColorTestsInRed: s.dashboardColorTestsInRed,
         starColor: s.starColor,
+        notificationsEnabled: s.notificationsEnabled,
+        notificationPollMinutes: s.notificationPollMinutes,
+        notifyClassbook: s.notifyClassbook,
+        notifyMessages: s.notifyMessages,
+        notifyGrades: s.notifyGrades,
+        notifyObservations: s.notifyObservations,
+        notifyHomework: s.notifyHomework,
         language: s.language,
         allSubjects: allSubjects,
         ignoreForGradesAverage: s.ignoreForGradesAverage,

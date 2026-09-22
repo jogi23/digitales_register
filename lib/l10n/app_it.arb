@@ -636,5 +636,39 @@
   "connectionRelogin": "Accedi di nuovo",
   "connectionReconnecting": "Connessione in corso …",
   "connectionOutdated": "Dati non aggiornati",
-  "settingsStayLoggedInBackgroundHint": "Le notifiche in background funzionano solo con accesso silenzioso con password; con 2FA e SPID/CIE è possibile solo il controllo manuale."
+  "settingsStayLoggedInBackgroundHint": "Le notifiche in background funzionano solo con accesso silenzioso con password; con 2FA e SPID/CIE è possibile solo il controllo manuale.",
+  "settingsNotificationsEnable": "Attiva notifiche",
+  "settingsNotificationsEnableSubtitle": "Controlla regolarmente nuove voci",
+  "settingsNotificationsInterval": "Intervallo di controllo",
+  "settingsNotificationsIntervalSubtitle": "Quanto spesso l’app controlla nuove notifiche",
+  "settingsNotificationsTypes": "Tipi di notifiche da controllare",
+  "settingsNotificationsTypeClassbook": "Registro",
+  "settingsNotificationsTypeMessages": "Comunicazioni",
+  "settingsNotificationsTypeGrades": "Valutazioni",
+  "settingsNotificationsTypeObservations": "Osservazioni",
+  "settingsNotificationsTypeHomework": "Compiti",
+  "notificationsEveryMinutes": "Ogni {minutes} minuti",
+  "@notificationsEveryMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "notificationsEveryHours": "Ogni {hours} ore",
+  "@notificationsEveryHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "notificationsAccount": "Account: {name}",
+  "@notificationsAccount": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
 }

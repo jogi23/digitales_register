@@ -75,6 +75,35 @@ Future<ProviderContainer> _pumpSettingsPage(
 
 void main() {
   testWidgets(
+    'notification settings can be changed',
+    (tester) async {
+      final container = await _pumpSettingsPage(tester);
+      addTearDown(container.dispose);
+
+      const enableLabel = 'Benachrichtigungen aktivieren';
+      await tester.scrollUntilVisible(
+        find.text(enableLabel),
+        100,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      expect(container.read(settingsProvider).notificationsEnabled, isTrue);
+
+      await tester.tap(find.text(enableLabel));
+      await tester.pumpAndSettle();
+      expect(container.read(settingsProvider).notificationsEnabled, isFalse);
+
+      await tester.tap(find.text(enableLabel));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Alle 30 Minuten'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Alle 3 Stunden').last);
+      await tester.pumpAndSettle();
+      expect(container.read(settingsProvider).notificationPollMinutes, 180);
+    },
+  );
+
+  testWidgets(
     'staying on the page when switching accounts can be turned on',
     (tester) async {
       final container = await _pumpSettingsPage(tester);

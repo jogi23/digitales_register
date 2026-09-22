@@ -15,9 +15,14 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'dart:async';
+
+import 'package:dr/app_state.dart';
 import 'package:dr/data.dart';
 import 'package:dr/middleware/middleware.dart' show wrapper;
+import 'package:dr/providers/login_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
+import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -42,8 +47,32 @@ class NotificationsState {
 }
 
 class NotificationsNotifier extends Notifier<NotificationsState> {
+  Timer? _pollTimer;
+
   @override
-  NotificationsState build() => const NotificationsState();
+  NotificationsState build() {
+    ref.listen(
+      settingsProvider.select(
+        (s) => (
+          s.notificationsEnabled,
+          s.notificationPollMinutes,
+          s.notifyClassbook,
+          s.notifyMessages,
+          s.notifyGrades,
+          s.notifyObservations,
+          s.notifyHomework,
+        ),
+      ),
+      (_, __) => _restartPolling(),
+    );
+    ref.listen(
+      loginProvider.select((s) => s.loggedIn),
+      (_, __) => _restartPolling(),
+    );
+    ref.onDispose(() => _pollTimer?.cancel());
+    Future.microtask(_restartPolling);
+    return const NotificationsState();
+  }
 
   void reset() {
     state = const NotificationsState();
@@ -53,10 +82,15 @@ class NotificationsNotifier extends Notifier<NotificationsState> {
 
   Future<void> load() async {
     if (ref.read(noInternetProvider)) return;
+    final settings = ref.read(settingsProvider);
+    if (!settings.notificationsEnabled) return;
     final dynamic data = await wrapper.send("api/notification/unread");
     if (data is List) {
+      final parsed = _parseNotifications(data)
+          .where((n) => _isEnabledType(n, settings))
+          .toList();
       state = state.copyWith(
-        notifications: _parseNotifications(data),
+        notifications: parsed,
         lastFetched: UtcDateTime.now(),
       );
     }
@@ -120,6 +154,40 @@ class NotificationsNotifier extends Notifier<NotificationsState> {
           ),
         )
         .toList();
+  }
+
+  bool _isEnabledType(Notification n, SettingsState settings) {
+    switch ((n.type ?? '').toLowerCase()) {
+      case 'message':
+        return settings.notifyMessages;
+      case 'grade':
+        return settings.notifyGrades;
+      case 'observation':
+        return settings.notifyObservations;
+      case 'homework':
+        return settings.notifyHomework;
+      case 'entry':
+      case 'classbook':
+        return settings.notifyClassbook;
+      default:
+        return true;
+    }
+  }
+
+  void _restartPolling() {
+    _pollTimer?.cancel();
+    final settings = ref.read(settingsProvider);
+    final loggedIn = ref.read(loginProvider).loggedIn;
+    if (!settings.notificationsEnabled) {
+      state = state.copyWith(notifications: []);
+      return;
+    }
+    if (!loggedIn) return;
+    unawaited(load());
+    _pollTimer = Timer.periodic(
+      Duration(minutes: settings.notificationPollMinutes),
+      (_) => unawaited(load()),
+    );
   }
 }
 

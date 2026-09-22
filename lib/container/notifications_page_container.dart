@@ -19,6 +19,7 @@
 import 'package:dr/providers/messages_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/providers/notifications_provider.dart';
+import 'package:dr/providers/login_provider.dart';
 import 'package:dr/services/app_router.dart';
 import 'package:dr/ui/notifications_page.dart';
 import 'package:flutter/material.dart' hide Notification;
@@ -29,10 +30,12 @@ class NotificationPageContainer extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(notificationsProvider);
     final noInternet = ref.watch(noInternetProvider);
+    final accountLabel = ref.watch(loginProvider.select((s) => s.username));
     final notifier = ref.read(notificationsProvider.notifier);
     return NotificationPage(
       onRefresh: ref.read(notificationsProvider.notifier).load,
       notifications: state.notifications,
+      accountLabel: accountLabel,
       noInternet: noInternet,
       deleteNotification: notifier.delete,
       // Through the messages: they mark the message and remove its

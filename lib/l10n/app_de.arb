@@ -664,5 +664,39 @@
       }
     }
   },
-  "settingsStayLoggedInBackgroundHint": "Hintergrund-Benachrichtigungen funktionieren nur bei stiller Anmeldung mit Passwort; bei 2FA sowie SPID/CIE nur manuelles Nachsehen."
+  "settingsStayLoggedInBackgroundHint": "Hintergrund-Benachrichtigungen funktionieren nur bei stiller Anmeldung mit Passwort; bei 2FA sowie SPID/CIE nur manuelles Nachsehen.",
+  "settingsNotificationsEnable": "Benachrichtigungen aktivieren",
+  "settingsNotificationsEnableSubtitle": "Neue Einträge werden regelmäßig geprüft",
+  "settingsNotificationsInterval": "Prüfintervall",
+  "settingsNotificationsIntervalSubtitle": "Wie oft die App nach neuen Benachrichtigungen sucht",
+  "settingsNotificationsTypes": "Welche Benachrichtigungen geprüft werden",
+  "settingsNotificationsTypeClassbook": "Merkheft",
+  "settingsNotificationsTypeMessages": "Mitteilungen",
+  "settingsNotificationsTypeGrades": "Bewertungen",
+  "settingsNotificationsTypeObservations": "Beobachtungen",
+  "settingsNotificationsTypeHomework": "Hausaufgaben",
+  "notificationsEveryMinutes": "Alle {minutes} Minuten",
+  "@notificationsEveryMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "notificationsEveryHours": "Alle {hours} Stunden",
+  "@notificationsEveryHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "notificationsAccount": "Konto: {name}",
+  "@notificationsAccount": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
 }

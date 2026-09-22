@@ -306,4 +306,34 @@ void main() {
       expect(s.classbookViewMode, ClassbookViewMode.chronological);
     });
   });
+
+  group('notification settings', () {
+    test('are enabled by default', () {
+      final s = SettingsState();
+      expect(s.notificationsEnabled, isTrue);
+      expect(s.notificationPollMinutes, 30);
+      expect(s.notifyClassbook, isTrue);
+      expect(s.notifyMessages, isTrue);
+      expect(s.notifyGrades, isTrue);
+      expect(s.notifyObservations, isTrue);
+      expect(s.notifyHomework, isTrue);
+    });
+
+    test('poll interval survives a restart', () async {
+      final before = _makeContainer();
+      before.read(settingsProvider.notifier).setNotificationPollMinutes(180);
+      await pumpEventQueue();
+
+      final after = _makeContainer();
+      await after.read(settingsProvider.notifier).loadGlobal();
+      expect(after.read(settingsProvider).notificationPollMinutes, 180);
+    });
+
+    test('invalid stored interval falls back to 30 minutes', () {
+      final s = SettingsState.fromJson(<String, dynamic>{
+        'notificationPollMinutes': 17,
+      });
+      expect(s.notificationPollMinutes, 30);
+    });
+  });
 }

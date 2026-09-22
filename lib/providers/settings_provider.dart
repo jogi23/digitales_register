@@ -120,6 +120,30 @@ class SettingsNotifier extends Notifier<SettingsState> {
   void setMessageSignature(String? name) =>
       _update(state.copyWith(messageSignature: name));
 
+  // ─── Notification settings ────────────────────────────────────────────────
+
+  void setNotificationsEnabled(bool value) =>
+      _update(state.copyWith(notificationsEnabled: value));
+
+  void setNotificationPollMinutes(int minutes) {
+    final safe = allowedNotificationPollMinutes.contains(minutes) ? minutes : 30;
+    _update(state.copyWith(notificationPollMinutes: safe));
+  }
+
+  void setNotifyClassbook(bool value) =>
+      _update(state.copyWith(notifyClassbook: value));
+
+  void setNotifyMessages(bool value) =>
+      _update(state.copyWith(notifyMessages: value));
+
+  void setNotifyGrades(bool value) => _update(state.copyWith(notifyGrades: value));
+
+  void setNotifyObservations(bool value) =>
+      _update(state.copyWith(notifyObservations: value));
+
+  void setNotifyHomework(bool value) =>
+      _update(state.copyWith(notifyHomework: value));
+
   // ─── Dashboard settings ───────────────────────────────────────────────────
 
   void setMarkNewOrChanged(bool value) =>

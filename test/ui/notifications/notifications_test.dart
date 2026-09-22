@@ -117,6 +117,31 @@ void main() {
         find.byType(NotificationPage), matchesGoldenFile("page.png"));
   });
 
+  testWidgets('shows type-specific icon', (WidgetTester tester) async {
+    final notifications = [
+      Notification(
+        (b) => b
+          ..id = 1
+          ..title = "Neue Mitteilung"
+          ..timeSent = UtcDateTime(2020, 1, 2)
+          ..type = "message",
+      ),
+      Notification(
+        (b) => b
+          ..id = 2
+          ..title = "Neue Bewertung"
+          ..timeSent = UtcDateTime(2020, 1, 2)
+          ..type = "grade",
+      ),
+    ];
+    final widget = _buildTestWidget(
+      initialState: NotificationsState(notifications: notifications),
+    );
+    await tester.pumpWidget(widget);
+    expect(find.byIcon(Icons.mail_outline), findsOneWidget);
+    expect(find.byIcon(Icons.grading_outlined), findsOneWidget);
+  });
+
   testGoldens('Notification page delete single animation',
       (WidgetTester tester) async {
     final notifications = [
