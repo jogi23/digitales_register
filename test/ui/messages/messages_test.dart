@@ -331,7 +331,7 @@ void main() {
       expect(find.text("Bestätigung offen"), findsNothing);
     });
 
-    testWidgets('an answered message is not marked', (tester) async {
+    testWidgets('an agreed message is marked as agreed', (tester) async {
       await tester.pumpWidget(
         _buildWidget(
           _stateWithResponse(
@@ -339,7 +339,49 @@ void main() {
           ),
         ),
       );
-      expect(find.byType(MessageActionChip), findsNothing);
+      expect(find.text("Zugestimmt"), findsOneWidget);
+    });
+
+    testWidgets('a rejected message is marked as rejected', (tester) async {
+      await tester.pumpWidget(
+        _buildWidget(
+          _stateWithResponse(
+            _info(givenResponse: MessageResponseInfo.answerNotAgree),
+          ),
+        ),
+      );
+      expect(find.text("Abgelehnt"), findsOneWidget);
+    });
+
+    testWidgets('a signed message is marked as signed', (tester) async {
+      await tester.pumpWidget(
+        _buildWidget(
+          _stateWithResponse(
+            _info(
+              type: MessageResponseInfo.typeRead,
+              signatureRequired: true,
+              givenSignature: "Max Mustermann",
+            ),
+          ),
+        ),
+      );
+      expect(find.text("Unterschrieben"), findsOneWidget);
+    });
+
+    testWidgets(
+        'an answered message is marked even where the reader could not act',
+        (tester) async {
+      await tester.pumpWidget(
+        _buildWidget(
+          _stateWithResponse(
+            _info(
+              givenResponse: MessageResponseInfo.answerAgree,
+              parentSignatureRequired: true,
+            ),
+          ),
+        ),
+      );
+      expect(find.text("Zugestimmt"), findsOneWidget);
     });
 
     testWidgets('nothing is marked the reader cannot do in the app',
