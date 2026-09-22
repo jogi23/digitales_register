@@ -7,14 +7,16 @@
           "title": "Neue Funktionen",
           "items": [
             "Profilfoto: Vor dem Speichern lässt sich der Ausschnitt wählen. Das Bild lässt sich im Fenster ziehen und zoomen; was im Kreis steht, wird das Foto.",
-            "Profilfoto: Ein Tippen auf das Foto fragt, ob es gewechselt oder entfernt werden soll. Entfernt stehen wieder die Initialen im Kreis."
+            "Profilfoto: Ein Tippen auf das Foto fragt, ob es gewechselt oder entfernt werden soll. Entfernt stehen wieder die Initialen im Kreis.",
+            "Mitteilungen: eine selbst gesendete Mitteilung lässt sich zurücknehmen, solange das Portal es erlaubt — vier Stunden nach dem Senden. Nach einer Rückfrage; bei den Empfängern verschwindet sie mit."
           ]
         },
         {
           "title": "Verbesserungen",
           "items": [
             "Fächerfarben sind auf einem neu eingerichteten Gerät von Anfang an eingeschaltet. Wer sie ausgeschaltet hat, behält sie aus.",
-            "Merkheft-Wochenansicht: Sind die Fächerfarben aus, tragen Stunden mit Einträgen einen ruhigen Hintergrund und unten rechts ein kleines Zeichen. Bisher färbte die Wochenansicht auch dann ein, wenn die Farben abbestellt waren."
+            "Merkheft-Wochenansicht: Sind die Fächerfarben aus, tragen Stunden mit Einträgen einen ruhigen Hintergrund und unten rechts ein kleines Zeichen. Bisher färbte die Wochenansicht auch dann ein, wenn die Farben abbestellt waren.",
+            "Merkheft-Wochenansicht: Sind alle Einträge eines Fachs an diesem Tag abgehakt, trägt die Stunde unten rechts einen Haken. Noten und Beobachtungen zählen nicht mit — sie sind nichts zum Abarbeiten."
           ]
         },
         {
@@ -30,14 +32,16 @@
           "title": "New features",
           "items": [
             "Account photo: the section can be chosen before it is saved. Drag and zoom the picture in the window; what is inside the circle becomes the photo.",
-            "Account photo: tapping it asks whether to change or remove it. Removed, the initials are back in the circle."
+            "Account photo: tapping it asks whether to change or remove it. Removed, the initials are back in the circle.",
+            "Messages: a message sent by this account can be taken back for as long as the portal allows — four hours after it went out. After a question back; it disappears for the recipients as well."
           ]
         },
         {
           "title": "Improvements",
           "items": [
             "Subject colours are on from the start on a newly set up device. Whoever switched them off keeps them off.",
-            "Merkheft week view: with the subject colours off, lessons that carry an entry get a quiet background and a small mark in the bottom right corner. Until now the week view coloured them anyway."
+            "Merkheft week view: with the subject colours off, lessons that carry an entry get a quiet background and a small mark in the bottom right corner. Until now the week view coloured them anyway.",
+            "Merkheft week view: once every entry of a subject on that day is ticked off, its lesson carries a tick in the bottom right corner. Grades and observations do not count — they are nothing to work through."
           ]
         },
         {
@@ -53,14 +57,16 @@
           "title": "Nuove funzioni",
           "items": [
             "Foto del profilo: prima di salvarla si può scegliere l'inquadratura. L'immagine si trascina e si ingrandisce nella finestra; diventa foto ciò che sta nel cerchio.",
-            "Foto del profilo: toccandola si sceglie se cambiarla o rimuoverla. Rimossa, nel cerchio tornano le iniziali."
+            "Foto del profilo: toccandola si sceglie se cambiarla o rimuoverla. Rimossa, nel cerchio tornano le iniziali.",
+            "Messaggi: un messaggio inviato da questo account si può ritirare finché il portale lo consente — quattro ore dopo l'invio. Previa conferma; sparisce anche per i destinatari."
           ]
         },
         {
           "title": "Miglioramenti",
           "items": [
             "I colori delle materie sono attivi fin dall'inizio su un dispositivo appena configurato. Chi li ha disattivati li mantiene disattivati.",
-            "Vista settimanale del Merkheft: con i colori delle materie disattivati, le ore con annotazioni hanno uno sfondo discreto e un piccolo segno in basso a destra. Finora la vista settimanale le colorava comunque."
+            "Vista settimanale del Merkheft: con i colori delle materie disattivati, le ore con annotazioni hanno uno sfondo discreto e un piccolo segno in basso a destra. Finora la vista settimanale le colorava comunque.",
+            "Vista settimanale del Merkheft: quando tutte le annotazioni di una materia di quel giorno sono spuntate, l'ora porta un segno di spunta in basso a destra. Voti e osservazioni non contano: non sono cose da sbrigare."
           ]
         },
         {

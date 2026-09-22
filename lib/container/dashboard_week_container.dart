@@ -38,6 +38,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+/// The subjects of [day] whose entries are all ticked off.
+///
+/// Only entries that can be ticked off count. A grade or an observation is
+/// nothing to work through, and a subject that carries none but those is not
+/// finished — it never had anything open (#264).
+@visibleForTesting
+Set<String> finishedSubjects(Day day) {
+  final open = <String>{};
+  final finished = <String>{};
+  for (final entry in day.homework) {
+    final label = entry.label;
+    if (label == null || entry.deleted || !entry.checkable) continue;
+    (entry.checked ? finished : open).add(normalizeSubject(label));
+  }
+  return finished.difference(open);
+}
+
 /// The dashboard as one week of the timetable, with lessons that have no
 /// entries dimmed.
 ///
@@ -168,6 +185,13 @@ class _DashboardWeekContainerState
     };
   }
 
+  /// The subjects whose entries are worked through, per day.
+  Map<UtcDateTime, Set<String>> _subjectsFinished() {
+    return <UtcDateTime, Set<String>>{
+      for (final day in widget.days) _dateOnly(day.date): finishedSubjects(day),
+    };
+  }
+
   /// Opens the day the user tapped: its entries, and the way to add one.
   ///
   /// Deliberately the shared day widget rather than a dialog of its own —
@@ -268,6 +292,7 @@ class _DashboardWeekContainerState
               // off, a mark takes over (#260).
               colorBackground: settings.dashboardColorBorders,
               markEntries: !settings.dashboardColorBorders,
+              subjectsFinished: _subjectsFinished(),
               showTimes: settings.calendarShowTimes,
               showAllDetails: settings.calendarShowAllDetails,
               subjectThemes: subjectAppearance.themes,

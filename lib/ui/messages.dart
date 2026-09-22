@@ -72,6 +72,15 @@ class MessagesPage extends StatefulWidget {
   final bool hasUnread;
   final void Function(MessageAttachmentFile message) onOpenFile;
   final void Function(Message message) onMarkAsRead;
+
+  /// Asks the portal what else it knows about a message that is being
+  /// opened. Only that answer says whether a sent message can still be taken
+  /// back (#235).
+  final void Function(Message message) onOpenDetails;
+
+  /// Takes a sent message back; false means it is still there afterwards.
+  final Future<bool> Function(Message message) onDelete;
+
   /// Answers a message; false means the answer did not reach the server.
   final Future<bool> Function(Message message,
       {String? response, String? signature}) onReply;
@@ -100,6 +109,8 @@ class MessagesPage extends StatefulWidget {
     required this.hasUnread,
     required this.onOpenFile,
     required this.onMarkAsRead,
+    required this.onOpenDetails,
+    required this.onDelete,
     required this.onReply,
     required this.onMarkAllAsRead,
     required this.onRefresh,
@@ -356,6 +367,8 @@ class _MessagesPageState extends State<MessagesPage> {
                     onToggleStar: () => widget.onToggleStar(message),
                     onOpenFile: widget.onOpenFile,
                     onMarkAsRead: widget.onMarkAsRead,
+                    onOpenDetails: widget.onOpenDetails,
+                    onDelete: widget.onDelete,
                     onReply: widget.onReply,
                     signature: widget.signature,
                     onSignature: widget.onSignature,
@@ -452,6 +465,12 @@ class MessageWidget extends StatefulWidget {
   final VoidCallback onToggleStar;
   final void Function(MessageAttachmentFile message) onOpenFile;
   final void Function(Message message) onMarkAsRead;
+
+  /// Asks for what the list does not carry, as soon as the message opens.
+  final void Function(Message message) onOpenDetails;
+
+  /// Takes the message back; false means it is still there afterwards.
+  final Future<bool> Function(Message message) onDelete;
   final Future<bool> Function(Message message,
       {String? response, String? signature}) onReply;
   final String? signature;
@@ -473,6 +492,8 @@ class MessageWidget extends StatefulWidget {
     required this.onOpenFile,
     required this.noInternet,
     required this.onMarkAsRead,
+    required this.onOpenDetails,
+    required this.onDelete,
     required this.onReply,
     required this.signature,
     required this.onSignature,
@@ -488,13 +509,27 @@ class _MessageWidgetState extends State<MessageWidget> {
   late final bool initiallyExpanded;
   final ExpansibleController _controller = ExpansibleController();
 
+  /// While the portal is being asked to take the message back.
+  bool _deleting = false;
+
+  /// What the list does not carry — whether a sent message can still be
+  /// taken back — is only known once it is open (#235). A received message
+  /// has no detail of its own, so it is not asked for.
+  void _askForDetails() {
+    if (widget.message.outgoing) widget.onOpenDetails(widget.message);
+  }
+
   @override
   void initState() {
     super.initState();
     initiallyExpanded = widget.expand;
     if (initiallyExpanded) {
       WidgetsBinding.instance.addPostFrameCallback(
-        (_) { if (mounted) widget.onMarkAsRead(widget.message); },
+        (_) {
+          if (!mounted) return;
+          widget.onMarkAsRead(widget.message);
+          _askForDetails();
+        },
       );
     }
   }
@@ -507,8 +542,38 @@ class _MessageWidgetState extends State<MessageWidget> {
         if (!mounted) return;
         _controller.expand();
         widget.onMarkAsRead(widget.message);
+        _askForDetails();
       });
     }
+  }
+
+  /// Asks first: the portal keeps no copy, and the recipients lose the
+  /// message as well.
+  Future<void> _delete() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(tr(context).messageDeleteTitle),
+        content: Text(tr(context).messageDeleteConfirm),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(tr(context).commonCancel),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(tr(context).commonDelete),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    setState(() => _deleting = true);
+    final gone = await widget.onDelete(widget.message);
+    // Gone means the tile went with it; there is nothing left to set.
+    if (!mounted) return;
+    setState(() => _deleting = false);
+    if (!gone) showSnackBar(tr(context).messageDeleteFailed);
   }
 
   Widget _title(BuildContext context) {
@@ -595,9 +660,9 @@ class _MessageWidgetState extends State<MessageWidget> {
       backgroundColor: widget.tileColor,
       collapsedBackgroundColor: widget.tileColor,
       onExpansionChanged: (expanded) {
-        if (expanded && widget.message.isNew) {
-          widget.onMarkAsRead(widget.message);
-        }
+        if (!expanded) return;
+        if (widget.message.isNew) widget.onMarkAsRead(widget.message);
+        _askForDetails();
       },
       // A long press starts picking messages for a common action; a tap still
       // reaches the tile and opens it.
@@ -707,6 +772,22 @@ class _MessageWidgetState extends State<MessageWidget> {
                     onPressed: widget.noInternet ? null : onAnswer,
                     icon: const Icon(Icons.reply),
                     label: Text(tr(context).messageAnswer),
+                  ),
+                ),
+              ],
+              // Only the portal knows how long a sent message may be taken
+              // back, and it says so on the message itself. Received ones are
+              // never the reader's to take back (#235).
+              if (widget.message.outgoing && widget.message.canDelete) ...[
+                const Divider(),
+                AnimatedLinearProgressIndicator(show: _deleting),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: OutlinedButton.icon(
+                    onPressed:
+                        widget.noInternet || _deleting ? null : _delete,
+                    icon: const Icon(Icons.delete_outline),
+                    label: Text(tr(context).messageDelete),
                   ),
                 ),
               ],

@@ -101,6 +101,12 @@ class CalendarWeek extends StatelessWidget {
                                 d.date.day,
                               )] ??
                               const <String>{},
+                      finishedSubjects: vm.subjectsFinished[UtcDateTime(
+                            d.date.year,
+                            d.date.month,
+                            d.date.day,
+                          )] ??
+                          const <String>{},
                       subjectNicks: vm.subjectNicks,
                       isSelected: vm.selection?.date == d.date,
                       selectedHour: vm.selection?.date == d.date
@@ -304,6 +310,9 @@ class _DayHeader extends StatelessWidget {
 class _HoursChunk extends StatelessWidget {
   final Set<String>? highlightedSubjects;
 
+  /// Subjects of this day that are worked through.
+  final Set<String> finishedSubjects;
+
   /// Opens the day behind a lesson that carries an entry.
   final VoidCallback? onEntryTap;
   final Map<String, String> subjectNicks;
@@ -321,6 +330,7 @@ class _HoursChunk extends StatelessWidget {
 
   const _HoursChunk({
     this.highlightedSubjects,
+    required this.finishedSubjects,
     this.onEntryTap,
     required this.subjectNicks,
     required this.hours,
@@ -395,11 +405,15 @@ class _HoursChunk extends StatelessWidget {
   }) {
     final subject = normalizeSubject(hour.subject);
     final hasEntry = _hasEntry(hour);
+    final finished = finishedSubjects.contains(subject);
     final theme = colorBackground ? subjectThemes[subject] : null;
-    final marked = markEntries && hasEntry && highlightedSubjects != null;
+    // The tick already says there is something here, and that it is done.
+    final marked =
+        markEntries && hasEntry && !finished && highlightedSubjects != null;
     return HourWidget(
       hour: hour,
       dimmed: !hasEntry,
+      finished: finished,
       // Only lessons that carry an entry lead anywhere; a dimmed one has
       // nothing to show.
       onEntryTap: hasEntry ? onEntryTap : null,
@@ -429,6 +443,10 @@ class CalendarDayWidget extends StatelessWidget {
 
   /// Lessons whose subject is not in here are dimmed. `null` dims nothing.
   final Set<String>? highlightedSubjects;
+
+  /// Lessons whose subject is in here carry a tick: everything noted for that
+  /// subject on this day is worked through (#264).
+  final Set<String> finishedSubjects;
 
   /// Tapping the day header; null leaves it inert.
   final void Function(UtcDateTime date)? onTap;
@@ -464,6 +482,7 @@ class CalendarDayWidget extends StatelessWidget {
     required this.grid,
     required this.calendarDay,
     this.highlightedSubjects,
+    this.finishedSubjects = const {},
     this.onTap,
     this.onAddReminder,
     this.onEntryTap,
@@ -527,6 +546,7 @@ class CalendarDayWidget extends StatelessWidget {
               child: _HoursChunk(
                 hours: chunks[i],
                 highlightedSubjects: highlightedSubjects,
+                finishedSubjects: finishedSubjects,
                 onEntryTap: onEntryTap == null
                     ? null
                     : () => onEntryTap!(calendarDay.date),
@@ -584,6 +604,10 @@ class HourWidget extends ConsumerWidget {
   /// colours are switched off and the tint cannot say it (#260).
   final bool marked;
 
+  /// Everything noted for this subject on this day is worked through, which
+  /// the tile says with a tick (#264).
+  final bool finished;
+
   /// Opens the day this lesson belongs to. Null falls back to selecting the
   /// lesson, which is what the calendar page does.
   final VoidCallback? onEntryTap;
@@ -604,6 +628,7 @@ class HourWidget extends ConsumerWidget {
     required this.hour,
     this.dimmed = false,
     this.marked = false,
+    this.finished = false,
     this.onEntryTap,
     this.showAllDetails = false,
     this.roomNames = const {},
@@ -676,16 +701,19 @@ class HourWidget extends ConsumerWidget {
                 if (rooms.isNotEmpty)
                   const Positioned(top: 0, right: 0, child: RoomCorner()),
                 // The bottom right corner, because the top right belongs to
-                // the room and the left edge to the warning.
-                if (marked)
+                // the room and the left edge to the warning. A tick where the
+                // work is done, otherwise the mark that there is work.
+                if (finished || marked)
                   Positioned(
                     bottom: 1,
                     right: 1,
                     child: Icon(
-                      Icons.assignment_outlined,
+                      finished ? Icons.check_circle : Icons.assignment_outlined,
                       size: 12,
                       color: Theme.of(context).colorScheme.primary,
-                      semanticLabel: tr(context).weekLessonHasEntry,
+                      semanticLabel: finished
+                          ? tr(context).weekLessonFinished
+                          : tr(context).weekLessonHasEntry,
                     ),
                   ),
               ],

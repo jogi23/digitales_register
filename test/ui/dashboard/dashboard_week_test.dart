@@ -608,6 +608,53 @@ Future<void> main() async {
     });
   });
 
+  group('a subject that is worked through', () {
+    /// The fixture week with every entry of [subject] ticked off.
+    BuiltList<Day> ticked(String subject) => BuiltList<Day>([
+          for (final day in _dashboardState.allDays!)
+            day.rebuild(
+              (b) => b.homework.map(
+                (hw) => hw.label == subject
+                    ? hw.rebuild((b) => b
+                      ..checkable = true
+                      ..checked = true)
+                    : hw,
+              ),
+            ),
+        ]);
+
+    testWidgets('carries a tick', (tester) async {
+      await pumpWeek(tester, days: ticked('Mathematik'));
+      expect(hourOnMonday(tester, 'Mathematik').finished, isTrue);
+      expect(find.byIcon(Icons.check_circle), findsWidgets);
+    });
+
+    testWidgets('a subject with open entries carries none', (tester) async {
+      await pumpWeek(tester, days: ticked('Mathematik'));
+      expect(hourOnMonday(tester, 'Deutsch').finished, isFalse);
+    });
+
+    testWidgets('a lesson with nothing noted carries none', (tester) async {
+      await pumpWeek(tester, days: ticked('Mathematik'));
+      expect(hourOnMonday(tester, 'Religion').finished, isFalse);
+      expect(hourOnMonday(tester, 'Religion').dimmed, isTrue);
+    });
+
+    testWidgets('the tick takes the place of the mark without colours',
+        (tester) async {
+      // Both in one tile would say the same thing twice.
+      await pumpWeek(tester, days: ticked('Mathematik'), colours: false);
+      expect(hourOnMonday(tester, 'Mathematik').finished, isTrue);
+      expect(hourOnMonday(tester, 'Mathematik').marked, isFalse);
+      expect(hourOnMonday(tester, 'Deutsch').marked, isTrue);
+    });
+
+    testWidgets('nothing is ticked while entries are open', (tester) async {
+      await pumpWeek(tester);
+      expect(find.byIcon(Icons.check_circle), findsNothing);
+    });
+  });
+
   testGoldens('week view golden', (tester) async {
     await loadAppFonts();
     await pumpWeek(tester);
@@ -626,5 +673,93 @@ Future<void> main() async {
       find.byType(DashboardWeekContainer),
       matchesGoldenFile('week_view_dark.png'),
     );
+  });
+
+  group('which subjects count as worked through', () {
+    final date = UtcDateTime(2026, 5, 11);
+
+    Homework entry(
+      String subject, {
+      required bool checked,
+      bool checkable = true,
+      bool deleted = false,
+      int id = 1,
+    }) =>
+        Homework(
+          (b) => b
+            ..id = id
+            ..label = subject
+            ..checkable = checkable
+            ..checked = checked
+            ..deleted = deleted
+            ..deleteable = false
+            ..firstSeen = date
+            ..isChanged = false
+            ..isNew = false
+            ..warning = false
+            ..type = HomeworkType.lessonHomework
+            ..title = 'Aufgabe'
+            ..subtitle = 'Für morgen',
+        );
+
+    Day dayWith(List<Homework> entries) => Day(
+          (b) => b
+            ..date = date
+            ..lastRequested = date
+            ..deletedHomework = ListBuilder<Homework>()
+            ..homework = ListBuilder<Homework>(entries),
+        );
+
+    test('every entry ticked off', () {
+      expect(
+        finishedSubjects(dayWith([entry('Mathematik', checked: true)])),
+        {'mathematik'},
+      );
+    });
+
+    test('one entry still open is enough to keep the subject out', () {
+      expect(
+        finishedSubjects(dayWith([
+          entry('Mathematik', checked: true),
+          entry('Mathematik', checked: false, id: 2),
+        ])),
+        isEmpty,
+      );
+    });
+
+    test('subjects are counted apart', () {
+      expect(
+        finishedSubjects(dayWith([
+          entry('Mathematik', checked: true),
+          entry('Deutsch', checked: false, id: 2),
+        ])),
+        {'mathematik'},
+      );
+    });
+
+    test('a grade is nothing to work through', () {
+      // Nothing to tick off, so the subject was never open — and is not
+      // finished either.
+      expect(
+        finishedSubjects(dayWith([
+          entry('Mathematik', checked: false, checkable: false),
+        ])),
+        isEmpty,
+      );
+    });
+
+    test('a deleted entry does not hold the subject open', () {
+      expect(
+        finishedSubjects(dayWith([
+          entry('Mathematik', checked: true),
+          entry('Mathematik', checked: false, deleted: true, id: 2),
+        ])),
+        {'mathematik'},
+      );
+    });
+
+    test('a day without entries finishes nothing', () {
+      expect(finishedSubjects(dayWith([])), isEmpty);
+    });
   });
 }

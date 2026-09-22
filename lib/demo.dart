@@ -88,6 +88,8 @@ Future<dynamic> getDemoResponse(String url, dynamic args) async {
   if (synthetic.containsKey(url)) return synthetic[url];
 
   if (url == _replyUrl) return _demoReply(args);
+  if (url == _getMessageUrl) return _demoMessageDetail(args);
+  if (url == _deleteMessageUrl) return _demoDeleteMessage(args);
   if (_composeUrls.contains(url)) return _demoCompose(url, args);
   if (url == _absenceReasonUrl) return _demoAbsenceReason(args);
   if (url == _absenceFutureUrl) return _demoFutureAbsence(args);
@@ -223,36 +225,83 @@ dynamic _demoRemoveFutureAbsence(dynamic args) {
 
 const _myMessagesUrl = 'api/message/getMyMessages';
 const _replyUrl = 'api/message/reply';
+const _getMessageUrl = 'api/message/getMessage';
+const _deleteMessageUrl = 'api/message/deleteMessage';
+
+/// Messages taken back while the demo runs. The capture is read-only, so the
+/// deletion lives here and the list leaves them out.
+final Set<int> _demoDeletedMessages = <int>{};
+
+/// The captured message list, or an empty one.
+List<dynamic> _capturedMessages() =>
+    _capture
+        .where((item) => _pathOf(item['address'] as String) == _myMessagesUrl)
+        .map((item) => item['response'])
+        .whereType<List<dynamic>>()
+        .firstOrNull ??
+    const <dynamic>[];
+
+/// What the portal knows about one message beyond the list.
+///
+/// Only this answer says whether a sent message can still be taken back. For
+/// a received one the portal has nothing to add and answers with a plain
+/// sentence rather than with JSON; the demo does the same, so the app meets
+/// that case here too.
+dynamic _demoMessageDetail(dynamic args) {
+  final id = args is Map ? args['messageId'] : null;
+  final message = _capturedMessages()
+      .whereType<Map>()
+      .firstWhereOrNull((m) => m['id'] == id);
+  if (message == null || message['label_outgoing'] != true) {
+    return 'glossary.no_need_to_fetch_message';
+  }
+  final gone = _demoDeletedMessages.contains(id);
+  return <String, dynamic>{
+    'message': <String, dynamic>{
+      ...message.cast<String, dynamic>(),
+      // The capture is months old, but the demo keeps its one sent message
+      // within the window, so taking one back can be tried out.
+      'deleteMessageEnabled': gone ? 2 : 1,
+      'deleted': gone ? 1 : 0,
+    },
+  };
+}
+
+/// Takes a message back the way the portal does: with an empty answer. What
+/// says whether it worked is the list, which no longer holds it.
+dynamic _demoDeleteMessage(dynamic args) {
+  final id = args is Map ? args['messageId'] : null;
+  if (id is int) _demoDeletedMessages.add(id);
+  return '';
+}
 
 /// Confirmations sent while the demo runs. The capture is read-only, so the
 /// answers live here and are merged into every message list.
 final Map<int, Map<String, dynamic>> _demoReplies =
     <int, Map<String, dynamic>>{};
 
-/// Applies [_demoReplies] on top of the captured messages.
+/// Applies [_demoReplies] on top of the captured messages, and leaves out
+/// the ones taken back during this demo session.
 List<dynamic> _withDemoReplies(List<dynamic> messages) {
-  if (_demoReplies.isEmpty) return messages;
+  if (_demoReplies.isEmpty && _demoDeletedMessages.isEmpty) return messages;
   return <dynamic>[
     for (final message in messages)
-      if (message is Map && _demoReplies.containsKey(message['id']))
-        <String, dynamic>{
-          ...message.cast<String, dynamic>(),
-          ..._demoReplies[message['id']]!,
-        }
-      else
-        message,
+      if (!(message is Map && _demoDeletedMessages.contains(message['id'])))
+        if (message is Map && _demoReplies.containsKey(message['id']))
+          <String, dynamic>{
+            ...message.cast<String, dynamic>(),
+            ..._demoReplies[message['id']]!,
+          }
+        else
+          message,
   ];
 }
 
 /// Records a confirmation and answers like the server does: with the full,
 /// updated message list.
 dynamic _demoReply(dynamic args) {
-  final stored = _capture
-      .where((item) => _pathOf(item['address'] as String) == _myMessagesUrl)
-      .map((item) => item['response'])
-      .whereType<List<dynamic>>()
-      .firstOrNull;
-  if (stored == null) return null;
+  final stored = _capturedMessages();
+  if (stored.isEmpty) return null;
 
   final id = args is Map ? args['messageId'] : null;
   final response = args is Map && args['response'] is Map

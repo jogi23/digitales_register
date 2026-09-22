@@ -975,6 +975,14 @@ abstract class Message implements Built<Message, MessageBuilder> {
   static const archiveTypeArchive = 1;
   static const archiveTypeRestore = 2;
 
+  /// Whether the portal still lets this account take the sent message back.
+  ///
+  /// The portal keeps a sent message deletable for four hours, and the app
+  /// does not work that window out on its own: the device clock has no say in
+  /// it. Only `getMessage` carries the flag, so it is false until the message
+  /// was opened — the list does not know (#235).
+  bool get canDelete;
+
   bool get canArchive => archiveType == archiveTypeArchive;
   bool get canRestore => archiveType == archiveTypeRestore;
 
@@ -993,7 +1001,8 @@ abstract class Message implements Built<Message, MessageBuilder> {
     ..archived = false
     ..archiveType = 0
     ..fromUserId = 0
-    ..canReply = false;
+    ..canReply = false
+    ..canDelete = false;
 }
 
 /// The folders the message list offers, as the portal files messages.

@@ -24,6 +24,7 @@ import 'package:dr/providers/messages_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/ui/messages.dart';
+import 'package:dr/ui/snack_bar.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -52,6 +53,26 @@ class _TestMessagesNotifier extends MessagesNotifier {
   Future<bool> reply(int messageId, {String? response, String? signature}) async {
     sentSignature = signature;
     return replyResult;
+  }
+
+  /// The messages [loadDetails] was asked about.
+  final List<int> detailRequests = <int>[];
+
+  @override
+  Future<void> loadDetails(int messageId) async {
+    detailRequests.add(messageId);
+  }
+
+  /// Whether [deleteMessage] reports the message gone afterwards.
+  bool deleteResult = true;
+
+  /// The message [deleteMessage] was asked to take back.
+  int? deleteRequest;
+
+  @override
+  Future<bool> deleteMessage(int messageId) async {
+    deleteRequest = messageId;
+    return deleteResult;
   }
 
   /// The last move [setArchived] was asked for.
@@ -122,6 +143,7 @@ Widget _buildWidget(
   _TestMessagesNotifier? messages,
   SettingsState? settings,
   MessageCategory? category,
+  GlobalKey<ScaffoldMessengerState>? messengerKey,
 }) {
   return ProviderScope(
     overrides: [
@@ -134,7 +156,33 @@ Widget _buildWidget(
         messageListProvider.overrideWith(() => _TestListNotifier(category)),
     ],
     child: MaterialApp(
+      scaffoldMessengerKey: messengerKey,
       home: MessagesPageContainer(),
+    ),
+  );
+}
+
+/// One message this account sent, as the portal describes it once it was
+/// opened: [canDelete] is what `getMessage` said about the four hour window.
+MessagesState _sentState({
+  required bool canDelete,
+  bool outgoing = true,
+}) {
+  return MessagesState(
+    (b) => b.messages = ListBuilder(
+      <Message>[
+        Message(
+          (b) => b
+            ..fromName = "Sender"
+            ..recipientString = "Empfänger"
+            ..id = 25
+            ..subject = "Betreff"
+            ..timeSent = UtcDateTime.parse("2020-03-04 20:57:38")
+            ..text = _messageText
+            ..outgoing = outgoing
+            ..canDelete = canDelete,
+        )
+      ],
     ),
   );
 }
@@ -786,5 +834,108 @@ void main() {
       expect(button.onPressed, isNotNull, reason: 'must be repeatable');
     });
 
+  });
+
+  group('taking a sent message back', () {
+    /// Opens the one message of [state] and hands back the notifier behind it.
+    Future<_TestMessagesNotifier> open(
+      WidgetTester tester,
+      MessagesState state, {
+      GlobalKey<ScaffoldMessengerState>? messengerKey,
+    }) async {
+      final messages = _TestMessagesNotifier(state);
+      await tester.pumpWidget(_buildWidget(
+        state,
+        messages: messages,
+        category: MessageCategory.all,
+        messengerKey: messengerKey,
+      ));
+      await tester.tap(find.text("Betreff"));
+      await tester.pumpAndSettle();
+      return messages;
+    }
+
+    testWidgets('opening a sent message asks the portal about it',
+        (tester) async {
+      // The list does not say how long it may still be taken back.
+      final messages = await open(tester, _sentState(canDelete: false));
+      expect(messages.detailRequests, [25]);
+    });
+
+    testWidgets('a received message is not asked about', (tester) async {
+      final messages = await open(
+        tester,
+        _sentState(canDelete: false, outgoing: false),
+      );
+      expect(messages.detailRequests, isEmpty);
+    });
+
+    testWidgets('inside the window it offers to take it back',
+        (tester) async {
+      await open(tester, _sentState(canDelete: true));
+      expect(find.text('Mitteilung löschen'), findsOneWidget);
+    });
+
+    testWidgets('outside it there is nothing to press', (tester) async {
+      await open(tester, _sentState(canDelete: false));
+      expect(find.text('Mitteilung löschen'), findsNothing);
+    });
+
+    testWidgets('a received message never offers it', (tester) async {
+      // Only the sender may take a message back.
+      await open(tester, _sentState(canDelete: true, outgoing: false));
+      expect(find.text('Mitteilung löschen'), findsNothing);
+    });
+
+    testWidgets('it asks before it does it', (tester) async {
+      final messages = await open(tester, _sentState(canDelete: true));
+      await tester.tap(find.text('Mitteilung löschen'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Mitteilung löschen?'), findsOneWidget);
+      expect(messages.deleteRequest, isNull);
+    });
+
+    testWidgets('cancelling leaves the message alone', (tester) async {
+      final messages = await open(tester, _sentState(canDelete: true));
+      await tester.tap(find.text('Mitteilung löschen'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Abbrechen'));
+      await tester.pumpAndSettle();
+
+      expect(messages.deleteRequest, isNull);
+    });
+
+    testWidgets('confirming sends it off', (tester) async {
+      final messages = await open(tester, _sentState(canDelete: true));
+      await tester.tap(find.text('Mitteilung löschen'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Löschen'));
+      await tester.pumpAndSettle();
+
+      expect(messages.deleteRequest, 25);
+    });
+
+    testWidgets('a deletion that did not happen is said out loud',
+        (tester) async {
+      final key = GlobalKey<ScaffoldMessengerState>();
+      final previous = scaffoldMessengerKey;
+      scaffoldMessengerKey = key;
+      addTearDown(() => scaffoldMessengerKey = previous);
+
+      final messages = await open(
+        tester,
+        _sentState(canDelete: true),
+        messengerKey: key,
+      );
+      messages.deleteResult = false;
+      await tester.tap(find.text('Mitteilung löschen'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Löschen'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Die Mitteilung ließ sich nicht löschen'),
+          findsOneWidget);
+    });
   });
 }
