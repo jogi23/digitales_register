@@ -17,34 +17,15 @@
 
 import 'dart:async';
 
-import 'package:dr/app_state.dart';
 import 'package:dr/data.dart';
 import 'package:dr/middleware/middleware.dart' show wrapper;
-import 'package:dr/notification_type.dart';
+import 'package:dr/notification_visibility.dart';
 import 'package:dr/providers/login_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-bool isNotificationTypeEnabled(Notification n, SettingsState settings) {
-  switch (normalizedNotificationType(n.type)) {
-    case notificationTypeMessage:
-      return settings.notifyMessages;
-    case notificationTypeGrade:
-      return settings.notifyGrades;
-    case notificationTypeObservation:
-      return settings.notifyObservations;
-    case notificationTypeHomework:
-      return settings.notifyHomework;
-    case notificationTypeEntry:
-    case notificationTypeClassbook:
-      return settings.notifyClassbook;
-    default:
-      return true;
-  }
-}
 
 class NotificationsState {
   final List<Notification> notifications;
@@ -175,12 +156,13 @@ class NotificationsNotifier extends Notifier<NotificationsState> {
   }
 
   void _restartPolling() {
+    final wasRunning = _pollTimer?.isActive ?? false;
     _pollTimer?.cancel();
     final settings = ref.read(settingsProvider);
     final loggedIn = ref.read(loginProvider).loggedIn;
     if (!settings.notificationsEnabled) return;
     if (!loggedIn) return;
-    unawaited(load());
+    if (!wasRunning) unawaited(load());
     _pollTimer = Timer.periodic(
       Duration(minutes: settings.notificationPollMinutes),
       (_) => unawaited(load()),

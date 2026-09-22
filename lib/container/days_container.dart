@@ -21,6 +21,7 @@ import 'package:built_value/built_value.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/data.dart';
 import 'package:dr/main.dart' show showSnackBar;
+import 'package:dr/notification_visibility.dart';
 import 'package:dr/providers/dashboard_error_provider.dart';
 import 'package:dr/providers/dashboard_provider.dart';
 import 'package:dr/providers/login_provider.dart';
