@@ -20,6 +20,7 @@ import 'dart:async';
 import 'package:dr/app_state.dart';
 import 'package:dr/data.dart';
 import 'package:dr/middleware/middleware.dart' show wrapper;
+import 'package:dr/notification_type.dart';
 import 'package:dr/providers/login_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
@@ -157,17 +158,17 @@ class NotificationsNotifier extends Notifier<NotificationsState> {
   }
 
   bool _isEnabledType(Notification n, SettingsState settings) {
-    switch ((n.type ?? '').toLowerCase()) {
-      case 'message':
+    switch (normalizedNotificationType(n.type)) {
+      case notificationTypeMessage:
         return settings.notifyMessages;
-      case 'grade':
+      case notificationTypeGrade:
         return settings.notifyGrades;
-      case 'observation':
+      case notificationTypeObservation:
         return settings.notifyObservations;
-      case 'homework':
+      case notificationTypeHomework:
         return settings.notifyHomework;
-      case 'entry':
-      case 'classbook':
+      case notificationTypeEntry:
+      case notificationTypeClassbook:
         return settings.notifyClassbook;
       default:
         return true;
@@ -178,10 +179,7 @@ class NotificationsNotifier extends Notifier<NotificationsState> {
     _pollTimer?.cancel();
     final settings = ref.read(settingsProvider);
     final loggedIn = ref.read(loginProvider).loggedIn;
-    if (!settings.notificationsEnabled) {
-      state = state.copyWith(notifications: []);
-      return;
-    }
+    if (!settings.notificationsEnabled) return;
     if (!loggedIn) return;
     unawaited(load());
     _pollTimer = Timer.periodic(

@@ -20,6 +20,7 @@ import 'package:deleteable_tile/deleteable_tile.dart';
 import 'package:dr/data.dart';
 import 'package:dr/l10n/l10n.dart';
 import 'package:dr/main.dart';
+import 'package:dr/notification_type.dart';
 import 'package:dr/ui/layout.dart';
 import 'package:dr/ui/pull_to_refresh.dart';
 import 'package:dr/util.dart';
@@ -150,11 +151,11 @@ class NotificationWidget extends StatelessWidget {
   bool get _isGrade =>
       !_isMessage && notification.objectId != null && goToGrade != null;
 
-  IconData get _typeIcon => switch ((notification.type ?? '').toLowerCase()) {
-        'message' => Icons.mail_outline,
-        'grade' => Icons.grading_outlined,
-        'observation' => Icons.visibility_outlined,
-        'homework' => Icons.assignment_outlined,
+  IconData get _typeIcon => switch (normalizedNotificationType(notification.type)) {
+        notificationTypeMessage => Icons.mail_outline,
+        notificationTypeGrade => Icons.grading_outlined,
+        notificationTypeObservation => Icons.visibility_outlined,
+        notificationTypeHomework => Icons.assignment_outlined,
         _ => Icons.notifications_outlined,
       };
 
