@@ -71,7 +71,7 @@ class NotificationsNotifier extends Notifier<NotificationsState> {
       (_, __) => _restartPolling(),
     );
     ref.onDispose(() => _pollTimer?.cancel());
-    Future.microtask(_restartPolling);
+    _restartPolling();
     return const NotificationsState();
   }
 
@@ -87,11 +87,16 @@ class NotificationsNotifier extends Notifier<NotificationsState> {
     if (!settings.notificationsEnabled) return;
     final dynamic data = await wrapper.send("api/notification/unread");
     if (data is List) {
-      final parsed = _parseNotifications(data)
+      final enabledNow = _parseNotifications(data)
           .where((n) => _isEnabledType(n, settings))
           .toList();
+      final keptDisabled = state.notifications
+          .where((n) => !_isEnabledType(n, settings))
+          .toList();
+      final merged = [...keptDisabled, ...enabledNow]
+        ..sort((a, b) => b.timeSent.compareTo(a.timeSent));
       state = state.copyWith(
-        notifications: parsed,
+        notifications: merged,
         lastFetched: UtcDateTime.now(),
       );
     }
