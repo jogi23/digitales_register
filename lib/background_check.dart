@@ -26,6 +26,7 @@ import 'package:dr/notification_type.dart';
 import 'package:dr/notification_visibility.dart';
 import 'package:dr/providers/account_profile_provider.dart';
 import 'package:dr/system_notifications.dart';
+import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
 import 'package:dr/wrapper.dart';
 import 'package:flutter/foundation.dart';
@@ -144,6 +145,7 @@ void backgroundCheckDispatcher() {
     try {
       await checkForNewNotifications(
         announceAll: inputData?['announceAll'] == true,
+        testNotification: inputData?['testNotification'] == true,
       );
     } on Object catch (e, s) {
       // A failed round is not worth a retry: the next one comes anyway.
@@ -158,12 +160,20 @@ const _debugTaskName = 'dr.notificationCheck.now';
 /// Runs the check once, right away and in the background isolate — for
 /// trying it out in a debug build without waiting for the next round.
 /// [announceAll] treats everything unread as new, so there is something to
-/// see.
-Future<void> runBackgroundCheckNow({bool announceAll = false}) =>
+/// see. [testNotification] shows each account's latest received message
+/// instead, whether read or not — for when nothing is unread; nothing is
+/// remembered as seen.
+Future<void> runBackgroundCheckNow({
+  bool announceAll = false,
+  bool testNotification = false,
+}) =>
     Workmanager().registerOneOffTask(
       _debugTaskName,
       _debugTaskName,
-      inputData: {'announceAll': announceAll},
+      inputData: {
+        'announceAll': announceAll,
+        'testNotification': testNotification,
+      },
       existingWorkPolicy: ExistingWorkPolicy.replace,
     );
 
@@ -200,7 +210,10 @@ L _translations(SettingsState settings) {
 }
 
 /// One round: every stored account, one after the other.
-Future<void> checkForNewNotifications({bool announceAll = false}) async {
+Future<void> checkForNewNotifications({
+  bool announceAll = false,
+  bool testNotification = false,
+}) async {
   await loadPackageInfo();
   await initSystemNotifications();
   final prefs = await SharedPreferences.getInstance();
@@ -224,11 +237,15 @@ Future<void> checkForNewNotifications({bool announceAll = false}) async {
     json.decode(await const FlutterSecureStorage().read(key: 'login') ?? '{}'),
   );
   final atStart = await _readKnown(prefs);
-  final known = {for (final e in atStart.entries) e.key: {...e.value}};
+  final known = {
+    for (final e in atStart.entries) e.key: {...e.value}
+  };
 
   for (final account in accounts) {
     final key = notificationAccountKey(account.user, account.url);
-    final result = await _fetchUnread(account);
+    final result = testNotification
+        ? await _fetchLatestMessage(account)
+        : await _fetchUnread(account);
     // Not reached, or not without a code: it stays as it was until the
     // next round.
     if (result == null) {
@@ -236,11 +253,13 @@ Future<void> checkForNewNotifications({bool announceAll = false}) async {
       continue;
     }
     final alias = (profiles[key] as Map<String, dynamic>?)?['alias'] as String?;
-    final fresh = freshNotifications(
-      known: announceAll ? const {} : known[key],
-      unread: result.unread,
-      settings: settings,
-    );
+    final fresh = testNotification
+        ? result.unread
+        : freshNotifications(
+            known: announceAll ? const {} : known[key],
+            unread: result.unread,
+            settings: settings,
+          );
     debugPrint(
       "Background check: ${result.unread.length} unread, ${fresh.length} new",
     );
@@ -257,6 +276,8 @@ Future<void> checkForNewNotifications({bool announceAll = false}) async {
     );
     known[key] = {for (final n in result.unread) n.id};
   }
+  // A test leaves the list of what was seen as it was.
+  if (testNotification) return;
 
   final keys = {
     for (final a in accounts) notificationAccountKey(a.user, a.url),
@@ -277,8 +298,50 @@ Future<void> checkForNewNotifications({bool announceAll = false}) async {
   });
 }
 
-Future<({List<Notification> unread, String? fullName})?> _fetchUnread(
+typedef _Fetched = ({List<Notification> unread, String? fullName});
+
+Future<_Fetched?> _fetchUnread(StoredAccount account) =>
+    _inSession(account, (session) async {
+      final dynamic data = await session.send("api/notification/unread");
+      return data is List ? parseNotifications(data) : null;
+    });
+
+/// The account's latest received message, dressed up as a notification
+/// about it. For [runBackgroundCheckNow]'s test only: it has no notification
+/// on the portal behind it, hence the id 0.
+Future<_Fetched?> _fetchLatestMessage(StoredAccount account) =>
+    _inSession(account, (session) async {
+      final dynamic data = await session.send("api/message/getMyMessages");
+      if (data is! List) return null;
+      final received = data
+          .whereType<Map<dynamic, dynamic>>()
+          .where((m) => getBool(m["label_outgoing"]) != true)
+          .where((m) => getString(m["timeSent"]) != null)
+          .toList()
+        ..sort(
+          (a, b) =>
+              getString(b["timeSent"])!.compareTo(getString(a["timeSent"])!),
+        );
+      if (received.isEmpty) return const [];
+      final latest = received.first;
+      return [
+        Notification(
+          (b) => b
+            ..id = 0
+            ..title = "Test · ${getString(latest["subject"]) ?? ""}"
+            ..subTitle = getString(latest["fromName"])
+            ..type = notificationTypeMessage
+            ..objectId = getInt(latest["id"])
+            ..timeSent = UtcDateTime.parse(getString(latest["timeSent"])!),
+        ),
+      ];
+    });
+
+/// Signs into [account] on a session of its own, runs [fetch] and signs out
+/// again. Null when the account cannot be reached or signed into.
+Future<_Fetched?> _inSession(
   StoredAccount account,
+  Future<List<Notification>?> Function(Wrapper session) fetch,
 ) async {
   final session = Wrapper();
   try {
@@ -294,9 +357,9 @@ Future<({List<Notification> unread, String? fullName})?> _fetchUnread(
       addProtocolItem: (_) {},
     );
     if (!await session.loggedIn) return null;
-    final dynamic data = await session.send("api/notification/unread");
-    if (data is! List) return null;
-    return (unread: parseNotifications(data), fullName: session.config?.fullName);
+    final notifications = await fetch(session);
+    if (notifications == null) return null;
+    return (unread: notifications, fullName: session.config?.fullName);
   } on Object catch (e) {
     debugPrint("Background check failed for an account: $e");
     return null;

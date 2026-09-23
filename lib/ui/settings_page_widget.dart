@@ -241,11 +241,12 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
                 : null,
             value: entry.key,
             groupValue: value,
-            onChanged: entry.key == EntryDisplayMode.timeline && !timelineEnabled
-                ? null
-                : (mode) {
-                    if (mode != null) onChanged(mode);
-                  },
+            onChanged:
+                entry.key == EntryDisplayMode.timeline && !timelineEnabled
+                    ? null
+                    : (mode) {
+                        if (mode != null) onChanged(mode);
+                      },
           ),
       ];
 
@@ -349,23 +350,38 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
               onLongPress: () =>
                   unawaited(runBackgroundCheckNow(announceAll: true)),
             ),
+          if (kDebugMode && Platform.isAndroid)
+            ListTile(
+              enabled:
+                  widget.vm.notificationsEnabled && !widget.vm.noPassSaving,
+              leading: const Icon(Icons.bug_report_outlined),
+              title: const Text('Test-Benachrichtigung zeigen (Debug)'),
+              subtitle: const Text(
+                'Neueste empfangene Mitteilung jedes Kontos, auch gelesene',
+              ),
+              onTap: () =>
+                  unawaited(runBackgroundCheckNow(testNotification: true)),
+            ),
           _subheading(context, tr(context).settingsNotificationsTypes),
           SwitchListTile.adaptive(
             title: Text(tr(context).settingsNotificationsTypeClassbook),
-            onChanged:
-                widget.vm.notificationsEnabled ? widget.onSetNotifyClassbook : null,
+            onChanged: widget.vm.notificationsEnabled
+                ? widget.onSetNotifyClassbook
+                : null,
             value: widget.vm.notifyClassbook,
           ),
           SwitchListTile.adaptive(
             title: Text(tr(context).settingsNotificationsTypeMessages),
-            onChanged:
-                widget.vm.notificationsEnabled ? widget.onSetNotifyMessages : null,
+            onChanged: widget.vm.notificationsEnabled
+                ? widget.onSetNotifyMessages
+                : null,
             value: widget.vm.notifyMessages,
           ),
           SwitchListTile.adaptive(
             title: Text(tr(context).settingsNotificationsTypeGrades),
-            onChanged:
-                widget.vm.notificationsEnabled ? widget.onSetNotifyGrades : null,
+            onChanged: widget.vm.notificationsEnabled
+                ? widget.onSetNotifyGrades
+                : null,
             value: widget.vm.notifyGrades,
           ),
           SwitchListTile.adaptive(
@@ -377,8 +393,9 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
           ),
           SwitchListTile.adaptive(
             title: Text(tr(context).settingsNotificationsTypeHomework),
-            onChanged:
-                widget.vm.notificationsEnabled ? widget.onSetNotifyHomework : null,
+            onChanged: widget.vm.notificationsEnabled
+                ? widget.onSetNotifyHomework
+                : null,
             value: widget.vm.notifyHomework,
           ),
           // Next to the account switch it is about; the demo has no second
@@ -882,7 +899,8 @@ class _SeedColorPicker extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(tr(context).settingsAccentColor, style: Theme.of(context).textTheme.titleMedium),
+          Text(tr(context).settingsAccentColor,
+              style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,

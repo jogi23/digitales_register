@@ -89,6 +89,7 @@ Future<void> _askPermission(
 void openSystemNotification(SystemNotificationTarget target) {
   final login = providerContainer.read(loginProvider);
   final notifier = providerContainer.read(loginProvider.notifier);
+  debugPrint("System notification tapped (logged in: ${login.loggedIn})");
   if (!login.loggedIn) {
     // Started by the tap: the stored account is still signing in. Decided
     // once it has — after the callbacks, which are cleared right after
@@ -99,12 +100,15 @@ void openSystemNotification(SystemNotificationTarget target) {
     return;
   }
   if (wrapper.user == target.user && sameServer(wrapper.url, target.url)) {
+    debugPrint("System notification: same account, opening");
     _open(target);
     return;
   }
   final index = login.otherAccounts.indexWhere(
     (a) => a.username == target.user && sameServer(a.url, target.url),
   );
+  debugPrint("System notification: other account, index $index of "
+      "${login.otherAccounts.length}");
   // The account was removed since the notification came.
   if (index < 0) return;
   notifier.addAfterLoginCallback(() => _open(target));
@@ -125,14 +129,17 @@ void _open(SystemNotificationTarget target, {int framesLeft = 10}) {
   final router = providerContainer.read(appRouterProvider);
   final notifications = providerContainer.read(notificationsProvider.notifier);
   final objectId = target.objectId;
+  // Id 0 is the test notification of debug builds: no notification on the
+  // portal stands behind it, so there is nothing to mark there.
+  final fromPortal = target.id > 0;
   switch (normalizedNotificationType(target.type)) {
     case notificationTypeMessage when objectId != null:
       // Both: the list may not have been loaded yet after a cold start.
-      unawaited(notifications.markAsRead(target.id));
+      if (fromPortal) unawaited(notifications.markAsRead(target.id));
       unawaited(notifications.markMessageAsRead(objectId));
       router.showMessage(objectId);
     case notificationTypeGrade when objectId != null:
-      unawaited(notifications.markAsRead(target.id));
+      if (fromPortal) unawaited(notifications.markAsRead(target.id));
       router.revealGrade(objectId);
     default:
       router.showNotifications();
