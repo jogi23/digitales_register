@@ -26,6 +26,7 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 ### Intern
 
 - Plugins für App-Infos, Teilen und Dateiauswahl auf aktuelle Fassungen gehoben, dazu der sichere Speicher; unter Windows laufen sie damit auf win32 6. Der eigene Schlüsselspeicher für macOS und Linux ist entfallen — dort greift jetzt derselbe sichere Speicher wie auf den anderen Plattformen.
+- Teilen (App-Einladung, Mitteilungs-Export, Debug-Log, Netzwerkprotokoll) nutzt die aktuelle Schnittstelle von share_plus statt der veralteten.
 
 ## 1.4.0 — 2026-09-15
 

@@ -56,5 +56,7 @@ Future<bool> openPlayStoreListing() async {
 /// it anyway, and this keeps working when it is not installed.
 Future<void> shareApp(BuildContext context) async {
   final l = tr(context);
-  await Share.share(invitationText(l), subject: l.shareSubject);
+  await SharePlus.instance.share(
+    ShareParams(text: invitationText(l), subject: l.shareSubject),
+  );
 }

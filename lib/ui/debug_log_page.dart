@@ -58,9 +58,11 @@ class _DebugLogPageState extends State<DebugLogPage> {
       final file = File('${dir.path}/dr_debug_log_$timestamp.txt');
       await file.writeAsString(text);
 
-      await Share.shareXFiles(
-        [XFile(file.path, mimeType: 'text/plain')],
-        subject: 'DigiReg Debug-Log',
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(file.path, mimeType: 'text/plain')],
+          subject: 'DigiReg Debug-Log',
+        ),
       );
     } catch (e) {
       if (!mounted) return;

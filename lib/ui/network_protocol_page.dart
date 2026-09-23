@@ -88,9 +88,11 @@ Future<void> _exportProtocol(List<NetworkProtocolItem> items) async {
     await file.writeAsString(jsonString);
 
     if (Platform.isAndroid) {
-      await Share.shareXFiles(
-        [XFile(file.path, mimeType: 'application/json')],
-        subject: 'DigiReg Netzwerk-Capture',
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(file.path, mimeType: 'application/json')],
+          subject: 'DigiReg Netzwerk-Capture',
+        ),
       );
       return;
     }
