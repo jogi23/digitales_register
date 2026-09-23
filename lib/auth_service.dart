@@ -57,6 +57,16 @@ class AuthService {
 
   AddNetworkProtocolItem? onAddProtocolItem;
 
+  /// Whether the app has signed in on this instance and handed over its
+  /// callbacks — successfully or not, a start without a network counts.
+  ///
+  /// Until then the app's own sign-in is still on its way: after an account
+  /// switch, and at every start from storage, the stored Merkheft shows
+  /// before the login goes out. A request in that gap must not sign in by
+  /// itself: it would do so without the callbacks, and race the app's login
+  /// for the session cookie.
+  bool get appHasSignedIn => onLogout != null;
+
   /// Hook called by [Wrapper] to allow [SessionManager] to start the session
   /// timer once config is available.
   void Function(Config)? onSessionStarted;
