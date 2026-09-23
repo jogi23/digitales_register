@@ -674,9 +674,9 @@
   },
   "settingsStayLoggedInBackgroundHint": "Hintergrund-Benachrichtigungen funktionieren nur bei stiller Anmeldung mit Passwort; bei 2FA sowie SPID/CIE nur manuelles Nachsehen.",
   "settingsNotificationsEnable": "Benachrichtigungen aktivieren",
-  "settingsNotificationsEnableSubtitle": "Neue Einträge werden regelmäßig geprüft",
+  "settingsNotificationsEnableSubtitle": "Neue Einträge aller Konten erscheinen als Android-Benachrichtigung, auch wenn die App geschlossen ist",
   "settingsNotificationsInterval": "Prüfintervall",
-  "settingsNotificationsIntervalSubtitle": "Wie oft die App nach neuen Benachrichtigungen sucht",
+  "settingsNotificationsIntervalSubtitle": "Wie oft nachgesehen wird; im Energiesparmodus kann Android das verzögern",
   "settingsNotificationsTypes": "Welche Benachrichtigungen geprüft werden",
   "settingsNotificationsTypeClassbook": "Merkheft",
   "settingsNotificationsTypeMessages": "Mitteilungen",
@@ -707,20 +707,16 @@
       }
     }
   },
-  "notificationsMessagesInAccount": "Mitteilungen in {account}",
-  "@notificationsMessagesInAccount": {
-    "placeholders": {
-      "account": {
-        "type": "String"
-      }
-    }
-  },
-  "notificationsUnreadCount": "{count, plural, one {{count} ungelesene Nachricht} other {{count} ungelesene Nachrichten}}",
-  "@notificationsUnreadCount": {
+  "systemNotificationsChannel": "Neue Einträge",
+  "systemNotificationsChannelDescription": "Neue Mitteilungen, Bewertungen und andere Einträge aus dem Register",
+  "systemNotificationsCount": "{count, plural, one {{count} Benachrichtigung} other {{count} Benachrichtigungen}}",
+  "@systemNotificationsCount": {
     "placeholders": {
       "count": {
         "type": "int"
       }
     }
-  }
+  },
+  "settingsStayLoggedInOffHint": "Aus: Anmeldung bei jedem Start, kein Kontowechsel",
+  "settingsNotificationsNeedStayLoggedIn": "Android-Benachrichtigungen gibt es nur mit „Angemeldet bleiben“; bis dahin nur in der App"
 }

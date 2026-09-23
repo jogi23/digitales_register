@@ -27,6 +27,25 @@ import 'package:intl/intl.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 late final PackageInfo packageInfo;
+bool _packageInfoLoaded = false;
+
+/// Fills [packageInfo] once per isolate. The background check for
+/// notifications runs in an isolate of its own, and a second assignment in
+/// the same one would throw.
+Future<void> loadPackageInfo() async {
+  if (_packageInfoLoaded) return;
+  _packageInfoLoaded = true;
+  try {
+    packageInfo = await PackageInfo.fromPlatform();
+  } catch (_) {
+    packageInfo = PackageInfo(
+      appName: "Unknown",
+      packageName: "Unknown",
+      version: "Unknown",
+      buildNumber: "Unknown",
+    );
+  }
+}
 
 String get appVersion {
   if (Platform.environment.containsKey('FLUTTER_TEST')) {

@@ -72,6 +72,11 @@ class AppRouter {
     _ref.read(loginProvider.notifier).setChangePassword(mustChange: false);
   }
 
+  /// Back to the page the menu shows, from the notifications or from wherever
+  /// a tapped system notification found the app.
+  void _backToHome() =>
+      navigatorKey!.currentState!.popUntil((route) => route.isFirst);
+
   void showNotifications() {
     unawaited(navigatorKey!.currentState!.pushNamed("/notifications"));
   }
@@ -132,7 +137,7 @@ class AppRouter {
   /// expanded and scrolled to. Not the grade's detail page; see
   /// [showGrade] for that.
   void revealGrade(int objectId) {
-    navigatorKey!.currentState!.pop();
+    _backToHome();
     showGrades();
     unawaited(
         _ref.read(gradesProvider.notifier).requestSubjectDetail(objectId));
@@ -196,7 +201,7 @@ class AppRouter {
   }
 
   void showMessage(int id) {
-    navigatorKey!.currentState!.pop();
+    _backToHome();
     showMessages();
     _ref.read(messagesProvider.notifier).select(id);
   }

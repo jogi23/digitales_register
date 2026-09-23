@@ -48,6 +48,7 @@ import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/providers/subject_appearance_provider.dart';
 import 'package:dr/serializers.dart';
 import 'package:dr/services/app_router.dart';
+import 'package:dr/services/system_notification_service.dart';
 import 'package:dr/ui/dialog.dart';
 import 'package:dr/ui/snack_bar.dart';
 import 'package:dr/util.dart';
@@ -198,6 +199,9 @@ Future<void> _doLoad() async {
   await providerContainer.read(accountProfileProvider.notifier).load();
   await providerContainer.read(subjectAppearanceProvider.notifier).load();
   await providerContainer.read(settingsProvider.notifier).loadGlobal();
+  // The notifications setting is app-wide, so the check in the background
+  // can be scheduled before any account has signed in.
+  keepBackgroundCheckInSync(providerContainer);
   // From here on every subject that turns up — in the grades, in the
   // timetable, in the Merkheft — is given a colour of its own.
   keepSubjectThemesUpToDate(providerContainer);
