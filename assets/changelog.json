@@ -23,7 +23,8 @@
           "title": "Fehlerbehebungen",
           "items": [
             "Das Profilfoto ließ sich nach der ersten Auswahl nicht mehr ändern: Das neue Bild lag unter demselben Namen, und die App zeigte weiter das alte.",
-            "Kalender: Bei einem neuen Konto hatten nur einige Fächer eine Farbe. Jedes Fach bekommt seine Farbe jetzt, sobald es auftaucht — auch wenn es nur im Stundenplan vorkommt."
+            "Kalender: Bei einem neuen Konto hatten nur einige Fächer eine Farbe. Jedes Fach bekommt seine Farbe jetzt, sobald es auftaucht — auch wenn es nur im Stundenplan vorkommt.",
+            "Beim Start mit gespeichertem Konto und nach einem Kontowechsel meldet sich die App nur noch einmal an. Eine zweite Anmeldung zur selben Zeit konnte die Sitzung stören, und beendete das Portal sie später, konnte die App abstürzen."
           ]
         },
         {
@@ -54,7 +55,8 @@
           "title": "Bug fixes",
           "items": [
             "The account photo could not be changed after the first time: the new picture went to the same file name, and the app kept showing the old one.",
-            "Calendar: on a new account only some subjects had a colour. Every subject is given one as soon as it turns up now — even one that appears nowhere but in the timetable."
+            "Calendar: on a new account only some subjects had a colour. Every subject is given one as soon as it turns up now — even one that appears nowhere but in the timetable.",
+            "When starting with a stored account and after switching accounts, the app now signs in only once. A second sign-in at the same time could disturb the session, and if the portal ended it later, the app could crash."
           ]
         },
         {
@@ -85,7 +87,8 @@
           "title": "Correzioni",
           "items": [
             "La foto del profilo non si poteva più cambiare dopo la prima scelta: la nuova immagine finiva con lo stesso nome di file e l'app mostrava ancora quella vecchia.",
-            "Calendario: con un account nuovo solo alcune materie avevano un colore. Ora ogni materia riceve il suo colore appena compare, anche se esiste solo nell'orario."
+            "Calendario: con un account nuovo solo alcune materie avevano un colore. Ora ogni materia riceve il suo colore appena compare, anche se esiste solo nell'orario.",
+            "All’avvio con un account salvato e dopo un cambio di account, l’app ora accede una sola volta. Un secondo accesso contemporaneo poteva disturbare la sessione e, se il portale la chiudeva in seguito, l’app poteva bloccarsi."
           ]
         },
         {

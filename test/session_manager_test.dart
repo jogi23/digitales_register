@@ -59,6 +59,7 @@ _MockAuthService makeSignedOutAuth() {
   when(() => auth.loggedIn).thenAnswer((_) async => false);
   when(() => auth.user).thenReturn(null);
   when(() => auth.pass).thenReturn(null);
+  when(() => auth.appHasSignedIn).thenReturn(true);
   return auth;
 }
 
@@ -95,6 +96,32 @@ class _StatusAdapter implements HttpClientAdapter {
 
 /// An account that is signed in and can sign in again with what it stored.
 /// Counts the logins in [logins].
+/// Answers every request with nothing, noting where it went.
+class _PathAdapter implements HttpClientAdapter {
+  _PathAdapter(this.paths);
+
+  final List<String> paths;
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    paths.add(options.path);
+    return ResponseBody.fromString(
+      '{"loggedIn":false}',
+      200,
+      headers: {
+        Headers.contentTypeHeader: [Headers.jsonContentType],
+      },
+    );
+  }
+
+  @override
+  void close({bool force = false}) {}
+}
+
 class _SignedInAuth {
   final auth = _MockAuthService();
   bool loggedIn = true;
@@ -106,6 +133,7 @@ class _SignedInAuth {
     when(() => auth.forceLoggedOut()).thenAnswer((_) => loggedIn = false);
     when(() => auth.user).thenReturn('user');
     when(() => auth.pass).thenReturn('pass');
+    when(() => auth.appHasSignedIn).thenReturn(true);
     when(() => auth.login(
           any(),
           any(),
@@ -221,6 +249,7 @@ void main() {
         when(() => auth.loggedIn).thenAnswer((_) async => false);
         when(() => auth.user).thenReturn(null);
         when(() => auth.pass).thenReturn(null);
+        when(() => auth.appHasSignedIn).thenReturn(true);
         return auth;
       }
 
@@ -519,8 +548,7 @@ void main() {
               any(),
               any(),
               allowInteractive2fa: any(named: 'allowInteractive2fa'),
-            ))
-            .thenAnswer((_) async {});
+            )).thenAnswer((_) async {});
         when(() => signedIn.auth.logout(
               hard: any(named: 'hard'),
               logoutForcedByServer: any(named: 'logoutForcedByServer'),
@@ -559,8 +587,7 @@ void main() {
             any(),
             any(),
             allowInteractive2fa: any(named: 'allowInteractive2fa'),
-          ))
-          .thenAnswer((invocation) async {
+          )).thenAnswer((invocation) async {
         logins.add([
           for (final argument in invocation.positionalArguments)
             argument as String?,
@@ -606,6 +633,61 @@ void main() {
       expect(await setup.sm.ensureLoggedIn(), isFalse);
       expect(await setup.sm.ensureLoggedIn(), isFalse);
       expect(setup.logins, hasLength(1));
+    });
+  });
+
+  group('a request before the app has signed in', () {
+    /// A fresh session with nothing signed in yet, as the app has it between
+    /// creating it and its own sign-in — after an account switch, or at
+    /// every start from storage, where the Merkheft shows the stored state
+    /// before the login goes out.
+    ({AuthService auth, SessionManager sm, List<String> paths}) fresh() {
+      final api = ApiClient();
+      final paths = <String>[];
+      api.dio.httpClientAdapter = _PathAdapter(paths);
+      final auth = AuthService(api);
+      final sm = SessionManager(api, auth)
+        ..storedLogin = () async => (
+              user: 'anna',
+              pass: 'geheim',
+              url: 'https://schule.digitalesregister.it',
+            );
+      return (auth: auth, sm: sm, paths: paths);
+    }
+
+    test('leaves the login to the app instead of racing it', () async {
+      final setup = fresh();
+      var expired = 0;
+      setup.sm.onSessionExpired = () => expired++;
+
+      // Signing in from storage here went through without the app's
+      // callbacks: an assertion in debug builds, and in release a session
+      // whose forced logout had nothing to call.
+      expect(await setup.sm.send('api/student/dashboard/dashboard'), isNull);
+      expect(setup.paths, isEmpty);
+      // Not an expired session either: the app's own login is on its way.
+      expect(expired, 0);
+    });
+
+    test('once the app has tried, storage may sign in again', () async {
+      final setup = fresh();
+      // The app's login, failed for want of a network — as after a start
+      // without one. Coming back online must still sign in from storage.
+      setup.paths.clear();
+      await setup.auth.login(
+        'anna',
+        'geheim',
+        null,
+        'https://schule.digitalesregister.it',
+        logout: () {},
+        configLoaded: () {},
+        relogin: () {},
+        addProtocolItem: (_) {},
+      );
+      setup.paths.clear();
+
+      await setup.sm.send('api/student/dashboard/dashboard');
+      expect(setup.paths, contains(endsWith('api/auth/login')));
     });
   });
 }

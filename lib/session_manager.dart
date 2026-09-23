@@ -151,6 +151,9 @@ class SessionManager {
           } else {
             _authService.onRelogin!();
           }
+        } else if (!_authService.appHasSignedIn) {
+          // Too early: the app's own sign-in is on its way.
+          return false;
         } else if (await _signInFromStorage()) {
           // Signed in again with what storage still holds.
         } else {
@@ -183,7 +186,7 @@ class SessionManager {
       return response;
     }
     if (!await ensureLoggedIn()) {
-      if (!noInternet) onSessionExpired?.call();
+      if (!noInternet && _authService.appHasSignedIn) onSessionExpired?.call();
       return null;
     }
     try {
@@ -268,8 +271,9 @@ class SessionManager {
     )) {
       log("returning null for request to $url, user is not logged in");
       // Not being logged in with a working network is a session that ran
-      // out, not an outage: it needs a new login, not another try.
-      if (!noInternet) onSessionExpired?.call();
+      // out, not an outage: it needs a new login, not another try. Unless
+      // the app has not signed in yet — then it is only early.
+      if (!noInternet && _authService.appHasSignedIn) onSessionExpired?.call();
       // A retry that cannot sign in again is where the first failure ends.
       if (isRetryAfterUnexpectedLogout) {
         onError?.call(UnexpectedLogoutException());
