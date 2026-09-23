@@ -273,10 +273,16 @@ class _DaysWidgetState extends State<DaysWidget> {
     // reset the view back to today.
     final anchorDate = _currentTopDayDate(oldWidget.vm.days);
     // Switching to a calendar view after the first frame has to fetch the
-    // other direction too; only the first build did so.
+    // other direction too; only the first build did so. Not right here:
+    // didUpdateWidget runs mid-build, and loading marks the dashboard as
+    // loading before its first await — a provider change Riverpod forbids
+    // while the tree is building.
     if (widget.vm.viewMode != oldWidget.vm.viewMode &&
         widget.vm.viewMode != DashboardViewMode.list) {
-      unawaited(widget.loadBothDirections());
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        unawaited(widget.loadBothDirections());
+      });
     }
     updateValues();
     update();

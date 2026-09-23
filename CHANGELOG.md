@@ -20,6 +20,7 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 
 - Das Profilfoto ließ sich nach der ersten Auswahl nicht mehr ändern: Das neue Bild lag unter demselben Namen, und die App zeigte weiter das alte.
 - Kalender: Bei einem neuen Konto hatten nur einige Fächer eine Farbe. Jedes Fach bekommt seine Farbe jetzt, sobald es auftaucht — auch wenn es nur im Stundenplan vorkommt.
+- Merkheft: Wechselte die Ansicht von der Liste in den Monat oder die Woche — etwa nach einem Kontowechsel —, lud die App die Einträge beider Richtungen nicht nach. Das Laden startete mitten im Aufbau der Seite und brach ab.
 
 ### Intern
 
