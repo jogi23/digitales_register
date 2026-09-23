@@ -45,9 +45,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:dr/ui/snack_bar.dart';
 import 'package:dr/services/review_prompt.dart';
+import 'package:dr/services/system_notification_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:responsive_scaffold/responsive_scaffold.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:app_links/app_links.dart';
@@ -76,16 +76,8 @@ Future<void> main() async {
 Future<void> _runApp() async {
   final binding = WidgetsFlutterBinding.ensureInitialized();
   binding.deferFirstFrame();
-  try {
-    packageInfo = await PackageInfo.fromPlatform();
-  } catch (_) {
-    packageInfo = PackageInfo(
-      appName: "Unknown",
-      packageName: "Unknown",
-      version: "Unknown",
-      buildNumber: "Unknown",
-    );
-  }
+  await loadPackageInfo();
+  await initSystemNotificationService();
   navigatorKey = GlobalKey();
   scaffoldKey = GlobalKey();
   scaffoldMessengerKey = GlobalKey();
@@ -114,6 +106,7 @@ Future<void> _runApp() async {
         });
       }
       unawaited(startApp(uri));
+      unawaited(openLaunchNotification());
       WidgetsBinding.instance.addObserver(
         LifecycleObserver(
           () => unawaited(handleRestarted()),

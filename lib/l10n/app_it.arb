@@ -646,9 +646,9 @@
   "connectionOutdated": "Dati non aggiornati",
   "settingsStayLoggedInBackgroundHint": "Le notifiche in background funzionano solo con accesso silenzioso con password; con 2FA e SPID/CIE è possibile solo il controllo manuale.",
   "settingsNotificationsEnable": "Attiva notifiche",
-  "settingsNotificationsEnableSubtitle": "Controlla regolarmente nuove voci",
+  "settingsNotificationsEnableSubtitle": "Le nuove voci di tutti gli account appaiono come notifiche Android, anche con l’app chiusa",
   "settingsNotificationsInterval": "Intervallo di controllo",
-  "settingsNotificationsIntervalSubtitle": "Quanto spesso l’app controlla nuove notifiche",
+  "settingsNotificationsIntervalSubtitle": "Quanto spesso controllare; in modalità risparmio energetico Android può ritardarlo",
   "settingsNotificationsTypes": "Tipi di notifiche da controllare",
   "settingsNotificationsTypeClassbook": "Registro",
   "settingsNotificationsTypeMessages": "Comunicazioni",
@@ -679,20 +679,9 @@
       }
     }
   },
-  "notificationsMessagesInAccount": "Comunicazioni in {account}",
-  "@notificationsMessagesInAccount": {
-    "placeholders": {
-      "account": {
-        "type": "String"
-      }
-    }
-  },
-  "notificationsUnreadCount": "{count, plural, one {{count} messaggio non letto} other {{count} messaggi non letti}}",
-  "@notificationsUnreadCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  }
+  "systemNotificationsChannel": "Nuove voci",
+  "systemNotificationsChannelDescription": "Nuove comunicazioni, valutazioni e altre voci dal registro",
+  "systemNotificationsCount": "{count, plural, one {{count} notifica} other {{count} notifiche}}",
+  "settingsStayLoggedInOffHint": "Disattivato: accesso a ogni avvio, nessun cambio di account",
+  "settingsNotificationsNeedStayLoggedIn": "Le notifiche Android richiedono «Resta connesso»; fino ad allora solo nell’app"
 }

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Das Benachrichtigungssymbol wird nur per Namen aus Dart angesprochen;
+     ohne diesen Hinweis könnte die Ressourcenverkleinerung es entfernen. -->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@drawable/ic_notification" />

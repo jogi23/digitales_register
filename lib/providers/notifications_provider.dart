@@ -16,18 +16,15 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'dart:async';
-import 'dart:convert';
 
+import 'package:dr/background_check.dart';
 import 'package:dr/data.dart';
-import 'package:dr/l10n/l10n.dart';
-import 'package:dr/middleware/middleware.dart' show secureStorage, wrapper;
+import 'package:dr/middleware/middleware.dart' show wrapper;
 import 'package:dr/notification_type.dart';
 import 'package:dr/providers/login_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/utc_date_time.dart';
-import 'package:dr/util.dart';
-import 'package:dr/wrapper.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class NotificationsState {
@@ -52,9 +49,13 @@ class NotificationsState {
 class NotificationsNotifier extends Notifier<NotificationsState> {
   Timer? _pollTimer;
   bool _loading = false;
-  final _syntheticAccountById = <int, String>{};
-  final _lastSyntheticCounts = <String, int>{};
-  final _dismissedSyntheticAccounts = <String>{};
+
+  /// Read here, but perhaps not yet on the portal: a list fetched before the
+  /// portal heard of it would bring them back. Kept out until the portal no
+  /// longer lists them. By notification id, and for messages by message id —
+  /// a message may be read before its notification was in the list.
+  final _readHere = <int>{};
+  final _messagesReadHere = <int>{};
 
   @override
   NotificationsState build() {
@@ -74,6 +75,8 @@ class NotificationsNotifier extends Notifier<NotificationsState> {
   }
 
   void reset() {
+    _readHere.clear();
+    _messagesReadHere.clear();
     state = const NotificationsState();
   }
 
@@ -87,11 +90,31 @@ class NotificationsNotifier extends Notifier<NotificationsState> {
       final settings = ref.read(settingsProvider);
       if (!settings.notificationsEnabled) return;
       final dynamic data = await wrapper.send("api/notification/unread");
-      final fromCurrent =
-          data is List ? _parseNotifications(data) : <Notification>[];
-      final fromOthers = await _otherAccountMessageNotifications();
-      final parsed = [...fromCurrent, ...fromOthers]
+      final fetched =
+          data is List ? parseNotifications(data) : <Notification>[];
+      _readHere.retainAll(fetched.map((n) => n.id));
+      _messagesReadHere.retainAll(
+        fetched.where((n) => n.type == "message").map((n) => n.objectId),
+      );
+      final parsed = fetched
+          .where((n) => !_readHere.contains(n.id))
+          .where(
+            (n) =>
+                n.type != "message" || !_messagesReadHere.contains(n.objectId),
+          )
+          .toList()
         ..sort((a, b) => b.timeSent.compareTo(a.timeSent));
+      // Seen here, so the background check does not bring them up again as
+      // a system notification.
+      final user = wrapper.user;
+      final url = wrapper.url;
+      if (data is List && user != null && url != null) {
+        unawaited(rememberSeenNotifications(
+          user: user,
+          url: url,
+          ids: fetched.map((n) => n.id),
+        ));
+      }
       state = state.copyWith(
         notifications: parsed,
         lastFetched: UtcDateTime.now(),
@@ -102,25 +125,32 @@ class NotificationsNotifier extends Notifier<NotificationsState> {
   }
 
   Future<void> delete(Notification notification) async {
+    _readHere.add(notification.id);
     state = state.copyWith(
       notifications:
           state.notifications.where((n) => n != notification).toList(),
     );
-    if (notification.id < 0) {
-      final accountKey = _syntheticAccountById[notification.id];
-      if (accountKey != null) _dismissedSyntheticAccounts.add(accountKey);
-      return;
-    }
     await wrapper.send(
       "api/notification/markAsRead",
       args: {"id": notification.id},
     );
   }
 
+  /// Marks the notification with [id] as read, whether or not it is in the
+  /// list yet — a tapped system notification may have come before the list.
+  Future<void> markAsRead(int id) async {
+    _readHere.add(id);
+    state = state.copyWith(
+      notifications: state.notifications.where((n) => n.id != id).toList(),
+    );
+    await wrapper.send("api/notification/markAsRead", args: {"id": id});
+  }
+
   Future<void> deleteAll() async {
     final messageNotifications = state.notifications
         .where((n) => n.type == "message" && n.objectId != null)
         .toList();
+    _readHere.addAll(state.notifications.map((n) => n.id));
     state = state.copyWith(notifications: []);
     for (final n in messageNotifications) {
       await wrapper.send(
@@ -138,6 +168,7 @@ class NotificationsNotifier extends Notifier<NotificationsState> {
     // object id, and reading a message says nothing about that grade.
     bool matches(Notification n) =>
         n.type == "message" && n.objectId == objectId;
+    _messagesReadHere.add(objectId);
     final matching = state.notifications.where(matches).toList();
     state = state.copyWith(
       notifications: state.notifications.where((n) => !matches(n)).toList(),
@@ -145,25 +176,6 @@ class NotificationsNotifier extends Notifier<NotificationsState> {
     for (final n in matching) {
       await wrapper.send("api/notification/markAsRead", args: {"id": n.id});
     }
-  }
-
-  List<Notification> _parseNotifications(List<dynamic> data) {
-    return data
-        .map<Notification>(
-          (dynamic n) => tryParse(
-            getMap(n),
-            (dynamic n) => Notification(
-              (b) => b
-                ..id = getInt(n["id"])
-                ..title = getString(n["title"])
-                ..type = getString(n["type"])
-                ..objectId = getInt(n["objectId"])
-                ..subTitle = getString(n["subTitle"])
-                ..timeSent = UtcDateTime.parse(getString(n["timeSent"])!),
-            ),
-          ),
-        )
-        .toList();
   }
 
   void _restartPolling() {
@@ -178,117 +190,6 @@ class NotificationsNotifier extends Notifier<NotificationsState> {
       (_) => unawaited(load()),
     );
   }
-
-  Future<List<Notification>> _otherAccountMessageNotifications() async {
-    final currentUser = wrapper.user;
-    final currentUrl = wrapper.url;
-    final accounts = await _storedLogins();
-    final otherAccounts = accounts
-        .where((a) => a.user != currentUser || a.url != currentUrl)
-        .toList();
-    final List<Notification> out = [];
-    final summaries = await Future.wait(
-      otherAccounts.map(_unreadMessageSummaryFor),
-    );
-    for (var i = 0; i < otherAccounts.length; i++) {
-      final account = otherAccounts[i];
-      final summary = summaries[i];
-      final count = summary.count;
-      final accountKey = '${account.user}|${account.url}';
-      final previousCount = _lastSyntheticCounts[accountKey];
-      _lastSyntheticCounts[accountKey] = count;
-      if (count != previousCount) {
-        _dismissedSyntheticAccounts.remove(accountKey);
-      }
-      if (count <= 0) continue;
-      if (_dismissedSyntheticAccounts.contains(accountKey)) continue;
-      final id = _syntheticIdForAccount(accountKey);
-      _syntheticAccountById[id] = accountKey;
-      out.add(
-        Notification(
-          (b) => b
-            ..id = id
-            ..title = trGlobal.notificationsMessagesInAccount(account.user)
-            ..subTitle = trGlobal.notificationsUnreadCount(count)
-            ..type = 'message'
-            ..timeSent = summary.latest ?? UtcDateTime.now(),
-        ),
-      );
-    }
-    return out;
-  }
-
-  Future<({int count, UtcDateTime? latest})> _unreadMessageSummaryFor(
-    ({String user, String pass, String url}) account,
-  ) async {
-    final temp = Wrapper();
-    try {
-      await temp.login(
-        account.user,
-        account.pass,
-        null,
-        account.url,
-        allowInteractive2fa: false,
-        logout: () {},
-        configLoaded: () {},
-        relogin: () {},
-        addProtocolItem: (_) {},
-      );
-      if (!await temp.loggedIn) return (count: 0, latest: null);
-      final dynamic data = await temp.send("api/notification/unread");
-      if (data is! List) return (count: 0, latest: null);
-      final parsed = _parseNotifications(data);
-      final messages = parsed
-          .where(
-            (n) => normalizedNotificationType(n.type) == notificationTypeMessage,
-          )
-          .toList();
-      final latest = messages.isEmpty
-          ? null
-          : messages
-              .map((n) => n.timeSent)
-              .reduce((a, b) => a.compareTo(b) >= 0 ? a : b);
-      return (count: messages.length, latest: latest);
-    } on Exception {
-      return (count: 0, latest: null);
-    } finally {
-      temp.logout(hard: true);
-    }
-  }
-
-  Future<List<({String user, String pass, String url})>> _storedLogins() async {
-    try {
-      final raw = await secureStorage.read(key: "login");
-      final decoded = json.decode(raw ?? "{}");
-      final entries = <Map<dynamic, dynamic>>[];
-      if (decoded is Map) {
-        entries.add(decoded);
-        final others = decoded["otherAccounts"];
-        if (others is List) {
-          for (final dynamic entry in others) {
-            if (entry is Map) entries.add(entry);
-          }
-        }
-      }
-      final seen = <String>{};
-      final out = <({String user, String pass, String url})>[];
-      for (final e in entries) {
-        final user = getString(e["user"]);
-        final pass = getString(e["pass"]);
-        final url = getString(e["url"]);
-        if (user == null || pass == null || url == null) continue;
-        final key = '$user|$url';
-        if (!seen.add(key)) continue;
-        out.add((user: user, pass: pass, url: url));
-      }
-      return out;
-    } catch (_) {
-      return const [];
-    }
-  }
-
-  int _syntheticIdForAccount(String accountKey) =>
-      -((accountKey.hashCode & 0x3fffffff) + 1);
 }
 
 final notificationsProvider =

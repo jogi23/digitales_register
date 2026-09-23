@@ -16,8 +16,12 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'dart:async';
+import 'dart:io';
+
 import 'package:deleteable_tile/deleteable_tile.dart';
 import 'package:dr/app_state.dart';
+import 'package:dr/background_check.dart';
 import 'package:dr/container/settings_page.dart';
 import 'package:dr/ui/account_avatar_button.dart';
 import 'package:dr/ui/autocomplete_options.dart';
@@ -237,11 +241,12 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
                 : null,
             value: entry.key,
             groupValue: value,
-            onChanged: entry.key == EntryDisplayMode.timeline && !timelineEnabled
-                ? null
-                : (mode) {
-                    if (mode != null) onChanged(mode);
-                  },
+            onChanged:
+                entry.key == EntryDisplayMode.timeline && !timelineEnabled
+                    ? null
+                    : (mode) {
+                        if (mode != null) onChanged(mode);
+                      },
           ),
       ];
 
@@ -289,6 +294,7 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
             title: Text(tr(context).settingsStayLoggedIn),
             subtitle: Text(
               '${tr(context).settingsStayLoggedInSubtitle}\n'
+              '${tr(context).settingsStayLoggedInOffHint}\n'
               '${tr(context).settingsStayLoggedInBackgroundHint}',
             ),
             onChanged: (bool value) {
@@ -298,7 +304,14 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
           ),
           SwitchListTile.adaptive(
             title: Text(tr(context).settingsNotificationsEnable),
-            subtitle: Text(tr(context).settingsNotificationsEnableSubtitle),
+            // Still a switch without a stored password: it also governs the
+            // list inside the app, which works either way. Only the system
+            // notifications need to sign in on their own.
+            subtitle: Text(
+              widget.vm.noPassSaving && Platform.isAndroid
+                  ? tr(context).settingsNotificationsNeedStayLoggedIn
+                  : tr(context).settingsNotificationsEnableSubtitle,
+            ),
             onChanged: widget.onSetNotificationsEnabled,
             value: widget.vm.notificationsEnabled,
           ),
@@ -324,23 +337,51 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
               ],
             ),
           ),
+          // Only in debug builds: one round right away, in the background
+          // isolate, instead of waiting for the next one.
+          if (kDebugMode && Platform.isAndroid)
+            ListTile(
+              enabled:
+                  widget.vm.notificationsEnabled && !widget.vm.noPassSaving,
+              leading: const Icon(Icons.bug_report_outlined),
+              title: const Text('Jetzt im Hintergrund prüfen (Debug)'),
+              subtitle: const Text('Lang drücken: alle Ungelesenen melden'),
+              onTap: () => unawaited(runBackgroundCheckNow()),
+              onLongPress: () =>
+                  unawaited(runBackgroundCheckNow(announceAll: true)),
+            ),
+          if (kDebugMode && Platform.isAndroid)
+            ListTile(
+              enabled:
+                  widget.vm.notificationsEnabled && !widget.vm.noPassSaving,
+              leading: const Icon(Icons.bug_report_outlined),
+              title: const Text('Test-Benachrichtigung zeigen (Debug)'),
+              subtitle: const Text(
+                'Neueste empfangene Mitteilung jedes Kontos, auch gelesene',
+              ),
+              onTap: () =>
+                  unawaited(runBackgroundCheckNow(testNotification: true)),
+            ),
           _subheading(context, tr(context).settingsNotificationsTypes),
           SwitchListTile.adaptive(
             title: Text(tr(context).settingsNotificationsTypeClassbook),
-            onChanged:
-                widget.vm.notificationsEnabled ? widget.onSetNotifyClassbook : null,
+            onChanged: widget.vm.notificationsEnabled
+                ? widget.onSetNotifyClassbook
+                : null,
             value: widget.vm.notifyClassbook,
           ),
           SwitchListTile.adaptive(
             title: Text(tr(context).settingsNotificationsTypeMessages),
-            onChanged:
-                widget.vm.notificationsEnabled ? widget.onSetNotifyMessages : null,
+            onChanged: widget.vm.notificationsEnabled
+                ? widget.onSetNotifyMessages
+                : null,
             value: widget.vm.notifyMessages,
           ),
           SwitchListTile.adaptive(
             title: Text(tr(context).settingsNotificationsTypeGrades),
-            onChanged:
-                widget.vm.notificationsEnabled ? widget.onSetNotifyGrades : null,
+            onChanged: widget.vm.notificationsEnabled
+                ? widget.onSetNotifyGrades
+                : null,
             value: widget.vm.notifyGrades,
           ),
           SwitchListTile.adaptive(
@@ -352,8 +393,9 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
           ),
           SwitchListTile.adaptive(
             title: Text(tr(context).settingsNotificationsTypeHomework),
-            onChanged:
-                widget.vm.notificationsEnabled ? widget.onSetNotifyHomework : null,
+            onChanged: widget.vm.notificationsEnabled
+                ? widget.onSetNotifyHomework
+                : null,
             value: widget.vm.notifyHomework,
           ),
           // Next to the account switch it is about; the demo has no second
@@ -857,7 +899,8 @@ class _SeedColorPicker extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(tr(context).settingsAccentColor, style: Theme.of(context).textTheme.titleMedium),
+          Text(tr(context).settingsAccentColor,
+              style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
