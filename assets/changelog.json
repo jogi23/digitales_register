@@ -25,6 +25,12 @@
             "Das Profilfoto ließ sich nach der ersten Auswahl nicht mehr ändern: Das neue Bild lag unter demselben Namen, und die App zeigte weiter das alte.",
             "Kalender: Bei einem neuen Konto hatten nur einige Fächer eine Farbe. Jedes Fach bekommt seine Farbe jetzt, sobald es auftaucht — auch wenn es nur im Stundenplan vorkommt."
           ]
+        },
+        {
+          "title": "Intern",
+          "items": [
+            "Plugins für App-Infos, Teilen und Dateiauswahl auf aktuelle Fassungen gehoben, dazu der sichere Speicher; unter Windows laufen sie damit auf win32 6. Der eigene Schlüsselspeicher für macOS und Linux ist entfallen — dort greift jetzt derselbe sichere Speicher wie auf den anderen Plattformen."
+          ]
         }
       ],
       "en": [
@@ -50,6 +56,12 @@
             "The account photo could not be changed after the first time: the new picture went to the same file name, and the app kept showing the old one.",
             "Calendar: on a new account only some subjects had a colour. Every subject is given one as soon as it turns up now — even one that appears nowhere but in the timetable."
           ]
+        },
+        {
+          "title": "Internal",
+          "items": [
+            "Plugins for app info, sharing and file picking updated to current versions, along with the secure storage; on Windows they now run on win32 6. The separate key storage for macOS and Linux is gone — those platforms now use the same secure storage as all others."
+          ]
         }
       ],
       "it": [
@@ -74,6 +86,12 @@
           "items": [
             "La foto del profilo non si poteva più cambiare dopo la prima scelta: la nuova immagine finiva con lo stesso nome di file e l'app mostrava ancora quella vecchia.",
             "Calendario: con un account nuovo solo alcune materie avevano un colore. Ora ogni materia riceve il suo colore appena compare, anche se esiste solo nell'orario."
+          ]
+        },
+        {
+          "title": "Interno",
+          "items": [
+            "Plugin per informazioni sull'app, condivisione e selezione dei file aggiornati alle versioni attuali, insieme all'archivio sicuro; su Windows ora funzionano con win32 6. L'archivio delle chiavi separato per macOS e Linux è stato rimosso: su queste piattaforme ora si usa lo stesso archivio sicuro delle altre."
           ]
         }
       ]
