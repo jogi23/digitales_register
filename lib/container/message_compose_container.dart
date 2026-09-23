@@ -57,10 +57,13 @@ class _MessageComposeContainerState
   /// school allows is its own business.
   Future<void> _pickAttachment(MessageComposeNotifier notifier) async {
     final picked = await FilePicker.pickFiles();
-    final file = picked?.files.firstOrNull;
+    final file = picked.firstOrNull;
     final path = file?.path;
     if (file == null || path == null) return;
-    await notifier.attach(path: path, name: file.name, size: file.size);
+    // Null only when even a disk read fails; the upload would fail as well.
+    final size = await file.length();
+    if (size == null) return;
+    await notifier.attach(path: path, name: file.name, size: size);
   }
 
   @override

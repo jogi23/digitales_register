@@ -5,9 +5,8 @@ allprojects {
     }
     afterEvaluate {
         // Manche Plugins nageln ein compileSdk fest, das älter ist als das,
-        // was ihre eigenen Abhängigkeiten verlangen - biometric_storage 5.0.1
-        // steht auf 31, androidx.biometric will 33. Seit AGP 9 bricht der Build
-        // daran ab, statt es stillschweigend anzuheben.
+        // was ihre eigenen Abhängigkeiten verlangen. Seit AGP 9 bricht der
+        // Build daran ab, statt es stillschweigend anzuheben.
         if (it.hasProperty('android') && it.android.compileSdk != null
                 && it.android.compileSdk < 36) {
             it.android.compileSdk = 36
@@ -25,19 +24,6 @@ allprojects {
                     it.android.namespace = matcher.group(1)
                 }
             }
-        }
-    }
-}
-
-// file_picker 11 verlaesst sich ab AGP 9 darauf, dass Kotlin vom Build
-// mitgebracht wird, und wendet KGP nicht mehr selbst an. Global bleibt
-// android.builtInKotlin aus (biometric_storage und in_app_review wenden KGP
-// selbst an), also bekommt nur dieses Modul das eingebaute Kotlin - sonst
-// wird sein Kotlin nie kompiliert und FilePickerPlugin fehlt beim Linken.
-subprojects {
-    if (project.name == 'file_picker') {
-        project.beforeEvaluate {
-            project.pluginManager.apply('com.android.built-in-kotlin')
         }
     }
 }

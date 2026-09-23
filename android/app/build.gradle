@@ -1,8 +1,8 @@
 plugins {
     id "com.android.application"
     // Built-in Kotlin nur für die App: android.builtInKotlin bleibt in
-    // gradle.properties aus, solange biometric_storage und in_app_review das
-    // Kotlin Gradle Plugin selbst anwenden - global an bricht deren Build ab.
+    // gradle.properties aus, solange in_app_review das Kotlin Gradle Plugin
+    // selbst anwendet - global an bricht dessen Build ab.
     id "com.android.built-in-kotlin"
     id "dev.flutter.flutter-gradle-plugin"
 }
