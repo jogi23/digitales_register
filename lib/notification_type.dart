@@ -15,6 +15,10 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'package:dr/data.dart';
+import 'package:dr/utc_date_time.dart';
+import 'package:dr/util.dart';
+
 const notificationTypeMessage = 'message';
 const notificationTypeGrade = 'grade';
 const notificationTypeObservation = 'observation';
@@ -23,3 +27,22 @@ const notificationTypeClassbook = 'classbook';
 const notificationTypeEntry = 'entry';
 
 String normalizedNotificationType(String? type) => (type ?? '').toLowerCase();
+
+/// The notifications as `api/notification/unread` hands them over; entries
+/// that do not parse are left out.
+List<Notification> parseNotifications(List<dynamic> data) => data
+    .map<Notification>(
+      (dynamic n) => tryParse(
+        getMap(n),
+        (dynamic n) => Notification(
+          (b) => b
+            ..id = getInt(n["id"])
+            ..title = getString(n["title"])
+            ..type = getString(n["type"])
+            ..objectId = getInt(n["objectId"])
+            ..subTitle = getString(n["subTitle"])
+            ..timeSent = UtcDateTime.parse(getString(n["timeSent"])!),
+        ),
+      ),
+    )
+    .toList();

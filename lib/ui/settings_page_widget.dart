@@ -16,8 +16,12 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'dart:async';
+import 'dart:io';
+
 import 'package:deleteable_tile/deleteable_tile.dart';
 import 'package:dr/app_state.dart';
+import 'package:dr/background_check.dart';
 import 'package:dr/container/settings_page.dart';
 import 'package:dr/ui/account_avatar_button.dart';
 import 'package:dr/ui/autocomplete_options.dart';
@@ -289,6 +293,7 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
             title: Text(tr(context).settingsStayLoggedIn),
             subtitle: Text(
               '${tr(context).settingsStayLoggedInSubtitle}\n'
+              '${tr(context).settingsStayLoggedInOffHint}\n'
               '${tr(context).settingsStayLoggedInBackgroundHint}',
             ),
             onChanged: (bool value) {
@@ -298,7 +303,14 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
           ),
           SwitchListTile.adaptive(
             title: Text(tr(context).settingsNotificationsEnable),
-            subtitle: Text(tr(context).settingsNotificationsEnableSubtitle),
+            // Still a switch without a stored password: it also governs the
+            // list inside the app, which works either way. Only the system
+            // notifications need to sign in on their own.
+            subtitle: Text(
+              widget.vm.noPassSaving && Platform.isAndroid
+                  ? tr(context).settingsNotificationsNeedStayLoggedIn
+                  : tr(context).settingsNotificationsEnableSubtitle,
+            ),
             onChanged: widget.onSetNotificationsEnabled,
             value: widget.vm.notificationsEnabled,
           ),
@@ -324,6 +336,19 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
               ],
             ),
           ),
+          // Only in debug builds: one round right away, in the background
+          // isolate, instead of waiting for the next one.
+          if (kDebugMode && Platform.isAndroid)
+            ListTile(
+              enabled:
+                  widget.vm.notificationsEnabled && !widget.vm.noPassSaving,
+              leading: const Icon(Icons.bug_report_outlined),
+              title: const Text('Jetzt im Hintergrund prüfen (Debug)'),
+              subtitle: const Text('Lang drücken: alle Ungelesenen melden'),
+              onTap: () => unawaited(runBackgroundCheckNow()),
+              onLongPress: () =>
+                  unawaited(runBackgroundCheckNow(announceAll: true)),
+            ),
           _subheading(context, tr(context).settingsNotificationsTypes),
           SwitchListTile.adaptive(
             title: Text(tr(context).settingsNotificationsTypeClassbook),

@@ -8,7 +8,8 @@
           "items": [
             "Profilfoto: Vor dem Speichern lässt sich der Ausschnitt wählen. Das Bild lässt sich im Fenster ziehen und zoomen; was im Kreis steht, wird das Foto.",
             "Profilfoto: Ein Tippen auf das Foto fragt, ob es gewechselt oder entfernt werden soll. Entfernt stehen wieder die Initialen im Kreis.",
-            "Mitteilungen: eine selbst gesendete Mitteilung lässt sich zurücknehmen, solange das Portal es erlaubt — vier Stunden nach dem Senden. Nach einer Rückfrage; bei den Empfängern verschwindet sie mit."
+            "Mitteilungen: eine selbst gesendete Mitteilung lässt sich zurücknehmen, solange das Portal es erlaubt — vier Stunden nach dem Senden. Nach einer Rückfrage; bei den Empfängern verschwindet sie mit.",
+            "Benachrichtigungen: Neue Mitteilungen, Bewertungen und andere Einträge erscheinen unter Android als Systembenachrichtigung, auch wenn die App geschlossen ist — für alle gespeicherten Konten, je Konto gruppiert und mit dessen Alias. Ein Tippen öffnet den Eintrag und wechselt dafür bei Bedarf das Konto. In den Einstellungen lässt sich festlegen, wie oft nachgesehen wird und welche Arten sich melden. Konten mit Zwei-Faktor-Anmeldung, SPID oder CIE sowie das Demokonto bleiben außen vor."
           ]
         },
         {
@@ -39,7 +40,8 @@
           "items": [
             "Account photo: the section can be chosen before it is saved. Drag and zoom the picture in the window; what is inside the circle becomes the photo.",
             "Account photo: tapping it asks whether to change or remove it. Removed, the initials are back in the circle.",
-            "Messages: a message sent by this account can be taken back for as long as the portal allows — four hours after it went out. After a question back; it disappears for the recipients as well."
+            "Messages: a message sent by this account can be taken back for as long as the portal allows — four hours after it went out. After a question back; it disappears for the recipients as well.",
+            "Notifications: new messages, grades and other entries appear as Android system notifications, even when the app is closed — for all stored accounts, grouped by account and labelled with its alias. Tapping one opens the entry and switches to its account if needed. The settings decide how often to check and which kinds are reported. Accounts with two-factor sign-in, SPID or CIE and the demo account are left out."
           ]
         },
         {
@@ -70,7 +72,8 @@
           "items": [
             "Foto del profilo: prima di salvarla si può scegliere l'inquadratura. L'immagine si trascina e si ingrandisce nella finestra; diventa foto ciò che sta nel cerchio.",
             "Foto del profilo: toccandola si sceglie se cambiarla o rimuoverla. Rimossa, nel cerchio tornano le iniziali.",
-            "Messaggi: un messaggio inviato da questo account si può ritirare finché il portale lo consente — quattro ore dopo l'invio. Previa conferma; sparisce anche per i destinatari."
+            "Messaggi: un messaggio inviato da questo account si può ritirare finché il portale lo consente — quattro ore dopo l'invio. Previa conferma; sparisce anche per i destinatari.",
+            "Notifiche: nuove comunicazioni, valutazioni e altre voci compaiono come notifiche di sistema Android, anche con l’app chiusa — per tutti gli account salvati, raggruppate per account e con il suo alias. Un tocco apre la voce e, se serve, passa al suo account. Nelle impostazioni si stabilisce ogni quanto controllare e quali tipi segnalare. Restano esclusi gli account con accesso a due fattori, SPID o CIE e l’account demo."
           ]
         },
         {

@@ -9,6 +9,7 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 - Profilfoto: Vor dem Speichern lässt sich der Ausschnitt wählen. Das Bild lässt sich im Fenster ziehen und zoomen; was im Kreis steht, wird das Foto.
 - Profilfoto: Ein Tippen auf das Foto fragt, ob es gewechselt oder entfernt werden soll. Entfernt stehen wieder die Initialen im Kreis.
 - Mitteilungen: eine selbst gesendete Mitteilung lässt sich zurücknehmen, solange das Portal es erlaubt — vier Stunden nach dem Senden. Nach einer Rückfrage; bei den Empfängern verschwindet sie mit.
+- Benachrichtigungen: Neue Mitteilungen, Bewertungen und andere Einträge erscheinen unter Android als Systembenachrichtigung, auch wenn die App geschlossen ist — für alle gespeicherten Konten, je Konto gruppiert und mit dessen Alias. Ein Tippen öffnet den Eintrag und wechselt dafür bei Bedarf das Konto. In den Einstellungen lässt sich festlegen, wie oft nachgesehen wird und welche Arten sich melden. Konten mit Zwei-Faktor-Anmeldung, SPID oder CIE sowie das Demokonto bleiben außen vor.
 
 ### Verbesserungen
 

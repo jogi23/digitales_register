@@ -646,9 +646,9 @@
   "connectionOutdated": "Data is out of date",
   "settingsStayLoggedInBackgroundHint": "Background notifications work only with silent password sign-in; with 2FA and SPID/CIE you can only check manually.",
   "settingsNotificationsEnable": "Enable notifications",
-  "settingsNotificationsEnableSubtitle": "Check regularly for new entries",
+  "settingsNotificationsEnableSubtitle": "New entries of all accounts appear as Android notifications, even when the app is closed",
   "settingsNotificationsInterval": "Check interval",
-  "settingsNotificationsIntervalSubtitle": "How often the app checks for new notifications",
+  "settingsNotificationsIntervalSubtitle": "How often to check; Android may delay this to save battery",
   "settingsNotificationsTypes": "Notification types to check",
   "settingsNotificationsTypeClassbook": "Classbook",
   "settingsNotificationsTypeMessages": "Messages",
@@ -679,20 +679,9 @@
       }
     }
   },
-  "notificationsMessagesInAccount": "Messages in {account}",
-  "@notificationsMessagesInAccount": {
-    "placeholders": {
-      "account": {
-        "type": "String"
-      }
-    }
-  },
-  "notificationsUnreadCount": "{count, plural, one {{count} unread message} other {{count} unread messages}}",
-  "@notificationsUnreadCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  }
+  "systemNotificationsChannel": "New entries",
+  "systemNotificationsChannelDescription": "New messages, grades and other entries from the register",
+  "systemNotificationsCount": "{count, plural, one {{count} notification} other {{count} notifications}}",
+  "settingsStayLoggedInOffHint": "Off: sign in at every start, no switching accounts",
+  "settingsNotificationsNeedStayLoggedIn": "Android notifications need “Stay signed in”; until then only inside the app"
 }
