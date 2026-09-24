@@ -21,6 +21,7 @@ import 'dart:developer';
 import 'package:dr/api_client.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/config_parser.dart';
+import 'package:dr/debug_log.dart';
 import 'package:dr/demo.dart' as demo;
 import 'package:dr/main.dart';
 import 'package:dr/ui/dialog.dart';
@@ -165,6 +166,7 @@ class AuthService {
         return null;
       }
       log("login succeeded");
+      debugLog(LogCategory.login, '${accountTag(user, url)}: Server sagt ja');
       lastLoginInteraction = DateTime.now();
       config = loadedConfig;
       loggedInCompleter.complete(true);
@@ -175,12 +177,20 @@ class AuthService {
       onConfigLoaded!();
     } else {
       log("login did not succeed");
+      // The error key only: the message may name the user.
+      debugLog(
+        LogCategory.login,
+        '${accountTag(user, url)}: Server sagt nein (${response["error"]})',
+      );
       loggedInCompleter.complete(false);
       error = "[${response["error"]}] ${response["message"]}";
       switch (getString(response["error"])) {
         case "two_factor_needed":
           if (!allowInteractive2fa) {
-            log("2FA needed, but this login attempt is non-interactive.");
+            debugLog(
+              LogCategory.login,
+              'Zwei-Faktor-Code nötig, hier aber nicht abfragbar',
+            );
             return response;
           }
           final tfaCode = await _request2FA();
@@ -196,7 +206,10 @@ class AuthService {
           return;
         case "two_factor_wrong":
           if (!allowInteractive2fa) {
-            log("2FA code wrong, but this login attempt is non-interactive.");
+            debugLog(
+              LogCategory.login,
+              'Zwei-Faktor-Code falsch, hier aber nicht abfragbar',
+            );
             return response;
           }
           final tfaCode = await _request2FA(wasWrong: true);
@@ -226,6 +239,11 @@ class AuthService {
   Future<void> _failLogin(Completer<bool> loggedIn, Object e) async {
     loggedIn.complete(false);
     log("Error while logging in (login failed)", error: e);
+    debugLog(
+      LogCategory.login,
+      'Anmeldung gescheitert: ${e.runtimeType}',
+      data: shorten('$e', 500),
+    );
     // A page that arrived but was the wrong one says nothing about the
     // connection.
     if (e is TimeoutException ||

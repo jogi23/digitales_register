@@ -20,6 +20,7 @@ import 'dart:io';
 
 import 'package:dr/app_state.dart';
 import 'package:dr/background_check.dart';
+import 'package:dr/debug_log.dart';
 import 'package:dr/main.dart' show scaffoldKey;
 import 'package:dr/middleware/middleware.dart' show wrapper;
 import 'package:dr/notification_type.dart';
@@ -81,7 +82,11 @@ Future<void> _askPermission(
   final prefs = await SharedPreferences.getInstance();
   if (!always && (prefs.getBool(_permissionAskedPrefsKey) ?? false)) return;
   await prefs.setBool(_permissionAskedPrefsKey, true);
-  await requestSystemNotificationPermission();
+  final granted = await requestSystemNotificationPermission();
+  debugLog(
+    LogCategory.systemNotification,
+    'Berechtigung angefragt: ${granted ? 'erteilt' : 'nicht erteilt'}',
+  );
 }
 
 /// Opens what a tapped system notification is about — in its own account,
@@ -89,7 +94,11 @@ Future<void> _askPermission(
 void openSystemNotification(SystemNotificationTarget target) {
   final login = providerContainer.read(loginProvider);
   final notifier = providerContainer.read(loginProvider.notifier);
-  debugPrint("System notification tapped (logged in: ${login.loggedIn})");
+  debugLog(
+    LogCategory.systemNotification,
+    'Getippt: ${target.type}, ${accountTag(target.user, target.url)}'
+    '${login.loggedIn ? '' : ', wartet auf die Anmeldung'}',
+  );
   if (!login.loggedIn) {
     // Started by the tap: the stored account is still signing in. Decided
     // once it has — after the callbacks, which are cleared right after
@@ -100,15 +109,19 @@ void openSystemNotification(SystemNotificationTarget target) {
     return;
   }
   if (wrapper.user == target.user && sameServer(wrapper.url, target.url)) {
-    debugPrint("System notification: same account, opening");
+    debugLog(LogCategory.systemNotification, 'Gleiches Konto, wird geöffnet');
     _open(target);
     return;
   }
   final index = login.otherAccounts.indexWhere(
     (a) => a.username == target.user && sameServer(a.url, target.url),
   );
-  debugPrint("System notification: other account, index $index of "
-      "${login.otherAccounts.length}");
+  debugLog(
+    LogCategory.systemNotification,
+    index < 0
+        ? 'Konto nicht mehr gespeichert'
+        : 'Anderes Konto: Index $index von ${login.otherAccounts.length}',
+  );
   // The account was removed since the notification came.
   if (index < 0) return;
   notifier.addAfterLoginCallback(() => _open(target));
@@ -119,6 +132,12 @@ void openSystemNotification(SystemNotificationTarget target) {
 /// yet; this waits a few frames for it.
 void _open(SystemNotificationTarget target, {int framesLeft = 10}) {
   if (scaffoldKey?.currentState == null) {
+    if (framesLeft == 0) {
+      debugLog(
+        LogCategory.systemNotification,
+        'Startseite steht nicht: nichts geöffnet',
+      );
+    }
     if (framesLeft > 0) {
       WidgetsBinding.instance.addPostFrameCallback(
         (_) => _open(target, framesLeft: framesLeft - 1),
@@ -132,6 +151,10 @@ void _open(SystemNotificationTarget target, {int framesLeft = 10}) {
   // Id 0 is the test notification of debug builds: no notification on the
   // portal stands behind it, so there is nothing to mark there.
   final fromPortal = target.id > 0;
+  debugLog(
+    LogCategory.systemNotification,
+    'Öffnet ${target.type} ${objectId ?? '-'}${fromPortal ? '' : ' (Test)'}',
+  );
   switch (normalizedNotificationType(target.type)) {
     case notificationTypeMessage when objectId != null:
       // Both: the list may not have been loaded yet after a cold start.

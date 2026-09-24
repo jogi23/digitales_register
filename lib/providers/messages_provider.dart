@@ -21,6 +21,7 @@ import 'package:built_collection/built_collection.dart';
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:dr/app_state.dart';
 import 'package:dr/data.dart';
+import 'package:dr/debug_log.dart';
 import 'package:dr/middleware/middleware.dart'
     show canOpenFile, downloadFile, openFile, wrapper;
 import 'package:dr/providers/notifications_provider.dart';
@@ -43,6 +44,11 @@ class MessagesNotifier extends Notifier<MessagesState> {
     final dynamic response = await wrapper.send("api/message/getMyMessages");
     if (response != null) {
       state = _parseMessages(response as List);
+      debugLog(
+        LogCategory.messages,
+        'Liste geladen: ${state.messages.length}, '
+        '${state.messages.where((m) => m.isNew).length} ungelesen',
+      );
       _revealSelected();
     }
   }
@@ -100,6 +106,11 @@ class MessagesNotifier extends Notifier<MessagesState> {
         onError: (error) => failure = error,
       );
       if (failure != null) allSent = false;
+      debugLog(
+        LogCategory.messages,
+        '${archived ? 'Archivieren' : 'Aus dem Archiv'} ${message.id}: '
+        '${failure == null ? 'gesendet' : 'Fehler'}',
+      );
     }
     await load();
     return allSent;
@@ -150,9 +161,17 @@ class MessagesNotifier extends Notifier<MessagesState> {
       args: <String, Object?>{"messageId": messageId},
       onError: (error) => failure = error,
     );
-    if (failure != null) return false;
+    if (failure != null) {
+      debugLog(LogCategory.messages, 'Zurücknehmen $messageId: Fehler');
+      return false;
+    }
     await load();
-    return state.messages.every((m) => m.id != messageId);
+    final gone = state.messages.every((m) => m.id != messageId);
+    debugLog(
+      LogCategory.messages,
+      'Zurücknehmen $messageId: ${gone ? 'weg' : 'noch in der Liste'}',
+    );
+    return gone;
   }
 
   /// Applies [updates] to the message with [messageId], if it is still there.
@@ -184,6 +203,10 @@ class MessagesNotifier extends Notifier<MessagesState> {
   Future<void> markAllAsRead() async {
     final unread = state.messages.where((m) => m.isNew).toList();
     if (unread.isEmpty) return;
+    debugLog(
+      LogCategory.messages,
+      'Alle als gelesen: ${unread.map((m) => m.id).join(', ')}',
+    );
     ref
         .read(messageListProvider.notifier)
         .keepUnread(unread.map((m) => m.id));
@@ -204,6 +227,7 @@ class MessagesNotifier extends Notifier<MessagesState> {
   }
 
   Future<void> markAsRead(int messageId) async {
+    debugLog(LogCategory.messages, 'Als gelesen: $messageId');
     ref.read(messageListProvider.notifier).keepUnread([messageId]);
     state = state.rebuild((b) {
       if (messageId == b.showMessage) {
@@ -254,7 +278,10 @@ class MessagesNotifier extends Notifier<MessagesState> {
       },
       onError: (error) => failure = error,
     );
-    if (failure != null) return false;
+    if (failure != null) {
+      debugLog(LogCategory.messages, 'Bestätigen $messageId: Fehler');
+      return false;
+    }
     if (result is List) {
       state = _parseMessages(result);
     } else {
@@ -262,11 +289,17 @@ class MessagesNotifier extends Notifier<MessagesState> {
       // whether the answer was taken. Asking the server beats guessing.
       await load();
     }
-    return state.messages
+    final answered = state.messages
             .firstWhereOrNull((message) => message.id == messageId)
             ?.responseInfo
             ?.answered ??
         false;
+    debugLog(
+      LogCategory.messages,
+      'Bestätigen $messageId: ${answered ? 'bestätigt' : 'nicht bestätigt'}'
+      '${result is List ? '' : ' (Liste neu geladen)'}',
+    );
+    return answered;
   }
 
   void _markDownloading(MessageAttachmentFile file) {

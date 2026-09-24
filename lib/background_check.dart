@@ -21,6 +21,7 @@ import 'dart:ui';
 
 import 'package:dr/app_state.dart';
 import 'package:dr/data.dart';
+import 'package:dr/debug_log.dart';
 import 'package:dr/l10n/l10n.dart';
 import 'package:dr/notification_type.dart';
 import 'package:dr/notification_visibility.dart';
@@ -29,7 +30,6 @@ import 'package:dr/system_notifications.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
 import 'package:dr/wrapper.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
@@ -142,6 +142,7 @@ void backgroundCheckDispatcher() {
     // without this the notifications plugin had no Android side here and
     // showed nothing, without a word.
     DartPluginRegistrant.ensureInitialized();
+    await DebugLog.instance.init(isolate: 'Hintergrund');
     try {
       await checkForNewNotifications(
         announceAll: inputData?['announceAll'] == true,
@@ -149,7 +150,7 @@ void backgroundCheckDispatcher() {
       );
     } on Object catch (e, s) {
       // A failed round is not worth a retry: the next one comes anyway.
-      debugPrint("Background check failed: $e\n$s");
+      debugLogError('Hintergrundabruf', e, s);
     }
     return true;
   });
@@ -190,9 +191,14 @@ Future<void> initBackgroundCheck() async {
 Future<void> scheduleBackgroundCheck(SettingsState settings) async {
   if (!Platform.isAndroid) return;
   if (!settings.notificationsEnabled) {
+    debugLog(LogCategory.background, 'Abruf abgestellt');
     await Workmanager().cancelByUniqueName(_taskName);
     return;
   }
+  debugLog(
+    LogCategory.background,
+    'Abruf geplant: alle ${settings.notificationPollMinutes} min',
+  );
   await Workmanager().registerPeriodicTask(
     _taskName,
     _taskName,
@@ -225,7 +231,10 @@ Future<void> checkForNewNotifications({
       : SettingsState().withGlobalJson(
           json.decode(rawSettings) as Map<dynamic, dynamic>,
         );
-  if (!settings.notificationsEnabled) return;
+  if (!settings.notificationsEnabled) {
+    debugLog(LogCategory.background, 'Lauf übersprungen: abgestellt');
+    return;
+  }
   final l = _translations(settings);
 
   final rawProfiles = prefs.getString(_profilesPrefsKey);
@@ -235,6 +244,12 @@ Future<void> checkForNewNotifications({
 
   final accounts = notifiableAccounts(
     json.decode(await const FlutterSecureStorage().read(key: 'login') ?? '{}'),
+  );
+  final started = DateTime.now();
+  debugLog(
+    LogCategory.background,
+    'Lauf${testNotification ? ' (Test)' : announceAll ? ' (alle melden)' : ''}: '
+    '${accounts.length} Konten',
   );
   final atStart = await _readKnown(prefs);
   final known = {
@@ -248,8 +263,9 @@ Future<void> checkForNewNotifications({
         : await _fetchUnread(account);
     // Not reached, or not without a code: it stays as it was until the
     // next round.
+    final tag = accountTag(account.user, account.url);
     if (result == null) {
-      debugPrint("Background check: account not reached");
+      debugLog(LogCategory.background, '$tag: nicht erreicht');
       continue;
     }
     final alias = (profiles[key] as Map<String, dynamic>?)?['alias'] as String?;
@@ -260,8 +276,12 @@ Future<void> checkForNewNotifications({
             unread: result.unread,
             settings: settings,
           );
-    debugPrint(
-      "Background check: ${result.unread.length} unread, ${fresh.length} new",
+    debugLog(
+      LogCategory.background,
+      testNotification
+          ? '$tag: letzte Mitteilung als Test'
+          : '$tag: ${result.unread.length} ungelesen, ${fresh.length} neu'
+              '${known[key] == null ? ' (zum ersten Mal)' : ''}',
     );
     await syncAccountNotifications(
       l: l,
@@ -276,6 +296,10 @@ Future<void> checkForNewNotifications({
     );
     known[key] = {for (final n in result.unread) n.id};
   }
+  debugLog(
+    LogCategory.background,
+    'Lauf fertig nach ${DateTime.now().difference(started).inSeconds} s',
+  );
   // A test leaves the list of what was seen as it was.
   if (testNotification) return;
 
@@ -360,8 +384,12 @@ Future<_Fetched?> _inSession(
     final notifications = await fetch(session);
     if (notifications == null) return null;
     return (unread: notifications, fullName: session.config?.fullName);
-  } on Object catch (e) {
-    debugPrint("Background check failed for an account: $e");
+  } on Object catch (e, s) {
+    debugLogError(
+      'Hintergrundabruf, ${accountTag(account.user, account.url)}',
+      e,
+      s,
+    );
     return null;
   } finally {
     session.logout(hard: true);

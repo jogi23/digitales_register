@@ -22,6 +22,7 @@ import 'package:dio/dio.dart';
 import 'package:dr/api_client.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/auth_service.dart';
+import 'package:dr/debug_log.dart';
 import 'package:dr/demo.dart';
 import 'package:dr/util.dart';
 import 'package:mutex/mutex.dart';
@@ -116,6 +117,7 @@ class SessionManager {
     await _loginMutex.acquire();
     try {
       if (_serverLogoutTime != null && _serverNow.isAfter(_serverLogoutTime!)) {
+        debugLog(LogCategory.session, 'Sitzung laut Server abgelaufen');
         _authService.forceLoggedOut();
       }
       if (isRetryAfterUnexpectedLogout) {
@@ -123,10 +125,16 @@ class SessionManager {
                 ?.add(const Duration(minutes: 1))
                 .isAfter(DateTime.now()) ??
             false) {
-          log("unexpected logout: not trying to relogin, last relogin attempt was less than a minute ago.");
-          log("  retrying just the request (we might have logged in in the meantime, as requests are running in parallel).");
+          debugLog(
+            LogCategory.session,
+            'Unerwartet abgemeldet: letzte Neuanmeldung vor weniger als einer '
+            'Minute, nur die Anfrage wird wiederholt',
+          );
         } else {
-          log("unexpected logout: trying to relogin and retrying the request after that.");
+          debugLog(
+            LogCategory.session,
+            'Unerwartet abgemeldet: Neuanmeldung, dann die Anfrage erneut',
+          );
           _authService.forceLoggedOut();
           _lastUnexpectedLogout = DateTime.now();
         }
@@ -134,6 +142,7 @@ class SessionManager {
 
       if (!await _authService.loggedIn) {
         if (_authService.user != null && _authService.pass != null) {
+          debugLog(LogCategory.session, 'Neuanmeldung mit der Sitzung');
           await _authService.login(
             _authService.user,
             _authService.pass,
@@ -143,8 +152,13 @@ class SessionManager {
           );
           if (!await _authService.loggedIn) {
             if (noInternet) {
+              debugLog(LogCategory.session, 'Neuanmeldung: kein Netz');
               onNoInternet?.call(true);
             } else {
+              debugLog(
+                LogCategory.session,
+                'Neuanmeldung fehlgeschlagen: Abmeldung',
+              );
               _authService.logout(hard: true, logoutForcedByServer: true);
             }
             return false;
@@ -153,6 +167,10 @@ class SessionManager {
           }
         } else if (!_authService.appHasSignedIn) {
           // Too early: the app's own sign-in is on its way.
+          debugLog(
+            LogCategory.session,
+            'Anfrage vor der ersten Anmeldung: übersprungen',
+          );
           return false;
         } else if (await _signInFromStorage()) {
           // Signed in again with what storage still holds.
@@ -227,13 +245,20 @@ class SessionManager {
     final last = _lastStoredLoginTry;
     if (last != null &&
         DateTime.now().difference(last) < _storedLoginCooldown) {
-      log("not signing in from storage again: last try was just now");
+      debugLog(
+        LogCategory.session,
+        'Anmeldung aus dem Speicher: letzter Versuch vor '
+        '${DateTime.now().difference(last).inSeconds} s, wartet',
+      );
       return false;
     }
     final stored = await read();
     if (stored == null) return false;
     _lastStoredLoginTry = DateTime.now();
-    log("signing in again with the stored credentials");
+    debugLog(
+      LogCategory.session,
+      'Neuanmeldung aus dem Speicher: ${accountTag(stored.user, stored.url)}',
+    );
     await _authService.login(
       stored.user,
       stored.pass,
@@ -242,6 +267,11 @@ class SessionManager {
       allowInteractive2fa: false,
     );
     if (!await _authService.loggedIn) {
+      debugLog(
+        LogCategory.session,
+        'Neuanmeldung aus dem Speicher fehlgeschlagen'
+        '${noInternet ? ', kein Netz' : ''}',
+      );
       if (noInternet) onNoInternet?.call(true);
       return false;
     }
@@ -269,7 +299,7 @@ class SessionManager {
     if (!await ensureLoggedIn(
       isRetryAfterUnexpectedLogout: isRetryAfterUnexpectedLogout,
     )) {
-      log("returning null for request to $url, user is not logged in");
+      debugLog(LogCategory.session, 'Ohne Sitzung, nicht gesendet: $url');
       // Not being logged in with a working network is a session that ran
       // out, not an outage: it needs a new login, not another try. Unless
       // the app has not signed in yet — then it is only early.
@@ -301,8 +331,11 @@ class SessionManager {
       // empty without a word, and the connection display never noticed.
       if (e is DioException && e.response?.statusCode == 401) {
         _record(url, args, e.response?.data, error: e);
+        debugLog(
+          LogCategory.session,
+          '401 auf $url${isRetryAfterUnexpectedLogout ? ', auch nach Neuanmeldung' : ''}',
+        );
         if (isRetryAfterUnexpectedLogout) {
-          log("retrying the request was unsuccessful, the server still answers 401.");
           _authService.error = e.toString();
           onSessionExpired?.call();
           onError?.call(e);
@@ -331,8 +364,12 @@ class SessionManager {
     if (responseData is String &&
         RegExp(r'^[\s\n]*<script type="text/javascript">\n?\s*window\.location = "https://.+\.digitalesregister.it/v2/login";\n?\s*</script>[\s\n]*$')
             .hasMatch(responseData)) {
+      debugLog(
+        LogCategory.session,
+        'Weiterleitung zur Anmeldung auf $url'
+        '${isRetryAfterUnexpectedLogout ? ', auch nach Neuanmeldung' : ''}',
+      );
       if (isRetryAfterUnexpectedLogout) {
-        log("retrying the request was unsuccessful, we seem to be still logged out.");
         onSessionExpired?.call();
         throw UnexpectedLogoutException();
       }
@@ -367,6 +404,10 @@ class SessionManager {
   Future<void> _handleError(Exception e) async {
     log("Error while sending request", error: e);
     if (e is TimeoutException || await refreshNoInternet()) {
+      debugLog(
+        LogCategory.session,
+        'Anfrage fehlgeschlagen, kein Netz: ${e.runtimeType}',
+      );
       noInternet = true;
       _authService.forceLoggedOut();
       onNoInternet?.call(true);
@@ -393,6 +434,7 @@ class SessionManager {
       // Runs from a timer nobody awaits: an error here used to end the app.
       // The next round checks the login again.
       log("Error while extending the session", error: e);
+      debugLogError('Sitzung verlängern', e);
     }
     // Checks may overlap while one waits for the server; whichever finishes
     // last leaves the only timer.
@@ -414,6 +456,10 @@ class SessionManager {
       // Without network there is no answer either, and no reason to log out:
       // the next request signs in again once the network is back.
       if (!noInternet) {
+        debugLog(
+          LogCategory.session,
+          'Keine Antwort auf Verlängerung: Abmeldung',
+        );
         _authService.logout(hard: safeMode, logoutForcedByServer: true);
       }
       return;
@@ -425,14 +471,20 @@ class SessionManager {
     }
     final newExpiration = result["newExpiration"];
     if (result["forceLogout"] == true) {
+      debugLog(LogCategory.session, 'Server verlangt Abmeldung');
       _authService.logout(hard: safeMode, logoutForcedByServer: true);
     } else if (result["noSession"] == true) {
       // The server no longer knows the session but did not ask to log out:
       // the next request signs in again with the stored login.
+      debugLog(LogCategory.session, 'Server kennt die Sitzung nicht mehr');
       _authService.forceLoggedOut();
     } else if (newExpiration is int) {
       _serverLogoutTime =
           DateTime.fromMillisecondsSinceEpoch(newExpiration * 1000);
+      debugLog(
+        LogCategory.session,
+        'Sitzung verlängert bis ${_serverLogoutTime!.toIso8601String()}',
+      );
     }
   }
 }

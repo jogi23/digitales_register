@@ -18,6 +18,7 @@
 import 'dart:convert';
 
 import 'package:dr/app_state.dart';
+import 'package:dr/debug_log.dart';
 import 'package:dr/middleware/middleware.dart' show wrapper;
 import 'package:dr/providers/config_provider.dart';
 import 'package:dr/providers/messages_provider.dart';
@@ -405,6 +406,11 @@ class MessageComposeNotifier extends AutoDisposeNotifier<MessageComposeState> {
       // the file goes under `file`.
       fields: <String, Object?>{'title': name, 'categoryId': 0},
     );
+    debugLog(
+      LogCategory.messages,
+      'Anhang hochladen ($size Bytes): '
+      '${uploadedId(uploaded) == null ? 'ohne Id, fehlgeschlagen' : 'Id erhalten'}',
+    );
     if (_disposed) return;
     _replace(
       attachment,
@@ -474,6 +480,8 @@ class MessageComposeNotifier extends AutoDisposeNotifier<MessageComposeState> {
     final type = state.type;
     if (type == null) return '';
     state = state.copyWith(sending: true);
+    final recipients = state.selectedCount;
+    final attachments = state.attachments.where((a) => a.sendable).length;
     Object? failure;
     final result = await wrapper.send(
       'api/message/sendMessage',
@@ -506,6 +514,17 @@ class MessageComposeNotifier extends AutoDisposeNotifier<MessageComposeState> {
             {'error': final String key} => key,
             _ => '',
           };
+    // Who and what stay out: the count and the portal's verdict are enough.
+    debugLog(
+      LogCategory.messages,
+      'Senden an $recipients Personen, $attachments Anhänge'
+      '${quote == null ? '' : ', mit Zitat'}: '
+      '${switch (error) {
+        null => 'angenommen',
+        '' => 'keine Antwort',
+        _ => error
+      }}',
+    );
     if (_disposed) return error;
     state = state.copyWith(sending: false);
     // Unlike a confirmation, the portal answers without the new list.

@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'package:dr/debug_log.dart';
 import 'package:dr/middleware/middleware.dart' show wrapper;
 import 'package:dr/providers/dashboard_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
@@ -114,6 +115,7 @@ class ConnectionNotifier extends Notifier<ConnectionInfo> {
   }
 
   void _applyOffline(bool offline) {
+    debugLog(LogCategory.session, offline ? 'Offline' : 'Wieder online');
     if (offline) {
       state = state.copyWith(status: ConnectionStatus.offline);
     } else if (state.status == ConnectionStatus.offline) {
@@ -145,6 +147,9 @@ class ConnectionNotifier extends Notifier<ConnectionInfo> {
   /// The network is there, but the session is not.
   void markSessionExpired() {
     if (state.status == ConnectionStatus.offline) return;
+    if (state.status != ConnectionStatus.sessionExpired) {
+      debugLog(LogCategory.session, 'Anzeige: Sitzung abgelaufen');
+    }
     state = state.copyWith(status: ConnectionStatus.sessionExpired);
   }
 
@@ -157,6 +162,7 @@ class ConnectionNotifier extends Notifier<ConnectionInfo> {
   Future<void> reconnect() async {
     if (state.reconnecting) return;
     state = state.copyWith(reconnecting: true);
+    debugLog(LogCategory.session, 'Verbindung wiederherstellen');
     try {
       await ref.read(noInternetProvider.notifier).refresh();
       if (ref.read(noInternetProvider)) {
@@ -168,9 +174,14 @@ class ConnectionNotifier extends Notifier<ConnectionInfo> {
         // session: sending the reader to the login form there asked for a
         // password they did not need, on a page they could not leave.
         if (ref.read(noInternetProvider) || wrapper.noInternet) {
+          debugLog(LogCategory.session, 'Wiederherstellen: kein Netz');
           state = state.copyWith(status: ConnectionStatus.offline);
           return;
         }
+        debugLog(
+          LogCategory.session,
+          'Wiederherstellen: Anmeldung nötig, Formular',
+        );
         state = state.copyWith(status: ConnectionStatus.sessionExpired);
         ref.read(appRouterProvider).showLogin();
         return;

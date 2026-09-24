@@ -18,6 +18,7 @@
 import 'dart:convert';
 
 import 'package:dr/data.dart';
+import 'package:dr/debug_log.dart';
 import 'package:dr/l10n/l10n.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
@@ -125,6 +126,7 @@ Future<void> initSystemNotifications({
 Future<SystemNotificationTarget?> launchTarget() async {
   final details = await _plugin.getNotificationAppLaunchDetails();
   if (details == null || !details.didNotificationLaunchApp) return null;
+  debugLog(LogCategory.start, 'Start aus einer Systembenachrichtigung');
   return SystemNotificationTarget.fromPayload(
     details.notificationResponse?.payload,
   );
@@ -204,11 +206,18 @@ Future<void> syncAccountNotifications({
   for (final n in fresh) {
     shown[n.id] = n.title;
   }
+  var withdrawn = 0;
   for (final id in shown.keys.toList()) {
     if (unreadIds.contains(id)) continue;
     await android.cancel(id: id, tag: account.key);
     shown.remove(id);
+    withdrawn++;
   }
+  debugLog(
+    LogCategory.systemNotification,
+    '${accountTag(account.user, account.url)}: ${fresh.length} angezeigt, '
+    '$withdrawn zurückgenommen, ${shown.length} stehen',
+  );
 
   if (shown.isEmpty) {
     await android.cancel(id: _summaryId, tag: account.key);
@@ -241,6 +250,10 @@ Future<void> cancelNotificationsExcept(Set<String> accountKeys) async {
   for (final a in await android.getActiveNotifications()) {
     final tag = a.tag;
     if (a.id == null || tag == null || accountKeys.contains(tag)) continue;
+    debugLog(
+      LogCategory.systemNotification,
+      'Zurückgenommen: Konto nicht mehr gespeichert',
+    );
     await android.cancel(id: a.id!, tag: tag);
   }
 }

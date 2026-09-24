@@ -19,6 +19,7 @@ import 'dart:async';
 
 import 'package:dr/background_check.dart';
 import 'package:dr/data.dart';
+import 'package:dr/debug_log.dart';
 import 'package:dr/middleware/middleware.dart' show wrapper;
 import 'package:dr/notification_type.dart';
 import 'package:dr/providers/login_provider.dart';
@@ -115,6 +116,11 @@ class NotificationsNotifier extends Notifier<NotificationsState> {
           ids: fetched.map((n) => n.id),
         ));
       }
+      debugLog(
+        LogCategory.notifications,
+        'Geladen: ${fetched.length}, davon ${fetched.length - parsed.length} '
+        'in dieser Sitzung gelesen und zurückgehalten',
+      );
       state = state.copyWith(
         notifications: parsed,
         lastFetched: UtcDateTime.now(),
@@ -125,6 +131,7 @@ class NotificationsNotifier extends Notifier<NotificationsState> {
   }
 
   Future<void> delete(Notification notification) async {
+    debugLog(LogCategory.notifications, 'Gelesen: ${notification.id}');
     _readHere.add(notification.id);
     state = state.copyWith(
       notifications:
@@ -139,6 +146,7 @@ class NotificationsNotifier extends Notifier<NotificationsState> {
   /// Marks the notification with [id] as read, whether or not it is in the
   /// list yet — a tapped system notification may have come before the list.
   Future<void> markAsRead(int id) async {
+    debugLog(LogCategory.notifications, 'Gelesen: $id');
     _readHere.add(id);
     state = state.copyWith(
       notifications: state.notifications.where((n) => n.id != id).toList(),
@@ -147,6 +155,10 @@ class NotificationsNotifier extends Notifier<NotificationsState> {
   }
 
   Future<void> deleteAll() async {
+    debugLog(
+      LogCategory.notifications,
+      'Alle gelesen: ${state.notifications.length}',
+    );
     final messageNotifications = state.notifications
         .where((n) => n.type == "message" && n.objectId != null)
         .toList();

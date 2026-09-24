@@ -37,6 +37,11 @@ void _resetAllProviders() {
 }
 
 Future<void> _doLogout({required bool hard, bool forced = false}) async {
+  debugLog(
+    LogCategory.login,
+    'Abmelden: ${hard ? 'hart' : 'weich'}'
+    '${forced ? ', vom Server erzwungen' : ''}',
+  );
   if (!providerContainer.read(settingsProvider).noPasswordSaving && hard) {
     await secureStorage.write(
       key: "login",
@@ -117,7 +122,9 @@ Future<void> _doLogin(
   String url, {
   bool fromStorage = false,
 }) async {
+  final account = accountTag(user, url);
   if (!credentialsComplete(user, pass)) {
+    debugLog(LogCategory.login, '$account: Anmeldung ohne Zugangsdaten');
     providerContainer.read(loginProvider.notifier).setLoginFailed(
           cause: trGlobal.loginEnterSomething,
           username: user,
@@ -130,6 +137,10 @@ Future<void> _doLogin(
   }
 
   final fixedUrl = fixupUrl(url);
+  debugLog(
+    LogCategory.login,
+    '$account: Anmeldung ${fromStorage ? 'aus dem Speicher' : 'aus dem Formular'}',
+  );
   providerContainer.read(loginProvider.notifier).setLoggingIn();
   wrapper.url = fixedUrl;
   providerContainer.read(loginProvider.notifier).setUrl(fixedUrl);
@@ -169,6 +180,7 @@ Future<void> _doLogin(
 
   if (await wrapper.loggedIn) {
     if (wrapper.config?.isStudentOrParent == false) {
+      debugLog(LogCategory.login, '$account: Benutzertyp nicht unterstützt');
       wrapper.logout(hard: true);
       providerContainer.read(loginProvider.notifier).setLoginFailed(
             cause: trGlobal.loginUserTypeUnsupported,
@@ -184,6 +196,7 @@ Future<void> _doLogin(
       secondaryOnlineLogin: offlineLogin,
     );
   } else if (result is Map && result["error"] == "password_expired") {
+    debugLog(LogCategory.login, '$account: Passwort abgelaufen');
     await _doDeletePass();
     providerContainer.read(appRouterProvider).showLogin();
     providerContainer
@@ -191,6 +204,12 @@ Future<void> _doLogin(
         .setChangePassword(mustChange: true);
   } else {
     final noInternet = wrapper.noInternet;
+    debugLog(
+      LogCategory.login,
+      '$account: Anmeldung fehlgeschlagen'
+      '${noInternet ? ', kein Netz' : ''}'
+      '${fromStorage ? ', bleibt bei den gespeicherten Daten' : ', zurück zum Formular'}',
+    );
     if (noInternet) {
       providerContainer.read(noInternetProvider.notifier).setNoInternet(true);
     }
@@ -229,6 +248,12 @@ Future<void> _doLoggedIn({
       !secondaryOnlineLogin) {
     log("loading state");
     final state = await _readFromStorage(key);
+    debugLog(
+      LogCategory.start,
+      state == null
+          ? 'Kein gespeicherter Zustand'
+          : 'Gespeicherter Zustand geladen (${state.length} Zeichen)',
+    );
     if (state != null) {
       try {
         final decoded = json.decode(state);
@@ -247,6 +272,7 @@ Future<void> _doLoggedIn({
             }
           }
         } else if (decoded is List && decoded.isNotEmpty) {
+          debugLog(LogCategory.start, 'Altes Speicherformat: ${decoded[0]}');
           if (decoded[0] == 'SettingsState') {
             final restoredSettings = _parseSettingsFromLegacyList(decoded)
                 .copyWith(noPasswordSaving: currentSettings.noPasswordSaving);
@@ -270,9 +296,10 @@ Future<void> _doLoggedIn({
         await _doSaveNoPass(
           providerContainer.read(settingsProvider).noPasswordSaving,
         );
-      } catch (e) {
+      } catch (e, s) {
         showSnackBar(trGlobal.errorLoadingSavedData);
         log("Failed to load data", error: e);
+        debugLogError('Gespeicherte Daten laden', e, s);
       }
     }
     _popAll();
@@ -403,6 +430,7 @@ Future<void> _doResetPass(String newPass) async {
 }
 
 Future<void> _doAddAccount() async {
+  debugLog(LogCategory.account, 'Konto hinzufügen');
   // There might be no loginStorage if "stay logged in" is not enabled.
   final loginStorage = await secureStorage.read(key: "login");
   if (loginStorage != null) {
@@ -433,6 +461,12 @@ Future<void> _doSelectAccount(int index) async {
   final selectedIndex = index + (otherAccounts.length - stored.length);
   login["otherAccounts"] = otherAccounts;
   final dynamic selected = otherAccounts.removeAt(selectedIndex);
+  debugLog(
+    LogCategory.account,
+    'Wechsel von ${accountTag(getString(login["user"]), getString(login["url"]))} '
+    'zu ${accountTag(getString(selected["user"]), getString(selected["url"]))} '
+    '(Index $index von ${stored.length})',
+  );
   login["user"] = selected["user"];
   login["pass"] = selected["pass"];
   login["url"] = selected["url"];
@@ -444,6 +478,7 @@ Future<void> _doSelectAccount(int index) async {
   if (page != null &&
       page != Pages.homework &&
       providerContainer.read(settingsProvider).keepPageOnAccountSwitch) {
+    debugLog(LogCategory.account, 'Seite ${page.name} wird wieder geöffnet');
     providerContainer
         .read(loginProvider.notifier)
         .addAfterLoginCallback(() => _reopenPage(page));
