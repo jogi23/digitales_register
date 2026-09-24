@@ -2,7 +2,7 @@
 
 Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` — Änderungen bitte dort eintragen, nicht hier.
 
-## 1.4.1 — 2026-09-21
+## 1.4.1 — 2026-09-24
 
 ### Neue Funktionen
 
@@ -16,6 +16,7 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 - Fächerfarben sind auf einem neu eingerichteten Gerät von Anfang an eingeschaltet. Wer sie ausgeschaltet hat, behält sie aus.
 - Merkheft-Wochenansicht: Sind die Fächerfarben aus, tragen Stunden mit Einträgen einen ruhigen Hintergrund und unten rechts ein kleines Zeichen. Bisher färbte die Wochenansicht auch dann ein, wenn die Farben abbestellt waren.
 - Merkheft-Wochenansicht: Sind alle Einträge eines Fachs an diesem Tag abgehakt, trägt die Stunde unten rechts einen Haken. Noten und Beobachtungen zählen nicht mit — sie sind nichts zum Abarbeiten.
+- Mitteilungen: Beantwortete Mitteilungen zeigen in der Liste, wie sie beantwortet wurden — Daumen hoch für zugestimmt, Daumen runter für abgelehnt, ein gefüllter Stift für unterschrieben —, auch wenn der andere Erziehungsberechtigte geantwortet hat. Bisher trugen sie gar keine Marke mehr. Alle Marken, auch die für noch offene Antworten, sind jetzt reine Symbole, damit mehrere nebeneinander in die Titelzeile passen.
 
 ### Fehlerbehebungen
 
@@ -23,6 +24,7 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 - Kalender: Bei einem neuen Konto hatten nur einige Fächer eine Farbe. Jedes Fach bekommt seine Farbe jetzt, sobald es auftaucht — auch wenn es nur im Stundenplan vorkommt.
 - Beim Start mit gespeichertem Konto und nach einem Kontowechsel meldet sich die App nur noch einmal an. Eine zweite Anmeldung zur selben Zeit konnte die Sitzung stören, und beendete das Portal sie später, konnte die App abstürzen.
 - Merkheft: Wechselte die Ansicht von der Liste in den Monat oder die Woche — etwa beim Öffnen der App —, lud die App die Einträge beider Richtungen nicht nach. Das Laden startete mitten im Aufbau der Seite und brach ab.
+- Mitteilungen: Eine Mitteilung, zu der noch eine ungelesene Benachrichtigung besteht, gilt jetzt als neu, auch wenn das Portal sie schon als gelesen führt. Bisher fehlte ihr dann das „neu“.
 
 ### Intern
 
