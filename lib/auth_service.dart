@@ -128,6 +128,7 @@ class AuthService {
           ..userId = demoUserId,
       );
       config = demoConfig;
+      debugLog(LogCategory.login, '${accountTag(user, url)}: Demokonto');
       onSessionStarted?.call(demoConfig);
       configLoaded?.call();
       return;

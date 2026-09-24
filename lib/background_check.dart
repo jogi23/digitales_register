@@ -156,8 +156,7 @@ bool appUsesAccount(String? mark, String key, DateTime now) {
   try {
     final decoded = json.decode(mark) as Map<String, dynamic>;
     final at = DateTime.fromMillisecondsSinceEpoch(decoded['at'] as int);
-    return decoded['key'] == key &&
-        now.difference(at) < appAccountMarkLifetime;
+    return decoded['key'] == key && now.difference(at) < appAccountMarkLifetime;
   } on Object {
     return false;
   }
@@ -207,8 +206,13 @@ void backgroundCheckDispatcher() {
 
 const _debugTaskName = 'dr.notificationCheck.now';
 
-/// Runs the check once, right away and in the background isolate — for
-/// trying it out in a debug build without waiting for the next round.
+/// How long a check started by hand waits: time to leave the app, which
+/// then takes back its mark, so the account in use is checked as well.
+const debugCheckDelay = Duration(seconds: 10);
+
+/// Runs the check once, after [debugCheckDelay] and in the background
+/// isolate — for trying it out in a debug build without waiting for the
+/// next round.
 /// [announceAll] treats everything unread as new, so there is something to
 /// see. [testNotification] shows each account's latest received message
 /// instead, whether read or not — for when nothing is unread; nothing is
@@ -216,16 +220,22 @@ const _debugTaskName = 'dr.notificationCheck.now';
 Future<void> runBackgroundCheckNow({
   bool announceAll = false,
   bool testNotification = false,
-}) =>
-    Workmanager().registerOneOffTask(
-      _debugTaskName,
-      _debugTaskName,
-      inputData: {
-        'announceAll': announceAll,
-        'testNotification': testNotification,
-      },
-      existingWorkPolicy: ExistingWorkPolicy.replace,
-    );
+}) {
+  debugLog(
+    LogCategory.background,
+    'Test-Lauf in ${debugCheckDelay.inSeconds} s',
+  );
+  return Workmanager().registerOneOffTask(
+    _debugTaskName,
+    _debugTaskName,
+    inputData: {
+      'announceAll': announceAll,
+      'testNotification': testNotification,
+    },
+    initialDelay: debugCheckDelay,
+    existingWorkPolicy: ExistingWorkPolicy.replace,
+  );
+}
 
 /// Starts the scheduler; before [scheduleBackgroundCheck].
 Future<void> initBackgroundCheck() async {
