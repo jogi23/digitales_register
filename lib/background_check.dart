@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
@@ -48,10 +49,19 @@ const _knownPrefsKey = 'system_notifications_known';
 /// The account the app is signed into while it is in use, and since when.
 const _appAccountPrefsKey = 'system_notifications_app_account';
 
-/// How long a mark from [markAppAccount] holds. The app takes it back when
-/// it goes to the background; this only covers an app that never got to,
-/// because it crashed or was killed while in use.
-const appAccountMarkLifetime = Duration(hours: 3);
+/// How long a mark from [markAppAccount] holds unless renewed.
+///
+/// The app takes it back when it goes to the background — but not when it
+/// is swiped away from the recent apps, crashes or is stopped: the mark
+/// stayed, and with a lifetime of three hours the account in use had no
+/// system notifications for that long. Short, and renewed every
+/// [appAccountMarkRenewal] while the app runs.
+const appAccountMarkLifetime = Duration(minutes: 3);
+
+/// How often the app renews its mark while it is in use.
+const appAccountMarkRenewal = Duration(minutes: 1);
+
+Timer? _appAccountMarkRenewal;
 
 /// Settings and aliases, where the app keeps them.
 const _settingsPrefsKey = 'settings_global';
@@ -171,15 +181,22 @@ bool appUsesAccount(String? mark, String key, DateTime now) {
 /// leaves it alone.
 Future<void> markAppAccount({String? user, String? url}) async {
   if (!Platform.isAndroid) return;
+  _appAccountMarkRenewal?.cancel();
   final prefs = await SharedPreferences.getInstance();
   if (user == null || url == null) {
     await prefs.remove(_appAccountPrefsKey);
     return;
   }
-  await prefs.setString(
-    _appAccountPrefsKey,
-    appAccountMark(notificationAccountKey(user, url), DateTime.now()),
+  final key = notificationAccountKey(user, url);
+  Future<void> write() => prefs.setString(
+        _appAccountPrefsKey,
+        appAccountMark(key, DateTime.now()),
+      );
+  _appAccountMarkRenewal = Timer.periodic(
+    appAccountMarkRenewal,
+    (_) => unawaited(write()),
   );
+  await write();
 }
 
 /// Entry point of the background isolate.
@@ -233,6 +250,9 @@ Future<void> runBackgroundCheckNow({
       'testNotification': testNotification,
     },
     initialDelay: debugCheckDelay,
+    // As for the periodic check: without it Android may start the run with
+    // no network for the app, as it did after the app was swiped away.
+    constraints: Constraints(networkType: NetworkType.connected),
     existingWorkPolicy: ExistingWorkPolicy.replace,
   );
 }

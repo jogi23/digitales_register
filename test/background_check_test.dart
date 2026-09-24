@@ -55,19 +55,25 @@ void main() {
 
   group('appUsesAccount', () {
     final now = DateTime(2026, 9, 24, 12);
-    final key = notificationAccountKey('anna', 'https://schule.digitalesregister.it');
+    final key =
+        notificationAccountKey('anna', 'https://schule.digitalesregister.it');
 
     test('holds for the account the app marked, while the mark is fresh', () {
       final mark = appAccountMark(key, now);
       expect(appUsesAccount(mark, key, now), isTrue);
       expect(
-        appUsesAccount(mark, key, now.add(const Duration(hours: 2, minutes: 59))),
+        appUsesAccount(
+          mark,
+          key,
+          now.add(appAccountMarkLifetime - const Duration(seconds: 1)),
+        ),
         isTrue,
       );
     });
 
     test('not for another account', () {
-      final other = notificationAccountKey('ben', 'https://schule.digitalesregister.it');
+      final other =
+          notificationAccountKey('ben', 'https://schule.digitalesregister.it');
       expect(appUsesAccount(appAccountMark(other, now), key, now), isFalse);
     });
 
@@ -81,9 +87,24 @@ void main() {
       expect(appUsesAccount(mark, key, now), isTrue);
     });
 
-    test('not once the mark is stale: an app that crashed took nothing back', () {
+    test('not once the mark is stale: an app that crashed took nothing back',
+        () {
       final mark = appAccountMark(key, now);
-      expect(appUsesAccount(mark, key, now.add(appAccountMarkLifetime)), isFalse);
+      expect(
+          appUsesAccount(mark, key, now.add(appAccountMarkLifetime)), isFalse);
+    });
+
+    test('is renewed well before it runs out', () {
+      // One renewal may come late or be lost; the next must still be in
+      // time, or the check signs into the account the app is using.
+      expect(appAccountMarkRenewal * 2, lessThan(appAccountMarkLifetime));
+    });
+
+    test('runs out within minutes when the app could not take it back', () {
+      // Swiped away from the recent apps, the app said nothing: its account
+      // went without system notifications for three hours.
+      expect(appAccountMarkLifetime,
+          lessThanOrEqualTo(const Duration(minutes: 5)));
     });
 
     test('not without a mark, nor with one that cannot be read', () {

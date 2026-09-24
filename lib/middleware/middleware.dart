@@ -389,6 +389,7 @@ Future<String?> _readFromStorage(String key) async {
 }
 
 Future<void> handleRestarted() async {
+  debugLog(LogCategory.start, 'App im Vordergrund');
   if (providerContainer.read(loginProvider).loggedIn) {
     unawaited(markAppAccount(user: wrapper.user, url: wrapper.url));
   }
@@ -405,6 +406,7 @@ Future<void> handleRestarted() async {
 /// The app went to the background: the check there may sign into its
 /// account again, and what is on screen is saved while there is still time.
 Future<void> handlePaused() async {
+  debugLog(LogCategory.start, 'App im Hintergrund');
   unawaited(markAppAccount());
   await saveStateImmediately();
 }
