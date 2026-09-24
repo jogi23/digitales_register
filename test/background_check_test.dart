@@ -55,17 +55,19 @@ void main() {
 
   group('appUsesAccount', () {
     final now = DateTime(2026, 9, 24, 12);
+    const app = 4711;
     final key =
         notificationAccountKey('anna', 'https://schule.digitalesregister.it');
 
-    test('holds for the account the app marked, while the mark is fresh', () {
-      final mark = appAccountMark(key, now);
-      expect(appUsesAccount(mark, key, now), isTrue);
+    test('holds for the account the app marked, in its own process', () {
+      final mark = appAccountMark(key, now, pid: app);
+      expect(appUsesAccount(mark, key, now, pid: app), isTrue);
       expect(
         appUsesAccount(
           mark,
           key,
           now.add(appAccountMarkLifetime - const Duration(seconds: 1)),
+          pid: app,
         ),
         isTrue,
       );
@@ -74,7 +76,11 @@ void main() {
     test('not for another account', () {
       final other =
           notificationAccountKey('ben', 'https://schule.digitalesregister.it');
-      expect(appUsesAccount(appAccountMark(other, now), key, now), isFalse);
+      expect(
+        appUsesAccount(appAccountMark(other, now, pid: app), key, now,
+            pid: app),
+        isFalse,
+      );
     });
 
     test('the same account, typed without the scheme', () {
@@ -83,34 +89,35 @@ void main() {
       final mark = appAccountMark(
         notificationAccountKey('anna', 'schule.digitalesregister.it'),
         now,
+        pid: app,
       );
-      expect(appUsesAccount(mark, key, now), isTrue);
+      expect(appUsesAccount(mark, key, now, pid: app), isTrue);
     });
 
-    test('not once the mark is stale: an app that crashed took nothing back',
-        () {
-      final mark = appAccountMark(key, now);
+    test('not from a process that is gone: the app was swiped away', () {
+      // The check runs in the app's process while that lives. Swiped away,
+      // the app went to the background and took its mark back — which did
+      // not reach the disk before the process ended, and the account in
+      // use was left out.
+      final mark = appAccountMark(key, now, pid: app);
+      expect(appUsesAccount(mark, key, now, pid: app + 1), isFalse);
+    });
+
+    test('not once the mark is stale', () {
+      final mark = appAccountMark(key, now, pid: app);
       expect(
-          appUsesAccount(mark, key, now.add(appAccountMarkLifetime)), isFalse);
-    });
-
-    test('is renewed well before it runs out', () {
-      // One renewal may come late or be lost; the next must still be in
-      // time, or the check signs into the account the app is using.
-      expect(appAccountMarkRenewal * 2, lessThan(appAccountMarkLifetime));
-    });
-
-    test('runs out within minutes when the app could not take it back', () {
-      // Swiped away from the recent apps, the app said nothing: its account
-      // went without system notifications for three hours.
-      expect(appAccountMarkLifetime,
-          lessThanOrEqualTo(const Duration(minutes: 5)));
+        appUsesAccount(mark, key, now.add(appAccountMarkLifetime), pid: app),
+        isFalse,
+      );
     });
 
     test('not without a mark, nor with one that cannot be read', () {
-      expect(appUsesAccount(null, key, now), isFalse);
-      expect(appUsesAccount('kaputt', key, now), isFalse);
-      expect(appUsesAccount('{"key": 1}', key, now), isFalse);
+      expect(appUsesAccount(null, key, now, pid: app), isFalse);
+      expect(appUsesAccount('kaputt', key, now, pid: app), isFalse);
+      expect(appUsesAccount('{"key": 1}', key, now, pid: app), isFalse);
+      // Written before marks named their process.
+      final old = '{"key": "$key", "at": ${now.millisecondsSinceEpoch}}';
+      expect(appUsesAccount(old, key, now, pid: app), isFalse);
     });
   });
 

@@ -15,7 +15,6 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
@@ -49,19 +48,9 @@ const _knownPrefsKey = 'system_notifications_known';
 /// The account the app is signed into while it is in use, and since when.
 const _appAccountPrefsKey = 'system_notifications_app_account';
 
-/// How long a mark from [markAppAccount] holds unless renewed.
-///
-/// The app takes it back when it goes to the background — but not when it
-/// is swiped away from the recent apps, crashes or is stopped: the mark
-/// stayed, and with a lifetime of three hours the account in use had no
-/// system notifications for that long. Short, and renewed every
-/// [appAccountMarkRenewal] while the app runs.
-const appAccountMarkLifetime = Duration(minutes: 3);
-
-/// How often the app renews its mark while it is in use.
-const appAccountMarkRenewal = Duration(minutes: 1);
-
-Timer? _appAccountMarkRenewal;
+/// How long a mark from [markAppAccount] holds at most — for a process
+/// that lives on without the app ever saying it left.
+const appAccountMarkLifetime = Duration(hours: 3);
 
 /// Settings and aliases, where the app keeps them.
 const _settingsPrefsKey = 'settings_global';
@@ -155,18 +144,30 @@ Future<void> rememberSeenNotifications({
 
 /// What [markAppAccount] stores: [key] as the account in use since [now].
 @visibleForTesting
-String appAccountMark(String key, DateTime now) =>
-    json.encode({'key': key, 'at': now.millisecondsSinceEpoch});
+String appAccountMark(String key, DateTime now, {required int pid}) =>
+    json.encode({'key': key, 'at': now.millisecondsSinceEpoch, 'pid': pid});
 
 /// Whether [mark] says the app is signed into the account under [key] —
-/// and says it recently enough to still be true.
+/// written by the process the check runs in, [pid], and recently enough.
+///
+/// The check runs in the app's process as long as that lives. A mark from
+/// another process is one the app left behind when it was swiped away,
+/// crashed or was stopped: taking it back as it went to the background
+/// did not reach the disk in time, and the account in use was left out.
 @visibleForTesting
-bool appUsesAccount(String? mark, String key, DateTime now) {
+bool appUsesAccount(
+  String? mark,
+  String key,
+  DateTime now, {
+  required int pid,
+}) {
   if (mark == null) return false;
   try {
     final decoded = json.decode(mark) as Map<String, dynamic>;
     final at = DateTime.fromMillisecondsSinceEpoch(decoded['at'] as int);
-    return decoded['key'] == key && now.difference(at) < appAccountMarkLifetime;
+    return decoded['key'] == key &&
+        decoded['pid'] == pid &&
+        now.difference(at) < appAccountMarkLifetime;
   } on Object {
     return false;
   }
@@ -181,22 +182,15 @@ bool appUsesAccount(String? mark, String key, DateTime now) {
 /// leaves it alone.
 Future<void> markAppAccount({String? user, String? url}) async {
   if (!Platform.isAndroid) return;
-  _appAccountMarkRenewal?.cancel();
   final prefs = await SharedPreferences.getInstance();
   if (user == null || url == null) {
     await prefs.remove(_appAccountPrefsKey);
     return;
   }
-  final key = notificationAccountKey(user, url);
-  Future<void> write() => prefs.setString(
-        _appAccountPrefsKey,
-        appAccountMark(key, DateTime.now()),
-      );
-  _appAccountMarkRenewal = Timer.periodic(
-    appAccountMarkRenewal,
-    (_) => unawaited(write()),
+  await prefs.setString(
+    _appAccountPrefsKey,
+    appAccountMark(notificationAccountKey(user, url), DateTime.now(), pid: pid),
   );
-  await write();
 }
 
 /// Entry point of the background isolate.
@@ -345,6 +339,7 @@ Future<void> checkForNewNotifications({
       prefs.getString(_appAccountPrefsKey),
       key,
       DateTime.now(),
+      pid: pid,
     )) {
       debugLog(
         LogCategory.background,
