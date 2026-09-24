@@ -338,6 +338,21 @@ void main() {
         expect(answers, 0);
       });
 
+      test('turned into the demo while signing in, it asks no server (#283)',
+          () async {
+        // The request set out before the stored login turned out to be the
+        // demo: it went to the network and crashed writing the protocol.
+        final signedIn = _SignedInAuth();
+        var asked = 0;
+        when(() => signedIn.auth.demoMode).thenAnswer((_) => asked++ > 0);
+        final adapter = _StatusAdapter([200]);
+        final sm = _sessionAnswering(signedIn, adapter);
+
+        final result = await sm.send('api/student/dashboard/toggle_reminder');
+        expect(adapter.requests, 0);
+        expect((result as Map)['success'], isTrue);
+      });
+
       test('a demo answer is not mistaken for a dead session', () async {
         final sm = _makeSessionManager(demoMode: true);
         var expired = 0;

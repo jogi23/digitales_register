@@ -179,7 +179,7 @@ class SessionManager {
             }
             return false;
           } else {
-            _authService.onRelogin!();
+            _authService.onRelogin?.call();
           }
         } else if (!_authService.appHasSignedIn) {
           // Too early: the app's own sign-in is on its way.
@@ -304,13 +304,7 @@ class SessionManager {
     void Function(Object error)? onError,
   }) async {
     if (_retired) return null;
-    if (_authService.demoMode) {
-      final dynamic response = await getDemoResponse(url, args);
-      // The demo answers the way the server would. Without reporting it the
-      // connection display waited forever for a first answer.
-      if (response != null) onRequestSucceeded?.call();
-      return response;
-    }
+    if (_authService.demoMode) return _demoAnswer(url, args);
     assert(!url.startsWith("/"));
 
     if (!await ensureLoggedIn(
@@ -327,6 +321,9 @@ class SessionManager {
       }
       return null;
     }
+    // Signing in from storage may have turned this into the demo while the
+    // request waited: it has no server to send to (#283).
+    if (_authService.demoMode) return _demoAnswer(url, args);
 
     dynamic responseData;
     try {
@@ -402,6 +399,14 @@ class SessionManager {
     return responseData;
   }
 
+  /// What the demo answers — the way the server would. Without reporting it
+  /// the connection display waited forever for a first answer.
+  Future<dynamic> _demoAnswer(String url, Map<String, Object?> args) async {
+    final dynamic response = await getDemoResponse(url, args);
+    if (response != null) onRequestSucceeded?.call();
+    return response;
+  }
+
   /// Writes one request to the network log. Both call sites used to build
   /// the item themselves, and the failing one quietly left out the reason.
   void _record(
@@ -410,7 +415,7 @@ class SessionManager {
     dynamic responseData, {
     Object? error,
   }) {
-    _authService.onAddProtocolItem!(NetworkProtocolItem((b) => b
+    _authService.onAddProtocolItem?.call(NetworkProtocolItem((b) => b
       ..address = _apiClient.baseAddress + url
       ..response = stringifyMaybeJson(responseData)
       ..parameters = stringifyMaybeJson(args)

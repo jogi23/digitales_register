@@ -88,6 +88,29 @@ class AuthService {
     VoidCallback? relogin,
     AddNetworkProtocolItem? addProtocolItem,
   }) async {
+    // Before the demo as well: it signs in again when its session runs out
+    // like any other, and that called onRelogin — null for the demo (#283).
+    if (logout != null) {
+      onLogout = logout;
+    } else {
+      assert(onLogout != null);
+    }
+    if (configLoaded != null) {
+      onConfigLoaded = configLoaded;
+    } else {
+      assert(onConfigLoaded != null);
+    }
+    if (relogin != null) {
+      onRelogin = relogin;
+    } else {
+      assert(onRelogin != null);
+    }
+    if (addProtocolItem != null) {
+      onAddProtocolItem = addProtocolItem;
+    } else {
+      assert(onAddProtocolItem != null);
+    }
+
     if (isDemoUser(url: url, username: user)) {
       demoMode = true;
       _loggedIn = Future.value(true);
@@ -110,27 +133,6 @@ class AuthService {
       return;
     } else {
       demoMode = false;
-    }
-
-    if (logout != null) {
-      onLogout = logout;
-    } else {
-      assert(onLogout != null);
-    }
-    if (configLoaded != null) {
-      onConfigLoaded = configLoaded;
-    } else {
-      assert(onConfigLoaded != null);
-    }
-    if (relogin != null) {
-      onRelogin = relogin;
-    } else {
-      assert(onRelogin != null);
-    }
-    if (addProtocolItem != null) {
-      onAddProtocolItem = addProtocolItem;
-    } else {
-      assert(onAddProtocolItem != null);
     }
 
     _apiClient.url = url;
