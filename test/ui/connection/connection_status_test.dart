@@ -151,7 +151,8 @@ void main() {
     await tester.tap(find.byType(ConnectionStatusButton));
     await tester.pumpAndSettle();
     expect(find.text('Verbunden'), findsOneWidget);
-    expect(find.textContaining('Zuletzt aktualisiert'), findsOneWidget);
+    // The wall-clock time as stored, not shifted by the device's zone.
+    expect(find.text('Zuletzt aktualisiert: 09:55'), findsOneWidget);
     expect(find.text('Neu verbinden'), findsOneWidget);
     // Closing leaves the connection alone.
     await tester.tap(find.text('Schließen'));

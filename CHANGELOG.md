@@ -12,6 +12,7 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 - Benachrichtigungen: Wurde die App durch Tippen auf eine Systembenachrichtigung gestartet, öffnete sich der Eintrag nicht. Jetzt öffnet er sich, und nach der Anmeldung erfährt auch das Portal, dass er gelesen ist.
 - Zeugnis: War die Sitzung abgelaufen, zeigte die App die Anmeldeseite des Portals als Zeugnis. Sie meldet sich jetzt erst neu an.
 - Profilfoto: Beim Entfernen oder Wechseln des Fotos entstand im Hintergrund ein Fehler. Lässt sich ein Foto nicht laden, stehen jetzt die Initialen da.
+- Verbindung: Die Zeit „Zuletzt aktualisiert“ lag um die Zeitverschiebung — im Sommer zwei Stunden — in der Zukunft.
 
 ## 1.4.1 — 2026-09-24
 
