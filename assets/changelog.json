@@ -1,6 +1,6 @@
 {
   "1.4.1": {
-    "date": "2026-09-21",
+    "date": "2026-09-24",
     "points": {
       "de": [
         {
@@ -17,7 +17,8 @@
           "items": [
             "Fächerfarben sind auf einem neu eingerichteten Gerät von Anfang an eingeschaltet. Wer sie ausgeschaltet hat, behält sie aus.",
             "Merkheft-Wochenansicht: Sind die Fächerfarben aus, tragen Stunden mit Einträgen einen ruhigen Hintergrund und unten rechts ein kleines Zeichen. Bisher färbte die Wochenansicht auch dann ein, wenn die Farben abbestellt waren.",
-            "Merkheft-Wochenansicht: Sind alle Einträge eines Fachs an diesem Tag abgehakt, trägt die Stunde unten rechts einen Haken. Noten und Beobachtungen zählen nicht mit — sie sind nichts zum Abarbeiten."
+            "Merkheft-Wochenansicht: Sind alle Einträge eines Fachs an diesem Tag abgehakt, trägt die Stunde unten rechts einen Haken. Noten und Beobachtungen zählen nicht mit — sie sind nichts zum Abarbeiten.",
+            "Mitteilungen: Beantwortete Mitteilungen zeigen in der Liste, wie sie beantwortet wurden — Daumen hoch für zugestimmt, Daumen runter für abgelehnt, ein gefüllter Stift für unterschrieben —, auch wenn der andere Erziehungsberechtigte geantwortet hat. Bisher trugen sie gar keine Marke mehr. Alle Marken, auch die für noch offene Antworten, sind jetzt reine Symbole, damit mehrere nebeneinander in die Titelzeile passen."
           ]
         },
         {
@@ -26,7 +27,8 @@
             "Das Profilfoto ließ sich nach der ersten Auswahl nicht mehr ändern: Das neue Bild lag unter demselben Namen, und die App zeigte weiter das alte.",
             "Kalender: Bei einem neuen Konto hatten nur einige Fächer eine Farbe. Jedes Fach bekommt seine Farbe jetzt, sobald es auftaucht — auch wenn es nur im Stundenplan vorkommt.",
             "Beim Start mit gespeichertem Konto und nach einem Kontowechsel meldet sich die App nur noch einmal an. Eine zweite Anmeldung zur selben Zeit konnte die Sitzung stören, und beendete das Portal sie später, konnte die App abstürzen.",
-            "Merkheft: Wechselte die Ansicht von der Liste in den Monat oder die Woche — etwa beim Öffnen der App —, lud die App die Einträge beider Richtungen nicht nach. Das Laden startete mitten im Aufbau der Seite und brach ab."
+            "Merkheft: Wechselte die Ansicht von der Liste in den Monat oder die Woche — etwa beim Öffnen der App —, lud die App die Einträge beider Richtungen nicht nach. Das Laden startete mitten im Aufbau der Seite und brach ab.",
+            "Mitteilungen: Eine Mitteilung, zu der noch eine ungelesene Benachrichtigung besteht, gilt jetzt als neu, auch wenn das Portal sie schon als gelesen führt. Bisher fehlte ihr dann das „neu“."
           ]
         },
         {
@@ -44,7 +46,7 @@
           "items": [
             "Account photo: the section can be chosen before it is saved. Drag and zoom the picture in the window; what is inside the circle becomes the photo.",
             "Account photo: tapping it asks whether to change or remove it. Removed, the initials are back in the circle.",
-            "Messages: a message sent by this account can be taken back for as long as the portal allows — four hours after it went out. After a question back; it disappears for the recipients as well.",
+            "Messages: a message sent by this account can be taken back for as long as the portal allows — four hours after it went out. After a confirmation prompt; it disappears for the recipients as well.",
             "Notifications: new messages, grades and other entries appear as Android system notifications, even when the app is closed — for all stored accounts, grouped by account and labelled with its alias. Tapping one opens the entry and switches to its account if needed. The settings decide how often to check and which kinds are reported. Accounts with two-factor sign-in, SPID or CIE and the demo account are left out."
           ]
         },
@@ -53,7 +55,8 @@
           "items": [
             "Subject colours are on from the start on a newly set up device. Whoever switched them off keeps them off.",
             "Merkheft week view: with the subject colours off, lessons that carry an entry get a quiet background and a small mark in the bottom right corner. Until now the week view coloured them anyway.",
-            "Merkheft week view: once every entry of a subject on that day is ticked off, its lesson carries a tick in the bottom right corner. Grades and observations do not count — they are nothing to work through."
+            "Merkheft week view: once every entry of a subject on that day is ticked off, its lesson carries a tick in the bottom right corner. Grades and observations do not count — they are nothing to work through.",
+            "Messages: answered messages show in the list how they were answered — thumbs up for agreed, thumbs down for declined, a filled pen for signed — even when the other parent answered. Until now they carried no mark at all. All marks, including those for answers still open, are now plain symbols, so several fit side by side in the title row."
           ]
         },
         {
@@ -62,7 +65,8 @@
             "The account photo could not be changed after the first time: the new picture went to the same file name, and the app kept showing the old one.",
             "Calendar: on a new account only some subjects had a colour. Every subject is given one as soon as it turns up now — even one that appears nowhere but in the timetable.",
             "When starting with a stored account and after switching accounts, the app now signs in only once. A second sign-in at the same time could disturb the session, and if the portal ended it later, the app could crash.",
-            "Merkheft: when the view changed from the list to the month or the week — on opening the app, say — the app did not fetch the entries of both directions. The fetch started while the page was being built and broke off."
+            "Merkheft: when the view changed from the list to the month or the week — on opening the app, say — the app did not fetch the entries of both directions. The fetch started while the page was being built and broke off.",
+            "Messages: a message whose notification is still unread now counts as new, even when the portal already lists it as read. Until now it lacked the “neu” badge then."
           ]
         },
         {
@@ -80,7 +84,7 @@
           "items": [
             "Foto del profilo: prima di salvarla si può scegliere l'inquadratura. L'immagine si trascina e si ingrandisce nella finestra; diventa foto ciò che sta nel cerchio.",
             "Foto del profilo: toccandola si sceglie se cambiarla o rimuoverla. Rimossa, nel cerchio tornano le iniziali.",
-            "Messaggi: un messaggio inviato da questo account si può ritirare finché il portale lo consente — quattro ore dopo l'invio. Previa conferma; sparisce anche per i destinatari.",
+            "Comunicazioni: una comunicazione inviata da questo account si può ritirare finché il portale lo consente — quattro ore dopo l'invio. Previa conferma; sparisce anche per i destinatari.",
             "Notifiche: nuove comunicazioni, valutazioni e altre voci compaiono come notifiche di sistema Android, anche con l’app chiusa — per tutti gli account salvati, raggruppate per account e con il suo alias. Un tocco apre la voce e, se serve, passa al suo account. Nelle impostazioni si stabilisce ogni quanto controllare e quali tipi segnalare. Restano esclusi gli account con accesso a due fattori, SPID o CIE e l’account demo."
           ]
         },
@@ -89,7 +93,8 @@
           "items": [
             "I colori delle materie sono attivi fin dall'inizio su un dispositivo appena configurato. Chi li ha disattivati li mantiene disattivati.",
             "Vista settimanale del Merkheft: con i colori delle materie disattivati, le ore con annotazioni hanno uno sfondo discreto e un piccolo segno in basso a destra. Finora la vista settimanale le colorava comunque.",
-            "Vista settimanale del Merkheft: quando tutte le annotazioni di una materia di quel giorno sono spuntate, l'ora porta un segno di spunta in basso a destra. Voti e osservazioni non contano: non sono cose da sbrigare."
+            "Vista settimanale del Merkheft: quando tutte le annotazioni di una materia di quel giorno sono spuntate, l'ora porta un segno di spunta in basso a destra. Voti e osservazioni non contano: non sono cose da sbrigare.",
+            "Comunicazioni: le comunicazioni a cui è già stata data risposta mostrano nell'elenco quale risposta è stata data — pollice in su per approvato, pollice in giù per respinto, una penna piena per firmato —, anche se ha risposto l'altro genitore. Finora non portavano alcun segno. Tutti i segni, anche quelli per le risposte ancora aperte, sono ora semplici simboli, così che più segni stiano affiancati nella riga del titolo."
           ]
         },
         {
@@ -98,7 +103,8 @@
             "La foto del profilo non si poteva più cambiare dopo la prima scelta: la nuova immagine finiva con lo stesso nome di file e l'app mostrava ancora quella vecchia.",
             "Calendario: con un account nuovo solo alcune materie avevano un colore. Ora ogni materia riceve il suo colore appena compare, anche se esiste solo nell'orario.",
             "All’avvio con un account salvato e dopo un cambio di account, l’app ora accede una sola volta. Un secondo accesso contemporaneo poteva disturbare la sessione e, se il portale la chiudeva in seguito, l’app poteva bloccarsi.",
-            "Agenda: quando la vista passava dall'elenco al mese o alla settimana, ad esempio all'apertura dell'app, l'app non caricava le voci in entrambe le direzioni. Il caricamento partiva mentre la pagina veniva costruita e si interrompeva."
+            "Agenda: quando la vista passava dall'elenco al mese o alla settimana, ad esempio all'apertura dell'app, l'app non caricava le voci in entrambe le direzioni. Il caricamento partiva mentre la pagina veniva costruita e si interrompeva.",
+            "Comunicazioni: una comunicazione la cui notifica non è ancora letta ora risulta nuova, anche se il portale la dà già per letta. Finora in quel caso le mancava l'etichetta «neu»."
           ]
         },
         {
