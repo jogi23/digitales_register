@@ -31,7 +31,8 @@
         {
           "title": "Intern",
           "items": [
-            "Plugins für App-Infos, Teilen und Dateiauswahl auf aktuelle Fassungen gehoben, dazu der sichere Speicher; unter Windows laufen sie damit auf win32 6. Der eigene Schlüsselspeicher für macOS und Linux ist entfallen — dort greift jetzt derselbe sichere Speicher wie auf den anderen Plattformen."
+            "Plugins für App-Infos, Teilen und Dateiauswahl auf aktuelle Fassungen gehoben, dazu der sichere Speicher; unter Windows laufen sie damit auf win32 6. Der eigene Schlüsselspeicher für macOS und Linux ist entfallen — dort greift jetzt derselbe sichere Speicher wie auf den anderen Plattformen.",
+            "Teilen (App-Einladung, Mitteilungs-Export, Debug-Log, Netzwerkprotokoll) nutzt die aktuelle Schnittstelle von share_plus statt der veralteten."
           ]
         }
       ],
@@ -64,7 +65,8 @@
         {
           "title": "Internal",
           "items": [
-            "Plugins for app info, sharing and file picking updated to current versions, along with the secure storage; on Windows they now run on win32 6. The separate key storage for macOS and Linux is gone — those platforms now use the same secure storage as all others."
+            "Plugins for app info, sharing and file picking updated to current versions, along with the secure storage; on Windows they now run on win32 6. The separate key storage for macOS and Linux is gone — those platforms now use the same secure storage as all others.",
+            "Sharing (app invitation, message export, debug log, network capture) uses the current share_plus interface instead of the deprecated one."
           ]
         }
       ],
@@ -97,7 +99,8 @@
         {
           "title": "Interno",
           "items": [
-            "Plugin per informazioni sull'app, condivisione e selezione dei file aggiornati alle versioni attuali, insieme all'archivio sicuro; su Windows ora funzionano con win32 6. L'archivio delle chiavi separato per macOS e Linux è stato rimosso: su queste piattaforme ora si usa lo stesso archivio sicuro delle altre."
+            "Plugin per informazioni sull'app, condivisione e selezione dei file aggiornati alle versioni attuali, insieme all'archivio sicuro; su Windows ora funzionano con win32 6. L'archivio delle chiavi separato per macOS e Linux è stato rimosso: su queste piattaforme ora si usa lo stesso archivio sicuro delle altre.",
+            "La condivisione (invito all’app, esportazione delle comunicazioni, log di debug, registro di rete) usa l’interfaccia attuale di share_plus invece di quella deprecata."
           ]
         }
       ]

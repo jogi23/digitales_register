@@ -388,10 +388,12 @@ Future<bool> exportMessages(
     if (share) {
       final file = File('${(await getTemporaryDirectory()).path}/$name');
       await file.writeAsBytes(bytes, flush: true);
-      await Share.shareXFiles(
-        [XFile(file.path, mimeType: format.mimeType)],
-        subject:
-            messages.length == 1 ? messages.single.subject : l.messagesTitle,
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(file.path, mimeType: format.mimeType)],
+          subject:
+              messages.length == 1 ? messages.single.subject : l.messagesTitle,
+        ),
       );
     } else {
       final path = await saveToDownloads(name, bytes);
