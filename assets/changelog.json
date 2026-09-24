@@ -33,7 +33,8 @@
           "title": "Intern",
           "items": [
             "Plugins für App-Infos, Teilen und Dateiauswahl auf aktuelle Fassungen gehoben, dazu der sichere Speicher; unter Windows laufen sie damit auf win32 6. Der eigene Schlüsselspeicher für macOS und Linux ist entfallen — dort greift jetzt derselbe sichere Speicher wie auf den anderen Plattformen.",
-            "Teilen (App-Einladung, Mitteilungs-Export, Debug-Log, Netzwerkprotokoll) nutzt die aktuelle Schnittstelle von share_plus statt der veralteten."
+            "Teilen (App-Einladung, Mitteilungs-Export, Debug-Log, Netzwerkprotokoll) nutzt die aktuelle Schnittstelle von share_plus statt der veralteten.",
+            "Debug-Log (nur in Debug-Builds): hält jetzt fest, was beim Start, bei Anmeldung, Sitzung und Kontowechsel, im Hintergrundabruf und beim Tippen auf Systembenachrichtigungen geschieht, dazu Schreibwege bei Mitteilungen und Absenzen und unbehandelte Fehler. Die Einträge landen auch in einer Datei, die einen Neustart übersteht und die Einträge des Hintergrundabrufs aufnimmt; im Speicher bleiben höchstens 1000. Konten erscheinen nur als Kürzel, Passwörter, Cookies und Mitteilungstexte nie. Die Seite lässt sich nach Art filtern und per Ziehen neu laden."
           ]
         }
       ],
@@ -68,7 +69,8 @@
           "title": "Internal",
           "items": [
             "Plugins for app info, sharing and file picking updated to current versions, along with the secure storage; on Windows they now run on win32 6. The separate key storage for macOS and Linux is gone — those platforms now use the same secure storage as all others.",
-            "Sharing (app invitation, message export, debug log, network capture) uses the current share_plus interface instead of the deprecated one."
+            "Sharing (app invitation, message export, debug log, network capture) uses the current share_plus interface instead of the deprecated one.",
+            "Debug log (debug builds only): now records what happens at start-up, at sign-in, in the session and when switching accounts, in the background check and when a system notification is tapped, plus writes to messages and absences and uncaught errors. Entries also go to a file that survives a restart and takes in the background check's entries; memory keeps at most 1000. Accounts appear only as a short tag, passwords, cookies and message texts never. The page can be filtered by kind and reloaded by pulling down."
           ]
         }
       ],
@@ -103,7 +105,8 @@
           "title": "Interno",
           "items": [
             "Plugin per informazioni sull'app, condivisione e selezione dei file aggiornati alle versioni attuali, insieme all'archivio sicuro; su Windows ora funzionano con win32 6. L'archivio delle chiavi separato per macOS e Linux è stato rimosso: su queste piattaforme ora si usa lo stesso archivio sicuro delle altre.",
-            "La condivisione (invito all’app, esportazione delle comunicazioni, log di debug, registro di rete) usa l’interfaccia attuale di share_plus invece di quella deprecata."
+            "La condivisione (invito all’app, esportazione delle comunicazioni, log di debug, registro di rete) usa l’interfaccia attuale di share_plus invece di quella deprecata.",
+            "Log di debug (solo nelle build di debug): ora registra cosa succede all'avvio, all'accesso, nella sessione e al cambio di account, nel controllo in background e al tocco di una notifica di sistema, oltre alle scritture su comunicazioni e assenze e agli errori non gestiti. Le voci finiscono anche in un file che sopravvive al riavvio e raccoglie quelle del controllo in background; in memoria ne restano al massimo 1000. Gli account compaiono solo come sigla, password, cookie e testi delle comunicazioni mai. La pagina si può filtrare per tipo e aggiornare trascinando verso il basso."
           ]
         }
       ]

@@ -45,10 +45,11 @@ class CertificateNotifier extends Notifier<CertificateState> {
     final dynamic response =
         await wrapper.send("student/certificate", method: "GET");
     if (response is String) {
+      // Shortened: the whole page is a report card, names and grades.
       debugLog(
-        'Zeugnis',
-        'HTML geladen (${response.length} Bytes)',
-        data: response,
+        LogCategory.certificate,
+        'HTML geladen (${response.length} Zeichen)',
+        data: shorten(response, 2000),
       );
       state = state.copyWith(
         html: response,
@@ -56,8 +57,9 @@ class CertificateNotifier extends Notifier<CertificateState> {
       );
     } else {
       debugLog(
-        'Zeugnis',
-        'Unerwartete Antwort: ${response.runtimeType} — $response',
+        LogCategory.certificate,
+        'Unerwartete Antwort: ${response.runtimeType}',
+        data: shorten('$response', 2000),
       );
     }
   }

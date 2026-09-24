@@ -33,16 +33,39 @@ class DebugLogPage extends StatefulWidget {
 }
 
 class _DebugLogPageState extends State<DebugLogPage> {
-  List<DebugLogEntry> get _entries =>
-      DebugLog.instance.entries.reversed.toList();
+  /// Newest first.
+  List<DebugLogEntry> _entries = const [];
+  bool _loading = true;
 
-  void _clear() {
-    DebugLog.instance.clear();
-    setState(() {});
+  /// The category shown, or null for all.
+  String? _category;
+
+  @override
+  void initState() {
+    super.initState();
+    _reload();
+  }
+
+  Future<void> _reload() async {
+    final entries = await DebugLog.instance.readAll();
+    if (!mounted) return;
+    setState(() {
+      _entries = entries.reversed.toList();
+      _loading = false;
+    });
+  }
+
+  List<DebugLogEntry> get _shown => _category == null
+      ? _entries
+      : _entries.where((e) => e.category == _category).toList();
+
+  Future<void> _clear() async {
+    await DebugLog.instance.clear();
+    await _reload();
   }
 
   Future<void> _share() async {
-    final text = DebugLog.instance.export();
+    final text = DebugLog.export(_shown.reversed);
     if (text.isEmpty) {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(tr(context).debugLogEmpty)));
@@ -74,7 +97,8 @@ class _DebugLogPageState extends State<DebugLogPage> {
 
   @override
   Widget build(BuildContext context) {
-    final entries = _entries;
+    final entries = _shown;
+    final categories = {for (final e in _entries) e.category};
     return Scaffold(
       appBar: AppBar(
         title: Text(tr(context).settingsDebugLog),
@@ -91,13 +115,56 @@ class _DebugLogPageState extends State<DebugLogPage> {
           ),
         ],
       ),
-      body: entries.isEmpty
-          ? Center(child: Text(tr(context).changelogEmpty))
-          : ListView.separated(
-              padding: context.systemInsets,
-              itemCount: entries.length,
-              separatorBuilder: (_, __) => const Divider(height: 1),
-              itemBuilder: (context, i) => _EntryTile(entry: entries[i]),
+      body: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : Column(
+              children: [
+                if (categories.length > 1)
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: Row(
+                      children: [
+                        for (final category
+                            in LogCategory.values.where(categories.contains))
+                          Padding(
+                            padding: const EdgeInsets.all(4),
+                            child: FilterChip(
+                              label: Text(category),
+                              selected: _category == category,
+                              onSelected: (on) => setState(
+                                () => _category = on ? category : null,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                Expanded(
+                  child: RefreshIndicator(
+                    onRefresh: _reload,
+                    child: entries.isEmpty
+                        ? ListView(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(32),
+                                child: Center(
+                                  child: Text(tr(context).debugLogEmpty),
+                                ),
+                              ),
+                            ],
+                          )
+                        : ListView.separated(
+                            padding: context.systemInsets,
+                            itemCount: entries.length,
+                            separatorBuilder: (_, __) =>
+                                const Divider(height: 1),
+                            itemBuilder: (context, i) =>
+                                _EntryTile(entry: entries[i]),
+                          ),
+                  ),
+                ),
+              ],
             ),
     );
   }
@@ -110,9 +177,10 @@ class _EntryTile extends StatelessWidget {
 
   String get _time {
     final t = entry.timestamp;
-    return '${t.hour.toString().padLeft(2, '0')}:'
+    final time = '${t.hour.toString().padLeft(2, '0')}:'
         '${t.minute.toString().padLeft(2, '0')}:'
         '${t.second.toString().padLeft(2, '0')}';
+    return entry.isolate == null ? time : '$time · ${entry.isolate}';
   }
 
   @override

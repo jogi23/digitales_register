@@ -28,6 +28,7 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 
 - Plugins für App-Infos, Teilen und Dateiauswahl auf aktuelle Fassungen gehoben, dazu der sichere Speicher; unter Windows laufen sie damit auf win32 6. Der eigene Schlüsselspeicher für macOS und Linux ist entfallen — dort greift jetzt derselbe sichere Speicher wie auf den anderen Plattformen.
 - Teilen (App-Einladung, Mitteilungs-Export, Debug-Log, Netzwerkprotokoll) nutzt die aktuelle Schnittstelle von share_plus statt der veralteten.
+- Debug-Log (nur in Debug-Builds): hält jetzt fest, was beim Start, bei Anmeldung, Sitzung und Kontowechsel, im Hintergrundabruf und beim Tippen auf Systembenachrichtigungen geschieht, dazu Schreibwege bei Mitteilungen und Absenzen und unbehandelte Fehler. Die Einträge landen auch in einer Datei, die einen Neustart übersteht und die Einträge des Hintergrundabrufs aufnimmt; im Speicher bleiben höchstens 1000. Konten erscheinen nur als Kürzel, Passwörter, Cookies und Mitteilungstexte nie. Die Seite lässt sich nach Art filtern und per Ziehen neu laden.
 
 ## 1.4.0 — 2026-09-15
 

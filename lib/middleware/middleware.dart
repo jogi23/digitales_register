@@ -25,6 +25,7 @@ import 'package:built_collection/built_collection.dart';
 import 'package:dio/dio.dart' as dio;
 import 'package:dr/l10n/l10n.dart';
 import 'package:dr/app_state.dart';
+import 'package:dr/debug_log.dart';
 import 'package:dr/main.dart' hide scaffoldMessengerKey, showSnackBar;
 import 'package:dr/pages.dart';
 import 'package:dr/providers/absences_provider.dart';
@@ -105,6 +106,7 @@ void wireLoginDispatchers(LoginNotifier notifier) {
 
 Future<void> _handleError(dynamic e, StackTrace? trace) async {
   log("Error caught by error middleware", error: e, stackTrace: trace);
+  debugLogError('Fehlerseite', e, trace);
   unawaited(Sentry.captureException(e, stackTrace: trace));
   var stackTrace = trace;
   try {
@@ -212,6 +214,11 @@ Future<void> _doLoad() async {
     login = const <Never, Never>{};
     showSnackBar(trGlobal.errorLoadingSavedData);
     log("Failed to load login credentials", error: e);
+    debugLog(
+      LogCategory.start,
+      'Gespeicherte Anmeldung nicht lesbar, Speicher wird geleert',
+      data: '$e',
+    );
     try {
       await secureStorage.deleteAll();
     } catch (e) {
@@ -235,6 +242,12 @@ Future<void> _doLoad() async {
   providerContainer
       .read(loginProvider.notifier)
       .setOtherAccounts(otherAccounts);
+  debugLog(
+    LogCategory.start,
+    'Gespeicherte Anmeldung: ${accountTag(user, url)}, '
+    'Passwort ${pass != null ? 'gespeichert' : 'fehlt'}, '
+    '${otherAccounts.length} weitere Konten',
+  );
   final currentLogin = providerContainer.read(loginProvider);
   // Der Zweig greift, wenn die App über einen Link gestartet wurde, der auf
   // einen anderen Server oder Benutzer zeigt als das gespeicherte Konto -
@@ -246,6 +259,10 @@ Future<void> _doLoad() async {
   // liegen und ist über die Konten-Karte erreichbar.
   if ((currentLogin.url != null && !sameServer(currentLogin.url, url)) ||
       (currentLogin.username != null && currentLogin.username != user)) {
+    debugLog(
+      LogCategory.start,
+      'Link zeigt auf ein anderes Konto: Anmeldeformular',
+    );
     providerContainer.read(appRouterProvider).showLogin();
   } else {
     if (user != null && pass != null) {
@@ -355,6 +372,11 @@ Future<String?> _readFromStorage(String key) async {
     // exists for — a keystore that cannot be read any more — never runs.
     return await secureStorage.read(key: escapeKey(key));
   } catch (e) {
+    debugLog(
+      LogCategory.start,
+      'Gespeicherter Zustand nicht lesbar, Speicher wird geleert',
+      data: '$e',
+    );
     try {
       await secureStorage.deleteAll();
     } catch (e) {
@@ -387,6 +409,16 @@ Future<void> _doStart(Uri? uri) async {
   final sitzungLaeuft = uri != null &&
       providerContainer.read(loginProvider).loggedIn &&
       sameServer(uri.origin, wrapper.url);
+  if (uri != null) {
+    // Path and parameter names only: a reset link carries the mail address
+    // and a token in its parameters.
+    debugLog(
+      LogCategory.start,
+      'Link: ${uri.path}#${uri.fragment} '
+      '(Parameter: ${uri.queryParameters.keys.join(', ')})'
+      '${sitzungLaeuft ? ', Sitzung läuft schon' : ''}',
+    );
+  }
 
   if (uri != null) {
     // Die Adresse der laufenden Sitzung bleibt stehen: Sie kann anders

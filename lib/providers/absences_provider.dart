@@ -20,6 +20,7 @@ import 'dart:convert';
 import 'package:built_collection/built_collection.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/data.dart';
+import 'package:dr/debug_log.dart';
 import 'package:dr/middleware/middleware.dart' show wrapper;
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/utc_date_time.dart';
@@ -101,7 +102,9 @@ class AbsencesNotifier extends Notifier<AbsencesState> {
     // the test account had no absence to give a reason for. Its siblings say
     // `success`, so that is taken when it comes; otherwise the reloaded list
     // decides.
-    return wroteOk(result) ?? (_groupFor(group)?.reason == reason);
+    final ok = wroteOk(result) ?? (_groupFor(group)?.reason == reason);
+    _logWrite('Begründen', result, ok);
+    return ok;
   }
 
   /// Reports an absence that is still to come.
@@ -132,7 +135,7 @@ class AbsencesNotifier extends Notifier<AbsencesState> {
       },
     );
     await load();
-    return wroteOk(result) ??
+    final ok = wroteOk(result) ??
         state.futureAbsences.any(
           (a) =>
               a.startDate == startDate &&
@@ -140,6 +143,8 @@ class AbsencesNotifier extends Notifier<AbsencesState> {
               a.startHour == startHour &&
               a.endHour == endHour,
         );
+    _logWrite('Voranmelden', result, ok);
+    return ok;
   }
 
   /// Takes a reported absence back.
@@ -151,7 +156,7 @@ class AbsencesNotifier extends Notifier<AbsencesState> {
       args: {"futureAbsence": json.decode(raw)},
     );
     await load();
-    return wroteOk(result) ??
+    final ok = wroteOk(result) ??
         !state.futureAbsences.any(
           (a) =>
               a.startDate == absence.startDate &&
@@ -159,7 +164,20 @@ class AbsencesNotifier extends Notifier<AbsencesState> {
               a.endDate == absence.endDate &&
               a.endHour == absence.endHour,
         );
+    _logWrite('Voranmeldung zurücknehmen', result, ok);
+    return ok;
   }
+
+  /// What a write came to — never with the reason: it can be about health.
+  void _logWrite(String what, dynamic result, bool ok) => debugLog(
+        LogCategory.absences,
+        '$what: ${ok ? 'übernommen' : 'nicht übernommen'} '
+        '(${switch (wroteOk(result)) {
+          true => 'Portal sagt ja',
+          false => 'Portal sagt nein',
+          null => 'aus der neu geladenen Liste',
+        }})',
+      );
 
   /// [group] in the state as it is now: the same absence, the way the
   /// register sees it after the reload.

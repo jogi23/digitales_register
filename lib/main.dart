@@ -27,6 +27,7 @@ import 'package:dr/container/pass_reset_container.dart';
 import 'package:dr/container/profile_container.dart';
 import 'package:dr/container/request_pass_reset_container.dart';
 import 'package:dr/container/settings_page.dart';
+import 'package:dr/debug_log.dart';
 import 'package:dr/middleware/middleware.dart';
 import 'package:dr/providers/account_profile_provider.dart';
 import 'package:dr/providers/login_provider.dart';
@@ -41,6 +42,7 @@ import 'package:dr/ui/splash_overlay.dart';
 import 'package:dr/ui/subject_appearance_page.dart';
 import 'package:dr/util.dart';
 import 'package:dynamic_theme/dynamic_theme.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:dr/ui/snack_bar.dart';
@@ -76,7 +78,14 @@ Future<void> main() async {
 Future<void> _runApp() async {
   final binding = WidgetsFlutterBinding.ensureInitialized();
   binding.deferFirstFrame();
+  await DebugLog.instance.init();
+  _logUnhandledErrors(binding);
   await loadPackageInfo();
+  debugLog(
+    LogCategory.start,
+    'App-Start: $appVersion, ${Platform.operatingSystem} '
+    '${Platform.operatingSystemVersion}',
+  );
   await initSystemNotificationService();
   navigatorKey = GlobalKey();
   scaffoldKey = GlobalKey();
@@ -116,6 +125,23 @@ Future<void> _runApp() async {
       );
     },
   );
+}
+
+/// Puts errors nobody caught into the debug log as well. Sentry has set its
+/// handlers by now; they keep running after this one.
+void _logUnhandledErrors(WidgetsBinding binding) {
+  if (!kDebugMode) return;
+  final flutterError = FlutterError.onError;
+  FlutterError.onError = (details) {
+    debugLogError('Flutter', details.exception, details.stack);
+    flutterError?.call(details);
+  };
+  final dispatcher = binding.platformDispatcher;
+  final platformError = dispatcher.onError;
+  dispatcher.onError = (error, stack) {
+    debugLogError('Unbehandelt', error, stack);
+    return platformError?.call(error, stack) ?? false;
+  };
 }
 
 class RegisterApp extends ConsumerWidget {

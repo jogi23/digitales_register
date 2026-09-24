@@ -17,6 +17,7 @@
 
 import 'dart:async';
 
+import 'package:dr/debug_log.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -237,6 +238,12 @@ class LoginNotifier extends Notifier<LoginState> {
   }
 
   void executeAfterLoginCallbacks() {
+    if (_callAfterLogin.isNotEmpty) {
+      debugLog(
+        LogCategory.login,
+        'Nach der Anmeldung: ${_callAfterLogin.length} Aufträge',
+      );
+    }
     for (final callback in List.of(_callAfterLogin)) {
       callback();
     }
