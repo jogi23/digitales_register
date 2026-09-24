@@ -77,3 +77,6 @@ tools/debug-devices.local
 lib/l10n/app_localizations*.dart
 
 CLAUDE.local.md
+
+# Browser-Mitschnitte (enthalten Session-Cookies und Personendaten)
+*.har
