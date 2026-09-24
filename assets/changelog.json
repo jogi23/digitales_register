@@ -6,7 +6,12 @@
         {
           "title": "Fehlerbehebungen",
           "items": [
-            "Benachrichtigungen: Der Abruf im Hintergrund meldet sich nicht mehr mit dem Konto an, mit dem die geöffnete App gerade angemeldet ist — die App fragt für dieses Konto ohnehin selbst nach. Die zweite Anmeldung zur selben Zeit konnte die Sitzung der App beenden; beim Start erschien dann „Verbindung fehlgeschlagen“, obwohl das Netz da war."
+            "Benachrichtigungen: Der Abruf im Hintergrund meldet sich nicht mehr mit dem Konto an, mit dem die geöffnete App gerade angemeldet ist — die App fragt für dieses Konto ohnehin selbst nach. Die zweite Anmeldung zur selben Zeit konnte die Sitzung der App beenden; beim Start erschien dann „Verbindung fehlgeschlagen“, obwohl das Netz da war.",
+            "Kontowechsel: Die Sitzung des vorigen Kontos lief im Hintergrund weiter und konnte das neue Konto abmelden — dann stand ohne Grund „Sitzung abgelaufen“ da. Sie endet jetzt mit dem Wechsel.",
+            "Demokonto: Nach fünf Minuten oder beim Wechsel ins Demokonto konnte die App mit einem Fehler abbrechen.",
+            "Benachrichtigungen: Wurde die App durch Tippen auf eine Systembenachrichtigung gestartet, öffnete sich der Eintrag nicht. Jetzt öffnet er sich, und nach der Anmeldung erfährt auch das Portal, dass er gelesen ist.",
+            "Zeugnis: War die Sitzung abgelaufen, zeigte die App die Anmeldeseite des Portals als Zeugnis. Sie meldet sich jetzt erst neu an.",
+            "Profilfoto: Beim Entfernen oder Wechseln des Fotos entstand im Hintergrund ein Fehler. Lässt sich ein Foto nicht laden, stehen jetzt die Initialen da."
           ]
         }
       ],
@@ -14,7 +19,12 @@
         {
           "title": "Bug fixes",
           "items": [
-            "Notifications: the background check no longer signs into the account the open app is signed into — the app asks for that account itself anyway. The second sign-in at the same time could end the app's session; at start-up the app then showed “Connection failed” although the network was there."
+            "Notifications: the background check no longer signs into the account the open app is signed into — the app asks for that account itself anyway. The second sign-in at the same time could end the app's session; at start-up the app then showed “Connection failed” although the network was there.",
+            "Switching accounts: the previous account's session kept running in the background and could sign the new account out — “Session expired” then appeared for no reason. It now ends with the switch.",
+            "Demo account: after five minutes, or when switching to the demo account, the app could stop with an error.",
+            "Notifications: when the app was started by tapping a system notification, the entry did not open. It now opens, and after signing in the portal also learns that it was read.",
+            "Report card: when the session had expired, the app showed the portal's sign-in page as the report card. It now signs in again first.",
+            "Account photo: removing or changing the photo caused an error in the background. If a photo cannot be loaded, the initials now show instead."
           ]
         }
       ],
@@ -22,7 +32,12 @@
         {
           "title": "Correzioni",
           "items": [
-            "Notifiche: il controllo in background non accede più con l'account con cui l'app aperta è connessa — per quell'account l'app controlla già da sé. Il secondo accesso contemporaneo poteva chiudere la sessione dell'app; all'avvio compariva allora «Connessione non riuscita», benché la rete ci fosse."
+            "Notifiche: il controllo in background non accede più con l'account con cui l'app aperta è connessa — per quell'account l'app controlla già da sé. Il secondo accesso contemporaneo poteva chiudere la sessione dell'app; all'avvio compariva allora «Connessione non riuscita», benché la rete ci fosse.",
+            "Cambio di account: la sessione dell'account precedente continuava in background e poteva disconnettere il nuovo account — compariva allora «Sessione scaduta» senza motivo. Ora termina con il cambio.",
+            "Account demo: dopo cinque minuti, o passando all'account demo, l'app poteva interrompersi con un errore.",
+            "Notifiche: se l'app veniva avviata toccando una notifica di sistema, la voce non si apriva. Ora si apre, e dopo l'accesso anche il portale sa che è stata letta.",
+            "Pagella: se la sessione era scaduta, l'app mostrava come pagella la pagina di accesso del portale. Ora prima accede di nuovo.",
+            "Foto profilo: rimuovendo o cambiando la foto si verificava un errore in background. Se una foto non si può caricare, ora compaiono le iniziali."
           ]
         }
       ]

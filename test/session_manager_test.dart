@@ -151,9 +151,10 @@ class _PageAdapter implements HttpClientAdapter {
 }
 
 /// The parts of the portal's sign-in page that tell it apart (#285).
-const _loginPage = '<!DOCTYPE html><html><head><title>Login</title></head>'
-    '<body><div class="login-container"><form>'
-    '<input type="text" name="username"><input type="password" name="password">'
+const _loginPage = '<!DOCTYPE html><html><head><title>Login</title></head> '
+    '<body><div class="login-container"><form> '
+    '<input type="text" name="username"> '
+    '<input type="password" name="password"> '
     '</form></div></body></html>';
 
 class _SignedInAuth {

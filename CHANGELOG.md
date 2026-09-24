@@ -7,6 +7,11 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 ### Fehlerbehebungen
 
 - Benachrichtigungen: Der Abruf im Hintergrund meldet sich nicht mehr mit dem Konto an, mit dem die geöffnete App gerade angemeldet ist — die App fragt für dieses Konto ohnehin selbst nach. Die zweite Anmeldung zur selben Zeit konnte die Sitzung der App beenden; beim Start erschien dann „Verbindung fehlgeschlagen“, obwohl das Netz da war.
+- Kontowechsel: Die Sitzung des vorigen Kontos lief im Hintergrund weiter und konnte das neue Konto abmelden — dann stand ohne Grund „Sitzung abgelaufen“ da. Sie endet jetzt mit dem Wechsel.
+- Demokonto: Nach fünf Minuten oder beim Wechsel ins Demokonto konnte die App mit einem Fehler abbrechen.
+- Benachrichtigungen: Wurde die App durch Tippen auf eine Systembenachrichtigung gestartet, öffnete sich der Eintrag nicht. Jetzt öffnet er sich, und nach der Anmeldung erfährt auch das Portal, dass er gelesen ist.
+- Zeugnis: War die Sitzung abgelaufen, zeigte die App die Anmeldeseite des Portals als Zeugnis. Sie meldet sich jetzt erst neu an.
+- Profilfoto: Beim Entfernen oder Wechseln des Fotos entstand im Hintergrund ein Fehler. Lässt sich ein Foto nicht laden, stehen jetzt die Initialen da.
 
 ## 1.4.1 — 2026-09-24
 
