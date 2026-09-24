@@ -1,4 +1,33 @@
 {
+  "1.5.0": {
+    "date": "2026-09-24",
+    "points": {
+      "de": [
+        {
+          "title": "Fehlerbehebungen",
+          "items": [
+            "Benachrichtigungen: Der Abruf im Hintergrund meldet sich nicht mehr mit dem Konto an, mit dem die geöffnete App gerade angemeldet ist — die App fragt für dieses Konto ohnehin selbst nach. Die zweite Anmeldung zur selben Zeit konnte die Sitzung der App beenden; beim Start erschien dann „Verbindung fehlgeschlagen“, obwohl das Netz da war."
+          ]
+        }
+      ],
+      "en": [
+        {
+          "title": "Bug fixes",
+          "items": [
+            "Notifications: the background check no longer signs into the account the open app is signed into — the app asks for that account itself anyway. The second sign-in at the same time could end the app's session; at start-up the app then showed “Connection failed” although the network was there."
+          ]
+        }
+      ],
+      "it": [
+        {
+          "title": "Correzioni",
+          "items": [
+            "Notifiche: il controllo in background non accede più con l'account con cui l'app aperta è connessa — per quell'account l'app controlla già da sé. Il secondo accesso contemporaneo poteva chiudere la sessione dell'app; all'avvio compariva allora «Connessione non riuscita», benché la rete ci fosse."
+          ]
+        }
+      ]
+    }
+  },
   "1.4.1": {
     "date": "2026-09-24",
     "points": {

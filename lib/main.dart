@@ -120,7 +120,7 @@ Future<void> _runApp() async {
         LifecycleObserver(
           () => unawaited(handleRestarted()),
           // this might not finish in time:
-          saveStateImmediately,
+          () => unawaited(handlePaused()),
         ),
       );
     },

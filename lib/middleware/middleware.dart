@@ -25,6 +25,7 @@ import 'package:built_collection/built_collection.dart';
 import 'package:dio/dio.dart' as dio;
 import 'package:dr/l10n/l10n.dart';
 import 'package:dr/app_state.dart';
+import 'package:dr/background_check.dart' show markAppAccount;
 import 'package:dr/debug_log.dart';
 import 'package:dr/main.dart' hide scaffoldMessengerKey, showSnackBar;
 import 'package:dr/pages.dart';
@@ -387,6 +388,9 @@ Future<String?> _readFromStorage(String key) async {
 }
 
 Future<void> handleRestarted() async {
+  if (providerContainer.read(loginProvider).loggedIn) {
+    unawaited(markAppAccount(user: wrapper.user, url: wrapper.url));
+  }
   if (providerContainer.read(loginProvider).loggedIn &&
       DateTime.now().difference(wrapper.lastInteraction).inMinutes > 3) {
     wrapper.interaction();
@@ -395,6 +399,13 @@ Future<void> handleRestarted() async {
       await providerContainer.read(dashboardProvider.notifier).refresh();
     }
   }
+}
+
+/// The app went to the background: the check there may sign into its
+/// account again, and what is on screen is saved while there is still time.
+Future<void> handlePaused() async {
+  unawaited(markAppAccount());
+  await saveStateImmediately();
 }
 
 Future<void> _doStart(Uri? uri) async {

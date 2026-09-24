@@ -30,6 +30,7 @@ import 'package:dr/system_notifications.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
 import 'package:dr/wrapper.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
@@ -43,6 +44,14 @@ const _taskName = 'dr.notificationCheck';
 
 /// The ids each account had unread at the last look, by [notificationAccountKey].
 const _knownPrefsKey = 'system_notifications_known';
+
+/// The account the app is signed into while it is in use, and since when.
+const _appAccountPrefsKey = 'system_notifications_app_account';
+
+/// How long a mark from [markAppAccount] holds. The app takes it back when
+/// it goes to the background; this only covers an app that never got to,
+/// because it crashed or was killed while in use.
+const appAccountMarkLifetime = Duration(hours: 3);
 
 /// Settings and aliases, where the app keeps them.
 const _settingsPrefsKey = 'settings_global';
@@ -132,6 +141,46 @@ Future<void> rememberSeenNotifications({
   final key = notificationAccountKey(user, url);
   known[key] = {...?known[key], ...ids};
   await _writeKnown(prefs, known);
+}
+
+/// What [markAppAccount] stores: [key] as the account in use since [now].
+@visibleForTesting
+String appAccountMark(String key, DateTime now) =>
+    json.encode({'key': key, 'at': now.millisecondsSinceEpoch});
+
+/// Whether [mark] says the app is signed into the account under [key] —
+/// and says it recently enough to still be true.
+@visibleForTesting
+bool appUsesAccount(String? mark, String key, DateTime now) {
+  if (mark == null) return false;
+  try {
+    final decoded = json.decode(mark) as Map<String, dynamic>;
+    final at = DateTime.fromMillisecondsSinceEpoch(decoded['at'] as int);
+    return decoded['key'] == key &&
+        now.difference(at) < appAccountMarkLifetime;
+  } on Object {
+    return false;
+  }
+}
+
+/// Tells the background check which account the app is signed into while it
+/// is in use, or with [user] null that it no longer is.
+///
+/// A check signing into the same account at the same time ended the app's
+/// session: its next request found itself logged out (#280). The app asks
+/// for that account's notifications itself while it is open, so the check
+/// leaves it alone.
+Future<void> markAppAccount({String? user, String? url}) async {
+  if (!Platform.isAndroid) return;
+  final prefs = await SharedPreferences.getInstance();
+  if (user == null || url == null) {
+    await prefs.remove(_appAccountPrefsKey);
+    return;
+  }
+  await prefs.setString(
+    _appAccountPrefsKey,
+    appAccountMark(notificationAccountKey(user, url), DateTime.now()),
+  );
 }
 
 /// Entry point of the background isolate.
@@ -258,12 +307,26 @@ Future<void> checkForNewNotifications({
 
   for (final account in accounts) {
     final key = notificationAccountKey(account.user, account.url);
+    final tag = accountTag(account.user, account.url);
+    // Read again for every account: the app may have signed in meanwhile,
+    // and signing in here as well would end its session.
+    await prefs.reload();
+    if (appUsesAccount(
+      prefs.getString(_appAccountPrefsKey),
+      key,
+      DateTime.now(),
+    )) {
+      debugLog(
+        LogCategory.background,
+        '$tag: übersprungen, die App ist damit angemeldet',
+      );
+      continue;
+    }
     final result = testNotification
         ? await _fetchLatestMessage(account)
         : await _fetchUnread(account);
     // Not reached, or not without a code: it stays as it was until the
     // next round.
-    final tag = accountTag(account.user, account.url);
     if (result == null) {
       debugLog(LogCategory.background, '$tag: nicht erreicht');
       continue;

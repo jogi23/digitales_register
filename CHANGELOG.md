@@ -2,6 +2,12 @@
 
 Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` — Änderungen bitte dort eintragen, nicht hier.
 
+## 1.5.0 — 2026-09-24
+
+### Fehlerbehebungen
+
+- Benachrichtigungen: Der Abruf im Hintergrund meldet sich nicht mehr mit dem Konto an, mit dem die geöffnete App gerade angemeldet ist — die App fragt für dieses Konto ohnehin selbst nach. Die zweite Anmeldung zur selben Zeit konnte die Sitzung der App beenden; beim Start erschien dann „Verbindung fehlgeschlagen“, obwohl das Netz da war.
+
 ## 1.4.1 — 2026-09-24
 
 ### Neue Funktionen

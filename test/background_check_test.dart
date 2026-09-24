@@ -53,6 +53,46 @@ void main() {
     });
   });
 
+  group('appUsesAccount', () {
+    final now = DateTime(2026, 9, 24, 12);
+    final key = notificationAccountKey('anna', 'https://schule.digitalesregister.it');
+
+    test('holds for the account the app marked, while the mark is fresh', () {
+      final mark = appAccountMark(key, now);
+      expect(appUsesAccount(mark, key, now), isTrue);
+      expect(
+        appUsesAccount(mark, key, now.add(const Duration(hours: 2, minutes: 59))),
+        isTrue,
+      );
+    });
+
+    test('not for another account', () {
+      final other = notificationAccountKey('ben', 'https://schule.digitalesregister.it');
+      expect(appUsesAccount(appAccountMark(other, now), key, now), isFalse);
+    });
+
+    test('the same account, typed without the scheme', () {
+      // The app marks the address it signs in with, fixed up; the check
+      // reads the stored one as typed.
+      final mark = appAccountMark(
+        notificationAccountKey('anna', 'schule.digitalesregister.it'),
+        now,
+      );
+      expect(appUsesAccount(mark, key, now), isTrue);
+    });
+
+    test('not once the mark is stale: an app that crashed took nothing back', () {
+      final mark = appAccountMark(key, now);
+      expect(appUsesAccount(mark, key, now.add(appAccountMarkLifetime)), isFalse);
+    });
+
+    test('not without a mark, nor with one that cannot be read', () {
+      expect(appUsesAccount(null, key, now), isFalse);
+      expect(appUsesAccount('kaputt', key, now), isFalse);
+      expect(appUsesAccount('{"key": 1}', key, now), isFalse);
+    });
+  });
+
   group('freshNotifications', () {
     final settings = SettingsState();
 
