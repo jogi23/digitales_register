@@ -122,6 +122,40 @@ class _PathAdapter implements HttpClientAdapter {
   void close({bool force = false}) {}
 }
 
+/// Answers every request with the next page in [pages]; the last repeats.
+class _PageAdapter implements HttpClientAdapter {
+  _PageAdapter(this.pages);
+
+  final List<String> pages;
+  int requests = 0;
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    final page = pages[requests < pages.length ? requests : pages.length - 1];
+    requests++;
+    return ResponseBody.fromString(
+      page,
+      200,
+      headers: {
+        Headers.contentTypeHeader: ['text/html; charset=utf-8'],
+      },
+    );
+  }
+
+  @override
+  void close({bool force = false}) {}
+}
+
+/// The parts of the portal's sign-in page that tell it apart (#285).
+const _loginPage = '<!DOCTYPE html><html><head><title>Login</title></head>'
+    '<body><div class="login-container"><form>'
+    '<input type="text" name="username"><input type="password" name="password">'
+    '</form></div></body></html>';
+
 class _SignedInAuth {
   final auth = _MockAuthService();
   bool loggedIn = true;
@@ -618,6 +652,47 @@ void main() {
         expect(expired, 1);
         expect(errors.single, isA<UnexpectedLogoutException>());
       });
+    });
+  });
+
+  group('the sign-in page instead of a page (#285)', () {
+    SessionManager answering(_SignedInAuth signedIn, _PageAdapter adapter) {
+      final apiClient = ApiClient()
+        ..url = 'https://schule.digitalesregister.it';
+      apiClient.dio.httpClientAdapter = adapter;
+      return SessionManager(apiClient, signedIn.auth);
+    }
+
+    test('is told apart from a page', () {
+      expect(isLoginPage(_loginPage), isTrue);
+      expect(isLoginPage('<div class="student-subject-list">Zeugnis</div>'),
+          isFalse);
+      // A page that merely mentions a password is none.
+      expect(isLoginPage('<p>type="password"</p>'), isFalse);
+    });
+
+    test('signs in again and asks once more', () async {
+      final signedIn = _SignedInAuth();
+      final adapter = _PageAdapter([_loginPage, '<div>Zeugnis</div>']);
+      final sm = answering(signedIn, adapter);
+
+      final result = await sm.send('student/certificate', method: 'GET');
+      expect(result, '<div>Zeugnis</div>');
+      expect(signedIn.logins, 1);
+      expect(adapter.requests, 2);
+    });
+
+    test('still the sign-in page after that: the session is gone', () async {
+      final signedIn = _SignedInAuth();
+      final sm = answering(signedIn, _PageAdapter([_loginPage]));
+      var expired = 0;
+      sm.onSessionExpired = () => expired++;
+
+      await expectLater(
+        sm.send('student/certificate', method: 'GET'),
+        throwsA(isA<UnexpectedLogoutException>()),
+      );
+      expect(expired, 1);
     });
   });
 

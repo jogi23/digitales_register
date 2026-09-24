@@ -25,10 +25,19 @@ import 'package:dr/auth_service.dart';
 import 'package:dr/debug_log.dart';
 import 'package:dr/demo.dart';
 import 'package:dr/util.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:mutex/mutex.dart';
 
 // Declared here (instead of wrapper.dart) to avoid a circular import.
 class UnexpectedLogoutException implements Exception {}
+
+/// Whether [html] is the portal's sign-in page — what a page asked for
+/// comes back as once the session is gone. Told by its form, not by its
+/// title, which follows the language.
+@visibleForTesting
+bool isLoginPage(String html) =>
+    html.contains('class="login-container"') &&
+    html.contains('type="password"');
 
 /// Manages session lifetime, auto-logout, and authenticated HTTP requests.
 ///
@@ -374,10 +383,13 @@ class SessionManager {
     //	<script type="text/javascript">
     //window.location = "https://vinzentinum.digitalesregister.it/v2/login";
     //</script>
-
+    //
+    // A page asked for with GET — the certificate — gets the whole sign-in
+    // page instead, which the app took for the page and showed (#285).
     if (responseData is String &&
-        RegExp(r'^[\s\n]*<script type="text/javascript">\n?\s*window\.location = "https://.+\.digitalesregister.it/v2/login";\n?\s*</script>[\s\n]*$')
-            .hasMatch(responseData)) {
+        (RegExp(r'^[\s\n]*<script type="text/javascript">\n?\s*window\.location = "https://.+\.digitalesregister.it/v2/login";\n?\s*</script>[\s\n]*$')
+                .hasMatch(responseData) ||
+            isLoginPage(responseData))) {
       debugLog(
         LogCategory.session,
         'Weiterleitung zur Anmeldung auf $url'
