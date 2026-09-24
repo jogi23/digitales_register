@@ -88,6 +88,19 @@ class SessionManager {
   /// cancelling, each one left its own chain of checks behind.
   Timer? _sessionTimer;
 
+  /// Set once another session took this one's place. An account switch
+  /// used to leave the old session running: it went on extending itself,
+  /// signed in again when it ran out — and when that failed, its forced
+  /// logout logged out the app, which by then showed another account (#282).
+  bool _retired = false;
+
+  /// Stops this session for good: no more checks, extensions or logins,
+  /// and nothing reported to the app any more.
+  void retire() {
+    _retired = true;
+    _sessionTimer?.cancel();
+  }
+
   final _loginMutex = Mutex();
   DateTime? _lastUnexpectedLogout;
 
@@ -114,8 +127,11 @@ class SessionManager {
   Future<bool> ensureLoggedIn({
     bool isRetryAfterUnexpectedLogout = false,
   }) async {
+    if (_retired) return false;
     await _loginMutex.acquire();
     try {
+      // Retired while waiting for the lock.
+      if (_retired) return false;
       if (_serverLogoutTime != null && _serverNow.isAfter(_serverLogoutTime!)) {
         debugLog(LogCategory.session, 'Sitzung laut Server abgelaufen');
         _authService.forceLoggedOut();
@@ -287,6 +303,7 @@ class SessionManager {
     bool isRetryAfterUnexpectedLogout = false,
     void Function(Object error)? onError,
   }) async {
+    if (_retired) return null;
     if (_authService.demoMode) {
       final dynamic response = await getDemoResponse(url, args);
       // The demo answers the way the server would. Without reporting it the
@@ -403,6 +420,7 @@ class SessionManager {
 
   Future<void> _handleError(Exception e) async {
     log("Error while sending request", error: e);
+    if (_retired) return;
     if (e is TimeoutException || await refreshNoInternet()) {
       debugLog(
         LogCategory.session,
@@ -421,6 +439,7 @@ class SessionManager {
   /// few seconds, for as long as the account stays logged in.
   Future<void> _checkSession() async {
     _sessionTimer?.cancel();
+    if (_retired) return;
     try {
       if (!await _authService.loggedIn) return;
       if (_authService.demoMode) return;
@@ -439,6 +458,7 @@ class SessionManager {
     // Checks may overlap while one waits for the server; whichever finishes
     // last leaves the only timer.
     _sessionTimer?.cancel();
+    if (_retired) return;
     _sessionTimer = Timer(const Duration(seconds: 5), _checkSession);
   }
 
@@ -452,6 +472,9 @@ class SessionManager {
         },
       ),
     );
+    // Retired while the server was asked: whatever it says is no longer
+    // this session's to act on.
+    if (_retired) return;
     if (result == null) {
       // Without network there is no answer either, and no reason to log out:
       // the next request signs in again once the network is back.

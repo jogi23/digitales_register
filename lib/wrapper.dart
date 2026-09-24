@@ -166,6 +166,13 @@ class Wrapper {
   void logout({required bool hard, bool logoutForcedByServer = false}) =>
       _auth.logout(hard: hard, logoutForcedByServer: logoutForcedByServer);
 
+  /// Puts this session aside for a new one: it stops on its own and drops
+  /// its cookies, without a word to the server or to the app.
+  void retire() {
+    _session.retire();
+    _auth.logout(hard: false, logoutForcedByServer: true);
+  }
+
   // ── Backward-compatible static helper ────────────────────────────────────
 
   /// Delegates to [ConfigParser.parse]. Kept for test backward compatibility.

@@ -467,6 +467,40 @@ void main() {
         verifyNoLogout();
       });
 
+      test('a retired session stops checking and extending (#282)', () {
+        serverAnswers();
+        startSession(runningOut(), (async) {
+          sm.retire();
+          async.elapse(const Duration(minutes: 5));
+        });
+
+        // The first extension went out before the switch; none after it.
+        verify(() => dio.post<dynamic>(any(), data: any(named: 'data')))
+            .called(1);
+        verifyNoLogout();
+      });
+
+      test('a retired session never logs the app out (#282)', () {
+        // Its extension answered after the account switch: the server wants
+        // the old session gone, which is no reason to touch the new one.
+        final answer = Completer<Response<dynamic>>();
+        when(() => dio.post<dynamic>(any(), data: any(named: 'data')))
+            .thenAnswer((_) => answer.future);
+        startSession(runningOut(), (async) {
+          sm.retire();
+          answer.complete(
+            Response<dynamic>(
+              requestOptions: RequestOptions(),
+              data: <String, Object?>{'forceLogout': true},
+            ),
+          );
+          async.flushMicrotasks();
+        });
+
+        verifyNoLogout();
+        verifyNever(() => auth.forceLoggedOut());
+      });
+
       test('a new login leaves exactly one check waiting', () {
         startSession(_config(autoLogoutSeconds: 3600), (async) {
           sm.startSession(_config(autoLogoutSeconds: 3600));
@@ -626,6 +660,19 @@ void main() {
       setup.sm.storedLogin = () async => null;
       expect(await setup.sm.ensureLoggedIn(), isFalse);
       expect(setup.logins, isEmpty);
+    });
+
+    test('a retired session signs in no more (#282)', () async {
+      final setup = signedOut();
+      var expired = 0;
+      setup.sm.onSessionExpired = () => expired++;
+      setup.sm.retire();
+
+      expect(await setup.sm.ensureLoggedIn(), isFalse);
+      expect(await setup.sm.send('api/student/dashboard/dashboard'), isNull);
+      expect(setup.logins, isEmpty);
+      // Nor does it tell the app its session ran out: that is the new one's.
+      expect(expired, 0);
     });
 
     test('a password the server refuses is not sent again and again', () async {

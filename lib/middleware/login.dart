@@ -67,6 +67,7 @@ Future<void> _doLogout({required bool hard, bool forced = false}) async {
   providerContainer.read(isDemoProvider.notifier).state = false;
   if (hard) {
     unawaited(markAppAccount());
+    if (wrapper is! Mock) wrapper.retire();
     wrapper = Wrapper();
     _resetAllProviders();
     await _doLoad();

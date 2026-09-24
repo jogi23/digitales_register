@@ -181,6 +181,7 @@ Future<void> _doLoad() async {
   // By resetting the wrapper we clear all cookies.
   // However we don't want to reset the wrapper in tests
   if (wrapper is! Mock) {
+    wrapper.retire();
     wrapper = Wrapper()
       ..onNoInternet = (bool v) {
         providerContainer.read(noInternetProvider.notifier).setNoInternet(v);
