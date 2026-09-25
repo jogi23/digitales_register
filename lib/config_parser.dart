@@ -52,8 +52,27 @@ class ConfigParser {
         ..imgSource = imgSource
         ..currentSemesterMaybe = currentSemesterMaybe
         ..isStudentOrParent = isStudentOrParent
-        ..submissionMaxItems = _readSubmissionMaxItems(source),
+        ..submissionMaxItems = _readSubmissionMaxItems(source)
+        ..competenceScale = _readCompetenceScale(source),
     );
+  }
+
+  /// The most stars a competence scale may have and still fit a row.
+  static const maxCompetenceScale = 10;
+
+  /// How many stars the school rates competences on. The page carries it
+  /// twice: `competence_stars_scale: 4,` in the config block and
+  /// `var KOPETENZENSKALA=4` (misspelt so by the portal) for its own script.
+  /// The portal itself knows 4, 5, 6 and 10.
+  static int _readCompetenceScale(String source) {
+    final match = RegExp(
+            r"(?:competence_stars_scale\s*:|KOPETENZENSKALA\s*=)\s*(\d+)")
+        .firstMatch(source);
+    final value = int.tryParse(match?.group(1) ?? "");
+    if (value == null || value <= 0 || value > maxCompetenceScale) {
+      return Config.defaultCompetenceScale;
+    }
+    return value;
   }
 
   /// How many attachments a message may carry. The page carries it as

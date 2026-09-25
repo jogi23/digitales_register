@@ -16,6 +16,7 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:dr/app_state.dart';
+import 'package:dr/providers/config_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/ui/star_rating.dart';
 import 'package:flutter/material.dart';
@@ -30,12 +31,28 @@ class _TestSettingsNotifier extends SettingsNotifier {
 }
 
 void main() {
-  Widget stars(String starColor, {required Brightness brightness}) {
+  Widget stars(
+    String starColor, {
+    required Brightness brightness,
+    int? competenceScale,
+  }) {
     return ProviderScope(
       overrides: [
         settingsProvider.overrideWith(
           () => _TestSettingsNotifier(SettingsState(starColor: starColor)),
         ),
+        if (competenceScale != null)
+          configProvider.overrideWith(
+            (_) => Config(
+              (b) => b
+                ..userId = 1
+                ..autoLogoutSeconds = 60
+                ..fullName = 'Test'
+                ..imgSource = ''
+                ..isStudentOrParent = true
+                ..competenceScale = competenceScale,
+            ),
+          ),
       ],
       child: MaterialApp(
         theme: ThemeData(
@@ -91,6 +108,22 @@ void main() {
           .pumpWidget(stars(accentStarColorId, brightness: Brightness.light));
       expect(find.byIcon(Icons.star), findsNWidgets(4));
       expect(find.byIcon(Icons.star_border), findsNWidgets(2));
+    });
+
+    testWidgets('draws as many stars as the school rates on', (tester) async {
+      // Gusstav's school rates on four: 4 of 4, not 4 of 6 (#291).
+      await tester.pumpWidget(stars(accentStarColorId,
+          brightness: Brightness.light, competenceScale: 4));
+      expect(find.byIcon(Icons.star), findsNWidgets(4));
+      expect(find.byIcon(Icons.star_border), findsNothing);
+    });
+
+    testWidgets('fits a scale of ten', (tester) async {
+      await tester.pumpWidget(stars(accentStarColorId,
+          brightness: Brightness.light, competenceScale: 10));
+      expect(find.byIcon(Icons.star), findsNWidgets(4));
+      expect(find.byIcon(Icons.star_border), findsNWidgets(6));
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets('follows the accent colour by default', (tester) async {

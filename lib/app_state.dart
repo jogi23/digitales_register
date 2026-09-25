@@ -197,6 +197,10 @@ abstract class Config implements Built<Config, ConfigBuilder> {
   /// How many attachments one message may carry, from the school's
   /// `submission_maximum_number_items_allowed`.
   int get submissionMaxItems;
+
+  /// How many stars the school rates competences on, from the page's
+  /// `KOPETENZENSKALA` (sic).
+  int get competenceScale;
   static Serializer<Config> get serializer => _$configSerializer;
 
   factory Config([Function(ConfigBuilder b)? updates]) = _$Config;
@@ -206,8 +210,13 @@ abstract class Config implements Built<Config, ConfigBuilder> {
   /// What the portal falls back to where the page does not say.
   static const defaultSubmissionMaxItems = 8;
 
+  /// The scale the app always drew before it read the school's.
+  static const defaultCompetenceScale = 6;
+
   static void _initializeBuilder(ConfigBuilder builder) {
-    builder.submissionMaxItems = defaultSubmissionMaxItems;
+    builder
+      ..submissionMaxItems = defaultSubmissionMaxItems
+      ..competenceScale = defaultCompetenceScale;
   }
 }
 
