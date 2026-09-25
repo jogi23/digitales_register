@@ -380,6 +380,25 @@ void main() {
     );
   });
 
+  test('star all-subjects average is formatted out of the school scale',
+      () {
+    final subjects = _starGradesState.gradesState.subjects;
+    expect(
+      calculateAllSubjectsAverage(
+        subjects,
+        Semester.first,
+        const [],
+        GradingMode.stars,
+        competenceScale: 4,
+      ),
+      '5,5/4',
+    );
+  });
+
+  test('star value is formatted out of the school scale', () {
+    expect(formatStarValue(3.5, competenceScale: 4), '3,5/4★');
+  });
+
   test('star chart selection text shows star values and competence lines', () {
     final text = formatChartSelectionText(
       'KuTE',

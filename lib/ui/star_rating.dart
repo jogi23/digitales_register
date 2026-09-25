@@ -122,8 +122,7 @@ class StarRow extends ConsumerWidget {
     final color =
         resolveStarColor(context, ref.watch(settingsProvider).starColor);
     // Each school picks its own scale; the page tells which.
-    final starCount = ref.watch(configProvider)?.competenceScale ??
-        Config.defaultCompetenceScale;
+    final starCount = ref.watch(competenceScaleProvider);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: List.generate(

@@ -421,22 +421,29 @@ abstract class Subject implements Built<Subject, SubjectBuilder> {
   }
 
   /// The average as it is shown next to the subject, or null while nothing
-  /// has been graded — an "Ø /" says nothing worth the space.
-  String? formattedAverage(Semester semester) {
+  /// has been graded — an "Ø /" says nothing worth the space. Stars are out
+  /// of [competenceScale], the school's scale.
+  String? formattedAverage(
+    Semester semester, {
+    int competenceScale = Config.defaultCompetenceScale,
+  }) {
     if (detectGradingMode([this], semester) == GradingMode.stars) {
       return starAverage(semester) == null
           ? null
-          : starAverageFormatted(semester);
+          : starAverageFormatted(semester, competenceScale: competenceScale);
     }
     return average(semester) == null ? null : averageFormatted(semester);
   }
 
-  String starAverageFormatted(Semester semester) {
+  String starAverageFormatted(
+    Semester semester, {
+    int competenceScale = Config.defaultCompetenceScale,
+  }) {
     final avg = starAverage(semester);
     if (avg == null) {
       return "/";
     }
-    return "${gradeAverageFormat.format(avg)}/6";
+    return "${gradeAverageFormat.format(avg)}/$competenceScale";
   }
 
   static Map<String, List<DetailEntry>> sortByType(List<DetailEntry> entries) {
