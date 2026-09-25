@@ -19,3 +19,11 @@ import 'package:dr/app_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final configProvider = StateProvider<Config?>((_) => null);
+
+/// How many stars the signed-in school rates competences on — six until its
+/// page has been read.
+final competenceScaleProvider = Provider<int>(
+  (ref) =>
+      ref.watch(configProvider)?.competenceScale ??
+      Config.defaultCompetenceScale,
+);

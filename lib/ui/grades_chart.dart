@@ -187,7 +187,14 @@ class _GradesChartState extends State<GradesChart> {
       final line = _lines[spot.barIndex];
       final point = line.points[spot.spotIndex].value;
       selections.add(
-        _Selection(formatChartSelectionText(line.name, point), line.color),
+        _Selection(
+          formatChartSelectionText(
+            line.name,
+            point,
+            competenceScale: widget.competenceScale,
+          ),
+          line.color,
+        ),
       );
     }
     if (selections.isEmpty) return;
@@ -374,15 +381,22 @@ class _GradesChartState extends State<GradesChart> {
   }
 }
 
-String formatStarValue(double value) =>
-    '${gradeAverageFormat.format(value)}/6★';
+String formatStarValue(
+  double value, {
+  int competenceScale = Config.defaultCompetenceScale,
+}) =>
+    '${gradeAverageFormat.format(value)}/$competenceScale★';
 
-String formatChartSelectionText(String subject, GradeChartPoint point) {
+String formatChartSelectionText(
+  String subject,
+  GradeChartPoint point, {
+  int competenceScale = Config.defaultCompetenceScale,
+}) {
   if (point.mode == GradingMode.numeric) {
     return "$subject – ${point.type}: ${formatGradeFromInt(point.numericGrade)}";
   }
   return [
-    "$subject – ${point.type}: ${formatStarValue(point.value)}",
+    "$subject – ${point.type}: ${formatStarValue(point.value, competenceScale: competenceScale)}",
     if (point.competences?.isNotEmpty == true)
       ...point.competences!.map(
         (c) => "${c.typeName}: ${c.grade}★",

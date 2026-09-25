@@ -213,6 +213,21 @@ void main() {
       );
       expect(subject.formattedAverage(Semester.first), '5/6');
     });
+
+    test('formats the star average out of the school scale', () {
+      // A school rating on four showed "Ø 4/6" (#291).
+      final subject = _counted(
+        basicGrades: [],
+        detailGrades: [
+          _gradeDetail(competences: [_competence(), _competence()]),
+        ],
+        observations: [],
+      );
+      expect(
+        subject.formattedAverage(Semester.first, competenceScale: 4),
+        '5/4',
+      );
+    });
   });
 
   group('formatGradeFromString', () {

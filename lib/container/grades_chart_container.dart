@@ -108,8 +108,7 @@ class GradesChartContainer extends ConsumerWidget {
       gradingMode: gradingMode,
       isFullscreen: isFullscreen,
       goFullscreen: ref.read(appRouterProvider).showGradesChart,
-      competenceScale: ref.watch(configProvider)?.competenceScale ??
-          Config.defaultCompetenceScale,
+      competenceScale: ref.watch(competenceScaleProvider),
     );
   }
 }
