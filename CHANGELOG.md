@@ -15,6 +15,8 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 - Verbindung: Die Zeit „Zuletzt aktualisiert“ lag um die Zeitverschiebung — im Sommer zwei Stunden — in der Zukunft.
 - Benachrichtigungen: Neue Hausaufgaben und Prüfungen für diese und die nächste Woche melden sich jetzt als Systembenachrichtigung. Das Portal führt dazu keine eigene Benachrichtigung, deshalb blieb es bisher still. Ein Tippen öffnet die Hausaufgaben.
 - Hausaufgaben: Aufgaben für die nächste Woche erschienen erst, nachdem das Merkheft sie geladen hatte. Die Seite lädt jetzt beim Öffnen und Aktualisieren diese und die nächste Woche.
+- Benachrichtigungen: Die Schalter in den Einstellungen greifen jetzt für alle Arten, die das Portal kennt. Geteilte Mitteilungen, kritische Beobachtungen und Prüfungen meldeten sich bisher auch dann, wenn ihr Schalter aus war. Neu ist ein Schalter für Absenzen; ein Tippen darauf öffnet die Absenzen.
+- Benachrichtigungen: Ein Tippen auf eine Beobachtung in der Liste suchte eine Bewertung mit derselben Nummer und ließ die Benachrichtigung verschwinden.
 
 ## 1.4.1 — 2026-09-24
 

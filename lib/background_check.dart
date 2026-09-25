@@ -142,13 +142,23 @@ List<UpcomingHomework> homeworkOf(Iterable<CalendarDay> days) {
 
 /// Which of [homework] deserves a system notification — the same rules as
 /// [freshNotifications], under the setting for homework.
+///
+/// What the portal tells of itself, among its [unread] notifications, is
+/// left out: one notification of it is enough.
 List<UpcomingHomework> freshHomework({
   required Set<int>? known,
   required List<UpcomingHomework> homework,
   required SettingsState settings,
+  List<Notification> unread = const [],
 }) {
   if (known == null || !settings.notifyHomework) return const [];
-  return homework.where((h) => !known.contains(h.id)).toList();
+  final byPortal = {
+    for (final n in unread)
+      if (isHomeworkNotification(n)) n.objectId,
+  };
+  return homework
+      .where((h) => !known.contains(h.id) && !byPortal.contains(h.id))
+      .toList();
 }
 
 Future<Map<String, Set<int>>> _readKnown(
@@ -446,6 +456,7 @@ Future<void> checkForNewNotifications({
             known: announceAll ? const {} : knownHomework[key],
             homework: homework,
             settings: settings,
+            unread: result.unread,
           );
     debugLog(
       LogCategory.background,

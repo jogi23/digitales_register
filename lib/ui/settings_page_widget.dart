@@ -81,6 +81,7 @@ class SettingsPageWidget extends StatefulWidget {
   final OnSettingChanged<bool> onSetNotifyGrades;
   final OnSettingChanged<bool> onSetNotifyObservations;
   final OnSettingChanged<bool> onSetNotifyHomework;
+  final OnSettingChanged<bool> onSetNotifyAbsences;
   final VoidCallback onShowProfile;
   final SettingsViewModel vm;
 
@@ -121,6 +122,7 @@ class SettingsPageWidget extends StatefulWidget {
     required this.onSetNotifyGrades,
     required this.onSetNotifyObservations,
     required this.onSetNotifyHomework,
+    required this.onSetNotifyAbsences,
   });
 
   @override
@@ -403,6 +405,13 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
                 ? widget.onSetNotifyHomework
                 : null,
             value: widget.vm.notifyHomework,
+          ),
+          SwitchListTile.adaptive(
+            title: Text(tr(context).settingsNotificationsTypeAbsences),
+            onChanged: widget.vm.notificationsEnabled
+                ? widget.onSetNotifyAbsences
+                : null,
+            value: widget.vm.notifyAbsences,
           ),
           // Next to the account switch it is about; the demo has no second
           // account to switch to.

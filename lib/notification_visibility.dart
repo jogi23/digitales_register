@@ -19,16 +19,18 @@ import 'package:dr/app_state.dart';
 import 'package:dr/data.dart';
 import 'package:dr/notification_type.dart';
 
+/// Whether the settings let [n] through. Kinds no setting speaks for — a
+/// changed password, a note of the school's own — always do.
 bool isNotificationTypeEnabled(Notification n, SettingsState settings) {
+  if (isMessageNotification(n)) return settings.notifyMessages;
+  if (isHomeworkNotification(n)) return settings.notifyHomework;
+  if (isAbsenceNotification(n)) return settings.notifyAbsences;
   switch (normalizedNotificationType(n.type)) {
-    case notificationTypeMessage:
-      return settings.notifyMessages;
     case notificationTypeGrade:
       return settings.notifyGrades;
     case notificationTypeObservation:
+    case notificationTypeCriticalObservation:
       return settings.notifyObservations;
-    case notificationTypeHomework:
-      return settings.notifyHomework;
     case notificationTypeEntry:
     case notificationTypeClassbook:
       return settings.notifyClassbook;

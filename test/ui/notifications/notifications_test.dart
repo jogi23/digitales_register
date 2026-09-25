@@ -415,6 +415,48 @@ void main() {
     expect(container.read(notificationsProvider).notifications, isEmpty);
   });
 
+  testWidgets('an observation is not opened as a grade (#290)',
+      (WidgetTester tester) async {
+    // Its object id is no grade's: revealing it found nothing, and the
+    // notification was gone.
+    wrapper = MockWrapper();
+    final appRouter = MockAppRouter();
+    final notification = Notification(
+      (b) => b
+        ..id = 5
+        ..title = "Neue Beobachtung"
+        ..timeSent = UtcDateTime(2021, 3, 12)
+        ..objectId = 18
+        ..type = "observation",
+    );
+    final container = ProviderContainer(
+      overrides: [
+        notificationsProvider.overrideWith(
+          () => _TestNotificationsNotifier(
+            NotificationsState(notifications: [notification]),
+          ),
+        ),
+        appRouterProvider.overrideWith((ref) => appRouter),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(
+          home: NotificationPageContainer(),
+          theme: ThemeData(primarySwatch: Colors.deepOrange),
+        ),
+      ),
+    );
+    await tester.tap(find.text("Neue Beobachtung"));
+    await tester.pumpAndSettle();
+
+    verifyNever(() => appRouter.revealGrade(any()));
+    expect(container.read(notificationsProvider).notifications, [notification]);
+  });
+
   group('message notification', () {
     late MockAppRouter appRouter;
     late ProviderContainer container;

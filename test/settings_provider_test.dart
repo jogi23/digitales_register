@@ -317,6 +317,7 @@ void main() {
       expect(s.notifyGrades, isTrue);
       expect(s.notifyObservations, isTrue);
       expect(s.notifyHomework, isTrue);
+      expect(s.notifyAbsences, isTrue);
     });
 
     test('poll interval survives a restart', () async {
@@ -327,6 +328,16 @@ void main() {
       final after = _makeContainer();
       await after.read(settingsProvider.notifier).loadGlobal();
       expect(after.read(settingsProvider).notificationPollMinutes, 180);
+    });
+
+    test('the absences switch survives a restart', () async {
+      final before = _makeContainer();
+      before.read(settingsProvider.notifier).setNotifyAbsences(false);
+      await pumpEventQueue();
+
+      final after = _makeContainer();
+      await after.read(settingsProvider.notifier).loadGlobal();
+      expect(after.read(settingsProvider).notifyAbsences, isFalse);
     });
 
     test('invalid stored interval falls back to 30 minutes', () {

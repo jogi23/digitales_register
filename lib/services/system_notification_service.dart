@@ -186,7 +186,8 @@ void _open(SystemNotificationTarget target, {int framesLeft = 10}) {
     'Öffnet ${target.type} ${objectId ?? '-'}${target.id == 0 ? ' (Test)' : ''}',
   );
   switch (normalizedNotificationType(target.type)) {
-    case notificationTypeMessage when objectId != null:
+    case notificationTypeMessage || notificationTypeMessageShared
+        when objectId != null:
       router.showMessage(objectId);
       _whenSignedIn(
         () {
@@ -204,9 +205,17 @@ void _open(SystemNotificationTarget target, {int framesLeft = 10}) {
       _whenSignedIn(() {
         if (fromPortal) unawaited(notifications.markAsRead(target.id));
       });
-    case notificationTypeHomework:
+    case notificationTypeHomework || notificationTypeExam:
       // The overview loads the weeks itself, the new entry among them.
       router.showHomeworkOverview();
+      _whenSignedIn(() {
+        if (fromPortal) unawaited(notifications.markAsRead(target.id));
+      });
+    case notificationTypeAbsence ||
+          notificationTypeAbsenceReason ||
+          notificationTypeAbsenceAdvance ||
+          notificationTypeAbsenceReasonAdvanceForClass:
+      router.showAbsences();
       _whenSignedIn(() {
         if (fromPortal) unawaited(notifications.markAsRead(target.id));
       });

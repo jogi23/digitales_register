@@ -208,6 +208,21 @@ void main() {
       );
     });
 
+    test('leaves out what the portal tells of itself', () {
+      // The portal has a kind of its own for homework; one notification of
+      // the same entry is enough.
+      final fresh = freshHomework(
+        known: const {},
+        homework: homework,
+        settings: settings,
+        // Its object id is the entry's id: 7.
+        unread: [
+          _notification(1, type: 'homeWork').rebuild((b) => b..objectId = 7),
+        ],
+      );
+      expect(fresh.map((h) => h.id), [8]);
+    });
+
     test('stays quiet with homework switched off in the settings', () {
       expect(
         freshHomework(

@@ -682,6 +682,7 @@
   "settingsNotificationsTypeMessages": "Mitteilungen",
   "settingsNotificationsTypeGrades": "Bewertungen",
   "settingsNotificationsTypeObservations": "Beobachtungen",
+  "settingsNotificationsTypeAbsences": "Absenzen",
   "settingsNotificationsTypeHomework": "Hausaufgaben",
   "notificationsEveryMinutes": "Alle {minutes, plural, one {{minutes} Minute} other {{minutes} Minuten}}",
   "@notificationsEveryMinutes": {

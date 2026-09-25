@@ -397,6 +397,7 @@ class SettingsState {
     this.notifyGrades = true,
     this.notifyObservations = true,
     this.notifyHomework = true,
+    this.notifyAbsences = true,
   })  : ignoreForGradesAverage = ignoreForGradesAverage ?? [],
         classbookSubjects = classbookSubjects ?? [];
 
@@ -494,6 +495,7 @@ class SettingsState {
   final bool notifyGrades;
   final bool notifyObservations;
   final bool notifyHomework;
+  final bool notifyAbsences;
 
   SettingsState copyWith({
     bool? noPasswordSaving,
@@ -534,6 +536,7 @@ class SettingsState {
     bool? notifyGrades,
     bool? notifyObservations,
     bool? notifyHomework,
+    bool? notifyAbsences,
   }) =>
       SettingsState(
         noPasswordSaving: noPasswordSaving ?? this.noPasswordSaving,
@@ -588,6 +591,7 @@ class SettingsState {
         notifyGrades: notifyGrades ?? this.notifyGrades,
         notifyObservations: notifyObservations ?? this.notifyObservations,
         notifyHomework: notifyHomework ?? this.notifyHomework,
+        notifyAbsences: notifyAbsences ?? this.notifyAbsences,
       );
 
   Map<String, dynamic> toJson() => {
@@ -628,6 +632,7 @@ class SettingsState {
         'notifyGrades': notifyGrades,
         'notifyObservations': notifyObservations,
         'notifyHomework': notifyHomework,
+        'notifyAbsences': notifyAbsences,
       };
 
   factory SettingsState.fromJson(Map<dynamic, dynamic> json) => SettingsState(
@@ -701,6 +706,7 @@ class SettingsState {
         notifyGrades: json['notifyGrades'] as bool? ?? true,
         notifyObservations: json['notifyObservations'] as bool? ?? true,
         notifyHomework: json['notifyHomework'] as bool? ?? true,
+        notifyAbsences: json['notifyAbsences'] as bool? ?? true,
       );
 
   /// The settings that belong to the app rather than to one account:
@@ -744,6 +750,7 @@ class SettingsState {
     'notifyGrades',
     'notifyObservations',
     'notifyHomework',
+    'notifyAbsences',
   };
 
   /// Only the app-wide settings, for storing them on their own.
@@ -810,7 +817,8 @@ class SettingsState {
         other.notifyMessages == notifyMessages &&
         other.notifyGrades == notifyGrades &&
         other.notifyObservations == notifyObservations &&
-        other.notifyHomework == notifyHomework;
+        other.notifyHomework == notifyHomework &&
+        other.notifyAbsences == notifyAbsences;
   }
 
   @override
@@ -852,6 +860,7 @@ class SettingsState {
         notifyGrades,
         notifyObservations,
         notifyHomework,
+        notifyAbsences,
       ]);
 }
 

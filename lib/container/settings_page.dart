@@ -76,6 +76,7 @@ class SettingsPageContainer extends ConsumerWidget {
       onSetNotifyGrades: notifier.setNotifyGrades,
       onSetNotifyObservations: notifier.setNotifyObservations,
       onSetNotifyHomework: notifier.setNotifyHomework,
+      onSetNotifyAbsences: notifier.setNotifyAbsences,
     );
   }
 }
@@ -117,6 +118,7 @@ class SettingsViewModel {
   final bool notifyGrades;
   final bool notifyObservations;
   final bool notifyHomework;
+  final bool notifyAbsences;
 
   /// Null follows the device language.
   final String? language;
@@ -155,6 +157,7 @@ class SettingsViewModel {
     this.notifyGrades = true,
     this.notifyObservations = true,
     this.notifyHomework = true,
+    this.notifyAbsences = true,
     this.language,
     required this.allSubjects,
     required this.ignoreForGradesAverage,
@@ -194,6 +197,7 @@ class SettingsViewModel {
         notifyGrades: s.notifyGrades,
         notifyObservations: s.notifyObservations,
         notifyHomework: s.notifyHomework,
+        notifyAbsences: s.notifyAbsences,
         language: s.language,
         allSubjects: allSubjects,
         ignoreForGradesAverage: s.ignoreForGradesAverage,

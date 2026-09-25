@@ -146,16 +146,32 @@ class NotificationWidget extends StatelessWidget {
   });
 
   bool get _isMessage =>
-      notification.type == "message" && notification.objectId != null;
+      isMessageNotification(notification) && notification.objectId != null;
 
+  // Only a grade: the object id of an observation or an absence is no grade,
+  // and revealing it found nothing — while the notification was gone (#290).
   bool get _isGrade =>
-      !_isMessage && notification.objectId != null && goToGrade != null;
+      normalizedNotificationType(notification.type) == notificationTypeGrade &&
+      notification.objectId != null &&
+      goToGrade != null;
 
-  IconData get _typeIcon => switch (normalizedNotificationType(notification.type)) {
-        notificationTypeMessage => Icons.mail_outline,
+  IconData get _typeIcon =>
+      switch (normalizedNotificationType(notification.type)) {
+        notificationTypeMessage ||
+        notificationTypeMessageShared =>
+          Icons.mail_outline,
         notificationTypeGrade => Icons.grading_outlined,
-        notificationTypeObservation => Icons.visibility_outlined,
-        notificationTypeHomework => Icons.assignment_outlined,
+        notificationTypeObservation ||
+        notificationTypeCriticalObservation =>
+          Icons.visibility_outlined,
+        notificationTypeHomework ||
+        notificationTypeExam =>
+          Icons.assignment_outlined,
+        notificationTypeAbsence ||
+        notificationTypeAbsenceReason ||
+        notificationTypeAbsenceAdvance ||
+        notificationTypeAbsenceReasonAdvanceForClass =>
+          Icons.event_busy_outlined,
         _ => Icons.notifications_outlined,
       };
 
