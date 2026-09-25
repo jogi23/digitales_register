@@ -31,7 +31,8 @@ class SystemNotificationTarget {
   final String user;
   final String url;
 
-  /// The id of the notification on the portal.
+  /// The id of the notification on the portal — or, below zero, of the
+  /// system notification about homework ([homeworkNotificationId]).
   final int id;
   final String? type;
   final int? objectId;
@@ -99,6 +100,12 @@ const _channelId = 'register_notifications';
 /// Portal ids are positive; the summary of a group never meets one of them.
 const _summaryId = -1;
 
+/// The id of the system notification about the homework [homeworkId]: below
+/// the summary, so it meets neither a portal id nor the summary.
+int homeworkNotificationId(int homeworkId) => _summaryId - 1 - homeworkId;
+
+bool _isHomework(int id) => id < _summaryId;
+
 final _plugin = FlutterLocalNotificationsPlugin();
 
 AndroidFlutterLocalNotificationsPlugin? get _android =>
@@ -165,11 +172,16 @@ AndroidNotificationDetails _details(
 /// Brings the account's system notifications in line with the portal: shows
 /// [fresh], takes back those no longer in [unreadIds] and keeps a summary on
 /// top of whatever is left.
+///
+/// Homework has no unread state on the portal: its notifications go once it
+/// is no longer among [homeworkIds] — its week has passed, or it was deleted.
+/// With [homeworkIds] null, its weeks were not fetched and they all stay.
 Future<void> syncAccountNotifications({
   required L l,
   required NotifiedAccount account,
   required List<Notification> fresh,
   required Set<int> unreadIds,
+  Set<int>? homeworkIds,
 }) async {
   final android = _android;
   if (android == null) return;
@@ -208,7 +220,10 @@ Future<void> syncAccountNotifications({
   }
   var withdrawn = 0;
   for (final id in shown.keys.toList()) {
-    if (unreadIds.contains(id)) continue;
+    final stays = _isHomework(id)
+        ? homeworkIds == null || homeworkIds.contains(id)
+        : unreadIds.contains(id);
+    if (stays) continue;
     await android.cancel(id: id, tag: account.key);
     shown.remove(id);
     withdrawn++;

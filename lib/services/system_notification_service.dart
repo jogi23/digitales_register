@@ -177,12 +177,13 @@ void _open(SystemNotificationTarget target, {int framesLeft = 10}) {
   final router = providerContainer.read(appRouterProvider);
   final notifications = providerContainer.read(notificationsProvider.notifier);
   final objectId = target.objectId;
-  // Id 0 is the test notification of debug builds: no notification on the
-  // portal stands behind it, so there is nothing to mark there.
+  // Id 0 is the test notification of debug builds, negative ids are homework
+  // found by the check itself: no notification on the portal stands behind
+  // them, so there is nothing to mark there.
   final fromPortal = target.id > 0;
   debugLog(
     LogCategory.systemNotification,
-    'Öffnet ${target.type} ${objectId ?? '-'}${fromPortal ? '' : ' (Test)'}',
+    'Öffnet ${target.type} ${objectId ?? '-'}${target.id == 0 ? ' (Test)' : ''}',
   );
   switch (normalizedNotificationType(target.type)) {
     case notificationTypeMessage when objectId != null:
@@ -200,6 +201,12 @@ void _open(SystemNotificationTarget target, {int framesLeft = 10}) {
       );
     case notificationTypeGrade when objectId != null:
       router.revealGrade(objectId);
+      _whenSignedIn(() {
+        if (fromPortal) unawaited(notifications.markAsRead(target.id));
+      });
+    case notificationTypeHomework:
+      // The overview loads the weeks itself, the new entry among them.
+      router.showHomeworkOverview();
       _whenSignedIn(() {
         if (fromPortal) unawaited(notifications.markAsRead(target.id));
       });

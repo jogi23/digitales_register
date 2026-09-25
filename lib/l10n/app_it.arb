@@ -681,6 +681,7 @@
   },
   "systemNotificationsChannel": "Nuove voci",
   "systemNotificationsChannelDescription": "Nuove comunicazioni, valutazioni e altre voci dal registro",
+  "systemNotificationsHomeworkDue": "{type} per {date}",
   "systemNotificationsCount": "{count, plural, one {{count} notifica} other {{count} notifiche}}",
   "settingsStayLoggedInOffHint": "Disattivato: accesso a ogni avvio, nessun cambio di account",
   "settingsNotificationsNeedStayLoggedIn": "Le notifiche Android richiedono «Resta connesso»; fino ad allora solo nell’app"

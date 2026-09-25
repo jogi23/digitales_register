@@ -15,9 +15,12 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'dart:async';
+
 import 'package:built_collection/built_collection.dart';
-import 'package:collection/collection.dart';
 import 'package:dr/app_state.dart';
+import 'package:dr/background_check.dart' show homeworkOf, rememberSeenHomework;
+import 'package:dr/calendar_parser.dart';
 import 'package:dr/data.dart';
 import 'package:dr/middleware/middleware.dart'
     show canOpenFile, downloadFile, openFile, wrapper;
@@ -47,9 +50,9 @@ class CalendarNotifier extends Notifier<CalendarState> {
         args: {"startDate": DateFormat("yyyy-MM-dd").format(monday)},
       );
       if (data != null) {
-        state = state.rebuild(
-          (b) => b.days.addAll(_parseLoaded(data as Map<String, dynamic>)),
-        );
+        final days = _parseLoaded(data as Map<String, dynamic>);
+        state = state.rebuild((b) => b.days.addAll(days));
+        _rememberHomework(days.values);
       }
     } finally {
       // Also on failure: a week stuck in "loading" would spin forever.
@@ -57,8 +60,33 @@ class CalendarNotifier extends Notifier<CalendarState> {
     }
   }
 
+  /// Homework the app has loaded is no news: the background check need not
+  /// bring it up again as a system notification (#288).
+  void _rememberHomework(Iterable<CalendarDay> days) {
+    final user = wrapper.user;
+    final url = wrapper.url;
+    if (user == null || url == null) return;
+    unawaited(rememberSeenHomework(
+      user: user,
+      url: url,
+      ids: homeworkOf(days).map((h) => h.id),
+    ));
+  }
+
   /// Loads the week every page built on the calendar opens with.
   Future<void> loadCurrentWeek() => load(state.shownMonday);
+
+  /// Loads this week and the next — what the homework overview is about.
+  ///
+  /// It lists whatever weeks are loaded; with this one alone, homework due
+  /// next week stayed hidden until another page happened to load it (#289).
+  Future<void> loadUpcomingWeeks() {
+    final monday = toMonday(now);
+    return Future.wait([
+      load(monday),
+      load(monday.add(const Duration(days: 7))),
+    ]);
+  }
 
   void setCurrentMonday(UtcDateTime monday) {
     final selectedDate = state.selection?.date;
@@ -67,8 +95,7 @@ class CalendarNotifier extends Notifier<CalendarState> {
         (b) => b
           ..currentMonday = monday
           ..selection = CalendarSelection(
-            (b) => b
-              ..date = UtcDateTime(monday.year, monday.month, monday.day),
+            (b) => b..date = UtcDateTime(monday.year, monday.month, monday.day),
           ).toBuilder(),
       );
     } else {
@@ -186,198 +213,8 @@ class CalendarNotifier extends Notifier<CalendarState> {
   Map<UtcDateTime, CalendarDay> parseLoaded(Map<String, dynamic> data) =>
       _parseLoaded(data);
 
-  Map<UtcDateTime, CalendarDay> _parseLoaded(Map<String, dynamic> data) {
-    return data.map(
-      (k, dynamic e) {
-        final date = UtcDateTime.parse(k);
-        return MapEntry(
-          date,
-          tryParse<CalendarDayBuilder, dynamic>(
-            e,
-            (dynamic e) => _parseCalendarDay(
-              getMap(getMap(e)!.values.first.values.first)!,
-              date,
-              state.days[date],
-            ),
-          ).build(),
-        );
-      },
-    );
-  }
-
-  CalendarDayBuilder _parseCalendarDay(
-    Map day,
-    UtcDateTime date,
-    CalendarDay? oldDay,
-  ) {
-    return CalendarDayBuilder()
-      ..lastFetched = UtcDateTime.now()
-      ..date = date
-      ..hours = ListBuilder(
-        (day.values.toList()
-              ..removeWhere((dynamic e) => e == null || e["isLesson"] == 0)
-              ..sort(
-                (dynamic a, dynamic b) => getInt(a["hour"])!.compareTo(
-                  getInt(b["hour"])!,
-                ),
-              ))
-            .map<CalendarHour>(
-          (dynamic h) => tryParse(
-            getMap(h)!,
-            (Map map) => _parseHour(map, date, oldDay),
-          ).build(),
-        ),
-      );
-  }
-
-  CalendarHourBuilder _parseHour(
-    Map hour,
-    UtcDateTime date,
-    CalendarDay? oldDay,
-  ) {
-    final lesson = getMap(hour["lesson"])!;
-    final timeSpans = ListBuilder<TimeSpan>();
-    for (final linkedLesson in <dynamic>[
-      lesson,
-      ...getList(lesson["linkedHours"]) ?? <dynamic>[],
-    ]) {
-      final date = tryParse(
-        getString(linkedLesson["date"])!,
-        (String s) => UtcDateTime.parse(s),
-      );
-      UtcDateTime parseTime(UtcDateTime date, Map timeObject) {
-        final h = getInt(timeObject["h"])!;
-        final m = getInt(timeObject["m"])!;
-        return UtcDateTime(date.year, date.month, date.day, h, m);
-      }
-
-      final from = parseTime(date, getMap(linkedLesson["timeStartObject"])!);
-      final to = parseTime(date, getMap(linkedLesson["timeEndObject"])!);
-      timeSpans.add(
-        TimeSpan((b) => b
-          ..from = from
-          ..to = to),
-      );
-    }
-
-    final fromHour = getInt(lesson["hour"])!;
-    final toHour = getInt(lesson["toHour"])!;
-
-    final oldHour = oldDay?.hours.firstWhereOrNull(
-      (hour) =>
-          (hour.fromHour <= fromHour && hour.toHour >= toHour) ||
-          (hour.fromHour >= fromHour && hour.toHour <= toHour),
-    );
-
-    return CalendarHourBuilder()
-      ..fromHour = fromHour
-      ..toHour = toHour
-      ..timeSpans = timeSpans
-      ..rooms = ListBuilder(
-        getList(lesson["rooms"])!
-            .map<String>((dynamic r) => r["name"] as String),
-      )
-      ..subject = getString(lesson["subject"]["name"])
-      ..classId = getInt(lesson["classId"])
-      ..subjectId = getInt(lesson["subject"]["id"])
-      ..teachers = ListBuilder(
-        getList(lesson["teachers"])!.map<Teacher>(
-          (dynamic r) => Teacher(
-            (b) => b
-              ..firstName = getString(r["firstName"])
-              ..lastName = getString(r["lastName"]),
-          ),
-        ),
-      )
-      ..homeworkExams = ListBuilder(
-        (lesson["homeworkExams"] as List).map<HomeworkExam>(
-          (dynamic e) => tryParse(getMap(e)!, _parseHomeworkExam),
-        ),
-      )
-      ..lessonContents = ListBuilder(
-        (lesson["lessonContents"] as List).map<LessonContent>(
-          (dynamic e) => tryParse(
-            getMap(e)!,
-            (Map map) => _parseLessonContent(map, date, oldHour),
-          ),
-        ),
-      );
-  }
-
-  HomeworkExam _parseHomeworkExam(Map homeworkExam) {
-    return HomeworkExam(
-      (b) => b
-        ..deadline =
-            UtcDateTime.parse(getString(homeworkExam["deadline"])!)
-        ..hasGradeGroupSubmissions =
-            getBool(homeworkExam["hasGradeGroupSubmissions"])
-        ..hasGrades = getBool(homeworkExam["hasGrades"])
-        ..warning = homeworkExam["homework"] == 0
-        ..homework = homeworkExam["homework"] != 0
-        ..id = getInt(homeworkExam["id"])
-        ..name = getString(homeworkExam["name"])
-        ..online = homeworkExam["online"] != 0
-        ..typeId = getInt(homeworkExam["typeId"])
-        ..typeName = getString(homeworkExam["typeName"]),
-    );
-  }
-
-  LessonContent _parseLessonContent(
-    Map lessonContent,
-    UtcDateTime date,
-    CalendarHour? oldHour,
-  ) {
-    return LessonContent(
-      (b) => b
-        ..name = getString(lessonContent["name"])
-        ..typeName = getString(lessonContent["typeName"])
-        ..submissions = tryParse(
-          getList(lessonContent["lessonContentSubmissions"]),
-          (List? input) {
-            return input
-                ?.map(
-                  (dynamic submission) => _parseLessonContentSubmission(
-                    getMap(submission)!,
-                    date,
-                    oldHour,
-                  ),
-                )
-                .whereType<LessonContentSubmission>()
-                .toBuiltList()
-                .toBuilder();
-          },
-        ),
-    );
-  }
-
-  LessonContentSubmission? _parseLessonContentSubmission(
-    Map submission,
-    UtcDateTime date,
-    CalendarHour? oldHour,
-  ) {
-    final type = getString(submission["type"]);
-    if (type != "file") return null;
-    final originalName = getString(submission["originalName"]);
-    final id = getString(submission["id"]);
-    final fileAvailable = oldHour?.lessonContents.any(
-          (content) => content.submissions.any(
-            (s) =>
-                s.originalName == originalName &&
-                s.id == id &&
-                s.fileAvailable,
-          ),
-        ) ??
-        false;
-    return LessonContentSubmission(
-      (b) => b
-        ..type = type
-        ..originalName = originalName
-        ..id = id
-        ..lessonContentId = getString(submission["lessonContentId"])
-        ..date = date
-        ..fileAvailable = fileAvailable,
-    );
-  }
+  Map<UtcDateTime, CalendarDay> _parseLoaded(Map<String, dynamic> data) =>
+      parseCalendarWeek(data, previous: state.days.toMap());
 }
 
 final calendarProvider =

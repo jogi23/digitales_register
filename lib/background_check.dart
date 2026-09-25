@@ -20,6 +20,7 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:dr/app_state.dart';
+import 'package:dr/calendar_parser.dart';
 import 'package:dr/data.dart';
 import 'package:dr/debug_log.dart';
 import 'package:dr/l10n/l10n.dart';
@@ -32,18 +33,25 @@ import 'package:dr/util.dart';
 import 'package:dr/wrapper.dart';
 import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
 
 // Looks for new notifications while the app is closed, on Android only: the
 // portal pushes nothing, so every stored account is signed into now and then
 // and asked what is unread. What was not there the last time turns into a
-// system notification.
+// system notification. So does homework that was not there: the portal
+// keeps no notification about it (#288).
 
 const _taskName = 'dr.notificationCheck';
 
 /// The ids each account had unread at the last look, by [notificationAccountKey].
 const _knownPrefsKey = 'system_notifications_known';
+
+/// The homework each account had this week and the next at the last look,
+/// by [notificationAccountKey].
+const _knownHomeworkPrefsKey = 'system_notifications_known_homework';
 
 /// The account the app is signed into while it is in use, and since when.
 const _appAccountPrefsKey = 'system_notifications_app_account';
@@ -103,8 +111,51 @@ List<Notification> freshNotifications({
       .toList();
 }
 
-Future<Map<String, Set<int>>> _readKnown(SharedPreferences prefs) async {
-  final raw = prefs.getString(_knownPrefsKey);
+/// A homework or an exam as its system notification tells of it: [date] is
+/// the lesson it is entered for.
+typedef UpcomingHomework = ({
+  int id,
+  UtcDateTime date,
+  String subject,
+  String name,
+  String typeName,
+});
+
+/// The homework and exams of [days], each once — an entry for a double
+/// lesson may stand in both hours.
+List<UpcomingHomework> homeworkOf(Iterable<CalendarDay> days) {
+  final seen = <int>{};
+  return [
+    for (final day in days)
+      for (final hour in day.hours)
+        for (final h in hour.homeworkExams)
+          if (seen.add(h.id))
+            (
+              id: h.id,
+              date: day.date,
+              subject: hour.subject,
+              name: h.name,
+              typeName: h.typeName,
+            ),
+  ];
+}
+
+/// Which of [homework] deserves a system notification — the same rules as
+/// [freshNotifications], under the setting for homework.
+List<UpcomingHomework> freshHomework({
+  required Set<int>? known,
+  required List<UpcomingHomework> homework,
+  required SettingsState settings,
+}) {
+  if (known == null || !settings.notifyHomework) return const [];
+  return homework.where((h) => !known.contains(h.id)).toList();
+}
+
+Future<Map<String, Set<int>>> _readKnown(
+  SharedPreferences prefs, [
+  String prefsKey = _knownPrefsKey,
+]) async {
+  final raw = prefs.getString(prefsKey);
   if (raw == null) return {};
   try {
     final decoded = json.decode(raw) as Map<String, dynamic>;
@@ -118,16 +169,16 @@ Future<Map<String, Set<int>>> _readKnown(SharedPreferences prefs) async {
 
 Future<void> _writeKnown(
   SharedPreferences prefs,
-  Map<String, Set<int>> known,
-) =>
+  Map<String, Set<int>> known, [
+  String prefsKey = _knownPrefsKey,
+]) =>
     prefs.setString(
-      _knownPrefsKey,
+      prefsKey,
       json.encode(known.map((k, v) => MapEntry(k, v.toList()))),
     );
 
-/// Remembers that the app showed these notifications, so the next check in
-/// the background does not announce them again.
-Future<void> rememberSeenNotifications({
+Future<void> _rememberSeen(
+  String prefsKey, {
   required String user,
   required String url,
   required Iterable<int> ids,
@@ -136,11 +187,29 @@ Future<void> rememberSeenNotifications({
   final prefs = await SharedPreferences.getInstance();
   // The background check writes from an isolate of its own.
   await prefs.reload();
-  final known = await _readKnown(prefs);
+  final known = await _readKnown(prefs, prefsKey);
   final key = notificationAccountKey(user, url);
   known[key] = {...?known[key], ...ids};
-  await _writeKnown(prefs, known);
+  await _writeKnown(prefs, known, prefsKey);
 }
+
+/// Remembers that the app showed these notifications, so the next check in
+/// the background does not announce them again.
+Future<void> rememberSeenNotifications({
+  required String user,
+  required String url,
+  required Iterable<int> ids,
+}) =>
+    _rememberSeen(_knownPrefsKey, user: user, url: url, ids: ids);
+
+/// Remembers that the app loaded this homework, so the next check in the
+/// background does not announce it again.
+Future<void> rememberSeenHomework({
+  required String user,
+  required String url,
+  required Iterable<int> ids,
+}) =>
+    _rememberSeen(_knownHomeworkPrefsKey, user: user, url: url, ids: ids);
 
 /// What [markAppAccount] stores: [key] as the account in use since [now].
 @visibleForTesting
@@ -309,6 +378,8 @@ Future<void> checkForNewNotifications({
     return;
   }
   final l = _translations(settings);
+  // Flutter's localizations set the dates up in the app, not here.
+  await initializeDateFormatting(l.localeName);
 
   final rawProfiles = prefs.getString(_profilesPrefsKey);
   final profiles = rawProfiles == null
@@ -327,6 +398,10 @@ Future<void> checkForNewNotifications({
   final atStart = await _readKnown(prefs);
   final known = {
     for (final e in atStart.entries) e.key: {...e.value}
+  };
+  final homeworkAtStart = await _readKnown(prefs, _knownHomeworkPrefsKey);
+  final knownHomework = {
+    for (final e in homeworkAtStart.entries) e.key: {...e.value}
   };
 
   for (final account in accounts) {
@@ -364,12 +439,21 @@ Future<void> checkForNewNotifications({
             unread: result.unread,
             settings: settings,
           );
+    final homework = result.homework;
+    final freshHw = homework == null
+        ? const <UpcomingHomework>[]
+        : freshHomework(
+            known: announceAll ? const {} : knownHomework[key],
+            homework: homework,
+            settings: settings,
+          );
     debugLog(
       LogCategory.background,
       testNotification
           ? '$tag: letzte Mitteilung als Test'
           : '$tag: ${result.unread.length} ungelesen, ${fresh.length} neu'
-              '${known[key] == null ? ' (zum ersten Mal)' : ''}',
+              '${known[key] == null ? ' (zum ersten Mal)' : ''}; '
+              '${_homeworkLog(homework, freshHw, knownHomework[key])}',
     );
     await syncAccountNotifications(
       l: l,
@@ -379,10 +463,19 @@ Future<void> checkForNewNotifications({
         name: alias ?? result.fullName ?? account.user,
         key: key,
       ),
-      fresh: fresh,
+      fresh: [
+        ...fresh,
+        for (final h in freshHw) _homeworkNotification(l, h),
+      ],
       unreadIds: {for (final n in result.unread) n.id},
+      homeworkIds: homework == null
+          ? null
+          : {for (final h in homework) homeworkNotificationId(h.id)},
     );
     known[key] = {for (final n in result.unread) n.id};
+    if (homework != null) {
+      knownHomework[key] = {for (final h in homework) h.id};
+    }
   }
   debugLog(
     LogCategory.background,
@@ -395,28 +488,116 @@ Future<void> checkForNewNotifications({
     for (final a in accounts) notificationAccountKey(a.user, a.url),
   };
   known.removeWhere((k, _) => !keys.contains(k));
+  knownHomework.removeWhere((k, _) => !keys.contains(k));
   await cancelNotificationsExcept(keys);
   // Read again right before writing: the app may have added what it showed
-  // in the meantime. Only those additions are kept — the rest of the old
-  // list is what this round just replaced.
+  // in the meantime.
   await prefs.reload();
-  final latest = await _readKnown(prefs);
-  await _writeKnown(prefs, {
-    for (final e in known.entries)
-      e.key: {
-        ...e.value,
-        ...?latest[e.key]?.difference(atStart[e.key] ?? const {}),
-      },
-  });
+  await _writeKnownSince(prefs, _knownPrefsKey, known, atStart);
+  await _writeKnownSince(
+    prefs,
+    _knownHomeworkPrefsKey,
+    knownHomework,
+    homeworkAtStart,
+  );
 }
 
-typedef _Fetched = ({List<Notification> unread, String? fullName});
+/// Writes what a round found, plus what the app added since [atStart]. Only
+/// those additions are kept — the rest of the old list is what this round
+/// just replaced.
+Future<void> _writeKnownSince(
+  SharedPreferences prefs,
+  String prefsKey,
+  Map<String, Set<int>> known,
+  Map<String, Set<int>> atStart,
+) async {
+  final latest = await _readKnown(prefs, prefsKey);
+  await _writeKnown(
+    prefs,
+    {
+      for (final e in known.entries)
+        e.key: {
+          ...e.value,
+          ...?latest[e.key]?.difference(atStart[e.key] ?? const {}),
+        },
+    },
+    prefsKey,
+  );
+}
+
+String _homeworkLog(
+  List<UpcomingHomework>? homework,
+  List<UpcomingHomework> fresh,
+  Set<int>? known,
+) {
+  if (homework == null) return 'Aufgaben nicht erreicht';
+  return '${homework.length} Aufgaben, ${fresh.length} neu'
+      '${known == null ? ' (zum ersten Mal)' : ''}';
+}
+
+/// [h] as a system notification: what is to be done, and for when.
+Notification _homeworkNotification(L l, UpcomingHomework h) => Notification(
+      (b) => b
+        ..id = homeworkNotificationId(h.id)
+        ..title = '${h.subject}: ${h.name}'
+        ..subTitle = l.systemNotificationsHomeworkDue(
+          h.typeName,
+          DateFormat.MMMMEEEEd(l.localeName).format(h.date),
+        )
+        ..type = notificationTypeHomework
+        ..objectId = h.id
+        ..timeSent = UtcDateTime.now(),
+    );
+
+/// What an account has to tell. [homework] is null when its weeks could not
+/// be fetched: then what was known of them stays as it was.
+typedef _Found = ({
+  List<Notification> unread,
+  List<UpcomingHomework>? homework,
+});
+
+typedef _Fetched = ({
+  List<Notification> unread,
+  List<UpcomingHomework>? homework,
+  String? fullName,
+});
 
 Future<_Fetched?> _fetchUnread(StoredAccount account) =>
     _inSession(account, (session) async {
       final dynamic data = await session.send("api/notification/unread");
-      return data is List ? parseNotifications(data) : null;
+      if (data is! List) return null;
+      return (
+        unread: parseNotifications(data),
+        homework: await _fetchHomework(session, account),
+      );
     });
+
+/// The homework of this week and the next — what is due is mostly ahead.
+Future<List<UpcomingHomework>?> _fetchHomework(
+  Wrapper session,
+  StoredAccount account,
+) async {
+  final monday = toMonday(now);
+  final days = <CalendarDay>[];
+  try {
+    for (final week in [monday, monday.add(const Duration(days: 7))]) {
+      final dynamic data = await session.send(
+        "api/calendar/student",
+        args: {"startDate": DateFormat("yyyy-MM-dd").format(week)},
+      );
+      if (data is! Map<String, dynamic>) return null;
+      days.addAll(parseCalendarWeek(data).values);
+    }
+  } on Object catch (e, s) {
+    debugLogError(
+      'Hintergrundabruf Aufgaben, ${accountTag(account.user, account.url)}',
+      e,
+      s,
+    );
+    return null;
+  }
+  return homeworkOf(days);
+}
 
 /// The account's latest received message, dressed up as a notification
 /// about it. For [runBackgroundCheckNow]'s test only: it has no notification
@@ -434,26 +615,31 @@ Future<_Fetched?> _fetchLatestMessage(StoredAccount account) =>
           (a, b) =>
               getString(b["timeSent"])!.compareTo(getString(a["timeSent"])!),
         );
-      if (received.isEmpty) return const [];
+      if (received.isEmpty) {
+        return (unread: const <Notification>[], homework: null);
+      }
       final latest = received.first;
-      return [
-        Notification(
-          (b) => b
-            ..id = 0
-            ..title = "Test · ${getString(latest["subject"]) ?? ""}"
-            ..subTitle = getString(latest["fromName"])
-            ..type = notificationTypeMessage
-            ..objectId = getInt(latest["id"])
-            ..timeSent = UtcDateTime.parse(getString(latest["timeSent"])!),
-        ),
-      ];
+      return (
+        homework: null,
+        unread: [
+          Notification(
+            (b) => b
+              ..id = 0
+              ..title = "Test · ${getString(latest["subject"]) ?? ""}"
+              ..subTitle = getString(latest["fromName"])
+              ..type = notificationTypeMessage
+              ..objectId = getInt(latest["id"])
+              ..timeSent = UtcDateTime.parse(getString(latest["timeSent"])!),
+          ),
+        ],
+      );
     });
 
 /// Signs into [account] on a session of its own, runs [fetch] and signs out
 /// again. Null when the account cannot be reached or signed into.
 Future<_Fetched?> _inSession(
   StoredAccount account,
-  Future<List<Notification>?> Function(Wrapper session) fetch,
+  Future<_Found?> Function(Wrapper session) fetch,
 ) async {
   final session = Wrapper();
   try {
@@ -469,9 +655,13 @@ Future<_Fetched?> _inSession(
       addProtocolItem: (_) {},
     );
     if (!await session.loggedIn) return null;
-    final notifications = await fetch(session);
-    if (notifications == null) return null;
-    return (unread: notifications, fullName: session.config?.fullName);
+    final found = await fetch(session);
+    if (found == null) return null;
+    return (
+      unread: found.unread,
+      homework: found.homework,
+      fullName: session.config?.fullName,
+    );
   } on Object catch (e, s) {
     debugLogError(
       'Hintergrundabruf, ${accountTag(account.user, account.url)}',

@@ -44,9 +44,9 @@ class HomeworkOverviewContainer extends ConsumerWidget {
         actions: const [ConnectionStatusButton(), AccountAvatarButton()],
       ),
       body: PullToRefresh(
-        // Die Aufgaben kommen mit der Kalenderwoche: neu laden heißt die Woche neu
-        // holen, mit der die Seite auch öffnet.
-        onRefresh: ref.read(calendarProvider.notifier).loadCurrentWeek,
+        // Die Aufgaben kommen mit den Kalenderwochen: neu laden heißt die
+        // Wochen neu holen, mit denen die Seite auch öffnet.
+        onRefresh: ref.read(calendarProvider.notifier).loadUpcomingWeeks,
         child: LessonEntryList(
           entries: homeworkEntries(calendar.days.values),
           viewMode: settings.homeworkViewMode,

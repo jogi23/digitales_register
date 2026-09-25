@@ -13,6 +13,8 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 - Zeugnis: War die Sitzung abgelaufen, zeigte die App die Anmeldeseite des Portals als Zeugnis. Sie meldet sich jetzt erst neu an.
 - Profilfoto: Beim Entfernen oder Wechseln des Fotos entstand im Hintergrund ein Fehler. Lässt sich ein Foto nicht laden, stehen jetzt die Initialen da.
 - Verbindung: Die Zeit „Zuletzt aktualisiert“ lag um die Zeitverschiebung — im Sommer zwei Stunden — in der Zukunft.
+- Benachrichtigungen: Neue Hausaufgaben und Prüfungen für diese und die nächste Woche melden sich jetzt als Systembenachrichtigung. Das Portal führt dazu keine eigene Benachrichtigung, deshalb blieb es bisher still. Ein Tippen öffnet die Hausaufgaben.
+- Hausaufgaben: Aufgaben für die nächste Woche erschienen erst, nachdem das Merkheft sie geladen hatte. Die Seite lädt jetzt beim Öffnen und Aktualisieren diese und die nächste Woche.
 
 ## 1.4.1 — 2026-09-24
 
