@@ -132,6 +132,9 @@ class SettingsPageWidget extends StatefulWidget {
 class _SettingsPageWidgetState extends State<SettingsPageWidget> {
   final controller = AutoScrollController(suggestedRowHeight: 250);
 
+  /// Well beyond the whole page, so no section is left unbuilt.
+  static const _buildAheadExtent = 20000.0;
+
   List<String> get notYetIgnoredForAverageSubjects => widget.vm.allSubjects
       .where((element) => !widget.vm.ignoreForGradesAverage.contains(element))
       .toList();
@@ -266,6 +269,10 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
       ),
       body: ListView(
         controller: controller,
+        // Every section built up front: scrollToIndex can only guess its way
+        // to a section that is not built yet, and the guess stalls once one
+        // section is taller than the screen — the grades never came into view.
+        cacheExtent: _buildAheadExtent,
         padding: context.systemInsets,
         children: <Widget>[
           if (!widget.vm.demoMode) ...[
