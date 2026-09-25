@@ -585,7 +585,8 @@ abstract class Competence implements Built<Competence, CompetenceBuilder> {
   static Serializer<Competence> get serializer => _$competenceSerializer;
 
   String get typeName;
-  // The grade from 0 to 5.
+  /// How many stars the competence scored, on the school's scale
+  /// ([Config.competenceScale]).
   int get grade;
 
   /// What the teacher wrote about this single competence.

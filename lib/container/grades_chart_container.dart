@@ -19,6 +19,7 @@
 import 'package:built_collection/built_collection.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/data.dart';
+import 'package:dr/providers/config_provider.dart';
 import 'package:dr/providers/grades_provider.dart';
 import 'package:dr/providers/subject_appearance_provider.dart';
 import 'package:dr/services/app_router.dart';
@@ -107,6 +108,8 @@ class GradesChartContainer extends ConsumerWidget {
       gradingMode: gradingMode,
       isFullscreen: isFullscreen,
       goFullscreen: ref.read(appRouterProvider).showGradesChart,
+      competenceScale: ref.watch(configProvider)?.competenceScale ??
+          Config.defaultCompetenceScale,
     );
   }
 }

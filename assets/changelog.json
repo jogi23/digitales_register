@@ -16,7 +16,8 @@
             "Benachrichtigungen: Neue Hausaufgaben und Prüfungen für diese und die nächste Woche melden sich jetzt als Systembenachrichtigung. Das Portal führt dazu keine eigene Benachrichtigung, deshalb blieb es bisher still. Ein Tippen öffnet die Hausaufgaben.",
             "Hausaufgaben: Aufgaben für die nächste Woche erschienen erst, nachdem das Merkheft sie geladen hatte. Die Seite lädt jetzt beim Öffnen und Aktualisieren diese und die nächste Woche.",
             "Benachrichtigungen: Die Schalter in den Einstellungen greifen jetzt für alle Arten, die das Portal kennt. Geteilte Mitteilungen, kritische Beobachtungen und Prüfungen meldeten sich bisher auch dann, wenn ihr Schalter aus war. Neu ist ein Schalter für Absenzen; ein Tippen darauf öffnet die Absenzen.",
-            "Benachrichtigungen: Ein Tippen auf eine Beobachtung in der Liste suchte eine Bewertung mit derselben Nummer und ließ die Benachrichtigung verschwinden."
+            "Benachrichtigungen: Ein Tippen auf eine Beobachtung in der Liste suchte eine Bewertung mit derselben Nummer und ließ die Benachrichtigung verschwinden.",
+            "Kompetenzen: Die App zeigte immer sechs Sterne, auch wo die Schule auf einer anderen Skala bewertet — etwa auf vier. Sterne und Diagramm folgen jetzt der Skala der Schule."
           ]
         }
       ],
@@ -34,7 +35,8 @@
             "Notifications: new homework and tests for this week and the next now show up as a system notification. The portal keeps no notification of its own for them, so nothing came so far. A tap opens the homework.",
             "Homework: assignments for next week only appeared after the Merkheft had loaded them. The page now loads this week and the next when it opens and when it is refreshed.",
             "Notifications: the switches in the settings now work for every kind the portal knows. Shared messages, critical observations and tests showed up even with their switch off. There is a new switch for absences; tapping one opens the absences.",
-            "Notifications: tapping an observation in the list looked for a grade with the same number and made the notification disappear."
+            "Notifications: tapping an observation in the list looked for a grade with the same number and made the notification disappear.",
+            "Competences: the app always showed six stars, even where the school rates on another scale — four, for instance. Stars and chart now follow the school's scale."
           ]
         }
       ],
@@ -52,7 +54,8 @@
             "Notifiche: i nuovi compiti e le verifiche di questa settimana e della prossima arrivano ora come notifica di sistema. Il portale non ne crea una propria, perciò finora non arrivava nulla. Un tocco apre i compiti.",
             "Compiti: i compiti della settimana prossima comparivano solo dopo che il Merkheft li aveva caricati. La pagina carica ora questa settimana e la prossima all'apertura e all'aggiornamento.",
             "Notifiche: gli interruttori nelle impostazioni valgono ora per tutti i tipi che il portale conosce. Messaggi condivisi, osservazioni critiche e verifiche arrivavano anche con l'interruttore spento. Nuovo interruttore per le assenze; un tocco apre le assenze.",
-            "Notifiche: un tocco su un'osservazione nell'elenco cercava una valutazione con lo stesso numero e faceva sparire la notifica."
+            "Notifiche: un tocco su un'osservazione nell'elenco cercava una valutazione con lo stesso numero e faceva sparire la notifica.",
+            "Competenze: l'app mostrava sempre sei stelle, anche dove la scuola valuta su un'altra scala — per esempio su quattro. Stelle e grafico seguono ora la scala della scuola."
           ]
         }
       ]
