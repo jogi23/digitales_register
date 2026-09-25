@@ -18,10 +18,12 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:dr/debug_log.dart';
 import 'package:dr/providers/account_profile_provider.dart';
 import 'package:dr/providers/config_provider.dart';
 import 'package:dr/providers/login_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
+import 'package:dr/ui/account_avatar_button.dart';
 import 'package:dr/ui/photo_crop_page.dart';
 import 'package:dr/util.dart';
 import 'package:dr/l10n/l10n.dart';
@@ -113,6 +115,7 @@ class _AccountSheetState extends ConsumerState<AccountSheet> {
 
     final previous = ref.read(accountProfileProvider)[_currentKey]?.photoPath;
     await ref.read(accountProfileProvider.notifier).setPhoto(_currentKey, dest);
+    debugLog(LogCategory.account, 'Profilfoto gesetzt');
     await _discard(previous);
   }
 
@@ -120,13 +123,18 @@ class _AccountSheetState extends ConsumerState<AccountSheet> {
   Future<void> _removePhoto() async {
     final previous = ref.read(accountProfileProvider)[_currentKey]?.photoPath;
     await ref.read(accountProfileProvider.notifier).setPhoto(_currentKey, null);
+    debugLog(LogCategory.account, 'Profilfoto entfernt');
     await _discard(previous);
   }
 
   /// Drops a photo that is not in use any more, file and cached image alike.
   Future<void> _discard(String? path) async {
     if (path == null) return;
+    // Only once every avatar has been built anew without it: one still
+    // showing it loads it again after the eviction and finds no file (#286).
+    await WidgetsBinding.instance.endOfFrame;
     await FileImage(File(path)).evict();
+    debugLog(LogCategory.account, 'Altes Profilfoto verworfen');
     try {
       final file = File(path);
       if (file.existsSync()) await file.delete();
@@ -423,28 +431,11 @@ class _AccountSheetState extends ConsumerState<AccountSheet> {
     String fallbackName, {
     required double radius,
   }) {
-    final colorScheme = Theme.of(context).colorScheme;
-    if (profile.photoPath != null) {
-      final file = File(profile.photoPath!);
-      if (file.existsSync()) {
-        return CircleAvatar(
-          radius: radius,
-          backgroundImage: FileImage(file),
-        );
-      }
-    }
-    final initials = accountInitials(profile.alias ?? fallbackName);
-    return CircleAvatar(
+    return ProfileAvatar(
+      photoPath: profile.photoPath,
+      name: profile.alias ?? fallbackName,
       radius: radius,
-      backgroundColor: colorScheme.primaryContainer,
-      child: Text(
-        initials,
-        style: TextStyle(
-          fontSize: radius * 0.55,
-          fontWeight: FontWeight.bold,
-          color: colorScheme.onPrimaryContainer,
-        ),
-      ),
+      initialsScale: 0.55,
     );
   }
 }

@@ -18,13 +18,14 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:dr/app_state.dart';
+import 'package:dr/app_state.dart' hide LoginState;
 import 'package:dr/background_check.dart';
 import 'package:dr/debug_log.dart';
 import 'package:dr/main.dart' show scaffoldKey;
 import 'package:dr/middleware/middleware.dart' show wrapper;
 import 'package:dr/notification_type.dart';
 import 'package:dr/providers/login_provider.dart';
+import 'package:dr/providers/messages_provider.dart';
 import 'package:dr/providers/notifications_provider.dart';
 import 'package:dr/providers/provider_container.dart';
 import 'package:dr/providers/settings_provider.dart';
@@ -108,7 +109,7 @@ void openSystemNotification(SystemNotificationTarget target) {
     );
     return;
   }
-  if (wrapper.user == target.user && sameServer(wrapper.url, target.url)) {
+  if (isCurrentAccount(login, target)) {
     debugLog(LogCategory.systemNotification, 'Gleiches Konto, wird geöffnet');
     _open(target);
     return;
@@ -126,6 +127,34 @@ void openSystemNotification(SystemNotificationTarget target) {
   if (index < 0) return;
   notifier.addAfterLoginCallback(() => _open(target));
   notifier.selectAccount(index);
+}
+
+/// Whether [target] belongs to the account the app is in.
+///
+/// Asked of the login state, not of the session: after a start by the tap
+/// the app shows the stored account before it has signed in online, and the
+/// session knew no user yet — the account in use was looked for among the
+/// others, and nothing opened (#284).
+@visibleForTesting
+bool isCurrentAccount(LoginState login, SystemNotificationTarget target) =>
+    login.username == target.user && sameServer(login.url, target.url);
+
+/// Runs [tellPortal] once the app has signed in online — right away if it
+/// has. Before that, as after a start by the tap, requests are dropped;
+/// [thenReload] then fetches what the stored state could not show.
+void _whenSignedIn(void Function() tellPortal, {void Function()? thenReload}) {
+  if (wrapper.user != null) {
+    tellPortal();
+    return;
+  }
+  debugLog(
+    LogCategory.systemNotification,
+    'Portal erfährt es nach der Anmeldung',
+  );
+  providerContainer.read(loginProvider.notifier).addAfterLoginCallback(() {
+    tellPortal();
+    thenReload?.call();
+  });
 }
 
 /// After an account switch the home page is built anew and may not stand
@@ -148,22 +177,48 @@ void _open(SystemNotificationTarget target, {int framesLeft = 10}) {
   final router = providerContainer.read(appRouterProvider);
   final notifications = providerContainer.read(notificationsProvider.notifier);
   final objectId = target.objectId;
-  // Id 0 is the test notification of debug builds: no notification on the
-  // portal stands behind it, so there is nothing to mark there.
+  // Id 0 is the test notification of debug builds, negative ids are homework
+  // found by the check itself: no notification on the portal stands behind
+  // them, so there is nothing to mark there.
   final fromPortal = target.id > 0;
   debugLog(
     LogCategory.systemNotification,
-    'Öffnet ${target.type} ${objectId ?? '-'}${fromPortal ? '' : ' (Test)'}',
+    'Öffnet ${target.type} ${objectId ?? '-'}${target.id == 0 ? ' (Test)' : ''}',
   );
   switch (normalizedNotificationType(target.type)) {
-    case notificationTypeMessage when objectId != null:
-      // Both: the list may not have been loaded yet after a cold start.
-      if (fromPortal) unawaited(notifications.markAsRead(target.id));
-      unawaited(notifications.markMessageAsRead(objectId));
+    case notificationTypeMessage || notificationTypeMessageShared
+        when objectId != null:
       router.showMessage(objectId);
+      _whenSignedIn(
+        () {
+          // Both: the list may not have been loaded yet after a cold start.
+          if (fromPortal) unawaited(notifications.markAsRead(target.id));
+          unawaited(notifications.markMessageAsRead(objectId));
+        },
+        // A message newer than the stored list shows once it is loaded.
+        thenReload: () => unawaited(
+          providerContainer.read(messagesProvider.notifier).load(),
+        ),
+      );
     case notificationTypeGrade when objectId != null:
-      if (fromPortal) unawaited(notifications.markAsRead(target.id));
       router.revealGrade(objectId);
+      _whenSignedIn(() {
+        if (fromPortal) unawaited(notifications.markAsRead(target.id));
+      });
+    case notificationTypeHomework || notificationTypeExam:
+      // The overview loads the weeks itself, the new entry among them.
+      router.showHomeworkOverview();
+      _whenSignedIn(() {
+        if (fromPortal) unawaited(notifications.markAsRead(target.id));
+      });
+    case notificationTypeAbsence ||
+          notificationTypeAbsenceReason ||
+          notificationTypeAbsenceAdvance ||
+          notificationTypeAbsenceReasonAdvanceForClass:
+      router.showAbsences();
+      _whenSignedIn(() {
+        if (fromPortal) unawaited(notifications.markAsRead(target.id));
+      });
     default:
       router.showNotifications();
   }

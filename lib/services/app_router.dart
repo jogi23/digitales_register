@@ -100,8 +100,7 @@ class AppRouter {
     scaffoldKey!.currentState!.selectContentWidget(
         const HomeworkOverviewContainer(), Pages.homeworkOverview);
     // Wie beim Klassenbuch: Die Aufgaben kommen mit den Kalenderwochen.
-    final monday = _ref.read(calendarProvider).shownMonday;
-    unawaited(_ref.read(calendarProvider.notifier).load(monday));
+    unawaited(_ref.read(calendarProvider.notifier).loadUpcomingWeeks());
   }
 
   void showClassbook() {

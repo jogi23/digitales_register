@@ -18,11 +18,16 @@
 import 'package:built_collection/built_collection.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/data.dart';
+import 'package:dr/middleware/middleware.dart' show wrapper;
 import 'package:dr/providers/calendar_provider.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
+import 'package:dr/wrapper.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
+
+class _MockWrapper extends Mock implements Wrapper {}
 
 // A Wednesday; its week starts on Monday, 14 September.
 final _wednesday = UtcDateTime(2026, 9, 16);
@@ -72,5 +77,26 @@ void main() {
     expect(container.read(calendarProvider).currentMonday, isNull);
     expect(container.read(calendarProvider).shownMonday, _monday);
     expect(() => container.read(calendarProvider).currentDays, returnsNormally);
+  });
+
+  test('the homework overview loads this week and the next (#289)', () async {
+    // Homework is mostly due ahead; with this week alone, what was entered
+    // for Monday next week stayed hidden until the Merkheft loaded it.
+    final mock = _MockWrapper();
+    wrapper = mock;
+    when(() => mock.send(any(), args: any(named: 'args')))
+        .thenAnswer((_) async => <String, dynamic>{});
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    final notifier = container.read(calendarProvider.notifier);
+    // The calendar page was left on another week.
+    notifier.setCurrentMonday(UtcDateTime(2026, 8, 31));
+
+    await notifier.loadUpcomingWeeks();
+
+    final weeks = verify(
+      () => mock.send('api/calendar/student', args: captureAny(named: 'args')),
+    ).captured.map((a) => (a as Map)['startDate']);
+    expect(weeks, ['2026-09-14', '2026-09-21']);
   });
 }

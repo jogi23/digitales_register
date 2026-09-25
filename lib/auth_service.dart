@@ -88,30 +88,8 @@ class AuthService {
     VoidCallback? relogin,
     AddNetworkProtocolItem? addProtocolItem,
   }) async {
-    if (isDemoUser(url: url, username: user)) {
-      demoMode = true;
-      _loggedIn = Future.value(true);
-      this.user = user;
-      this.pass = pass;
-      final demoUserId = await _getDemoUserId();
-      final demoConfig = Config(
-        (b) => b
-          ..autoLogoutSeconds = 300
-          ..currentSemesterMaybe = 1
-          ..fullName = "Demo User"
-          ..imgSource =
-              "https://vinzentinum.digitalesregister.it/v2/theme/icons/profile_empty.png"
-          ..isStudentOrParent = true
-          ..userId = demoUserId,
-      );
-      config = demoConfig;
-      onSessionStarted?.call(demoConfig);
-      configLoaded?.call();
-      return;
-    } else {
-      demoMode = false;
-    }
-
+    // Before the demo as well: it signs in again when its session runs out
+    // like any other, and that called onRelogin — null for the demo (#283).
     if (logout != null) {
       onLogout = logout;
     } else {
@@ -131,6 +109,31 @@ class AuthService {
       onAddProtocolItem = addProtocolItem;
     } else {
       assert(onAddProtocolItem != null);
+    }
+
+    if (isDemoUser(url: url, username: user)) {
+      demoMode = true;
+      _loggedIn = Future.value(true);
+      this.user = user;
+      this.pass = pass;
+      final demoUserId = await _getDemoUserId();
+      final demoConfig = Config(
+        (b) => b
+          ..autoLogoutSeconds = 300
+          ..currentSemesterMaybe = 1
+          ..fullName = "Demo User"
+          ..imgSource =
+              "https://vinzentinum.digitalesregister.it/v2/theme/icons/profile_empty.png"
+          ..isStudentOrParent = true
+          ..userId = demoUserId,
+      );
+      config = demoConfig;
+      debugLog(LogCategory.login, '${accountTag(user, url)}: Demokonto');
+      onSessionStarted?.call(demoConfig);
+      configLoaded?.call();
+      return;
+    } else {
+      demoMode = false;
     }
 
     _apiClient.url = url;

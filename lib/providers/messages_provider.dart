@@ -24,6 +24,7 @@ import 'package:dr/data.dart';
 import 'package:dr/debug_log.dart';
 import 'package:dr/middleware/middleware.dart'
     show canOpenFile, downloadFile, openFile, wrapper;
+import 'package:dr/notification_type.dart';
 import 'package:dr/providers/notifications_provider.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
@@ -349,7 +350,7 @@ class MessagesNotifier extends Notifier<MessagesState> {
     final notifiedMessageIds = ref
         .read(notificationsProvider)
         .notifications
-        .where((n) => n.type == "message" && n.objectId != null)
+        .where((n) => isMessageNotification(n) && n.objectId != null)
         .map((n) => n.objectId!)
         .toSet();
     final messages = json

@@ -95,13 +95,14 @@ class NotificationsNotifier extends Notifier<NotificationsState> {
           data is List ? parseNotifications(data) : <Notification>[];
       _readHere.retainAll(fetched.map((n) => n.id));
       _messagesReadHere.retainAll(
-        fetched.where((n) => n.type == "message").map((n) => n.objectId),
+        fetched.where(isMessageNotification).map((n) => n.objectId),
       );
       final parsed = fetched
           .where((n) => !_readHere.contains(n.id))
           .where(
             (n) =>
-                n.type != "message" || !_messagesReadHere.contains(n.objectId),
+                !isMessageNotification(n) ||
+                !_messagesReadHere.contains(n.objectId),
           )
           .toList()
         ..sort((a, b) => b.timeSent.compareTo(a.timeSent));
@@ -160,7 +161,7 @@ class NotificationsNotifier extends Notifier<NotificationsState> {
       'Alle gelesen: ${state.notifications.length}',
     );
     final messageNotifications = state.notifications
-        .where((n) => n.type == "message" && n.objectId != null)
+        .where((n) => isMessageNotification(n) && n.objectId != null)
         .toList();
     _readHere.addAll(state.notifications.map((n) => n.id));
     state = state.copyWith(notifications: []);
@@ -179,7 +180,7 @@ class NotificationsNotifier extends Notifier<NotificationsState> {
     // Only message notifications: a grade can carry the same number as its
     // object id, and reading a message says nothing about that grade.
     bool matches(Notification n) =>
-        n.type == "message" && n.objectId == objectId;
+        isMessageNotification(n) && n.objectId == objectId;
     _messagesReadHere.add(objectId);
     final matching = state.notifications.where(matches).toList();
     state = state.copyWith(

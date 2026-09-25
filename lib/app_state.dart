@@ -197,6 +197,10 @@ abstract class Config implements Built<Config, ConfigBuilder> {
   /// How many attachments one message may carry, from the school's
   /// `submission_maximum_number_items_allowed`.
   int get submissionMaxItems;
+
+  /// How many stars the school rates competences on, from the page's
+  /// `KOPETENZENSKALA` (sic).
+  int get competenceScale;
   static Serializer<Config> get serializer => _$configSerializer;
 
   factory Config([Function(ConfigBuilder b)? updates]) = _$Config;
@@ -206,8 +210,13 @@ abstract class Config implements Built<Config, ConfigBuilder> {
   /// What the portal falls back to where the page does not say.
   static const defaultSubmissionMaxItems = 8;
 
+  /// The scale the app always drew before it read the school's.
+  static const defaultCompetenceScale = 6;
+
   static void _initializeBuilder(ConfigBuilder builder) {
-    builder.submissionMaxItems = defaultSubmissionMaxItems;
+    builder
+      ..submissionMaxItems = defaultSubmissionMaxItems
+      ..competenceScale = defaultCompetenceScale;
   }
 }
 
@@ -397,6 +406,7 @@ class SettingsState {
     this.notifyGrades = true,
     this.notifyObservations = true,
     this.notifyHomework = true,
+    this.notifyAbsences = true,
   })  : ignoreForGradesAverage = ignoreForGradesAverage ?? [],
         classbookSubjects = classbookSubjects ?? [];
 
@@ -494,6 +504,7 @@ class SettingsState {
   final bool notifyGrades;
   final bool notifyObservations;
   final bool notifyHomework;
+  final bool notifyAbsences;
 
   SettingsState copyWith({
     bool? noPasswordSaving,
@@ -534,6 +545,7 @@ class SettingsState {
     bool? notifyGrades,
     bool? notifyObservations,
     bool? notifyHomework,
+    bool? notifyAbsences,
   }) =>
       SettingsState(
         noPasswordSaving: noPasswordSaving ?? this.noPasswordSaving,
@@ -588,6 +600,7 @@ class SettingsState {
         notifyGrades: notifyGrades ?? this.notifyGrades,
         notifyObservations: notifyObservations ?? this.notifyObservations,
         notifyHomework: notifyHomework ?? this.notifyHomework,
+        notifyAbsences: notifyAbsences ?? this.notifyAbsences,
       );
 
   Map<String, dynamic> toJson() => {
@@ -628,6 +641,7 @@ class SettingsState {
         'notifyGrades': notifyGrades,
         'notifyObservations': notifyObservations,
         'notifyHomework': notifyHomework,
+        'notifyAbsences': notifyAbsences,
       };
 
   factory SettingsState.fromJson(Map<dynamic, dynamic> json) => SettingsState(
@@ -701,6 +715,7 @@ class SettingsState {
         notifyGrades: json['notifyGrades'] as bool? ?? true,
         notifyObservations: json['notifyObservations'] as bool? ?? true,
         notifyHomework: json['notifyHomework'] as bool? ?? true,
+        notifyAbsences: json['notifyAbsences'] as bool? ?? true,
       );
 
   /// The settings that belong to the app rather than to one account:
@@ -744,6 +759,7 @@ class SettingsState {
     'notifyGrades',
     'notifyObservations',
     'notifyHomework',
+    'notifyAbsences',
   };
 
   /// Only the app-wide settings, for storing them on their own.
@@ -810,7 +826,8 @@ class SettingsState {
         other.notifyMessages == notifyMessages &&
         other.notifyGrades == notifyGrades &&
         other.notifyObservations == notifyObservations &&
-        other.notifyHomework == notifyHomework;
+        other.notifyHomework == notifyHomework &&
+        other.notifyAbsences == notifyAbsences;
   }
 
   @override
@@ -852,6 +869,7 @@ class SettingsState {
         notifyGrades,
         notifyObservations,
         notifyHomework,
+        notifyAbsences,
       ]);
 }
 

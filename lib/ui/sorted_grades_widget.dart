@@ -19,6 +19,7 @@
 import 'package:dr/app_state.dart';
 import 'package:dr/container/sorted_grades_container.dart';
 import 'package:dr/data.dart';
+import 'package:dr/providers/config_provider.dart';
 import 'package:dr/services/app_router.dart';
 import 'package:dr/ui/animated_linear_progress_indicator.dart';
 import 'package:dr/ui/entry_card.dart';
@@ -147,7 +148,7 @@ class SortedGradesWidget extends StatelessWidget {
   }
 }
 
-class SubjectWidget extends StatefulWidget {
+class SubjectWidget extends ConsumerStatefulWidget {
   final bool sortByType, showCancelled, noInternet, ignoredForAverage;
 
   /// Every grade and observation in a card of its own rather than a row.
@@ -195,7 +196,7 @@ class SubjectWidget extends StatefulWidget {
   _SubjectWidgetState createState() => _SubjectWidgetState();
 }
 
-class _SubjectWidgetState extends State<SubjectWidget> {
+class _SubjectWidgetState extends ConsumerState<SubjectWidget> {
   bool closed = true;
   final _controller = ExpansibleController();
 
@@ -272,7 +273,10 @@ class _SubjectWidgetState extends State<SubjectWidget> {
     final theme = Theme.of(context);
     // Null while nothing is graded yet — then there is no average to show.
     final average = widget.showAverage
-        ? widget.subject.formattedAverage(widget.semester)
+        ? widget.subject.formattedAverage(
+            widget.semester,
+            competenceScale: ref.watch(competenceScaleProvider),
+          )
         : null;
     final altColor =
         theme.colorScheme.surfaceContainerHighest.withOpacity(0.75);

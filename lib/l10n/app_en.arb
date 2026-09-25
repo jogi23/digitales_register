@@ -654,6 +654,7 @@
   "settingsNotificationsTypeMessages": "Messages",
   "settingsNotificationsTypeGrades": "Grades",
   "settingsNotificationsTypeObservations": "Observations",
+  "settingsNotificationsTypeAbsences": "Absences",
   "settingsNotificationsTypeHomework": "Homework",
   "notificationsEveryMinutes": "{minutes, plural, one {Every {minutes} minute} other {Every {minutes} minutes}}",
   "@notificationsEveryMinutes": {
@@ -681,6 +682,7 @@
   },
   "systemNotificationsChannel": "New entries",
   "systemNotificationsChannelDescription": "New messages, grades and other entries from the register",
+  "systemNotificationsHomeworkDue": "{type} for {date}",
   "systemNotificationsCount": "{count, plural, one {{count} notification} other {{count} notifications}}",
   "settingsStayLoggedInOffHint": "Off: sign in at every start, no switching accounts",
   "settingsNotificationsNeedStayLoggedIn": "Android notifications need “Stay signed in”; until then only inside the app"

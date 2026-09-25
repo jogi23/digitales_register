@@ -58,6 +58,28 @@ void main() {
         expect(await sut.loggedIn, isTrue);
       });
 
+      test('keeps the callbacks of the app, as any login does (#283)',
+          () async {
+        var relogins = 0;
+        await sut.login(
+          'demo-user-6540',
+          'anything',
+          null,
+          'https://wertwerk-demo.digitalesregister.it',
+          logout: () {},
+          configLoaded: () {},
+          relogin: () => relogins++,
+          addProtocolItem: (_) {},
+        );
+
+        // The demo session runs out after five minutes like any other and
+        // signs in again; that called onRelogin, which the demo left null.
+        expect(sut.appHasSignedIn, isTrue);
+        expect(sut.onAddProtocolItem, isNotNull);
+        sut.onRelogin!();
+        expect(relogins, 1);
+      });
+
       test('populates config with demo values', () async {
         await sut.login(
           'demo-user-6540',

@@ -144,6 +144,9 @@ class SettingsNotifier extends Notifier<SettingsState> {
   void setNotifyHomework(bool value) =>
       _update(state.copyWith(notifyHomework: value));
 
+  void setNotifyAbsences(bool value) =>
+      _update(state.copyWith(notifyAbsences: value));
+
   // ─── Dashboard settings ───────────────────────────────────────────────────
 
   void setMarkNewOrChanged(bool value) =>

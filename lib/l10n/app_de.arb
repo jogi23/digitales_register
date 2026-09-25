@@ -682,6 +682,7 @@
   "settingsNotificationsTypeMessages": "Mitteilungen",
   "settingsNotificationsTypeGrades": "Bewertungen",
   "settingsNotificationsTypeObservations": "Beobachtungen",
+  "settingsNotificationsTypeAbsences": "Absenzen",
   "settingsNotificationsTypeHomework": "Hausaufgaben",
   "notificationsEveryMinutes": "Alle {minutes, plural, one {{minutes} Minute} other {{minutes} Minuten}}",
   "@notificationsEveryMinutes": {
@@ -709,6 +710,18 @@
   },
   "systemNotificationsChannel": "Neue Einträge",
   "systemNotificationsChannelDescription": "Neue Mitteilungen, Bewertungen und andere Einträge aus dem Register",
+  "systemNotificationsHomeworkDue": "{type} für {date}",
+  "@systemNotificationsHomeworkDue": {
+    "description": "Zweite Zeile der Systembenachrichtigung zu einer neuen Hausaufgabe: Art laut Portal und Tag der Stunde",
+    "placeholders": {
+      "type": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "systemNotificationsCount": "{count, plural, one {{count} Benachrichtigung} other {{count} Benachrichtigungen}}",
   "@systemNotificationsCount": {
     "placeholders": {

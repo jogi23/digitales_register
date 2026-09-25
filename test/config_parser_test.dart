@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'package:dr/app_state.dart';
 import 'package:dr/config_parser.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -85,6 +86,35 @@ void main() {
       test('returns 1 when semesterWechsel=2', () {
         final config = ConfigParser.parse(_src(extra: 'semesterWechsel=2;'));
         expect(config.currentSemesterMaybe, 1);
+      });
+    });
+
+    group('competenceScale', () {
+      test('reads the scale from the config block', () {
+        final config = ConfigParser.parse(_src()
+            .replaceFirst('{ ', '{ competence_stars_scale: 4, '));
+        expect(config.competenceScale, 4);
+      });
+
+      test('reads the scale from the portal script', () {
+        // As gs-schlanders carries it, misspelling included.
+        final config =
+            ConfigParser.parse(_src(extra: 'var KOPETENZENSKALA=4;'));
+        expect(config.competenceScale, 4);
+      });
+
+      test('keeps six stars where the page does not say', () {
+        final config = ConfigParser.parse(_src());
+        expect(config.competenceScale, Config.defaultCompetenceScale);
+      });
+
+      test('keeps six stars for a value no row can draw', () {
+        for (final value in ['0', '11', 'abc']) {
+          final config =
+              ConfigParser.parse(_src(extra: 'var KOPETENZENSKALA=$value;'));
+          expect(config.competenceScale, Config.defaultCompetenceScale,
+              reason: value);
+        }
       });
     });
 

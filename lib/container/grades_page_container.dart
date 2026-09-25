@@ -21,6 +21,7 @@ import 'dart:async';
 import 'package:built_collection/built_collection.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/data.dart';
+import 'package:dr/providers/config_provider.dart';
 import 'package:dr/providers/grades_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
@@ -73,6 +74,7 @@ class GradesPageContainer extends ConsumerWidget {
           gradesState.semester,
           settings.ignoreForGradesAverage,
           gradingMode,
+          competenceScale: ref.watch(competenceScaleProvider),
         ),
         gradingMode: gradingMode,
         hasData: gradesState.subjects.any(
@@ -117,8 +119,9 @@ String calculateAllSubjectsAverage(
   BuiltList<Subject> subjects,
   Semester semester,
   List<String> ignoreForGradesAverage,
-  GradingMode gradingMode,
-) {
+  GradingMode gradingMode, {
+  int competenceScale = Config.defaultCompetenceScale,
+}) {
   if (gradingMode == GradingMode.stars) {
     var sum = 0.0;
     var n = 0;
@@ -135,7 +138,7 @@ String calculateAllSubjectsAverage(
     if (n == 0) {
       return "/";
     }
-    return "${gradeAverageFormat.format(sum / n)}/6";
+    return "${gradeAverageFormat.format(sum / n)}/$competenceScale";
   }
 
   var sum = 0;

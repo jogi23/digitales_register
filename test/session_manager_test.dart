@@ -122,6 +122,41 @@ class _PathAdapter implements HttpClientAdapter {
   void close({bool force = false}) {}
 }
 
+/// Answers every request with the next page in [pages]; the last repeats.
+class _PageAdapter implements HttpClientAdapter {
+  _PageAdapter(this.pages);
+
+  final List<String> pages;
+  int requests = 0;
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    final page = pages[requests < pages.length ? requests : pages.length - 1];
+    requests++;
+    return ResponseBody.fromString(
+      page,
+      200,
+      headers: {
+        Headers.contentTypeHeader: ['text/html; charset=utf-8'],
+      },
+    );
+  }
+
+  @override
+  void close({bool force = false}) {}
+}
+
+/// The parts of the portal's sign-in page that tell it apart (#285).
+const _loginPage = '<!DOCTYPE html><html><head><title>Login</title></head> '
+    '<body><div class="login-container"><form> '
+    '<input type="text" name="username"> '
+    '<input type="password" name="password"> '
+    '</form></div></body></html>';
+
 class _SignedInAuth {
   final auth = _MockAuthService();
   bool loggedIn = true;
@@ -338,6 +373,21 @@ void main() {
         expect(answers, 0);
       });
 
+      test('turned into the demo while signing in, it asks no server (#283)',
+          () async {
+        // The request set out before the stored login turned out to be the
+        // demo: it went to the network and crashed writing the protocol.
+        final signedIn = _SignedInAuth();
+        var asked = 0;
+        when(() => signedIn.auth.demoMode).thenAnswer((_) => asked++ > 0);
+        final adapter = _StatusAdapter([200]);
+        final sm = _sessionAnswering(signedIn, adapter);
+
+        final result = await sm.send('api/student/dashboard/toggle_reminder');
+        expect(adapter.requests, 0);
+        expect((result as Map)['success'], isTrue);
+      });
+
       test('a demo answer is not mistaken for a dead session', () async {
         final sm = _makeSessionManager(demoMode: true);
         var expired = 0;
@@ -467,6 +517,40 @@ void main() {
         verifyNoLogout();
       });
 
+      test('a retired session stops checking and extending (#282)', () {
+        serverAnswers();
+        startSession(runningOut(), (async) {
+          sm.retire();
+          async.elapse(const Duration(minutes: 5));
+        });
+
+        // The first extension went out before the switch; none after it.
+        verify(() => dio.post<dynamic>(any(), data: any(named: 'data')))
+            .called(1);
+        verifyNoLogout();
+      });
+
+      test('a retired session never logs the app out (#282)', () {
+        // Its extension answered after the account switch: the server wants
+        // the old session gone, which is no reason to touch the new one.
+        final answer = Completer<Response<dynamic>>();
+        when(() => dio.post<dynamic>(any(), data: any(named: 'data')))
+            .thenAnswer((_) => answer.future);
+        startSession(runningOut(), (async) {
+          sm.retire();
+          answer.complete(
+            Response<dynamic>(
+              requestOptions: RequestOptions(),
+              data: <String, Object?>{'forceLogout': true},
+            ),
+          );
+          async.flushMicrotasks();
+        });
+
+        verifyNoLogout();
+        verifyNever(() => auth.forceLoggedOut());
+      });
+
       test('a new login leaves exactly one check waiting', () {
         startSession(_config(autoLogoutSeconds: 3600), (async) {
           sm.startSession(_config(autoLogoutSeconds: 3600));
@@ -572,6 +656,47 @@ void main() {
     });
   });
 
+  group('the sign-in page instead of a page (#285)', () {
+    SessionManager answering(_SignedInAuth signedIn, _PageAdapter adapter) {
+      final apiClient = ApiClient()
+        ..url = 'https://schule.digitalesregister.it';
+      apiClient.dio.httpClientAdapter = adapter;
+      return SessionManager(apiClient, signedIn.auth);
+    }
+
+    test('is told apart from a page', () {
+      expect(isLoginPage(_loginPage), isTrue);
+      expect(isLoginPage('<div class="student-subject-list">Zeugnis</div>'),
+          isFalse);
+      // A page that merely mentions a password is none.
+      expect(isLoginPage('<p>type="password"</p>'), isFalse);
+    });
+
+    test('signs in again and asks once more', () async {
+      final signedIn = _SignedInAuth();
+      final adapter = _PageAdapter([_loginPage, '<div>Zeugnis</div>']);
+      final sm = answering(signedIn, adapter);
+
+      final result = await sm.send('student/certificate', method: 'GET');
+      expect(result, '<div>Zeugnis</div>');
+      expect(signedIn.logins, 1);
+      expect(adapter.requests, 2);
+    });
+
+    test('still the sign-in page after that: the session is gone', () async {
+      final signedIn = _SignedInAuth();
+      final sm = answering(signedIn, _PageAdapter([_loginPage]));
+      var expired = 0;
+      sm.onSessionExpired = () => expired++;
+
+      await expectLater(
+        sm.send('student/certificate', method: 'GET'),
+        throwsA(isA<UnexpectedLogoutException>()),
+      );
+      expect(expired, 1);
+    });
+  });
+
   group('signing in again from storage', () {
     /// An account whose session ran out: nothing is signed in and the
     /// credentials this session held are gone, but storage still has them.
@@ -626,6 +751,19 @@ void main() {
       setup.sm.storedLogin = () async => null;
       expect(await setup.sm.ensureLoggedIn(), isFalse);
       expect(setup.logins, isEmpty);
+    });
+
+    test('a retired session signs in no more (#282)', () async {
+      final setup = signedOut();
+      var expired = 0;
+      setup.sm.onSessionExpired = () => expired++;
+      setup.sm.retire();
+
+      expect(await setup.sm.ensureLoggedIn(), isFalse);
+      expect(await setup.sm.send('api/student/dashboard/dashboard'), isNull);
+      expect(setup.logins, isEmpty);
+      // Nor does it tell the app its session ran out: that is the new one's.
+      expect(expired, 0);
     });
 
     test('a password the server refuses is not sent again and again', () async {

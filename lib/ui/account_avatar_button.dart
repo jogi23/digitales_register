@@ -41,24 +41,52 @@ class AccountAvatar extends ConsumerWidget {
     final key = accountProfileKey(login.username ?? '', login.url ?? '');
     final profile = profiles[key] ?? const AccountProfile();
 
+    return ProfileAvatar(
+      photoPath: profile.photoPath,
+      name: profile.alias ?? displayName,
+      radius: radius,
+      // Two letters have to fit whatever size the avatar is.
+      initialsScale: 0.625,
+    );
+  }
+}
+
+/// A profile photo, or the initials of [name] where there is none.
+///
+/// The initials lie underneath the photo, so they also show when it cannot
+/// be loaded. A photo removed or replaced while an avatar still showed it
+/// used to end in a PathNotFoundException, reported as an error (#286).
+class ProfileAvatar extends StatelessWidget {
+  final String? photoPath;
+  final String name;
+  final double radius;
+
+  /// The size of the initials, relative to [radius].
+  final double initialsScale;
+
+  const ProfileAvatar({
+    super.key,
+    required this.photoPath,
+    required this.name,
+    required this.radius,
+    required this.initialsScale,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    if (profile.photoPath != null) {
-      final file = File(profile.photoPath!);
-      if (file.existsSync()) {
-        return CircleAvatar(
-          radius: radius,
-          backgroundImage: FileImage(file),
-        );
-      }
-    }
+    final path = photoPath;
+    final file = path == null ? null : File(path);
+    final photo = file != null && file.existsSync() ? FileImage(file) : null;
     return CircleAvatar(
       radius: radius,
       backgroundColor: colorScheme.primaryContainer,
+      foregroundImage: photo,
+      onForegroundImageError: photo == null ? null : (_, __) {},
       child: Text(
-        accountInitials(profile.alias ?? displayName),
+        accountInitials(name),
         style: TextStyle(
-          // Two letters have to fit whatever size the avatar is.
-          fontSize: radius * 0.625,
+          fontSize: radius * initialsScale,
           fontWeight: FontWeight.bold,
           color: colorScheme.onPrimaryContainer,
         ),

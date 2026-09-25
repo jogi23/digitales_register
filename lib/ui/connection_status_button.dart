@@ -130,11 +130,14 @@ _Look _lookOf(BuildContext context, ConnectionInfo connection) {
 }
 
 /// The time of the last answer, for the dialog.
+///
+/// [UtcDateTime] already holds the local wall-clock time; `toLocal()` would
+/// add the zone offset a second time.
 String _lastUpdateLabel(BuildContext context, ConnectionInfo connection) {
   final last = connection.lastSuccess;
   if (last == null) return tr(context).connectionNeverUpdated;
   return tr(context).connectionLastUpdate(
-    DateFormat.Hm(tr(context).localeName).format(last.toLocal()),
+    DateFormat.Hm(tr(context).localeName).format(last),
   );
 }
 

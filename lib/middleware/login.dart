@@ -66,6 +66,8 @@ Future<void> _doLogout({required bool hard, bool forced = false}) async {
   providerContainer.read(loginProvider.notifier).logout(hard: hard);
   providerContainer.read(isDemoProvider.notifier).state = false;
   if (hard) {
+    unawaited(markAppAccount());
+    if (wrapper is! Mock) wrapper.retire();
     wrapper = Wrapper();
     _resetAllProviders();
     await _doLoad();
@@ -142,6 +144,9 @@ Future<void> _doLogin(
     '$account: Anmeldung ${fromStorage ? 'aus dem Speicher' : 'aus dem Formular'}',
   );
   providerContainer.read(loginProvider.notifier).setLoggingIn();
+  // Before the login, so a check in the background already running does not
+  // sign into the same account and end the session this one is starting.
+  unawaited(markAppAccount(user: user, url: fixedUrl));
   wrapper.url = fixedUrl;
   providerContainer.read(loginProvider.notifier).setUrl(fixedUrl);
 

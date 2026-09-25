@@ -16,6 +16,7 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:dr/app_state.dart';
+import 'package:dr/providers/config_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -106,7 +107,7 @@ Color resolveStarColor(BuildContext context, String id) {
       theme.colorScheme.primary;
 }
 
-/// A competence rating: [starCount] stars, [filled] of them full.
+/// A competence rating on the school's scale, [filled] stars of it full.
 class StarRow extends ConsumerWidget {
   /// How many stars are filled in.
   final int filled;
@@ -116,13 +117,12 @@ class StarRow extends ConsumerWidget {
 
   const StarRow({super.key, required this.filled, this.size});
 
-  /// The scale the register grades competences on.
-  static const starCount = 6;
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final color =
         resolveStarColor(context, ref.watch(settingsProvider).starColor);
+    // Each school picks its own scale; the page tells which.
+    final starCount = ref.watch(competenceScaleProvider);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: List.generate(

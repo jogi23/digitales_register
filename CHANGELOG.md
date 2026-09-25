@@ -2,6 +2,24 @@
 
 Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` — Änderungen bitte dort eintragen, nicht hier.
 
+## 1.5.0 — 2026-09-24
+
+### Fehlerbehebungen
+
+- Benachrichtigungen: Der Abruf im Hintergrund meldet sich nicht mehr mit dem Konto an, mit dem die geöffnete App gerade angemeldet ist — die App fragt für dieses Konto ohnehin selbst nach. Die zweite Anmeldung zur selben Zeit konnte die Sitzung der App beenden; beim Start erschien dann „Verbindung fehlgeschlagen“, obwohl das Netz da war.
+- Kontowechsel: Die Sitzung des vorigen Kontos lief im Hintergrund weiter und konnte das neue Konto abmelden — dann stand ohne Grund „Sitzung abgelaufen“ da. Sie endet jetzt mit dem Wechsel.
+- Demokonto: Nach fünf Minuten oder beim Wechsel ins Demokonto konnte die App mit einem Fehler abbrechen.
+- Benachrichtigungen: Wurde die App durch Tippen auf eine Systembenachrichtigung gestartet, öffnete sich der Eintrag nicht. Jetzt öffnet er sich, und nach der Anmeldung erfährt auch das Portal, dass er gelesen ist.
+- Zeugnis: War die Sitzung abgelaufen, zeigte die App die Anmeldeseite des Portals als Zeugnis. Sie meldet sich jetzt erst neu an.
+- Profilfoto: Beim Entfernen oder Wechseln des Fotos entstand im Hintergrund ein Fehler. Lässt sich ein Foto nicht laden, stehen jetzt die Initialen da.
+- Verbindung: Die Zeit „Zuletzt aktualisiert“ lag um die Zeitverschiebung — im Sommer zwei Stunden — in der Zukunft.
+- Benachrichtigungen: Neue Hausaufgaben und Prüfungen für diese und die nächste Woche melden sich jetzt als Systembenachrichtigung. Das Portal führt dazu keine eigene Benachrichtigung, deshalb blieb es bisher still. Ein Tippen öffnet die Hausaufgaben.
+- Hausaufgaben: Aufgaben für die nächste Woche erschienen erst, nachdem das Merkheft sie geladen hatte. Die Seite lädt jetzt beim Öffnen und Aktualisieren diese und die nächste Woche.
+- Benachrichtigungen: Die Schalter in den Einstellungen greifen jetzt für alle Arten, die das Portal kennt. Geteilte Mitteilungen, kritische Beobachtungen und Prüfungen meldeten sich bisher auch dann, wenn ihr Schalter aus war. Neu ist ein Schalter für Absenzen; ein Tippen darauf öffnet die Absenzen.
+- Benachrichtigungen: Ein Tippen auf eine Beobachtung in der Liste suchte eine Bewertung mit derselben Nummer und ließ die Benachrichtigung verschwinden.
+- Kompetenzen: Die App zeigte immer sechs Sterne, auch wo die Schule auf einer anderen Skala bewertet — etwa auf vier. Sterne, Durchschnitte und Diagramm folgen jetzt der Skala der Schule.
+- Einstellungen: Das Zahnrad neben dem Notendurchschnitt öffnete die Einstellungen, sprang aber nicht zum Abschnitt Noten.
+
 ## 1.4.1 — 2026-09-24
 
 ### Neue Funktionen

@@ -250,6 +250,13 @@ void main() {
       );
       addTearDown(container.dispose);
 
+      // The section heads the page. The guess of scroll_to_index stalled once
+      // the login section outgrew the screen, and it never got there.
+      final l = tr(tester.element(find.byType(MaterialApp)));
+      final heading = find.text(l.settingsSectionGrades);
+      expect(heading, findsOneWidget);
+      expect(tester.getTopLeft(heading).dy, lessThan(120));
+
       await expectLater(
         find.byType(SettingsPageContainer),
         matchesGoldenFile("scrolled_to_grades.png"),

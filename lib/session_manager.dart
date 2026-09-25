@@ -25,10 +25,19 @@ import 'package:dr/auth_service.dart';
 import 'package:dr/debug_log.dart';
 import 'package:dr/demo.dart';
 import 'package:dr/util.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:mutex/mutex.dart';
 
 // Declared here (instead of wrapper.dart) to avoid a circular import.
 class UnexpectedLogoutException implements Exception {}
+
+/// Whether [html] is the portal's sign-in page — what a page asked for
+/// comes back as once the session is gone. Told by its form, not by its
+/// title, which follows the language.
+@visibleForTesting
+bool isLoginPage(String html) =>
+    html.contains('class="login-container"') &&
+    html.contains('type="password"');
 
 /// Manages session lifetime, auto-logout, and authenticated HTTP requests.
 ///
@@ -88,6 +97,19 @@ class SessionManager {
   /// cancelling, each one left its own chain of checks behind.
   Timer? _sessionTimer;
 
+  /// Set once another session took this one's place. An account switch
+  /// used to leave the old session running: it went on extending itself,
+  /// signed in again when it ran out — and when that failed, its forced
+  /// logout logged out the app, which by then showed another account (#282).
+  bool _retired = false;
+
+  /// Stops this session for good: no more checks, extensions or logins,
+  /// and nothing reported to the app any more.
+  void retire() {
+    _retired = true;
+    _sessionTimer?.cancel();
+  }
+
   final _loginMutex = Mutex();
   DateTime? _lastUnexpectedLogout;
 
@@ -114,8 +136,11 @@ class SessionManager {
   Future<bool> ensureLoggedIn({
     bool isRetryAfterUnexpectedLogout = false,
   }) async {
+    if (_retired) return false;
     await _loginMutex.acquire();
     try {
+      // Retired while waiting for the lock.
+      if (_retired) return false;
       if (_serverLogoutTime != null && _serverNow.isAfter(_serverLogoutTime!)) {
         debugLog(LogCategory.session, 'Sitzung laut Server abgelaufen');
         _authService.forceLoggedOut();
@@ -163,7 +188,7 @@ class SessionManager {
             }
             return false;
           } else {
-            _authService.onRelogin!();
+            _authService.onRelogin?.call();
           }
         } else if (!_authService.appHasSignedIn) {
           // Too early: the app's own sign-in is on its way.
@@ -287,13 +312,8 @@ class SessionManager {
     bool isRetryAfterUnexpectedLogout = false,
     void Function(Object error)? onError,
   }) async {
-    if (_authService.demoMode) {
-      final dynamic response = await getDemoResponse(url, args);
-      // The demo answers the way the server would. Without reporting it the
-      // connection display waited forever for a first answer.
-      if (response != null) onRequestSucceeded?.call();
-      return response;
-    }
+    if (_retired) return null;
+    if (_authService.demoMode) return _demoAnswer(url, args);
     assert(!url.startsWith("/"));
 
     if (!await ensureLoggedIn(
@@ -310,6 +330,9 @@ class SessionManager {
       }
       return null;
     }
+    // Signing in from storage may have turned this into the demo while the
+    // request waited: it has no server to send to (#283).
+    if (_authService.demoMode) return _demoAnswer(url, args);
 
     dynamic responseData;
     try {
@@ -360,10 +383,13 @@ class SessionManager {
     //	<script type="text/javascript">
     //window.location = "https://vinzentinum.digitalesregister.it/v2/login";
     //</script>
-
+    //
+    // A page asked for with GET — the certificate — gets the whole sign-in
+    // page instead, which the app took for the page and showed (#285).
     if (responseData is String &&
-        RegExp(r'^[\s\n]*<script type="text/javascript">\n?\s*window\.location = "https://.+\.digitalesregister.it/v2/login";\n?\s*</script>[\s\n]*$')
-            .hasMatch(responseData)) {
+        (RegExp(r'^[\s\n]*<script type="text/javascript">\n?\s*window\.location = "https://.+\.digitalesregister.it/v2/login";\n?\s*</script>[\s\n]*$')
+                .hasMatch(responseData) ||
+            isLoginPage(responseData))) {
       debugLog(
         LogCategory.session,
         'Weiterleitung zur Anmeldung auf $url'
@@ -385,6 +411,14 @@ class SessionManager {
     return responseData;
   }
 
+  /// What the demo answers — the way the server would. Without reporting it
+  /// the connection display waited forever for a first answer.
+  Future<dynamic> _demoAnswer(String url, Map<String, Object?> args) async {
+    final dynamic response = await getDemoResponse(url, args);
+    if (response != null) onRequestSucceeded?.call();
+    return response;
+  }
+
   /// Writes one request to the network log. Both call sites used to build
   /// the item themselves, and the failing one quietly left out the reason.
   void _record(
@@ -393,7 +427,7 @@ class SessionManager {
     dynamic responseData, {
     Object? error,
   }) {
-    _authService.onAddProtocolItem!(NetworkProtocolItem((b) => b
+    _authService.onAddProtocolItem?.call(NetworkProtocolItem((b) => b
       ..address = _apiClient.baseAddress + url
       ..response = stringifyMaybeJson(responseData)
       ..parameters = stringifyMaybeJson(args)
@@ -403,6 +437,7 @@ class SessionManager {
 
   Future<void> _handleError(Exception e) async {
     log("Error while sending request", error: e);
+    if (_retired) return;
     if (e is TimeoutException || await refreshNoInternet()) {
       debugLog(
         LogCategory.session,
@@ -421,6 +456,7 @@ class SessionManager {
   /// few seconds, for as long as the account stays logged in.
   Future<void> _checkSession() async {
     _sessionTimer?.cancel();
+    if (_retired) return;
     try {
       if (!await _authService.loggedIn) return;
       if (_authService.demoMode) return;
@@ -439,6 +475,7 @@ class SessionManager {
     // Checks may overlap while one waits for the server; whichever finishes
     // last leaves the only timer.
     _sessionTimer?.cancel();
+    if (_retired) return;
     _sessionTimer = Timer(const Duration(seconds: 5), _checkSession);
   }
 
@@ -452,6 +489,9 @@ class SessionManager {
         },
       ),
     );
+    // Retired while the server was asked: whatever it says is no longer
+    // this session's to act on.
+    if (_retired) return;
     if (result == null) {
       // Without network there is no answer either, and no reason to log out:
       // the next request signs in again once the network is back.

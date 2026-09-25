@@ -1,4 +1,69 @@
 {
+  "1.5.0": {
+    "date": "2026-09-24",
+    "points": {
+      "de": [
+        {
+          "title": "Fehlerbehebungen",
+          "items": [
+            "Benachrichtigungen: Der Abruf im Hintergrund meldet sich nicht mehr mit dem Konto an, mit dem die geöffnete App gerade angemeldet ist — die App fragt für dieses Konto ohnehin selbst nach. Die zweite Anmeldung zur selben Zeit konnte die Sitzung der App beenden; beim Start erschien dann „Verbindung fehlgeschlagen“, obwohl das Netz da war.",
+            "Kontowechsel: Die Sitzung des vorigen Kontos lief im Hintergrund weiter und konnte das neue Konto abmelden — dann stand ohne Grund „Sitzung abgelaufen“ da. Sie endet jetzt mit dem Wechsel.",
+            "Demokonto: Nach fünf Minuten oder beim Wechsel ins Demokonto konnte die App mit einem Fehler abbrechen.",
+            "Benachrichtigungen: Wurde die App durch Tippen auf eine Systembenachrichtigung gestartet, öffnete sich der Eintrag nicht. Jetzt öffnet er sich, und nach der Anmeldung erfährt auch das Portal, dass er gelesen ist.",
+            "Zeugnis: War die Sitzung abgelaufen, zeigte die App die Anmeldeseite des Portals als Zeugnis. Sie meldet sich jetzt erst neu an.",
+            "Profilfoto: Beim Entfernen oder Wechseln des Fotos entstand im Hintergrund ein Fehler. Lässt sich ein Foto nicht laden, stehen jetzt die Initialen da.",
+            "Verbindung: Die Zeit „Zuletzt aktualisiert“ lag um die Zeitverschiebung — im Sommer zwei Stunden — in der Zukunft.",
+            "Benachrichtigungen: Neue Hausaufgaben und Prüfungen für diese und die nächste Woche melden sich jetzt als Systembenachrichtigung. Das Portal führt dazu keine eigene Benachrichtigung, deshalb blieb es bisher still. Ein Tippen öffnet die Hausaufgaben.",
+            "Hausaufgaben: Aufgaben für die nächste Woche erschienen erst, nachdem das Merkheft sie geladen hatte. Die Seite lädt jetzt beim Öffnen und Aktualisieren diese und die nächste Woche.",
+            "Benachrichtigungen: Die Schalter in den Einstellungen greifen jetzt für alle Arten, die das Portal kennt. Geteilte Mitteilungen, kritische Beobachtungen und Prüfungen meldeten sich bisher auch dann, wenn ihr Schalter aus war. Neu ist ein Schalter für Absenzen; ein Tippen darauf öffnet die Absenzen.",
+            "Benachrichtigungen: Ein Tippen auf eine Beobachtung in der Liste suchte eine Bewertung mit derselben Nummer und ließ die Benachrichtigung verschwinden.",
+            "Kompetenzen: Die App zeigte immer sechs Sterne, auch wo die Schule auf einer anderen Skala bewertet — etwa auf vier. Sterne, Durchschnitte und Diagramm folgen jetzt der Skala der Schule.",
+            "Einstellungen: Das Zahnrad neben dem Notendurchschnitt öffnete die Einstellungen, sprang aber nicht zum Abschnitt Noten."
+          ]
+        }
+      ],
+      "en": [
+        {
+          "title": "Bug fixes",
+          "items": [
+            "Notifications: the background check no longer signs into the account the open app is signed into — the app asks for that account itself anyway. The second sign-in at the same time could end the app's session; at start-up the app then showed “Connection failed” although the network was there.",
+            "Switching accounts: the previous account's session kept running in the background and could sign the new account out — “Session expired” then appeared for no reason. It now ends with the switch.",
+            "Demo account: after five minutes, or when switching to the demo account, the app could stop with an error.",
+            "Notifications: when the app was started by tapping a system notification, the entry did not open. It now opens, and after signing in the portal also learns that it was read.",
+            "Report card: when the session had expired, the app showed the portal's sign-in page as the report card. It now signs in again first.",
+            "Account photo: removing or changing the photo caused an error in the background. If a photo cannot be loaded, the initials now show instead.",
+            "Connection: the “Last updated” time was ahead by the time-zone offset — two hours in summer.",
+            "Notifications: new homework and tests for this week and the next now show up as a system notification. The portal keeps no notification of its own for them, so nothing came so far. A tap opens the homework.",
+            "Homework: assignments for next week only appeared after the Merkheft had loaded them. The page now loads this week and the next when it opens and when it is refreshed.",
+            "Notifications: the switches in the settings now work for every kind the portal knows. Shared messages, critical observations and tests showed up even with their switch off. There is a new switch for absences; tapping one opens the absences.",
+            "Notifications: tapping an observation in the list looked for a grade with the same number and made the notification disappear.",
+            "Competences: the app always showed six stars, even where the school rates on another scale — four, for instance. Stars, averages and chart now follow the school's scale.",
+            "Settings: the gear next to the grade average opened the settings without scrolling to the grades section."
+          ]
+        }
+      ],
+      "it": [
+        {
+          "title": "Correzioni",
+          "items": [
+            "Notifiche: il controllo in background non accede più con l'account con cui l'app aperta è connessa — per quell'account l'app controlla già da sé. Il secondo accesso contemporaneo poteva chiudere la sessione dell'app; all'avvio compariva allora «Connessione non riuscita», benché la rete ci fosse.",
+            "Cambio di account: la sessione dell'account precedente continuava in background e poteva disconnettere il nuovo account — compariva allora «Sessione scaduta» senza motivo. Ora termina con il cambio.",
+            "Account demo: dopo cinque minuti, o passando all'account demo, l'app poteva interrompersi con un errore.",
+            "Notifiche: se l'app veniva avviata toccando una notifica di sistema, la voce non si apriva. Ora si apre, e dopo l'accesso anche il portale sa che è stata letta.",
+            "Pagella: se la sessione era scaduta, l'app mostrava come pagella la pagina di accesso del portale. Ora prima accede di nuovo.",
+            "Foto profilo: rimuovendo o cambiando la foto si verificava un errore in background. Se una foto non si può caricare, ora compaiono le iniziali.",
+            "Connessione: l'ora di «Ultimo aggiornamento» era avanti del fuso orario — due ore in estate.",
+            "Notifiche: i nuovi compiti e le verifiche di questa settimana e della prossima arrivano ora come notifica di sistema. Il portale non ne crea una propria, perciò finora non arrivava nulla. Un tocco apre i compiti.",
+            "Compiti: i compiti della settimana prossima comparivano solo dopo che il Merkheft li aveva caricati. La pagina carica ora questa settimana e la prossima all'apertura e all'aggiornamento.",
+            "Notifiche: gli interruttori nelle impostazioni valgono ora per tutti i tipi che il portale conosce. Messaggi condivisi, osservazioni critiche e verifiche arrivavano anche con l'interruttore spento. Nuovo interruttore per le assenze; un tocco apre le assenze.",
+            "Notifiche: un tocco su un'osservazione nell'elenco cercava una valutazione con lo stesso numero e faceva sparire la notifica.",
+            "Competenze: l'app mostrava sempre sei stelle, anche dove la scuola valuta su un'altra scala — per esempio su quattro. Stelle, medie e grafico seguono ora la scala della scuola.",
+            "Impostazioni: l'ingranaggio accanto alla media apriva le impostazioni senza portare alla sezione dei voti."
+          ]
+        }
+      ]
+    }
+  },
   "1.4.1": {
     "date": "2026-09-24",
     "points": {

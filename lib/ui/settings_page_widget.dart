@@ -81,6 +81,7 @@ class SettingsPageWidget extends StatefulWidget {
   final OnSettingChanged<bool> onSetNotifyGrades;
   final OnSettingChanged<bool> onSetNotifyObservations;
   final OnSettingChanged<bool> onSetNotifyHomework;
+  final OnSettingChanged<bool> onSetNotifyAbsences;
   final VoidCallback onShowProfile;
   final SettingsViewModel vm;
 
@@ -121,6 +122,7 @@ class SettingsPageWidget extends StatefulWidget {
     required this.onSetNotifyGrades,
     required this.onSetNotifyObservations,
     required this.onSetNotifyHomework,
+    required this.onSetNotifyAbsences,
   });
 
   @override
@@ -129,6 +131,9 @@ class SettingsPageWidget extends StatefulWidget {
 
 class _SettingsPageWidgetState extends State<SettingsPageWidget> {
   final controller = AutoScrollController(suggestedRowHeight: 250);
+
+  /// Well beyond the whole page, so no section is left unbuilt.
+  static const _buildAheadExtent = 20000.0;
 
   List<String> get notYetIgnoredForAverageSubjects => widget.vm.allSubjects
       .where((element) => !widget.vm.ignoreForGradesAverage.contains(element))
@@ -264,6 +269,10 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
       ),
       body: ListView(
         controller: controller,
+        // Every section built up front: scrollToIndex can only guess its way
+        // to a section that is not built yet, and the guess stalls once one
+        // section is taller than the screen — the grades never came into view.
+        cacheExtent: _buildAheadExtent,
         padding: context.systemInsets,
         children: <Widget>[
           if (!widget.vm.demoMode) ...[
@@ -345,7 +354,11 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
                   widget.vm.notificationsEnabled && !widget.vm.noPassSaving,
               leading: const Icon(Icons.bug_report_outlined),
               title: const Text('Jetzt im Hintergrund prüfen (Debug)'),
-              subtitle: const Text('Lang drücken: alle Ungelesenen melden'),
+              subtitle: Text(
+                'Lang drücken: alle Ungelesenen melden. Startet nach '
+                '${debugCheckDelay.inSeconds} s – App verlassen, damit '
+                'auch dieses Konto dabei ist',
+              ),
               onTap: () => unawaited(runBackgroundCheckNow()),
               onLongPress: () =>
                   unawaited(runBackgroundCheckNow(announceAll: true)),
@@ -356,8 +369,10 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
                   widget.vm.notificationsEnabled && !widget.vm.noPassSaving,
               leading: const Icon(Icons.bug_report_outlined),
               title: const Text('Test-Benachrichtigung zeigen (Debug)'),
-              subtitle: const Text(
-                'Neueste empfangene Mitteilung jedes Kontos, auch gelesene',
+              subtitle: Text(
+                'Neueste empfangene Mitteilung jedes Kontos, auch gelesene. '
+                'Startet nach ${debugCheckDelay.inSeconds} s – App '
+                'verlassen, damit auch dieses Konto dabei ist',
               ),
               onTap: () =>
                   unawaited(runBackgroundCheckNow(testNotification: true)),
@@ -397,6 +412,13 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
                 ? widget.onSetNotifyHomework
                 : null,
             value: widget.vm.notifyHomework,
+          ),
+          SwitchListTile.adaptive(
+            title: Text(tr(context).settingsNotificationsTypeAbsences),
+            onChanged: widget.vm.notificationsEnabled
+                ? widget.onSetNotifyAbsences
+                : null,
+            value: widget.vm.notifyAbsences,
           ),
           // Next to the account switch it is about; the demo has no second
           // account to switch to.
