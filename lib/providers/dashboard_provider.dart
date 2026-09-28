@@ -584,7 +584,7 @@ Competence _parseDashboardCompetence(Map data) {
   return Competence(
     (b) => b
       ..typeName = getString(data['typeName'])
-      ..grade = (double.tryParse(getString(data['grade']) ?? '') ?? 0).toInt(),
+      ..grade = double.tryParse(getString(data['grade']) ?? '') ?? 0,
   );
 }
 

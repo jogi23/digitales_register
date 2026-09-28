@@ -24,7 +24,8 @@
             "Benachrichtigungen: Die Schalter in den Einstellungen greifen jetzt für alle Arten, die das Portal kennt. Geteilte Mitteilungen, kritische Beobachtungen und Prüfungen meldeten sich bisher auch dann, wenn ihr Schalter aus war. Neu ist ein Schalter für Absenzen; ein Tippen darauf öffnet die Absenzen.",
             "Benachrichtigungen: Ein Tippen auf eine Beobachtung in der Liste suchte eine Bewertung mit derselben Nummer und ließ die Benachrichtigung verschwinden.",
             "Kompetenzen: Die App zeigte immer sechs Sterne, auch wo die Schule auf einer anderen Skala bewertet — etwa auf vier. Sterne, Durchschnitte und Diagramm folgen jetzt der Skala der Schule.",
-            "Einstellungen: Das Zahnrad neben dem Notendurchschnitt öffnete die Einstellungen, sprang aber nicht zum Abschnitt Noten."
+            "Einstellungen: Das Zahnrad neben dem Notendurchschnitt öffnete die Einstellungen, sprang aber nicht zum Abschnitt Noten.",
+            "Kompetenzen: An Schulen, die halbe Sterne vergeben, zeigte die App eine Bewertung von 3,5 als drei Sterne. Jetzt steht ein halber Stern da, auch im Diagramm und im Sterndurchschnitt."
           ]
         }
       ],
@@ -50,7 +51,8 @@
             "Notifications: the switches in the settings now work for every kind the portal knows. Shared messages, critical observations and tests showed up even with their switch off. There is a new switch for absences; tapping one opens the absences.",
             "Notifications: tapping an observation in the list looked for a grade with the same number and made the notification disappear.",
             "Competences: the app always showed six stars, even where the school rates on another scale — four, for instance. Stars, averages and chart now follow the school's scale.",
-            "Settings: the gear next to the grade average opened the settings without scrolling to the grades section."
+            "Settings: the gear next to the grade average opened the settings without scrolling to the grades section.",
+            "Competences: at schools that award half stars, the app showed a rating of 3.5 as three stars. A half star now shows, in the chart and in the star average as well."
           ]
         }
       ],
@@ -76,7 +78,8 @@
             "Notifiche: gli interruttori nelle impostazioni valgono ora per tutti i tipi che il portale conosce. Messaggi condivisi, osservazioni critiche e verifiche arrivavano anche con l'interruttore spento. Nuovo interruttore per le assenze; un tocco apre le assenze.",
             "Notifiche: un tocco su un'osservazione nell'elenco cercava una valutazione con lo stesso numero e faceva sparire la notifica.",
             "Competenze: l'app mostrava sempre sei stelle, anche dove la scuola valuta su un'altra scala — per esempio su quattro. Stelle, medie e grafico seguono ora la scala della scuola.",
-            "Impostazioni: l'ingranaggio accanto alla media apriva le impostazioni senza portare alla sezione dei voti."
+            "Impostazioni: l'ingranaggio accanto alla media apriva le impostazioni senza portare alla sezione dei voti.",
+            "Competenze: nelle scuole che assegnano mezze stelle, l'app mostrava una valutazione di 3,5 come tre stelle. Ora compare una mezza stella, anche nel grafico e nella media delle stelle."
           ]
         }
       ]

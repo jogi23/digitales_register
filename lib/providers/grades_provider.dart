@@ -429,7 +429,7 @@ Competence _parseCompetence(Map data) {
   return Competence((b) => b
     ..typeName = getString(data["typeName"])
     ..description = getString(data["description"])
-    ..grade = (double.tryParse(getString(data["grade"]) ?? "") ?? 0).toInt());
+    ..grade = double.tryParse(getString(data["grade"]) ?? "") ?? 0);
 }
 
 class _SemesterLock {

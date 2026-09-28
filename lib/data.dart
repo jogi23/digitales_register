@@ -593,8 +593,10 @@ abstract class Competence implements Built<Competence, CompetenceBuilder> {
 
   String get typeName;
   /// How many stars the competence scored, on the school's scale
-  /// ([Config.competenceScale]).
-  int get grade;
+  /// ([Config.competenceScale]). Schools that allow it rate in halves — the
+  /// portal sends `"3.50"` —, so this is not a whole number (#293). States
+  /// saved while it was one read back as the same value.
+  double get grade;
 
   /// What the teacher wrote about this single competence.
   String? get description;

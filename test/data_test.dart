@@ -2,6 +2,7 @@
 import 'package:built_collection/built_collection.dart';
 import 'package:dr/app_state.dart' show Semester;
 import 'package:dr/data.dart';
+import 'package:dr/serializers.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -410,5 +411,16 @@ void main() {
 
       expect(subject.starAverageFormatted(Semester.first), '5,5/6');
     });
+  });
+
+  test('a competence saved as a whole number reads back (#293)', () {
+    // Saved states from before the grade could be a half carry an int.
+    final competence = serializers.deserializeWith(Competence.serializer, [
+      'typeName',
+      'Lesen',
+      'grade',
+      4,
+    ])!;
+    expect(competence.grade, 4.0);
   });
 }

@@ -399,7 +399,7 @@ String formatChartSelectionText(
     "$subject – ${point.type}: ${formatStarValue(point.value, competenceScale: competenceScale)}",
     if (point.competences?.isNotEmpty == true)
       ...point.competences!.map(
-        (c) => "${c.typeName}: ${c.grade}★",
+        (c) => "${c.typeName}: ${gradeAverageFormat.format(c.grade)}★",
       ),
   ].join("\n");
 }
