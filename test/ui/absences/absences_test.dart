@@ -33,6 +33,7 @@ import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 import '../../fixtures/api_fixtures.dart';
+import '../../system_bars.dart';
 
 class _TestAbsencesNotifier extends AbsencesNotifier {
   _TestAbsencesNotifier(this._initialState);
@@ -196,19 +197,53 @@ void main() {
             g.justified != AbsenceJustified.forSchool)
         .length;
 
-    testWidgets('mit Schreibrecht führt die Titelzeile zum Melden',
+    final reportButton =
+        find.widgetWithText(FloatingActionButton, 'Absenz melden');
+
+    testWidgets('mit Schreibrecht führt ein großer Knopf zum Melden',
         (tester) async {
       await tester
           .pumpWidget(_buildTestWidget(initialState: withRight(canEdit: true)));
       await tester.pumpAndSettle();
-      expect(find.byTooltip('Absenz melden'), findsOneWidget);
+      // Like "Neue Mitteilung", not a small plus in the title bar.
+      expect(reportButton, findsOneWidget);
+      expect(find.byIcon(Icons.add), findsNothing);
     });
+
+    for (final holding in Holding.values) {
+      testWidgets('der Knopf verdeckt den letzten Eintrag nicht '
+          '(${holding.name})', (tester) async {
+        holdPhone(tester, holding);
+        await tester.pumpWidget(
+            _buildTestWidget(initialState: withRight(canEdit: true)));
+        await tester.pumpAndSettle();
+        // The list's own scroll view, not the one PullToRefresh wraps
+        // around the page.
+        await scrollToEnd(
+          tester,
+          find
+              .descendant(
+                of: find.byType(ListView),
+                matching: find.byType(Scrollable),
+              )
+              .first,
+        );
+
+        final last = find.byType(ListTile).last;
+        expectClearOfSystemBars(tester, last);
+        expectClearOfSystemBars(tester, reportButton);
+        expect(
+          tester.getRect(last).bottom,
+          lessThanOrEqualTo(tester.getRect(reportButton).top),
+        );
+      });
+    }
 
     testWidgets('ohne Schreibrecht gibt es keine Knöpfe', (tester) async {
       await tester.pumpWidget(
           _buildTestWidget(initialState: withRight(canEdit: false)));
       await tester.pumpAndSettle();
-      expect(find.byTooltip('Absenz melden'), findsNothing);
+      expect(reportButton, findsNothing);
       expect(find.byIcon(Icons.edit_note), findsNothing);
     });
 

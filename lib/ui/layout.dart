@@ -19,6 +19,10 @@ import 'package:flutter/widgets.dart';
 import 'package:responsive_scaffold/responsive_scaffold.dart'
     show compactHeightBreakpoint;
 
+/// Room an extended floating action button takes at the bottom of a list:
+/// its height, its margin, and a little air above the last entry.
+const fabClearance = 88.0;
+
 /// Where the system puts its bars, and how much room the frame leaves.
 ///
 /// Every screen needs the same two answers, so they are given once here.
@@ -38,6 +42,11 @@ extension SystemInsets on BuildContext {
       bottom: padding.bottom,
     );
   }
+
+  /// [systemInsets] with room below the last entry for an extended floating
+  /// action button, which would otherwise sit on top of it.
+  EdgeInsets get systemInsetsWithFab =>
+      systemInsets.copyWith(bottom: systemInsets.bottom + fabClearance);
 
   /// Just the bottom part of [systemInsets], for a plain spacer.
   double get systemBottomInset => MediaQuery.viewPaddingOf(this).bottom;
