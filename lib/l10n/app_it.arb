@@ -297,7 +297,7 @@
   "settingsColorLessons": "Colora le lezioni nel calendario con questi colori",
   "settingsShowTimes": "Mostra gli orari nel calendario",
   "settingsSixDayWeek": "Settimana di 6 giorni (beta)",
-  "settingsSixDayWeekHint": "Il sabato conta come giorno di scuola, anche se la scuola ne indica solo cinque",
+  "settingsSixDayWeekHint": "Il sabato conta come giorno di scuola",
   "settingsShowAllDetails": "Mostra tutti i dettagli nel calendario",
   "settingsShowAllDetailsHint": "Docenti e aula direttamente nella lezione, se c'è spazio",
   "calendarRoomTooltip": "Aula: {room}",
