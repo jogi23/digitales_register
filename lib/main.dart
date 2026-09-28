@@ -93,6 +93,8 @@ Future<void> _runApp() async {
   secureStorage = const FlutterSecureStorage();
   providerContainer = ProviderContainer();
   wireLoginDispatchers(providerContainer.read(loginProvider.notifier));
+  // Before anything reads the stored accounts.
+  await migrateMovedSchools();
   unawaited(providerContainer.read(accountProfileProvider.notifier).load());
   unawaited(reviewPrompt.recordLaunch());
   runApp(SentryWidget(
