@@ -349,7 +349,8 @@ class MessageExport {
   static String _attachmentNames(Message message) =>
       message.attachments.map((a) => a.originalName).join(', ');
 
-  static String _listPrefix(DeltaLine line, int number) => switch (line.list) {
+  static String _listPrefix(DeltaLine line, int number) =>
+      switch (line.list) {
         DeltaList.bullet => '• ',
         DeltaList.ordered => '$number. ',
         null => '',
@@ -357,8 +358,7 @@ class MessageExport {
 
   static String _markdownSpan(DeltaSpan span) {
     // Markers have to touch the text: "** bold**" is no emphasis.
-    final match =
-        RegExp(r'^(\s*)(.*?)(\s*)$', dotAll: true).firstMatch(span.text)!;
+    final match = RegExp(r'^(\s*)(.*?)(\s*)$', dotAll: true).firstMatch(span.text)!;
     var core = _escape(match[2]!);
     if (core.isEmpty) return span.text;
     if (span.link != null) core = '[$core](${span.link})';
