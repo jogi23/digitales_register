@@ -32,8 +32,14 @@ Map<String, String> _texts(String language) {
 }
 
 /// The names between braces, which every language has to keep.
+/// The arguments a text takes: `{date}`, and the `kind` of
+/// `{kind, select, …}`. A brace right after a word or `=1` opens a branch of
+/// a select or plural — `message{Mitteilung}` — whose text is translated.
 Set<String> _placeholders(String text) =>
-    RegExp(r'\{(\w+)\}').allMatches(text).map((m) => m.group(1)!).toSet();
+    RegExp(r'(?<![\w=])\{(\w+)[},]')
+        .allMatches(text)
+        .map((m) => m.group(1)!)
+        .toSet();
 
 void main() {
   final german = _texts('de');

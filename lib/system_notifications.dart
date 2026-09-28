@@ -20,6 +20,7 @@ import 'dart:convert';
 import 'package:dr/data.dart';
 import 'package:dr/debug_log.dart';
 import 'package:dr/l10n/l10n.dart';
+import 'package:dr/notification_type.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 // The system's own notifications on Android — as opposed to the list inside
@@ -169,6 +170,15 @@ AndroidNotificationDetails _details(
       category: AndroidNotificationCategory.message,
     );
 
+/// [n]'s title with what it is about in front — „Hausaufgabe · Italienisch:
+/// …“ —, so that is clear at a glance (#297). Android groups only once, by
+/// account here; a second level by kind is not to be had.
+String withKind(L l, Notification n) {
+  final kind = notificationKindOf(n.type);
+  final label = kind == null ? '' : l.systemNotificationsKind(kind);
+  return label.isEmpty ? n.title : '$label · ${n.title}';
+}
+
 /// Brings the account's system notifications in line with the portal: shows
 /// [fresh], takes back those no longer in [unreadIds] and keeps a summary on
 /// top of whatever is left.
@@ -186,12 +196,13 @@ Future<void> syncAccountNotifications({
   final android = _android;
   if (android == null) return;
   for (final n in fresh) {
-    final text = [n.title, if (n.subTitle?.isNotEmpty ?? false) n.subTitle!]
-        .join('\n');
+    final body = withKind(l, n);
+    final text =
+        [body, if (n.subTitle?.isNotEmpty ?? false) n.subTitle!].join('\n');
     await _plugin.show(
       id: n.id,
       title: account.name,
-      body: n.title,
+      body: body,
       notificationDetails: NotificationDetails(
         android: _details(
           l,
@@ -216,7 +227,7 @@ Future<void> syncAccountNotifications({
         a.id!: a.body ?? '',
   };
   for (final n in fresh) {
-    shown[n.id] = n.title;
+    shown[n.id] = withKind(l, n);
   }
   var withdrawn = 0;
   for (final id in shown.keys.toList()) {

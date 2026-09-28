@@ -118,7 +118,7 @@ typedef UpcomingHomework = ({
   UtcDateTime date,
   String subject,
   String name,
-  String typeName,
+  bool exam,
 });
 
 /// The homework and exams of [days], each once — an entry for a double
@@ -135,7 +135,7 @@ List<UpcomingHomework> homeworkOf(Iterable<CalendarDay> days) {
               date: day.date,
               subject: hour.subject,
               name: h.name,
-              typeName: h.typeName,
+              exam: !h.homework,
             ),
   ];
 }
@@ -552,10 +552,9 @@ Notification _homeworkNotification(L l, UpcomingHomework h) => Notification(
         ..id = homeworkNotificationId(h.id)
         ..title = '${h.subject}: ${h.name}'
         ..subTitle = l.systemNotificationsHomeworkDue(
-          h.typeName,
           DateFormat.MMMMEEEEd(l.localeName).format(h.date),
         )
-        ..type = notificationTypeHomework
+        ..type = h.exam ? notificationTypeExam : notificationTypeHomework
         ..objectId = h.id
         ..timeSent = UtcDateTime.now(),
     );

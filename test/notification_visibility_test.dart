@@ -17,8 +17,12 @@
 
 import 'package:dr/app_state.dart';
 import 'package:dr/data.dart';
+import 'package:dr/l10n/l10n.dart';
+import 'package:dr/notification_type.dart';
 import 'package:dr/notification_visibility.dart';
+import 'package:dr/system_notifications.dart';
 import 'package:dr/utc_date_time.dart';
+import 'package:flutter/widgets.dart' show Locale;
 import 'package:flutter_test/flutter_test.dart';
 
 /// The kinds of notification the portal knows, spelled as it sends them —
@@ -100,5 +104,35 @@ void main() {
       _portalTypes.difference(_hidden(none)),
       {'substituteLesson', 'lessonTeacherChanged', 'passwordChanged', 'custom'},
     );
+  });
+
+  group('what a system notification is about (#297)', () {
+    test('every kind of the portal has a label, in every language', () {
+      for (final language in ['de', 'en', 'it']) {
+        final l = lookupL(Locale(language));
+        for (final type in _portalTypes) {
+          final kind = notificationKindOf(type);
+          expect(kind, isNotNull, reason: type);
+          expect(l.systemNotificationsKind(kind!), isNotEmpty,
+              reason: '$type in $language');
+        }
+      }
+    });
+
+    test('stands in front of the text', () {
+      final l = lookupL(const Locale('de'));
+      expect(withKind(l, _of('homeWork')), 'Hausaufgabe · homeWork');
+      expect(withKind(l, _of('exam')), 'Prüfung · exam');
+      expect(withKind(l, _of('messageShared')), 'Mitteilung · messageShared');
+      expect(
+        withKind(l, _of('substituteLesson')),
+        'Kalender · substituteLesson',
+      );
+    });
+
+    test('a kind the app does not know leaves the text as it is', () {
+      final l = lookupL(const Locale('de'));
+      expect(withKind(l, _of('somethingNew')), 'somethingNew');
+    });
   });
 }

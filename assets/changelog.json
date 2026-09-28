@@ -6,7 +6,8 @@
         {
           "title": "Verbesserungen",
           "items": [
-            "Merkheft-Monatsansicht: Die Tage des Vor- und Folgemonats in der ersten und letzten Woche stehen jetzt leicht ausgegraut da, statt zu fehlen — mit Punkt, wenn es an dem Tag etwas gibt. Ein Tippen zeigt den Tag wie jeden anderen."
+            "Merkheft-Monatsansicht: Die Tage des Vor- und Folgemonats in der ersten und letzten Woche stehen jetzt leicht ausgegraut da, statt zu fehlen — mit Punkt, wenn es an dem Tag etwas gibt. Ein Tippen zeigt den Tag wie jeden anderen.",
+            "Benachrichtigungen: Vor dem Text steht jetzt, worum es geht — etwa „Hausaufgabe · Italienisch: …“, „Mitteilung · …“ oder „Absenz · …“. Neue Prüfungen melden sich als Prüfung, nicht als Hausaufgabe."
           ]
         },
         {
@@ -32,7 +33,8 @@
         {
           "title": "Improvements",
           "items": [
-            "Merkheft month view: the days of the previous and next month in the first and last week are now shown slightly greyed out instead of being left out — with a dot when something is on that day. Tapping one shows the day like any other."
+            "Merkheft month view: the days of the previous and next month in the first and last week are now shown slightly greyed out instead of being left out — with a dot when something is on that day. Tapping one shows the day like any other.",
+            "Notifications: the text now starts with what it is about — such as “Homework · Italian: …”, “Message · …” or “Absence · …”. New tests show up as a test, not as homework."
           ]
         },
         {
@@ -58,7 +60,8 @@
         {
           "title": "Miglioramenti",
           "items": [
-            "Vista mensile del Merkheft: i giorni del mese precedente e successivo nella prima e nell'ultima settimana ora compaiono leggermente in grigio invece di mancare — con il punto se in quel giorno c'è qualcosa. Un tocco mostra il giorno come ogni altro."
+            "Vista mensile del Merkheft: i giorni del mese precedente e successivo nella prima e nell'ultima settimana ora compaiono leggermente in grigio invece di mancare — con il punto se in quel giorno c'è qualcosa. Un tocco mostra il giorno come ogni altro.",
+            "Notifiche: il testo ora inizia con ciò di cui si tratta — ad esempio «Compito · Italiano: …», «Comunicazione · …» o «Assenza · …». Le nuove verifiche arrivano come verifica, non come compito."
           ]
         },
         {
