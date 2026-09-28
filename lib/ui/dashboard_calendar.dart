@@ -473,10 +473,6 @@ class _MonthGrid extends StatelessWidget {
   }
 
   Widget _cell(DateTime date, DateTime today) {
-    // Days of the neighbouring months stay blank.
-    if (date.month != month.month || date.year != month.year) {
-      return const SizedBox.shrink();
-    }
     final day = byDate[date];
     final current = pick;
     final selected = switch (current) {
@@ -493,6 +489,10 @@ class _MonthGrid extends StatelessWidget {
       hasWarning: day?.homework.any((h) => h.warning) ?? false,
       isToday: date == today,
       isSelected: selected,
+      // The first and last row reach into the neighbouring months. Their
+      // days are shown faded rather than left blank, so an entry there is
+      // not missed (#298).
+      isOutsideMonth: date.month != month.month || date.year != month.year,
       onTap: () => onPickDay(date),
     );
   }
@@ -558,6 +558,9 @@ class _DayCell extends StatelessWidget {
   final bool hasWarning;
   final bool isToday;
   final bool isSelected;
+
+  /// Whether the day belongs to the month before or after the one shown.
+  final bool isOutsideMonth;
   final VoidCallback onTap;
 
   const _DayCell({
@@ -567,12 +570,14 @@ class _DayCell extends StatelessWidget {
     required this.hasWarning,
     required this.isToday,
     required this.isSelected,
+    this.isOutsideMonth = false,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final dot = hasWarning ? scheme.error : scheme.primary;
 
     return InkWell(
       onTap: onTap,
@@ -599,11 +604,15 @@ class _DayCell extends StatelessWidget {
                   style: TextStyle(
                     // Days the dashboard never loaded are faded: no dot there
                     // means "unknown", not "nothing to do".
+                    // Days of the neighbouring months are faded less: what is
+                    // known about them still counts.
                     color: isSelected
                         ? scheme.onPrimary
-                        : isKnown
-                            ? null
-                            : scheme.onSurfaceVariant.withValues(alpha: 0.4),
+                        : !isKnown
+                            ? scheme.onSurfaceVariant.withValues(alpha: 0.4)
+                            : isOutsideMonth
+                                ? scheme.onSurfaceVariant.withValues(alpha: 0.6)
+                                : null,
                     fontWeight: isToday ? FontWeight.bold : null,
                   ),
                 ),
@@ -623,7 +632,7 @@ class _DayCell extends StatelessWidget {
                       shape: BoxShape.circle,
                       // The dot sits below the circle, so it keeps its own
                       // colour even while the day is selected.
-                      color: hasWarning ? scheme.error : scheme.primary,
+                      color: isOutsideMonth ? dot.withValues(alpha: 0.5) : dot,
                     ),
                   ),
           ),
