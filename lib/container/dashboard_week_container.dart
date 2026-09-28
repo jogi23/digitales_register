@@ -22,6 +22,7 @@ import 'package:built_collection/built_collection.dart';
 import 'package:dr/container/calendar_week_container.dart';
 import 'package:dr/data.dart';
 import 'package:dr/providers/calendar_provider.dart';
+import 'package:dr/providers/config_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/providers/subject_appearance_provider.dart';
@@ -268,13 +269,14 @@ class _DashboardWeekContainerState
     final noInternet = ref.watch(noInternetProvider);
     final settings = ref.watch(settingsProvider);
     final subjectAppearance = ref.watch(subjectAppearanceProvider);
-    final weekDays = calendarState.daysForWeek(_monday).toList()
-      ..sort((a, b) => a.date.compareTo(b.date));
+    final weekDays =
+        calendarState.schoolWeek(_monday, ref.watch(daysInWeekProvider));
 
     return Column(
       children: <Widget>[
         _WeekHeader(
           monday: _monday,
+          daysInWeek: ref.watch(daysInWeekProvider),
           onPrevious: () => _changeWeek(-1),
           onNext: () => _changeWeek(1),
           onToday: () => _goTo(toMonday(Day.dateToday())),
@@ -312,6 +314,9 @@ class _DashboardWeekContainerState
 
 class _WeekHeader extends StatelessWidget {
   final UtcDateTime monday;
+
+  /// How many days the week has; the header runs to the last of them.
+  final int daysInWeek;
   final VoidCallback onPrevious;
   final VoidCallback onNext;
   final VoidCallback onToday;
@@ -319,6 +324,7 @@ class _WeekHeader extends StatelessWidget {
 
   const _WeekHeader({
     required this.monday,
+    required this.daysInWeek,
     required this.onPrevious,
     required this.onNext,
     required this.onToday,
@@ -328,7 +334,8 @@ class _WeekHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final format = DateFormat("dd.MM.yy");
-    final friday = monday.add(const Duration(days: 4));
+    // Friday, or Saturday where the school teaches then (#292).
+    final lastDay = monday.add(Duration(days: daysInWeek - 1));
     // Sideways the header is height the timetable needs more than it does.
     final density =
         context.isCompactHeight ? VisualDensity.compact : VisualDensity.standard;
@@ -342,7 +349,7 @@ class _WeekHeader extends StatelessWidget {
           onPressed: onPrevious,
         ),
         Text(
-          "${format.format(monday)} - ${format.format(friday)}",
+          "${format.format(monday)} - ${format.format(lastDay)}",
           style: Theme.of(context).textTheme.titleMedium,
         ),
         Row(

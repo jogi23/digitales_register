@@ -89,6 +89,26 @@ void main() {
       });
     });
 
+    group('daysInWeek (#292)', () {
+      test('reads the school days from the config block', () {
+        final config = ConfigParser.parse(
+            _src().replaceFirst('{ ', '{ days_in_week: 6, '));
+        expect(config.daysInWeek, 6);
+      });
+
+      test('keeps Monday to Friday where the page does not say', () {
+        expect(ConfigParser.parse(_src()).daysInWeek, Config.defaultDaysInWeek);
+      });
+
+      test('keeps Monday to Friday for a value no week has', () {
+        for (final value in ['0', '8']) {
+          final config = ConfigParser.parse(
+              _src().replaceFirst('{ ', '{ days_in_week: $value, '));
+          expect(config.daysInWeek, Config.defaultDaysInWeek, reason: value);
+        }
+      });
+    });
+
     group('competenceScale', () {
       test('reads the scale from the config block', () {
         final config = ConfigParser.parse(_src()

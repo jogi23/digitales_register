@@ -17,6 +17,7 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:dr/providers/calendar_provider.dart';
+import 'package:dr/providers/config_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/providers/subject_appearance_provider.dart';
@@ -32,7 +33,10 @@ class CalendarContainer extends ConsumerWidget {
     final noInternet = ref.watch(noInternetProvider);
     final settings = ref.watch(settingsProvider);
     final subjectAppearance = ref.watch(subjectAppearanceProvider);
-    final currentDays = calendarState.currentDays;
+    final currentDays = calendarState.schoolWeek(
+      calendarState.shownMonday,
+      ref.watch(daysInWeekProvider),
+    );
     return Calendar(
       vm: CalendarViewModel(
         first: currentDays.isEmpty ? null : currentDays.first.date,

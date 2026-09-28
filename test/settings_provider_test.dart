@@ -1,5 +1,6 @@
 // Copyright (C) 2026 Johannes Feichter
 import 'package:dr/app_state.dart';
+import 'package:dr/providers/config_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -345,6 +346,39 @@ void main() {
         'notificationPollMinutes': 17,
       });
       expect(s.notificationPollMinutes, 30);
+    });
+  });
+
+  group('six-day week (#292)', () {
+    test('is off by default and kept per account', () {
+      final s = SettingsState();
+      expect(s.sixDayWeek, isFalse);
+      final on = s.copyWith(sixDayWeek: true);
+      expect(SettingsState.fromJson(on.toJson()).sixDayWeek, isTrue);
+      // The school is the account's; another account may teach Mon–Fri.
+      expect(on.globalJson().containsKey('sixDayWeek'), isFalse);
+    });
+
+    test('decides the school days over the page', () {
+      final container = _makeContainer();
+      expect(container.read(daysInWeekProvider), 5);
+
+      container.read(configProvider.notifier).state = Config(
+        (b) => b
+          ..userId = 1
+          ..autoLogoutSeconds = 1
+          ..fullName = 'Test'
+          ..imgSource = ''
+          ..isStudentOrParent = true
+          ..daysInWeek = 6,
+      );
+      expect(container.read(daysInWeekProvider), 6);
+
+      container.read(configProvider.notifier).state =
+          container.read(configProvider)!.rebuild((b) => b..daysInWeek = 5);
+      expect(container.read(daysInWeekProvider), 5);
+      container.read(settingsProvider.notifier).setSixDayWeek(true);
+      expect(container.read(daysInWeekProvider), 6);
     });
   });
 }

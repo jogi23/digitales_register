@@ -296,6 +296,8 @@
   "settingsColorHomework": "Colour homework with these colours",
   "settingsColorLessons": "Colour calendar lessons with these colours",
   "settingsShowTimes": "Show times in the calendar",
+  "settingsSixDayWeek": "6-day week (beta)",
+  "settingsSixDayWeekHint": "Saturday counts as a school day",
   "settingsShowAllDetails": "Show all details in the calendar",
   "settingsShowAllDetailsHint": "Teachers and room right in the lesson, as far as there is space",
   "calendarRoomTooltip": "Room: {room}",

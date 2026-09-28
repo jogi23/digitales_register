@@ -206,6 +206,8 @@ Future<void> _doLoad() async {
   // The notifications setting is app-wide, so the check in the background
   // can be scheduled before any account has signed in.
   keepBackgroundCheckInSync(providerContainer);
+  // The week's school days decide which week "today" falls in.
+  keepDaysInWeekInSync(providerContainer);
   // From here on every subject that turns up — in the grades, in the
   // timetable, in the Merkheft — is given a colour of its own.
   keepSubjectThemesUpToDate(providerContainer);

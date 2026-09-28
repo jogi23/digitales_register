@@ -275,10 +275,8 @@ class _CalendarState extends ConsumerState<Calendar> with TickerProviderStateMix
                                     firstDate: UtcDateTime(2018),
                                     lastDate: UtcDateTime(2050),
                                     initialDate: widget.vm.currentMonday,
-                                    selectableDayPredicate: (day) {
-                                      return day.weekday != DateTime.sunday &&
-                                          day.weekday != DateTime.saturday;
-                                    },
+                                    selectableDayPredicate: (day) =>
+                                        day.weekday <= schoolDaysInWeek,
                                   );
                                   if (result == null) return;
                                   final date = toMonday(result.makeUtc());

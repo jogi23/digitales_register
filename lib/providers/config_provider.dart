@@ -16,6 +16,8 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:dr/app_state.dart';
+import 'package:dr/providers/settings_provider.dart';
+import 'package:dr/util.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final configProvider = StateProvider<Config?>((_) => null);
@@ -27,3 +29,20 @@ final competenceScaleProvider = Provider<int>(
       ref.watch(configProvider)?.competenceScale ??
       Config.defaultCompetenceScale,
 );
+
+/// How many days of the week are school days: six when the setting asks for
+/// it, otherwise what the school's page says, Monday to Friday until then.
+final daysInWeekProvider = Provider<int>(
+  (ref) => ref.watch(settingsProvider.select((s) => s.sixDayWeek))
+      ? 6
+      : ref.watch(configProvider)?.daysInWeek ?? Config.defaultDaysInWeek,
+);
+
+/// Keeps [schoolDaysInWeek] in step with [daysInWeekProvider] from now on.
+void keepDaysInWeekInSync(ProviderContainer container) {
+  container.listen<int>(
+    daysInWeekProvider,
+    (_, days) => schoolDaysInWeek = days,
+    fireImmediately: true,
+  );
+}

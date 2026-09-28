@@ -201,6 +201,10 @@ abstract class Config implements Built<Config, ConfigBuilder> {
   /// How many stars the school rates competences on, from the page's
   /// `KOPETENZENSKALA` (sic).
   int get competenceScale;
+
+  /// How many days of the week the school teaches on, from the page's
+  /// `days_in_week`: 5 for Monday to Friday, 6 with Saturday (#292).
+  int get daysInWeek;
   static Serializer<Config> get serializer => _$configSerializer;
 
   factory Config([Function(ConfigBuilder b)? updates]) = _$Config;
@@ -213,10 +217,14 @@ abstract class Config implements Built<Config, ConfigBuilder> {
   /// The scale the app always drew before it read the school's.
   static const defaultCompetenceScale = 6;
 
+  /// Monday to Friday, which the app always assumed before.
+  static const defaultDaysInWeek = 5;
+
   static void _initializeBuilder(ConfigBuilder builder) {
     builder
       ..submissionMaxItems = defaultSubmissionMaxItems
-      ..competenceScale = defaultCompetenceScale;
+      ..competenceScale = defaultCompetenceScale
+      ..daysInWeek = defaultDaysInWeek;
   }
 }
 
@@ -407,6 +415,7 @@ class SettingsState {
     this.notifyObservations = true,
     this.notifyHomework = true,
     this.notifyAbsences = true,
+    this.sixDayWeek = false,
   })  : ignoreForGradesAverage = ignoreForGradesAverage ?? [],
         classbookSubjects = classbookSubjects ?? [];
 
@@ -506,6 +515,10 @@ class SettingsState {
   final bool notifyHomework;
   final bool notifyAbsences;
 
+  /// Treats Saturday as a school day whatever the school's page says — for
+  /// schools that teach on Saturdays but do not tell (#292, beta).
+  final bool sixDayWeek;
+
   SettingsState copyWith({
     bool? noPasswordSaving,
     bool? typeSorted,
@@ -546,6 +559,7 @@ class SettingsState {
     bool? notifyObservations,
     bool? notifyHomework,
     bool? notifyAbsences,
+    bool? sixDayWeek,
   }) =>
       SettingsState(
         noPasswordSaving: noPasswordSaving ?? this.noPasswordSaving,
@@ -601,6 +615,7 @@ class SettingsState {
         notifyObservations: notifyObservations ?? this.notifyObservations,
         notifyHomework: notifyHomework ?? this.notifyHomework,
         notifyAbsences: notifyAbsences ?? this.notifyAbsences,
+        sixDayWeek: sixDayWeek ?? this.sixDayWeek,
       );
 
   Map<String, dynamic> toJson() => {
@@ -642,6 +657,7 @@ class SettingsState {
         'notifyObservations': notifyObservations,
         'notifyHomework': notifyHomework,
         'notifyAbsences': notifyAbsences,
+        'sixDayWeek': sixDayWeek,
       };
 
   factory SettingsState.fromJson(Map<dynamic, dynamic> json) => SettingsState(
@@ -716,6 +732,7 @@ class SettingsState {
         notifyObservations: json['notifyObservations'] as bool? ?? true,
         notifyHomework: json['notifyHomework'] as bool? ?? true,
         notifyAbsences: json['notifyAbsences'] as bool? ?? true,
+        sixDayWeek: json['sixDayWeek'] as bool? ?? false,
       );
 
   /// The settings that belong to the app rather than to one account:
@@ -827,7 +844,8 @@ class SettingsState {
         other.notifyGrades == notifyGrades &&
         other.notifyObservations == notifyObservations &&
         other.notifyHomework == notifyHomework &&
-        other.notifyAbsences == notifyAbsences;
+        other.notifyAbsences == notifyAbsences &&
+        other.sixDayWeek == sixDayWeek;
   }
 
   @override
@@ -870,6 +888,7 @@ class SettingsState {
         notifyObservations,
         notifyHomework,
         notifyAbsences,
+        sixDayWeek,
       ]);
 }
 
@@ -951,6 +970,34 @@ abstract class CalendarState
   /// anywhere. [currentMonday] is not saved, so it is empty again after a
   /// reset (account switch, logout) or a restore from storage.
   UtcDateTime get shownMonday => currentMonday ?? toMonday(now);
+
+  /// The school days of the week from [monday]: the loaded ones, and an
+  /// empty one for a school day after Friday the portal sent nothing for —
+  /// so a Saturday of a six-day week shows as free rather than not at all
+  /// (#292). Monday to Friday stay as the portal sends them. Nothing while
+  /// the week has not been loaded.
+  List<CalendarDay> schoolWeek(UtcDateTime monday, int daysInWeek) {
+    final loaded = {
+      for (final day in daysForWeek(monday))
+        UtcDateTime(day.date.year, day.date.month, day.date.day): day,
+    };
+    if (loaded.isEmpty) return const [];
+    final dates = <UtcDateTime>{
+      ...loaded.keys,
+      for (var i = Config.defaultDaysInWeek; i < daysInWeek; i++)
+        monday.add(Duration(days: i)),
+    }.toList()
+      ..sort();
+    return [
+      for (final date in dates)
+        loaded[date] ??
+            CalendarDay(
+              (b) => b
+                ..date = date
+                ..hours = ListBuilder(),
+            ),
+    ];
+  }
 
   Iterable<CalendarDay> get currentDays {
     return daysForWeek(shownMonday);

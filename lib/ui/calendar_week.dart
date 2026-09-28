@@ -25,6 +25,7 @@ import 'package:dr/ui/calendar_grid.dart';
 import 'package:dr/ui/layout.dart';
 import 'package:dr/ui/no_internet.dart';
 import 'package:dr/utc_date_time.dart';
+import 'package:dr/util.dart' show schoolDaysInWeek;
 import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -1016,8 +1017,8 @@ bool _dateIsNear(UtcDateTime date1, UtcDateTime date2) {
 }
 
 Widget findHolidayIconForSeason(UtcDateTime date, Color color, double size) {
-  // Weekends
-  if (date.weekday >= 6) {
+  // Days the school does not teach on
+  if (date.weekday > schoolDaysInWeek) {
     return Icon(
       Icons.weekend,
       color: color,

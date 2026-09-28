@@ -128,8 +128,14 @@ int isoWeekNumber(DateTime date) {
   return ((dayOfYear - 1) ~/ 7) + 1;
 }
 
-UtcDateTime toMonday(UtcDateTime date) {
-  final s = date.weekday >= 6
+/// How many days of the week the signed-in school teaches on — kept in step
+/// with `daysInWeekProvider`, for code that has no ref to read it.
+int schoolDaysInWeek = 5;
+
+/// The Monday of the school week [date] belongs to. A day after the school
+/// week — Saturday at most schools, Sunday at all — belongs to the next one.
+UtcDateTime toMonday(UtcDateTime date, {int? daysInWeek}) {
+  final s = date.weekday > (daysInWeek ?? schoolDaysInWeek)
       ? date.add(Duration(days: 8 - date.weekday))
       : date.subtract(
           Duration(days: date.weekday - 1),

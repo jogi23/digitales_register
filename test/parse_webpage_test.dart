@@ -27,6 +27,8 @@ void main() {
     expect(config.imgSource,
         "https://vinzentinum.digitalesregister.it/v2/theme/icons/profile_empty.png");
     expect(config.autoLogoutSeconds, 300);
+    // As a real page carries it (#292).
+    expect(config.daysInWeek, 5);
   });
 }
 
