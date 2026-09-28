@@ -20,6 +20,7 @@ import 'package:built_collection/built_collection.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/container/messages_container.dart';
 import 'package:dr/data.dart';
+import 'package:dr/providers/connection_provider.dart';
 import 'package:dr/providers/messages_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
@@ -50,7 +51,8 @@ class _TestMessagesNotifier extends MessagesNotifier {
   MessagesState build() => initialState;
 
   @override
-  Future<bool> reply(int messageId, {String? response, String? signature}) async {
+  Future<bool> reply(int messageId,
+      {String? response, String? signature}) async {
     sentSignature = signature;
     return replyResult;
   }
@@ -129,6 +131,37 @@ MessagesState _buildState({
   );
 }
 
+/// Starts offline or online, without the side effects going on or offline
+/// has in the app (a toast, a logout, a reload).
+class _TestNoInternetNotifier extends NoInternetNotifier {
+  final bool initial;
+  _TestNoInternetNotifier(this.initial);
+
+  @override
+  bool build() => initial;
+
+  @override
+  void onGoingOffline() {}
+
+  @override
+  Future<void> onGoingOnline() async {}
+}
+
+/// Counts attempts to restore the connection; [succeeds] decides whether the
+/// connection is back afterwards.
+class _TestConnectionNotifier extends ConnectionNotifier {
+  final bool succeeds;
+  int restores = 0;
+  _TestConnectionNotifier({required this.succeeds});
+
+  @override
+  Future<bool> restore() async {
+    restores++;
+    if (succeeds) ref.read(noInternetProvider.notifier).setNoInternet(false);
+    return succeeds;
+  }
+}
+
 /// Starts the list on a folder other than received.
 class _TestListNotifier extends MessageListNotifier {
   final MessageCategory initialCategory;
@@ -144,12 +177,15 @@ Widget _buildWidget(
   SettingsState? settings,
   MessageCategory? category,
   GlobalKey<ScaffoldMessengerState>? messengerKey,
+  bool offline = false,
+  _TestConnectionNotifier? connection,
 }) {
   return ProviderScope(
     overrides: [
       messagesProvider
           .overrideWith(() => messages ?? _TestMessagesNotifier(state)),
-      noInternetProvider.overrideWith(NoInternetNotifier.new),
+      noInternetProvider.overrideWith(() => _TestNoInternetNotifier(offline)),
+      if (connection != null) connectionProvider.overrideWith(() => connection),
       if (settings != null)
         settingsProvider.overrideWith(() => _TestSettingsNotifier(settings)),
       if (category != null)
@@ -186,7 +222,6 @@ MessagesState _sentState({
     ),
   );
 }
-
 
 MessagesState _stateWithResponse(MessageResponseInfo? info) {
   return MessagesState(
@@ -255,9 +290,17 @@ Future<void> _openMessage(
   MessagesState state, {
   _TestMessagesNotifier? messages,
   SettingsState? settings,
+  bool offline = false,
+  _TestConnectionNotifier? connection,
 }) async {
   await tester.pumpWidget(
-    _buildWidget(state, messages: messages, settings: settings),
+    _buildWidget(
+      state,
+      messages: messages,
+      settings: settings,
+      offline: offline,
+      connection: connection,
+    ),
   );
   await tester.tap(find.text("Betreff"));
   await tester.pumpAndSettle();
@@ -475,8 +518,8 @@ void main() {
       await tester.pumpWidget(_buildWidget(receivedAndSent()));
       expect(find.text("Eingang"), findsOneWidget);
       expect(find.text("Ausgang"), findsNothing);
-      final selected = tester.widget<ChoiceChip>(
-          find.widgetWithText(ChoiceChip, "Empfangen"));
+      final selected = tester
+          .widget<ChoiceChip>(find.widgetWithText(ChoiceChip, "Empfangen"));
       expect(selected.selected, isTrue);
     });
 
@@ -654,8 +697,7 @@ void main() {
       expect(find.text("Mitteilungen"), findsOneWidget);
     });
 
-    testWidgets('share and save offer PDF, text and Markdown',
-        (tester) async {
+    testWidgets('share and save offer PDF, text and Markdown', (tester) async {
       await tester.pumpWidget(_buildWidget(twoMessages()));
       await tester.longPress(find.text("Zweite"));
       await tester.pumpAndSettle();
@@ -743,8 +785,7 @@ void main() {
       expect(find.text("Stimme zu"), findsNothing);
     });
 
-    testWidgets('confirm stays disabled until a name is typed',
-        (tester) async {
+    testWidgets('confirm stays disabled until a name is typed', (tester) async {
       await _openMessage(
         tester,
         _stateWithResponse(
@@ -759,6 +800,92 @@ void main() {
       await tester.enterText(find.byType(TextField), "Max Mustermann");
       await tester.pumpAndSettle();
       expect(button().onPressed, isNotNull);
+    });
+
+    group('offline', () {
+      const offlineHint = "Keine Verbindung – Bestätigen geht erst online. "
+          "Tippe auf den Button, um die Verbindung neu zu prüfen.";
+      FilledButton confirm(WidgetTester tester) => tester.widget<FilledButton>(
+            find.widgetWithText(FilledButton, "Bestätigen"),
+          );
+
+      testWidgets('a typed name leaves the button grey and says why',
+          (tester) async {
+        // The report: a name typed, the button still grey, nothing on the
+        // page saying the app had lost its connection.
+        await _openMessage(
+          tester,
+          _stateWithResponse(
+            _info(type: MessageResponseInfo.typeRead, signatureRequired: true),
+          ),
+          offline: true,
+          connection: _TestConnectionNotifier(succeeds: false),
+        );
+        await tester.enterText(find.byType(TextField), "Max Mustermann");
+        await tester.pumpAndSettle();
+
+        expect(confirm(tester).onPressed, isNull);
+        expect(find.text(offlineHint), findsOneWidget);
+      });
+
+      testWidgets('a tap on the grey button checks the connection, sends not',
+          (tester) async {
+        final messages = _TestMessagesNotifier(
+          _stateWithResponse(
+            _info(type: MessageResponseInfo.typeRead, signatureRequired: true),
+          ),
+        );
+        final connection = _TestConnectionNotifier(succeeds: true);
+        await _openMessage(
+          tester,
+          messages.initialState,
+          messages: messages,
+          offline: true,
+          connection: connection,
+        );
+        await tester.enterText(find.byType(TextField), "Max Mustermann");
+        await tester.pumpAndSettle();
+
+        final button = find.widgetWithText(FilledButton, "Bestätigen");
+        await tester.ensureVisible(button);
+        await tester.pumpAndSettle();
+        await tester.tap(button);
+        await tester.pumpAndSettle();
+
+        expect(connection.restores, 1);
+        // Confirming binds the reader: back online, it waits for a tap.
+        expect(messages.sentSignature, isNull);
+        expect(confirm(tester).onPressed, isNotNull);
+        expect(find.text(offlineHint), findsNothing);
+      });
+
+      testWidgets('agree buttons check the connection as well', (tester) async {
+        final connection = _TestConnectionNotifier(succeeds: false);
+        await _openMessage(
+          tester,
+          _stateWithResponse(_info()),
+          offline: true,
+          connection: connection,
+        );
+
+        await tester.ensureVisible(find.text("Stimme zu"));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text("Stimme zu"));
+        await tester.pumpAndSettle();
+
+        expect(connection.restores, 1);
+        expect(find.text(offlineHint), findsOneWidget);
+      });
+
+      testWidgets('online there is no such hint', (tester) async {
+        await _openMessage(
+          tester,
+          _stateWithResponse(
+            _info(type: MessageResponseInfo.typeRead, signatureRequired: true),
+          ),
+        );
+        expect(find.text(offlineHint), findsNothing);
+      });
     });
 
     testWidgets('whitespace alone does not enable the confirm button',
@@ -875,7 +1002,6 @@ void main() {
       final button = tester.widget<FilledButton>(find.byType(FilledButton));
       expect(button.onPressed, isNotNull, reason: 'must be repeatable');
     });
-
   });
 
   group('taking a sent message back', () {
@@ -919,8 +1045,7 @@ void main() {
       expect(messages.detailRequests, isEmpty);
     });
 
-    testWidgets('inside the window it offers to take it back',
-        (tester) async {
+    testWidgets('inside the window it offers to take it back', (tester) async {
       await open(tester, _sentState(canDelete: true));
       expect(find.text('Mitteilung löschen'), findsOneWidget);
     });
@@ -983,8 +1108,8 @@ void main() {
       await tester.tap(find.text('Löschen'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Die Mitteilung ließ sich nicht löschen'),
-          findsOneWidget);
+      expect(
+          find.text('Die Mitteilung ließ sich nicht löschen'), findsOneWidget);
     });
   });
 }

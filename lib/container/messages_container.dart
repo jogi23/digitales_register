@@ -20,6 +20,7 @@ import 'dart:async';
 
 import 'package:dr/container/message_compose_container.dart';
 import 'package:dr/l10n/l10n.dart';
+import 'package:dr/providers/connection_provider.dart';
 import 'package:dr/providers/messages_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
@@ -85,6 +86,7 @@ class MessagesPageContainer extends ConsumerWidget {
       signature: signature,
       onSignature: (name) =>
           ref.read(settingsProvider.notifier).setMessageSignature(name),
+      onReconnect: ref.read(connectionProvider.notifier).restore,
       onMarkAllAsRead: () =>
           ref.read(messagesProvider.notifier).markAllAsRead(),
       // Offline the pull restores the connection first (PullToRefresh).

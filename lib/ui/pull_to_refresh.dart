@@ -16,7 +16,6 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:dr/providers/connection_provider.dart';
-import 'package:dr/ui/snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -66,13 +65,7 @@ class PullToRefresh extends ConsumerWidget {
   }
 
   Future<void> _refresh(WidgetRef ref) async {
-    if (ref.read(connectionProvider).hasProblem) {
-      await ref.read(connectionProvider.notifier).reconnect();
-      final status = ref.read(connectionProvider).status;
-      // Still nothing to reach: say so briefly, the way going offline does.
-      if (status == ConnectionStatus.offline) showNoConnectionToast();
-      if (status != ConnectionStatus.connected) return;
-    }
+    if (!await ref.read(connectionProvider.notifier).restore()) return;
     await onRefresh();
   }
 
