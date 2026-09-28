@@ -68,6 +68,63 @@ void main() {
     expect(find.text('Vinzentinum'), findsOneWidget);
   });
 
+  testWidgets('a typed address wins over the school picked before',
+      (tester) async {
+    // A school that moved: the list still sent the login to its old address
+    // (301), whatever was typed into the address field.
+    String? loginUrl;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: LoginPageContent(
+          vm: buildVm(
+            servers: const {
+              'SSP Sterzing 3':
+                  'https://schulsprengel-sterzing3.digitalesregister.it',
+              'Vinzentinum': 'https://vinzentinum.digitalesregister.it',
+            },
+            url: 'https://schulsprengel-sterzing3.digitalesregister.it',
+          ),
+          onLogin: (_, __, url) => loginUrl = url,
+          setSaveNoPass: (_) {},
+          onReload: () {},
+          onChangePass: (_, __, ___, ____) {},
+          onRequestPassReset: (_) {},
+          onSelectAccount: (_) {},
+        ),
+      ),
+    );
+    await tester.pump();
+    expect(find.text('SSP Sterzing 3'), findsOneWidget);
+
+    final address = find.widgetWithText(TextField, 'Adresse');
+    await tester.enterText(
+      address,
+      'https://ms-sterzing.digitalesregister.it/v2/login',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Benutzername'),
+      'anna',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Passwort'),
+      'geheim',
+    );
+    await tester.pump();
+
+    expect(find.text('Andere Schule'), findsOneWidget);
+    final login = find.widgetWithText(ElevatedButton, 'Login');
+    await tester.ensureVisible(login);
+    await tester.tap(login);
+    expect(loginUrl, 'https://ms-sterzing.digitalesregister.it/v2/login');
+
+    // Typing a listed school's address picks that school again.
+    await tester.enterText(address, 'vinzentinum.digitalesregister.it');
+    await tester.pump();
+    expect(find.text('Vinzentinum'), findsOneWidget);
+    await tester.tap(login);
+    expect(loginUrl, 'https://vinzentinum.digitalesregister.it');
+  });
+
   testWidgets('several accounts no longer ask which one to use',
       (tester) async {
     // The app starts in the account that was used last; switching happens

@@ -28,6 +28,7 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 - Kompetenzen: An Schulen, die halbe Sterne vergeben, zeigte die App eine Bewertung von 3,5 als drei Sterne. Jetzt steht ein halber Stern da, auch im Diagramm und im Sterndurchschnitt.
 - Kalender: Mit „Tests immer rot umrahmen“ war eine Stunde mit Test in der Detailansicht nicht rot umrahmt. Jetzt ist sie es, wie im Merkheft.
 - Anmeldung: Gab es unter der Schuladresse keine Schule, stand ein langer technischer Fehlertext („DioException … 301“) da. Jetzt heißt es, dass es dort keine Schule gibt und die Adresse zu prüfen ist. 18 Schulen, deren Adresse nicht mehr existiert, sind aus der Auswahl verschwunden.
+- Anmeldung: War eine Schule aus der Liste gewählt, ging die Anmeldung immer an deren Adresse — auch wenn im Feld „Adresse“ etwas anderes stand. Wer die Adresse einer umgezogenen Schule von Hand eintrug, landete so weiter bei der alten. Jetzt zählt die eingetippte Adresse; passt sie zu einer Schule der Liste, wird diese ausgewählt.
 
 ## 1.4.1 — 2026-09-24
 
