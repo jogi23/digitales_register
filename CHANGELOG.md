@@ -4,6 +4,10 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 
 ## 1.5.0 — 2026-09-24
 
+### Verbesserungen
+
+- Merkheft-Monatsansicht: Die Tage des Vor- und Folgemonats in der ersten und letzten Woche stehen jetzt leicht ausgegraut da, statt zu fehlen — mit Punkt, wenn es an dem Tag etwas gibt. Ein Tippen zeigt den Tag wie jeden anderen.
+
 ### Fehlerbehebungen
 
 - Benachrichtigungen: Der Abruf im Hintergrund meldet sich nicht mehr mit dem Konto an, mit dem die geöffnete App gerade angemeldet ist — die App fragt für dieses Konto ohnehin selbst nach. Die zweite Anmeldung zur selben Zeit konnte die Sitzung der App beenden; beim Start erschien dann „Verbindung fehlgeschlagen“, obwohl das Netz da war.

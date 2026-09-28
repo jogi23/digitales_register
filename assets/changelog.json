@@ -4,6 +4,12 @@
     "points": {
       "de": [
         {
+          "title": "Verbesserungen",
+          "items": [
+            "Merkheft-Monatsansicht: Die Tage des Vor- und Folgemonats in der ersten und letzten Woche stehen jetzt leicht ausgegraut da, statt zu fehlen — mit Punkt, wenn es an dem Tag etwas gibt. Ein Tippen zeigt den Tag wie jeden anderen."
+          ]
+        },
+        {
           "title": "Fehlerbehebungen",
           "items": [
             "Benachrichtigungen: Der Abruf im Hintergrund meldet sich nicht mehr mit dem Konto an, mit dem die geöffnete App gerade angemeldet ist — die App fragt für dieses Konto ohnehin selbst nach. Die zweite Anmeldung zur selben Zeit konnte die Sitzung der App beenden; beim Start erschien dann „Verbindung fehlgeschlagen“, obwohl das Netz da war.",
@@ -24,6 +30,12 @@
       ],
       "en": [
         {
+          "title": "Improvements",
+          "items": [
+            "Merkheft month view: the days of the previous and next month in the first and last week are now shown slightly greyed out instead of being left out — with a dot when something is on that day. Tapping one shows the day like any other."
+          ]
+        },
+        {
           "title": "Bug fixes",
           "items": [
             "Notifications: the background check no longer signs into the account the open app is signed into — the app asks for that account itself anyway. The second sign-in at the same time could end the app's session; at start-up the app then showed “Connection failed” although the network was there.",
@@ -43,6 +55,12 @@
         }
       ],
       "it": [
+        {
+          "title": "Miglioramenti",
+          "items": [
+            "Vista mensile del Merkheft: i giorni del mese precedente e successivo nella prima e nell'ultima settimana ora compaiono leggermente in grigio invece di mancare — con il punto se in quel giorno c'è qualcosa. Un tocco mostra il giorno come ogni altro."
+          ]
+        },
         {
           "title": "Correzioni",
           "items": [

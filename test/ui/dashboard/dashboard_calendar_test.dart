@@ -97,6 +97,10 @@ class _TestSettingsNotifier extends SettingsNotifier {
 // does not, which is what the calendar has to tell apart.
 late DashboardState _mayState;
 
+// May with the last day of April in front, which carries entries: in May's
+// grid it is one of the days of the neighbouring month.
+late DashboardState _aprilEndState;
+
 Future<void> main() async {
   setUpAll(() async {
     await initializeDateFormatting('de');
@@ -106,12 +110,26 @@ Future<void> main() async {
       params: {'viewFuture': false},
     ) as List;
     final may = raw
-        .where((dynamic d) => (d as Map)['date'].toString().startsWith('2026-05'))
+        .where(
+            (dynamic d) => (d as Map)['date'].toString().startsWith('2026-05'))
         .toList();
     final days = parseDays(may, deduplicate: false).whereType<Day>().toList();
     _mayState = DashboardState(
       (b) => b
         ..allDays = ListBuilder(days)
+        ..future = false,
+    );
+    final aprilEnd = raw
+        .where((dynamic d) => (d as Map)['date'].toString() == '2026-04-30')
+        .toList();
+    _aprilEndState = DashboardState(
+      (b) => b
+        // Newest first, as the server sends them: the calendar opens on the
+        // month of the first day, which has to stay May.
+        ..allDays = ListBuilder(<Day>[
+          ...days,
+          ...parseDays(aprilEnd, deduplicate: false).whereType<Day>(),
+        ])
         ..future = false,
     );
   });
@@ -123,9 +141,11 @@ Future<void> main() async {
     Brightness brightness = Brightness.light,
     bool loading = false,
     bool marksLoading = false,
+    DashboardState? state,
   }) {
+    final initial = state ?? _mayState;
     notifier = _TestDashboardNotifier(
-      loading ? _mayState.rebuild((b) => b..loading = true) : _mayState,
+      loading ? initial.rebuild((b) => b..loading = true) : initial,
       marksLoading: marksLoading,
     );
     return ProviderScope(
@@ -155,9 +175,10 @@ Future<void> main() async {
   Future<void> pumpCalendar(
     WidgetTester tester, {
     Brightness brightness = Brightness.light,
+    DashboardState? state,
   }) async {
     await tester.pumpWidget(
-      dashboard(calendarView: true, brightness: brightness),
+      dashboard(calendarView: true, brightness: brightness, state: state),
     );
     await tester.pumpAndSettle();
   }
@@ -349,10 +370,8 @@ Future<void> main() async {
 
   group('days outside the loaded span', () {
     /// The colour the day number is drawn in.
-    Color? colourOfDay(WidgetTester tester, String dayOfMonth) => tester
-        .widget<Text>(find.text(dayOfMonth).first)
-        .style
-        ?.color;
+    Color? colourOfDay(WidgetTester tester, String dayOfMonth) =>
+        tester.widget<Text>(find.text(dayOfMonth).first).style?.color;
 
     testWidgets('are faded, so no dot does not read as "nothing to do"',
         (tester) async {
@@ -369,6 +388,71 @@ Future<void> main() async {
     testWidgets('loaded days keep the normal colour', (tester) async {
       await pumpCalendar(tester);
       expect(colourOfDay(tester, '15'), isNull);
+    });
+  });
+
+  group('days of the neighbouring months (#298)', () {
+    /// The cell of the [index]th day drawn with [dayOfMonth] — the grid
+    /// shows the 30th of April and of May alike.
+    Finder cell(String dayOfMonth, {int index = 0}) => find
+        .ancestor(
+          of: find.text(dayOfMonth).at(index),
+          matching: find.byType(InkWell),
+        )
+        .first;
+
+    Color? colourOfDay(WidgetTester tester, String dayOfMonth,
+            {int index = 0}) =>
+        tester.widget<Text>(find.text(dayOfMonth).at(index)).style?.color;
+
+    /// The dot's colour, or null when the day carries none.
+    Color? dotOf(WidgetTester tester, Finder cell) {
+      final dot = find.descendant(
+        of: cell,
+        matching: find.byWidgetPredicate(
+          (w) => w is SizedBox && w.width == 6 && w.child != null,
+        ),
+      );
+      if (dot.evaluate().isEmpty) return null;
+      final box = tester.widget<DecoratedBox>(
+        find.descendant(of: dot, matching: find.byType(DecoratedBox)),
+      );
+      return (box.decoration as BoxDecoration).color;
+    }
+
+    testWidgets('are shown instead of left blank', (tester) async {
+      await pumpCalendar(tester);
+      expect(find.text('Mai 2026'), findsOneWidget);
+      // May starts on a Friday: the first row begins with 27 to 30 April.
+      for (final day in ['27', '28', '29']) {
+        expect(find.text(day), findsNWidgets(2));
+      }
+    });
+
+    testWidgets('are faded and carry the dot of their entries', (tester) async {
+      await pumpCalendar(tester, state: _aprilEndState);
+      final april30 = cell('30');
+      final may30 = cell('30', index: 1);
+
+      expect(colourOfDay(tester, '30'), isNotNull);
+      expect(colourOfDay(tester, '30', index: 1), isNull);
+
+      final dot = dotOf(tester, april30);
+      expect(dot, isNotNull);
+      expect(dot!.a, lessThan(1));
+      // The 30th of May has no entries.
+      expect(dotOf(tester, may30), isNull);
+    });
+
+    testWidgets('tapping one shows its entries and keeps the month',
+        (tester) async {
+      await pumpCalendar(tester, state: _aprilEndState);
+      await tester.tap(cell('30'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Mai 2026'), findsOneWidget);
+      // The day header of the entry list carries the date.
+      expect(find.textContaining('30.4.'), findsWidgets);
     });
   });
 
@@ -403,7 +487,6 @@ Future<void> main() async {
       // The day header stays so a reminder can still be added.
       expect(find.textContaining('9.5.'), findsWidgets);
     });
-
   });
 
   group('picking a week', () {
@@ -481,8 +564,7 @@ Future<void> main() async {
       return tester.getSize(circle);
     }
 
-    testWidgets('are the same size for one and two digit days',
-        (tester) async {
+    testWidgets('are the same size for one and two digit days', (tester) async {
       // A circle sized to its text alone shrinks for single digits, which
       // made the 7th look smaller than the 17th.
       await pumpCalendar(tester);
