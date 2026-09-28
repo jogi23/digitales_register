@@ -24,6 +24,7 @@ import 'package:dr/config_parser.dart';
 import 'package:dr/debug_log.dart';
 import 'package:dr/demo.dart' as demo;
 import 'package:dr/main.dart';
+import 'package:dr/services/school_report.dart';
 import 'package:dr/ui/dialog.dart';
 import 'package:dr/util.dart';
 import 'package:flutter/material.dart';
@@ -44,6 +45,10 @@ class AuthService {
   String? user, pass;
   bool demoMode = false;
   String? error;
+
+  /// Whether the last login failed because there is no school at its
+  /// address, not because of the account or the connection.
+  bool schoolNotFound = false;
 
   /// The account's configuration; null until a login has loaded it.
   Config? config;
@@ -137,6 +142,7 @@ class AuthService {
     }
 
     _apiClient.url = url;
+    schoolNotFound = false;
     final loggedInCompleter = Completer<bool>();
     _loggedIn = loggedInCompleter.future;
     Map response;
@@ -241,6 +247,7 @@ class AuthService {
 
   Future<void> _failLogin(Completer<bool> loggedIn, Object e) async {
     loggedIn.complete(false);
+    schoolNotFound = isSchoolNotFound(e);
     log("Error while logging in (login failed)", error: e);
     debugLog(
       LogCategory.login,
@@ -248,9 +255,11 @@ class AuthService {
       data: shorten('$e', 500),
     );
     // A page that arrived but was the wrong one says nothing about the
-    // connection.
+    // connection, and neither does a server that sent the school away.
     if (e is TimeoutException ||
-        (e is! ConfigParseException && await _refreshNoInternetCheck())) {
+        (e is! ConfigParseException &&
+            !schoolNotFound &&
+            await _refreshNoInternetCheck())) {
       noInternetDuringLogin = true;
     }
     error = "Unknown Error:\n$e";

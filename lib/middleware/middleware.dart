@@ -51,6 +51,7 @@ import 'package:dr/providers/subject_appearance_provider.dart';
 import 'package:dr/serializers.dart';
 import 'package:dr/services/app_router.dart';
 import 'package:dr/services/system_notification_service.dart';
+import 'package:dr/services/school_report.dart';
 import 'package:dr/ui/dialog.dart';
 import 'package:dr/ui/snack_bar.dart';
 import 'package:dr/util.dart';

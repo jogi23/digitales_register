@@ -195,6 +195,7 @@ Future<void> _doLogin(
       _showUserTypeNotSupported(fixedUrl);
       return;
     }
+    if (!wrapper.demoMode) unawaited(schoolReporter.loggedIn(fixedUrl));
     await _doLoggedIn(
       username: wrapper.user!,
       fromStorage: fromStorage,
@@ -209,10 +210,13 @@ Future<void> _doLogin(
         .setChangePassword(mustChange: true);
   } else {
     final noInternet = wrapper.noInternet;
+    final schoolNotFound = wrapper.schoolNotFound;
+    if (schoolNotFound) unawaited(schoolReporter.notFound(fixedUrl));
     debugLog(
       LogCategory.login,
       '$account: Anmeldung fehlgeschlagen'
       '${noInternet ? ', kein Netz' : ''}'
+      '${schoolNotFound ? ', keine Schule unter der Adresse' : ''}'
       '${fromStorage ? ', bleibt bei den gespeicherten Daten' : ', zurück zum Formular'}',
     );
     if (noInternet) {
@@ -220,12 +224,18 @@ Future<void> _doLogin(
     }
     if (fromStorage) {
       if (!noInternet) {
-        showSnackBar(trGlobal.errorConnectionFailed);
+        showSnackBar(
+          schoolNotFound
+              ? trGlobal.loginSchoolUnreachable
+              : trGlobal.errorConnectionFailed,
+        );
       }
       return;
     }
     providerContainer.read(loginProvider.notifier).setLoginFailed(
-          cause: wrapper.error ?? "Unknown error",
+          cause: schoolNotFound
+              ? trGlobal.loginSchoolUnreachable
+              : wrapper.error ?? "Unknown error",
           username: user,
         );
     await _doDeletePass();

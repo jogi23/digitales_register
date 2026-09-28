@@ -323,6 +323,7 @@
   "loginOtherSchool": "Altra scuola",
   "loginSchool": "Scuola",
   "loginSchoolNotFound": "Scuola non trovata",
+  "loginSchoolUnreachable": "A questo indirizzo non esiste nessuna scuola. Controlla l'indirizzo della scuola.",
   "loginFeedback": "Feedback?",
   "loginDemo": "Demo",
   "loginForgotPassword": "Password dimenticata",

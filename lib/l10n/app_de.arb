@@ -344,6 +344,7 @@
   "loginOtherSchool": "Andere Schule",
   "loginSchool": "Schule",
   "loginSchoolNotFound": "Schule nicht gefunden",
+  "loginSchoolUnreachable": "Unter dieser Adresse gibt es keine Schule. Bitte prüfe die Schuladresse.",
   "loginFeedback": "Feedback?",
   "loginDemo": "Demo",
   "loginForgotPassword": "Passwort vergessen",
