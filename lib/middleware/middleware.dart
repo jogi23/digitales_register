@@ -23,6 +23,7 @@ import 'dart:io';
 
 import 'package:built_collection/built_collection.dart';
 import 'package:dio/dio.dart' as dio;
+import 'package:dr/api_client.dart';
 import 'package:dr/l10n/l10n.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/background_check.dart' show markAppAccount;
@@ -50,6 +51,7 @@ import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/providers/subject_appearance_provider.dart';
 import 'package:dr/serializers.dart';
 import 'package:dr/services/app_router.dart';
+import 'package:dr/services/school_moves.dart';
 import 'package:dr/services/school_report.dart';
 import 'package:dr/services/system_notification_service.dart';
 import 'package:dr/ui/dialog.dart';
@@ -63,6 +65,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 export 'package:dr/pages.dart';

@@ -20,7 +20,8 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-const _prefsKey = 'account_profiles';
+/// Where the profiles are kept in the shared preferences.
+const accountProfilesPrefsKey = 'account_profiles';
 
 class AccountProfile {
   final String? alias;
@@ -49,14 +50,13 @@ const _s = Object();
 
 String accountProfileKey(String username, String url) => '$username@$url';
 
-class AccountProfileNotifier
-    extends Notifier<Map<String, AccountProfile>> {
+class AccountProfileNotifier extends Notifier<Map<String, AccountProfile>> {
   @override
   Map<String, AccountProfile> build() => {};
 
   Future<void> load() async {
     final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_prefsKey);
+    final raw = prefs.getString(accountProfilesPrefsKey);
     if (raw == null) return;
     final decoded = json.decode(raw) as Map<String, dynamic>;
     state = decoded.map(
@@ -76,13 +76,12 @@ class AccountProfileNotifier
     await _persist();
   }
 
-  AccountProfile profileFor(String key) =>
-      state[key] ?? const AccountProfile();
+  AccountProfile profileFor(String key) => state[key] ?? const AccountProfile();
 
   Future<void> _persist() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(
-      _prefsKey,
+      accountProfilesPrefsKey,
       json.encode(state.map((k, v) => MapEntry(k, v.toJson()))),
     );
   }

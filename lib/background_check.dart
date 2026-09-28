@@ -62,7 +62,6 @@ const appAccountMarkLifetime = Duration(hours: 3);
 
 /// Settings and aliases, where the app keeps them.
 const _settingsPrefsKey = 'settings_global';
-const _profilesPrefsKey = 'account_profiles';
 
 typedef StoredAccount = ({String user, String pass, String url});
 
@@ -391,7 +390,7 @@ Future<void> checkForNewNotifications({
   // Flutter's localizations set the dates up in the app, not here.
   await initializeDateFormatting(l.localeName);
 
-  final rawProfiles = prefs.getString(_profilesPrefsKey);
+  final rawProfiles = prefs.getString(accountProfilesPrefsKey);
   final profiles = rawProfiles == null
       ? const <String, dynamic>{}
       : json.decode(rawProfiles) as Map<String, dynamic>;

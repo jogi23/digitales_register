@@ -28,7 +28,11 @@ class ApiClient {
   String? url;
 
   String get baseAddress => "$url/v2/";
-  String get loginAddress => "${baseAddress}api/auth/login";
+  String get loginAddress => loginAddressFor(url);
+
+  /// The login endpoint of the server at [url] — also what an account's
+  /// saved state is filed under.
+  static String loginAddressFor(String? url) => "$url/v2/api/auth/login";
 
   ApiClient() {
     dio.interceptors.add(CookieManager(cookieJar));

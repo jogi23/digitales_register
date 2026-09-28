@@ -99,6 +99,59 @@ List<Object?> accountsWithCurrent(Map<dynamic, dynamic> login) {
   return accounts;
 }
 
+/// Moves the stored accounts of schools with a new address (see
+/// [movedSchoolUrl]) there — the login, each account's saved state and its
+/// alias and photo — before anything reads them.
+///
+/// Without it an account of a moved school only ever met "no school at this
+/// address", and choosing the school again started it with nothing saved.
+Future<void> migrateMovedSchools() async {
+  try {
+    final raw = await secureStorage.read(key: "login");
+    if (raw == null) return;
+    final dynamic decoded = json.decode(raw);
+    if (decoded is! Map) return;
+    final result = migrateStoredLogin(Map<String, Object?>.from(decoded));
+    if (result == null) return;
+
+    // The state first: should it fail, the login still points at the old
+    // address, and the next start tries again.
+    for (final move in result.moves) {
+      String key(String url) => getStorageKey(
+            move.user,
+            ApiClient.loginAddressFor(fixupUrl(url)),
+          );
+      final from = key(move.from);
+      final to = key(move.to);
+      final state = await _readFromStorage(from);
+      if (state == null) continue;
+      // An account signed in at the new address already has its own.
+      if (await _readFromStorage(to) == null) await _writeToStorage(to, state);
+      await secureStorage.delete(key: escapeKey(from));
+    }
+    await secureStorage.write(key: "login", value: json.encode(result.login));
+
+    final prefs = await SharedPreferences.getInstance();
+    final profiles = prefs.getString(accountProfilesPrefsKey);
+    if (profiles != null) {
+      final migrated = migrateProfileKeys(
+        Map<String, Object?>.from(json.decode(profiles) as Map),
+      );
+      if (migrated != null) {
+        await prefs.setString(accountProfilesPrefsKey, json.encode(migrated));
+      }
+    }
+    debugLog(
+      LogCategory.start,
+      'Schule umgezogen: ${result.moves.map((m) => accountTag(m.user, m.to)).join(', ')}',
+    );
+  } catch (e) {
+    // The accounts stay where they were; nothing is lost.
+    debugLog(LogCategory.start, 'Umzug der Schuladresse gescheitert',
+        data: '$e');
+  }
+}
+
 /// The credentials of the account in use, straight from storage.
 ///
 /// The session reads them when its own are gone, so a session that ran out

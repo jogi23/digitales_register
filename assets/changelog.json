@@ -14,7 +14,8 @@
           "items": [
             "Merkheft-Monatsansicht: Die Tage des Vor- und Folgemonats in der ersten und letzten Woche stehen jetzt leicht ausgegraut da, statt zu fehlen — mit Punkt, wenn es an dem Tag etwas gibt. Ein Tippen zeigt den Tag wie jeden anderen.",
             "Benachrichtigungen: Vor dem Text steht jetzt, worum es geht — etwa „Hausaufgabe · Italienisch: …“, „Mitteilung · …“ oder „Absenz · …“. Neue Prüfungen melden sich als Prüfung, nicht als Hausaufgabe.",
-            "Schulliste: Meldet sich jemand bei einer Schule an, die noch nicht in der Liste steht, oder ist eine Schule aus der Liste nicht mehr erreichbar, schickt die App die Adresse der Schule an den Fehlerbericht-Dienst — nur die Adresse, nie Benutzername oder Passwort. So bleibt die Liste aktuell."
+            "Schulliste: Meldet sich jemand bei einer Schule an, die noch nicht in der Liste steht, oder ist eine Schule aus der Liste nicht mehr erreichbar, schickt die App die Adresse der Schule an den Fehlerbericht-Dienst — nur die Adresse, nie Benutzername oder Passwort. So bleibt die Liste aktuell.",
+            "Schulliste: Gespeicherte Konten einer Schule mit neuer Adresse ziehen beim Start von selbst mit um — samt gespeicherten Daten, Alias und Foto. Neu auswählen oder anmelden ist nicht nötig."
           ]
         },
         {
@@ -52,7 +53,8 @@
           "items": [
             "Merkheft month view: the days of the previous and next month in the first and last week are now shown slightly greyed out instead of being left out — with a dot when something is on that day. Tapping one shows the day like any other.",
             "Notifications: the text now starts with what it is about — such as “Homework · Italian: …”, “Message · …” or “Absence · …”. New tests show up as a test, not as homework.",
-            "School list: when someone signs in at a school that is not in the list yet, or a listed school can no longer be reached, the app sends the school's address to the error reporting service — the address only, never the username or password. This keeps the list up to date."
+            "School list: when someone signs in at a school that is not in the list yet, or a listed school can no longer be reached, the app sends the school's address to the error reporting service — the address only, never the username or password. This keeps the list up to date.",
+            "School list: saved accounts of a school with a new address move along by themselves at startup — together with saved data, alias and photo. There is no need to pick the school again or sign in anew."
           ]
         },
         {
@@ -90,7 +92,8 @@
           "items": [
             "Vista mensile del Merkheft: i giorni del mese precedente e successivo nella prima e nell'ultima settimana ora compaiono leggermente in grigio invece di mancare — con il punto se in quel giorno c'è qualcosa. Un tocco mostra il giorno come ogni altro.",
             "Notifiche: il testo ora inizia con ciò di cui si tratta — ad esempio «Compito · Italiano: …», «Comunicazione · …» o «Assenza · …». Le nuove verifiche arrivano come verifica, non come compito.",
-            "Elenco delle scuole: se qualcuno accede a una scuola non ancora presente nell'elenco, o una scuola dell'elenco non è più raggiungibile, l'app invia l'indirizzo della scuola al servizio di segnalazione errori — solo l'indirizzo, mai nome utente o password. Così l'elenco resta aggiornato."
+            "Elenco delle scuole: se qualcuno accede a una scuola non ancora presente nell'elenco, o una scuola dell'elenco non è più raggiungibile, l'app invia l'indirizzo della scuola al servizio di segnalazione errori — solo l'indirizzo, mai nome utente o password. Così l'elenco resta aggiornato.",
+            "Elenco delle scuole: gli account salvati di una scuola con un nuovo indirizzo si spostano da soli all'avvio — insieme ai dati salvati, all'alias e alla foto. Non serve scegliere di nuovo la scuola né accedere di nuovo."
           ]
         },
         {
