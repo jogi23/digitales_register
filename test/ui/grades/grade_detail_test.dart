@@ -46,7 +46,7 @@ class _TestSettingsNotifier extends SettingsNotifier {
   SettingsState build() => SettingsState();
 }
 
-Competence _competence(String name, int grade, {String? description}) =>
+Competence _competence(String name, double grade, {String? description}) =>
     Competence(
       (b) => b
         ..typeName = name

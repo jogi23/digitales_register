@@ -30,6 +30,10 @@ class _TestSettingsNotifier extends SettingsNotifier {
   SettingsState build() => initial;
 }
 
+/// The row of icons [filled] draws, on a scale of five.
+List<IconData> _row(double filled) =>
+    [for (var i = 0; i < 5; i++) starIconFor(filled, i)];
+
 void main() {
   Widget stars(
     String starColor, {
@@ -150,6 +154,29 @@ void main() {
           .pumpWidget(stars('chartreuse', brightness: Brightness.light));
       final theme = Theme.of(tester.element(find.byType(StarRow)));
       expect(drawnColor(tester), theme.colorScheme.primary);
+    });
+  });
+
+  group('half stars (#293)', () {
+    const full = Icons.star;
+    const half = Icons.star_half;
+    const empty = Icons.star_border;
+
+    test('whole numbers fill whole stars', () {
+      expect(_row(0), [empty, empty, empty, empty, empty]);
+      expect(_row(3), [full, full, full, empty, empty]);
+      expect(_row(5), [full, full, full, full, full]);
+    });
+
+    test('a half shows as a half star (#293)', () {
+      expect(_row(3.5), [full, full, full, half, empty]);
+      expect(_row(0.5), [half, empty, empty, empty, empty]);
+    });
+
+    test('other fractions go to the nearest half', () {
+      expect(_row(3.2), _row(3));
+      expect(_row(3.3), _row(3.5));
+      expect(_row(3.8), _row(4));
     });
   });
 }

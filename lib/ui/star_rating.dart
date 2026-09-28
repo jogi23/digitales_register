@@ -109,8 +109,9 @@ Color resolveStarColor(BuildContext context, String id) {
 
 /// A competence rating on the school's scale, [filled] stars of it full.
 class StarRow extends ConsumerWidget {
-  /// How many stars are filled in.
-  final int filled;
+  /// How many stars are filled in. A half shows as a half star (#293); the
+  /// value is rounded to the nearest half first.
+  final double filled;
 
   /// Icon size, or null for the surrounding icon theme's.
   final double? size;
@@ -128,11 +129,21 @@ class StarRow extends ConsumerWidget {
       children: List.generate(
         starCount,
         (n) => Icon(
-          n < filled ? Icons.star : Icons.star_border,
+          starIconFor(filled, n),
           color: color,
           size: size,
         ),
       ),
     );
   }
+}
+
+/// The icon of the star at [index] (from 0) in a row rating [filled] stars:
+/// full, half or empty, [filled] taken to the nearest half.
+@visibleForTesting
+IconData starIconFor(double filled, int index) {
+  final halves = (filled * 2).round();
+  if (halves >= 2 * (index + 1)) return Icons.star;
+  if (halves == 2 * index + 1) return Icons.star_half;
+  return Icons.star_border;
 }

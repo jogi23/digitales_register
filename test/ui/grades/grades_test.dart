@@ -238,7 +238,7 @@ GradeDetail _deutschGrade({
   required String typeName,
   required String created,
   required String competenceTypeName,
-  required int competenceGrade,
+  required double competenceGrade,
   String? description,
 }) =>
     GradeDetail(

@@ -7,6 +7,8 @@
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 
+import 'dart:convert';
+
 import 'package:built_collection/built_collection.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/data.dart';
@@ -275,6 +277,72 @@ void main() {
       competences.any((c) => c.description?.isNotEmpty == true),
       isTrue,
     );
+  });
+
+  test('a competence rated in halves keeps its half (#293)', () async {
+    // Schools that allow it send "3.50"; cutting it to a whole number drew
+    // three stars for three and a half.
+    // The portal answers with the detail as a JSON string.
+    final raw = fixtureFor(
+      'api/student/subject_detail',
+      params: {'subjectId': _subjectId},
+    );
+    final detail = json.decode(raw is String ? raw : json.encode(raw));
+    var halved = false;
+    void halve(Object? node) {
+      if (halved) return;
+      if (node is Map) {
+        final competences = node['competences'];
+        if (competences is List && competences.isNotEmpty) {
+          (competences.first as Map)['grade'] = '3.50';
+          halved = true;
+          return;
+        }
+        node.values.forEach(halve);
+      } else if (node is List) {
+        node.forEach(halve);
+      }
+    }
+
+    halve(detail);
+    expect(halved, isTrue, reason: 'the fixture carries competences');
+
+    final notifier = container.read(gradesProvider.notifier);
+    notifier.restore(
+      GradesState(
+        (b) => b
+          ..semester = Semester.first.toBuilder()
+          ..subjects = ListBuilder([
+            _subject(id: _subjectId, name: 'Mathematik'),
+          ]),
+      ),
+    );
+    when(
+      () => mockWrapper.send(
+        'api/student/subject_detail',
+        args: any(named: 'args'),
+      ),
+    ).thenAnswer((_) async => raw is String ? json.encode(detail) : detail);
+    when(
+      () => mockWrapper.send(
+        'api/student/entry/getGrade',
+        args: any(named: 'args'),
+      ),
+    ).thenAnswer((_) async => null);
+
+    await notifier.loadDetails(
+      container.read(gradesProvider).subjects.first,
+      Semester.first,
+    );
+    await pumpEventQueue();
+
+    final grades = container
+        .read(gradesProvider)
+        .subjects
+        .first
+        .grades[Semester.first]!
+        .expand((g) => g.competences.map((c) => c.grade));
+    expect(grades, contains(3.5));
   });
 
   test('opening a grade adds what only getGrade reports', () async {
