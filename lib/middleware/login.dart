@@ -195,7 +195,9 @@ Future<void> _doLogin(
       _showUserTypeNotSupported(fixedUrl);
       return;
     }
-    if (!wrapper.demoMode) unawaited(schoolReporter.loggedIn(fixedUrl));
+    if (!isDemoUser(url: fixedUrl, username: user)) {
+      unawaited(schoolReporter.loggedIn(fixedUrl));
+    }
     await _doLoggedIn(
       username: wrapper.user!,
       fromStorage: fromStorage,
