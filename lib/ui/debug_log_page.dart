@@ -122,7 +122,9 @@ class _DebugLogPageState extends State<DebugLogPage> {
                 if (categories.length > 1)
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    // Sideways the navigation bar sits at one end of the row.
+                    padding: context.systemInsets.copyWith(bottom: 0) +
+                        const EdgeInsets.symmetric(horizontal: 8),
                     child: Row(
                       children: [
                         for (final category

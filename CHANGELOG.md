@@ -14,6 +14,7 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 - Benachrichtigungen: Vor dem Text steht jetzt, worum es geht — etwa „Hausaufgabe · Italienisch: …“, „Mitteilung · …“ oder „Absenz · …“. Neue Prüfungen melden sich als Prüfung, nicht als Hausaufgabe.
 - Schulliste: Meldet sich jemand bei einer Schule an, die noch nicht in der Liste steht, oder ist eine Schule aus der Liste nicht mehr erreichbar, schickt die App die Adresse der Schule an den Fehlerbericht-Dienst — nur die Adresse, nie Benutzername oder Passwort. So bleibt die Liste aktuell.
 - Schulliste: Gespeicherte Konten einer Schule mit neuer Adresse ziehen beim Start von selbst mit um — samt gespeicherten Daten, Alias und Foto. Neu auswählen oder anmelden ist nicht nötig.
+- Absenz melden: Der Button „Melden“ steht jetzt groß am Ende des Formulars, wie „Senden“ bei Mitteilungen, statt klein in der Titelleiste.
 
 ### Fehlerbehebungen
 
@@ -35,6 +36,7 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 - Anmeldung: Gab es unter der Schuladresse keine Schule, stand ein langer technischer Fehlertext („DioException … 301“) da. Jetzt heißt es, dass es dort keine Schule gibt und die Adresse zu prüfen ist. Die Schulliste stimmt wieder: Schulen mit neuer Adresse stehen mit dieser drin — etwa die Grundschulen im Passeier, die Mittelschulen Sterzing und Tschögglberg oder die Berufsbildungszentren Schlanders und Zuegg. Ist eine Schule in einem Sprengel aufgegangen, findet die Suche sie über den Ortsnamen. Sieben bisher fehlende Grundschulen sind neu dabei.
 - Anmeldung: War eine Schule aus der Liste gewählt, ging die Anmeldung immer an deren Adresse — auch wenn im Feld „Adresse“ etwas anderes stand. Wer die Adresse einer umgezogenen Schule von Hand eintrug, landete so weiter bei der alten. Jetzt zählt die eingetippte Adresse; passt sie zu einer Schule der Liste, wird diese ausgewählt.
 - Mitteilungen: War die App gerade ohne Verbindung, blieb der Button zum Bestätigen grau, obwohl ein Name eingetragen war — und nichts sagte, warum. Jetzt steht darunter, dass keine Verbindung besteht, und ein Tippen auf den grauen Button prüft die Verbindung neu. Bestätigt wird danach erst mit einem eigenen Tippen.
+- Systemleisten: Bei einer langen Mitteilung lag der Button „Senden“ halb unter der Navigationsleiste. Auch die Anmeldung, Hilfe & Feedback, Fächer, der Notenrechner, das Debug-Log, die Tagesansicht der Woche und der Foto-Zuschnitt halten jetzt Abstand zu den Systemleisten — auch im Querformat, wo die Leiste an der Seite sitzt.
 
 ## 1.4.1 — 2026-09-24
 

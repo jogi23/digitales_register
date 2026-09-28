@@ -30,6 +30,7 @@ import 'package:dr/ui/connection_status_button.dart';
 import 'package:dr/ui/entry_card.dart';
 import 'package:dr/ui/layout.dart';
 import 'package:dr/ui/no_internet.dart';
+import 'package:dr/ui/primary_action_button.dart';
 import 'package:dr/ui/pull_to_refresh.dart';
 import 'package:dr/ui/snack_bar.dart';
 import 'package:dr/util.dart';
@@ -1004,24 +1005,11 @@ class _MessageResponseSectionState extends State<MessageResponseSection> {
         else
           // Full width with an icon: the button that binds the reader should
           // not weigh the same as any other on the page.
-          SizedBox(
-            width: double.infinity,
-            child: _reconnectOnTap(
-              FilledButton(
-                style: FilledButton.styleFrom(
-                  minimumSize: const Size.fromHeight(48),
-                  textStyle: theme.textTheme.titleMedium,
-                ),
-                onPressed: _canSend ? () => _send(null) : null,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.draw),
-                    const SizedBox(width: 8),
-                    Text(tr(context).messageConfirm),
-                  ],
-                ),
-              ),
+          _reconnectOnTap(
+            PrimaryActionButton(
+              onPressed: _canSend ? () => _send(null) : null,
+              icon: Icons.draw,
+              label: tr(context).messageConfirm,
             ),
           ),
         if (_offline)

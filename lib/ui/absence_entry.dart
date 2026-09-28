@@ -19,6 +19,7 @@ import 'package:dr/data.dart';
 import 'package:dr/l10n/l10n.dart';
 import 'package:dr/ui/dialog.dart';
 import 'package:dr/ui/layout.dart';
+import 'package:dr/ui/primary_action_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
 import 'package:intl/intl.dart';
@@ -416,24 +417,6 @@ class _FutureAbsencePageState extends State<FutureAbsencePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(l.absenceReportTitle),
-        actions: <Widget>[
-          TextButton(
-            onPressed: _complete
-                ? () => Navigator.of(context).pop(
-                      FutureAbsenceInput(
-                        startDate: _startDate,
-                        endDate: _endDate,
-                        startHour: _startHour,
-                        endHour: _endHour,
-                        reason: _reason.text.trim(),
-                        signature: _signature.text.trim(),
-                        note: _note.text.trim(),
-                      ),
-                    )
-                : null,
-            child: Text(l.absenceReportSend),
-          ),
-        ],
       ),
       body: ListView(
         padding: context.systemInsets + const EdgeInsets.only(bottom: 24),
@@ -480,7 +463,31 @@ class _FutureAbsencePageState extends State<FutureAbsencePage> {
               decoration: InputDecoration(labelText: l.absenceNoteLabel),
             ),
           ),
+          // At the end of the form, like sending a message: in the app bar
+          // it looked like any other action and was easy to miss.
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+            child: PrimaryActionButton(
+              onPressed: _complete ? _submit : null,
+              icon: Icons.send,
+              label: l.absenceReportSend,
+            ),
+          ),
         ],
+      ),
+    );
+  }
+
+  void _submit() {
+    Navigator.of(context).pop(
+      FutureAbsenceInput(
+        startDate: _startDate,
+        endDate: _endDate,
+        startHour: _startHour,
+        endHour: _endHour,
+        reason: _reason.text.trim(),
+        signature: _signature.text.trim(),
+        note: _note.text.trim(),
       ),
     );
   }

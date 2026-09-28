@@ -21,6 +21,8 @@ import 'package:dr/ui/snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../system_bars.dart';
+
 const _teacherJson = <String, Object?>{
   'type': 'user',
   'id': 7330,
@@ -167,6 +169,37 @@ Future<void> _write(WidgetTester tester) async {
 }
 
 void main() {
+  group('clear of the system bars (#308)', () {
+    for (final holding in Holding.values) {
+      testWidgets('the send button, phone held ${holding.name}',
+          (tester) async {
+        await _open(tester, _page(_state(), _Calls()));
+        holdPhone(tester, holding);
+        await tester.pumpAndSettle();
+        // A text longer than the screen, as in the report: only then does
+        // the form end at the bottom edge, where the bar is.
+        await tester.scrollUntilVisible(
+          find.widgetWithText(TextField, 'Mitteilung'),
+          200,
+          scrollable: find.byType(Scrollable).first,
+        );
+        await tester.enterText(
+          find.widgetWithText(TextField, 'Mitteilung'),
+          List.filled(30, 'Zeile').join('\n'),
+        );
+        await tester.pumpAndSettle();
+        await scrollToEnd(tester);
+        expectClearOfSystemBars(
+          tester,
+          find.ancestor(
+            of: find.text('Senden'),
+            matching: find.byType(FilledButton),
+          ),
+        );
+      });
+    }
+  });
+
   testWidgets('sending waits for subject and text', (tester) async {
     await _open(tester, _page(_state(), _Calls()));
     expect(_sendButton(tester).onPressed, isNull);

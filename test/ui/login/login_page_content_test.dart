@@ -4,6 +4,8 @@ import 'package:dr/ui/login_page_content.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../system_bars.dart';
+
 void main() {
   LoginPageViewModel buildVm({
     required Map<String, String> servers,
@@ -124,6 +126,47 @@ void main() {
     await tester.tap(login);
     expect(loginUrl, 'https://vinzentinum.digitalesregister.it');
   });
+
+  for (final holding in Holding.values) {
+    testWidgets('the form stays clear of the system bars, ${holding.name}',
+        (tester) async {
+      holdPhone(tester, holding);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: LoginPageContent(
+            vm: buildVm(
+              servers: const {},
+              otherAccounts: [
+                for (var i = 1; i <= 6; i++)
+                  OtherAccount(username: 'konto$i', url: 'https://a.example'),
+              ],
+            ),
+            onLogin: (_, __, ___) {},
+            setSaveNoPass: (_) {},
+            onReload: () {},
+            onChangePass: (_, __, ___, ____) {},
+            onRequestPassReset: (_) {},
+            onSelectAccount: (_) {},
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await scrollToEnd(tester);
+      expectClearOfSystemBars(
+        tester,
+        find.ancestor(of: find.text('konto6'), matching: find.byType(ListTile)),
+      );
+      await tester.scrollUntilVisible(
+        find.widgetWithText(ElevatedButton, 'Login'),
+        -200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expectClearOfSystemBars(
+        tester,
+        find.widgetWithText(ElevatedButton, 'Login'),
+      );
+    });
+  }
 
   testWidgets('several accounts no longer ask which one to use',
       (tester) async {

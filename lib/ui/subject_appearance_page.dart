@@ -22,6 +22,7 @@ import 'package:dr/providers/all_subjects_provider.dart';
 import 'package:dr/providers/subject_appearance_provider.dart';
 import 'package:dr/ui/dialog.dart';
 import 'package:dr/l10n/l10n.dart';
+import 'package:dr/ui/layout.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -112,6 +113,7 @@ class _SubjectAppearancePageState
       body: subjects.isEmpty
           ? Center(child: Text(tr(context).subjectNoSubjects))
           : ListView.builder(
+              padding: context.systemInsets,
               itemCount: subjects.length,
               itemBuilder: (context, index) {
                 final subject = subjects[index];

@@ -235,7 +235,10 @@ class _DashboardWeekContainerState
                   ),
                 );
               }
-              return SingleChildScrollView(child: dayBuilder(day));
+              return SingleChildScrollView(
+                padding: context.systemInsets,
+                child: dayBuilder(day),
+              );
             },
           ),
         ),

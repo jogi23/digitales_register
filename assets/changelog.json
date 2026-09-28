@@ -15,7 +15,8 @@
             "Merkheft-Monatsansicht: Die Tage des Vor- und Folgemonats in der ersten und letzten Woche stehen jetzt leicht ausgegraut da, statt zu fehlen — mit Punkt, wenn es an dem Tag etwas gibt. Ein Tippen zeigt den Tag wie jeden anderen.",
             "Benachrichtigungen: Vor dem Text steht jetzt, worum es geht — etwa „Hausaufgabe · Italienisch: …“, „Mitteilung · …“ oder „Absenz · …“. Neue Prüfungen melden sich als Prüfung, nicht als Hausaufgabe.",
             "Schulliste: Meldet sich jemand bei einer Schule an, die noch nicht in der Liste steht, oder ist eine Schule aus der Liste nicht mehr erreichbar, schickt die App die Adresse der Schule an den Fehlerbericht-Dienst — nur die Adresse, nie Benutzername oder Passwort. So bleibt die Liste aktuell.",
-            "Schulliste: Gespeicherte Konten einer Schule mit neuer Adresse ziehen beim Start von selbst mit um — samt gespeicherten Daten, Alias und Foto. Neu auswählen oder anmelden ist nicht nötig."
+            "Schulliste: Gespeicherte Konten einer Schule mit neuer Adresse ziehen beim Start von selbst mit um — samt gespeicherten Daten, Alias und Foto. Neu auswählen oder anmelden ist nicht nötig.",
+            "Absenz melden: Der Button „Melden“ steht jetzt groß am Ende des Formulars, wie „Senden“ bei Mitteilungen, statt klein in der Titelleiste."
           ]
         },
         {
@@ -38,7 +39,8 @@
             "Kalender: Mit „Tests immer rot umrahmen“ war eine Stunde mit Test in der Detailansicht nicht rot umrahmt. Jetzt ist sie es, wie im Merkheft.",
             "Anmeldung: Gab es unter der Schuladresse keine Schule, stand ein langer technischer Fehlertext („DioException … 301“) da. Jetzt heißt es, dass es dort keine Schule gibt und die Adresse zu prüfen ist. Die Schulliste stimmt wieder: Schulen mit neuer Adresse stehen mit dieser drin — etwa die Grundschulen im Passeier, die Mittelschulen Sterzing und Tschögglberg oder die Berufsbildungszentren Schlanders und Zuegg. Ist eine Schule in einem Sprengel aufgegangen, findet die Suche sie über den Ortsnamen. Sieben bisher fehlende Grundschulen sind neu dabei.",
             "Anmeldung: War eine Schule aus der Liste gewählt, ging die Anmeldung immer an deren Adresse — auch wenn im Feld „Adresse“ etwas anderes stand. Wer die Adresse einer umgezogenen Schule von Hand eintrug, landete so weiter bei der alten. Jetzt zählt die eingetippte Adresse; passt sie zu einer Schule der Liste, wird diese ausgewählt.",
-            "Mitteilungen: War die App gerade ohne Verbindung, blieb der Button zum Bestätigen grau, obwohl ein Name eingetragen war — und nichts sagte, warum. Jetzt steht darunter, dass keine Verbindung besteht, und ein Tippen auf den grauen Button prüft die Verbindung neu. Bestätigt wird danach erst mit einem eigenen Tippen."
+            "Mitteilungen: War die App gerade ohne Verbindung, blieb der Button zum Bestätigen grau, obwohl ein Name eingetragen war — und nichts sagte, warum. Jetzt steht darunter, dass keine Verbindung besteht, und ein Tippen auf den grauen Button prüft die Verbindung neu. Bestätigt wird danach erst mit einem eigenen Tippen.",
+            "Systemleisten: Bei einer langen Mitteilung lag der Button „Senden“ halb unter der Navigationsleiste. Auch die Anmeldung, Hilfe & Feedback, Fächer, der Notenrechner, das Debug-Log, die Tagesansicht der Woche und der Foto-Zuschnitt halten jetzt Abstand zu den Systemleisten — auch im Querformat, wo die Leiste an der Seite sitzt."
           ]
         }
       ],
@@ -55,7 +57,8 @@
             "Merkheft month view: the days of the previous and next month in the first and last week are now shown slightly greyed out instead of being left out — with a dot when something is on that day. Tapping one shows the day like any other.",
             "Notifications: the text now starts with what it is about — such as “Homework · Italian: …”, “Message · …” or “Absence · …”. New tests show up as a test, not as homework.",
             "School list: when someone signs in at a school that is not in the list yet, or a listed school can no longer be reached, the app sends the school's address to the error reporting service — the address only, never the username or password. This keeps the list up to date.",
-            "School list: saved accounts of a school with a new address move along by themselves at startup — together with saved data, alias and photo. There is no need to pick the school again or sign in anew."
+            "School list: saved accounts of a school with a new address move along by themselves at startup — together with saved data, alias and photo. There is no need to pick the school again or sign in anew.",
+            "Report an absence: the “Report” button now sits large at the end of the form, like “Send” for messages, instead of small in the title bar."
           ]
         },
         {
@@ -78,7 +81,8 @@
             "Calendar: with “Always frame tests in red”, a lesson with a test was not framed in red in the detail view. It now is, as in the Merkheft.",
             "Login: when there was no school at the school address, a long technical error (“DioException … 301”) appeared. Now the app says there is no school at that address and asks to check it. The school list is correct again: schools with a new address are listed under it — such as the primary schools in Passeier, the Sterzing and Tschögglberg middle schools or the Schlanders and Zuegg vocational centres. Where a school became part of a school district, searching for the village finds it. Seven primary schools that were missing are new.",
             "Login: with a school picked from the list, the login always went to that school's address — even when the “Address” field said something else. Typing in the new address of a school that had moved still led to the old one. Now the typed address counts; if it matches a school in the list, that school is selected.",
-            "Messages: while the app had no connection, the confirm button stayed grey even with a name filled in — and nothing said why. Now a line below says there is no connection, and tapping the grey button checks the connection again. Confirming then takes a tap of its own."
+            "Messages: while the app had no connection, the confirm button stayed grey even with a name filled in — and nothing said why. Now a line below says there is no connection, and tapping the grey button checks the connection again. Confirming then takes a tap of its own.",
+            "System bars: with a long message, the “Send” button sat half under the navigation bar. The login, Help & feedback, subjects, the grade calculator, the debug log, the day view of the week and the photo crop now keep clear of the system bars as well — also in landscape, where the bar sits at the side."
           ]
         }
       ],
@@ -95,7 +99,8 @@
             "Vista mensile del Merkheft: i giorni del mese precedente e successivo nella prima e nell'ultima settimana ora compaiono leggermente in grigio invece di mancare — con il punto se in quel giorno c'è qualcosa. Un tocco mostra il giorno come ogni altro.",
             "Notifiche: il testo ora inizia con ciò di cui si tratta — ad esempio «Compito · Italiano: …», «Comunicazione · …» o «Assenza · …». Le nuove verifiche arrivano come verifica, non come compito.",
             "Elenco delle scuole: se qualcuno accede a una scuola non ancora presente nell'elenco, o una scuola dell'elenco non è più raggiungibile, l'app invia l'indirizzo della scuola al servizio di segnalazione errori — solo l'indirizzo, mai nome utente o password. Così l'elenco resta aggiornato.",
-            "Elenco delle scuole: gli account salvati di una scuola con un nuovo indirizzo si spostano da soli all'avvio — insieme ai dati salvati, all'alias e alla foto. Non serve scegliere di nuovo la scuola né accedere di nuovo."
+            "Elenco delle scuole: gli account salvati di una scuola con un nuovo indirizzo si spostano da soli all'avvio — insieme ai dati salvati, all'alias e alla foto. Non serve scegliere di nuovo la scuola né accedere di nuovo.",
+            "Segnala assenza: il pulsante «Segnala» ora è grande in fondo al modulo, come «Invia» nelle comunicazioni, invece che piccolo nella barra del titolo."
           ]
         },
         {
@@ -118,7 +123,8 @@
             "Calendario: con «Incornicia sempre le verifiche in rosso», una lezione con verifica non era incorniciata di rosso nella vista dettagliata. Ora lo è, come nel Merkheft.",
             "Accesso: se all'indirizzo della scuola non c'era nessuna scuola, compariva un lungo errore tecnico («DioException … 301»). Ora l'app dice che a quell'indirizzo non c'è nessuna scuola e chiede di controllarlo. L'elenco delle scuole è di nuovo corretto: le scuole con un nuovo indirizzo compaiono con quello — ad esempio le scuole primarie della Val Passiria, le scuole medie di Vipiteno e del Tschögglberg o i centri di formazione professionale di Silandro e Zuegg. Se una scuola è confluita in un istituto comprensivo, la ricerca la trova tramite il nome del paese. Sette scuole primarie che mancavano sono nuove.",
             "Accesso: con una scuola scelta dall'elenco, l'accesso andava sempre al suo indirizzo — anche se nel campo «Indirizzo» c'era altro. Chi inseriva a mano il nuovo indirizzo di una scuola trasferita finiva comunque su quello vecchio. Ora vale l'indirizzo digitato; se corrisponde a una scuola dell'elenco, questa viene selezionata.",
-            "Comunicazioni: quando l'app era senza connessione, il pulsante di conferma restava grigio anche con il nome inserito — senza alcuna spiegazione. Ora sotto compare che manca la connessione, e un tocco sul pulsante grigio verifica di nuovo la connessione. La conferma richiede poi un tocco a parte."
+            "Comunicazioni: quando l'app era senza connessione, il pulsante di conferma restava grigio anche con il nome inserito — senza alcuna spiegazione. Ora sotto compare che manca la connessione, e un tocco sul pulsante grigio verifica di nuovo la connessione. La conferma richiede poi un tocco a parte.",
+            "Barre di sistema: con una comunicazione lunga, il pulsante «Invia» finiva a metà sotto la barra di navigazione. Anche l'accesso, Aiuto e feedback, le materie, il calcolatore dei voti, il registro di debug, la vista del giorno della settimana e il ritaglio della foto ora restano liberi dalle barre di sistema — anche in orizzontale, dove la barra è di lato."
           ]
         }
       ]

@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'package:dr/ui/layout.dart';
 import 'package:dr/util.dart';
 import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
@@ -30,6 +31,7 @@ class HelpFeedbackPage extends StatelessWidget {
         title: Text(tr(context).helpTitle),
       ),
       body: ListView(
+        padding: context.systemInsets,
         children: [
           ListTile(
             leading: const Icon(Icons.email),

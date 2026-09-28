@@ -20,6 +20,7 @@ import 'package:collection/collection.dart';
 import 'package:dr/container/login_page.dart';
 import 'package:dr/ui/animated_linear_progress_indicator.dart';
 import 'package:dr/ui/autocomplete_options.dart';
+import 'package:dr/ui/layout.dart';
 import 'package:dr/util.dart';
 import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
@@ -156,6 +157,7 @@ class _LoginPageContentState extends State<LoginPageContent> {
             Center(
               child: ListView(
                 shrinkWrap: true,
+                padding: context.systemInsets,
                 children: <Widget>[
                   if (!widget.vm.changePass) ...[
                     Padding(
