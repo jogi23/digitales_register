@@ -172,7 +172,10 @@ void main() {
         _day(monday, [
           _hour('Italienisch', 1, [_homework(7, 'leggere')]),
           // A double lesson carries its entry in both hours.
-          _hour('Mathematik', 2, [_homework(8, 'S. 12'), _homework(9, 'Test')]),
+          _hour('Mathematik', 2, [
+            _homework(8, 'S. 12'),
+            _homework(9, 'Test', exam: true),
+          ]),
           _hour('Mathematik', 3, [_homework(8, 'S. 12')]),
         ]),
       ];
@@ -181,6 +184,8 @@ void main() {
       expect(homework.first.subject, 'Italienisch');
       expect(homework.first.name, 'leggere');
       expect(homework.first.date, monday);
+      // An exam is told apart, so its notification says so (#297).
+      expect(homework.map((h) => h.exam), [false, false, true]);
     });
   });
 
@@ -292,11 +297,12 @@ CalendarHour _hour(String subject, int hour, List<HomeworkExam> homework) =>
         ..homeworkExams = ListBuilder(homework),
     );
 
-HomeworkExam _homework(int id, String name) => HomeworkExam(
+HomeworkExam _homework(int id, String name, {bool exam = false}) =>
+    HomeworkExam(
       (b) => b
         ..id = id
         ..name = name
-        ..homework = true
+        ..homework = !exam
         ..online = false
         ..deadline = UtcDateTime(2026, 9, 28)
         ..hasGrades = false

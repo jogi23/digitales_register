@@ -682,7 +682,8 @@
   },
   "systemNotificationsChannel": "Nuove voci",
   "systemNotificationsChannelDescription": "Nuove comunicazioni, valutazioni e altre voci dal registro",
-  "systemNotificationsHomeworkDue": "{type} per {date}",
+  "systemNotificationsHomeworkDue": "Per {date}",
+  "systemNotificationsKind": "{kind, select, message{Comunicazione} grade{Valutazione} observation{Osservazione} homework{Compito} exam{Verifica} absence{Assenza} calendar{Calendario} classbook{Registro} account{Account} notice{Avviso} other{}}",
   "systemNotificationsCount": "{count, plural, one {{count} notifica} other {{count} notifiche}}",
   "settingsStayLoggedInOffHint": "Disattivato: accesso a ogni avvio, nessun cambio di account",
   "settingsNotificationsNeedStayLoggedIn": "Le notifiche Android richiedono «Resta connesso»; fino ad allora solo nell’app"

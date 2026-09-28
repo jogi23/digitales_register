@@ -34,12 +34,42 @@ const notificationTypeAbsenceReason = 'absencereason';
 const notificationTypeAbsenceAdvance = 'absenceadvance';
 const notificationTypeAbsenceReasonAdvanceForClass =
     'absencereasonadvanceforclass';
+const notificationTypeSubstituteLesson = 'substitutelesson';
+const notificationTypeLessonTeacherChanged = 'lessonteacherchanged';
+const notificationTypePasswordChanged = 'passwordchanged';
+const notificationTypeCustom = 'custom';
 
 // Not among the portal's kinds; the "Merkheft" setting still answers to them.
 const notificationTypeClassbook = 'classbook';
 const notificationTypeEntry = 'entry';
 
 String normalizedNotificationType(String? type) => (type ?? '').toLowerCase();
+
+/// What a notification of [type] is about, in a word — the key the
+/// translations pick its label by (`systemNotificationsKind`), null for a
+/// kind the app does not know.
+String? notificationKindOf(String? type) =>
+    switch (normalizedNotificationType(type)) {
+      notificationTypeMessage || notificationTypeMessageShared => 'message',
+      notificationTypeGrade => 'grade',
+      notificationTypeObservation ||
+      notificationTypeCriticalObservation =>
+        'observation',
+      notificationTypeHomework => 'homework',
+      notificationTypeExam => 'exam',
+      notificationTypeAbsence ||
+      notificationTypeAbsenceReason ||
+      notificationTypeAbsenceAdvance ||
+      notificationTypeAbsenceReasonAdvanceForClass =>
+        'absence',
+      notificationTypeSubstituteLesson ||
+      notificationTypeLessonTeacherChanged =>
+        'calendar',
+      notificationTypeClassbook || notificationTypeEntry => 'classbook',
+      notificationTypePasswordChanged => 'account',
+      notificationTypeCustom => 'notice',
+      _ => null,
+    };
 
 /// Whether [n] is about a message — sent to the user or shared with them.
 /// Its [Notification.objectId] is the message's id either way.

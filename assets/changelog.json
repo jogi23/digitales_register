@@ -4,6 +4,12 @@
     "points": {
       "de": [
         {
+          "title": "Verbesserungen",
+          "items": [
+            "Benachrichtigungen: Vor dem Text steht jetzt, worum es geht — etwa „Hausaufgabe · Italienisch: …“, „Mitteilung · …“ oder „Absenz · …“. Neue Prüfungen melden sich als Prüfung, nicht als Hausaufgabe."
+          ]
+        },
+        {
           "title": "Fehlerbehebungen",
           "items": [
             "Benachrichtigungen: Der Abruf im Hintergrund meldet sich nicht mehr mit dem Konto an, mit dem die geöffnete App gerade angemeldet ist — die App fragt für dieses Konto ohnehin selbst nach. Die zweite Anmeldung zur selben Zeit konnte die Sitzung der App beenden; beim Start erschien dann „Verbindung fehlgeschlagen“, obwohl das Netz da war.",
@@ -24,6 +30,12 @@
       ],
       "en": [
         {
+          "title": "Improvements",
+          "items": [
+            "Notifications: the text now starts with what it is about — such as “Homework · Italian: …”, “Message · …” or “Absence · …”. New tests show up as a test, not as homework."
+          ]
+        },
+        {
           "title": "Bug fixes",
           "items": [
             "Notifications: the background check no longer signs into the account the open app is signed into — the app asks for that account itself anyway. The second sign-in at the same time could end the app's session; at start-up the app then showed “Connection failed” although the network was there.",
@@ -43,6 +55,12 @@
         }
       ],
       "it": [
+        {
+          "title": "Miglioramenti",
+          "items": [
+            "Notifiche: il testo ora inizia con ciò di cui si tratta — ad esempio «Compito · Italiano: …», «Comunicazione · …» o «Assenza · …». Le nuove verifiche arrivano come verifica, non come compito."
+          ]
+        },
         {
           "title": "Correzioni",
           "items": [

@@ -710,14 +710,20 @@
   },
   "systemNotificationsChannel": "Neue Einträge",
   "systemNotificationsChannelDescription": "Neue Mitteilungen, Bewertungen und andere Einträge aus dem Register",
-  "systemNotificationsHomeworkDue": "{type} für {date}",
+  "systemNotificationsHomeworkDue": "Fällig am {date}",
+  "systemNotificationsKind": "{kind, select, message{Mitteilung} grade{Bewertung} observation{Beobachtung} homework{Hausaufgabe} exam{Prüfung} absence{Absenz} calendar{Kalender} classbook{Merkheft} account{Konto} notice{Hinweis} other{}}",
   "@systemNotificationsHomeworkDue": {
-    "description": "Zweite Zeile der Systembenachrichtigung zu einer neuen Hausaufgabe: Art laut Portal und Tag der Stunde",
+    "description": "Zweite Zeile der Systembenachrichtigung zu einer neuen Hausaufgabe: Tag der Stunde, für die sie eingetragen ist",
     "placeholders": {
-      "type": {
-        "type": "String"
-      },
       "date": {
+        "type": "String"
+      }
+    }
+  },
+  "@systemNotificationsKind": {
+    "description": "Worum es in einer Systembenachrichtigung geht, vor ihrem Text; leer für unbekannte Arten",
+    "placeholders": {
+      "kind": {
         "type": "String"
       }
     }

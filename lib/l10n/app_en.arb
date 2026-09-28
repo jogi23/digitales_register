@@ -682,7 +682,8 @@
   },
   "systemNotificationsChannel": "New entries",
   "systemNotificationsChannelDescription": "New messages, grades and other entries from the register",
-  "systemNotificationsHomeworkDue": "{type} for {date}",
+  "systemNotificationsHomeworkDue": "Due on {date}",
+  "systemNotificationsKind": "{kind, select, message{Message} grade{Grade} observation{Observation} homework{Homework} exam{Test} absence{Absence} calendar{Calendar} classbook{Classbook} account{Account} notice{Notice} other{}}",
   "systemNotificationsCount": "{count, plural, one {{count} notification} other {{count} notifications}}",
   "settingsStayLoggedInOffHint": "Off: sign in at every start, no switching accounts",
   "settingsNotificationsNeedStayLoggedIn": "Android notifications need “Stay signed in”; until then only inside the app"
