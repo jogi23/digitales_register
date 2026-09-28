@@ -4,6 +4,12 @@
     "points": {
       "de": [
         {
+          "title": "Neue Funktionen",
+          "items": [
+            "Kalender: Schulen mit Unterricht am Samstag werden erkannt — Wochenkopf, Datumswahl und „heute“ reichen dann bis Samstag, und am Samstag bleibt die laufende Woche offen. Für Schulen, die das nicht angeben, gibt es in den Einstellungen die „6-Tages-Woche (beta)“."
+          ]
+        },
+        {
           "title": "Verbesserungen",
           "items": [
             "Merkheft-Monatsansicht: Die Tage des Vor- und Folgemonats in der ersten und letzten Woche stehen jetzt leicht ausgegraut da, statt zu fehlen — mit Punkt, wenn es an dem Tag etwas gibt. Ein Tippen zeigt den Tag wie jeden anderen.",
@@ -32,6 +38,12 @@
       ],
       "en": [
         {
+          "title": "New features",
+          "items": [
+            "Calendar: schools that teach on Saturdays are recognised — the week header, the date picker and “today” then run to Saturday, and on a Saturday the current week stays open. For schools that do not say so, the settings offer the “6-day week (beta)”."
+          ]
+        },
+        {
           "title": "Improvements",
           "items": [
             "Merkheft month view: the days of the previous and next month in the first and last week are now shown slightly greyed out instead of being left out — with a dot when something is on that day. Tapping one shows the day like any other.",
@@ -59,6 +71,12 @@
         }
       ],
       "it": [
+        {
+          "title": "Nuove funzioni",
+          "items": [
+            "Calendario: le scuole con lezione il sabato vengono riconosciute — l'intestazione della settimana, la scelta della data e «oggi» arrivano allora fino a sabato, e di sabato resta aperta la settimana in corso. Per le scuole che non lo indicano, nelle impostazioni c'è la «Settimana di 6 giorni (beta)»."
+          ]
+        },
         {
           "title": "Miglioramenti",
           "items": [

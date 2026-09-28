@@ -53,7 +53,8 @@ class ConfigParser {
         ..currentSemesterMaybe = currentSemesterMaybe
         ..isStudentOrParent = isStudentOrParent
         ..submissionMaxItems = _readSubmissionMaxItems(source)
-        ..competenceScale = _readCompetenceScale(source),
+        ..competenceScale = _readCompetenceScale(source)
+        ..daysInWeek = _readDaysInWeek(source),
     );
   }
 
@@ -71,6 +72,17 @@ class ConfigParser {
     final value = int.tryParse(match?.group(1) ?? "");
     if (value == null || value <= 0 || value > maxCompetenceScale) {
       return Config.defaultCompetenceScale;
+    }
+    return value;
+  }
+
+  /// How many days the school teaches on, from `days_in_week: 5,` in the
+  /// config block. Anything but a day count of a week keeps Monday to Friday.
+  static int _readDaysInWeek(String source) {
+    final match = RegExp(r"days_in_week\s*:\s*(\d+)").firstMatch(source);
+    final value = int.tryParse(match?.group(1) ?? "");
+    if (value == null || value < 1 || value > 7) {
+      return Config.defaultDaysInWeek;
     }
     return value;
   }

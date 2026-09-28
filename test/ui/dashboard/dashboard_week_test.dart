@@ -198,6 +198,7 @@ Future<void> main() async {
     Brightness brightness = Brightness.light,
     BuiltList<Day>? days,
     bool colours = true,
+    bool sixDayWeek = false,
   }) async {
     weekNotifier = _TestDashboardNotifier(
       days == null
@@ -215,6 +216,7 @@ Future<void> main() async {
               SettingsState(
                 dashboardViewMode: DashboardViewMode.week,
                 dashboardColorBorders: colours,
+                sixDayWeek: sixDayWeek,
               ),
             ),
           ),
@@ -264,6 +266,12 @@ Future<void> main() async {
       await tester.pumpWidget(dashboard());
       await tester.pump();
       expect(find.byType(DashboardWeekContainer), findsOneWidget);
+    });
+
+    testWidgets('the header runs to Saturday in a six-day week (#292)',
+        (tester) async {
+      await pumpWeek(tester, sixDayWeek: true);
+      expect(find.text('11.05.26 - 16.05.26'), findsOneWidget);
     });
 
     testWidgets('opens on the current week', (tester) async {

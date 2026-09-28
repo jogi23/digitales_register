@@ -80,6 +80,19 @@ void main() {
       final sunday = UtcDateTime(2024, 1, 14);
       expect(toMonday(sunday), UtcDateTime(2024, 1, 15));
     });
+
+    test('a school Saturday stays in its week (#292)', () {
+      final saturday = UtcDateTime(2024, 1, 13);
+      expect(toMonday(saturday, daysInWeek: 6), UtcDateTime(2024, 1, 8));
+      final sunday = UtcDateTime(2024, 1, 14);
+      expect(toMonday(sunday, daysInWeek: 6), UtcDateTime(2024, 1, 15));
+    });
+
+    test('follows the school days kept for code without a ref', () {
+      addTearDown(() => schoolDaysInWeek = 5);
+      schoolDaysInWeek = 6;
+      expect(toMonday(UtcDateTime(2024, 1, 13)), UtcDateTime(2024, 1, 8));
+    });
   });
 
   // ---------------------------------------------------------------------------

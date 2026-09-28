@@ -4,6 +4,10 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 
 ## 1.5.0 — 2026-09-24
 
+### Neue Funktionen
+
+- Kalender: Schulen mit Unterricht am Samstag werden erkannt — Wochenkopf, Datumswahl und „heute“ reichen dann bis Samstag, und am Samstag bleibt die laufende Woche offen. Für Schulen, die das nicht angeben, gibt es in den Einstellungen die „6-Tages-Woche (beta)“.
+
 ### Verbesserungen
 
 - Merkheft-Monatsansicht: Die Tage des Vor- und Folgemonats in der ersten und letzten Woche stehen jetzt leicht ausgegraut da, statt zu fehlen — mit Punkt, wenn es an dem Tag etwas gibt. Ein Tippen zeigt den Tag wie jeden anderen.

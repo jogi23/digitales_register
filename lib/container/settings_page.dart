@@ -57,6 +57,7 @@ class SettingsPageContainer extends ConsumerWidget {
       onSetIgnoreForGradesAverage: notifier.setIgnoreForGradesAverage,
       onSetDashboardColorBorders: notifier.setDashboardColorBorders,
       onSetCalenderColorBackground: notifier.setCalendarColorBackground,
+      onSetSixDayWeek: notifier.setSixDayWeek,
       onSetCalendarShowTimes: notifier.setCalendarShowTimes,
       onSetCalendarShowAllDetails: notifier.setCalendarShowAllDetails,
       onSetDashboardViewMode: notifier.setDashboardViewMode,
@@ -100,6 +101,7 @@ class SettingsViewModel {
   final bool showGradesSettings;
   final bool dashboardColorBorders;
   final bool calendarColorBackground;
+  final bool sixDayWeek;
   final bool calendarShowTimes;
   final bool calendarShowAllDetails;
   final DashboardViewMode dashboardViewMode;
@@ -139,6 +141,7 @@ class SettingsViewModel {
     required this.dashboardDeduplicateEntries,
     required this.dashboardColorBorders,
     required this.calendarColorBackground,
+    this.sixDayWeek = false,
     required this.calendarShowTimes,
     this.calendarShowAllDetails = false,
     required this.dashboardViewMode,
@@ -179,6 +182,7 @@ class SettingsViewModel {
         dashboardDeduplicateEntries: s.dashboardDeduplicateEntries,
         dashboardColorBorders: s.dashboardColorBorders,
         calendarColorBackground: s.calendarColorBackground,
+        sixDayWeek: s.sixDayWeek,
         calendarShowTimes: s.calendarShowTimes,
         calendarShowAllDetails: s.calendarShowAllDetails,
         dashboardViewMode: s.dashboardViewMode,

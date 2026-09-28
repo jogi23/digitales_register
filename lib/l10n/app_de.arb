@@ -303,6 +303,8 @@
   "settingsColorHomework": "Hausaufgaben mit diesen Farben färben",
   "settingsColorLessons": "Stunden im Kalender mit diesen Farben färben",
   "settingsShowTimes": "Uhrzeiten im Kalender anzeigen",
+  "settingsSixDayWeek": "6-Tages-Woche (beta)",
+  "settingsSixDayWeekHint": "Samstag gilt als Schultag, auch wenn die Schule nur fünf Tage angibt",
   "settingsShowAllDetails": "Alle Details im Kalender anzeigen",
   "settingsShowAllDetailsHint": "Lehrpersonen und Raum direkt in der Stunde, soweit Platz ist",
   "calendarRoomTooltip": "Raum: {room}",

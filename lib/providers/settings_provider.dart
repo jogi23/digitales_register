@@ -169,6 +169,9 @@ class SettingsNotifier extends Notifier<SettingsState> {
   void setCalendarColorBackground(bool value) =>
       _update(state.copyWith(calendarColorBackground: value));
 
+  void setSixDayWeek(bool value) =>
+      _update(state.copyWith(sixDayWeek: value));
+
   void setCalendarShowTimes(bool value) =>
       _update(state.copyWith(calendarShowTimes: value));
 
