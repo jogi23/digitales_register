@@ -52,6 +52,7 @@ void _stubFailedLogin(
   ).thenAnswer((_) async => null);
   when(() => mock.loggedIn).thenAnswer((_) => Future.value(false));
   when(() => mock.noInternet).thenReturn(noInternet);
+  when(() => mock.schoolNotFound).thenReturn(false);
   when(() => mock.loginAddress).thenReturn(_loginAddress);
   if (error != null) {
     when(() => mock.error).thenReturn(error);

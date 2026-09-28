@@ -13,7 +13,8 @@
           "title": "Verbesserungen",
           "items": [
             "Merkheft-Monatsansicht: Die Tage des Vor- und Folgemonats in der ersten und letzten Woche stehen jetzt leicht ausgegraut da, statt zu fehlen — mit Punkt, wenn es an dem Tag etwas gibt. Ein Tippen zeigt den Tag wie jeden anderen.",
-            "Benachrichtigungen: Vor dem Text steht jetzt, worum es geht — etwa „Hausaufgabe · Italienisch: …“, „Mitteilung · …“ oder „Absenz · …“. Neue Prüfungen melden sich als Prüfung, nicht als Hausaufgabe."
+            "Benachrichtigungen: Vor dem Text steht jetzt, worum es geht — etwa „Hausaufgabe · Italienisch: …“, „Mitteilung · …“ oder „Absenz · …“. Neue Prüfungen melden sich als Prüfung, nicht als Hausaufgabe.",
+            "Schulliste: Meldet sich jemand bei einer Schule an, die noch nicht in der Liste steht, oder ist eine Schule aus der Liste nicht mehr erreichbar, schickt die App die Adresse der Schule an den Fehlerbericht-Dienst — nur die Adresse, nie Benutzername oder Passwort. So bleibt die Liste aktuell."
           ]
         },
         {
@@ -33,7 +34,9 @@
             "Kompetenzen: Die App zeigte immer sechs Sterne, auch wo die Schule auf einer anderen Skala bewertet — etwa auf vier. Sterne, Durchschnitte und Diagramm folgen jetzt der Skala der Schule.",
             "Einstellungen: Das Zahnrad neben dem Notendurchschnitt öffnete die Einstellungen, sprang aber nicht zum Abschnitt Noten.",
             "Kompetenzen: An Schulen, die halbe Sterne vergeben, zeigte die App eine Bewertung von 3,5 als drei Sterne. Jetzt steht ein halber Stern da, auch im Diagramm und im Sterndurchschnitt.",
-            "Kalender: Mit „Tests immer rot umrahmen“ war eine Stunde mit Test in der Detailansicht nicht rot umrahmt. Jetzt ist sie es, wie im Merkheft."
+            "Kalender: Mit „Tests immer rot umrahmen“ war eine Stunde mit Test in der Detailansicht nicht rot umrahmt. Jetzt ist sie es, wie im Merkheft.",
+            "Anmeldung: Gab es unter der Schuladresse keine Schule, stand ein langer technischer Fehlertext („DioException … 301“) da. Jetzt heißt es, dass es dort keine Schule gibt und die Adresse zu prüfen ist. 18 Schulen, deren Adresse nicht mehr existiert, sind aus der Auswahl verschwunden; die Mittelschule Sterzing (Vigil Raber) steht mit ihrer neuen Adresse drin.",
+            "Anmeldung: War eine Schule aus der Liste gewählt, ging die Anmeldung immer an deren Adresse — auch wenn im Feld „Adresse“ etwas anderes stand. Wer die Adresse einer umgezogenen Schule von Hand eintrug, landete so weiter bei der alten. Jetzt zählt die eingetippte Adresse; passt sie zu einer Schule der Liste, wird diese ausgewählt."
           ]
         }
       ],
@@ -48,7 +51,8 @@
           "title": "Improvements",
           "items": [
             "Merkheft month view: the days of the previous and next month in the first and last week are now shown slightly greyed out instead of being left out — with a dot when something is on that day. Tapping one shows the day like any other.",
-            "Notifications: the text now starts with what it is about — such as “Homework · Italian: …”, “Message · …” or “Absence · …”. New tests show up as a test, not as homework."
+            "Notifications: the text now starts with what it is about — such as “Homework · Italian: …”, “Message · …” or “Absence · …”. New tests show up as a test, not as homework.",
+            "School list: when someone signs in at a school that is not in the list yet, or a listed school can no longer be reached, the app sends the school's address to the error reporting service — the address only, never the username or password. This keeps the list up to date."
           ]
         },
         {
@@ -68,7 +72,9 @@
             "Competences: the app always showed six stars, even where the school rates on another scale — four, for instance. Stars, averages and chart now follow the school's scale.",
             "Settings: the gear next to the grade average opened the settings without scrolling to the grades section.",
             "Competences: at schools that award half stars, the app showed a rating of 3.5 as three stars. A half star now shows, in the chart and in the star average as well.",
-            "Calendar: with “Always frame tests in red”, a lesson with a test was not framed in red in the detail view. It now is, as in the Merkheft."
+            "Calendar: with “Always frame tests in red”, a lesson with a test was not framed in red in the detail view. It now is, as in the Merkheft.",
+            "Login: when there was no school at the school address, a long technical error (“DioException … 301”) appeared. Now the app says there is no school at that address and asks to check it. 18 schools whose address no longer exists were removed from the list; the Sterzing middle school (Vigil Raber) is in it with its new address.",
+            "Login: with a school picked from the list, the login always went to that school's address — even when the “Address” field said something else. Typing in the new address of a school that had moved still led to the old one. Now the typed address counts; if it matches a school in the list, that school is selected."
           ]
         }
       ],
@@ -83,7 +89,8 @@
           "title": "Miglioramenti",
           "items": [
             "Vista mensile del Merkheft: i giorni del mese precedente e successivo nella prima e nell'ultima settimana ora compaiono leggermente in grigio invece di mancare — con il punto se in quel giorno c'è qualcosa. Un tocco mostra il giorno come ogni altro.",
-            "Notifiche: il testo ora inizia con ciò di cui si tratta — ad esempio «Compito · Italiano: …», «Comunicazione · …» o «Assenza · …». Le nuove verifiche arrivano come verifica, non come compito."
+            "Notifiche: il testo ora inizia con ciò di cui si tratta — ad esempio «Compito · Italiano: …», «Comunicazione · …» o «Assenza · …». Le nuove verifiche arrivano come verifica, non come compito.",
+            "Elenco delle scuole: se qualcuno accede a una scuola non ancora presente nell'elenco, o una scuola dell'elenco non è più raggiungibile, l'app invia l'indirizzo della scuola al servizio di segnalazione errori — solo l'indirizzo, mai nome utente o password. Così l'elenco resta aggiornato."
           ]
         },
         {
@@ -103,7 +110,9 @@
             "Competenze: l'app mostrava sempre sei stelle, anche dove la scuola valuta su un'altra scala — per esempio su quattro. Stelle, medie e grafico seguono ora la scala della scuola.",
             "Impostazioni: l'ingranaggio accanto alla media apriva le impostazioni senza portare alla sezione dei voti.",
             "Competenze: nelle scuole che assegnano mezze stelle, l'app mostrava una valutazione di 3,5 come tre stelle. Ora compare una mezza stella, anche nel grafico e nella media delle stelle.",
-            "Calendario: con «Incornicia sempre le verifiche in rosso», una lezione con verifica non era incorniciata di rosso nella vista dettagliata. Ora lo è, come nel Merkheft."
+            "Calendario: con «Incornicia sempre le verifiche in rosso», una lezione con verifica non era incorniciata di rosso nella vista dettagliata. Ora lo è, come nel Merkheft.",
+            "Accesso: se all'indirizzo della scuola non c'era nessuna scuola, compariva un lungo errore tecnico («DioException … 301»). Ora l'app dice che a quell'indirizzo non c'è nessuna scuola e chiede di controllarlo. 18 scuole il cui indirizzo non esiste più sono state tolte dall'elenco; la scuola media di Vipiteno (Vigil Raber) c'è con il suo nuovo indirizzo.",
+            "Accesso: con una scuola scelta dall'elenco, l'accesso andava sempre al suo indirizzo — anche se nel campo «Indirizzo» c'era altro. Chi inseriva a mano il nuovo indirizzo di una scuola trasferita finiva comunque su quello vecchio. Ora vale l'indirizzo digitato; se corrisponde a una scuola dell'elenco, questa viene selezionata."
           ]
         }
       ]

@@ -278,7 +278,8 @@ void main() {
         mockDio = _MockDio();
         when(() => mockClient.dio).thenReturn(mockDio);
         when(() => mockClient.url).thenReturn(url);
-        when(() => mockClient.loginAddress).thenReturn('$url/v2/api/auth/login');
+        when(() => mockClient.loginAddress)
+            .thenReturn('$url/v2/api/auth/login');
         when(() => mockClient.baseAddress).thenReturn('$url/v2/');
         when(() => mockClient.clearCookies()).thenReturn(null);
         when(() => mockDio.post<dynamic>(any(), data: any(named: 'data')))
@@ -320,6 +321,45 @@ void main() {
         expect(sut.error, contains('$ConfigParseException'));
         expect(sut.noInternetDuringLogin, isFalse);
         expect(configLoadedCalls, 0);
+      });
+
+      test('a school the server does not know fails as such, not as offline',
+          () async {
+        // An unknown subdomain gets a 301 to www.digitalesregister.it; Dio
+        // does not follow it for a POST.
+        final options = RequestOptions(path: '$url/v2/api/auth/login');
+        when(() => mockDio.post<dynamic>(any(), data: any(named: 'data')))
+            .thenThrow(
+          DioException.badResponse(
+            statusCode: 301,
+            requestOptions: options,
+            response: Response<dynamic>(
+              requestOptions: options,
+              statusCode: 301,
+            ),
+          ),
+        );
+
+        final result = await login();
+
+        expect(result, isNull);
+        expect(await sut.loggedIn, isFalse);
+        expect(sut.schoolNotFound, isTrue);
+        expect(sut.noInternetDuringLogin, isFalse);
+      });
+
+      test('a later login that reaches the school clears schoolNotFound',
+          () async {
+        sut.schoolNotFound = true;
+        serveHomePage(
+          'var currentUserId=42;'
+          'var config = { auto_logout_seconds: 60, };'
+          'navigationProfilePicture" src="https://example.com/pic.png">Alice</span>',
+        );
+
+        await login();
+
+        expect(sut.schoolNotFound, isFalse);
       });
 
       test('non-interactive login does not try to open a 2FA dialog', () async {

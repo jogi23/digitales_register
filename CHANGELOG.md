@@ -12,6 +12,7 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 
 - Merkheft-Monatsansicht: Die Tage des Vor- und Folgemonats in der ersten und letzten Woche stehen jetzt leicht ausgegraut da, statt zu fehlen — mit Punkt, wenn es an dem Tag etwas gibt. Ein Tippen zeigt den Tag wie jeden anderen.
 - Benachrichtigungen: Vor dem Text steht jetzt, worum es geht — etwa „Hausaufgabe · Italienisch: …“, „Mitteilung · …“ oder „Absenz · …“. Neue Prüfungen melden sich als Prüfung, nicht als Hausaufgabe.
+- Schulliste: Meldet sich jemand bei einer Schule an, die noch nicht in der Liste steht, oder ist eine Schule aus der Liste nicht mehr erreichbar, schickt die App die Adresse der Schule an den Fehlerbericht-Dienst — nur die Adresse, nie Benutzername oder Passwort. So bleibt die Liste aktuell.
 
 ### Fehlerbehebungen
 
@@ -30,6 +31,8 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 - Einstellungen: Das Zahnrad neben dem Notendurchschnitt öffnete die Einstellungen, sprang aber nicht zum Abschnitt Noten.
 - Kompetenzen: An Schulen, die halbe Sterne vergeben, zeigte die App eine Bewertung von 3,5 als drei Sterne. Jetzt steht ein halber Stern da, auch im Diagramm und im Sterndurchschnitt.
 - Kalender: Mit „Tests immer rot umrahmen“ war eine Stunde mit Test in der Detailansicht nicht rot umrahmt. Jetzt ist sie es, wie im Merkheft.
+- Anmeldung: Gab es unter der Schuladresse keine Schule, stand ein langer technischer Fehlertext („DioException … 301“) da. Jetzt heißt es, dass es dort keine Schule gibt und die Adresse zu prüfen ist. 18 Schulen, deren Adresse nicht mehr existiert, sind aus der Auswahl verschwunden; die Mittelschule Sterzing (Vigil Raber) steht mit ihrer neuen Adresse drin.
+- Anmeldung: War eine Schule aus der Liste gewählt, ging die Anmeldung immer an deren Adresse — auch wenn im Feld „Adresse“ etwas anderes stand. Wer die Adresse einer umgezogenen Schule von Hand eintrug, landete so weiter bei der alten. Jetzt zählt die eingetippte Adresse; passt sie zu einer Schule der Liste, wird diese ausgewählt.
 
 ## 1.4.1 — 2026-09-24
 

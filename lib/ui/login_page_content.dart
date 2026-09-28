@@ -125,6 +125,18 @@ class _LoginPageContentState extends State<LoginPageContent> {
 
   String get url => selectedPresetServer?.$2 ?? _urlController.text;
 
+  /// Typed over the address: from now on the address counts, not the school
+  /// picked before. That one kept winning and could lead nowhere — a school
+  /// that moved sent every login to its old, dead address.
+  void _onUrlEdited(String value) {
+    final school = widget.vm.servers.entries
+        .firstWhereOrNull((entry) => sameServer(entry.value, value));
+    setState(() {
+      selectedPresetServer = school == null ? null : (school.key, school.value);
+      _schoolController.text = school?.key ?? tr(context).loginOtherSchool;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -306,6 +318,7 @@ class _LoginPageContentState extends State<LoginPageContent> {
                               controller: _urlController,
                               enabled: !widget.vm.loading,
                               keyboardType: TextInputType.url,
+                              onChanged: _onUrlEdited,
                             ),
                             const Divider(),
                           ],
