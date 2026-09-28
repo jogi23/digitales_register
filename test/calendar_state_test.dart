@@ -99,4 +99,39 @@ void main() {
     ).captured.map((a) => (a as Map)['startDate']);
     expect(weeks, ['2026-09-14', '2026-09-21']);
   });
+
+  group('the school days of a week (#292)', () {
+    // Monday to Friday of the week of the 14th, as the portal sends them.
+    final loaded = CalendarState(
+      (b) => b.days.addAll({
+        for (var i = 0; i < 5; i++)
+          _monday.add(Duration(days: i)): _day(_monday.add(Duration(days: i))),
+      }),
+    );
+
+    test('are the loaded days in a five-day week', () {
+      expect(
+        loaded.schoolWeek(_monday, 5).map((d) => d.date.day),
+        [14, 15, 16, 17, 18],
+      );
+    });
+
+    test('get a free Saturday in a six-day week', () {
+      final week = loaded.schoolWeek(_monday, 6);
+      expect(week.map((d) => d.date.day), [14, 15, 16, 17, 18, 19]);
+      expect(week.last.hours, isEmpty);
+    });
+
+    test('are nothing while the week is not loaded', () {
+      expect(CalendarState().schoolWeek(_monday, 6), isEmpty);
+    });
+
+    test('keep a Saturday the portal sent, whatever the count', () {
+      final saturday = UtcDateTime(2026, 9, 19);
+      final withSaturday = loaded.rebuild(
+        (b) => b.days[saturday] = _day(saturday),
+      );
+      expect(withSaturday.schoolWeek(_monday, 5), hasLength(6));
+    });
+  });
 }

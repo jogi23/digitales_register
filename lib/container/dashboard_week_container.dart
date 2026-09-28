@@ -269,8 +269,8 @@ class _DashboardWeekContainerState
     final noInternet = ref.watch(noInternetProvider);
     final settings = ref.watch(settingsProvider);
     final subjectAppearance = ref.watch(subjectAppearanceProvider);
-    final weekDays = calendarState.daysForWeek(_monday).toList()
-      ..sort((a, b) => a.date.compareTo(b.date));
+    final weekDays =
+        calendarState.schoolWeek(_monday, ref.watch(daysInWeekProvider));
 
     return Column(
       children: <Widget>[

@@ -272,6 +272,13 @@ Future<void> main() async {
         (tester) async {
       await pumpWeek(tester, sixDayWeek: true);
       expect(find.text('11.05.26 - 16.05.26'), findsOneWidget);
+      // The school sends Monday to Friday; Saturday shows as a free day.
+      expect(find.text('Sa'), findsOneWidget);
+    });
+
+    testWidgets('a five-day week shows no Saturday', (tester) async {
+      await pumpWeek(tester);
+      expect(find.text('Sa'), findsNothing);
     });
 
     testWidgets('opens on the current week', (tester) async {

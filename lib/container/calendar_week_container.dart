@@ -19,6 +19,7 @@
 import 'package:dr/app_state.dart';
 import 'package:dr/data.dart';
 import 'package:dr/providers/calendar_provider.dart';
+import 'package:dr/providers/config_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/providers/subject_appearance_provider.dart';
@@ -42,7 +43,7 @@ class CalendarWeekContainer extends ConsumerWidget {
     final settings = ref.watch(settingsProvider);
     final subjectAppearance = ref.watch(subjectAppearanceProvider);
     final vm = CalendarWeekViewModel(
-      days: calendarState.daysForWeek(monday).toList(),
+      days: calendarState.schoolWeek(monday, ref.watch(daysInWeekProvider)),
       subjectNicks: subjectAppearance.nicks,
       noInternet: noInternet,
       selection: calendarState.selection,

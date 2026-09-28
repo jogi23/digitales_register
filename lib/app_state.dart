@@ -971,6 +971,34 @@ abstract class CalendarState
   /// reset (account switch, logout) or a restore from storage.
   UtcDateTime get shownMonday => currentMonday ?? toMonday(now);
 
+  /// The school days of the week from [monday]: the loaded ones, and an
+  /// empty one for a school day after Friday the portal sent nothing for —
+  /// so a Saturday of a six-day week shows as free rather than not at all
+  /// (#292). Monday to Friday stay as the portal sends them. Nothing while
+  /// the week has not been loaded.
+  List<CalendarDay> schoolWeek(UtcDateTime monday, int daysInWeek) {
+    final loaded = {
+      for (final day in daysForWeek(monday))
+        UtcDateTime(day.date.year, day.date.month, day.date.day): day,
+    };
+    if (loaded.isEmpty) return const [];
+    final dates = <UtcDateTime>{
+      ...loaded.keys,
+      for (var i = Config.defaultDaysInWeek; i < daysInWeek; i++)
+        monday.add(Duration(days: i)),
+    }.toList()
+      ..sort();
+    return [
+      for (final date in dates)
+        loaded[date] ??
+            CalendarDay(
+              (b) => b
+                ..date = date
+                ..hours = ListBuilder(),
+            ),
+    ];
+  }
+
   Iterable<CalendarDay> get currentDays {
     return daysForWeek(shownMonday);
   }
