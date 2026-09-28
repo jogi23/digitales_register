@@ -92,6 +92,9 @@ class MessagesPage extends StatefulWidget {
   final String? signature;
   final void Function(String signature) onSignature;
 
+  /// Tries to get the connection back; true when it worked.
+  final Future<bool> Function() onReconnect;
+
   const MessagesPage({
     super.key,
     required this.state,
@@ -116,6 +119,7 @@ class MessagesPage extends StatefulWidget {
     required this.onRefresh,
     required this.signature,
     required this.onSignature,
+    required this.onReconnect,
   });
 
   @override
@@ -283,7 +287,8 @@ class _MessagesPageState extends State<MessagesPage> {
           tooltip: l.messagesSelectAll,
           onPressed: selected.length == visible.length
               ? null
-              : () => setState(() => _selected = {for (final m in visible) m.id}),
+              : () =>
+                  setState(() => _selected = {for (final m in visible) m.id}),
         ),
         exportMenu(share: true),
         exportMenu(share: false),
@@ -372,6 +377,7 @@ class _MessagesPageState extends State<MessagesPage> {
                     onReply: widget.onReply,
                     signature: widget.signature,
                     onSignature: widget.onSignature,
+                    onReconnect: widget.onReconnect,
                     noInternet: widget.noInternet,
                     expand: message.id == state.showMessage,
                     tileColor: i.isOdd ? altColor : null,
@@ -475,6 +481,9 @@ class MessageWidget extends StatefulWidget {
       {String? response, String? signature}) onReply;
   final String? signature;
   final void Function(String signature) onSignature;
+
+  /// Tries to get the connection back; true when it worked.
+  final Future<bool> Function() onReconnect;
   final bool noInternet;
   final bool expand;
   final Color? tileColor;
@@ -497,6 +506,7 @@ class MessageWidget extends StatefulWidget {
     required this.onReply,
     required this.signature,
     required this.onSignature,
+    required this.onReconnect,
     required this.expand,
     this.tileColor,
   });
@@ -756,6 +766,7 @@ class _MessageWidgetState extends State<MessageWidget> {
                   noInternet: widget.noInternet,
                   signature: widget.signature,
                   onSignature: widget.onSignature,
+                  onReconnect: widget.onReconnect,
                   onReply: ({String? response, String? signature}) =>
                       widget.onReply(
                     widget.message,
@@ -784,8 +795,7 @@ class _MessageWidgetState extends State<MessageWidget> {
                 Align(
                   alignment: Alignment.centerRight,
                   child: OutlinedButton.icon(
-                    onPressed:
-                        widget.noInternet || _deleting ? null : _delete,
+                    onPressed: widget.noInternet || _deleting ? null : _delete,
                     icon: const Icon(Icons.delete_outline),
                     label: Text(tr(context).messageDelete),
                   ),
@@ -814,6 +824,9 @@ class MessageResponseSection extends StatefulWidget {
   final String? signature;
   final void Function(String signature) onSignature;
 
+  /// Tries to get the connection back; true when it worked.
+  final Future<bool> Function() onReconnect;
+
   const MessageResponseSection({
     super.key,
     required this.info,
@@ -821,6 +834,7 @@ class MessageResponseSection extends StatefulWidget {
     required this.onReply,
     required this.signature,
     required this.onSignature,
+    required this.onReconnect,
   });
 
   @override
@@ -837,6 +851,7 @@ class _MessageResponseSectionState extends State<MessageResponseSection> {
   bool _sending = false;
   bool _sent = false;
   bool _failed = false;
+  bool _reconnecting = false;
 
   @override
   void dispose() {
@@ -848,9 +863,29 @@ class _MessageResponseSectionState extends State<MessageResponseSection> {
     if (_sending || _sent || widget.noInternet) return false;
     // The portal only checks for a non-empty name, it does not match it
     // against the account.
-    return !widget.info.showSignatureField ||
-        _signature.text.trim().isNotEmpty;
+    return !widget.info.showSignatureField || _signature.text.trim().isNotEmpty;
   }
+
+  /// Offline is the one reason the button is grey that the page did not
+  /// name: the name was there, the button stayed grey, and nothing said why.
+  bool get _offline => widget.noInternet && !_sending && !_sent;
+
+  /// A tap on the grey button checks the connection again instead of doing
+  /// nothing. It does not send: confirming binds the reader, so that stays a
+  /// tap of its own once the button is back.
+  Future<void> _reconnect() async {
+    setState(() => _reconnecting = true);
+    await widget.onReconnect();
+    if (mounted) setState(() => _reconnecting = false);
+  }
+
+  /// [button] with taps going to [_reconnect] while offline. The disabled
+  /// button itself takes none, so they reach this detector.
+  Widget _reconnectOnTap(Widget button) => GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: _offline && !_reconnecting ? _reconnect : null,
+        child: button,
+      );
 
   Future<void> _send(String? response) async {
     final signature =
@@ -880,7 +915,9 @@ class _MessageResponseSectionState extends State<MessageResponseSection> {
     final theme = Theme.of(context);
 
     if (info.answered) {
-      return _Hint(info.historyText ?? info.badge ?? tr(context).messageAlreadyConfirmed);
+      return _Hint(info.historyText ??
+          info.badge ??
+          tr(context).messageAlreadyConfirmed);
     }
     if (info.parentSignatureRequired) {
       return _Hint(tr(context).messageParentOnly);
@@ -945,18 +982,22 @@ class _MessageResponseSectionState extends State<MessageResponseSection> {
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              OutlinedButton(
-                onPressed: _canSend
-                    ? () => _send(MessageResponseInfo.answerNotAgree)
-                    : null,
-                child: Text(tr(context).messageDisagree),
+              _reconnectOnTap(
+                OutlinedButton(
+                  onPressed: _canSend
+                      ? () => _send(MessageResponseInfo.answerNotAgree)
+                      : null,
+                  child: Text(tr(context).messageDisagree),
+                ),
               ),
               const SizedBox(width: 8),
-              FilledButton(
-                onPressed: _canSend
-                    ? () => _send(MessageResponseInfo.answerAgree)
-                    : null,
-                child: Text(tr(context).messageAgree),
+              _reconnectOnTap(
+                FilledButton(
+                  onPressed: _canSend
+                      ? () => _send(MessageResponseInfo.answerAgree)
+                      : null,
+                  child: Text(tr(context).messageAgree),
+                ),
               ),
             ],
           )
@@ -965,20 +1006,50 @@ class _MessageResponseSectionState extends State<MessageResponseSection> {
           // not weigh the same as any other on the page.
           SizedBox(
             width: double.infinity,
-            child: FilledButton(
-              style: FilledButton.styleFrom(
-                minimumSize: const Size.fromHeight(48),
-                textStyle: theme.textTheme.titleMedium,
+            child: _reconnectOnTap(
+              FilledButton(
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size.fromHeight(48),
+                  textStyle: theme.textTheme.titleMedium,
+                ),
+                onPressed: _canSend ? () => _send(null) : null,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.draw),
+                    const SizedBox(width: 8),
+                    Text(tr(context).messageConfirm),
+                  ],
+                ),
               ),
-              onPressed: _canSend ? () => _send(null) : null,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.draw),
-                  const SizedBox(width: 8),
-                  Text(tr(context).messageConfirm),
-                ],
-              ),
+            ),
+          ),
+        if (_offline)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Row(
+              children: [
+                if (_reconnecting)
+                  const SizedBox.square(
+                    dimension: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                else
+                  Icon(
+                    Icons.cloud_off,
+                    size: 18,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    tr(context).messageReplyOffline,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
       ],
@@ -1006,8 +1077,10 @@ class MessageActionChip extends StatelessWidget {
     // Green has no themed container: the app's palette gives success no
     // counterpart to [scheme.error], so agreement borrows a fixed shade
     // instead, picked per brightness like the rest of the app does.
-    final agreedBackground = isDark ? Colors.green.shade900 : Colors.green.shade50;
-    final agreedForeground = isDark ? Colors.green.shade200 : Colors.green.shade800;
+    final agreedBackground =
+        isDark ? Colors.green.shade900 : Colors.green.shade50;
+    final agreedForeground =
+        isDark ? Colors.green.shade200 : Colors.green.shade800;
     final (icon, label, background, foreground) = switch (action) {
       MessageAction.confirm => (
           Icons.draw_outlined,

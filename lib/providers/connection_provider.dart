@@ -20,6 +20,7 @@ import 'package:dr/middleware/middleware.dart' show wrapper;
 import 'package:dr/providers/dashboard_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/services/app_router.dart';
+import 'package:dr/ui/snack_bar.dart' show showNoConnectionToast;
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart' show now;
 import 'package:flutter/foundation.dart';
@@ -191,6 +192,16 @@ class ConnectionNotifier extends Notifier<ConnectionInfo> {
     } finally {
       state = state.copyWith(reconnecting: false);
     }
+  }
+
+  /// [reconnect] where it is needed, said out loud: a connection that works
+  /// is left alone, and one still out of reach afterwards gets the short
+  /// message that going offline shows. True when connected.
+  Future<bool> restore() async {
+    if (!state.hasProblem) return true;
+    await reconnect();
+    if (state.status == ConnectionStatus.offline) showNoConnectionToast();
+    return state.status == ConnectionStatus.connected;
   }
 }
 

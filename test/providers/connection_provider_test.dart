@@ -191,6 +191,28 @@ void main() {
       expect(router.loginShown, 0);
     });
 
+    test('restore leaves a working connection alone', () async {
+      final mock = _MockWrapper();
+      wrapper = mock;
+
+      expect(
+          await container.read(connectionProvider.notifier).restore(), isTrue);
+      verifyNever(() => mock.refreshNoInternet());
+    });
+
+    test('restore says false while the network stays away', () async {
+      container.dispose();
+      container = offlineContainer(stillOffline: true);
+      container.read(noInternetProvider.notifier).setNoInternet(true);
+
+      expect(
+          await container.read(connectionProvider.notifier).restore(), isFalse);
+      expect(
+        container.read(connectionProvider).status,
+        ConnectionStatus.offline,
+      );
+    });
+
     test('with a network but no session it leads to the login form', () async {
       container.dispose();
       container = offlineContainer(stillOffline: false);

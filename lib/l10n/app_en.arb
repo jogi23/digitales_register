@@ -216,6 +216,7 @@
   "messageOutgoing": "Sent",
   "messageSignatureHelper": "Enter your name to confirm",
   "messageReplyFailed": "The confirmation did not go through. Please try again.",
+  "messageReplyOffline": "No connection – confirming only works online. Tap the button to check the connection again.",
   "notificationsTitle": "Notifications",
   "notificationsEmpty": "No notifications",
   "notificationsAllRead": "All read",

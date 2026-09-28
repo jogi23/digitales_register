@@ -223,6 +223,7 @@
   "messageOutgoing": "Gesendet",
   "messageSignatureHelper": "Namen eingeben, um zu bestätigen",
   "messageReplyFailed": "Die Bestätigung ist nicht angekommen. Bitte noch einmal versuchen.",
+  "messageReplyOffline": "Keine Verbindung – Bestätigen geht erst online. Tippe auf den Button, um die Verbindung neu zu prüfen.",
   "notificationsTitle": "Benachrichtigungen",
   "notificationsEmpty": "Keine Benachrichtigungen",
   "notificationsAllRead": "Alle gelesen",

@@ -34,6 +34,7 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 - Kalender: Mit „Tests immer rot umrahmen“ war eine Stunde mit Test in der Detailansicht nicht rot umrahmt. Jetzt ist sie es, wie im Merkheft.
 - Anmeldung: Gab es unter der Schuladresse keine Schule, stand ein langer technischer Fehlertext („DioException … 301“) da. Jetzt heißt es, dass es dort keine Schule gibt und die Adresse zu prüfen ist. Die Schulliste stimmt wieder: Schulen mit neuer Adresse stehen mit dieser drin — etwa die Grundschulen im Passeier, die Mittelschulen Sterzing und Tschögglberg oder die Berufsbildungszentren Schlanders und Zuegg. Ist eine Schule in einem Sprengel aufgegangen, findet die Suche sie über den Ortsnamen. Sieben bisher fehlende Grundschulen sind neu dabei.
 - Anmeldung: War eine Schule aus der Liste gewählt, ging die Anmeldung immer an deren Adresse — auch wenn im Feld „Adresse“ etwas anderes stand. Wer die Adresse einer umgezogenen Schule von Hand eintrug, landete so weiter bei der alten. Jetzt zählt die eingetippte Adresse; passt sie zu einer Schule der Liste, wird diese ausgewählt.
+- Mitteilungen: War die App gerade ohne Verbindung, blieb der Button zum Bestätigen grau, obwohl ein Name eingetragen war — und nichts sagte, warum. Jetzt steht darunter, dass keine Verbindung besteht, und ein Tippen auf den grauen Button prüft die Verbindung neu. Bestätigt wird danach erst mit einem eigenen Tippen.
 
 ## 1.4.1 — 2026-09-24
 

@@ -216,6 +216,7 @@
   "messageOutgoing": "Inviato",
   "messageSignatureHelper": "Inserisci il tuo nome per confermare",
   "messageReplyFailed": "La conferma non è arrivata. Riprova.",
+  "messageReplyOffline": "Nessuna connessione – la conferma funziona solo online. Tocca il pulsante per verificare di nuovo la connessione.",
   "notificationsTitle": "Notifiche",
   "notificationsEmpty": "Nessuna notifica",
   "notificationsAllRead": "Tutte lette",
