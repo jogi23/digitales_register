@@ -34,6 +34,10 @@ class CalendarCard extends StatelessWidget {
   final SubmissionCallback onOpenFile;
   final bool noInternet;
 
+  /// Whether a lesson with a test is framed in red, as in the Merkheft
+  /// ("Tests immer rot umrahmen").
+  final bool colorTestsInRed;
+
   const CalendarCard({
     super.key,
     required this.hour,
@@ -41,10 +45,23 @@ class CalendarCard extends StatelessWidget {
     required this.selected,
     required this.onOpenFile,
     required this.noInternet,
+    this.colorTestsInRed = false,
   });
 
   String formatTime(UtcDateTime dateTime) {
     return DateFormat.Hm("de").format(dateTime);
+  }
+
+  /// The frame: red around a test when asked for — the same as in the
+  /// Merkheft (#302) —, the accent around the picked lesson, none otherwise.
+  BorderSide _border(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final test = colorTestsInRed && hour.warning;
+    if (!test && !selected) return BorderSide.none;
+    return BorderSide(
+      color: test ? scheme.error : scheme.secondary,
+      width: selected ? 2 : 1.5,
+    );
   }
 
   @override
@@ -52,12 +69,7 @@ class CalendarCard extends StatelessWidget {
     return Card(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
-        side: selected
-            ? BorderSide(
-                color: Theme.of(context).colorScheme.secondary,
-                width: 2,
-              )
-            : BorderSide.none,
+        side: _border(context),
       ),
       color: Theme.of(context).scaffoldBackgroundColor,
       elevation: 3,

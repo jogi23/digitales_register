@@ -26,7 +26,8 @@
             "Benachrichtigungen: Ein Tippen auf eine Beobachtung in der Liste suchte eine Bewertung mit derselben Nummer und ließ die Benachrichtigung verschwinden.",
             "Kompetenzen: Die App zeigte immer sechs Sterne, auch wo die Schule auf einer anderen Skala bewertet — etwa auf vier. Sterne, Durchschnitte und Diagramm folgen jetzt der Skala der Schule.",
             "Einstellungen: Das Zahnrad neben dem Notendurchschnitt öffnete die Einstellungen, sprang aber nicht zum Abschnitt Noten.",
-            "Kompetenzen: An Schulen, die halbe Sterne vergeben, zeigte die App eine Bewertung von 3,5 als drei Sterne. Jetzt steht ein halber Stern da, auch im Diagramm und im Sterndurchschnitt."
+            "Kompetenzen: An Schulen, die halbe Sterne vergeben, zeigte die App eine Bewertung von 3,5 als drei Sterne. Jetzt steht ein halber Stern da, auch im Diagramm und im Sterndurchschnitt.",
+            "Kalender: Mit „Tests immer rot umrahmen“ war eine Stunde mit Test in der Detailansicht nicht rot umrahmt. Jetzt ist sie es, wie im Merkheft."
           ]
         }
       ],
@@ -54,7 +55,8 @@
             "Notifications: tapping an observation in the list looked for a grade with the same number and made the notification disappear.",
             "Competences: the app always showed six stars, even where the school rates on another scale — four, for instance. Stars, averages and chart now follow the school's scale.",
             "Settings: the gear next to the grade average opened the settings without scrolling to the grades section.",
-            "Competences: at schools that award half stars, the app showed a rating of 3.5 as three stars. A half star now shows, in the chart and in the star average as well."
+            "Competences: at schools that award half stars, the app showed a rating of 3.5 as three stars. A half star now shows, in the chart and in the star average as well.",
+            "Calendar: with “Always frame tests in red”, a lesson with a test was not framed in red in the detail view. It now is, as in the Merkheft."
           ]
         }
       ],
@@ -82,7 +84,8 @@
             "Notifiche: un tocco su un'osservazione nell'elenco cercava una valutazione con lo stesso numero e faceva sparire la notifica.",
             "Competenze: l'app mostrava sempre sei stelle, anche dove la scuola valuta su un'altra scala — per esempio su quattro. Stelle, medie e grafico seguono ora la scala della scuola.",
             "Impostazioni: l'ingranaggio accanto alla media apriva le impostazioni senza portare alla sezione dei voti.",
-            "Competenze: nelle scuole che assegnano mezze stelle, l'app mostrava una valutazione di 3,5 come tre stelle. Ora compare una mezza stella, anche nel grafico e nella media delle stelle."
+            "Competenze: nelle scuole che assegnano mezze stelle, l'app mostrava una valutazione di 3,5 come tre stelle. Ora compare una mezza stella, anche nel grafico e nella media delle stelle.",
+            "Calendario: con «Incornicia sempre le verifiche in rosso», una lezione con verifica non era incorniciata di rosso nella vista dettagliata. Ora lo è, come nel Merkheft."
           ]
         }
       ]

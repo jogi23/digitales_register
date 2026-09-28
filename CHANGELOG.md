@@ -25,6 +25,7 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 - Kompetenzen: Die App zeigte immer sechs Sterne, auch wo die Schule auf einer anderen Skala bewertet — etwa auf vier. Sterne, Durchschnitte und Diagramm folgen jetzt der Skala der Schule.
 - Einstellungen: Das Zahnrad neben dem Notendurchschnitt öffnete die Einstellungen, sprang aber nicht zum Abschnitt Noten.
 - Kompetenzen: An Schulen, die halbe Sterne vergeben, zeigte die App eine Bewertung von 3,5 als drei Sterne. Jetzt steht ein halber Stern da, auch im Diagramm und im Sterndurchschnitt.
+- Kalender: Mit „Tests immer rot umrahmen“ war eine Stunde mit Test in der Detailansicht nicht rot umrahmt. Jetzt ist sie es, wie im Merkheft.
 
 ## 1.4.1 — 2026-09-24
 
