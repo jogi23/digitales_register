@@ -130,6 +130,48 @@ die ersten Anfragen nach dem Login.
   steht sogar in der Content-Security-Policy des Registers. Für Teil 2
   AdGuard für die beteiligten Domains pausieren.
 
+### Befund Vorab-Test SPID/CIE (29.09.2026, MS Welsberg, Elternkonto)
+
+**Korrektur der Ausgangslage:** Zumindest an dieser Schule ist SPID/CIE kein
+zweiter Faktor nach dem Passwort. Die Login-Seite hat einen **eigenen
+Abschnitt „Anmelden über SPID/CIE“** (für Eltern) mit nur einem Feld
+„Benutzername“, ohne Passwort. Schulen ohne SPID/CIE (z. B. Grundschulen
+Schlanders) zeigen den Abschnitt nicht.
+
+Ablauf bis zur Auswahlseite:
+
+1. `POST /v2/api/auth/login_spidcie`, Payload `{"username": "<benutzer>"}`.
+   Antwort (JSON):
+   ```json
+   {"url": "https://eid.istruzione.it/eid-gateway-oidc/oauth2/authorize?response_type=code&client_id=8cb11910-0b28-42ec-a8cb-69d11fed5914&scope=openid+gateway&redirect_uri=https%3A%2F%2F<schule>.digitalesregister.it%2Fv2%2Foidc_auth.php&state=<schule>%3B<benutzer>&aggregate_ref_type=MECHANOGRAPHIC_CODE&aggregate_ref_value=<schulcode>"}
+   ```
+   Die Antwort setzt nur `PHPSESSID` (`Secure`, `HttpOnly`, Pfad `/`),
+   noch kein `registerSession`.
+2. Der Browser folgt der URL. Protokoll: **OpenID Connect**,
+   Authorization-Code-Flow, **ohne PKCE und ohne `nonce`**.
+   - Vermittler: **MIM eID-Gateway** (`eid.istruzione.it`) des
+     Bildungsministeriums.
+   - `client_id` ist offenbar die Kennung des Digitalen Registers (gleich für
+     alle Schulen?).
+   - `state` = `<schul-subdomain>;<benutzername>` im Klartext.
+   - `aggregate_ref_value` = Schulcode (codice meccanografico) des Sprengels.
+   - **`redirect_uri` = `https://<schule>.digitalesregister.it/v2/oidc_auth.php`**:
+     Dort endet die Anmeldung (Erfolgs-URL).
+3. `…/eid-gateway-oidc/oauth2/authorize` → `…/eid-gateway/?client_id=…` →
+   Auswahlseite „Entra con SPID / Entra con CIE“.
+   Cookies auf `eid.istruzione.it` bis hier nur Dynatrace-Monitoring
+   (`dtCookie`, `dtPC`, `dtSa`, `rxVisitor`, `rxvt`), keine Sitzung.
+
+Noch offen: Station „CIE-Anbieter“ und vor allem der Rücksprung auf
+`oidc_auth.php` (welche Cookies dort gesetzt werden, wohin es danach geht).
+
+**Vorläufige Folgerung für die App:** `login_spidcie` selbst aufrufen
+(`PHPSESSID` landet im `CookieJar`), die `url` aus der Antwort in einem
+WebView/Custom Tab öffnen, die Navigation auf `/v2/oidc_auth.php` abfangen
+und diese URL mit Dio und dem vorhandenen `PHPSESSID` selbst aufrufen. Dann
+entstehen die Sitzungs-Cookies direkt in der App, ohne Cookie-Übertragung
+aus dem WebView. Muss mit dem Rücksprung bestätigt werden.
+
 Für Teil 2 heißt das: Beim Konto mit CIE-2FA vor allem darauf achten, ob die
 Login-Antwort **trotzdem** `PHPSESSID` und `registerSession` setzt und was
 statt `"loggedIn":true` zurückkommt.
