@@ -22,6 +22,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:dr/l10n/l10n.dart';
+import 'package:dr/ui/layout.dart';
 import 'package:flutter/material.dart';
 
 /// Side of the picture this page hands back, in pixels.
@@ -299,15 +300,17 @@ class _PhotoCropPageState extends State<PhotoCropPage> {
             ),
           ),
         ),
+        if (_saving) const LinearProgressIndicator(),
         Padding(
-          padding: const EdgeInsets.all(16),
+          // The hint is the last thing on the page: clear of the navigation
+          // bar, which used to run across it.
+          padding: const EdgeInsets.all(16) + context.systemInsets,
           child: Text(
             tr(context).photoCropHint,
             textAlign: TextAlign.center,
             style: const TextStyle(color: Colors.white70),
           ),
         ),
-        if (_saving) const LinearProgressIndicator(),
       ],
     );
   }

@@ -21,6 +21,7 @@ import 'package:dr/app_state.dart';
 import 'package:dr/data.dart';
 import 'package:dr/providers/grades_provider.dart';
 import 'package:dr/ui/dialog.dart';
+import 'package:dr/ui/layout.dart';
 import 'package:dr/util.dart';
 import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
@@ -299,7 +300,10 @@ class GradesList extends StatelessWidget {
         if (grades.isNotEmpty)
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.all(8).copyWith(bottom: 160),
+              // Room below for the buttons floating over the list; sideways
+              // clear of the navigation bar at the side as well.
+              padding: const EdgeInsets.all(8).copyWith(bottom: 160) +
+                  context.systemInsets,
               children: [
                 for (final grade in grades)
                   GradeTile(

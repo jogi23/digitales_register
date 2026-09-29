@@ -19,6 +19,8 @@ import 'dart:async';
 
 import 'package:dr/l10n/l10n.dart';
 import 'package:dr/providers/message_compose_provider.dart';
+import 'package:dr/ui/layout.dart';
+import 'package:dr/ui/primary_action_button.dart';
 import 'package:dr/ui/snack_bar.dart';
 import 'package:flutter/material.dart';
 
@@ -305,7 +307,9 @@ class _MessageComposePageState extends State<MessageComposePage> {
   Widget _form(BuildContext context, L l, MessageComposeState state) {
     final theme = Theme.of(context);
     return ListView(
-      padding: const EdgeInsets.all(16),
+      // Clear of the system bars as well: the send button at the end sat
+      // half under the navigation bar (#308).
+      padding: context.systemInsets + const EdgeInsets.all(16),
       children: [
         Text(l.messageComposeRecipients, style: theme.textTheme.titleSmall),
         const SizedBox(height: 8),
@@ -528,10 +532,10 @@ class _MessageComposePageState extends State<MessageComposePage> {
             padding: EdgeInsets.only(bottom: 8),
             child: LinearProgressIndicator(),
           ),
-        FilledButton.icon(
+        PrimaryActionButton(
           onPressed: _canSend ? _send : null,
-          icon: const Icon(Icons.send),
-          label: Text(l.messageSend),
+          icon: Icons.send,
+          label: l.messageSend,
         ),
       ],
     );

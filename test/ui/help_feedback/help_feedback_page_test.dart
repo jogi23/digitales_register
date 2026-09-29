@@ -19,6 +19,8 @@ import 'package:dr/ui/help_feedback_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../system_bars.dart';
+
 void main() {
   Widget build() => const MaterialApp(home: HelpFeedbackPage());
 
@@ -31,6 +33,17 @@ void main() {
     expect(find.text('Feature/Idee vorschlagen'), findsOneWidget);
     expect(find.text('Bug/Fehler melden'), findsOneWidget);
   });
+
+  for (final holding in Holding.values) {
+    testWidgets('the last entry stays clear of the bars, ${holding.name}',
+        (tester) async {
+      holdPhone(tester, holding);
+      await tester.pumpWidget(build());
+      await tester.pumpAndSettle();
+      await scrollToEnd(tester);
+      expectClearOfSystemBars(tester, find.byType(ListTile).last);
+    });
+  }
 
   testWidgets('shows an icon for every entry', (tester) async {
     await tester.pumpWidget(build());

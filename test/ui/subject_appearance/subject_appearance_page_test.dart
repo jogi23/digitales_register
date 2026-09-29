@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../system_bars.dart';
+
 class _TestSubjectAppearanceNotifier extends SubjectAppearanceNotifier {
   final SubjectAppearanceState initial;
   _TestSubjectAppearanceNotifier(this.initial);
@@ -44,6 +46,19 @@ Future<ProviderContainer> _pumpPage(
 }
 
 void main() {
+  for (final holding in Holding.values) {
+    testWidgets('the last subject stays clear of the bars, ${holding.name}',
+        (tester) async {
+      holdPhone(tester, holding);
+      await _pumpPage(
+        tester,
+        subjects: [for (var i = 1; i <= 20; i++) 'Fach $i'],
+      );
+      await scrollToEnd(tester);
+      expectClearOfSystemBars(tester, find.byType(ListTile).last);
+    });
+  }
+
   testWidgets('shows every subject of the current account', (tester) async {
     await _pumpPage(tester);
     expect(find.text('Deutsch'), findsOneWidget);

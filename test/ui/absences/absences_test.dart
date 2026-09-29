@@ -34,6 +34,8 @@ import 'package:intl/date_symbol_data_local.dart';
 
 import '../../fixtures/api_fixtures.dart';
 
+import '../../system_bars.dart';
+
 class _TestAbsencesNotifier extends AbsencesNotifier {
   _TestAbsencesNotifier(this._initialState);
   final AbsencesState _initialState;
@@ -260,16 +262,32 @@ void main() {
       expect(find.text('Demo Elternteil'), findsOneWidget);
     });
 
+    for (final holding in Holding.values) {
+      testWidgets('Melden unten wie Senden, frei von der Leiste '
+          '(${holding.name})', (tester) async {
+        holdPhone(tester, holding);
+        await tester.pumpWidget(formular());
+        await tester.pumpAndSettle();
+        // Not in the app bar any more: at the end of the form.
+        expect(find.widgetWithText(TextButton, 'Melden'), findsNothing);
+        await scrollToEnd(tester);
+        expectClearOfSystemBars(
+          tester,
+          find.widgetWithText(FilledButton, 'Melden'),
+        );
+      });
+    }
+
     testWidgets('meldet erst mit Grund und Unterschrift', (tester) async {
       await tester.pumpWidget(formular());
       await tester.pumpAndSettle();
-      final send = find.widgetWithText(TextButton, 'Melden');
-      expect(tester.widget<TextButton>(send).enabled, isFalse);
+      final send = find.widgetWithText(FilledButton, 'Melden');
+      expect(tester.widget<FilledButton>(send).enabled, isFalse);
 
       await tester.enterText(find.byType(TextField).at(0), 'Turnier');
       await tester.enterText(find.byType(TextField).at(1), 'Demo Elternteil');
       await tester.pump();
-      expect(tester.widget<TextButton>(send).enabled, isTrue);
+      expect(tester.widget<FilledButton>(send).enabled, isTrue);
     });
   });
 
