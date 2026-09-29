@@ -104,6 +104,36 @@ Kann sofort und allein erledigt werden.
 **Ergebnis Teil 1:** Antwort-JSON des Logins, Name(n) des Sitzungs-Cookies,
 die ersten Anfragen nach dem Login.
 
+### Befund Teil 1 (29.09.2026, Grundschulen Schlanders, Konto ohne 2FA)
+
+- Die Login-Seite zeigt nur Benutzername/Passwort, keinen SPID/CIE-Button.
+  Vor dem Login liegen **keine Cookies** auf der Schul-Domain.
+- `POST /v2/api/auth/login`, Payload `{"username", "password"}` (JSON), Antwort
+  `{"error":null,"loggedIn":true}`.
+- Dieselbe Antwort setzt die Sitzung. Beide Cookies gelten für die ganze
+  Schul-Domain (`.gs-schlanders…`, Pfad `/`) und sind Sitzungs-Cookies ohne
+  Ablaufdatum:
+  - `PHPSESSID`: `Secure`, `HttpOnly`
+  - `registerSession`: `Secure`, `HttpOnly`, `SameSite=Lax`. Es wird in der
+    Antwort zweimal gesetzt: zuerst mit `Max-Age=0` (ein altes löschen),
+    dann neu.
+- Danach: `GET /v2/` (HTML, daraus liest die App die Konfiguration),
+  `POST api/student/dashboard/dashboard`, `POST api/notification/unread`.
+  API-Anfragen schicken nur die Cookies mit, keinen `Authorization`-Header.
+- Etwa alle 2 min `POST api/auth/extendSession` mit `{"lastAction": <Unix-Zeit>}`,
+  Antwort `{"forceLogout":false,"newExpiration":…,"serverTime":…,"noSession":false}`.
+  `newExpiration` liegt 20 min nach `lastAction`: Die Sitzung läuft nach
+  **20 min ohne Aktion** ab. Die App kennt diesen Aufruf bereits
+  (`lib/session_manager.dart`).
+- SAML-tracer hat nichts SAML-Spezifisches aufgezeichnet (erwartet).
+- Aufgefallen: AdGuard lief systemweit mit (`injections.adguard.org`) und
+  steht sogar in der Content-Security-Policy des Registers. Für Teil 2
+  AdGuard für die beteiligten Domains pausieren.
+
+Für Teil 2 heißt das: Beim Konto mit CIE-2FA vor allem darauf achten, ob die
+Login-Antwort **trotzdem** `PHPSESSID` und `registerSession` setzt und was
+statt `"loggedIn":true` zurückkommt.
+
 ---
 
 ## Teil 2: CIE-Anmeldung mit der Testperson
