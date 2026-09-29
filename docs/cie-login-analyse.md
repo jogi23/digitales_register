@@ -1,127 +1,180 @@
 # CIE-Anmeldung im Browser nachvollziehen
 
-Ziel: Den kompletten Ablauf „Anmelden mit CIE“ im Digitalen Register Schritt
-für Schritt mitschneiden und so dokumentieren, dass sich daraus ableiten lässt,
-wie die App die Anmeldung übernehmen kann.
+Ziel: Die Anmeldung im Digitalen Register bei Konten, die nach dem Passwort
+eine Bestätigung per CIE verlangen, Schritt für Schritt mitschneiden. Daraus
+soll hervorgehen, wie die App diese Anmeldung übernehmen kann.
 
-Ausgangslage in der App: Heute meldet sich die App nur per Passwort an. Sie
-schickt `POST <schule>/v2/api/auth/login` mit `username`, `password` und bei
-Bedarf `two_factor` (`lib/auth_service.dart`, `lib/api_client.dart`). Danach
-lädt sie `GET <schule>/v2/` und liest daraus die Konfiguration
-(`_loadConfig`). Die Sitzung hängt allein an den Cookies im `CookieJar` von
-Dio. SPID/CIE gibt es nur als Hinweis in den Einstellungen, dass diese Konten
-keine Hintergrund-Benachrichtigungen bekommen.
+## Ausgangslage
 
-Die zentrale Frage lautet also: **Über welche Stationen läuft die CIE-Anmeldung,
-und welches Cookie (oder welcher Token) steht am Ende auf der Domain der Schule?**
+**Ablauf im Register (beobachtet):** Die CIE ist hier kein Ersatz für das
+Passwort, sondern der **zweite Faktor**. Zuerst gibt man Benutzername und
+Passwort ein. Erst wenn diese stimmen **und** das Konto 2FA verlangt, erscheint
+die CIE-Anmeldung. Konten ohne 2FA sehen die CIE nie.
+
+**Was die App heute kann** (`lib/auth_service.dart`, `lib/api_client.dart`):
+
+1. `POST <schule>/v2/api/auth/login` mit `username`, `password` und bei Bedarf
+   `two_factor` (ein Code).
+2. Die Antwort ist JSON. Bei `"loggedIn": true` lädt die App `GET <schule>/v2/`
+   und liest daraus die Konfiguration (`_loadConfig`).
+3. Bei `"error": "two_factor_needed"` fragt sie nach einem Code und schickt
+   den Login erneut mit `two_factor` (`two_factor_wrong` bei falschem Code).
+4. Die Sitzung hängt allein an den Cookies im `CookieJar` von Dio.
+
+Für die CIE als zweiten Faktor gibt es keinen Code, den die App eintragen
+könnte. Die zentralen Fragen lauten also:
+
+- **Was antwortet `api/auth/login` bei einem Konto mit CIE-2FA?** Welcher
+  Fehlercode, welche Felder, eine URL für die CIE?
+- **Wann entsteht die Sitzung?** Schon nach dem Passwort (und die CIE schaltet
+  sie nur frei) oder erst nach der CIE?
+- **Wie kommt man nach der CIE zurück**, und welches Cookie trägt danach die
+  Sitzung?
+
+## Beteiligte und Geräte
+
+| | Teil 1: Vergleichsbasis | Teil 2: CIE-Anmeldung |
+|---|---|---|
+| Konto | eigenes Konto, **ohne** 2FA | Konto der Testperson, **mit** 2FA per CIE |
+| Wer tippt | du | Testperson (Passwort, CieID-App); du bedienst die DevTools |
+| Geräte | PC | PC für den Mitschnitt, Handy der Testperson mit CieID-App zum Bestätigen |
+
+Mitgeschnitten wird immer am **PC**. Das Handy dient in Teil 2 nur zum
+Bestätigen in der CieID-App. Der Durchgang im Handy-Browser kommt erst in
+Teil 3.
 
 ---
 
-## 0. Vorbereitung
+## Vorbereitung (einmalig)
 
-1. **Testkonto klären:** eine echte CIE mit Zugang zum Digitalen Register
-   (Schüler- oder Elternkonto), dazu die CieID-App auf dem Handy mit
-   eingerichteter Stufe 2 (Benutzername/Passwort plus Bestätigung in der App).
-   Wer über Stufe 3 gehen will, braucht Karte + PIN und NFC-Handy oder einen
-   Kartenleser.
-2. **Sauberes Browserprofil:** ein eigenes Chrome- oder Firefox-Profil (oder ein
-   privates Fenster) ohne Erweiterungen, die Anfragen verändern
-   (Adblocker, Privacy-Badger usw.). Sonst fehlen Cookies oder Weiterleitungen.
-3. **Werkzeuge installieren:**
-   - Browser-DevTools (F12), Tab **Netzwerk**
-   - Erweiterung **SAML-tracer** (Firefox/Chrome): dekodiert `SAMLRequest` und
-     `SAMLResponse` automatisch
-   - optional für schwierige Fälle: `chrome://net-export` (zeichnet auch
-     Anfragen auf, die DevTools bei Seitenwechseln verliert)
-4. **Ablageort für Mitschnitte** außerhalb des Repos. HAR-Dateien enthalten
-   Session-Cookies, Codice Fiscale, Name und Geburtsdatum. Sie gehören **nie**
-   ins Repo, in Issues oder in Chats (`*.har` steht deshalb in `.gitignore`).
+1. **Eigenes Chrome-Profil** ohne weitere Erweiterungen (Profilbild oben rechts
+   → „Hinzufügen“). Adblocker und Co. können Weiterleitungen und Cookies stören.
+2. Darin die Erweiterung **SAML-tracer** installieren
+   (Chrome-Web-Store-ID `mpdajninpobndbfcldcmbpnnbhibjmch`, Projekt
+   `simplesamlphp/SAML-tracer`).
+3. **Ordner für Mitschnitte außerhalb des Repos**, z. B.
+   `Dokumente\CIE-Mitschnitt`. HAR-Dateien und Screenshots enthalten
+   Session-Cookies, Namen und Codice Fiscale. Sie gehören nie ins Repo, in
+   Issues oder in Chats (`*.har` steht in `.gitignore`, Screenshots nicht).
+4. `curl` für die Gegenprobe (unter Windows 10/11 als `curl.exe` dabei).
+5. **Mit der Testperson vorab klären:**
+   - Die CieID-App ist aktiviert, sie kennt ihre CieID-Zugangsdaten, die Karte
+     samt PIN liegt bereit.
+   - Sie ist einverstanden, dass ihr Login mitgeschnitten wird. Du gibst
+     nichts davon weiter, und am Ende meldet sie sich ab.
+   - Sie tippt ihr Passwort selbst ein. Im Mitschnitt steht es dann trotzdem
+     im Klartext (Payload von `api/auth/login`), also die HAR-Datei entsprechend
+     behandeln oder nach der Auswertung löschen.
 
-## 1. Ausgangspunkt festhalten
+### Einstellungen vor jedem Mitschnitt
 
-1. Schul-URL öffnen, z. B. `https://<schule>.digitalesregister.it/v2/login`.
-2. Screenshot der Login-Seite, Wortlaut des CIE/SPID-Buttons notieren.
-3. Rechtsklick auf den Button → „Untersuchen“: Ist es ein Link (`href`), ein
-   Formular (`action`, `method`, versteckte Felder) oder ein JavaScript-Handler?
-   Ziel-URL notieren.
-4. Im Tab **Anwendung → Cookies** nachsehen, welche Cookies **vor** der
-   Anmeldung schon auf der Schul-Domain liegen (Name, Domain, Pfad,
-   `HttpOnly`, `Secure`, `SameSite`, Ablauf).
+1. Die Login-Seite der Schule öffnen (`https://<schule>.digitalesregister.it/v2/login`),
+   **noch nichts eingeben**.
+2. F12 → Tab **Netzwerk**: „Log beibehalten“ und „Cache deaktivieren“ anhaken,
+   Filter auf **Alle**, Mitschnitt leeren.
+3. Tab **Anwendung → Cookies** für die Schul-Domain: Stand **vorher**
+   festhalten (Screenshot genügt).
+4. **SAML-tracer** über das Erweiterungs-Symbol öffnen. Er zeichnet nur auf,
+   solange sein Fenster offen ist.
 
-## 2. Mitschnitt starten
+---
 
-1. DevTools → **Netzwerk** öffnen.
-2. Häkchen bei **„Log beibehalten“ / „Preserve log“** (sonst ist nach jeder
-   Weiterleitung alles weg) und bei **„Cache deaktivieren“**.
-3. Filter auf **Alle**, Spalten `Status`, `Methode`, `Domain`, `Typ`,
-   `Initiator` einblenden.
-4. SAML-tracer parallel starten.
-5. Alten Mitschnitt leeren, dann erst den CIE-Button drücken.
+## Teil 1: Vergleichsbasis mit dem eigenen Konto (ohne 2FA)
 
-## 3. Anmeldung durchklicken und jede Station notieren
+Kann sofort und allein erledigt werden.
 
-Beim Durchklicken nichts beschleunigen. Nach jeder sichtbaren Seite kurz
-innehalten und im Netzwerk-Tab die neuen Einträge anschauen.
+1. Einstellungen wie oben.
+2. Mit eigenem Benutzernamen und Passwort anmelden.
+3. Im Netzwerk-Tab den Eintrag **`login`** (`POST …/v2/api/auth/login`)
+   anklicken und festhalten:
+   - **Payload:** welche Felder werden geschickt? (Nur die Feldnamen notieren.)
+   - **Antwort:** das JSON, also `loggedIn` und weitere Felder.
+   - **Header der Antwort:** alle `Set-Cookie`-Zeilen (Name, Pfad, Flags,
+     Ablauf; Wert nur gekürzt).
+4. Die Anfragen danach notieren: vermutlich `GET /v2/` und erste API-Aufrufe.
+   Schickt eine API-Anfrage nur `Cookie` mit oder zusätzlich `Authorization`
+   oder eigene Header?
+5. **Cookies nachher** mit dem Stand vorher vergleichen: Welches Cookie ist neu
+   oder hat einen neuen Wert? Das ist der Sitzungsträger beim normalen Login.
+6. Ist SAML-tracer leer geblieben? Das ist zu erwarten, sonst notieren, was
+   auftaucht.
+7. HAR speichern (Rechtsklick im Netzwerk-Tab → „Alle als HAR speichern“).
+8. Abmelden und dabei mitschneiden, welche Anfrage das auslöst.
 
-Erwartete Stationen (die tatsächlichen können abweichen, genau das gilt es
-herauszufinden):
+**Ergebnis Teil 1:** Antwort-JSON des Logins, Name(n) des Sitzungs-Cookies,
+die ersten Anfragen nach dem Login.
+
+---
+
+## Teil 2: CIE-Anmeldung mit der Testperson
+
+Der Mitschnitt läuft in **einem** Stück, von der Login-Seite bis zum
+Dashboard. Das Log erst am Ende leeren.
+
+### 2.1 Passwort-Schritt
+
+1. Einstellungen wie oben, Cookie-Stand **vorher** festhalten.
+2. Die Testperson gibt Benutzername und Passwort ein und schickt ab.
+3. **Sofort pausieren**, bevor irgendetwas weitergeklickt wird:
+   - Eintrag **`login`** → Tab **Antwort**: Das ist die wichtigste Stelle des
+     ganzen Tests. Welcher `error`-Code, welche `message`, gibt es eine URL,
+     einen Token oder eine ID für den CIE-Schritt?
+   - `Set-Cookie` in dieser Antwort: Wird hier schon ein Sitzungs-Cookie
+     gesetzt? Derselbe Name wie in Teil 1?
+   - Cookies **nach dem Passwort** festhalten (zweiter Screenshot).
+4. Was zeigt die Seite jetzt: eine Auswahl der Methoden (Code oder CIE), direkt
+   einen CIE-Button oder eine automatische Weiterleitung? Screenshot.
+5. Wenn es einen Button gibt: Rechtsklick → „Untersuchen“ und notieren, ob
+   er ein Link (`href`), ein Formular (`action`, versteckte Felder) oder
+   JavaScript ist. Löst er eine API-Anfrage aus (z. B. eine, die die CIE-URL
+   holt), diese Anfrage samt Antwort festhalten.
+
+### 2.2 CIE-Schritt
+
+Jetzt weiterklicken und die Stationen der Reihe nach festhalten:
 
 | # | Station | Worauf achten |
 |---|---------|---------------|
-| A | Digitales Register leitet weiter | Status `302`/`303` oder auto-submit-Formular? Ziel-Domain? |
-| B | Eventuell ein Vermittler (z. B. Landes-Login/Broker, IdP-Auswahl SPID/CIE) | Eigene Domain? Eigene Cookies? Auswahlseite? |
-| C | CIE-Identity-Provider des Innenministeriums (`*.servizicie.interno.gov.it` o. ä.) | Protokoll: SAML (`SAMLRequest`, `RelayState`) oder OpenID Connect (`/authorize?client_id=…&redirect_uri=…&state=…&nonce=…`)? |
-| D | Eingabe Benutzername/Passwort (Stufe 2) bzw. Kartenleser/QR-Code (Stufe 3) | Welche Stufe verlangt der Dienst (`AuthnContextClassRef` bzw. `acr_values`: `SpidL1/L2/L3`)? |
-| E | Bestätigung in der CieID-App / QR-Code | Pollt die Seite im Hintergrund (XHR alle paar Sekunden)? Welche URL? |
-| F | Einwilligungsseite („Daten übermitteln an …“) | Welche Attribute werden übergeben (Name, Codice Fiscale, …)? |
-| G | Rücksprung zum Vermittler bzw. zum Register | `POST` mit `SAMLResponse` oder `GET` mit `?code=…&state=…`? An welche URL (Assertion Consumer Service / `redirect_uri`)? |
-| H | Digitales Register setzt die Sitzung | Welche Antwort enthält `Set-Cookie` für die Schul-Domain? Wohin wird danach geleitet (`/v2/`, Dashboard)? |
+| A | Register leitet zur CIE weiter | `302`/`303` oder auto-submit-Formular? Ziel-Domain? |
+| B | Eventuell ein Vermittler (Landes-Login o. ä.) | Eigene Domain, eigene Cookies, Auswahlseite? |
+| C | CIE-Anbieter des Innenministeriums (`*.servizicie.interno.gov.it` o. ä.) | SAML (`SAMLRequest`, `RelayState`) oder OpenID Connect (`/authorize?client_id=…&redirect_uri=…&state=…`)? |
+| D | CieID-Anmeldung | Welche Stufe (`AuthnContextClassRef` bzw. `acr_values`: L1/L2/L3)? QR-Code am PC oder Push aufs Handy? |
+| E | Bestätigung in der CieID-App | Fragt die Seite im Hintergrund regelmäßig nach (XHR alle paar Sekunden)? Welche URL? |
+| F | Einwilligung („Daten übermitteln an …“) | Welche Attribute (nur die Namen, z. B. Codice Fiscale)? |
+| G | Rücksprung | `POST` mit `SAMLResponse` oder `GET` mit `?code=…&state=…`? An welche URL? Zum Vermittler oder direkt ins Register? |
+| H | Register schließt die Anmeldung ab | Welche Antwort setzt oder ändert das Sitzungs-Cookie? Wohin geht es danach (`/v2/`, Dashboard)? Fällt dabei eine API-Anfrage wie `api/auth/…` auf? |
 
-Für **jede** Station im Protokoll festhalten:
+Für **jede** Station notieren: URL (Parameter später schwärzen), Methode,
+Status, `Location`, `Set-Cookie`, bei `POST` die Feldnamen, und ob die Seite
+per JavaScript weiterspringt.
 
-- vollständige URL (Query-Parameter später schwärzen)
-- Methode und Statuscode
-- `Location`-Header bei Weiterleitungen
-- `Set-Cookie`-Header (Name, Domain, Pfad, Flags, Ablauf; Wert nur gekürzt)
-- Formularfelder bei `POST` (Payload-Tab)
-- ob die Seite nur per JavaScript weiterspringt (auto-submit-Formular,
-  `window.location`)
+Mit SAML-tracer bzw. dem Payload-Tab außerdem:
 
-## 4. Protokoll bestimmen
+- **SAML:** aus dem `SAMLRequest` `Issuer`, `AssertionConsumerServiceURL`,
+  `AuthnContextClassRef`; aus der `SAMLResponse` `Destination`, `Audience`,
+  `NotOnOrAfter` und die Namen der Attribute (keine Werte).
+- **OpenID Connect:** `client_id`, `redirect_uri`, `scope`, `acr_values`,
+  PKCE (`code_challenge`) ja/nein. Taucht im Browser ein `POST …/token` auf,
+  oder tauscht der Server des Registers den Code selbst?
 
-Mit SAML-tracer bzw. dem Payload-Tab:
+### 2.3 Nach der Anmeldung
 
-- **SAML:** `SAMLRequest` dekodieren lassen. Notieren: `Issuer` (wer fragt
-  an), `AssertionConsumerServiceURL`, `AuthnContextClassRef`, `ForceAuthn`.
-  Bei der `SAMLResponse`: `Destination`, `Audience`, `NotOnOrAfter` und die
-  Liste der Attribute (die Werte nicht abschreiben).
-- **OpenID Connect:** `client_id`, `redirect_uri`, `scope`, `response_type`,
-  `acr_values`, ob PKCE genutzt wird (`code_challenge`). Beim Rücksprung:
-  Wird der `code` im Browser gegen einen Token getauscht (dann taucht ein
-  `POST …/token` im Netzwerk-Tab auf) oder serverseitig vom Register (dann
-  nicht sichtbar)?
+1. Cookies **nachher** festhalten (dritter Screenshot) und mit „vorher“ und
+   „nach dem Passwort“ vergleichen:
+   - Gleiches Cookie wie nach dem Passwort, nur jetzt gültig? → Die CIE
+     schaltet eine bestehende Sitzung frei.
+   - Neues Cookie oder neuer Wert? → Die Sitzung entsteht erst nach der CIE.
+2. Local Storage und Session Storage der Schul-Domain ansehen: liegt dort ein
+   Token?
+3. Eine API-Anfrage anklicken (z. B. `api/notification/unread`) und prüfen,
+   was sie mitschickt.
+4. Die Antwort auf `GET /v2/` mit Teil 1 vergleichen: gleich aufgebaut? Davon
+   hängt ab, ob `ConfigParser.parse` unverändert funktioniert.
+5. HAR speichern, in SAML-tracer „Export“ speichern.
 
-Wichtig für die App: Wer am Ende den Token bekommt, **der Browser oder der
-Server des Registers**. Im zweiten Fall bleibt für die App nur das
-Session-Cookie der Schul-Domain.
+### 2.4 Gegenprobe mit dem Cookie
 
-## 5. Ergebnis auf der Schul-Domain untersuchen
-
-1. Nach erfolgreicher Anmeldung **Anwendung → Cookies** der Schul-Domain mit
-   dem Stand aus Schritt 1.4 vergleichen: Welches Cookie ist neu oder hat
-   sich geändert? Das ist mit hoher Wahrscheinlichkeit die Sitzung.
-2. **Local Storage / Session Storage** ansehen: Liegt dort ein Token?
-3. Im Netzwerk-Tab eine spätere API-Anfrage anklicken (z. B.
-   `api/notification/unread` oder `api/student/all_subjects`) und prüfen,
-   was sie mitschickt: nur `Cookie` oder zusätzlich `Authorization`/eigene
-   Header?
-4. Die Antwort auf `GET /v2/` ansehen: Ist sie gleich aufgebaut wie beim
-   Passwort-Login? Das entscheidet, ob `ConfigParser.parse` unverändert
-   funktioniert.
-
-## 6. Gegenprobe: Sitzung außerhalb des Browsers verwenden
-
-So lässt sich prüfen, ob „Cookie übernehmen“ für die App reicht.
+Noch **vor** dem Abmelden:
 
 1. Den Wert des Sitzungs-Cookies aus DevTools kopieren.
 2. Im Terminal:
@@ -129,63 +182,87 @@ So lässt sich prüfen, ob „Cookie übernehmen“ für die App reicht.
    curl -s -H 'Cookie: <name>=<wert>' \
      'https://<schule>.digitalesregister.it/v2/api/notification/unread'
    ```
-   Kommt JSON statt eines Login-Fehlers, reicht das Cookie allein.
-3. Zusätzlich testen, ob der Server das Cookie an `User-Agent`, IP oder
-   weitere Cookies bindet (anderer User-Agent, anderes Netz, nur dieses eine
-   Cookie).
-4. Lebensdauer messen: Uhrzeit der Anmeldung notieren und die Anfrage nach
-   30 min, 2 h, 12 h und 24 h ohne Zwischenaktivität wiederholen. Danach auch
-   mit Aktivität (verlängert sich die Sitzung gleitend?).
-5. Abmelden im Browser und prüfen, ob das Cookie serverseitig sofort
-   ungültig ist.
+   JSON statt Login-Fehler → das Cookie allein reicht.
+3. Mit anderem User-Agent wiederholen (`-A 'Test'`), um eine Bindung an den
+   Browser auszuschließen.
+4. Falls die Testperson einverstanden ist: Lebensdauer testen (nach 30 min,
+   2 h, 12 h ohne Aktivität erneut abfragen). Sonst diesen Punkt weglassen.
+5. Zum Schluss meldet sich die Testperson im Browser ab. Danach die
+   `curl`-Anfrage noch einmal: Ist das Cookie jetzt ungültig?
 
-Nach den Tests im Browser abmelden, damit das kopierte Cookie nicht gültig
-bleibt.
+### 2.5 Sonderfälle, falls Zeit bleibt
 
-## 7. Sonderfälle durchspielen
+- **Abbruch** im CieID-Dialog: Wohin geht es zurück? Mit welcher Meldung? Ist
+  man danach halb angemeldet (Cookie aus 2.1 noch gültig)?
+- **Zweiter Login** kurz danach: Verlangt das Register die CIE erneut, oder
+  merkt es sich das Gerät („diesem Gerät vertrauen“)? Überspringt der
+  CIE-Anbieter die Eingabe (Single Sign-on)?
+- Gibt es neben der CIE noch eine andere 2FA-Methode (Code per App/E-Mail),
+  die die App schon unterstützen würde?
 
-- **Handy-Browser statt Desktop:** Läuft Stufe 2 dort per App-Wechsel (Deep
-  Link `cieid://…` bzw. Universal Link) statt QR-Code? Relevant, weil die App
-  genau diesen Weg in einem WebView/Custom Tab gehen muss. Mitschnitt am
-  Android-Handy über `chrome://inspect` (USB-Debugging) am Desktop-Chrome.
-- **Abbruch** im CieID-Dialog und **falsches Passwort**: Wohin wird
-  zurückgeleitet, mit welcher Fehlermeldung/welchem Parameter?
-- **Zweite Anmeldung** kurz danach: Überspringt der IdP die Eingabe
-  (Single-Sign-On-Cookie beim IdP)? Wie lange?
-- **Mehrere Konten** (z. B. Elternteil mit zwei Kindern, oder dieselbe CIE an
-  zwei Schulen): Gibt es nach der CIE eine Kontoauswahl im Register?
-- **SPID** zum Vergleich einmal durchklicken: Wenn der Rücksprung ins Register
-  identisch ist, lässt sich beides mit demselben Code abdecken.
+---
 
-## 8. Ergebnis zusammenfassen
+## Teil 3: Durchgang im Handy-Browser (optional, später)
 
-Am Ende sollte ein kurzes Dokument (ohne personenbezogene Daten) diese Fragen
-beantworten:
+Wichtig, weil die App denselben Weg gehen muss: Im Handy-Browser öffnet sich
+statt QR-Code meist direkt die CieID-App, danach springt es zurück in den
+Browser.
 
-1. Start-URL für die CIE-Anmeldung (fest oder pro Schule verschieden?)
-2. Liste der Stationen mit Domain, Protokoll und Weiterleitungsart
-3. **Erfolgs-URL**: an welcher URL erkennt man, dass die Anmeldung fertig ist?
-4. **Sitzungsträger**: Cookie-Name(n), Domain, Pfad, Flags, Lebensdauer
-5. Reicht das Cookie allein für die API (Ergebnis aus Schritt 6)?
-6. Liefert `GET /v2/` danach dieselbe Konfiguration wie beim Passwort-Login?
-7. Verhalten bei Ablauf: Leitet die API auf die Login-Seite um oder liefert sie
-   einen Fehler, und in welchem Format?
-8. Funktioniert der Ablauf im mobilen Browser inklusive Wechsel zur CieID-App?
+1. Auf dem Android-Handy der Testperson die Entwickleroptionen und
+   **USB-Debugging** einschalten und das Handy per USB an den PC anschließen.
+2. Am PC in Chrome `chrome://inspect` öffnen und beim Tab des Handys auf
+   „inspect“ klicken. Die DevTools des Handy-Browsers laufen dann am PC.
+3. Teil 2 im Handy-Browser wiederholen. Besonders auf den Sprung zur
+   CieID-App achten (Deep Link `cieid://…` oder App-Link) und darauf, ob der
+   Rücksprung im selben Browser-Tab landet.
 
-## 9. Was daraus für die App folgt (Vorschau)
+(iPhone: nur über einen Mac mit Safari → Entwickler-Menü.)
 
-Je nach Ergebnis zeichnen sich zwei Wege ab:
+---
 
-- **Cookie reicht (wahrscheinlich):** Anmeldung in einem WebView bzw. Custom
-  Tab öffnen, die Erfolgs-URL aus 8.3 abfangen, die Cookies aus 8.4 auslesen
-  und in den `CookieJar` von `ApiClient` übertragen, danach `_loadConfig()`
-  wie gewohnt. Eine stille Neuanmeldung ohne Nutzer ist nicht möglich
-  (Bestätigung in der CieID-App nötig). Das passt zum bestehenden Hinweis,
-  dass SPID/CIE-Konten keine Hintergrund-Benachrichtigungen bekommen.
-- **Token statt Cookie:** Token aus Storage/Antwort übernehmen und als Header
-  in Dio setzen; Details hängen an Schritt 4 und 5.
+## Ergebnisse weitergeben
 
-Offene Punkte für die Umsetzung, die schon beim Mitschnitt mitgedacht werden
-sollten: Speichern der Sitzung pro Konto im bestehenden Mehrkonten-System,
-Erkennen einer abgelaufenen Sitzung, und ob `SessionManager` statt eines
-Passwort-Relogins den Nutzer erneut zur CIE-Anmeldung schicken muss.
+Weitergeben (z. B. an Claude oder ins Issue) nur die **geschwärzte**
+Zusammenfassung, nie die HAR-Dateien selbst:
+
+- Domains, Pfade, Methoden, Statuscodes der Stationen
+- Namen der Cookies und Header, **keine Werte**
+- Antwort-JSON von `api/auth/login` mit ersetzten persönlichen Angaben
+- keine `SAMLResponse`, keine Tokens, keine Codes, kein Codice Fiscale
+
+## Fragen, die am Ende beantwortet sein sollen
+
+1. Was antwortet `api/auth/login` bei einem Konto mit CIE-2FA (Fehlercode,
+   Felder, URL)?
+2. Wie gelangt man von dort zur CIE: feste URL, URL aus der Antwort oder eine
+   weitere API-Anfrage?
+3. Stationen der CIE-Anmeldung mit Domain, Protokoll und Art der Weiterleitung.
+4. **Erfolgs-URL:** Woran erkennt man, dass die Anmeldung fertig ist?
+5. **Sitzungsträger:** Cookie-Name(n), Domain, Pfad, Flags. Derselbe wie in
+   Teil 1? Entsteht er vor oder nach der CIE?
+6. Reicht das Cookie allein für die API (Gegenprobe)?
+7. Liefert `GET /v2/` dieselbe Konfiguration wie in Teil 1?
+8. Wie lange hält die Sitzung, und was antwortet die API, wenn sie abgelaufen
+   ist?
+9. Funktioniert der Ablauf im Handy-Browser inklusive Wechsel zur CieID-App?
+
+## Was daraus für die App folgt (Vorschau)
+
+Wahrscheinlichster Weg, je nach Ergebnis:
+
+1. Die App schickt wie bisher `api/auth/login` mit Benutzername und Passwort.
+2. Bei der neuen Antwort aus Frage 1 öffnet sie einen WebView bzw. Custom Tab
+   mit der CIE-URL aus Frage 2, **mit denselben Cookies** wie im `CookieJar`
+   (falls die Sitzung schon nach dem Passwort entsteht).
+3. Sie wartet auf die Erfolgs-URL aus Frage 4, übernimmt die Cookies aus dem
+   WebView zurück in den `CookieJar` und lädt `_loadConfig()` wie gewohnt.
+
+Offene Punkte für die Umsetzung:
+
+- Eine stille Neuanmeldung ist nicht möglich, weil die Bestätigung in der
+  CieID-App nötig ist. Das passt zum bestehenden Hinweis, dass SPID/CIE-Konten
+  keine Hintergrund-Benachrichtigungen bekommen. `SessionManager` muss bei
+  abgelaufener Sitzung den Nutzer zur CIE schicken statt still neu anzumelden.
+- Sitzung pro Konto im bestehenden Mehrkonten-System speichern.
+- Falls sich das Register ein vertrautes Gerät merkt (Sonderfall in 2.5), muss
+  die App das entsprechende Cookie dauerhaft behalten.
