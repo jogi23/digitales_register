@@ -162,7 +162,28 @@ Ablauf bis zur Auswahlseite:
    Cookies auf `eid.istruzione.it` bis hier nur Dynatrace-Monitoring
    (`dtCookie`, `dtPC`, `dtSa`, `rxVisitor`, `rxvt`), keine Sitzung.
 
-Noch offen: Station „CIE-Anbieter“ und vor allem der Rücksprung auf
+4. Klick „Entra con CIE“: `GET …/eid-gateway/sp/idps/cie/authenticate/?client_id=…&state=…&redirect_uri=https://eid.istruzione.it/eid-gateway-oidc/login-gateway&request_id=IAM_…`
+   → 200, HTML mit selbst abschickendem Formular. Setzt `JSESSIONID`
+   (Pfad `/eid-gateway`, `SameSite=None`). Schon `authorize` (Schritt 2)
+   antwortet mit 302 und setzt ein eigenes `JSESSIONID` für den OIDC-Teil.
+5. `POST https://idserver.servizicie.interno.gov.it/idp/profile/SAML2/POST/SSO`
+   mit SAML-AuthnRequest: Issuer `https://spid.pubblica.istruzione.it`
+   (der Vermittler, nicht das Register), `AuthnContextClassRef` **SpidL2**,
+   **`ForceAuthn="true"`** (keine Wiederverwendung einer CIE-Sitzung).
+6. `…/SSO?execution=e1s1` → `e1s2` → `/idp/Authn/CIEStart` →
+   `/idp/login/livello2?opId=IAM_…&level=2&SPName=https://spid.pubblica.istruzione.it…`:
+   CIE-Anmeldeseite (Nummer/Steuernummer + Passwort oder QR-Code für die
+   CieID-App; der QR-Code gilt nur kurz, die Seite fragt per XHR
+   `livello1e2checkqrcode` im Sekundentakt nach).
+7. Rückweg der CIE: `POST https://eid.istruzione.it/eid-gateway/saml2/cie/assertion-consumer`
+   mit `SAMLResponse` und `RelayState`.
+   - **Fehlerfall beobachtet** (Anmeldung abgelaufen): Status `AuthnFailed`,
+     `ErrorCode nr21` (SPID/CIE-Code für Zeitüberschreitung). Der Vermittler
+     zeigt danach wieder seine Auswahlseite und leitet **nicht** ans Register
+     zurück. Die App muss einen Abbruch also selbst erkennen (Nutzer schließt
+     den WebView), nicht über `oidc_auth.php`.
+
+Noch offen: der Erfolgsfall, also der Rücksprung vom Vermittler auf
 `oidc_auth.php` (welche Cookies dort gesetzt werden, wohin es danach geht).
 
 **Vorläufige Folgerung für die App:** `login_spidcie` selbst aufrufen
