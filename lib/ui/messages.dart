@@ -351,9 +351,7 @@ class _MessagesPageState extends State<MessagesPage> {
               ListView.builder(
                 physics: const AlwaysScrollableScrollPhysics(),
                 // Room below the last message for the new-message button.
-                padding: context.systemInsets.copyWith(
-                  bottom: context.systemInsets.bottom + 88,
-                ),
+                padding: context.systemInsetsWithFab,
                 itemCount: visible.length,
                 itemBuilder: (context, i) {
                   final message = visible[i];

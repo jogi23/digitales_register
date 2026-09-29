@@ -65,17 +65,20 @@ class AbsencesPage extends StatelessWidget {
     return Scaffold(
       appBar: ResponsiveAppBar(
         title: Text(tr(context).absencesTitle),
-        actions: <Widget>[
-          if (onReport != null)
-            IconButton(
-              icon: const Icon(Icons.add),
-              tooltip: tr(context).absenceReportTitle,
-              onPressed: onReport,
-            ),
-          const ConnectionStatusButton(),
-          const AccountAvatarButton(),
+        actions: const <Widget>[
+          ConnectionStatusButton(),
+          AccountAvatarButton(),
         ],
       ),
+      // Like writing a message: a small plus in the title bar was easy to
+      // miss for the one thing the page lets a parent do.
+      floatingActionButton: onReport == null
+          ? null
+          : FloatingActionButton.extended(
+              onPressed: onReport,
+              icon: const Icon(Icons.event_busy_outlined),
+              label: Text(tr(context).absenceReportTitle),
+            ),
       body: PullToRefresh(
         onRefresh: onRefresh,
         child: AbsencesBody(
@@ -84,6 +87,7 @@ class AbsencesPage extends StatelessWidget {
           displayMode: displayMode,
           onRemoveFuture: onRemoveFuture,
           onJustify: onJustify,
+          roomForButton: onReport != null,
         ),
       ),
     );
@@ -101,6 +105,9 @@ class AbsencesBody extends StatelessWidget {
   /// Gives a reason for one of the absences; null leaves out the button.
   final void Function(int group)? onJustify;
 
+  /// Keeps the last entry clear of the button floating over the list.
+  final bool roomForButton;
+
   const AbsencesBody({
     super.key,
     required this.state,
@@ -108,6 +115,7 @@ class AbsencesBody extends StatelessWidget {
     this.displayMode = EntryDisplayMode.list,
     this.onRemoveFuture,
     this.onJustify,
+    this.roomForButton = false,
   });
 
   @override
@@ -133,7 +141,9 @@ class AbsencesBody extends StatelessWidget {
                 ),
               )
             : ListView(
-                padding: context.systemInsets,
+                padding: roomForButton
+                    ? context.systemInsetsWithFab
+                    : context.systemInsets,
                 children: <Widget>[
                 AbsencesStatisticWidget(
                   stat: state.statistic!,
