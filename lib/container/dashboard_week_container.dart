@@ -34,6 +34,7 @@ import 'package:dr/util.dart';
 import 'package:dr/providers/dashboard_provider.dart';
 import 'package:dr/ui/days.dart';
 import 'package:dr/ui/snack_bar.dart';
+import 'package:dr/ui/week_header.dart';
 import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -149,8 +150,7 @@ class _DashboardWeekContainerState
     }
   }
 
-  void _changeWeek(int weeks) =>
-      _goTo(_monday.add(Duration(days: 7 * weeks)));
+  void _changeWeek(int weeks) => _goTo(_monday.add(Duration(days: 7 * weeks)));
 
   void _goTo(UtcDateTime monday) {
     if (monday == _monday) return;
@@ -201,8 +201,8 @@ class _DashboardWeekContainerState
   Widget Function(Day day) get dayBuilder => widget.dayBuilder;
 
   /// The dashboard day behind a calendar date, if it holds one.
-  Day? _dayFor(UtcDateTime date) => widget.days
-      .firstWhereOrNull((d) => _dateOnly(d.date) == _dateOnly(date));
+  Day? _dayFor(UtcDateTime date) =>
+      widget.days.firstWhereOrNull((d) => _dateOnly(d.date) == _dateOnly(date));
 
   /// Days that have something noted, for setting their header apart.
   Set<UtcDateTime> _daysWithEntries() => <UtcDateTime>{
@@ -272,18 +272,28 @@ class _DashboardWeekContainerState
     final noInternet = ref.watch(noInternetProvider);
     final settings = ref.watch(settingsProvider);
     final subjectAppearance = ref.watch(subjectAppearanceProvider);
-    final weekDays =
-        calendarState.schoolWeek(_monday, ref.watch(daysInWeekProvider));
+    final daysInWeek = ref.watch(daysInWeekProvider);
+    final weekDays = calendarState.schoolWeek(_monday, daysInWeek);
 
     return Column(
       children: <Widget>[
-        _WeekHeader(
+        WeekHeader(
           monday: _monday,
-          daysInWeek: ref.watch(daysInWeekProvider),
+          daysInWeek: daysInWeek,
+          // Friday, or Saturday where the school teaches then (#292).
+          label: Text(weekRangeLabel(
+            _monday,
+            _monday.add(Duration(days: daysInWeek - 1)),
+          )),
           onPrevious: () => _changeWeek(-1),
           onNext: () => _changeWeek(1),
-          onToday: () => _goTo(toMonday(Day.dateToday())),
-          isCurrentWeek: _monday == toMonday(Day.dateToday()),
+          onPickWeek: _goTo,
+          // The Merkheft's app bar has its own actions, so the way back sits
+          // in the header. Disabled while already there.
+          showToday: true,
+          onToday: _monday == toMonday(Day.dateToday())
+              ? null
+              : () => _goTo(toMonday(Day.dateToday())),
         ),
         Expanded(
           child: CalendarWeek(
@@ -309,70 +319,6 @@ class _DashboardWeekContainerState
               daysWithEntries: _daysWithEntries(),
             ),
           ),
-        ),
-      ],
-    );
-  }
-}
-
-class _WeekHeader extends StatelessWidget {
-  final UtcDateTime monday;
-
-  /// How many days the week has; the header runs to the last of them.
-  final int daysInWeek;
-  final VoidCallback onPrevious;
-  final VoidCallback onNext;
-  final VoidCallback onToday;
-  final bool isCurrentWeek;
-
-  const _WeekHeader({
-    required this.monday,
-    required this.daysInWeek,
-    required this.onPrevious,
-    required this.onNext,
-    required this.onToday,
-    required this.isCurrentWeek,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final format = DateFormat("dd.MM.yy");
-    // Friday, or Saturday where the school teaches then (#292).
-    final lastDay = monday.add(Duration(days: daysInWeek - 1));
-    // Sideways the header is height the timetable needs more than it does.
-    final density =
-        context.isCompactHeight ? VisualDensity.compact : VisualDensity.standard;
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: <Widget>[
-        IconButton(
-          icon: const Icon(Icons.chevron_left),
-          tooltip: tr(context).previousWeek,
-          visualDensity: density,
-          onPressed: onPrevious,
-        ),
-        Text(
-          "${format.format(monday)} - ${format.format(lastDay)}",
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            // Like the calendar page, only tighter: the header has no room
-            // for a labelled button. Disabled while already there.
-            IconButton(
-              icon: const Icon(Icons.today),
-              tooltip: tr(context).calendarCurrentWeek,
-              visualDensity: density,
-              onPressed: isCurrentWeek ? null : onToday,
-            ),
-            IconButton(
-              icon: const Icon(Icons.chevron_right),
-              tooltip: tr(context).nextWeek,
-              visualDensity: density,
-              onPressed: onNext,
-            ),
-          ],
         ),
       ],
     );

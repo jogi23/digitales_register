@@ -590,6 +590,42 @@ Future<void> main() async {
       await tester.pump();
       expect(find.text('11.05.26 - 15.05.26'), findsOneWidget);
     });
+
+    // Like the calendar: a tap on the dates picks any week (#305).
+    testWidgets('a tap on the dates picks the week', (tester) async {
+      await pumpWeek(tester);
+      await tester.tap(find.text('11.05.26 - 15.05.26'));
+      await tester.pumpAndSettle();
+      expect(find.byType(DatePickerDialog), findsOneWidget);
+
+      await tester.tap(find.text('27'));
+      await tester.tap(find.text('OK'));
+      await tester.pump();
+      expect(find.text('25.05.26 - 29.05.26'), findsOneWidget);
+    });
+
+    testWidgets('days past the school week cannot be picked', (tester) async {
+      await pumpWeek(tester);
+      await tester.tap(find.text('11.05.26 - 15.05.26'));
+      await tester.pumpAndSettle();
+      final picker = tester.widget<DatePickerDialog>(
+        find.byType(DatePickerDialog),
+      );
+      expect(picker.selectableDayPredicate!(DateTime.utc(2026, 5, 15)), isTrue);
+      expect(picker.selectableDayPredicate!(DateTime.utc(2026, 5, 16)), isFalse);
+    });
+
+    testWidgets('in a six-day week Saturday can be picked (#292)',
+        (tester) async {
+      await pumpWeek(tester, sixDayWeek: true);
+      await tester.tap(find.text('11.05.26 - 16.05.26'));
+      await tester.pumpAndSettle();
+      final picker = tester.widget<DatePickerDialog>(
+        find.byType(DatePickerDialog),
+      );
+      expect(picker.selectableDayPredicate!(DateTime.utc(2026, 5, 16)), isTrue);
+      expect(picker.selectableDayPredicate!(DateTime.utc(2026, 5, 17)), isFalse);
+    });
   });
 
   group('without the subject colours', () {
