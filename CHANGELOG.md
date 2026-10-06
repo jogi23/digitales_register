@@ -11,7 +11,7 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 ### Verbesserungen
 
 - Absenzen: „Absenz melden“ ist jetzt ein großer Knopf unten rechts, wie „Neue Mitteilung“, statt eines kleinen Plus in der Titelleiste. Die Liste lässt darunter Platz, damit er keinen Eintrag verdeckt.
-- Merkheft-Wochenansicht: Die Kopfleiste sieht jetzt aus wie im Kalender — gleiche Farben, Größe und Schrift. Ein Tippen auf das Datum öffnet die Datumswahl und springt zur gewählten Woche.
+- Merkheft-Wochenansicht: Die Kopfleiste sieht jetzt aus wie im Kalender — gleiche Farben, Größe und Schrift. Ein Tippen auf das Datum öffnet die Datumswahl und springt zur gewählten Woche. Auch im Kalender steht der Sprung zur aktuellen Woche jetzt als Symbol rechts in der Leiste statt in der Titelleiste.
 - Merkheft-Monatsansicht: Die Tage des Vor- und Folgemonats in der ersten und letzten Woche stehen jetzt leicht ausgegraut da, statt zu fehlen — mit Punkt, wenn es an dem Tag etwas gibt. Ein Tippen zeigt den Tag wie jeden anderen.
 - Benachrichtigungen: Vor dem Text steht jetzt, worum es geht — etwa „Hausaufgabe · Italienisch: …“, „Mitteilung · …“ oder „Absenz · …“. Neue Prüfungen melden sich als Prüfung, nicht als Hausaufgabe.
 - Schulliste: Meldet sich jemand bei einer Schule an, die noch nicht in der Liste steht, oder ist eine Schule aus der Liste nicht mehr erreichbar, schickt die App die Adresse der Schule an den Fehlerbericht-Dienst — nur die Adresse, nie Benutzername oder Passwort. So bleibt die Liste aktuell.
