@@ -2,7 +2,7 @@
 
 Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` — Änderungen bitte dort eintragen, nicht hier.
 
-## 1.5.0 — 2026-09-24
+## 1.5.0 — 2026-10-06
 
 ### Neue Funktionen
 
