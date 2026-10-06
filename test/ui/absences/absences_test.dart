@@ -35,8 +35,6 @@ import 'package:intl/date_symbol_data_local.dart';
 import '../../fixtures/api_fixtures.dart';
 import '../../system_bars.dart';
 
-import '../../system_bars.dart';
-
 class _TestAbsencesNotifier extends AbsencesNotifier {
   _TestAbsencesNotifier(this._initialState);
   final AbsencesState _initialState;
@@ -74,13 +72,13 @@ void main() {
     await loadFixtures();
 
     // Die Fixture enthält bereits einen notJustified- und notYetJustified-Eintrag.
-    _demoAbsencesState = parseAbsencesFromJson(
-        fixtureFor('api/student/dashboard/absences'));
+    _demoAbsencesState =
+        parseAbsencesFromJson(fixtureFor('api/student/dashboard/absences'));
   });
 
   testGoldens('simple absences', (WidgetTester tester) async {
-    final parsedState = parseAbsencesFromJson(
-        fixtureFor('api/student/dashboard/absences'));
+    final parsedState =
+        parseAbsencesFromJson(fixtureFor('api/student/dashboard/absences'));
 
     final widget = _buildTestWidget(initialState: parsedState);
     await tester.pumpWidget(widget);
@@ -109,31 +107,37 @@ void main() {
 
   group('demo data Absenzen', () {
     testWidgets('shows cancel icon for rejected entry', (tester) async {
-      await tester.pumpWidget(_buildTestWidget(initialState: _demoAbsencesState));
+      await tester
+          .pumpWidget(_buildTestWidget(initialState: _demoAbsencesState));
       await tester.pumpAndSettle();
       expect(find.byIcon(Icons.cancel), findsOneWidget);
     });
 
-    testWidgets('shows pending icon for not-yet-justified entry', (tester) async {
-      await tester.pumpWidget(_buildTestWidget(initialState: _demoAbsencesState));
+    testWidgets('shows pending icon for not-yet-justified entry',
+        (tester) async {
+      await tester
+          .pumpWidget(_buildTestWidget(initialState: _demoAbsencesState));
       await tester.pumpAndSettle();
       expect(find.byIcon(Icons.radio_button_unchecked), findsOneWidget);
     });
 
     testWidgets('shows reason text for rejected entry', (tester) async {
-      await tester.pumpWidget(_buildTestWidget(initialState: _demoAbsencesState));
+      await tester
+          .pumpWidget(_buildTestWidget(initialState: _demoAbsencesState));
       await tester.pumpAndSettle();
       expect(find.textContaining('Eishockey Training'), findsOneWidget);
     });
 
     testWidgets('shows reason text for pending entry', (tester) async {
-      await tester.pumpWidget(_buildTestWidget(initialState: _demoAbsencesState));
+      await tester
+          .pumpWidget(_buildTestWidget(initialState: _demoAbsencesState));
       await tester.pumpAndSettle();
       expect(find.textContaining('Hockey Turnier'), findsOneWidget);
     });
 
     testGoldens('demo absences golden', (tester) async {
-      await tester.pumpWidget(_buildTestWidget(initialState: _demoAbsencesState));
+      await tester
+          .pumpWidget(_buildTestWidget(initialState: _demoAbsencesState));
       await tester.pumpAndSettle();
       await expectLater(
         find.byType(AbsencesPageContainer),
@@ -213,7 +217,8 @@ void main() {
     });
 
     for (final holding in Holding.values) {
-      testWidgets('der Knopf verdeckt den letzten Eintrag nicht '
+      testWidgets(
+          'der Knopf verdeckt den letzten Eintrag nicht '
           '(${holding.name})', (tester) async {
         holdPhone(tester, holding);
         await tester.pumpWidget(
@@ -298,7 +303,8 @@ void main() {
     });
 
     for (final holding in Holding.values) {
-      testWidgets('Melden unten wie Senden, frei von der Leiste '
+      testWidgets(
+          'Melden unten wie Senden, frei von der Leiste '
           '(${holding.name})', (tester) async {
         holdPhone(tester, holding);
         await tester.pumpWidget(formular());

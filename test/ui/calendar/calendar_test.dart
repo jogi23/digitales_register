@@ -283,16 +283,19 @@ Future<void> main() async {
           find.byType(CircularProgressIndicator).evaluate().isNotEmpty,
       isTrue,
     );
-    expect(find.text("Aktuelle Woche"), findsOneWidget);
+    final today = find.byTooltip("Aktuelle Woche");
+    IconButton todayButton() => tester.widget<IconButton>(
+        find.ancestor(of: today, matching: find.byType(IconButton)).first);
+    expect(today, findsOneWidget);
 
-    await tester.tap(find.text("Aktuelle Woche"));
+    await tester.tap(today);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
     // Already on the current week now, so the jump is spent.
-    expect(tester.widget<TextButton>(find.widgetWithText(TextButton, "Aktuelle Woche")).onPressed, isNull);
+    expect(todayButton().onPressed, isNull);
 
     await tester.pump(const Duration(milliseconds: 100));
-    expect(tester.widget<TextButton>(find.widgetWithText(TextButton, "Aktuelle Woche")).onPressed, isNull);
+    expect(todayButton().onPressed, isNull);
   });
 
   testWidgets("tapping the bar opens settings", (WidgetTester tester) async {
@@ -370,7 +373,8 @@ Future<void> main() async {
           ),
           noInternetProvider.overrideWith(NoInternetNotifier.new),
           subjectAppearanceProvider.overrideWith(
-            () => _TestSubjectAppearanceNotifier(const SubjectAppearanceState()),
+            () =>
+                _TestSubjectAppearanceNotifier(const SubjectAppearanceState()),
           ),
         ],
       );
@@ -455,7 +459,8 @@ Future<void> main() async {
           ),
           noInternetProvider.overrideWith(NoInternetNotifier.new),
           subjectAppearanceProvider.overrideWith(
-            () => _TestSubjectAppearanceNotifier(const SubjectAppearanceState()),
+            () =>
+                _TestSubjectAppearanceNotifier(const SubjectAppearanceState()),
           ),
         ],
       );
@@ -564,7 +569,6 @@ Future<void> main() async {
       await tester.pump();
       expect(find.text('Testfrau'), findsWidgets);
     });
-
 
     testWidgets('shows the time axis with lesson times', (tester) async {
       await tester.pumpWidget(getDemoCalendar());

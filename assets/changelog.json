@@ -13,6 +13,7 @@
           "title": "Verbesserungen",
           "items": [
             "Absenzen: „Absenz melden“ ist jetzt ein großer Knopf unten rechts, wie „Neue Mitteilung“, statt eines kleinen Plus in der Titelleiste. Die Liste lässt darunter Platz, damit er keinen Eintrag verdeckt.",
+            "Merkheft-Wochenansicht: Die Kopfleiste sieht jetzt aus wie im Kalender — gleiche Farben, Größe und Schrift. Ein Tippen auf das Datum öffnet die Datumswahl und springt zur gewählten Woche. Auch im Kalender steht der Sprung zur aktuellen Woche jetzt als Symbol rechts in der Leiste statt in der Titelleiste.",
             "Merkheft-Monatsansicht: Die Tage des Vor- und Folgemonats in der ersten und letzten Woche stehen jetzt leicht ausgegraut da, statt zu fehlen — mit Punkt, wenn es an dem Tag etwas gibt. Ein Tippen zeigt den Tag wie jeden anderen.",
             "Benachrichtigungen: Vor dem Text steht jetzt, worum es geht — etwa „Hausaufgabe · Italienisch: …“, „Mitteilung · …“ oder „Absenz · …“. Neue Prüfungen melden sich als Prüfung, nicht als Hausaufgabe.",
             "Schulliste: Meldet sich jemand bei einer Schule an, die noch nicht in der Liste steht, oder ist eine Schule aus der Liste nicht mehr erreichbar, schickt die App die Adresse der Schule an den Fehlerbericht-Dienst — nur die Adresse, nie Benutzername oder Passwort. So bleibt die Liste aktuell.",
@@ -57,6 +58,7 @@
           "title": "Improvements",
           "items": [
             "Absences: “Report an absence” is now a large button at the bottom right, like “New message”, instead of a small plus in the title bar. The list leaves room below it so it covers no entry.",
+            "Merkheft week view: the header now looks like the calendar's — same colours, size and font. Tapping the dates opens a date picker and jumps to the chosen week. In the calendar too, the way back to the current week is now an icon at the right of that bar instead of in the title bar.",
             "Merkheft month view: the days of the previous and next month in the first and last week are now shown slightly greyed out instead of being left out — with a dot when something is on that day. Tapping one shows the day like any other.",
             "Notifications: the text now starts with what it is about — such as “Homework · Italian: …”, “Message · …” or “Absence · …”. New tests show up as a test, not as homework.",
             "School list: when someone signs in at a school that is not in the list yet, or a listed school can no longer be reached, the app sends the school's address to the error reporting service — the address only, never the username or password. This keeps the list up to date.",
@@ -101,6 +103,7 @@
           "title": "Miglioramenti",
           "items": [
             "Assenze: «Segnala un'assenza» ora è un grande pulsante in basso a destra, come «Nuova comunicazione», invece di un piccolo più nella barra del titolo. L'elenco lascia spazio sotto, così non copre nessuna voce.",
+            "Vista settimanale del Merkheft: l'intestazione ora è come quella del calendario — stessi colori, dimensioni e carattere. Toccando le date si apre la scelta della data e si passa alla settimana scelta. Anche nel calendario il ritorno alla settimana corrente è ora un'icona a destra della barra, non più nella barra del titolo.",
             "Vista mensile del Merkheft: i giorni del mese precedente e successivo nella prima e nell'ultima settimana ora compaiono leggermente in grigio invece di mancare — con il punto se in quel giorno c'è qualcosa. Un tocco mostra il giorno come ogni altro.",
             "Notifiche: il testo ora inizia con ciò di cui si tratta — ad esempio «Compito · Italiano: …», «Comunicazione · …» o «Assenza · …». Le nuove verifiche arrivano come verifica, non come compito.",
             "Elenco delle scuole: se qualcuno accede a una scuola non ancora presente nell'elenco, o una scuola dell'elenco non è più raggiungibile, l'app invia l'indirizzo della scuola al servizio di segnalazione errori — solo l'indirizzo, mai nome utente o password. Così l'elenco resta aggiornato.",
