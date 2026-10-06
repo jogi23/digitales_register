@@ -193,7 +193,8 @@ class GradesNotifier extends Notifier<GradesState> {
     for (final subject in subjects) {
       final subjectId = subject.id;
       if (subjectId == null ||
-          subject.hasDetailData(semester) ||
+          // Stored details can be from before the latest grade (#314).
+          subject.hasCurrentDetailData(semester) ||
           _detailsLoadingSubjectIds.contains(subjectId)) {
         continue;
       }

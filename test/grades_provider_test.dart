@@ -229,6 +229,90 @@ void main() {
     expect(counts.grades, 0);
   });
 
+  group('stored details against a fresh subject list (#314)', () {
+    setUp(() {
+      when(
+        () => mockWrapper.send(
+          'api/student/all_subjects',
+          args: any(named: 'args'),
+        ),
+      ).thenAnswer((_) async => fixtureFor('api/student/all_subjects'));
+      when(
+        () => mockWrapper.send(
+          'api/student/subject_detail',
+          args: any(named: 'args'),
+        ),
+      ).thenAnswer(
+        (_) async => fixtureFor(
+          'api/student/subject_detail',
+          params: {'subjectId': _subjectId},
+        ),
+      );
+      when(
+        () => mockWrapper.send(
+          'api/student/entry/getGrade',
+          args: any(named: 'args'),
+        ),
+      ).thenAnswer((_) async => null);
+    });
+
+    Future<void> loadFirst() async {
+      // load() hands the request to the semester lock without awaiting it.
+      await container.read(gradesProvider.notifier).load(Semester.first);
+      await pumpEventQueue();
+    }
+
+    Subject mathematik() => container
+        .read(gradesProvider)
+        .subjects
+        .firstWhere((s) => s.id == _subjectId);
+
+    test('details that miss what the list reports are fetched again', () async {
+      // Stored from an earlier visit, before the subject had anything: the
+      // list now reports competences the stored details know nothing of.
+      container.read(gradesProvider.notifier).restore(
+            GradesState(
+              (b) => b
+                ..semester = Semester.first.toBuilder()
+                ..subjects = ListBuilder([
+                  _subject(id: _subjectId, name: 'Mathematik').rebuild(
+                    (s) => s
+                      ..grades[Semester.first] = BuiltList<GradeDetail>()
+                      ..observations[Semester.first] = BuiltList<Observation>(),
+                  ),
+                ]),
+            ),
+          );
+
+      await loadFirst();
+
+      verify(
+        () => mockWrapper.send(
+          'api/student/subject_detail',
+          args: any(named: 'args', that: containsPair('subjectId', _subjectId)),
+        ),
+      ).called(1);
+      // The overview shows them without the subject being opened.
+      expect(mathematik().counts(Semester.first)!.competences, 18);
+      expect(mathematik().starAverage(Semester.first), isNotNull);
+    });
+
+    test('details that match the list are not fetched again', () async {
+      await loadFirst();
+      expect(mathematik().hasDetailData(Semester.first), isTrue);
+      clearInteractions(mockWrapper);
+
+      await loadFirst();
+
+      verifyNever(
+        () => mockWrapper.send(
+          'api/student/subject_detail',
+          args: any(named: 'args', that: containsPair('subjectId', _subjectId)),
+        ),
+      );
+    });
+  });
+
   test('the subject detail carries a comment per competence', () async {
     // They were parsed away before, and they are the reason the detail page
     // exists — the list has nowhere to put them.
