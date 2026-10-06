@@ -220,24 +220,6 @@ class _CalendarState extends ConsumerState<Calendar>
                   appBar: ResponsiveAppBar(
                     title: Text(tr(context).calendarTitle),
                     actions: <Widget>[
-                      TextButton(
-                        onPressed: toMonday(now) == widget.vm.currentMonday
-                            ? null
-                            : () {
-                                final date = toMonday(now);
-                                _controller.animateToPage(pageOf(date),
-                                    curve: _animatePageCurve,
-                                    duration: _animatePageDuration);
-                              },
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(tr(context).calendarCurrentWeek),
-                            SizedBox(width: 8),
-                            Icon(Icons.today),
-                          ],
-                        ),
-                      ),
                       const ConnectionStatusButton(),
                       const AccountAvatarButton(),
                     ],
@@ -262,6 +244,15 @@ class _CalendarState extends ConsumerState<Calendar>
                           curve: _animatePageCurve,
                           duration: _animatePageDuration,
                         ),
+                        // Beside the dates, as in the Merkheft (#305).
+                        showToday: true,
+                        onToday: toMonday(now) == widget.vm.currentMonday
+                            ? null
+                            : () => _controller.animateToPage(
+                                  pageOf(toMonday(now)),
+                                  curve: _animatePageCurve,
+                                  duration: _animatePageDuration,
+                                ),
                         label: widget.vm.first != null && widget.vm.last != null
                             ? Text(
                                 weekRangeLabel(
