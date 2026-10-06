@@ -320,22 +320,30 @@ abstract class Subject implements Built<Subject, SubjectBuilder> {
   /// Cancelled entries are left out throughout, matching both the list below
   /// and the way the register counts competences.
   SubjectCounts? counts(Semester semester) {
-    final grades = basicGrades(semester);
-    final entries = detailEntries(semester)?.where((e) => !e.cancelled);
-    if (grades == null && entries == null) return null;
     // Once the details are there they are the truth. Before that, the
     // register's own numbers are all there is — and they arrive with the
     // subject list, so the overview can show them right away.
     //
     // The grade count has to come from the details as well: classes that are
     // graded in competences only report an empty grade list in the overview.
-    if (entries == null) {
-      return SubjectCounts(
-        grades: grades!.where((g) => !g.cancelled).length,
-        competences: _countFor(competenceCounts, semester) ?? 0,
-        observations: _countFor(observationCounts, semester) ?? 0,
-      );
-    }
+    return _detailCounts(semester) ?? _overviewCounts(semester);
+  }
+
+  /// What the subject list reports, null before it was fetched.
+  SubjectCounts? _overviewCounts(Semester semester) {
+    final grades = basicGrades(semester);
+    if (grades == null) return null;
+    return SubjectCounts(
+      grades: grades.where((g) => !g.cancelled).length,
+      competences: _countFor(competenceCounts, semester) ?? 0,
+      observations: _countFor(observationCounts, semester) ?? 0,
+    );
+  }
+
+  /// What the stored details hold, null before they were fetched.
+  SubjectCounts? _detailCounts(Semester semester) {
+    final entries = detailEntries(semester)?.where((e) => !e.cancelled);
+    if (entries == null) return null;
     return SubjectCounts(
       grades: entries.whereType<GradeDetail>().length,
       competences: entries
@@ -343,6 +351,26 @@ abstract class Subject implements Built<Subject, SubjectBuilder> {
           .fold<int>(0, (n, g) => n + g.competences.length),
       observations: entries.whereType<Observation>().length,
     );
+  }
+
+  /// Whether the stored details still hold what the subject list reports.
+  ///
+  /// Details are stored with the app, so they outlive the visit they were
+  /// fetched on. A grade given since shows up in the list first; until the
+  /// details catch up, the overview would hide it (#314).
+  bool hasCurrentDetailData(Semester semester) {
+    if (semester == Semester.all) {
+      return [Semester.first, Semester.second].every(hasCurrentDetailData);
+    }
+    final details = _detailCounts(semester);
+    if (details == null) return false;
+    final overview = _overviewCounts(semester);
+    if (overview == null) return true;
+    return details.competences == overview.competences &&
+        details.observations == overview.observations &&
+        // Competence-only classes list no grades at all; there the
+        // competence count is what tells.
+        (overview.grades == 0 || details.grades == overview.grades);
   }
 
   /// Sums the two half-years for [Semester.all], as the counts are reported
@@ -592,6 +620,7 @@ abstract class Competence implements Built<Competence, CompetenceBuilder> {
   static Serializer<Competence> get serializer => _$competenceSerializer;
 
   String get typeName;
+
   /// How many stars the competence scored, on the school's scale
   /// ([Config.competenceScale]). Schools that allow it rate in halves — the
   /// portal sends `"3.50"` —, so this is not a whole number (#293). States
@@ -951,7 +980,8 @@ abstract class MessageResponseInfo
   static Serializer<MessageResponseInfo> get serializer =>
       _$messageResponseInfoSerializer;
   factory MessageResponseInfo(
-      [Function(MessageResponseInfoBuilder b)? updates]) = _$MessageResponseInfo;
+          [Function(MessageResponseInfoBuilder b)? updates]) =
+      _$MessageResponseInfo;
   MessageResponseInfo._();
 }
 

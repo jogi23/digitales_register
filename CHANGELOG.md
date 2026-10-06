@@ -39,6 +39,7 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 - Anmeldung: War eine Schule aus der Liste gewählt, ging die Anmeldung immer an deren Adresse — auch wenn im Feld „Adresse“ etwas anderes stand. Wer die Adresse einer umgezogenen Schule von Hand eintrug, landete so weiter bei der alten. Jetzt zählt die eingetippte Adresse; passt sie zu einer Schule der Liste, wird diese ausgewählt.
 - Mitteilungen: War die App gerade ohne Verbindung, blieb der Button zum Bestätigen grau, obwohl ein Name eingetragen war — und nichts sagte, warum. Jetzt steht darunter, dass keine Verbindung besteht, und ein Tippen auf den grauen Button prüft die Verbindung neu. Bestätigt wird danach erst mit einem eigenen Tippen.
 - Systemleisten: Bei einer langen Mitteilung lag der Button „Senden“ halb unter der Navigationsleiste. Auch die Anmeldung, Hilfe & Feedback, Fächer, der Notenrechner, das Debug-Log, die Tagesansicht der Woche und der Foto-Zuschnitt halten jetzt Abstand zu den Systemleisten — auch im Querformat, wo die Leiste an der Seite sitzt.
+- Bewertungen: Eine neue Bewertung erschien beim Fach erst, nachdem es einmal aufgeklappt war — bei Sternen fehlten Durchschnitt und „1 Bewertung · 1 Kompetenz“ ganz. Die App holt die Einzelheiten eines Fachs jetzt neu, sobald die Übersicht mehr meldet, als sie kennt.
 
 ## 1.4.1 — 2026-09-24
 
