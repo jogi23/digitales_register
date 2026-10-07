@@ -696,5 +696,11 @@
   "appLockReason": "Unlock the app",
   "appLockLockedOut": "Too many attempts. Please try again later.",
   "appLockError": "Unlocking failed.",
-  "appLockDisabled": "The device no longer has a screen lock – the app lock was switched off."
+  "appLockDisabled": "The device no longer has a screen lock – the app lock was switched off.",
+  "settingsAppLock": "Lock app",
+  "settingsAppLockSubtitle": "Unlock with fingerprint, face or device PIN when opening",
+  "settingsAppLockGrace": "Lock after",
+  "settingsAppLockGraceNow": "Immediately",
+  "settingsAppLockGraceMinutes": "{minutes} min",
+  "settingsAppLockNoDeviceLock": "No screen lock is set up on this device. Set up a PIN, pattern or fingerprint in the device settings first."
 }

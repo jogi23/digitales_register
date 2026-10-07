@@ -151,6 +151,16 @@ class AppLockController extends Notifier<AppLockState> {
     if (state.locked) unawaited(unlock(unlockReason));
   }
 
+  /// Asks for the device's lock without touching the lock itself — for
+  /// switching it on or off. True when it was passed.
+  Future<bool> confirm(String reason) async {
+    if (state.authenticating) return false;
+    state = state.copyWith(authenticating: true);
+    final result = await ref.read(deviceAuthProvider).authenticate(reason);
+    state = state.copyWith(authenticating: false);
+    return result == DeviceAuthResult.success;
+  }
+
   /// Asks for the device's lock once, when the app starts locked.
   Future<void> unlockAtStart() async {
     if (_askedAtStart || !state.locked) return;

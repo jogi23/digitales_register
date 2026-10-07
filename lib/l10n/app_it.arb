@@ -696,5 +696,11 @@
   "appLockReason": "Sblocca l'app",
   "appLockLockedOut": "Troppi tentativi. Riprova più tardi.",
   "appLockError": "Sblocco non riuscito.",
-  "appLockDisabled": "Il dispositivo non ha più un blocco schermo – il blocco dell'app è stato disattivato."
+  "appLockDisabled": "Il dispositivo non ha più un blocco schermo – il blocco dell'app è stato disattivato.",
+  "settingsAppLock": "Blocca app",
+  "settingsAppLockSubtitle": "Sblocca con impronta, volto o PIN del dispositivo all'apertura",
+  "settingsAppLockGrace": "Blocca dopo",
+  "settingsAppLockGraceNow": "Subito",
+  "settingsAppLockGraceMinutes": "{minutes} min",
+  "settingsAppLockNoDeviceLock": "Sul dispositivo non è impostato alcun blocco schermo. Imposta prima un PIN, una sequenza o un'impronta nelle impostazioni del dispositivo."
 }

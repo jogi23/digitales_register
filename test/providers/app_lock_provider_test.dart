@@ -256,6 +256,29 @@ void main() {
     });
   });
 
+  group('confirm', () {
+    test('tells whether the lock was passed', () async {
+      final c = make();
+      await unlocked(c);
+      expect(await lock(c).confirm(''), isTrue);
+      auth.result = DeviceAuthResult.cancelled;
+      expect(await lock(c).confirm(''), isFalse);
+    });
+
+    test('its prompt does not lock, even with grace zero', () async {
+      final c = make(grace: 0);
+      await unlocked(c);
+      auth.pending = Completer();
+      final confirmed = lock(c).confirm('');
+      lock(c).onPaused();
+      lock(c).onResumed();
+      auth.pending!.complete(DeviceAuthResult.success);
+      expect(await confirmed, isTrue);
+      expect(locked(c), isFalse);
+      expect(auth.calls, 1);
+    });
+  });
+
   test('switching the lock off unlocks', () {
     final c = make();
     expect(locked(c), isTrue);
