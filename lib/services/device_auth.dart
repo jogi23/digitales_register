@@ -51,9 +51,9 @@ class LocalDeviceAuth implements DeviceAuth {
   Future<DeviceAuthResult> authenticate(String reason) async {
     try {
       final ok = await _auth.authenticate(
+        // Not biometrics only (the default): the device PIN is the way in
+        // when they fail or are missing.
         localizedReason: reason,
-        // The device PIN is the way in when biometrics fail or are missing.
-        biometricOnly: false,
         persistAcrossBackgrounding: true,
       );
       return ok ? DeviceAuthResult.success : DeviceAuthResult.cancelled;
