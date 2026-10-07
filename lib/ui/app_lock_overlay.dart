@@ -73,8 +73,8 @@ class _AppLockOverlayState extends ConsumerState<AppLockOverlay> {
     // After returning from the background the controller asks by itself;
     // this is for the cold start.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted)
-        unawaited(ref.read(appLockProvider.notifier).unlockAtStart());
+      if (!mounted) return;
+      unawaited(ref.read(appLockProvider.notifier).unlockAtStart());
     });
   }
 
