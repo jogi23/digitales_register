@@ -93,5 +93,16 @@ void main() {
       expect(utc.month, 7);
       expect(utc.day, 4);
     });
+
+    test('toWallClock gives the same clock time as a real instant', () {
+      final sent = UtcDateTime(2026, 10, 7, 9, 26, 5);
+      final local = sent.toWallClock();
+      expect(local.isUtc, false);
+      expect(local, DateTime(2026, 10, 7, 9, 26, 5));
+      expect(
+        local.millisecondsSinceEpoch,
+        DateTime(2026, 10, 7, 9, 26, 5).millisecondsSinceEpoch,
+      );
+    });
   });
 }

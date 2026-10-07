@@ -208,7 +208,7 @@ Future<void> syncAccountNotifications({
           l,
           account,
           style: BigTextStyleInformation(text),
-          when: n.timeSent.millisecondsSinceEpoch,
+          when: n.timeSent.toWallClock().millisecondsSinceEpoch,
         ),
       ),
       payload: SystemNotificationTarget(

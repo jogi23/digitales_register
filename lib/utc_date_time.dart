@@ -50,6 +50,20 @@ class UtcDateTime extends DateTime {
     return super.add(duration).makeUtc();
   }
 
+  /// The same wall-clock time as a real local [DateTime]. The fields hold the
+  /// portal's local time, so [millisecondsSinceEpoch] is off by the device's
+  /// UTC offset; anything handing an instant to the system needs this.
+  DateTime toWallClock() => DateTime(
+        year,
+        month,
+        day,
+        hour,
+        minute,
+        second,
+        millisecond,
+        microsecond,
+      );
+
   UtcDateTime stripTime() {
     return UtcDateTime(
       year,
