@@ -13,10 +13,13 @@ class MainActivity: FlutterFragmentActivity() {
             .setMethodCallHandler { call, result ->
                 when (call.method) {
                     "setRecentsHidden" -> {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        // True when Android hides the preview itself.
+                        val byAndroid =
+                            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+                        if (byAndroid) {
                             setRecentsScreenshotEnabled(call.arguments != true)
                         }
-                        result.success(null)
+                        result.success(byAndroid)
                     }
                     "moveTaskToBack" -> {
                         moveTaskToBack(true)

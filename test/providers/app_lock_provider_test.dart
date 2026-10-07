@@ -207,6 +207,55 @@ void main() {
     });
   });
 
+  group('cover while leaving', () {
+    test('covers on inactive when Android keeps the preview', () async {
+      final c = make();
+      await unlocked(c);
+      lock(c).onInactive();
+      expect(c.read(appLockProvider).covered, isTrue);
+      lock(c).onResumed();
+      expect(c.read(appLockProvider).covered, isFalse);
+    });
+
+    test('no cover when Android hides the preview itself', () async {
+      final c = make();
+      await unlocked(c);
+      c.read(recentsHiddenByAndroidProvider.notifier).state = true;
+      lock(c).onInactive();
+      expect(c.read(appLockProvider).covered, isFalse);
+    });
+
+    test('no cover while the lock is off', () {
+      final c = make(enabled: false);
+      lock(c).onInactive();
+      expect(c.read(appLockProvider).covered, isFalse);
+    });
+
+    test('no cover from the prompt of its own', () {
+      final c = make();
+      auth.pending = Completer();
+      unawaited(lock(c).unlock(''));
+      lock(c).onInactive();
+      expect(c.read(appLockProvider).covered, isFalse);
+    });
+  });
+
+  group('at a cold start', () {
+    test('asks once', () async {
+      final c = make();
+      auth.result = DeviceAuthResult.cancelled;
+      await lock(c).unlockAtStart();
+      await lock(c).unlockAtStart();
+      expect(auth.calls, 1);
+    });
+
+    test('asks nothing when not locked', () async {
+      final c = make(enabled: false);
+      await lock(c).unlockAtStart();
+      expect(auth.calls, 0);
+    });
+  });
+
   test('switching the lock off unlocks', () {
     final c = make();
     expect(locked(c), isTrue);

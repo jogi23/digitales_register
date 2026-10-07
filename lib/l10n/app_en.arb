@@ -690,5 +690,11 @@
   "systemNotificationsKind": "{kind, select, message{Message} grade{Grade} observation{Observation} homework{Homework} exam{Test} absence{Absence} calendar{Calendar} classbook{Classbook} account{Account} notice{Notice} other{}}",
   "systemNotificationsCount": "{count, plural, one {{count} notification} other {{count} notifications}}",
   "settingsStayLoggedInOffHint": "Off: sign in at every start, no switching accounts",
-  "settingsNotificationsNeedStayLoggedIn": "Android notifications need “Stay signed in”; until then only inside the app"
+  "settingsNotificationsNeedStayLoggedIn": "Android notifications need “Stay signed in”; until then only inside the app",
+  "appLockTitle": "App locked",
+  "appLockUnlock": "Unlock",
+  "appLockReason": "Unlock the app",
+  "appLockLockedOut": "Too many attempts. Please try again later.",
+  "appLockError": "Unlocking failed.",
+  "appLockDisabled": "The device no longer has a screen lock – the app lock was switched off."
 }

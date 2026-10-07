@@ -30,10 +30,12 @@ import 'package:dr/container/settings_page.dart';
 import 'package:dr/debug_log.dart';
 import 'package:dr/middleware/middleware.dart';
 import 'package:dr/providers/account_profile_provider.dart';
+import 'package:dr/providers/app_lock_provider.dart';
 import 'package:dr/providers/login_provider.dart';
 import 'package:dr/l10n/l10n.dart';
 import 'package:dr/providers/provider_container.dart';
 import 'package:dr/providers/settings_provider.dart';
+import 'package:dr/ui/app_lock_overlay.dart';
 import 'package:dr/ui/app_theme.dart';
 import 'package:dr/ui/grade_calculator.dart';
 import 'package:dr/ui/grade_detail_page.dart';
@@ -46,6 +48,7 @@ import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:dr/ui/snack_bar.dart';
+import 'package:dr/services/app_lock_platform.dart';
 import 'package:dr/services/review_prompt.dart';
 import 'package:dr/services/system_notification_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -91,7 +94,13 @@ Future<void> _runApp() async {
   scaffoldKey = GlobalKey();
   scaffoldMessengerKey = GlobalKey();
   secureStorage = const FlutterSecureStorage();
-  providerContainer = ProviderContainer();
+  providerContainer = ProviderContainer(overrides: [
+    // The settings load after the first frame; the lock must not wait.
+    appLockInitiallyEnabledProvider
+        .overrideWithValue(await storedAppLockEnabled()),
+  ]);
+  installAppLockBackHandler(providerContainer);
+  keepRecentsInSync(providerContainer);
   wireLoginDispatchers(providerContainer.read(loginProvider.notifier));
   // Before anything reads the stored accounts.
   await migrateMovedSchools();
@@ -118,11 +127,19 @@ Future<void> _runApp() async {
       }
       unawaited(startApp(uri));
       unawaited(openLaunchNotification());
+      final appLock = providerContainer.read(appLockProvider.notifier);
       WidgetsBinding.instance.addObserver(
         LifecycleObserver(
-          () => unawaited(handleRestarted()),
+          () {
+            appLock.onResumed();
+            unawaited(handleRestarted());
+          },
           // this might not finish in time:
-          () => unawaited(handlePaused()),
+          () {
+            appLock.onPaused();
+            unawaited(handlePaused());
+          },
+          onInactive: appLock.onInactive,
         ),
       );
     },
@@ -261,8 +278,13 @@ class RegisterApp extends ConsumerWidget {
             // Middleware and providers put messages on the screen without a
             // context of their own; this keeps their translations current.
             rememberTranslations(context);
-            return Stack(
-              children: [child!, const Positioned.fill(child: SplashOverlay())],
+            return AppLockScope(
+              child: Stack(
+                children: [
+                  child!,
+                  const Positioned.fill(child: SplashOverlay()),
+                ],
+              ),
             );
           },
           theme: theme,
@@ -276,12 +298,16 @@ class RegisterApp extends ConsumerWidget {
 class LifecycleObserver with WidgetsBindingObserver {
   final VoidCallback onForeground;
   final VoidCallback onBackground;
+  final VoidCallback? onInactive;
 
-  LifecycleObserver(this.onForeground, this.onBackground);
+  LifecycleObserver(this.onForeground, this.onBackground, {this.onInactive});
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       onForeground();
+    }
+    if (state == AppLifecycleState.inactive) {
+      onInactive?.call();
     }
     if (state == AppLifecycleState.paused) {
       onBackground();

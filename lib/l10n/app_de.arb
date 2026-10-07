@@ -741,5 +741,11 @@
     }
   },
   "settingsStayLoggedInOffHint": "Aus: Anmeldung bei jedem Start, kein Kontowechsel",
-  "settingsNotificationsNeedStayLoggedIn": "Android-Benachrichtigungen gibt es nur mit „Angemeldet bleiben“; bis dahin nur in der App"
+  "settingsNotificationsNeedStayLoggedIn": "Android-Benachrichtigungen gibt es nur mit „Angemeldet bleiben“; bis dahin nur in der App",
+  "appLockTitle": "App gesperrt",
+  "appLockUnlock": "Entsperren",
+  "appLockReason": "Entsperre die App",
+  "appLockLockedOut": "Zu viele Versuche. Bitte später erneut versuchen.",
+  "appLockError": "Entsperren fehlgeschlagen.",
+  "appLockDisabled": "Am Gerät ist keine Sperre mehr eingerichtet – die App-Sperre wurde ausgeschaltet."
 }

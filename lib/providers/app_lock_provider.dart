@@ -36,10 +36,15 @@ class AppLockState {
   const AppLockState({
     required this.locked,
     this.authenticating = false,
+    this.covered = false,
     this.message,
   });
 
   final bool locked;
+
+  /// The app is on its way out and its preview is to show nothing: where
+  /// Android cannot hide it by itself.
+  final bool covered;
 
   /// The device's prompt is open.
   final bool authenticating;
@@ -48,11 +53,13 @@ class AppLockState {
   AppLockState copyWith({
     bool? locked,
     bool? authenticating,
+    bool? covered,
     AppLockMessage? Function()? message,
   }) =>
       AppLockState(
         locked: locked ?? this.locked,
         authenticating: authenticating ?? this.authenticating,
+        covered: covered ?? this.covered,
         message: message == null ? this.message : message(),
       );
 }
@@ -69,6 +76,10 @@ final appLockClockProvider =
 final appLockSupportedProvider =
     Provider<bool>((ref) => Platform.isAndroid || Platform.isIOS);
 
+/// Whether Android hides the app's preview in the recent apps itself
+/// (Android 13 on); set by `keepRecentsInSync`.
+final recentsHiddenByAndroidProvider = StateProvider<bool>((ref) => false);
+
 final appLockProvider =
     NotifierProvider<AppLockController, AppLockState>(AppLockController.new);
 
@@ -78,6 +89,7 @@ class AppLockController extends Notifier<AppLockState> {
   String unlockReason = '';
 
   bool _initiallyEnabled = false;
+  bool _askedAtStart = false;
   DateTime? _pausedAt;
 
   @override
@@ -106,6 +118,14 @@ class AppLockController extends Notifier<AppLockState> {
 
   DateTime _now() => ref.read(appLockClockProvider)();
 
+  /// The app is about to leave, or something covers it: hides it from the
+  /// preview in the recent apps where Android does not.
+  void onInactive() {
+    if (state.authenticating || !_enabled) return;
+    if (ref.read(recentsHiddenByAndroidProvider)) return;
+    state = state.copyWith(covered: true);
+  }
+
   /// The app went to the background. The device's own prompt sends it there
   /// as well; that does not count.
   void onPaused() {
@@ -119,6 +139,7 @@ class AppLockController extends Notifier<AppLockState> {
   /// The app is back. Locks when it was away for longer than allowed, and
   /// asks right away.
   void onResumed() {
+    if (state.covered) state = state.copyWith(covered: false);
     if (state.authenticating) return;
     final pausedAt = _pausedAt;
     _pausedAt = null;
@@ -128,6 +149,13 @@ class AppLockController extends Notifier<AppLockState> {
       state = state.copyWith(locked: true, message: () => null);
     }
     if (state.locked) unawaited(unlock(unlockReason));
+  }
+
+  /// Asks for the device's lock once, when the app starts locked.
+  Future<void> unlockAtStart() async {
+    if (_askedAtStart || !state.locked) return;
+    _askedAtStart = true;
+    await unlock(unlockReason);
   }
 
   /// Asks for the device's lock.

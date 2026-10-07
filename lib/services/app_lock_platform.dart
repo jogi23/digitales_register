@@ -19,6 +19,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:dr/debug_log.dart';
+import 'package:dr/providers/app_lock_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -30,21 +31,24 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 const appLockChannel = MethodChannel('dr/app_lock');
 
 /// Hides the app's preview in the recent apps — from Android 13 on; before
-/// that the lock screen covers the app as it leaves.
-Future<void> setRecentsHidden(bool hidden, {bool? isAndroid}) =>
-    _invoke('setRecentsHidden', hidden, isAndroid: isAndroid);
+/// that the lock screen covers the app as it leaves. True when Android does
+/// it.
+Future<bool> setRecentsHidden(bool hidden, {bool? isAndroid}) async =>
+    await _invoke<bool>('setRecentsHidden', hidden, isAndroid: isAndroid) ??
+    false;
 
 /// Sends the app to the background, as "back" on the home screen does.
 Future<void> moveTaskToBack({bool? isAndroid}) =>
     _invoke('moveTaskToBack', null, isAndroid: isAndroid);
 
-Future<void> _invoke(String method, Object? arguments,
+Future<T?> _invoke<T>(String method, Object? arguments,
     {bool? isAndroid}) async {
-  if (!(isAndroid ?? Platform.isAndroid)) return;
+  if (!(isAndroid ?? Platform.isAndroid)) return null;
   try {
-    await appLockChannel.invokeMethod<void>(method, arguments);
+    return await appLockChannel.invokeMethod<T>(method, arguments);
   } on Object catch (e, s) {
     debugLogError('App-Sperre $method', e, s);
+    return null;
   }
 }
 
@@ -53,7 +57,10 @@ void keepRecentsInSync(ProviderContainer container, {bool? isAndroid}) {
   if (!(isAndroid ?? Platform.isAndroid)) return;
   container.listen<bool>(
     settingsProvider.select((s) => s.appLockEnabled),
-    (_, enabled) => unawaited(setRecentsHidden(enabled, isAndroid: isAndroid)),
+    (_, enabled) async {
+      final byAndroid = await setRecentsHidden(enabled, isAndroid: isAndroid);
+      container.read(recentsHiddenByAndroidProvider.notifier).state = byAndroid;
+    },
     fireImmediately: true,
   );
 }

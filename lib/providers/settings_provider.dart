@@ -22,6 +22,20 @@ import 'package:dr/app_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/// Whether the app lock was on, read straight from storage — for `main()`,
+/// before the settings are loaded and before the first frame.
+Future<bool> storedAppLockEnabled() async {
+  final raw = (await SharedPreferences.getInstance())
+      .getString(SettingsNotifier._globalPrefsKey);
+  if (raw == null) return false;
+  try {
+    return (json.decode(raw) as Map<String, dynamic>)['appLockEnabled'] ==
+        true;
+  } on Object {
+    return false;
+  }
+}
+
 class SettingsNotifier extends Notifier<SettingsState> {
   static const _globalPrefsKey = 'settings_global';
 

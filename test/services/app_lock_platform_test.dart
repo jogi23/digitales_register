@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'package:dr/providers/app_lock_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/services/app_lock_platform.dart';
 import 'package:flutter/services.dart';
@@ -53,6 +54,16 @@ void main() {
       ('setRecentsHidden', true),
       ('setRecentsHidden', false),
     ]);
+  });
+
+  test('remembers whether Android hides the preview itself', () async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(appLockChannel, (call) async => true);
+    final c = ProviderContainer();
+    addTearDown(c.dispose);
+    keepRecentsInSync(c, isAndroid: true);
+    await pumpEventQueue();
+    expect(c.read(recentsHiddenByAndroidProvider), isTrue);
   });
 
   test('nothing is sent off Android', () async {

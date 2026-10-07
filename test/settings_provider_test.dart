@@ -412,6 +412,18 @@ void main() {
       );
     });
 
+    test('the stored switch can be read before the app starts', () async {
+      expect(await storedAppLockEnabled(), isFalse);
+
+      final c = _makeContainer();
+      c.read(settingsProvider.notifier).setAppLockEnabled(true);
+      await pumpEventQueue();
+      expect(await storedAppLockEnabled(), isTrue);
+
+      SharedPreferences.setMockInitialValues({'settings_global': 'kaputt'});
+      expect(await storedAppLockEnabled(), isFalse);
+    });
+
     test('are app-wide', () {
       final json = SettingsState(appLockEnabled: true).globalJson();
       expect(json['appLockEnabled'], isTrue);
