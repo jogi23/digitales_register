@@ -381,4 +381,41 @@ void main() {
       expect(container.read(daysInWeekProvider), 6);
     });
   });
+
+  group('app lock settings', () {
+    test('defaults are off and one minute', () {
+      expect(SettingsState().appLockEnabled, isFalse);
+      expect(SettingsState().appLockGraceMinutes, 1);
+    });
+
+    test('survive a restart', () async {
+      final before = _makeContainer();
+      before.read(settingsProvider.notifier)
+        ..setAppLockEnabled(true)
+        ..setAppLockGraceMinutes(5);
+      await pumpEventQueue();
+
+      final after = _makeContainer();
+      await after.read(settingsProvider.notifier).loadGlobal();
+      expect(after.read(settingsProvider).appLockEnabled, isTrue);
+      expect(after.read(settingsProvider).appLockGraceMinutes, 5);
+    });
+
+    test('an unknown grace falls back to one minute', () {
+      final c = _makeContainer();
+      c.read(settingsProvider.notifier).setAppLockGraceMinutes(7);
+      expect(c.read(settingsProvider).appLockGraceMinutes, 1);
+      expect(
+        SettingsState()
+            .withGlobalJson({'appLockGraceMinutes': 7}).appLockGraceMinutes,
+        1,
+      );
+    });
+
+    test('are app-wide', () {
+      final json = SettingsState(appLockEnabled: true).globalJson();
+      expect(json['appLockEnabled'], isTrue);
+      expect(json['appLockGraceMinutes'], 1);
+    });
+  });
 }

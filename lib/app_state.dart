@@ -371,6 +371,10 @@ const _unchanged = Object();
 const accentStarColorId = 'accent';
 const allowedNotificationPollMinutes = <int>[30, 60, 120, 180, 360, 720];
 
+/// How long the app may stay in the background before it locks again; 0 locks
+/// as soon as it leaves.
+const allowedAppLockGraceMinutes = <int>[0, 1, 5, 15];
+
 class SettingsState {
   SettingsState({
     this.noPasswordSaving = false,
@@ -416,6 +420,8 @@ class SettingsState {
     this.notifyHomework = true,
     this.notifyAbsences = true,
     this.sixDayWeek = false,
+    this.appLockEnabled = false,
+    this.appLockGraceMinutes = 1,
   })  : ignoreForGradesAverage = ignoreForGradesAverage ?? [],
         classbookSubjects = classbookSubjects ?? [];
 
@@ -519,6 +525,14 @@ class SettingsState {
   /// schools that teach on Saturdays but do not tell (#292, beta).
   final bool sixDayWeek;
 
+  /// Asks for the device's own lock — biometrics or its PIN — before the app
+  /// shows anything (#114).
+  final bool appLockEnabled;
+
+  /// Minutes in the background before the lock comes back, one of
+  /// [allowedAppLockGraceMinutes].
+  final int appLockGraceMinutes;
+
   SettingsState copyWith({
     bool? noPasswordSaving,
     bool? typeSorted,
@@ -560,6 +574,8 @@ class SettingsState {
     bool? notifyHomework,
     bool? notifyAbsences,
     bool? sixDayWeek,
+    bool? appLockEnabled,
+    int? appLockGraceMinutes,
   }) =>
       SettingsState(
         noPasswordSaving: noPasswordSaving ?? this.noPasswordSaving,
@@ -616,6 +632,8 @@ class SettingsState {
         notifyHomework: notifyHomework ?? this.notifyHomework,
         notifyAbsences: notifyAbsences ?? this.notifyAbsences,
         sixDayWeek: sixDayWeek ?? this.sixDayWeek,
+        appLockEnabled: appLockEnabled ?? this.appLockEnabled,
+        appLockGraceMinutes: appLockGraceMinutes ?? this.appLockGraceMinutes,
       );
 
   Map<String, dynamic> toJson() => {
@@ -658,6 +676,8 @@ class SettingsState {
         'notifyHomework': notifyHomework,
         'notifyAbsences': notifyAbsences,
         'sixDayWeek': sixDayWeek,
+        'appLockEnabled': appLockEnabled,
+        'appLockGraceMinutes': appLockGraceMinutes,
       };
 
   factory SettingsState.fromJson(Map<dynamic, dynamic> json) => SettingsState(
@@ -733,6 +753,13 @@ class SettingsState {
         notifyHomework: json['notifyHomework'] as bool? ?? true,
         notifyAbsences: json['notifyAbsences'] as bool? ?? true,
         sixDayWeek: json['sixDayWeek'] as bool? ?? false,
+        appLockEnabled: json['appLockEnabled'] as bool? ?? false,
+        appLockGraceMinutes: (() {
+          final value = json['appLockGraceMinutes'];
+          return value is int && allowedAppLockGraceMinutes.contains(value)
+              ? value
+              : 1;
+        })(),
       );
 
   /// The settings that belong to the app rather than to one account:
@@ -777,6 +804,8 @@ class SettingsState {
     'notifyObservations',
     'notifyHomework',
     'notifyAbsences',
+    'appLockEnabled',
+    'appLockGraceMinutes',
   };
 
   /// Only the app-wide settings, for storing them on their own.
@@ -845,7 +874,9 @@ class SettingsState {
         other.notifyObservations == notifyObservations &&
         other.notifyHomework == notifyHomework &&
         other.notifyAbsences == notifyAbsences &&
-        other.sixDayWeek == sixDayWeek;
+        other.sixDayWeek == sixDayWeek &&
+        other.appLockEnabled == appLockEnabled &&
+        other.appLockGraceMinutes == appLockGraceMinutes;
   }
 
   @override
@@ -889,6 +920,8 @@ class SettingsState {
         notifyHomework,
         notifyAbsences,
         sixDayWeek,
+        appLockEnabled,
+        appLockGraceMinutes,
       ]);
 }
 

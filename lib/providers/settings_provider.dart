@@ -120,6 +120,16 @@ class SettingsNotifier extends Notifier<SettingsState> {
   void setMessageSignature(String? name) =>
       _update(state.copyWith(messageSignature: name));
 
+  // ─── App lock ─────────────────────────────────────────────────────────────
+
+  void setAppLockEnabled(bool value) =>
+      _update(state.copyWith(appLockEnabled: value));
+
+  void setAppLockGraceMinutes(int minutes) {
+    final safe = allowedAppLockGraceMinutes.contains(minutes) ? minutes : 1;
+    _update(state.copyWith(appLockGraceMinutes: safe));
+  }
+
   // ─── Notification settings ────────────────────────────────────────────────
 
   void setNotificationsEnabled(bool value) =>
