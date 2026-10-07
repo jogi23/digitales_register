@@ -4,6 +4,10 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 
 ## 1.6.0 — 2026-10-07
 
+### Neue Funktionen
+
+- App-Sperre: In den Einstellungen unter „Anmeldung“ lässt sich die App mit der Sperre des Geräts schützen — Fingerabdruck, Gesicht oder Geräte-PIN. Sie fragt beim Start und nach der Rückkehr, wenn die App länger als gewählt im Hintergrund war (sofort, 1, 5 oder 15 Minuten). Solange sie an ist, zeigt die Übersicht der zuletzt genutzten Apps keinen Inhalt; Benachrichtigungen kommen weiter.
+
 ### Fehlerbehebungen
 
 - Benachrichtigungen: Systembenachrichtigungen zeigten als Zeitpunkt einen in der Zukunft — im Sommer zwei Stunden, etwa „in 1 Std.“. Jetzt steht die Zeit da, zu der der Eintrag kam.

@@ -4,6 +4,12 @@
     "points": {
       "de": [
         {
+          "title": "Neue Funktionen",
+          "items": [
+            "App-Sperre: In den Einstellungen unter „Anmeldung“ lässt sich die App mit der Sperre des Geräts schützen — Fingerabdruck, Gesicht oder Geräte-PIN. Sie fragt beim Start und nach der Rückkehr, wenn die App länger als gewählt im Hintergrund war (sofort, 1, 5 oder 15 Minuten). Solange sie an ist, zeigt die Übersicht der zuletzt genutzten Apps keinen Inhalt; Benachrichtigungen kommen weiter."
+          ]
+        },
+        {
           "title": "Fehlerbehebungen",
           "items": [
             "Benachrichtigungen: Systembenachrichtigungen zeigten als Zeitpunkt einen in der Zukunft — im Sommer zwei Stunden, etwa „in 1 Std.“. Jetzt steht die Zeit da, zu der der Eintrag kam."
@@ -12,6 +18,12 @@
       ],
       "en": [
         {
+          "title": "New features",
+          "items": [
+            "App lock: under “Sign-in” in the settings, the app can be protected with the device's lock — fingerprint, face or device PIN. It asks at start-up and on return when the app was in the background longer than chosen (immediately, 1, 5 or 15 minutes). While it is on, the recent apps overview shows no content; notifications keep coming."
+          ]
+        },
+        {
           "title": "Bug fixes",
           "items": [
             "Notifications: system notifications showed a time in the future — two hours ahead in summer, such as “in 1 hr”. Now they show the time the entry came in."
@@ -19,6 +31,12 @@
         }
       ],
       "it": [
+        {
+          "title": "Nuove funzioni",
+          "items": [
+            "Blocco dell'app: nelle impostazioni, sotto «Accesso», l'app può essere protetta con il blocco del dispositivo — impronta, volto o PIN del dispositivo. Lo chiede all'avvio e al ritorno, se l'app è rimasta in background più a lungo del tempo scelto (subito, 1, 5 o 15 minuti). Finché è attivo, la panoramica delle app recenti non mostra contenuti; le notifiche continuano ad arrivare."
+          ]
+        },
         {
           "title": "Correzioni",
           "items": [

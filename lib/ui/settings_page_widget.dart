@@ -24,6 +24,7 @@ import 'package:dr/app_state.dart';
 import 'package:dr/background_check.dart';
 import 'package:dr/container/settings_page.dart';
 import 'package:dr/ui/account_avatar_button.dart';
+import 'package:dr/ui/app_lock_settings.dart';
 import 'package:dr/ui/autocomplete_options.dart';
 import 'package:dr/ui/connection_status_button.dart';
 import 'package:dr/ui/dialog.dart';
@@ -313,6 +314,7 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
             },
             value: !widget.vm.noPassSaving,
           ),
+          const AppLockSettingsTiles(),
           SwitchListTile.adaptive(
             title: Text(tr(context).settingsNotificationsEnable),
             // Still a switch without a stored password: it also governs the

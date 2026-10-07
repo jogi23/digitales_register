@@ -40,6 +40,7 @@ abstract final class LogCategory {
   static const notifications = 'Benachrichtigungen';
   static const absences = 'Absenzen';
   static const certificate = 'Zeugnis';
+  static const appLock = 'App-Sperre';
   static const error = 'Fehler';
 
   static const values = [
@@ -53,6 +54,7 @@ abstract final class LogCategory {
     notifications,
     absences,
     certificate,
+    appLock,
     error,
   ];
 }
