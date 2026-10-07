@@ -2,6 +2,12 @@
 
 Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` — Änderungen bitte dort eintragen, nicht hier.
 
+## 1.6.0 — 2026-10-07
+
+### Fehlerbehebungen
+
+- Benachrichtigungen: Systembenachrichtigungen zeigten als Zeitpunkt einen in der Zukunft — im Sommer zwei Stunden, etwa „in 1 Std.“. Jetzt steht die Zeit da, zu der der Eintrag kam.
+
 ## 1.5.0 — 2026-10-06
 
 ### Neue Funktionen
