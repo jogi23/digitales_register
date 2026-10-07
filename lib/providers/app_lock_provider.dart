@@ -92,6 +92,9 @@ class AppLockController extends Notifier<AppLockState> {
   bool _askedAtStart = false;
   DateTime? _pausedAt;
 
+  /// When the app left while [confirm]'s prompt was open.
+  DateTime? _pausedDuringConfirm;
+
   @override
   AppLockState build() {
     _initiallyEnabled = ref.read(appLockInitiallyEnabledProvider);
@@ -129,7 +132,11 @@ class AppLockController extends Notifier<AppLockState> {
   /// The app went to the background. The device's own prompt sends it there
   /// as well; that does not count.
   void onPaused() {
-    if (state.authenticating || !_enabled) return;
+    if (state.authenticating) {
+      _pausedDuringConfirm ??= _now();
+      return;
+    }
+    if (!_enabled) return;
     _pausedAt = _now();
     if (_grace == Duration.zero && !state.locked) {
       state = state.copyWith(locked: true, message: () => null);
@@ -155,10 +162,26 @@ class AppLockController extends Notifier<AppLockState> {
   /// switching it on or off. True when it was passed.
   Future<bool> confirm(String reason) async {
     if (state.authenticating) return false;
+    _pausedDuringConfirm = null;
     state = state.copyWith(authenticating: true);
     final result = await ref.read(deviceAuthProvider).authenticate(reason);
     state = state.copyWith(authenticating: false);
-    return result == DeviceAuthResult.success;
+    final away = _pausedDuringConfirm;
+    _pausedDuringConfirm = null;
+    final passed = result == DeviceAuthResult.success;
+    // Left with the prompt open and away for long: whoever cancels it now
+    // need not be the one who opened it. A short trip to the device's PIN
+    // screen does not count, not even with no grace at all.
+    final allowed = _grace < const Duration(minutes: 1)
+        ? const Duration(minutes: 1)
+        : _grace;
+    if (!passed &&
+        _enabled &&
+        away != null &&
+        _now().difference(away) >= allowed) {
+      state = state.copyWith(locked: true);
+    }
+    return passed;
   }
 
   /// Asks for the device's lock once, when the app starts locked.

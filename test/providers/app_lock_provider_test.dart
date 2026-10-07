@@ -265,6 +265,48 @@ void main() {
       expect(await lock(c).confirm(''), isFalse);
     });
 
+    test('away for longer than allowed during it: locks when not passed',
+        () async {
+      final c = make();
+      await unlocked(c);
+      auth.pending = Completer();
+      final confirmed = lock(c).confirm('');
+      lock(c).onPaused();
+      now = now.add(const Duration(hours: 1));
+      lock(c).onResumed();
+      auth.pending!.complete(DeviceAuthResult.cancelled);
+      expect(await confirmed, isFalse);
+      expect(locked(c), isTrue);
+      expect(auth.calls, 1, reason: 'the lock screen offers the button');
+    });
+
+    test('away during it but passed: stays unlocked', () async {
+      final c = make();
+      await unlocked(c);
+      auth.pending = Completer();
+      final confirmed = lock(c).confirm('');
+      lock(c).onPaused();
+      now = now.add(const Duration(hours: 1));
+      lock(c).onResumed();
+      auth.pending!.complete(DeviceAuthResult.success);
+      expect(await confirmed, isTrue);
+      expect(locked(c), isFalse);
+    });
+
+    test('a short PIN screen during it does not lock, even with grace zero',
+        () async {
+      final c = make(grace: 0);
+      await unlocked(c);
+      auth.pending = Completer();
+      final confirmed = lock(c).confirm('');
+      lock(c).onPaused();
+      now = now.add(const Duration(seconds: 20));
+      lock(c).onResumed();
+      auth.pending!.complete(DeviceAuthResult.cancelled);
+      expect(await confirmed, isFalse);
+      expect(locked(c), isFalse);
+    });
+
     test('its prompt does not lock, even with grace zero', () async {
       final c = make(grace: 0);
       await unlocked(c);
