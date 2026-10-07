@@ -1,4 +1,33 @@
 {
+  "1.6.0": {
+    "date": "2026-10-07",
+    "points": {
+      "de": [
+        {
+          "title": "Fehlerbehebungen",
+          "items": [
+            "Benachrichtigungen: Systembenachrichtigungen zeigten als Zeitpunkt einen in der Zukunft — im Sommer zwei Stunden, etwa „in 1 Std.“. Jetzt steht die Zeit da, zu der der Eintrag kam."
+          ]
+        }
+      ],
+      "en": [
+        {
+          "title": "Bug fixes",
+          "items": [
+            "Notifications: system notifications showed a time in the future — two hours ahead in summer, such as “in 1 hr”. Now they show the time the entry came in."
+          ]
+        }
+      ],
+      "it": [
+        {
+          "title": "Correzioni",
+          "items": [
+            "Notifiche: le notifiche di sistema mostravano un orario nel futuro — d'estate due ore avanti, ad esempio «tra 1 ora». Ora mostrano l'ora in cui è arrivata la voce."
+          ]
+        }
+      ]
+    }
+  },
   "1.5.0": {
     "date": "2026-10-06",
     "points": {
