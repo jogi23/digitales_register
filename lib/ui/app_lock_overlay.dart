@@ -29,19 +29,53 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Puts the lock screen over [child] — the whole app — while it is locked,
 /// and a plain cover while it is leaving.
-class AppLockScope extends ConsumerWidget {
+class AppLockScope extends ConsumerStatefulWidget {
   const AppLockScope({super.key, required this.child});
 
   final Widget child;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AppLockScope> createState() => _AppLockScopeState();
+}
+
+class _AppLockScopeState extends ConsumerState<AppLockScope> {
+  /// Whether the pages could go back, as the navigator last said.
+  bool _pagesCanPop = false;
+
+  /// While locked, "back" is left to Android, which sends the app to the
+  /// background; otherwise its back gesture would close the pages under the
+  /// lock screen. The app's own handler decides from this notification.
+  void _tellCanHandlePop(bool value) =>
+      NavigationNotification(canHandlePop: value).dispatch(context);
+
+  @override
+  Widget build(BuildContext context) {
+    ref.listen(appLockProvider.select((s) => s.locked), (previous, locked) {
+      _tellCanHandlePop(!locked && _pagesCanPop);
+    });
+    ref.listen(appLockProvider.select((s) => s.message), (previous, message) {
+      if (message != AppLockMessage.disabled) return;
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+        SnackBar(content: Text(tr(context).appLockDisabled)),
+      );
+    });
     final (locked, covered) =
         ref.watch(appLockProvider.select((s) => (s.locked, s.covered)));
     return Stack(
       children: [
-        // Built on, so nothing is lost; but neither read out nor tappable.
-        ExcludeSemantics(excluding: locked || covered, child: child),
+        NotificationListener<NavigationNotification>(
+          onNotification: (notification) {
+            _pagesCanPop = notification.canHandlePop;
+            if (!ref.read(appLockProvider).locked) return false;
+            _tellCanHandlePop(false);
+            return true;
+          },
+          // Built on, so nothing is lost; but neither read out nor tappable.
+          child: ExcludeSemantics(
+            excluding: locked || covered,
+            child: widget.child,
+          ),
+        ),
         if (locked)
           const Positioned.fill(child: AppLockOverlay())
         else if (covered)

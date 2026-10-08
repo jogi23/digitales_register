@@ -20,6 +20,7 @@ import 'package:dr/services/app_lock_platform.dart';
 import 'package:dr/services/device_auth.dart';
 import 'package:dr/ui/app_lock_overlay.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -165,6 +166,47 @@ void main() {
     await tester.pumpAndSettle();
     expect(navigator.currentState!.canPop(), isFalse);
     expect(channelCalls, isNot(contains('moveTaskToBack')));
+  });
+
+  testWidgets('says so when the lock was switched off for lack of one',
+      (tester) async {
+    auth.result = DeviceAuthResult.notAvailable;
+    await pumpApp(tester);
+    await tester.pumpAndSettle();
+    expect(find.text('App gesperrt'), findsNothing);
+    expect(
+      find.text('Am Gerät ist keine Sperre mehr eingerichtet – '
+          'die App-Sperre wurde ausgeschaltet.'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('the back gesture is left to Android while locked',
+      (tester) async {
+    final handlesBack = <bool>[];
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      (call) async {
+        if (call.method == 'SystemNavigator.setFrameworkHandlesBack') {
+          handlesBack.add(call.arguments as bool);
+        }
+        return null;
+      },
+    );
+    auth.result = DeviceAuthResult.cancelled;
+    final c = await pumpApp(tester);
+    // The app tells Android only once it knows its lifecycle, as on a phone.
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pumpAndSettle();
+    navigator.currentState!.pushNamed('/second');
+    await tester.pumpAndSettle();
+    // A page to go back to, but the lock is on: Android takes "back".
+    expect(handlesBack.last, isFalse);
+
+    auth.result = DeviceAuthResult.success;
+    await c.read(appLockProvider.notifier).unlock('');
+    await tester.pumpAndSettle();
+    expect(handlesBack.last, isTrue);
   });
 
   testWidgets('the cover hides the app without a button', (tester) async {
