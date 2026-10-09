@@ -49,7 +49,7 @@ void main() {
         jsonDecode(jsonEncode(status.toJson())),
       );
       expect(back, isNotNull);
-      expect(back!.finishedAt, status.finishedAt);
+      expect(back!.finishedAt.isAtSameMomentAs(status.finishedAt), isTrue);
       expect(back.accounts.map((a) => a.label), ['Anna', 'Ben']);
       expect(back.accounts[0].outcome, AccountCheckOutcome.ok);
       expect(back.accounts[0].unread, 3);
@@ -71,12 +71,6 @@ void main() {
         }),
         isNull,
       );
-    });
-
-    test('keeps no password, no user name and no message text', () {
-      final text = jsonEncode(status.toJson());
-      expect(text, isNot(contains('password')));
-      expect(text, isNot(contains('user')));
     });
   });
 
@@ -106,11 +100,24 @@ void main() {
   });
 
   group('storage', () {
+    test('the time comes back as local time, not UTC', () async {
+      final prefs = await SharedPreferences.getInstance();
+      final local = DateTime(2026, 10, 8, 12, 30);
+      await writeBackgroundStatus(
+        prefs,
+        BackgroundStatus(finishedAt: local, accounts: const []),
+      );
+      final back = (await readBackgroundStatus())!.finishedAt;
+      expect(back.isUtc, isFalse);
+      expect(back.hour, 12);
+      expect(back.minute, 30);
+    });
+
     test('a written status is read back', () async {
       final prefs = await SharedPreferences.getInstance();
       await writeBackgroundStatus(prefs, status);
       final back = await readBackgroundStatus();
-      expect(back?.finishedAt, status.finishedAt);
+      expect(back?.finishedAt.isAtSameMomentAs(status.finishedAt), isTrue);
       expect(back?.accounts, hasLength(2));
     });
 

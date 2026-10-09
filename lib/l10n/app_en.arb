@@ -388,6 +388,8 @@
   "statusPermissionDenied": "System permission for notifications: not granted",
   "statusCheckNow": "Check now",
   "statusCheckNowHint": "Starts after 10 seconds. Leave the app so a signed-in account is checked as well.",
+  "statusCheckStarted": "Check started",
+  "statusCheckFailed": "The check could not be started",
   "settingsSource": "Source code",
   "settingsAddSubject": "Add a subject",
   "loginOtherSchool": "Other school",

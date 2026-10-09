@@ -388,6 +388,8 @@
   "statusPermissionDenied": "Autorizzazione di sistema per le notifiche: non concessa",
   "statusCheckNow": "Controlla ora",
   "statusCheckNowHint": "Parte dopo 10 secondi. Esci dall'app, così viene controllato anche un account connesso.",
+  "statusCheckStarted": "Controllo avviato",
+  "statusCheckFailed": "Impossibile avviare il controllo",
   "settingsSource": "Codice sorgente",
   "settingsAddSubject": "Aggiungi materia",
   "loginOtherSchool": "Altra scuola",

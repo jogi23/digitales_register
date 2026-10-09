@@ -56,6 +56,7 @@ void main() {
     bool notifications = true,
     bool isAndroid = true,
     void Function()? onCheck,
+    bool checkFails = false,
     List<BackgroundStatus?>? runs,
   }) async {
     var asked = 0;
@@ -65,7 +66,10 @@ void main() {
             runs == null ? shown : runs[asked++ < runs.length ? asked - 1 : 0],
       ),
       notificationPermissionProvider.overrideWith((ref) async => permission),
-      checkBackgroundNowProvider.overrideWithValue(() async => onCheck?.call()),
+      checkBackgroundNowProvider.overrideWithValue(() async {
+        if (checkFails) throw StateError('kein Planer');
+        onCheck?.call();
+      }),
     ]);
     addTearDown(c.dispose);
     c.read(settingsProvider.notifier).setNotificationsEnabled(notifications);
@@ -135,6 +139,23 @@ void main() {
     await tester.tap(find.text('Jetzt prüfen'));
     await tester.pumpAndSettle();
     expect(checks, 1);
+  });
+
+  testWidgets('"Jetzt prüfen" tells that the round was started',
+      (tester) async {
+    await pump(tester, shown: status);
+    await tester.tap(find.text('Jetzt prüfen'));
+    await tester.pump();
+    expect(find.text('Prüfung gestartet'), findsOneWidget);
+  });
+
+  testWidgets('"Jetzt prüfen" says so when the round could not be started',
+      (tester) async {
+    await pump(tester, shown: status, checkFails: true);
+    await tester.tap(find.text('Jetzt prüfen'));
+    await tester.pump();
+    expect(find.text('Prüfung konnte nicht gestartet werden'), findsOneWidget);
+    expect(find.text('Prüfung gestartet'), findsNothing);
   });
 
   testWidgets('is not there off Android', (tester) async {

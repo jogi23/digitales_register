@@ -87,7 +87,7 @@ class BackgroundStatus {
     final finishedAt = raw['finishedAt'];
     final accounts = raw['accounts'];
     if (finishedAt is! String || accounts is! List) return null;
-    final time = DateTime.tryParse(finishedAt);
+    final time = DateTime.tryParse(finishedAt)?.toLocal();
     final parsed = [for (final a in accounts) AccountCheckResult.tryParse(a)];
     if (time == null || parsed.contains(null)) return null;
     return BackgroundStatus(

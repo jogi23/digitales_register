@@ -409,6 +409,8 @@
   "statusPermissionDenied": "Systemberechtigung für Benachrichtigungen: nicht erteilt",
   "statusCheckNow": "Jetzt prüfen",
   "statusCheckNowHint": "Startet nach 10 Sekunden. Verlasse die App, damit auch ein angemeldetes Konto geprüft wird.",
+  "statusCheckStarted": "Prüfung gestartet",
+  "statusCheckFailed": "Prüfung konnte nicht gestartet werden",
   "settingsSource": "Zum Quellcode",
   "settingsAddSubject": "Fach hinzufügen",
   "loginOtherSchool": "Andere Schule",

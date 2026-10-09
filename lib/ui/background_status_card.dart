@@ -18,6 +18,7 @@
 import 'dart:io';
 
 import 'package:dr/background_check.dart';
+import 'package:dr/debug_log.dart';
 import 'package:dr/l10n/l10n.dart';
 import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/services/background_status.dart';
@@ -103,7 +104,7 @@ class _BackgroundStatusCardState extends ConsumerState<BackgroundStatusCard>
             Align(
               alignment: Alignment.centerLeft,
               child: TextButton(
-                onPressed: () => ref.read(checkBackgroundNowProvider)(),
+                onPressed: _checkNow,
                 child: Text(l.statusCheckNow),
               ),
             ),
@@ -111,6 +112,21 @@ class _BackgroundStatusCardState extends ConsumerState<BackgroundStatusCard>
         ),
       ),
     );
+  }
+
+  /// Starts a round and tells that it was: the tap has no other effect to see.
+  Future<void> _checkNow() async {
+    final l = tr(context);
+    final messenger = ScaffoldMessenger.of(context);
+    String message;
+    try {
+      await ref.read(checkBackgroundNowProvider)();
+      message = l.statusCheckStarted;
+    } on Object catch (e, s) {
+      debugLogError('Hintergrundabruf starten', e, s);
+      message = l.statusCheckFailed;
+    }
+    messenger.showSnackBar(SnackBar(content: Text(message)));
   }
 
   String _time(BuildContext context, DateTime time) {
