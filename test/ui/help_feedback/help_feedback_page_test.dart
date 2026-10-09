@@ -16,6 +16,7 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:dr/ui/help_feedback_page.dart';
+import 'package:dr/ui/help_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -28,10 +29,24 @@ void main() {
     await tester.pumpWidget(build());
     await tester.pumpAndSettle();
     expect(find.text('Hilfe & Feedback'), findsOneWidget);
+    expect(find.text('Häufige Fragen'), findsOneWidget);
     expect(find.text('Email schreiben'), findsOneWidget);
     expect(find.text('FAQ'), findsOneWidget);
     expect(find.text('Feature/Idee vorschlagen'), findsOneWidget);
     expect(find.text('Bug/Fehler melden'), findsOneWidget);
+  });
+
+  testWidgets('"Häufige Fragen" is the first entry and opens the FAQ',
+      (tester) async {
+    await tester.pumpWidget(build());
+    await tester.pumpAndSettle();
+    expect(
+      tester.getTopLeft(find.text('Häufige Fragen')).dy,
+      lessThan(tester.getTopLeft(find.text('Email schreiben')).dy),
+    );
+    await tester.tap(find.text('Häufige Fragen'));
+    await tester.pumpAndSettle();
+    expect(find.byType(HelpPage), findsOneWidget);
   });
 
   for (final holding in Holding.values) {
@@ -48,6 +63,7 @@ void main() {
   testWidgets('shows an icon for every entry', (tester) async {
     await tester.pumpWidget(build());
     await tester.pumpAndSettle();
+    expect(find.byIcon(Icons.quiz_outlined), findsOneWidget);
     expect(find.byIcon(Icons.email), findsOneWidget);
     expect(find.byIcon(Icons.help_outline), findsOneWidget);
     expect(find.byIcon(Icons.lightbulb_outline), findsOneWidget);

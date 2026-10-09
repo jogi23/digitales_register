@@ -16,6 +16,7 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:dr/app_links.dart';
+import 'package:dr/ui/help_page.dart';
 import 'package:dr/ui/layout.dart';
 import 'package:dr/util.dart';
 import 'package:dr/l10n/l10n.dart';
@@ -34,6 +35,14 @@ class HelpFeedbackPage extends StatelessWidget {
       body: ListView(
         padding: context.systemInsets,
         children: [
+          ListTile(
+            leading: const Icon(Icons.quiz_outlined),
+            title: Text(tr(context).helpOfflineFaq),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const HelpPage()),
+            ),
+          ),
           ListTile(
             leading: const Icon(Icons.email),
             title: Text(tr(context).helpWriteEmail),
