@@ -17,14 +17,11 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:collapsible_sidebar/collapsible_sidebar.dart';
-import 'package:dr/app_links.dart';
-import 'package:dr/middleware/middleware.dart';
-import 'package:dr/ui/about_page.dart';
-import 'package:dr/ui/help_feedback_page.dart';
-import 'package:dr/services/app_sharing.dart';
 import 'package:dr/l10n/l10n.dart';
+import 'package:dr/middleware/middleware.dart';
+import 'package:dr/ui/about_hub_page.dart';
+import 'package:dr/ui/help_feedback_page.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class Sidebar extends StatelessWidget {
   const Sidebar({
@@ -74,7 +71,7 @@ class Sidebar extends StatelessWidget {
       minWidth: 70,
       screenPadding: 0,
       // Kein Kopf mit Konto: Der Avatar steht in jeder Titelzeile, und das
-      // Menü ist mit sechzehn Punkten ohnehin länger als der Bildschirm.
+      // Menü ist mit dreizehn Punkten ohnehin länger als der Bildschirm.
       titleTooltip: '',
       toggleTooltipCollapsed: tr(context).menuExpand,
       toggleTooltipExpanded: tr(context).menuCollapse,
@@ -88,18 +85,18 @@ class Sidebar extends StatelessWidget {
       items: [
         CollapsibleItem(
           isSelected: currentSelected == Pages.homework,
-          icon: Icons.assignment,
+          icon: Icons.assignment_rounded,
           text: tr(context).menuHomework,
           onPressed: goHome,
         ),
         CollapsibleItem(
             text: tr(context).menuAbsences,
-            icon: Icons.hotel,
+            icon: Icons.hotel_rounded,
             isSelected: currentSelected == Pages.absences,
             onPressed: showAbsences),
         CollapsibleItem(
           text: tr(context).menuCalendar,
-          icon: Icons.calendar_today,
+          icon: Icons.calendar_today_rounded,
           isSelected: currentSelected == Pages.calendar,
           onPressed: showCalendar,
         ),
@@ -107,49 +104,49 @@ class Sidebar extends StatelessWidget {
           onPressed: showGrades,
           isSelected: currentSelected == Pages.grades,
           text: tr(context).menuGrades,
-          icon: Icons.grade,
+          icon: Icons.grade_rounded,
         ),
         CollapsibleItem(
           text: tr(context).menuMessages,
-          icon: Icons.message,
+          icon: Icons.message_rounded,
           isSelected: currentSelected == Pages.messages,
           onPressed: showMessages,
         ),
         CollapsibleItem(
           text: tr(context).menuCertificate,
-          icon: Icons.list,
+          icon: Icons.workspace_premium_rounded,
           isSelected: currentSelected == Pages.certificate,
           onPressed: showCertificate,
         ),
         CollapsibleItem(
           text: tr(context).menuClassbook,
-          icon: Icons.menu_book,
+          icon: Icons.menu_book_rounded,
           isSelected: currentSelected == Pages.classbook,
           onPressed: showClassbook,
         ),
         CollapsibleItem(
           text: tr(context).menuHomeworkOverview,
-          icon: Icons.assignment_turned_in,
+          icon: Icons.task_alt_rounded,
           isSelected: currentSelected == Pages.homeworkOverview,
           onPressed: showHomeworkOverview,
         ),
         CollapsibleItem(
           text: tr(context).menuCourseContent,
-          icon: Icons.folder_open,
+          icon: Icons.folder_open_rounded,
           isSelected: currentSelected == Pages.courseContent,
           onPressed: showCourseContent,
         ),
         CollapsibleItem(
           hasDivider: true,
           text: tr(context).menuSettings,
-          icon: Icons.settings,
+          icon: Icons.settings_rounded,
           isSelected: currentSelected == Pages.settings,
           onPressed: showSettings,
         ),
         CollapsibleItem(
           hasDivider: true,
           text: tr(context).menuHelp,
-          icon: Icons.help,
+          icon: Icons.help_rounded,
           onPressed: () => Navigator.of(context).push(
             MaterialPageRoute(
               builder: (_) => const HelpFeedbackPage(),
@@ -158,37 +155,18 @@ class Sidebar extends StatelessWidget {
         ),
         CollapsibleItem(
           hasDivider: true,
-          text: tr(context).menuRate,
-          icon: Icons.star_outline,
-          onPressed: openPlayStoreListing,
-        ),
-        CollapsibleItem(
-          text: tr(context).menuShare,
-          icon: Icons.share,
-          onPressed: () => shareApp(context),
-        ),
-        CollapsibleItem(
-          text: tr(context).menuOtherApps,
-          icon: Icons.apps,
-          onPressed: () => launchUrl(
-            AppLinks.otherApps,
-            mode: LaunchMode.externalApplication,
-          ),
-        ),
-        CollapsibleItem(
-          hasDivider: true,
           text: tr(context).menuAbout,
-          icon: Icons.info_outline,
+          icon: Icons.info_rounded,
           onPressed: () => Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (_) => const AboutPage(),
+              builder: (_) => const AboutHubPage(),
             ),
           ),
         ),
         CollapsibleItem(
           hasDivider: true,
           text: tr(context).menuLogout,
-          icon: Icons.logout,
+          icon: Icons.logout_rounded,
           onPressed: logout,
         ),
       ],

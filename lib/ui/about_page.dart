@@ -19,6 +19,7 @@ import 'package:dr/app_links.dart';
 import 'package:dr/l10n/l10n.dart';
 import 'package:dr/ui/changelog_page.dart';
 import 'package:dr/ui/layout.dart';
+import 'package:dr/ui/link_tile.dart';
 import 'package:dr/util.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -33,7 +34,7 @@ class AboutPage extends StatelessWidget {
     final colors = Theme.of(context).colorScheme;
     final text = Theme.of(context).textTheme;
     return Scaffold(
-      appBar: AppBar(title: Text(l.menuAbout)),
+      appBar: AppBar(title: Text(l.aboutTitle)),
       body: ListView(
         padding: context.systemInsets,
         children: [
@@ -73,7 +74,8 @@ class AboutPage extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(Icons.info_outline, color: colors.onSurfaceVariant),
+                    Icon(Icons.info_outline_rounded,
+                        color: colors.onSurfaceVariant),
                     const SizedBox(width: 12),
                     Expanded(child: Text(l.aboutIndependent)),
                   ],
@@ -83,14 +85,14 @@ class AboutPage extends StatelessWidget {
           ),
           _Header(l.aboutDevelopers),
           for (final (name, uri) in AppLinks.developers)
-            _LinkTile(
-              icon: Icons.person_outline,
+            LinkTile(
+              icon: Icons.person_outline_rounded,
               title: name,
               subtitle: uri.host,
               onTap: () => _open(uri),
             ),
           const Divider(),
-          _LinkTile(
+          LinkTile(
             icon: Icons.new_releases_outlined,
             title: l.changelogTitle,
             internal: true,
@@ -98,13 +100,13 @@ class AboutPage extends StatelessWidget {
               MaterialPageRoute(builder: (_) => const ChangelogPage()),
             ),
           ),
-          _LinkTile(
-            icon: Icons.code,
+          LinkTile(
+            icon: Icons.code_rounded,
             title: l.aboutSourceCode,
             subtitle: l.aboutFreeSoftware,
             onTap: () => _open(AppLinks.source),
           ),
-          _LinkTile(
+          LinkTile(
             icon: Icons.description_outlined,
             title: l.aboutLicenses,
             internal: true,
@@ -124,18 +126,18 @@ class AboutPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          _LinkTile(
+          LinkTile(
             icon: Icons.policy_outlined,
             title: l.aboutPrivacy,
             onTap: () => _open(AppLinks.privacy),
           ),
-          _LinkTile(
+          LinkTile(
             icon: Icons.badge_outlined,
             title: l.aboutImprint,
             onTap: () => _open(AppLinks.imprint),
           ),
-          _LinkTile(
-            icon: Icons.gavel,
+          LinkTile(
+            icon: Icons.gavel_rounded,
             title: l.aboutTerms,
             onTap: () => _open(AppLinks.terms),
           ),
@@ -172,34 +174,6 @@ class _Header extends StatelessWidget {
         header: true,
         child: Text(title, style: Theme.of(context).textTheme.titleSmall),
       ),
-    );
-  }
-}
-
-/// A row that opens a page in the app ([internal]) or in the browser.
-class _LinkTile extends StatelessWidget {
-  const _LinkTile({
-    required this.icon,
-    required this.title,
-    required this.onTap,
-    this.subtitle,
-    this.internal = false,
-  });
-
-  final IconData icon;
-  final String title;
-  final String? subtitle;
-  final bool internal;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      leading: Icon(icon),
-      title: Text(title),
-      subtitle: subtitle == null ? null : Text(subtitle!),
-      trailing: Icon(internal ? Icons.chevron_right : Icons.open_in_new),
-      onTap: onTap,
     );
   }
 }

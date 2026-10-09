@@ -15,9 +15,12 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'package:dr/app_links.dart';
 import 'package:dr/ui/help_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../../fake_url_launcher.dart';
 
 void main() {
   Widget build() => const MaterialApp(home: HelpPage());
@@ -52,5 +55,14 @@ void main() {
     await tester.tap(find.text(questions.first));
     await tester.pumpAndSettle();
     expect(find.textContaining('Bestätigungscode'), findsNothing);
+  });
+
+  testWidgets('ends with a link to the online FAQ', (tester) async {
+    final launcher = FakeUrlLauncher.install();
+    await tester.pumpWidget(build());
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('FAQ'));
+    await tester.pumpAndSettle();
+    expect(launcher.launched, [AppLinks.faq.toString()]);
   });
 }

@@ -15,7 +15,7 @@
   "menuSettings": "Settings",
   "menuHelp": "Help and feedback",
   "menuRate": "Rate on Google Play",
-  "menuAbout": "About this app",
+  "menuAbout": "About",
   "menuShare": "Share the app",
   "menuOtherApps": "Other apps by Wertwerk",
   "menuLogout": "Sign out",
@@ -421,6 +421,8 @@
   "passResetNotMatchingYet": "The passwords do not match yet",
   "commonOk": "Ok",
   "accountSheetClose": "Close the account card",
+  "aboutTitle": "About the app",
+  "aboutOtherAppsSubtitle": "More apps on Google Play",
   "aboutPrivacy": "Privacy policy",
   "aboutVersion": "Version {version}",
   "@aboutVersion": {

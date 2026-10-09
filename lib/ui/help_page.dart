@@ -15,9 +15,12 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'package:dr/app_links.dart';
 import 'package:dr/l10n/l10n.dart';
 import 'package:dr/ui/layout.dart';
+import 'package:dr/ui/link_tile.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// The common questions, answered in the app so they work offline.
 class HelpPage extends StatelessWidget {
@@ -45,6 +48,14 @@ class HelpPage extends StatelessWidget {
               childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
               children: [Text(answer)],
             ),
+          LinkTile(
+            icon: Icons.help_outline_rounded,
+            title: l.helpFaq,
+            onTap: () => launchUrl(
+              AppLinks.faq,
+              mode: LaunchMode.externalApplication,
+            ),
+          ),
         ],
       ),
     );

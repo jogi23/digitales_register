@@ -15,7 +15,7 @@
   "menuSettings": "Einstellungen",
   "menuHelp": "Hilfe und Feedback",
   "menuRate": "Bei Google Play bewerten",
-  "menuAbout": "Über diese App",
+  "menuAbout": "Über",
   "menuShare": "App teilen",
   "menuOtherApps": "Andere Apps von Wertwerk",
   "menuLogout": "Abmelden",
@@ -442,6 +442,8 @@
   "passResetNotMatchingYet": "Die Passwörter stimmen noch nicht überein",
   "commonOk": "Ok",
   "accountSheetClose": "Konto schließen",
+  "aboutTitle": "Über die App",
+  "aboutOtherAppsSubtitle": "Weitere Apps im Play Store",
   "aboutPrivacy": "Datenschutzerklärung",
   "aboutVersion": "Version {version}",
   "@aboutVersion": {

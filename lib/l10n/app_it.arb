@@ -15,7 +15,7 @@
   "menuSettings": "Impostazioni",
   "menuHelp": "Aiuto e feedback",
   "menuRate": "Valuta su Google Play",
-  "menuAbout": "Informazioni sull'app",
+  "menuAbout": "Informazioni",
   "menuShare": "Condividi l'app",
   "menuOtherApps": "Altre app di Wertwerk",
   "menuLogout": "Esci",
@@ -421,6 +421,8 @@
   "passResetNotMatchingYet": "Le password non coincidono ancora",
   "commonOk": "Ok",
   "accountSheetClose": "Chiudi l'account",
+  "aboutTitle": "Informazioni sull'app",
+  "aboutOtherAppsSubtitle": "Altre app su Google Play",
   "aboutPrivacy": "Informativa sulla privacy",
   "aboutVersion": "Versione {version}",
   "@aboutVersion": {
