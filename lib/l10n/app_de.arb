@@ -348,6 +348,7 @@
   "diagnosticsShareWarningTitle": "Protokoll teilen?",
   "diagnosticsShareWarningBody": "Das Protokoll enthält Antworten des Portals, etwa Noten, Absenzen und Mitteilungen, und kann persönliche Daten enthalten. Teile es nur mit Personen, denen du vertraust, zum Beispiel dem Support.",
   "diagnosticsNothingRecorded": "Nichts aufgezeichnet",
+  "diagnosticsShareFailed": "Teilen fehlgeschlagen",
   "settingsSource": "Zum Quellcode",
   "settingsAddSubject": "Fach hinzufügen",
   "loginOtherSchool": "Andere Schule",

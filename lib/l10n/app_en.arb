@@ -327,6 +327,7 @@
   "diagnosticsShareWarningTitle": "Share the log?",
   "diagnosticsShareWarningBody": "The log contains answers from the portal, such as grades, absences and messages, and may contain personal data. Share it only with people you trust, such as support.",
   "diagnosticsNothingRecorded": "Nothing recorded",
+  "diagnosticsShareFailed": "Sharing failed",
   "settingsSource": "Source code",
   "settingsAddSubject": "Add a subject",
   "loginOtherSchool": "Other school",

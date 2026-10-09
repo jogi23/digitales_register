@@ -327,6 +327,7 @@
   "diagnosticsShareWarningTitle": "Condividere il registro?",
   "diagnosticsShareWarningBody": "Il registro contiene le risposte del portale, ad esempio voti, assenze e messaggi, e può contenere dati personali. Condividilo solo con persone di cui ti fidi, ad esempio il supporto.",
   "diagnosticsNothingRecorded": "Niente registrato",
+  "diagnosticsShareFailed": "Condivisione non riuscita",
   "settingsSource": "Codice sorgente",
   "settingsAddSubject": "Aggiungi materia",
   "loginOtherSchool": "Altra scuola",

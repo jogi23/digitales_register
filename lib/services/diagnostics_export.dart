@@ -45,6 +45,22 @@ class DiagnosticsExport {
   final Future<Directory> Function() _tempDir;
   final Future<void> Function(ShareParams) _share;
 
+  Future<Directory> _exportDir() async {
+    final base = await _tempDir();
+    return Directory('${base.path}/dr_diagnostics');
+  }
+
+  /// Removes every file an earlier [share] left in the temporary folder.
+  Future<void> deleteExports() async {
+    try {
+      final dir = await _exportDir();
+      if (await dir.exists()) await dir.delete(recursive: true);
+    } on Object {
+      // Best effort: gone already, still open elsewhere, or no temporary
+      // folder to look in. The next share tries again.
+    }
+  }
+
   /// Shares the log and the [items] of the network protocol, leaving out
   /// whichever of the two has nothing in it.
   Future<DiagnosticsExportResult> share(List<NetworkProtocolItem> items) async {
@@ -55,7 +71,10 @@ class DiagnosticsExport {
         .toIso8601String()
         .replaceAll(':', '-')
         .replaceAll('.', '-');
-    final dir = await _tempDir();
+    // Earlier exports go first: they hold what the portal answered.
+    await deleteExports();
+    final dir = await _exportDir();
+    await dir.create(recursive: true);
     final files = <XFile>[];
     if (entries.isNotEmpty) {
       final file = File('${dir.path}/dr_debug_log_$stamp.txt');

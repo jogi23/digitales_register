@@ -26,13 +26,18 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class _FakeExport implements DiagnosticsExport {
   int calls = 0;
+  bool fails = false;
   DiagnosticsExportResult result = DiagnosticsExportResult.shared;
 
   @override
   Future<DiagnosticsExportResult> share(List<NetworkProtocolItem> items) async {
     calls++;
+    if (fails) throw StateError('kein Ziel');
     return result;
   }
+
+  @override
+  Future<void> deleteExports() async {}
 }
 
 void main() {
@@ -106,6 +111,18 @@ void main() {
     await tester.pumpAndSettle();
     expect(export.calls, 1);
     expect(find.text('Nichts aufgezeichnet'), findsNothing);
+  });
+
+  testWidgets('a failing share says so instead of failing silently',
+      (tester) async {
+    export.fails = true;
+    await pump(tester, enabled: true);
+    await tester.tap(find.text('Protokoll teilen'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Teilen'));
+    await tester.pumpAndSettle();
+    expect(find.text('Teilen fehlgeschlagen'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('an empty log says so', (tester) async {

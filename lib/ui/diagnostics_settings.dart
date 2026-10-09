@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'package:dr/debug_log.dart';
 import 'package:dr/l10n/l10n.dart';
 import 'package:dr/providers/network_protocol_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
@@ -72,13 +73,24 @@ class DiagnosticsSettingsTiles extends ConsumerWidget {
       ),
     );
     if (confirmed != true || !context.mounted) return;
-    final result = await ref
-        .read(diagnosticsExportProvider)
-        .share(ref.read(networkProtocolProvider));
-    if (result == DiagnosticsExportResult.empty && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l.diagnosticsNothingRecorded)),
-      );
+    final DiagnosticsExportResult result;
+    try {
+      result = await ref
+          .read(diagnosticsExportProvider)
+          .share(ref.read(networkProtocolProvider));
+    } on Object catch (e, s) {
+      debugLogError('Diagnose-Protokoll teilen', e, s);
+      if (context.mounted) _say(context, l.diagnosticsShareFailed);
+      return;
     }
+    if (result == DiagnosticsExportResult.empty && context.mounted) {
+      _say(context, l.diagnosticsNothingRecorded);
+    }
+  }
+
+  void _say(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
   }
 }

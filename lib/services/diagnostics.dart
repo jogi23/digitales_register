@@ -15,9 +15,12 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'dart:async';
+
 import 'package:dr/debug_log.dart';
 import 'package:dr/providers/network_protocol_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
+import 'package:dr/services/diagnostics_export.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -25,12 +28,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// debug log and the network protocol from now on. Turning it off throws
 /// away what was recorded; a debug build keeps recording either way.
 ///
+/// Switching on also starts from an empty log: a background run that was
+/// still going when the switch went off may have written to the file since.
+///
 /// The start sets [DebugLog.enabled] from the stored flag itself, before the
 /// settings are loaded.
 void keepDiagnosticsInSync(
   ProviderContainer container, {
   DebugLog? log,
   bool? debugBuild,
+  DiagnosticsExport? exporter,
 }) {
   final target = log ?? DebugLog.instance;
   final isDebugBuild = debugBuild ?? kDebugMode;
@@ -38,9 +45,13 @@ void keepDiagnosticsInSync(
     settingsProvider.select((s) => s.diagnosticsEnabled),
     (_, on) {
       target.enabled = isDebugBuild || on;
-      if (on || isDebugBuild) return;
+      if (isDebugBuild) return;
+      unawaited(target.clear());
+      if (on) return;
       container.read(networkProtocolProvider.notifier).reset();
-      target.clear();
+      final DiagnosticsExport exports =
+          exporter ?? container.read(diagnosticsExportProvider);
+      unawaited(exports.deleteExports());
     },
   );
 }

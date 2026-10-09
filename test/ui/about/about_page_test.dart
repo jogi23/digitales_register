@@ -64,6 +64,14 @@ void main() {
     expect(find.textContaining('unabhängige App'), findsOneWidget);
   });
 
+  testWidgets('reads the app name once, not for the logo as well',
+      (tester) async {
+    final handle = tester.ensureSemantics();
+    await pumpPage(tester);
+    expect(find.bySemanticsLabel('DigiReg ST'), findsOneWidget);
+    handle.dispose();
+  });
+
   testWidgets('names the three developers', (tester) async {
     await pumpPage(tester);
     await tester.scrollUntilVisible(

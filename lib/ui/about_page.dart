@@ -42,7 +42,7 @@ class AboutPage extends StatelessWidget {
             child: Image.asset(
               'assets/index.png',
               width: 100,
-              semanticLabel: 'DigiReg ST',
+              excludeFromSemantics: true,
             ),
           ),
           const SizedBox(height: 16),

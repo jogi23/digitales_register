@@ -55,6 +55,17 @@ void main() {
       );
     });
 
+    test('copes with keys that are not strings', () {
+      expect(
+        redactSensitive({
+          'nested': {1: 'eins', 'password': 'x'},
+        }),
+        {
+          'nested': {1: 'eins', 'password': '***'},
+        },
+      );
+    });
+
     test('does not change its input', () {
       final input = {'password': 'geheim'};
       redactSensitive(input);

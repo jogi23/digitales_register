@@ -61,6 +61,24 @@ void main() {
     expect(shared, isEmpty);
   });
 
+  test('removes what an earlier share left behind', () async {
+    await export.share([_item()]);
+    final first = files().single.path;
+    expect(File(first).existsSync(), isTrue);
+
+    log.add(LogCategory.start, 'zweiter Durchgang');
+    shared.clear();
+    await export.share([_item()]);
+    expect(File(first).existsSync(), isFalse);
+  });
+
+  test('deleteExports removes every exported file', () async {
+    await export.share([_item()]);
+    final path = files().single.path;
+    await export.deleteExports();
+    expect(File(path).existsSync(), isFalse);
+  });
+
   test('shares both files when both have data', () async {
     log.add(LogCategory.start, 'App-Start');
     expect(await export.share([_item()]), DiagnosticsExportResult.shared);

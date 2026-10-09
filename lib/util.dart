@@ -158,17 +158,16 @@ const _secretKeys = {'password', 'pass', 'newpassword', 'oldpassword'};
 /// [args] with the value of every password key replaced by `***`, however
 /// deep and however the key is capitalised. For anything that may be shared,
 /// such as the network protocol. [args] itself stays as it is.
-Map<String, Object?> redactSensitive(Map<String, Object?> args) =>
-    _redact(args) as Map<String, Object?>;
+Map<String, Object?> redactSensitive(Map<String, Object?> args) => {
+      for (final e in args.entries) e.key: _redactEntry(e.key, e.value),
+    };
+
+Object? _redactEntry(Object? key, Object? value) =>
+    _secretKeys.contains('$key'.toLowerCase()) ? '***' : _redact(value);
 
 Object? _redact(Object? value) => switch (value) {
       Map() => {
-          for (final e in value.entries)
-            e.key as String: _secretKeys.contains(
-              (e.key as String).toLowerCase(),
-            )
-                ? '***'
-                : _redact(e.value),
+          for (final e in value.entries) e.key: _redactEntry(e.key, e.value),
         },
       List() => [for (final e in value) _redact(e)],
       _ => value,

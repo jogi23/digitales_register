@@ -15,11 +15,14 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'dart:io';
+
 import 'package:dr/app_state.dart';
 import 'package:dr/debug_log.dart';
 import 'package:dr/providers/network_protocol_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/services/diagnostics.dart';
+import 'package:dr/services/diagnostics_export.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -58,6 +61,48 @@ void main() {
 
     log.add(LogCategory.start, 'danach');
     expect(log.entries, isEmpty);
+  });
+
+  test('turning the switch off deletes the exported files', () async {
+    final dir = Directory.systemTemp.createTempSync('dr_diagnostics_sync');
+    addTearDown(() => dir.deleteSync(recursive: true));
+    final export = DiagnosticsExport(
+      log: DebugLog(enabled: true)..add(LogCategory.start, 'x'),
+      tempDir: () async => dir,
+      share: (_) async {},
+    );
+    await export.share(const []);
+    final exported = dir.listSync(recursive: true).whereType<File>();
+    expect(exported, isNotEmpty);
+
+    final c = ProviderContainer();
+    addTearDown(c.dispose);
+    keepDiagnosticsInSync(c,
+        log: DebugLog(), debugBuild: false, exporter: export);
+    c.read(settingsProvider.notifier).setDiagnosticsEnabled(true);
+    c.read(settingsProvider.notifier).setDiagnosticsEnabled(false);
+    await pumpEventQueue();
+
+    expect(dir.listSync(recursive: true).whereType<File>(), isEmpty);
+  });
+
+  test('switching on starts from an empty log', () async {
+    // What a background run left in the file while the switch was off.
+    final dir = Directory.systemTemp.createTempSync('dr_diagnostics_file');
+    addTearDown(() => dir.deleteSync(recursive: true));
+    final file = File('${dir.path}/debug_log.jsonl')
+      ..writeAsStringSync(
+        '{"t":"2026-10-08T10:00:00.000","c":"Start","m":"Rest"}\n',
+      );
+    final log = DebugLog(enabled: false)..attachFile(file);
+    final c = ProviderContainer();
+    addTearDown(c.dispose);
+    keepDiagnosticsInSync(c, log: log, debugBuild: false);
+
+    c.read(settingsProvider.notifier).setDiagnosticsEnabled(true);
+    await pumpEventQueue();
+
+    expect(await log.readAll(), isEmpty);
   });
 
   test('a debug build keeps recording when the switch goes off', () async {
