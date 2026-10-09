@@ -81,12 +81,11 @@ class SettingsNotifier extends Notifier<SettingsState> {
   /// been stored with an account: taking them from there beats resetting the
   /// user to defaults.
   void load(SettingsState settings) {
-    final restored = settings.copyWith(scrollToGrades: false);
     if (_globalStored) {
-      state = restored.withGlobalsFrom(state);
+      state = settings.withGlobalsFrom(state);
       return;
     }
-    state = restored;
+    state = settings;
     unawaited(_persistGlobal());
   }
 
@@ -141,6 +140,18 @@ class SettingsNotifier extends Notifier<SettingsState> {
 
   void setIgnoreForGradesAverage(List<String> subjects) =>
       _update(state.copyWith(ignoreForGradesAverage: List.of(subjects)));
+
+  /// Free text can name a subject that is already excluded; it stays once.
+  void addIgnoredSubject(String subject) {
+    final current = state.ignoreForGradesAverage;
+    if (current.contains(subject)) return;
+    setIgnoreForGradesAverage([...current, subject]);
+  }
+
+  void removeIgnoredSubject(String subject) => setIgnoreForGradesAverage([
+        for (final other in state.ignoreForGradesAverage)
+          if (other != subject) other,
+      ]);
 
   void setStarColor(String id) => _update(state.copyWith(starColor: id));
 
@@ -255,12 +266,6 @@ class SettingsNotifier extends Notifier<SettingsState> {
 
   void setAccentBackground(bool value) =>
       _update(state.copyWith(accentBackground: value));
-
-  // ─── Routing-triggered ephemeral scroll state ─────────────────────────────
-
-  void scrollToGradesSection() => state = state.copyWith(scrollToGrades: true);
-
-  void resetScroll() => state = state.copyWith(scrollToGrades: false);
 }
 
 final settingsProvider =

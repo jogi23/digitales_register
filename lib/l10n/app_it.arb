@@ -282,18 +282,15 @@
   "calendarFree": "Libero",
   "settingsTitle": "Impostazioni",
   "settingsProfile": "Profilo",
-  "settingsSectionLogin": "Accesso",
   "settingsStayLoggedIn": "Resta connesso",
   "settingsStayLoggedInSubtitle": "I tuoi dati di accesso vengono salvati sul dispositivo",
   "settingsKeepPageOnAccountSwitch": "Resta sulla pagina al cambio di account",
   "settingsKeepPageOnAccountSwitchSubtitle": "Altrimenti dopo il cambio si apre l'Agenda",
-  "settingsSectionAppearance": "Aspetto",
   "settingsThemeFollowDevice": "Segui il tema del dispositivo",
   "settingsThemeLight": "Chiaro",
   "settingsThemeDark": "Scuro",
   "settingsAccentBackground": "Sfondo nel colore d'accento",
   "settingsAccentBackgroundSubtitle": "Disattivato: pagine bianche, scure in modalità scura",
-  "settingsSectionSubjects": "Materie",
   "settingsNicksAndColors": "Sigle e colori",
   "settingsColorHomework": "Colora i compiti con questi colori",
   "settingsColorLessons": "Colora le lezioni nel calendario con questi colori",
@@ -319,7 +316,6 @@
   "settingsStarColorDefault": "Predefinito",
   "settingsExcludeSubjects": "Escludi materie dalla media dei voti",
   "settingsNoSubjectExcluded": "Nessuna materia esclusa",
-  "settingsSectionAdvanced": "Avanzate",
   "settingsDiagnostics": "Registro diagnostico",
   "settingsDiagnosticsSubtitle": "Registra sul dispositivo cosa fa l'app e cosa risponde il portale. Non viene inviato nulla automaticamente; puoi inviarlo ad esempio al supporto.",
   "diagnosticsShare": "Condividi registro",
@@ -753,5 +749,52 @@
   "settingsAppLockGrace": "Blocca dopo",
   "settingsAppLockGraceNow": "Subito",
   "settingsAppLockGraceMinutes": "{minutes} min",
-  "settingsAppLockNoDeviceLock": "Sul dispositivo non è impostato alcun blocco schermo. Imposta prima un PIN, una sequenza o un'impronta nelle impostazioni del dispositivo."
+  "settingsAppLockNoDeviceLock": "Sul dispositivo non è impostato alcun blocco schermo. Imposta prima un PIN, una sequenza o un'impronta nelle impostazioni del dispositivo.",
+  "settingsCategoryAccount": "Account e sicurezza",
+  "settingsMoreInfo": "Maggiori informazioni",
+  "settingsCategoryNotifications": "Notifiche",
+  "settingsCategoryAppearance": "Tema e lingua",
+  "settingsTheme": "Tema",
+  "settingsBlockSubjectsCalendar": "Materie e calendario",
+  "settingsCategoryAdvanced": "Avanzate",
+  "settingsSummaryNotificationsOn": "Attive · {interval}",
+  "@settingsSummaryNotificationsOn": {
+    "placeholders": {
+      "interval": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsSummaryNotificationsOff": "Disattivate",
+  "settingsSummaryAppearance": "{theme} · {language}",
+  "@settingsSummaryAppearance": {
+    "placeholders": {
+      "theme": {
+        "type": "String"
+      },
+      "language": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsSummaryAppLockOn": "Blocco app attivo",
+  "settingsSummaryAppLockOff": "Blocco app disattivato",
+  "settingsBlockSummarySubjectsCalendar": "Abbreviazioni, colori, calendario",
+  "settingsBlockSummaryGrades": "Grafico, media, stelle",
+  "settingsSummaryDiagnosticsOn": "Registro diagnostico attivo",
+  "settingsSummaryDiagnosticsOff": "Registro diagnostico disattivato",
+  "settingsCategoryContent": "Contenuti e viste",
+  "settingsSummaryContent": "Compiti, calendario, voti",
+  "settingsBlockSummaryMerkheft": "Vista, contrassegni, colori",
+  "settingsBlockSummaryEntryView": "Disposizione, visualizzazione",
+  "settingsBlockSummaryAbsences": "Visualizzazione",
+  "settingsRemoveSubject": "Rimuovi {subject}",
+  "@settingsRemoveSubject": {
+    "placeholders": {
+      "subject": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsSummaryNotificationsInAppOnly": "Solo nell'app"
 }

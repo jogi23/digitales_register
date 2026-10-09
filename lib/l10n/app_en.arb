@@ -58,7 +58,7 @@
   "displayCards": "Cards",
   "displayTimeline": "Timeline",
   "displayTimelineOnlyByDay": "Only when arranged by day",
-  "settingsHomeworkOverview": "Homework",
+  "settingsHomeworkOverview": "Homework overview",
   "settingsAbsences": "Absences",
   "noConnection": "No connection",
   "gradesAverageStars": "Star average",
@@ -282,18 +282,15 @@
   "calendarFree": "Free",
   "settingsTitle": "Settings",
   "settingsProfile": "Profile",
-  "settingsSectionLogin": "Sign-in",
   "settingsStayLoggedIn": "Stay signed in",
   "settingsStayLoggedInSubtitle": "Your credentials are stored on this device",
   "settingsKeepPageOnAccountSwitch": "Stay on the page when switching accounts",
   "settingsKeepPageOnAccountSwitchSubtitle": "Otherwise Homework opens after switching",
-  "settingsSectionAppearance": "Appearance",
   "settingsThemeFollowDevice": "Follow the device theme",
   "settingsThemeLight": "Light",
   "settingsThemeDark": "Dark",
   "settingsAccentBackground": "Accent-coloured background",
   "settingsAccentBackgroundSubtitle": "Off: pages are white, or dark in dark mode",
-  "settingsSectionSubjects": "Subjects",
   "settingsNicksAndColors": "Short names and colours",
   "settingsColorHomework": "Colour homework with these colours",
   "settingsColorLessons": "Colour calendar lessons with these colours",
@@ -305,7 +302,7 @@
   "calendarRoomTooltip": "Room: {room}",
   "calendarRoomsTooltip": "Rooms: {rooms}",
   "settingsFrameTestsRed": "Always frame tests in red",
-  "settingsSectionHomework": "Homework",
+  "settingsSectionHomework": "Homework diary",
   "settingsViewList": "Show as a list",
   "settingsViewMonth": "Show as a month calendar",
   "settingsViewWeek": "Show as a weekly timetable",
@@ -319,7 +316,6 @@
   "settingsStarColorDefault": "Default",
   "settingsExcludeSubjects": "Leave subjects out of the grade average",
   "settingsNoSubjectExcluded": "No subject left out",
-  "settingsSectionAdvanced": "Advanced",
   "settingsDiagnostics": "Diagnostic log",
   "settingsDiagnosticsSubtitle": "Records on this device what the app does and what the portal answers. Nothing is sent automatically; you can send it to support, for example.",
   "diagnosticsShare": "Share log",
@@ -753,5 +749,52 @@
   "settingsAppLockGrace": "Lock after",
   "settingsAppLockGraceNow": "Immediately",
   "settingsAppLockGraceMinutes": "{minutes} min",
-  "settingsAppLockNoDeviceLock": "No screen lock is set up on this device. Set up a PIN, pattern or fingerprint in the device settings first."
+  "settingsAppLockNoDeviceLock": "No screen lock is set up on this device. Set up a PIN, pattern or fingerprint in the device settings first.",
+  "settingsCategoryAccount": "Account & security",
+  "settingsMoreInfo": "More information",
+  "settingsCategoryNotifications": "Notifications",
+  "settingsCategoryAppearance": "Theme & language",
+  "settingsTheme": "Theme",
+  "settingsBlockSubjectsCalendar": "Subjects & calendar",
+  "settingsCategoryAdvanced": "Advanced",
+  "settingsSummaryNotificationsOn": "On · {interval}",
+  "@settingsSummaryNotificationsOn": {
+    "placeholders": {
+      "interval": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsSummaryNotificationsOff": "Off",
+  "settingsSummaryAppearance": "{theme} · {language}",
+  "@settingsSummaryAppearance": {
+    "placeholders": {
+      "theme": {
+        "type": "String"
+      },
+      "language": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsSummaryAppLockOn": "App lock on",
+  "settingsSummaryAppLockOff": "App lock off",
+  "settingsBlockSummarySubjectsCalendar": "Abbreviations, colours, calendar",
+  "settingsBlockSummaryGrades": "Chart, average, stars",
+  "settingsSummaryDiagnosticsOn": "Diagnostic log on",
+  "settingsSummaryDiagnosticsOff": "Diagnostic log off",
+  "settingsCategoryContent": "Content & views",
+  "settingsSummaryContent": "Homework, calendar, grades",
+  "settingsBlockSummaryMerkheft": "View, marks, colours",
+  "settingsBlockSummaryEntryView": "Arrangement, display",
+  "settingsBlockSummaryAbsences": "Display",
+  "settingsRemoveSubject": "Remove {subject}",
+  "@settingsRemoveSubject": {
+    "placeholders": {
+      "subject": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsSummaryNotificationsInAppOnly": "Only in the app"
 }

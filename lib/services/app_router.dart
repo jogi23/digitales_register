@@ -22,7 +22,6 @@ import 'package:dr/container/absences_page_container.dart';
 import 'package:dr/container/calendar_container.dart';
 import 'package:dr/container/grades_page_container.dart';
 import 'package:dr/container/messages_container.dart';
-import 'package:dr/container/settings_page.dart';
 import 'package:dr/main.dart';
 import 'package:dr/container/classbook_page_container.dart';
 import 'package:dr/container/course_content_container.dart';
@@ -35,9 +34,9 @@ import 'package:dr/providers/grades_provider.dart';
 import 'package:dr/providers/login_provider.dart';
 import 'package:dr/providers/messages_provider.dart';
 import 'package:dr/providers/profile_provider.dart';
-import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/ui/certificate.dart';
 import 'package:dr/ui/grade_detail_page.dart';
+import 'package:dr/ui/settings/settings_hub_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -82,9 +81,8 @@ class AppRouter {
   }
 
   void showSettings() {
-    _ref.read(settingsProvider.notifier).resetScroll();
     scaffoldKey!.currentState!
-        .selectContentWidget(SettingsPageContainer(), Pages.settings);
+        .selectContentWidget(const SettingsHubPage(), Pages.settings);
   }
 
   void showCourseContent() {
@@ -205,9 +203,12 @@ class AppRouter {
     _ref.read(messagesProvider.notifier).select(id);
   }
 
+  /// The grades settings (the content page with Noten open), with the settings
+  /// hub underneath so that back leads there.
   void showEditGradesAverageSettings() {
-    _ref.read(settingsProvider.notifier).scrollToGradesSection();
-    unawaited(navigatorKey!.currentState!.pushNamed("/settings"));
+    final navigator = navigatorKey!.currentState!;
+    unawaited(navigator.pushNamed("/settings"));
+    unawaited(navigator.pushNamed("/settingsGrades"));
   }
 
   void showGradeCalculator() {

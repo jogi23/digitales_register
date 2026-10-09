@@ -111,8 +111,8 @@ void main() {
           );
 
       expect(c.read(settingsProvider).starColor, 'red');
-      expect(c.read(settingsProvider).dashboardViewMode,
-          DashboardViewMode.week);
+      expect(
+          c.read(settingsProvider).dashboardViewMode, DashboardViewMode.week);
     });
   });
 
@@ -188,14 +188,12 @@ void main() {
   });
 
   group('SettingsNotifier — load', () {
-    test('load restores settings and clears the grades scroll flag', () {
+    test('load restores the settings of the account', () {
       final c = _makeContainer();
-      c.read(settingsProvider.notifier).scrollToGradesSection();
       final saved = c.read(settingsProvider).copyWith(noPasswordSaving: true);
       c.read(settingsProvider.notifier).load(saved);
       final s = c.read(settingsProvider);
       expect(s.noPasswordSaving, true);
-      expect(s.scrollToGrades, false);
     });
   });
 
@@ -273,8 +271,7 @@ void main() {
   });
 
   group('display modes', () {
-    test('the homework page takes over the arrangement both pages shared',
-        () {
+    test('the homework page takes over the arrangement both pages shared', () {
       // Bisher galt eine Einstellung für Klassenbuch und Hausaufgaben.
       final alt = SettingsState.fromJson({'classbookViewMode': 'bySubject'});
       expect(alt.homeworkViewMode, ClassbookViewMode.bySubject);
@@ -450,6 +447,45 @@ void main() {
       final json = SettingsState(appLockEnabled: true).globalJson();
       expect(json['appLockEnabled'], isTrue);
       expect(json['appLockGraceMinutes'], 1);
+    });
+  });
+
+  group('SettingsNotifier — excluded subjects', () {
+    test('addIgnoredSubject appends and skips one already there', () {
+      final c = _makeContainer();
+      final notifier = c.read(settingsProvider.notifier);
+
+      notifier.addIgnoredSubject('Mathe');
+      notifier.addIgnoredSubject('Deutsch');
+      notifier.addIgnoredSubject('Mathe');
+
+      expect(
+        c.read(settingsProvider).ignoreForGradesAverage.toList(),
+        ['Mathe', 'Deutsch'],
+      );
+    });
+
+    test('removeIgnoredSubject removes just that subject', () {
+      final c = _makeContainer();
+      final notifier = c.read(settingsProvider.notifier)
+        ..setIgnoreForGradesAverage(['A', 'B', 'C']);
+
+      notifier.removeIgnoredSubject('B');
+
+      expect(
+        c.read(settingsProvider).ignoreForGradesAverage.toList(),
+        ['A', 'C'],
+      );
+    });
+
+    test('removing a subject that is not there changes nothing', () {
+      final c = _makeContainer();
+      final notifier = c.read(settingsProvider.notifier)
+        ..setIgnoreForGradesAverage(['A']);
+
+      notifier.removeIgnoredSubject('Z');
+
+      expect(c.read(settingsProvider).ignoreForGradesAverage.toList(), ['A']);
     });
   });
 }

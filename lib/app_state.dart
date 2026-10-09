@@ -381,7 +381,6 @@ class SettingsState {
     this.typeSorted = false,
     this.askWhenDelete = false,
     this.showCancelled = false,
-    this.scrollToGrades = false,
     this.showCalendarNicksBar = true,
     this.showGradesDiagram = true,
     this.showAllSubjectsAverage = true,
@@ -433,9 +432,6 @@ class SettingsState {
   final bool typeSorted;
   final bool askWhenDelete;
   final bool showCancelled;
-
-  // Not serialized — ephemeral UI state for the settings page
-  final bool scrollToGrades;
 
   final bool showCalendarNicksBar;
   final bool showGradesDiagram;
@@ -543,7 +539,6 @@ class SettingsState {
     bool? typeSorted,
     bool? askWhenDelete,
     bool? showCancelled,
-    bool? scrollToGrades,
     bool? showCalendarNicksBar,
     bool? showGradesDiagram,
     bool? showAllSubjectsAverage,
@@ -588,7 +583,6 @@ class SettingsState {
         typeSorted: typeSorted ?? this.typeSorted,
         askWhenDelete: askWhenDelete ?? this.askWhenDelete,
         showCancelled: showCancelled ?? this.showCancelled,
-        scrollToGrades: scrollToGrades ?? this.scrollToGrades,
         showCalendarNicksBar: showCalendarNicksBar ?? this.showCalendarNicksBar,
         showGradesDiagram: showGradesDiagram ?? this.showGradesDiagram,
         showAllSubjectsAverage:
@@ -831,9 +825,7 @@ class SettingsState {
         ...toJson(),
         for (final entry in json.entries)
           if (_globalKeys.contains(entry.key)) entry.key: entry.value,
-      })
-          // fromJson does not carry the ephemeral scroll flag.
-          .copyWith(scrollToGrades: scrollToGrades);
+      });
 
   /// This state with its app-wide settings taken from [other].
   SettingsState withGlobalsFrom(SettingsState other) =>
@@ -849,7 +841,6 @@ class SettingsState {
         other.typeSorted == typeSorted &&
         other.askWhenDelete == askWhenDelete &&
         other.showCancelled == showCancelled &&
-        other.scrollToGrades == scrollToGrades &&
         other.showCalendarNicksBar == showCalendarNicksBar &&
         other.showGradesDiagram == showGradesDiagram &&
         other.showAllSubjectsAverage == showAllSubjectsAverage &&
@@ -896,7 +887,6 @@ class SettingsState {
         typeSorted,
         askWhenDelete,
         showCancelled,
-        scrollToGrades,
         showCalendarNicksBar,
         showGradesDiagram,
         showAllSubjectsAverage,

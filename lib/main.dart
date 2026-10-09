@@ -26,7 +26,7 @@ import 'package:dr/container/notifications_page_container.dart';
 import 'package:dr/container/pass_reset_container.dart';
 import 'package:dr/container/profile_container.dart';
 import 'package:dr/container/request_pass_reset_container.dart';
-import 'package:dr/container/settings_page.dart';
+import 'package:dr/services/settings_routes.dart';
 import 'package:dr/debug_log.dart';
 import 'package:dr/middleware/middleware.dart';
 import 'package:dr/providers/account_profile_provider.dart';
@@ -258,12 +258,6 @@ class RegisterApp extends ConsumerWidget {
                   builder: (_) => const GradeCalculator(),
                   fullscreenDialog: true,
                 );
-              case "settings":
-                return MaterialPageRoute<void>(
-                  settings: settings,
-                  builder: (_) => SettingsPageContainer(),
-                  fullscreenDialog: true,
-                );
               case "subjectAppearance":
                 return MaterialPageRoute<void>(
                   settings: settings,
@@ -273,7 +267,8 @@ class RegisterApp extends ConsumerWidget {
                   fullscreenDialog: true,
                 );
               default:
-                throw Exception("Unknown Route ${pathElements[1]}");
+                return settingsRoute(settings) ??
+                    (throw Exception("Unknown Route ${pathElements[1]}"));
             }
           },
           builder: (context, child) {

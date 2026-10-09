@@ -217,6 +217,8 @@ void main() {
     await tester.tap(find.byIcon(Icons.settings));
     await tester.pumpAndSettle();
 
+    // The settings open on an overview; the profile row is in this group.
+    await tester.tap(find.text("Konto & Sicherheit"));
     await tester.pumpAndSettle();
 
     when(() => wrapper.send("api/profile/get")).thenAnswer(

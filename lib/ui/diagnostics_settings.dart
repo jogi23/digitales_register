@@ -37,6 +37,7 @@ class DiagnosticsSettingsTiles extends ConsumerWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         SwitchListTile.adaptive(
+          secondary: const Icon(Icons.manage_search_rounded),
           title: Text(l.settingsDiagnostics),
           subtitle: Text(l.settingsDiagnosticsSubtitle),
           value: enabled,
@@ -44,7 +45,7 @@ class DiagnosticsSettingsTiles extends ConsumerWidget {
         ),
         if (enabled)
           ListTile(
-            leading: const Icon(Icons.share),
+            leading: const Icon(Icons.share_rounded),
             title: Text(l.diagnosticsShare),
             onTap: () => _share(context, ref),
           ),

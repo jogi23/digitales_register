@@ -289,18 +289,15 @@
   "calendarFree": "Frei",
   "settingsTitle": "Einstellungen",
   "settingsProfile": "Profil",
-  "settingsSectionLogin": "Anmeldung",
   "settingsStayLoggedIn": "Angemeldet bleiben",
   "settingsStayLoggedInSubtitle": "Deine Zugangsdaten werden lokal gespeichert",
   "settingsKeepPageOnAccountSwitch": "Beim Kontowechsel auf der Seite bleiben",
   "settingsKeepPageOnAccountSwitchSubtitle": "Sonst öffnet sich nach dem Wechsel das Merkheft",
-  "settingsSectionAppearance": "Aussehen",
   "settingsThemeFollowDevice": "Geräte-Theme folgen",
   "settingsThemeLight": "Hell",
   "settingsThemeDark": "Dunkel",
   "settingsAccentBackground": "Hintergrund in Akzentfarbe",
   "settingsAccentBackgroundSubtitle": "Aus: Seiten weiß, im dunklen Modus dunkel",
-  "settingsSectionSubjects": "Fächer",
   "settingsNicksAndColors": "Kürzel und Farben",
   "settingsColorHomework": "Hausaufgaben mit diesen Farben färben",
   "settingsColorLessons": "Stunden im Kalender mit diesen Farben färben",
@@ -340,7 +337,6 @@
   "settingsStarColorDefault": "Standard",
   "settingsExcludeSubjects": "Fächer aus dem Notendurchschnitt ausschließen",
   "settingsNoSubjectExcluded": "Kein Fach ausgeschlossen",
-  "settingsSectionAdvanced": "Erweitert",
   "settingsDiagnostics": "Diagnose-Protokoll",
   "settingsDiagnosticsSubtitle": "Zeichnet auf dem Gerät auf, was die App tut und was das Portal antwortet. Nichts wird automatisch gesendet; du kannst es zum Beispiel dem Support schicken.",
   "diagnosticsShare": "Protokoll teilen",
@@ -811,5 +807,52 @@
       }
     }
   },
-  "settingsAppLockNoDeviceLock": "Am Gerät ist keine Bildschirmsperre eingerichtet. Richte zuerst in den Android-Einstellungen eine PIN, ein Muster oder einen Fingerabdruck ein."
+  "settingsAppLockNoDeviceLock": "Am Gerät ist keine Bildschirmsperre eingerichtet. Richte zuerst in den Android-Einstellungen eine PIN, ein Muster oder einen Fingerabdruck ein.",
+  "settingsCategoryAccount": "Konto & Sicherheit",
+  "settingsMoreInfo": "Mehr Informationen",
+  "settingsCategoryNotifications": "Benachrichtigungen",
+  "settingsCategoryAppearance": "Design & Sprache",
+  "settingsTheme": "Design",
+  "settingsBlockSubjectsCalendar": "Fächer & Kalender",
+  "settingsCategoryAdvanced": "Erweitert",
+  "settingsSummaryNotificationsOn": "An · {interval}",
+  "@settingsSummaryNotificationsOn": {
+    "placeholders": {
+      "interval": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsSummaryNotificationsOff": "Aus",
+  "settingsSummaryAppearance": "{theme} · {language}",
+  "@settingsSummaryAppearance": {
+    "placeholders": {
+      "theme": {
+        "type": "String"
+      },
+      "language": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsSummaryAppLockOn": "App-Sperre an",
+  "settingsSummaryAppLockOff": "App-Sperre aus",
+  "settingsBlockSummarySubjectsCalendar": "Kürzel, Farben, Kalender",
+  "settingsBlockSummaryGrades": "Diagramm, Durchschnitt, Sterne",
+  "settingsSummaryDiagnosticsOn": "Diagnose-Protokoll an",
+  "settingsSummaryDiagnosticsOff": "Diagnose-Protokoll aus",
+  "settingsCategoryContent": "Inhalte & Ansichten",
+  "settingsSummaryContent": "Merkheft, Kalender, Noten",
+  "settingsBlockSummaryMerkheft": "Ansicht, Markierungen, Farben",
+  "settingsBlockSummaryEntryView": "Anordnung, Anzeige",
+  "settingsBlockSummaryAbsences": "Anzeige",
+  "settingsRemoveSubject": "{subject} entfernen",
+  "@settingsRemoveSubject": {
+    "placeholders": {
+      "subject": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsSummaryNotificationsInAppOnly": "Nur in der App"
 }
