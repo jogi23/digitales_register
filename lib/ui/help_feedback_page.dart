@@ -15,6 +15,8 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'package:dr/app_links.dart';
+import 'package:dr/ui/help_page.dart';
 import 'package:dr/ui/layout.dart';
 import 'package:dr/util.dart';
 import 'package:dr/l10n/l10n.dart';
@@ -34,19 +36,19 @@ class HelpFeedbackPage extends StatelessWidget {
         padding: context.systemInsets,
         children: [
           ListTile(
+            leading: const Icon(Icons.quiz_outlined),
+            title: Text(tr(context).helpOfflineFaq),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const HelpPage()),
+            ),
+          ),
+          ListTile(
             leading: const Icon(Icons.email),
             title: Text(tr(context).helpWriteEmail),
             trailing: const Icon(Icons.open_in_new),
             onTap: () async {
-              await launchUrl(
-                Uri(
-                  scheme: 'mailto',
-                  path: 'hallo@wertwerk.io',
-                  queryParameters: {
-                    'subject': 'Feedback DigiReg ST $appVersion',
-                  },
-                ),
-              );
+              await launchUrl(AppLinks.feedbackMail(appVersion));
             },
           ),
           ListTile(
@@ -54,9 +56,7 @@ class HelpFeedbackPage extends StatelessWidget {
             title: Text(tr(context).helpFaq),
             trailing: const Icon(Icons.open_in_new),
             onTap: () => launchUrl(
-              Uri.parse(
-                "https://wertwerk.io/projekte/digitale-register-app/#faq",
-              ),
+              AppLinks.faq,
               mode: LaunchMode.externalApplication,
             ),
           ),
@@ -65,7 +65,7 @@ class HelpFeedbackPage extends StatelessWidget {
             title: Text(tr(context).helpSuggestFeature),
             trailing: const Icon(Icons.open_in_new),
             onTap: () => launchUrl(
-              Uri.parse("https://tally.so/r/Y5xKgv"),
+              AppLinks.suggestFeature,
               mode: LaunchMode.externalApplication,
             ),
           ),
@@ -74,7 +74,7 @@ class HelpFeedbackPage extends StatelessWidget {
             title: Text(tr(context).helpReportBug),
             trailing: const Icon(Icons.open_in_new),
             onTap: () => launchUrl(
-              Uri.parse("https://tally.so/r/yPdpP6"),
+              AppLinks.reportBug,
               mode: LaunchMode.externalApplication,
             ),
           ),

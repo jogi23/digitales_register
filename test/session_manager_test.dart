@@ -828,4 +828,23 @@ void main() {
       expect(setup.paths, contains(endsWith('api/auth/login')));
     });
   });
+
+  group('SessionManager network protocol', () {
+    test('never records a password', () async {
+      final signedIn = _SignedInAuth();
+      final items = <NetworkProtocolItem>[];
+      when(() => signedIn.auth.onAddProtocolItem).thenReturn(items.add);
+      final sm = _sessionAnswering(signedIn, _StatusAdapter([200]));
+
+      await sm.send(
+        'api/profile/updateEmail',
+        args: {'email': 'a@b.it', 'password': 'geheim'},
+      );
+
+      expect(items, hasLength(1));
+      expect(items.single.parameters, isNot(contains('geheim')));
+      expect(items.single.parameters, contains('***'));
+      expect(items.single.parameters, contains('a@b.it'));
+    });
+  });
 }

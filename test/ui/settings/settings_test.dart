@@ -88,6 +88,19 @@ Future<ProviderContainer> _pumpSettingsPage(
 }
 
 void main() {
+  testWidgets('offers the diagnostic log instead of the two log pages',
+      (tester) async {
+    await _pumpSettingsPage(tester);
+    await tester.scrollUntilVisible(
+      find.text('Diagnose-Protokoll'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('Diagnose-Protokoll'), findsOneWidget);
+    expect(find.text('Netzwerkprotokoll'), findsNothing);
+    expect(find.text('Debug-Log'), findsNothing);
+  });
+
   testWidgets(
     'notification settings can be changed',
     (tester) async {

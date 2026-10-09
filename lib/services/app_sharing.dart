@@ -15,23 +15,19 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'package:dr/app_links.dart';
 import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/widgets.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-/// Play Store id of the released app.
-///
-/// Written out rather than read from package_info: debug builds carry the
-/// `.debug` suffix and would point at a listing that does not exist.
-const playStorePackage = "io.wertwerk.digitalesregister";
+export 'package:dr/app_links.dart' show playStorePackage;
 
 /// Opens the listing in the Play Store app.
 Uri get playStoreAppUri => Uri.parse("market://details?id=$playStorePackage");
 
 /// The listing on the web, for devices without the Play Store app.
-Uri get playStoreWebUri => Uri.parse(
-    "https://play.google.com/store/apps/details?id=$playStorePackage");
+Uri get playStoreWebUri => AppLinks.playStore;
 
 /// What gets sent when someone shares the app, in the reader's language.
 ///

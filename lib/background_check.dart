@@ -27,11 +27,12 @@ import 'package:dr/l10n/l10n.dart';
 import 'package:dr/notification_type.dart';
 import 'package:dr/notification_visibility.dart';
 import 'package:dr/providers/account_profile_provider.dart';
+import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/system_notifications.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
 import 'package:dr/wrapper.dart';
-import 'package:flutter/foundation.dart' show visibleForTesting;
+import 'package:flutter/foundation.dart' show kDebugMode, visibleForTesting;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
@@ -279,6 +280,7 @@ void backgroundCheckDispatcher() {
     // without this the notifications plugin had no Android side here and
     // showed nothing, without a word.
     DartPluginRegistrant.ensureInitialized();
+    DebugLog.instance.enabled = kDebugMode || await storedDiagnosticsEnabled();
     await DebugLog.instance.init(isolate: 'Hintergrund');
     try {
       await checkForNewNotifications(

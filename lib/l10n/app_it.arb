@@ -17,6 +17,7 @@
   "menuRate": "Valuta su Google Play",
   "menuAbout": "Informazioni sull'app",
   "menuShare": "Condividi l'app",
+  "menuOtherApps": "Altre app di Wertwerk",
   "menuLogout": "Esci",
   "menuClassbook": "Registro di classe",
   "menuHomeworkOverview": "Compiti",
@@ -319,8 +320,13 @@
   "settingsExcludeSubjects": "Escludi materie dalla media dei voti",
   "settingsNoSubjectExcluded": "Nessuna materia esclusa",
   "settingsSectionAdvanced": "Avanzate",
-  "settingsNetworkLog": "Registro di rete",
-  "settingsDebugLog": "Registro di debug",
+  "settingsDiagnostics": "Registro diagnostico",
+  "settingsDiagnosticsSubtitle": "Registra sul dispositivo cosa fa l'app e cosa risponde il portale. Non viene inviato nulla automaticamente; puoi inviarlo ad esempio al supporto.",
+  "diagnosticsShare": "Condividi registro",
+  "diagnosticsShareWarningTitle": "Condividere il registro?",
+  "diagnosticsShareWarningBody": "Il registro contiene le risposte del portale, ad esempio voti, assenze e messaggi, e può contenere dati personali. Condividilo solo con persone di cui ti fidi, ad esempio il supporto.",
+  "diagnosticsNothingRecorded": "Niente registrato",
+  "diagnosticsShareFailed": "Condivisione non riuscita",
   "settingsSource": "Codice sorgente",
   "settingsAddSubject": "Aggiungi materia",
   "loginOtherSchool": "Altra scuola",
@@ -336,6 +342,17 @@
   "helpTitle": "Aiuto e feedback",
   "helpWriteEmail": "Scrivi un'email",
   "helpFaq": "Domande frequenti",
+  "helpOfflineFaq": "Domande frequenti",
+  "faqLoginQ": "Come faccio ad accedere?",
+  "faqLoginA": "Scegli la tua scuola e inserisci nome utente e password del Registro digitale. Se il tuo account richiede un codice di conferma, l'app te lo chiede. Password dimenticata? Puoi reimpostarla nella pagina di accesso.",
+  "faqNotificationsQ": "Perché le notifiche arrivano in ritardo?",
+  "faqNotificationsA": "L'app non riceve vere notifiche push, ma controlla in background a intervalli regolari (Impostazioni, Notifiche). Android può rimandare questi controlli, soprattutto con l'ottimizzazione della batteria attiva. Escludi l'app, così i messaggi arrivano in orario.",
+  "faqProfilesQ": "Come passo da un account all'altro?",
+  "faqProfilesA": "Tocca la tua immagine in alto a destra. Lì puoi aggiungere account e passare da uno all'altro.",
+  "faqHomeworkQ": "Dove vedo i miei compiti?",
+  "faqHomeworkA": "Nell'agenda sono elencati giorno per giorno. Il riepilogo «Compiti» nel menu mostra tutto ciò che è in scadenza.",
+  "faqAppLockQ": "Come proteggo l'app con il blocco del dispositivo?",
+  "faqAppLockA": "Attiva il blocco dell'app nelle impostazioni. Chiede poi impronta, volto o PIN del dispositivo all'avvio e al rientro.",
   "helpSuggestFeature": "Proponi una funzione o un'idea",
   "helpReportBug": "Segnala un errore",
   "profileSendEmails": "Invia email per le notifiche",
@@ -346,9 +363,23 @@
   "passResetNotMatchingYet": "Le password non coincidono ancora",
   "commonOk": "Ok",
   "accountSheetClose": "Chiudi l'account",
-  "aboutClientFor": "Un client per il ",
-  "aboutDevelopedBy": "Sviluppata da ",
   "aboutPrivacy": "Informativa sulla privacy",
+  "aboutVersion": "Versione {version}",
+  "@aboutVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "aboutIndependent": "DigiReg ST è un'app indipendente di Johannes Feichter e non è collegata al Registro digitale.",
+  "aboutDevelopers": "Sviluppatori",
+  "aboutSourceCode": "Codice sorgente (GPL)",
+  "aboutLicenses": "Licenze open source",
+  "aboutLegal": "Informazioni legali",
+  "aboutImprint": "Impressum",
+  "aboutTerms": "Condizioni d'uso",
+  "aboutPrivacyShort": "Credenziali e dati scolastici viaggiano solo tra l'app e il portale della tua scuola; le credenziali restano cifrate sul dispositivo. In caso di arresto anomalo l'app può inviare rapporti tecnici sugli errori. Nessuna pubblicità, nessun tracciamento.",
   "calcNewGrade": "Crea un nuovo voto",
   "commonAdd": "Aggiungi",
   "calcAddGrade": "Aggiungi un voto",
@@ -361,19 +392,7 @@
   "calcBothSemesters": "Entrambi i semestri",
   "calcImport": "Importa",
   "calcNoGrades": "Per questa materia non ci sono voti in questo periodo",
-  "networkExportAll": "Esporta tutte le risposte",
-  "networkNothingToExport": "Niente da esportare",
-  "networkExportDone": "Esportazione completata",
-  "networkPathCopied": "Percorso copiato negli appunti",
-  "networkCopyPath": "Copia il percorso",
-  "networkJsonCopied": "JSON copiato negli appunti",
-  "networkCopyJson": "Copia il JSON",
   "commonOkCaps": "OK",
-  "networkNothing": "Niente da mostrare",
-  "networkParameters": "Parametri",
-  "networkResponse": "Risposta",
-  "networkError": "Errore",
-  "networkCopied": "Copiato negli appunti",
   "errorConnectionFailed": "Connessione non riuscita",
   "errorLoadingSavedData": "Errore nel caricamento dei dati salvati",
   "commonBack": "Indietro",
@@ -492,33 +511,6 @@
       }
     }
   },
-  "networkNoneOfType": "Nessun {type}",
-  "@networkNoneOfType": {
-    "placeholders": {
-      "type": {
-        "type": "String"
-      }
-    }
-  },
-  "networkExportSaved": "{count} risposte salvate in:\n\n{path}",
-  "@networkExportSaved": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      },
-      "path": {
-        "type": "String"
-      }
-    }
-  },
-  "networkExportFailed": "Esportazione non riuscita: {error}",
-  "@networkExportFailed": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
   "messageParentOnly": "Questa comunicazione può essere confermata solo da un genitore o tutore.",
   "messageUnsupported": "Questa comunicazione richiede una conferma non ancora supportata dall'app. Aprila nel browser.",
   "settingsLanguage": "Lingua",
@@ -541,15 +533,12 @@
   "calendarLoadingEvents": "Caricamento degli impegni",
   "dashboardScrollToToday": "Vai al giorno corrente",
   "dashboardMarkAllSeen": "Segna tutto come visto",
-  "debugLogEmpty": "Il registro è vuoto",
   "commonShare": "Condividi",
-  "debugLogCopied": "Dati copiati negli appunti",
   "semesterFirst": "1° semestre",
   "semesterSecond": "2° semestre",
   "semesterBoth": "Entrambi i semestri",
   "passwordRules": "La nuova password deve:\n- essere lunga almeno 10 caratteri\n- contenere almeno una lettera maiuscola\n- contenere almeno una lettera minuscola\n- contenere almeno una cifra\n- contenere almeno un carattere speciale\n- essere diversa dalla password precedente",
   "aboutFreeSoftware": "Questo è software libero e puoi ridistribuirlo a determinate condizioni.\nIl programma è fornito SENZA ALCUNA GARANZIA.",
-  "aboutSeeLicence": "I dettagli sono nella GNU General Public License.",
   "shareInvitation": "Conosci già l'app per il Registro Elettronico? Compiti, voti e comunicazioni a colpo d'occhio, senza accedere ogni volta dal browser:",
   "shareSubject": "Il Registro Elettronico come app",
   "absenceJustified": "Giustificata",

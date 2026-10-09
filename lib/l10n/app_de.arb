@@ -17,6 +17,7 @@
   "menuRate": "Bei Google Play bewerten",
   "menuAbout": "Über diese App",
   "menuShare": "App teilen",
+  "menuOtherApps": "Andere Apps von Wertwerk",
   "menuLogout": "Abmelden",
   "menuClassbook": "Klassenbuch",
   "menuHomeworkOverview": "Hausaufgaben",
@@ -340,8 +341,13 @@
   "settingsExcludeSubjects": "Fächer aus dem Notendurchschnitt ausschließen",
   "settingsNoSubjectExcluded": "Kein Fach ausgeschlossen",
   "settingsSectionAdvanced": "Erweitert",
-  "settingsNetworkLog": "Netzwerkprotokoll",
-  "settingsDebugLog": "Debug-Log",
+  "settingsDiagnostics": "Diagnose-Protokoll",
+  "settingsDiagnosticsSubtitle": "Zeichnet auf dem Gerät auf, was die App tut und was das Portal antwortet. Nichts wird automatisch gesendet; du kannst es zum Beispiel dem Support schicken.",
+  "diagnosticsShare": "Protokoll teilen",
+  "diagnosticsShareWarningTitle": "Protokoll teilen?",
+  "diagnosticsShareWarningBody": "Das Protokoll enthält Antworten des Portals, etwa Noten, Absenzen und Mitteilungen, und kann persönliche Daten enthalten. Teile es nur mit Personen, denen du vertraust, zum Beispiel dem Support.",
+  "diagnosticsNothingRecorded": "Nichts aufgezeichnet",
+  "diagnosticsShareFailed": "Teilen fehlgeschlagen",
   "settingsSource": "Zum Quellcode",
   "settingsAddSubject": "Fach hinzufügen",
   "loginOtherSchool": "Andere Schule",
@@ -357,6 +363,17 @@
   "helpTitle": "Hilfe & Feedback",
   "helpWriteEmail": "Email schreiben",
   "helpFaq": "FAQ",
+  "helpOfflineFaq": "Häufige Fragen",
+  "faqLoginQ": "Wie melde ich mich an?",
+  "faqLoginA": "Wähle deine Schule und gib Benutzername und Passwort des Digitalen Registers ein. Verlangt dein Konto einen Bestätigungscode, fragt die App danach. Passwort vergessen? Auf der Anmeldeseite kannst du es zurücksetzen.",
+  "faqNotificationsQ": "Warum kommen Benachrichtigungen verspätet?",
+  "faqNotificationsA": "Die App bekommt keine echten Push-Nachrichten, sondern fragt im Hintergrund regelmäßig nach (Einstellungen, Benachrichtigungen). Android kann diese Abfragen verschieben, besonders bei aktiver Akku-Optimierung. Nimm die App davon aus, damit die Meldungen pünktlich ankommen.",
+  "faqProfilesQ": "Wie wechsle ich zwischen Konten?",
+  "faqProfilesA": "Tippe oben rechts auf dein Bild. Dort kannst du Konten hinzufügen und zwischen ihnen wechseln.",
+  "faqHomeworkQ": "Wo sehe ich meine Hausaufgaben?",
+  "faqHomeworkA": "Im Merkheft stehen sie pro Tag. Die Übersicht „Hausaufgaben“ im Menü zeigt alle anstehenden auf einen Blick.",
+  "faqAppLockQ": "Wie schütze ich die App mit der Gerätesperre?",
+  "faqAppLockA": "Schalte in den Einstellungen die App-Sperre ein. Sie fragt dann beim Start und nach der Rückkehr nach Fingerabdruck, Gesicht oder Geräte-PIN.",
   "helpSuggestFeature": "Feature/Idee vorschlagen",
   "helpReportBug": "Bug/Fehler melden",
   "profileSendEmails": "Emails für Benachrichtigungen senden",
@@ -367,9 +384,23 @@
   "passResetNotMatchingYet": "Die Passwörter stimmen noch nicht überein",
   "commonOk": "Ok",
   "accountSheetClose": "Konto schließen",
-  "aboutClientFor": "Ein Client für das ",
-  "aboutDevelopedBy": "Entwickelt von ",
   "aboutPrivacy": "Datenschutzerklärung",
+  "aboutVersion": "Version {version}",
+  "@aboutVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "aboutIndependent": "DigiReg ST ist eine unabhängige App von Johannes Feichter und steht in keiner Verbindung zum Digitalen Register.",
+  "aboutDevelopers": "Entwickler",
+  "aboutSourceCode": "Quellcode (GPL)",
+  "aboutLicenses": "Open-Source-Lizenzen",
+  "aboutLegal": "Rechtliches",
+  "aboutImprint": "Impressum",
+  "aboutTerms": "Nutzungsbedingungen",
+  "aboutPrivacyShort": "Zugangsdaten und Schuldaten gehen nur zwischen App und dem Portal deiner Schule hin und her; die Zugangsdaten bleiben verschlüsselt auf dem Gerät. Bei Abstürzen kann die App technische Fehlerberichte senden. Es gibt keine Werbung und kein Tracking.",
   "calcNewGrade": "Neue Note erstellen",
   "commonAdd": "Hinzufügen",
   "calcAddGrade": "Note hinzufügen",
@@ -382,19 +413,7 @@
   "calcBothSemesters": "Beide Semester",
   "calcImport": "Importieren",
   "calcNoGrades": "Für dieses Fach sind in diesem Zeitraum keine Noten verfügbar",
-  "networkExportAll": "Alle Antworten exportieren",
-  "networkNothingToExport": "Nichts zu exportieren",
-  "networkExportDone": "Export abgeschlossen",
-  "networkPathCopied": "Pfad in die Zwischenablage kopiert",
-  "networkCopyPath": "Pfad kopieren",
-  "networkJsonCopied": "JSON in die Zwischenablage kopiert",
-  "networkCopyJson": "JSON kopieren",
   "commonOkCaps": "OK",
-  "networkNothing": "Nichts vorhanden",
-  "networkParameters": "Parameter",
-  "networkResponse": "Antwort",
-  "networkError": "Fehler",
-  "networkCopied": "In die Zwischenablage kopiert",
   "errorConnectionFailed": "Verbindung fehlgeschlagen",
   "errorLoadingSavedData": "Fehler beim Laden der gespeicherten Daten",
   "commonBack": "Zurück",
@@ -513,33 +532,6 @@
       }
     }
   },
-  "networkNoneOfType": "Keine {type}",
-  "@networkNoneOfType": {
-    "placeholders": {
-      "type": {
-        "type": "String"
-      }
-    }
-  },
-  "networkExportSaved": "{count} Antworten gespeichert unter:\n\n{path}",
-  "@networkExportSaved": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      },
-      "path": {
-        "type": "String"
-      }
-    }
-  },
-  "networkExportFailed": "Export fehlgeschlagen: {error}",
-  "@networkExportFailed": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
   "messageParentOnly": "Diese Mitteilung kann nur von einem Erziehungsberechtigten bestätigt werden.",
   "messageUnsupported": "Diese Mitteilung verlangt eine Bestätigung, die in der App noch nicht unterstützt wird. Bitte im Browser öffnen.",
   "settingsLanguage": "Sprache",
@@ -562,15 +554,12 @@
   "calendarLoadingEvents": "Lade Termine",
   "dashboardScrollToToday": "Zum aktuellen Tag scrollen",
   "dashboardMarkAllSeen": "Alle als gesehen markieren",
-  "debugLogEmpty": "Log ist leer",
   "commonShare": "Teilen",
-  "debugLogCopied": "Daten in Zwischenablage kopiert",
   "semesterFirst": "1. Semester",
   "semesterSecond": "2. Semester",
   "semesterBoth": "Beide Semester",
   "passwordRules": "Das neue Passwort muss:\n- mindestens 10 Zeichen lang sein\n- mindestens einen Großbuchstaben enthalten\n- mindestens einen Kleinbuchstaben enthalten\n- mindestens eine Zahl enthalten\n- mindestens ein Sonderzeichen enthalten\n- nicht mit dem alten Passwort übereinstimmen",
   "aboutFreeSoftware": "Dies ist freie Software, und du darfst sie unter bestimmten Bedingungen weitergeben.\nFür dieses Programm gibt es KEINERLEI GARANTIE.",
-  "aboutSeeLicence": "Einzelheiten stehen in der GNU General Public License.",
   "shareInvitation": "Kennst du schon die App fürs Digitale Register? Hausaufgaben, Noten und Mitteilungen auf einen Blick — ohne jedes Mal im Browser einzuloggen:",
   "shareSubject": "Digitales Register als App",
   "absenceJustified": "Entschuldigt",

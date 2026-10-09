@@ -16,6 +16,7 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:dr/app_state.dart';
+import 'package:dr/providers/settings_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class NetworkProtocolNotifier extends Notifier<List<NetworkProtocolItem>> {
@@ -25,6 +26,7 @@ class NetworkProtocolNotifier extends Notifier<List<NetworkProtocolItem>> {
   void reset() => state = [];
 
   void add(NetworkProtocolItem item) {
+    if (!ref.read(diagnosticsActiveProvider)) return;
     state = [...state, item];
   }
 }

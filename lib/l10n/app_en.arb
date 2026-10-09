@@ -17,6 +17,7 @@
   "menuRate": "Rate on Google Play",
   "menuAbout": "About this app",
   "menuShare": "Share the app",
+  "menuOtherApps": "Other apps by Wertwerk",
   "menuLogout": "Sign out",
   "menuClassbook": "Class log",
   "menuHomeworkOverview": "Homework",
@@ -319,8 +320,13 @@
   "settingsExcludeSubjects": "Leave subjects out of the grade average",
   "settingsNoSubjectExcluded": "No subject left out",
   "settingsSectionAdvanced": "Advanced",
-  "settingsNetworkLog": "Network log",
-  "settingsDebugLog": "Debug log",
+  "settingsDiagnostics": "Diagnostic log",
+  "settingsDiagnosticsSubtitle": "Records on this device what the app does and what the portal answers. Nothing is sent automatically; you can send it to support, for example.",
+  "diagnosticsShare": "Share log",
+  "diagnosticsShareWarningTitle": "Share the log?",
+  "diagnosticsShareWarningBody": "The log contains answers from the portal, such as grades, absences and messages, and may contain personal data. Share it only with people you trust, such as support.",
+  "diagnosticsNothingRecorded": "Nothing recorded",
+  "diagnosticsShareFailed": "Sharing failed",
   "settingsSource": "Source code",
   "settingsAddSubject": "Add a subject",
   "loginOtherSchool": "Other school",
@@ -336,6 +342,17 @@
   "helpTitle": "Help & feedback",
   "helpWriteEmail": "Write an email",
   "helpFaq": "FAQ",
+  "helpOfflineFaq": "Frequently asked questions",
+  "faqLoginQ": "How do I sign in?",
+  "faqLoginA": "Choose your school and enter your username and password for Digitales Register. If your account asks for a confirmation code, the app will ask for it. Forgot your password? You can reset it on the sign-in page.",
+  "faqNotificationsQ": "Why do notifications arrive late?",
+  "faqNotificationsA": "The app does not receive real push messages. It checks in the background at regular intervals (Settings, Notifications). Android may postpone these checks, especially with battery optimization on. Exempt the app from it so messages arrive on time.",
+  "faqProfilesQ": "How do I switch between accounts?",
+  "faqProfilesA": "Tap your picture at the top right. There you can add accounts and switch between them.",
+  "faqHomeworkQ": "Where do I see my homework?",
+  "faqHomeworkA": "The first page of the menu shows it day by day. The overview further down the menu lists everything that is due at a glance.",
+  "faqAppLockQ": "How do I protect the app with the device lock?",
+  "faqAppLockA": "Turn on the app lock in the settings. It then asks for your fingerprint, face or device PIN on start and after you return.",
   "helpSuggestFeature": "Suggest a feature or an idea",
   "helpReportBug": "Report a bug",
   "profileSendEmails": "Send emails for notifications",
@@ -346,9 +363,23 @@
   "passResetNotMatchingYet": "The passwords do not match yet",
   "commonOk": "Ok",
   "accountSheetClose": "Close the account card",
-  "aboutClientFor": "A client for the ",
-  "aboutDevelopedBy": "Developed by ",
   "aboutPrivacy": "Privacy policy",
+  "aboutVersion": "Version {version}",
+  "@aboutVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "aboutIndependent": "DigiReg ST is an independent app by Johannes Feichter and is not affiliated with Digitales Register.",
+  "aboutDevelopers": "Developers",
+  "aboutSourceCode": "Source code (GPL)",
+  "aboutLicenses": "Open-source licenses",
+  "aboutLegal": "Legal",
+  "aboutImprint": "Legal notice",
+  "aboutTerms": "Terms of use",
+  "aboutPrivacyShort": "Your login and school data only travel between the app and your school's portal; the login stays encrypted on your device. If the app crashes it may send technical error reports. There is no advertising and no tracking.",
   "calcNewGrade": "Create a grade",
   "commonAdd": "Add",
   "calcAddGrade": "Add a grade",
@@ -361,19 +392,7 @@
   "calcBothSemesters": "Both semesters",
   "calcImport": "Import",
   "calcNoGrades": "This subject has no grades in this period",
-  "networkExportAll": "Export every response",
-  "networkNothingToExport": "Nothing to export",
-  "networkExportDone": "Export finished",
-  "networkPathCopied": "Path copied to the clipboard",
-  "networkCopyPath": "Copy the path",
-  "networkJsonCopied": "JSON copied to the clipboard",
-  "networkCopyJson": "Copy the JSON",
   "commonOkCaps": "OK",
-  "networkNothing": "Nothing here",
-  "networkParameters": "Parameters",
-  "networkResponse": "Response",
-  "networkError": "Error",
-  "networkCopied": "Copied to the clipboard",
   "errorConnectionFailed": "Connection failed",
   "errorLoadingSavedData": "The saved data could not be loaded",
   "commonBack": "Back",
@@ -492,33 +511,6 @@
       }
     }
   },
-  "networkNoneOfType": "No {type}",
-  "@networkNoneOfType": {
-    "placeholders": {
-      "type": {
-        "type": "String"
-      }
-    }
-  },
-  "networkExportSaved": "{count} responses saved to:\n\n{path}",
-  "@networkExportSaved": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      },
-      "path": {
-        "type": "String"
-      }
-    }
-  },
-  "networkExportFailed": "Export failed: {error}",
-  "@networkExportFailed": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
   "messageParentOnly": "This message can only be confirmed by a parent or guardian.",
   "messageUnsupported": "This message asks for a confirmation the app does not support yet. Please open it in the browser.",
   "settingsLanguage": "Language",
@@ -541,15 +533,12 @@
   "calendarLoadingEvents": "Loading the events",
   "dashboardScrollToToday": "Scroll to today",
   "dashboardMarkAllSeen": "Mark everything as seen",
-  "debugLogEmpty": "The log is empty",
   "commonShare": "Share",
-  "debugLogCopied": "Data copied to the clipboard",
   "semesterFirst": "First semester",
   "semesterSecond": "Second semester",
   "semesterBoth": "Both semesters",
   "passwordRules": "The new password has to:\n- be at least 10 characters long\n- contain at least one capital letter\n- contain at least one small letter\n- contain at least one digit\n- contain at least one special character\n- differ from the old password",
   "aboutFreeSoftware": "This is free software, and you are welcome to redistribute it under certain conditions.\nThis program comes with ABSOLUTELY NO WARRANTY.",
-  "aboutSeeLicence": "See the GNU General Public License for more details.",
   "shareInvitation": "Do you know the app for the Digital Register yet? Homework, grades and messages at a glance, without signing in through the browser every time:",
   "shareSubject": "The Digital Register as an app",
   "absenceJustified": "Justified",

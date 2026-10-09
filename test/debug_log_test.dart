@@ -32,6 +32,23 @@ void main() {
 
   tearDown(() => dir.deleteSync(recursive: true));
 
+  group('enabled', () {
+    test('drops entries while disabled and keeps them once enabled', () {
+      final log = DebugLog(enabled: false)..add(LogCategory.start, 'vorher');
+      expect(log.entries, isEmpty);
+
+      log.enabled = true;
+      log.add(LogCategory.start, 'nachher');
+      expect(log.entries.map((e) => e.message), ['nachher']);
+    });
+
+    test('writes nothing to the file while disabled', () async {
+      final log = DebugLog(enabled: false)..attachFile(file);
+      log.add(LogCategory.start, 'nicht aufgezeichnet');
+      expect(file.existsSync(), isFalse);
+    });
+  });
+
   group('ring buffer', () {
     test('keeps only the newest entries', () {
       final log = DebugLog(capacity: 3);

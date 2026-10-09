@@ -35,6 +35,7 @@ import 'package:dr/providers/login_provider.dart';
 import 'package:dr/l10n/l10n.dart';
 import 'package:dr/providers/provider_container.dart';
 import 'package:dr/providers/settings_provider.dart';
+import 'package:dr/services/diagnostics.dart';
 import 'package:dr/ui/app_lock_overlay.dart';
 import 'package:dr/ui/app_theme.dart';
 import 'package:dr/ui/grade_calculator.dart';
@@ -81,6 +82,7 @@ Future<void> main() async {
 Future<void> _runApp() async {
   final binding = WidgetsFlutterBinding.ensureInitialized();
   binding.deferFirstFrame();
+  DebugLog.instance.enabled = kDebugMode || await storedDiagnosticsEnabled();
   await DebugLog.instance.init();
   _logUnhandledErrors(binding);
   await loadPackageInfo();
@@ -100,6 +102,7 @@ Future<void> _runApp() async {
         .overrideWithValue(await storedAppLockEnabled()),
   ]);
   installAppLockBackHandler(providerContainer);
+  keepDiagnosticsInSync(providerContainer);
   keepRecentsInSync(providerContainer);
   wireLoginDispatchers(providerContainer.read(loginProvider.notifier));
   // Before anything reads the stored accounts.
@@ -149,7 +152,6 @@ Future<void> _runApp() async {
 /// Puts errors nobody caught into the debug log as well. Sentry has set its
 /// handlers by now; they keep running after this one.
 void _logUnhandledErrors(WidgetsBinding binding) {
-  if (!kDebugMode) return;
   final flutterError = FlutterError.onError;
   FlutterError.onError = (details) {
     debugLogError('Flutter', details.exception, details.stack);

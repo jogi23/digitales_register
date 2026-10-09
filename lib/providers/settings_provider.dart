@@ -19,22 +19,40 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:dr/app_state.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Whether the app lock was on, read straight from storage — for `main()`,
 /// before the settings are loaded and before the first frame.
-Future<bool> storedAppLockEnabled() async {
-  final raw = (await SharedPreferences.getInstance())
-      .getString(SettingsNotifier._globalPrefsKey);
+Future<bool> storedAppLockEnabled() => _storedFlag('appLockEnabled');
+
+/// Whether the diagnostic log was on, read straight from storage — for the
+/// start of the app and of the background isolate, before the settings load.
+/// Reads the preferences fresh: the other isolate may have changed them.
+Future<bool> storedDiagnosticsEnabled() => _storedFlag('diagnosticsEnabled');
+
+Future<bool> _storedFlag(String key) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.reload();
+  final raw = prefs.getString(SettingsNotifier._globalPrefsKey);
   if (raw == null) return false;
   try {
-    return (json.decode(raw) as Map<String, dynamic>)['appLockEnabled'] ==
-        true;
+    return (json.decode(raw) as Map<String, dynamic>)[key] == true;
   } on Object {
     return false;
   }
 }
+
+/// Whether this is a debug build; those record whatever the switch says.
+final debugBuildProvider = Provider<bool>((ref) => kDebugMode);
+
+/// Whether the network protocol and the debug log are recording.
+final diagnosticsActiveProvider = Provider<bool>(
+  (ref) =>
+      ref.watch(debugBuildProvider) ||
+      ref.watch(settingsProvider.select((s) => s.diagnosticsEnabled)),
+);
 
 class SettingsNotifier extends Notifier<SettingsState> {
   static const _globalPrefsKey = 'settings_global';
@@ -134,6 +152,9 @@ class SettingsNotifier extends Notifier<SettingsState> {
   void setMessageSignature(String? name) =>
       _update(state.copyWith(messageSignature: name));
 
+  void setDiagnosticsEnabled(bool value) =>
+      _update(state.copyWith(diagnosticsEnabled: value));
+
   // ─── App lock ─────────────────────────────────────────────────────────────
 
   void setAppLockEnabled(bool value) =>
@@ -150,7 +171,8 @@ class SettingsNotifier extends Notifier<SettingsState> {
       _update(state.copyWith(notificationsEnabled: value));
 
   void setNotificationPollMinutes(int minutes) {
-    final safe = allowedNotificationPollMinutes.contains(minutes) ? minutes : 30;
+    final safe =
+        allowedNotificationPollMinutes.contains(minutes) ? minutes : 30;
     _update(state.copyWith(notificationPollMinutes: safe));
   }
 
@@ -160,7 +182,8 @@ class SettingsNotifier extends Notifier<SettingsState> {
   void setNotifyMessages(bool value) =>
       _update(state.copyWith(notifyMessages: value));
 
-  void setNotifyGrades(bool value) => _update(state.copyWith(notifyGrades: value));
+  void setNotifyGrades(bool value) =>
+      _update(state.copyWith(notifyGrades: value));
 
   void setNotifyObservations(bool value) =>
       _update(state.copyWith(notifyObservations: value));
@@ -193,8 +216,7 @@ class SettingsNotifier extends Notifier<SettingsState> {
   void setCalendarColorBackground(bool value) =>
       _update(state.copyWith(calendarColorBackground: value));
 
-  void setSixDayWeek(bool value) =>
-      _update(state.copyWith(sixDayWeek: value));
+  void setSixDayWeek(bool value) => _update(state.copyWith(sixDayWeek: value));
 
   void setCalendarShowTimes(bool value) =>
       _update(state.copyWith(calendarShowTimes: value));
