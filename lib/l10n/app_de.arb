@@ -816,5 +816,7 @@
   "settingsMoreInfo": "Mehr Informationen",
   "settingsCategoryNotifications": "Benachrichtigungen",
   "settingsCategoryAppearance": "Darstellung",
-  "settingsTheme": "Design"
+  "settingsTheme": "Design",
+  "settingsCategorySubjectsCalendar": "Fächer & Kalender",
+  "settingsSectionCalendar": "Kalender"
 }

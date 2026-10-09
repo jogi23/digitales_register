@@ -758,5 +758,7 @@
   "settingsMoreInfo": "More information",
   "settingsCategoryNotifications": "Notifications",
   "settingsCategoryAppearance": "Appearance",
-  "settingsTheme": "Theme"
+  "settingsTheme": "Theme",
+  "settingsCategorySubjectsCalendar": "Subjects & calendar",
+  "settingsSectionCalendar": "Calendar"
 }
