@@ -31,11 +31,16 @@ class SettingsPageScaffold extends StatelessWidget {
     required this.title,
     required this.children,
     this.root = false,
+    this.cacheExtent,
   });
 
   final String title;
   final List<Widget> children;
   final bool root;
+
+  /// How far beyond the screen rows are built; a page that scrolls to one of
+  /// its rows needs it built.
+  final double? cacheExtent;
 
   @override
   Widget build(BuildContext context) {
@@ -50,6 +55,7 @@ class SettingsPageScaffold extends StatelessWidget {
               actions: const [ConnectionStatusButton()],
             ),
       body: ListView(
+        cacheExtent: cacheExtent,
         padding: context.systemInsets,
         children: children,
       ),

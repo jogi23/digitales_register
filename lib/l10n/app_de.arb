@@ -853,5 +853,6 @@
         "type": "String"
       }
     }
-  }
+  },
+  "settingsSummaryNotificationsInAppOnly": "Nur in der App"
 }

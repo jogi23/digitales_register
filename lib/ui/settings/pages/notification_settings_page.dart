@@ -24,19 +24,13 @@ import 'package:dr/l10n/l10n.dart';
 import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/ui/background_status_card.dart';
 import 'package:dr/ui/battery_hint.dart';
+import 'package:dr/ui/settings/settings_labels.dart';
 import 'package:dr/ui/settings/widgets/settings_choice_tile.dart';
 import 'package:dr/ui/settings/widgets/settings_headers.dart';
 import 'package:dr/ui/settings/widgets/settings_page_scaffold.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-/// "Every 30 minutes", "Every 3 hours".
-String notificationIntervalLabel(BuildContext context, int minutes) {
-  final l = tr(context);
-  if (minutes < 60) return l.notificationsEveryMinutes(minutes);
-  return l.notificationsEveryHours(minutes ~/ 60);
-}
 
 /// Whether and how often the app looks for news in the background, and which
 /// kinds of news are announced.

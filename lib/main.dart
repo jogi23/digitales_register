@@ -26,8 +26,7 @@ import 'package:dr/container/notifications_page_container.dart';
 import 'package:dr/container/pass_reset_container.dart';
 import 'package:dr/container/profile_container.dart';
 import 'package:dr/container/request_pass_reset_container.dart';
-import 'package:dr/ui/settings/pages/content_settings_page.dart';
-import 'package:dr/ui/settings/settings_hub_page.dart';
+import 'package:dr/services/settings_routes.dart';
 import 'package:dr/debug_log.dart';
 import 'package:dr/middleware/middleware.dart';
 import 'package:dr/providers/account_profile_provider.dart';
@@ -260,18 +259,8 @@ class RegisterApp extends ConsumerWidget {
                   fullscreenDialog: true,
                 );
               case "settings":
-                return MaterialPageRoute<void>(
-                  settings: settings,
-                  builder: (_) => const SettingsHubPage(),
-                  fullscreenDialog: true,
-                );
               case "settingsGrades":
-                return MaterialPageRoute<void>(
-                  settings: settings,
-                  builder: (_) => const ContentSettingsPage(
-                    initiallyExpanded: {ContentBlock.grades},
-                  ),
-                );
+                return settingsRoute(settings);
               case "subjectAppearance":
                 return MaterialPageRoute<void>(
                   settings: settings,

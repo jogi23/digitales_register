@@ -132,6 +132,20 @@ void main() {
     expect(tester.getTopLeft(find.text('Noten')).dy, lessThan(300));
   });
 
+  testWidgets('the deep link reaches Noten at large text on a short screen',
+      (tester) async {
+    tester.view.physicalSize = const Size(400, 200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await pumpSettings(
+      tester,
+      const ContentSettingsPage(initiallyExpanded: {ContentBlock.grades}),
+      textScale: 2,
+    );
+
+    expect(tester.getTopLeft(find.text('Noten')).dy, lessThan(200));
+  });
+
   testWidgets('all blocks open at text scale 2.0 do not overflow',
       (tester) async {
     tester.view.physicalSize = const Size(800, 3000);

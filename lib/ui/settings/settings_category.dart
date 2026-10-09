@@ -15,6 +15,8 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'dart:io';
+
 import 'package:dr/app_state.dart';
 import 'package:dr/l10n/l10n.dart';
 import 'package:dr/ui/settings/pages/account_settings_page.dart';
@@ -22,6 +24,7 @@ import 'package:dr/ui/settings/pages/advanced_settings_page.dart';
 import 'package:dr/ui/settings/pages/appearance_settings_page.dart';
 import 'package:dr/ui/settings/pages/content_settings_page.dart';
 import 'package:dr/ui/settings/pages/notification_settings_page.dart';
+import 'package:dr/ui/settings/settings_labels.dart';
 import 'package:flutter/material.dart';
 
 /// The groups the settings hub offers, in the order it lists them.
@@ -48,17 +51,22 @@ enum SettingsCategory {
   }
 
   /// One line that says what the group is set to, or what is in it.
-  String summary(BuildContext context, SettingsState s) {
+  ///
+  /// Without a stored password only the app itself notifies on Android, and
+  /// the line says so; [isAndroid] defaults to the platform it runs on.
+  String summary(BuildContext context, SettingsState s, {bool? isAndroid}) {
     final l = tr(context);
     return switch (this) {
       account => s.appLockEnabled
           ? l.settingsSummaryAppLockOn
           : l.settingsSummaryAppLockOff,
-      notifications => s.notificationsEnabled
-          ? l.settingsSummaryNotificationsOn(
-              notificationIntervalLabel(context, s.notificationPollMinutes),
-            )
-          : l.settingsSummaryNotificationsOff,
+      notifications => !s.notificationsEnabled
+          ? l.settingsSummaryNotificationsOff
+          : s.noPasswordSaving && (isAndroid ?? Platform.isAndroid)
+              ? l.settingsSummaryNotificationsInAppOnly
+              : l.settingsSummaryNotificationsOn(
+                  notificationIntervalLabel(context, s.notificationPollMinutes),
+                ),
       appearance => l.settingsSummaryAppearance(
           themeChoiceLabel(context, currentThemeChoice(context)),
           // A code this version does not know reads as the device language.

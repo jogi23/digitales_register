@@ -16,6 +16,8 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:dr/app_state.dart';
+import 'package:dr/l10n/l10n.dart';
+import 'package:dr/ui/settings/settings_category.dart';
 import 'package:dr/ui/settings/pages/account_settings_page.dart';
 import 'package:dr/ui/settings/pages/advanced_settings_page.dart';
 import 'package:dr/ui/settings/pages/appearance_settings_page.dart';
@@ -141,6 +143,42 @@ void main() {
 
     expect(tester.takeException(), isNull);
     expect(find.text('Geräte-Theme folgen · Gerätesprache'), findsOneWidget);
+  });
+
+  testWidgets('the notification summary says so when only the app notifies',
+      (tester) async {
+    await pumpSettings(tester, const SettingsHubPage());
+    final context = tester.element(find.byType(SettingsHubPage));
+    final s = SettingsState(
+      notificationsEnabled: true,
+      notificationPollMinutes: 30,
+      noPasswordSaving: true,
+    );
+
+    expect(
+      SettingsCategory.notifications.summary(context, s, isAndroid: true),
+      'Nur in der App',
+    );
+    expect(
+      SettingsCategory.notifications.summary(context, s, isAndroid: false),
+      'An · Alle 30 Minuten',
+    );
+  });
+
+  testWidgets('no settings page repeats an entry of the menu', (tester) async {
+    await pumpSettings(tester, const SettingsHubPage());
+    final l = tr(tester.element(find.byType(SettingsHubPage)));
+    final menuEntries = [l.menuHelp, l.menuAbout, l.menuRate, l.menuShare];
+
+    for (final title in _titles) {
+      await tester.tap(find.text(title));
+      await tester.pumpAndSettle();
+      for (final entry in menuEntries) {
+        expect(find.text(entry), findsNothing, reason: '$entry in $title');
+      }
+      await tester.tap(find.byTooltip('Zurück'));
+      await tester.pumpAndSettle();
+    }
   });
 
   testWidgets('demo mode keeps all five categories', (tester) async {

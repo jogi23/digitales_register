@@ -52,12 +52,14 @@ class GradesBlock extends ConsumerWidget {
       context: context,
       builder: (context) => AddSubject(availableSubjects: available),
     );
-    // Free text: the subject may already be on the list.
-    if (subject != null && !ignored.contains(subject)) {
-      ref
-          .read(settingsProvider.notifier)
-          .setIgnoreForGradesAverage([...ignored, subject]);
-    }
+    if (subject == null) return;
+    // The list as it is now, not as it was before the dialog opened; and free
+    // text, so the subject may already be on it.
+    final current = ref.read(settingsProvider).ignoreForGradesAverage;
+    if (current.contains(subject)) return;
+    ref
+        .read(settingsProvider.notifier)
+        .setIgnoreForGradesAverage([...current, subject]);
   }
 
   @override

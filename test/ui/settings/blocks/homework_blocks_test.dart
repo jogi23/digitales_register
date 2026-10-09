@@ -23,13 +23,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../settings_pump.dart';
 
-/// The page is one long list; a tall window builds all of it.
-void _tall(WidgetTester tester) {
-  tester.view.physicalSize = const Size(800, 4000);
-  tester.view.devicePixelRatio = 1;
-  addTearDown(tester.view.reset);
-}
-
 final _host = blockHost(const [
   MerkheftBlock(),
   ClassbookBlock(),
@@ -39,7 +32,7 @@ final _host = blockHost(const [
 
 void main() {
   testWidgets('picking the month view writes the setting', (tester) async {
-    _tall(tester);
+    useTallWindow(tester);
     final container = await pumpSettings(tester, _host);
     expect(
       container.read(settingsProvider).dashboardViewMode,
@@ -56,7 +49,7 @@ void main() {
   });
 
   testWidgets('each switch writes its setting', (tester) async {
-    _tall(tester);
+    useTallWindow(tester);
     final container = await pumpSettings(tester, _host);
 
     final fields = <String, bool Function(SettingsState)>{
@@ -78,7 +71,7 @@ void main() {
 
   testWidgets('classbook and overview arrangements write their own setting',
       (tester) async {
-    _tall(tester);
+    useTallWindow(tester);
     final container = await pumpSettings(tester, _host);
 
     await tester.tap(find.text('Nach Fach').at(0));
@@ -96,7 +89,7 @@ void main() {
 
   testWidgets('classbook, overview and absences display modes are separate',
       (tester) async {
-    _tall(tester);
+    useTallWindow(tester);
     final container = await pumpSettings(tester, _host);
 
     await tester.tap(find.text('Karten').at(0));
@@ -116,7 +109,7 @@ void main() {
 
   testWidgets('the classbook timeline is only selectable by day',
       (tester) async {
-    _tall(tester);
+    useTallWindow(tester);
     final container = await pumpSettings(
       tester,
       _host,
@@ -132,7 +125,7 @@ void main() {
   });
 
   testWidgets('meets tap target guidelines', (tester) async {
-    _tall(tester);
+    useTallWindow(tester);
     await pumpSettings(tester, _host);
 
     await expectMeetsGuidelines(tester);

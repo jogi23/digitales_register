@@ -17,6 +17,7 @@
 
 import 'package:dr/main.dart' as app;
 import 'package:dr/services/app_router.dart';
+import 'package:dr/services/settings_routes.dart';
 import 'package:dr/ui/settings/blocks/grades_block.dart';
 import 'package:dr/ui/settings/pages/content_settings_page.dart';
 import 'package:dr/ui/settings/settings_hub_page.dart';
@@ -32,26 +33,14 @@ void main() {
     'back returns to the hub',
     (tester) async {
       final key = GlobalKey<NavigatorState>();
+      final before = app.navigatorKey;
       app.navigatorKey = key;
+      addTearDown(() => app.navigatorKey = before);
       final container = await pumpSettings(
         tester,
         const SizedBox(),
         navigatorKey: key,
-        // Mirrors the "settings" and "settingsGrades" cases of main.dart.
-        onGenerateRoute: (settings) => switch (settings.name) {
-          '/settings' => MaterialPageRoute<void>(
-              settings: settings,
-              builder: (_) => const SettingsHubPage(),
-              fullscreenDialog: true,
-            ),
-          '/settingsGrades' => MaterialPageRoute<void>(
-              settings: settings,
-              builder: (_) => const ContentSettingsPage(
-                initiallyExpanded: {ContentBlock.grades},
-              ),
-            ),
-          _ => null,
-        },
+        onGenerateRoute: settingsRoute,
       );
 
       container.read(appRouterProvider).showEditGradesAverageSettings();

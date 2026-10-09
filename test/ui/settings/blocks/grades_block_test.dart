@@ -25,18 +25,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../settings_pump.dart';
 
-/// The page is one long list; a tall window builds all of it.
-void _tall(WidgetTester tester) {
-  tester.view.physicalSize = const Size(800, 3000);
-  tester.view.devicePixelRatio = 1;
-  addTearDown(tester.view.reset);
-}
-
 const _exclude = 'Fächer aus dem Notendurchschnitt ausschließen';
 
 void main() {
   testWidgets('the grade switches write their settings', (tester) async {
-    _tall(tester);
+    useTallWindow(tester);
     final container =
         await pumpSettings(tester, blockHost([const GradesBlock()]));
 
@@ -56,7 +49,7 @@ void main() {
   });
 
   testWidgets('picking a star colour writes the setting', (tester) async {
-    _tall(tester);
+    useTallWindow(tester);
     final container =
         await pumpSettings(tester, blockHost([const GradesBlock()]));
     expect(container.read(settingsProvider).starColor, accentStarColorId);
@@ -73,7 +66,7 @@ void main() {
   });
 
   testWidgets('the display mode writes the grades setting', (tester) async {
-    _tall(tester);
+    useTallWindow(tester);
     final container =
         await pumpSettings(tester, blockHost([const GradesBlock()]));
 
@@ -87,7 +80,7 @@ void main() {
   group('grades average ignore-list', () {
     testWidgets('adds an item, also with no known subject to suggest',
         (tester) async {
-      _tall(tester);
+      useTallWindow(tester);
       final container =
           await pumpSettings(tester, blockHost([const GradesBlock()]));
       await tester.tap(find.descendant(
@@ -114,7 +107,7 @@ void main() {
 
     testWidgets('removes an item and shows the empty hint after the last',
         (tester) async {
-      _tall(tester);
+      useTallWindow(tester);
       final container = await pumpSettings(
         tester,
         blockHost([const GradesBlock()]),
@@ -149,7 +142,7 @@ void main() {
 
     testWidgets('removing two subjects in quick succession removes both',
         (tester) async {
-      _tall(tester);
+      useTallWindow(tester);
       final container = await pumpSettings(
         tester,
         blockHost([const GradesBlock()]),
@@ -174,7 +167,7 @@ void main() {
 
     testWidgets('adding a subject that is already excluded changes nothing',
         (tester) async {
-      _tall(tester);
+      useTallWindow(tester);
       final container = await pumpSettings(
         tester,
         blockHost([const GradesBlock()]),
@@ -191,8 +184,31 @@ void main() {
           ['Fach1'].toBuiltList());
     });
 
+    testWidgets('adding writes onto the list as it is when the dialog closes',
+        (tester) async {
+      useTallWindow(tester);
+      final container = await pumpSettings(
+        tester,
+        blockHost([const GradesBlock()]),
+        settings: SettingsState(ignoreForGradesAverage: ['A']),
+      );
+      await tester.tap(find.byTooltip('Fach hinzufügen'));
+      await tester.pumpAndSettle();
+      // Changed while the dialog is open.
+      container
+          .read(settingsProvider.notifier)
+          .setIgnoreForGradesAverage(['A', 'B']);
+      tester.testTextInput.enterText('C');
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Fertig'));
+      await tester.pumpAndSettle();
+
+      expect(container.read(settingsProvider).ignoreForGradesAverage,
+          ['A', 'B', 'C'].toBuiltList());
+    });
+
     testWidgets('each remove button names its subject', (tester) async {
-      _tall(tester);
+      useTallWindow(tester);
       await pumpSettings(
         tester,
         blockHost([const GradesBlock()]),
@@ -204,7 +220,7 @@ void main() {
     });
 
     testWidgets('the empty hint is not a hardcoded grey', (tester) async {
-      _tall(tester);
+      useTallWindow(tester);
       await pumpSettings(tester, blockHost([const GradesBlock()]));
 
       final text = tester.widget<Text>(find.text('Kein Fach ausgeschlossen'));
@@ -214,7 +230,7 @@ void main() {
   });
 
   testWidgets('meets tap target guidelines', (tester) async {
-    _tall(tester);
+    useTallWindow(tester);
     await pumpSettings(tester, blockHost([const GradesBlock()]));
 
     await expectMeetsGuidelines(tester);

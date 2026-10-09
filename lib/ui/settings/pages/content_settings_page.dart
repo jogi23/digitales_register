@@ -108,6 +108,8 @@ class _ContentSettingsPageState extends State<ContentSettingsPage> {
     };
     return SettingsPageScaffold(
       title: l.settingsCategoryContent,
+      // Six headers: all built, so the block asked for can be scrolled to.
+      cacheExtent: 4000,
       children: [
         for (final entry in blocks.entries)
           KeyedSubtree(

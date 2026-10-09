@@ -17,32 +17,13 @@
 
 import 'package:dr/l10n/l10n.dart';
 import 'package:dr/providers/settings_provider.dart';
+import 'package:dr/ui/settings/settings_labels.dart';
 import 'package:dr/ui/settings/widgets/accent_color_picker.dart';
 import 'package:dr/ui/settings/widgets/settings_choice_tile.dart';
 import 'package:dr/ui/settings/widgets/settings_page_scaffold.dart';
 import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-enum ThemeChoice { followDevice, light, dark }
-
-/// What the theme is set to right now.
-ThemeChoice currentThemeChoice(BuildContext context) {
-  final theme = DynamicTheme.of(context)!;
-  if (theme.followDevice) return ThemeChoice.followDevice;
-  return theme.customBrightness == Brightness.dark
-      ? ThemeChoice.dark
-      : ThemeChoice.light;
-}
-
-String themeChoiceLabel(BuildContext context, ThemeChoice choice) {
-  final l = tr(context);
-  return switch (choice) {
-    ThemeChoice.followDevice => l.settingsThemeFollowDevice,
-    ThemeChoice.light => l.settingsThemeLight,
-    ThemeChoice.dark => l.settingsThemeDark,
-  };
-}
 
 /// Language, light or dark, and the colours the app wears.
 class AppearanceSettingsPage extends ConsumerStatefulWidget {

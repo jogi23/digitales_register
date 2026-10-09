@@ -106,3 +106,10 @@ Future<void> expectMeetsGuidelines(WidgetTester tester) async {
 Widget blockHost(List<Widget> blocks) => Scaffold(
       body: SingleChildScrollView(child: Column(children: blocks)),
     );
+
+/// A window tall enough that a long settings list is built whole.
+void useTallWindow(WidgetTester tester, {double height = 3000}) {
+  tester.view.physicalSize = Size(800, height);
+  tester.view.devicePixelRatio = 1;
+  addTearDown(tester.view.reset);
+}

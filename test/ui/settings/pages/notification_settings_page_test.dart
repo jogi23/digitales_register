@@ -24,16 +24,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../settings_pump.dart';
 
-/// The page is one long list; a tall window builds all of it.
-void _tall(WidgetTester tester) {
-  tester.view.physicalSize = const Size(800, 3000);
-  tester.view.devicePixelRatio = 1;
-  addTearDown(tester.view.reset);
-}
-
 void main() {
   testWidgets('notification settings can be changed', (tester) async {
-    _tall(tester);
+    useTallWindow(tester);
     final container =
         await pumpSettings(tester, const NotificationSettingsPage());
     final l = tr(tester.element(find.byType(NotificationSettingsPage)));
@@ -53,7 +46,7 @@ void main() {
   });
 
   testWidgets('each type switch writes its setting', (tester) async {
-    _tall(tester);
+    useTallWindow(tester);
     final container =
         await pumpSettings(tester, const NotificationSettingsPage());
 
@@ -78,7 +71,7 @@ void main() {
   testWidgets(
       'type switches and interval are disabled while notifications '
       'are off', (tester) async {
-    _tall(tester);
+    useTallWindow(tester);
     await pumpSettings(
       tester,
       const NotificationSettingsPage(),
@@ -96,7 +89,7 @@ void main() {
   });
 
   testWidgets('meets tap target guidelines', (tester) async {
-    _tall(tester);
+    useTallWindow(tester);
     await pumpSettings(tester, const NotificationSettingsPage());
 
     await expectMeetsGuidelines(tester);
