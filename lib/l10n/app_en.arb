@@ -321,8 +321,12 @@
   "settingsExcludeSubjects": "Leave subjects out of the grade average",
   "settingsNoSubjectExcluded": "No subject left out",
   "settingsSectionAdvanced": "Advanced",
-  "settingsNetworkLog": "Network log",
-  "settingsDebugLog": "Debug log",
+  "settingsDiagnostics": "Diagnostic log",
+  "settingsDiagnosticsSubtitle": "Records on this device what the app does and what the portal answers. Nothing is sent automatically; you can send it to support, for example.",
+  "diagnosticsShare": "Share log",
+  "diagnosticsShareWarningTitle": "Share the log?",
+  "diagnosticsShareWarningBody": "The log contains answers from the portal, such as grades, absences and messages, and may contain personal data. Share it only with people you trust, such as support.",
+  "diagnosticsNothingRecorded": "Nothing recorded",
   "settingsSource": "Source code",
   "settingsAddSubject": "Add a subject",
   "loginOtherSchool": "Other school",
@@ -388,19 +392,7 @@
   "calcBothSemesters": "Both semesters",
   "calcImport": "Import",
   "calcNoGrades": "This subject has no grades in this period",
-  "networkExportAll": "Export every response",
-  "networkNothingToExport": "Nothing to export",
-  "networkExportDone": "Export finished",
-  "networkPathCopied": "Path copied to the clipboard",
-  "networkCopyPath": "Copy the path",
-  "networkJsonCopied": "JSON copied to the clipboard",
-  "networkCopyJson": "Copy the JSON",
   "commonOkCaps": "OK",
-  "networkNothing": "Nothing here",
-  "networkParameters": "Parameters",
-  "networkResponse": "Response",
-  "networkError": "Error",
-  "networkCopied": "Copied to the clipboard",
   "errorConnectionFailed": "Connection failed",
   "errorLoadingSavedData": "The saved data could not be loaded",
   "commonBack": "Back",
@@ -519,33 +511,6 @@
       }
     }
   },
-  "networkNoneOfType": "No {type}",
-  "@networkNoneOfType": {
-    "placeholders": {
-      "type": {
-        "type": "String"
-      }
-    }
-  },
-  "networkExportSaved": "{count} responses saved to:\n\n{path}",
-  "@networkExportSaved": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      },
-      "path": {
-        "type": "String"
-      }
-    }
-  },
-  "networkExportFailed": "Export failed: {error}",
-  "@networkExportFailed": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
   "messageParentOnly": "This message can only be confirmed by a parent or guardian.",
   "messageUnsupported": "This message asks for a confirmation the app does not support yet. Please open it in the browser.",
   "settingsLanguage": "Language",
@@ -568,9 +533,7 @@
   "calendarLoadingEvents": "Loading the events",
   "dashboardScrollToToday": "Scroll to today",
   "dashboardMarkAllSeen": "Mark everything as seen",
-  "debugLogEmpty": "The log is empty",
   "commonShare": "Share",
-  "debugLogCopied": "Data copied to the clipboard",
   "semesterFirst": "First semester",
   "semesterSecond": "Second semester",
   "semesterBoth": "Both semesters",

@@ -321,8 +321,12 @@
   "settingsExcludeSubjects": "Escludi materie dalla media dei voti",
   "settingsNoSubjectExcluded": "Nessuna materia esclusa",
   "settingsSectionAdvanced": "Avanzate",
-  "settingsNetworkLog": "Registro di rete",
-  "settingsDebugLog": "Registro di debug",
+  "settingsDiagnostics": "Registro diagnostico",
+  "settingsDiagnosticsSubtitle": "Registra sul dispositivo cosa fa l'app e cosa risponde il portale. Non viene inviato nulla automaticamente; puoi inviarlo ad esempio al supporto.",
+  "diagnosticsShare": "Condividi registro",
+  "diagnosticsShareWarningTitle": "Condividere il registro?",
+  "diagnosticsShareWarningBody": "Il registro contiene le risposte del portale, ad esempio voti, assenze e messaggi, e può contenere dati personali. Condividilo solo con persone di cui ti fidi, ad esempio il supporto.",
+  "diagnosticsNothingRecorded": "Niente registrato",
   "settingsSource": "Codice sorgente",
   "settingsAddSubject": "Aggiungi materia",
   "loginOtherSchool": "Altra scuola",
@@ -388,19 +392,7 @@
   "calcBothSemesters": "Entrambi i semestri",
   "calcImport": "Importa",
   "calcNoGrades": "Per questa materia non ci sono voti in questo periodo",
-  "networkExportAll": "Esporta tutte le risposte",
-  "networkNothingToExport": "Niente da esportare",
-  "networkExportDone": "Esportazione completata",
-  "networkPathCopied": "Percorso copiato negli appunti",
-  "networkCopyPath": "Copia il percorso",
-  "networkJsonCopied": "JSON copiato negli appunti",
-  "networkCopyJson": "Copia il JSON",
   "commonOkCaps": "OK",
-  "networkNothing": "Niente da mostrare",
-  "networkParameters": "Parametri",
-  "networkResponse": "Risposta",
-  "networkError": "Errore",
-  "networkCopied": "Copiato negli appunti",
   "errorConnectionFailed": "Connessione non riuscita",
   "errorLoadingSavedData": "Errore nel caricamento dei dati salvati",
   "commonBack": "Indietro",
@@ -519,33 +511,6 @@
       }
     }
   },
-  "networkNoneOfType": "Nessun {type}",
-  "@networkNoneOfType": {
-    "placeholders": {
-      "type": {
-        "type": "String"
-      }
-    }
-  },
-  "networkExportSaved": "{count} risposte salvate in:\n\n{path}",
-  "@networkExportSaved": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      },
-      "path": {
-        "type": "String"
-      }
-    }
-  },
-  "networkExportFailed": "Esportazione non riuscita: {error}",
-  "@networkExportFailed": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
   "messageParentOnly": "Questa comunicazione può essere confermata solo da un genitore o tutore.",
   "messageUnsupported": "Questa comunicazione richiede una conferma non ancora supportata dall'app. Aprila nel browser.",
   "settingsLanguage": "Lingua",
@@ -568,9 +533,7 @@
   "calendarLoadingEvents": "Caricamento degli impegni",
   "dashboardScrollToToday": "Vai al giorno corrente",
   "dashboardMarkAllSeen": "Segna tutto come visto",
-  "debugLogEmpty": "Il registro è vuoto",
   "commonShare": "Condividi",
-  "debugLogCopied": "Dati copiati negli appunti",
   "semesterFirst": "1° semestre",
   "semesterSecond": "2° semestre",
   "semesterBoth": "Entrambi i semestri",

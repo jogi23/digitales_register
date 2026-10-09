@@ -29,9 +29,8 @@ import 'package:dr/ui/app_lock_settings.dart';
 import 'package:dr/ui/autocomplete_options.dart';
 import 'package:dr/ui/connection_status_button.dart';
 import 'package:dr/ui/dialog.dart';
-import 'package:dr/ui/debug_log_page.dart';
+import 'package:dr/ui/diagnostics_settings.dart';
 import 'package:dr/ui/layout.dart';
-import 'package:dr/ui/network_protocol_page.dart';
 import 'package:dr/ui/star_rating.dart';
 import 'package:dr/ui/subject_appearance_page.dart';
 import 'package:dr/l10n/l10n.dart';
@@ -776,31 +775,7 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
               ),
             ),
           ),
-          ListTile(
-            title: Text(tr(context).settingsNetworkLog),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute<void>(
-                  builder: (context) {
-                    return const NetworkProtocolPage();
-                  },
-                ),
-              );
-            },
-          ),
-          if (kDebugMode)
-            ListTile(
-              title: Text(tr(context).settingsDebugLog),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute<void>(
-                    builder: (context) => const DebugLogPage(),
-                  ),
-                );
-              },
-            ),
+          const DiagnosticsSettingsTiles(),
           ListTile(
             leading: const Icon(Icons.code),
             trailing: const Icon(Icons.open_in_new),

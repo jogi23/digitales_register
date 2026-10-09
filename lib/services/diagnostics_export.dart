@@ -20,10 +20,15 @@ import 'dart:io';
 
 import 'package:dr/app_state.dart';
 import 'package:dr/debug_log.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 enum DiagnosticsExportResult { shared, empty }
+
+final diagnosticsExportProvider = Provider<DiagnosticsExport>(
+  (ref) => DiagnosticsExport(),
+);
 
 /// Hands everything the diagnostic log recorded (#325) to the share sheet:
 /// the debug log as text and the network protocol as JSON.
