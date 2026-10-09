@@ -82,4 +82,67 @@ void main() {
 
     await expectMeetsGuidelines(tester);
   });
+
+  testWidgets('no two blocks share a title in any language', (tester) async {
+    for (final locale in const [Locale('de'), Locale('en'), Locale('it')]) {
+      await pumpSettings(tester, const ContentSettingsPage(), locale: locale);
+
+      final titles = [
+        for (final section in tester.widgetList<SettingsExpandableSection>(
+          find.byType(SettingsExpandableSection),
+        ))
+          section.title,
+      ];
+      expect(titles.toSet(), hasLength(titles.length), reason: '$locale');
+    }
+  });
+
+  testWidgets('a block the user opened stays open after scrolling away',
+      (tester) async {
+    tester.view.physicalSize = const Size(400, 500);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await pumpSettings(tester, const ContentSettingsPage());
+
+    await tester.tap(find.text('Merkheft'));
+    await tester.pumpAndSettle();
+    // Merkheft is tall: Noten starts out of reach until it is scrolled to.
+    await tester.scrollUntilVisible(find.text('Noten'), 300);
+    await tester.tap(find.text('Noten'));
+    await tester.pumpAndSettle();
+    await tester.drag(find.byType(ListView), const Offset(0, -3000));
+    await tester.pumpAndSettle();
+    expect(find.text('Neue oder geänderte Einträge markieren'), findsNothing);
+    await tester.drag(find.byType(ListView), const Offset(0, 6000));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Neue oder geänderte Einträge markieren'), findsOneWidget);
+  });
+
+  testWidgets('the deep link scrolls the asked-for block into view',
+      (tester) async {
+    tester.view.physicalSize = const Size(400, 300);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await pumpSettings(
+      tester,
+      const ContentSettingsPage(initiallyExpanded: {ContentBlock.grades}),
+    );
+
+    expect(tester.getTopLeft(find.text('Noten')).dy, lessThan(300));
+  });
+
+  testWidgets('all blocks open at text scale 2.0 do not overflow',
+      (tester) async {
+    tester.view.physicalSize = const Size(800, 3000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await pumpSettings(
+      tester,
+      const ContentSettingsPage(initiallyExpanded: {...ContentBlock.values}),
+      textScale: 2,
+    );
+
+    expect(tester.takeException(), isNull);
+  });
 }

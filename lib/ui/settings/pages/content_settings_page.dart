@@ -36,14 +36,39 @@ enum ContentBlock {
 /// How the app shows what the school provides: subjects, calendar, homework
 /// diary, class register, overview, absences and grades — each behind a header
 /// of its own.
-class ContentSettingsPage extends StatelessWidget {
+class ContentSettingsPage extends StatefulWidget {
   const ContentSettingsPage({
     super.key,
     this.initiallyExpanded = const {},
   });
 
-  /// The blocks that start open; the others start closed.
+  /// The blocks that start open; the others start closed. The first of them
+  /// is scrolled into view.
   final Set<ContentBlock> initiallyExpanded;
+
+  @override
+  State<ContentSettingsPage> createState() => _ContentSettingsPageState();
+}
+
+class _ContentSettingsPageState extends State<ContentSettingsPage> {
+  final _positions = {
+    for (final block in ContentBlock.values) block: GlobalKey(),
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    // With six headers and one block open, the one asked for can sit below
+    // the fold on a small screen or with large text.
+    final target = ContentBlock.values
+        .where(widget.initiallyExpanded.contains)
+        .firstOrNull;
+    if (target == null) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final context = _positions[target]!.currentContext;
+      if (context != null) Scrollable.ensureVisible(context);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -85,12 +110,17 @@ class ContentSettingsPage extends StatelessWidget {
       title: l.settingsCategoryContent,
       children: [
         for (final entry in blocks.entries)
-          SettingsExpandableSection(
-            key: ValueKey(entry.key),
-            title: entry.value.title,
-            summary: entry.value.summary,
-            initiallyExpanded: initiallyExpanded.contains(entry.key),
-            children: [entry.value.body],
+          KeyedSubtree(
+            key: _positions[entry.key],
+            child: SettingsExpandableSection(
+              // Remembers whether it is open while it is scrolled out of the
+              // lazily built list.
+              key: PageStorageKey(entry.key),
+              title: entry.value.title,
+              summary: entry.value.summary,
+              initiallyExpanded: widget.initiallyExpanded.contains(entry.key),
+              children: [entry.value.body],
+            ),
           ),
       ],
     );

@@ -1,5 +1,7 @@
 # Einstellungen als Kategorien-Hub
 
+> **Teilweise überholt:** Die Kategorien sind seit dem Abschnitt „Änderung 2026-10-09“ unten fünf statt sieben (Fächer & Kalender, Hausaufgaben & Klassenbuch und Noten bilden „Inhalte & Ansichten“, „Darstellung“ heißt „Design & Sprache“). Wo oben „sieben“ oder eine eigene Noten-Unterseite steht, gilt der Abschnitt unten.
+
 Issue: noch offen, vor dem ersten Commit anlegen. Basis-Branch: `feat/notification-diagnostics-318-319` (enthält Menü-Standard, Diagnose-Schalter, Akku-Hinweis, Hintergrund-Status). Arbeits-Branch: `feat/settings-hub`.
 
 Herkunft: Design-Kritik zu Menü und Einstellungen (2026-10-09), Teil A von A/B/C. Abgleich mit BiboNest (`lib/src/ui/accounts_page.dart`, `design/components.dart`) und [docs/STANDARD_MENU.md](../../STANDARD_MENU.md).

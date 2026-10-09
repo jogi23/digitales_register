@@ -43,6 +43,7 @@ Future<ProviderContainer> pumpSettings(
   SettingsState? settings,
   bool demo = false,
   double textScale = 1,
+  Locale locale = const Locale('de'),
   List<Override> overrides = const [],
   GlobalKey<NavigatorState>? navigatorKey,
   RouteFactory? onGenerateRoute,
@@ -61,7 +62,7 @@ Future<ProviderContainer> pumpSettings(
   final app = UncontrolledProviderScope(
     container: container,
     child: MaterialApp(
-      locale: const Locale('de'),
+      locale: locale,
       localizationsDelegates: const [
         L.delegate,
         GlobalMaterialLocalizations.delegate,

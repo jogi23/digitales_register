@@ -254,7 +254,6 @@ class SettingsNotifier extends Notifier<SettingsState> {
 
   void setAccentBackground(bool value) =>
       _update(state.copyWith(accentBackground: value));
-
 }
 
 final settingsProvider =

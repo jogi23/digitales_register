@@ -1,5 +1,7 @@
 # Einstellungen als Kategorien-Hub Implementation Plan
 
+> **Teilweise überholt:** Task 8 bis 10 und 12 (sieben Kategorien, `GradesSettingsPage`) sind durch [2026-10-09-settings-regroup.md](2026-10-09-settings-regroup.md) ersetzt: fünf Kategorien, Blöcke unter `lib/ui/settings/blocks/`.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Die Einstellungen werden ein Hub mit sieben Kategorien und Unterseiten, die `settingsProvider` direkt lesen; die 37-Callback-Seite entfällt.
