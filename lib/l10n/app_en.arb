@@ -753,5 +753,7 @@
   "settingsAppLockGrace": "Lock after",
   "settingsAppLockGraceNow": "Immediately",
   "settingsAppLockGraceMinutes": "{minutes} min",
-  "settingsAppLockNoDeviceLock": "No screen lock is set up on this device. Set up a PIN, pattern or fingerprint in the device settings first."
+  "settingsAppLockNoDeviceLock": "No screen lock is set up on this device. Set up a PIN, pattern or fingerprint in the device settings first.",
+  "settingsCategoryAccount": "Account & security",
+  "settingsMoreInfo": "More information"
 }

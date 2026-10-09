@@ -811,5 +811,7 @@
       }
     }
   },
-  "settingsAppLockNoDeviceLock": "Am Gerät ist keine Bildschirmsperre eingerichtet. Richte zuerst in den Android-Einstellungen eine PIN, ein Muster oder einen Fingerabdruck ein."
+  "settingsAppLockNoDeviceLock": "Am Gerät ist keine Bildschirmsperre eingerichtet. Richte zuerst in den Android-Einstellungen eine PIN, ein Muster oder einen Fingerabdruck ein.",
+  "settingsCategoryAccount": "Konto & Sicherheit",
+  "settingsMoreInfo": "Mehr Informationen"
 }

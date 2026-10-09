@@ -753,5 +753,7 @@
   "settingsAppLockGrace": "Blocca dopo",
   "settingsAppLockGraceNow": "Subito",
   "settingsAppLockGraceMinutes": "{minutes} min",
-  "settingsAppLockNoDeviceLock": "Sul dispositivo non è impostato alcun blocco schermo. Imposta prima un PIN, una sequenza o un'impronta nelle impostazioni del dispositivo."
+  "settingsAppLockNoDeviceLock": "Sul dispositivo non è impostato alcun blocco schermo. Imposta prima un PIN, una sequenza o un'impronta nelle impostazioni del dispositivo.",
+  "settingsCategoryAccount": "Account e sicurezza",
+  "settingsMoreInfo": "Maggiori informazioni"
 }
