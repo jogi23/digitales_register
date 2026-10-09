@@ -43,7 +43,7 @@ class GradesBlock extends ConsumerWidget {
       );
 
   Future<void> _addExcluded(BuildContext context, WidgetRef ref) async {
-    final ignored = ref.read(settingsProvider).ignoreForGradesAverage.toList();
+    final ignored = ref.read(settingsProvider).ignoreForGradesAverage;
     final available = ref
         .read(allSubjectsProvider)
         .where((subject) => !ignored.contains(subject))
@@ -52,14 +52,9 @@ class GradesBlock extends ConsumerWidget {
       context: context,
       builder: (context) => AddSubject(availableSubjects: available),
     );
-    if (subject == null) return;
-    // The list as it is now, not as it was before the dialog opened; and free
-    // text, so the subject may already be on it.
-    final current = ref.read(settingsProvider).ignoreForGradesAverage;
-    if (current.contains(subject)) return;
-    ref
-        .read(settingsProvider.notifier)
-        .setIgnoreForGradesAverage([...current, subject]);
+    if (subject != null) {
+      ref.read(settingsProvider.notifier).addIgnoredSubject(subject);
+    }
   }
 
   @override
@@ -147,14 +142,7 @@ class GradesBlock extends ConsumerWidget {
                         tooltip: l.settingsRemoveSubject(subject),
                         onPressed: () async {
                           await delete();
-                          // The live list: another row may have been removed
-                          // while this one was animating out.
-                          final current =
-                              ref.read(settingsProvider).ignoreForGradesAverage;
-                          notifier.setIgnoreForGradesAverage([
-                            for (final other in current)
-                              if (other != subject) other,
-                          ]);
+                          notifier.removeIgnoredSubject(subject);
                         },
                       ),
                     ),

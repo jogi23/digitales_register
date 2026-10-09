@@ -15,6 +15,9 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'dart:io';
+
+import 'package:dr/app_state.dart';
 import 'package:dr/l10n/l10n.dart';
 import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:flutter/material.dart';
@@ -45,3 +48,8 @@ String notificationIntervalLabel(BuildContext context, int minutes) {
   if (minutes < 60) return l.notificationsEveryMinutes(minutes);
   return l.notificationsEveryHours(minutes ~/ 60);
 }
+
+/// Without a stored password Android cannot sign in on its own, so only the
+/// app itself shows news; [isAndroid] defaults to the platform it runs on.
+bool notificationsInAppOnly(SettingsState s, {bool? isAndroid}) =>
+    s.noPasswordSaving && (isAndroid ?? Platform.isAndroid);

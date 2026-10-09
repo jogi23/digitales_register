@@ -27,16 +27,6 @@ import '../settings_pump.dart';
 DynamicThemeState _theme(WidgetTester tester) =>
     DynamicTheme.of(tester.element(find.byType(AppearanceSettingsPage)))!;
 
-Future<void> _choose(WidgetTester tester, String row, String option) async {
-  await tester.tap(find.text(row));
-  await tester.pumpAndSettle();
-  await tester.tap(find.descendant(
-    of: find.byType(AlertDialog),
-    matching: find.text(option),
-  ));
-  await tester.pumpAndSettle();
-}
-
 void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
@@ -44,7 +34,7 @@ void main() {
       (tester) async {
     await pumpSettings(tester, const AppearanceSettingsPage());
 
-    await _choose(tester, 'Design', 'Dunkel');
+    await chooseInDialog(tester, 'Design', 'Dunkel');
 
     expect(_theme(tester).followDevice, isFalse);
     expect(_theme(tester).customBrightness, Brightness.dark);
@@ -54,10 +44,10 @@ void main() {
 
   testWidgets('picking the device theme turns followDevice on', (tester) async {
     await pumpSettings(tester, const AppearanceSettingsPage());
-    await _choose(tester, 'Design', 'Hell');
+    await chooseInDialog(tester, 'Design', 'Hell');
     expect(_theme(tester).followDevice, isFalse);
 
-    await _choose(tester, 'Design', 'Geräte-Theme folgen');
+    await chooseInDialog(tester, 'Design', 'Geräte-Theme folgen');
 
     expect(_theme(tester).followDevice, isTrue);
   });
@@ -68,10 +58,10 @@ void main() {
         await pumpSettings(tester, const AppearanceSettingsPage());
     expect(container.read(settingsProvider).language, isNull);
 
-    await _choose(tester, 'Sprache', 'Italiano');
+    await chooseInDialog(tester, 'Sprache', 'Italiano');
     expect(container.read(settingsProvider).language, 'it');
 
-    await _choose(tester, 'Sprache', 'Gerätesprache');
+    await chooseInDialog(tester, 'Sprache', 'Gerätesprache');
     expect(container.read(settingsProvider).language, isNull);
   });
 

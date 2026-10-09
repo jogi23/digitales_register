@@ -110,10 +110,11 @@ void main() {
     await tester.scrollUntilVisible(find.text('Noten'), 300);
     await tester.tap(find.text('Noten'));
     await tester.pumpAndSettle();
-    await tester.drag(find.byType(ListView), const Offset(0, -3000));
+    await tester.drag(
+        find.byType(SingleChildScrollView), const Offset(0, -3000));
     await tester.pumpAndSettle();
-    expect(find.text('Neue oder geänderte Einträge markieren'), findsNothing);
-    await tester.drag(find.byType(ListView), const Offset(0, 6000));
+    await tester.drag(
+        find.byType(SingleChildScrollView), const Offset(0, 6000));
     await tester.pumpAndSettle();
 
     expect(find.text('Neue oder geänderte Einträge markieren'), findsOneWidget);

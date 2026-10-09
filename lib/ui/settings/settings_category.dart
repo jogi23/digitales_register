@@ -15,8 +15,6 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
-import 'dart:io';
-
 import 'package:dr/app_state.dart';
 import 'package:dr/l10n/l10n.dart';
 import 'package:dr/ui/settings/pages/account_settings_page.dart';
@@ -62,7 +60,7 @@ enum SettingsCategory {
           : l.settingsSummaryAppLockOff,
       notifications => !s.notificationsEnabled
           ? l.settingsSummaryNotificationsOff
-          : s.noPasswordSaving && (isAndroid ?? Platform.isAndroid)
+          : notificationsInAppOnly(s, isAndroid: isAndroid)
               ? l.settingsSummaryNotificationsInAppOnly
               : l.settingsSummaryNotificationsOn(
                   notificationIntervalLabel(context, s.notificationPollMinutes),

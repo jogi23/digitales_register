@@ -141,6 +141,18 @@ class SettingsNotifier extends Notifier<SettingsState> {
   void setIgnoreForGradesAverage(List<String> subjects) =>
       _update(state.copyWith(ignoreForGradesAverage: List.of(subjects)));
 
+  /// Free text can name a subject that is already excluded; it stays once.
+  void addIgnoredSubject(String subject) {
+    final current = state.ignoreForGradesAverage;
+    if (current.contains(subject)) return;
+    setIgnoreForGradesAverage([...current, subject]);
+  }
+
+  void removeIgnoredSubject(String subject) => setIgnoreForGradesAverage([
+        for (final other in state.ignoreForGradesAverage)
+          if (other != subject) other,
+      ]);
+
   void setStarColor(String id) => _update(state.copyWith(starColor: id));
 
   /// Null follows the device language.

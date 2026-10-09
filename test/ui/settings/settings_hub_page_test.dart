@@ -18,6 +18,7 @@
 import 'package:dr/app_state.dart';
 import 'package:dr/l10n/l10n.dart';
 import 'package:dr/ui/settings/settings_category.dart';
+import 'package:dr/ui/settings/settings_labels.dart';
 import 'package:dr/ui/settings/pages/account_settings_page.dart';
 import 'package:dr/ui/settings/pages/advanced_settings_page.dart';
 import 'package:dr/ui/settings/pages/appearance_settings_page.dart';
@@ -199,5 +200,14 @@ void main() {
     await pumpSettings(tester, const SettingsHubPage());
 
     await expectMeetsGuidelines(tester);
+  });
+
+  test('without a stored password only the app notifies on Android', () {
+    final stored = SettingsState(noPasswordSaving: false);
+    final none = SettingsState(noPasswordSaving: true);
+
+    expect(notificationsInAppOnly(none, isAndroid: true), isTrue);
+    expect(notificationsInAppOnly(none, isAndroid: false), isFalse);
+    expect(notificationsInAppOnly(stored, isAndroid: true), isFalse);
   });
 }

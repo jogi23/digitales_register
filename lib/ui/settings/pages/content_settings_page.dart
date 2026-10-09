@@ -30,7 +30,40 @@ enum ContentBlock {
   classbook,
   overview,
   absences,
-  grades,
+  grades;
+
+  String title(BuildContext context) {
+    final l = tr(context);
+    return switch (this) {
+      subjectsCalendar => l.settingsBlockSubjectsCalendar,
+      merkheft => l.settingsSectionHomework,
+      classbook => l.settingsClassbook,
+      overview => l.settingsHomeworkOverview,
+      absences => l.settingsAbsences,
+      grades => l.settingsSectionGrades,
+    };
+  }
+
+  /// What is in the block, so a closed one still says so.
+  String summary(BuildContext context) {
+    final l = tr(context);
+    return switch (this) {
+      subjectsCalendar => l.settingsBlockSummarySubjectsCalendar,
+      merkheft => l.settingsBlockSummaryMerkheft,
+      classbook || overview => l.settingsBlockSummaryEntryView,
+      absences => l.settingsBlockSummaryAbsences,
+      grades => l.settingsBlockSummaryGrades,
+    };
+  }
+
+  Widget get body => switch (this) {
+        subjectsCalendar => const SubjectsCalendarBlock(),
+        merkheft => const MerkheftBlock(),
+        classbook => const ClassbookBlock(),
+        overview => const OverviewBlock(),
+        absences => const AbsencesBlock(),
+        grades => const GradesBlock(),
+      };
 }
 
 /// How the app shows what the school provides: subjects, calendar, homework
@@ -51,77 +84,37 @@ class ContentSettingsPage extends StatefulWidget {
 }
 
 class _ContentSettingsPageState extends State<ContentSettingsPage> {
-  final _positions = {
-    for (final block in ContentBlock.values) block: GlobalKey(),
-  };
+  /// Marks the block that is scrolled to.
+  final _target = GlobalKey();
+
+  ContentBlock? get _targetBlock =>
+      ContentBlock.values.where(widget.initiallyExpanded.contains).firstOrNull;
 
   @override
   void initState() {
     super.initState();
     // With six headers and one block open, the one asked for can sit below
     // the fold on a small screen or with large text.
-    final target = ContentBlock.values
-        .where(widget.initiallyExpanded.contains)
-        .firstOrNull;
-    if (target == null) return;
+    if (_targetBlock == null) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final context = _positions[target]!.currentContext;
+      final context = _target.currentContext;
       if (context != null) Scrollable.ensureVisible(context);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final l = tr(context);
-    final blocks =
-        <ContentBlock, ({String title, String summary, Widget body})>{
-      ContentBlock.subjectsCalendar: (
-        title: l.settingsBlockSubjectsCalendar,
-        summary: l.settingsBlockSummarySubjectsCalendar,
-        body: const SubjectsCalendarBlock(),
-      ),
-      ContentBlock.merkheft: (
-        title: l.settingsSectionHomework,
-        summary: l.settingsBlockSummaryMerkheft,
-        body: const MerkheftBlock(),
-      ),
-      ContentBlock.classbook: (
-        title: l.settingsClassbook,
-        summary: l.settingsBlockSummaryEntryView,
-        body: const ClassbookBlock(),
-      ),
-      ContentBlock.overview: (
-        title: l.settingsHomeworkOverview,
-        summary: l.settingsBlockSummaryEntryView,
-        body: const OverviewBlock(),
-      ),
-      ContentBlock.absences: (
-        title: l.settingsAbsences,
-        summary: l.settingsBlockSummaryAbsences,
-        body: const AbsencesBlock(),
-      ),
-      ContentBlock.grades: (
-        title: l.settingsSectionGrades,
-        summary: l.settingsBlockSummaryGrades,
-        body: const GradesBlock(),
-      ),
-    };
     return SettingsPageScaffold(
-      title: l.settingsCategoryContent,
-      // Six headers: all built, so the block asked for can be scrolled to.
-      cacheExtent: 4000,
+      title: tr(context).settingsCategoryContent,
       children: [
-        for (final entry in blocks.entries)
+        for (final block in ContentBlock.values)
           KeyedSubtree(
-            key: _positions[entry.key],
+            key: block == _targetBlock ? _target : null,
             child: SettingsExpandableSection(
-              // Remembers whether it is open while it is scrolled out of the
-              // lazily built list.
-              key: PageStorageKey(entry.key),
-              title: entry.value.title,
-              summary: entry.value.summary,
-              initiallyExpanded: widget.initiallyExpanded.contains(entry.key),
-              children: [entry.value.body],
+              title: block.title(context),
+              summary: block.summary(context),
+              initiallyExpanded: widget.initiallyExpanded.contains(block),
+              children: [block.body],
             ),
           ),
       ],

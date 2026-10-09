@@ -258,9 +258,6 @@ class RegisterApp extends ConsumerWidget {
                   builder: (_) => const GradeCalculator(),
                   fullscreenDialog: true,
                 );
-              case "settings":
-              case "settingsGrades":
-                return settingsRoute(settings);
               case "subjectAppearance":
                 return MaterialPageRoute<void>(
                   settings: settings,
@@ -270,7 +267,8 @@ class RegisterApp extends ConsumerWidget {
                   fullscreenDialog: true,
                 );
               default:
-                throw Exception("Unknown Route ${pathElements[1]}");
+                return settingsRoute(settings) ??
+                    (throw Exception("Unknown Route ${pathElements[1]}"));
             }
           },
           builder: (context, child) {

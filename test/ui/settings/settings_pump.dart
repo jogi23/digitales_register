@@ -113,3 +113,18 @@ void useTallWindow(WidgetTester tester, {double height = 3000}) {
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
 }
+
+/// Taps the settings row [row] and picks [option] in the dialog it opens.
+Future<void> chooseInDialog(
+  WidgetTester tester,
+  String row,
+  String option,
+) async {
+  await tester.tap(find.text(row));
+  await tester.pumpAndSettle();
+  await tester.tap(find.descendant(
+    of: find.byType(AlertDialog),
+    matching: find.text(option),
+  ));
+  await tester.pumpAndSettle();
+}

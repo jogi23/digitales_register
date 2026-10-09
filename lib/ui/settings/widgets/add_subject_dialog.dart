@@ -21,9 +21,9 @@ import 'package:dr/ui/dialog.dart';
 import 'package:flutter/material.dart';
 
 class AddSubject extends StatefulWidget {
-  final List<String>? availableSubjects;
+  final List<String> availableSubjects;
 
-  const AddSubject({super.key, this.availableSubjects});
+  const AddSubject({super.key, required this.availableSubjects});
   @override
   _AddSubjectState createState() => _AddSubjectState();
 }
@@ -59,7 +59,7 @@ class _AddSubjectState extends State<AddSubject> {
         focusNode: focusNode,
         textEditingController: subjectNameController,
         optionsBuilder: (textEditingValue) {
-          return widget.availableSubjects!.where(
+          return widget.availableSubjects.where(
             (suggestion) => suggestion
                 .toLowerCase()
                 .contains(textEditingValue.text.toLowerCase()),
@@ -82,9 +82,7 @@ class _AddSubjectState extends State<AddSubject> {
           return TextFormField(
             controller: textEditingController,
             focusNode: focusNode,
-            onFieldSubmitted: (String value) {
-              onFieldSubmitted();
-            },
+            onFieldSubmitted: (_) => onFieldSubmitted(),
             autofocus: subjectNameController.text.isEmpty,
           );
         },

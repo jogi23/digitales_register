@@ -68,7 +68,7 @@ class NotificationSettingsPage extends ConsumerWidget {
           // list inside the app, which works either way. Only the system
           // notifications need to sign in on their own.
           subtitle: Text(
-            s.noPasswordSaving && Platform.isAndroid
+            notificationsInAppOnly(s)
                 ? l.settingsNotificationsNeedStayLoggedIn
                 : l.settingsNotificationsEnableSubtitle,
           ),
