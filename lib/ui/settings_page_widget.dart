@@ -27,6 +27,7 @@ import 'package:dr/container/settings_page.dart';
 import 'package:dr/ui/account_avatar_button.dart';
 import 'package:dr/ui/app_lock_settings.dart';
 import 'package:dr/ui/autocomplete_options.dart';
+import 'package:dr/ui/battery_hint.dart';
 import 'package:dr/ui/connection_status_button.dart';
 import 'package:dr/ui/dialog.dart';
 import 'package:dr/ui/diagnostics_settings.dart';
@@ -328,6 +329,7 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
             onChanged: widget.onSetNotificationsEnabled,
             value: widget.vm.notificationsEnabled,
           ),
+          const BatteryOptimizationHint(),
           ListTile(
             enabled: widget.vm.notificationsEnabled,
             title: Text(tr(context).settingsNotificationsInterval),

@@ -46,6 +46,11 @@ Future<T?> _invoke<T>(String method, {bool? isAndroid}) async {
   }
 }
 
+/// Opens the system page; a provider so that tests can stand in for it.
+final openBatterySettingsProvider = Provider<Future<void> Function()>(
+  (ref) => openBatteryOptimizationSettings,
+);
+
 /// The answer to [isIgnoringBatteryOptimizations]; invalidate it to ask again.
 final batteryOptimizationProvider = FutureProvider.autoDispose<bool?>(
   (ref) => isIgnoringBatteryOptimizations(),
