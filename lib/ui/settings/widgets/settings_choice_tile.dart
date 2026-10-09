@@ -20,7 +20,8 @@ import 'package:flutter/material.dart';
 
 /// One entry of a [SettingsChoiceTile].
 class SettingsChoice<T> {
-  const SettingsChoice({required this.value, required this.label, this.leading});
+  const SettingsChoice(
+      {required this.value, required this.label, this.leading});
 
   final T value;
   final String label;

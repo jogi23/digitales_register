@@ -33,8 +33,7 @@ void _tall(WidgetTester tester) {
 void main() {
   testWidgets('picking the month view writes the setting', (tester) async {
     _tall(tester);
-    final container =
-        await pumpSettings(tester, const HomeworkSettingsPage());
+    final container = await pumpSettings(tester, const HomeworkSettingsPage());
     expect(
       container.read(settingsProvider).dashboardViewMode,
       DashboardViewMode.list,
@@ -51,8 +50,7 @@ void main() {
 
   testWidgets('each switch writes its setting', (tester) async {
     _tall(tester);
-    final container =
-        await pumpSettings(tester, const HomeworkSettingsPage());
+    final container = await pumpSettings(tester, const HomeworkSettingsPage());
 
     final fields = <String, bool Function(SettingsState)>{
       'Neue oder geänderte Einträge markieren': (s) =>
@@ -74,8 +72,7 @@ void main() {
   testWidgets('classbook and overview arrangements write their own setting',
       (tester) async {
     _tall(tester);
-    final container =
-        await pumpSettings(tester, const HomeworkSettingsPage());
+    final container = await pumpSettings(tester, const HomeworkSettingsPage());
 
     await tester.tap(find.text('Nach Fach').at(0));
     await tester.pumpAndSettle();
@@ -93,8 +90,7 @@ void main() {
   testWidgets('classbook, overview and absences display modes are separate',
       (tester) async {
     _tall(tester);
-    final container =
-        await pumpSettings(tester, const HomeworkSettingsPage());
+    final container = await pumpSettings(tester, const HomeworkSettingsPage());
 
     await tester.tap(find.text('Karten').at(0));
     await tester.pumpAndSettle();

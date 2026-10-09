@@ -69,19 +69,18 @@ class AccountSettingsPage extends ConsumerWidget {
         ],
         SwitchListTile.adaptive(
           secondary: const Icon(Icons.login_rounded),
-          title: Row(
-            children: [
-              Flexible(child: Text(l.settingsStayLoggedIn)),
-              IconButton(
-                icon: const Icon(Icons.info_outline_rounded),
-                tooltip: l.settingsMoreInfo,
-                onPressed: () => _explainStayLoggedIn(context),
-              ),
-            ],
-          ),
+          title: Text(l.settingsStayLoggedIn),
           subtitle: Text(l.settingsStayLoggedInSubtitle),
           value: !settings.noPasswordSaving,
           onChanged: (value) => notifier.setSaveNoPass(!value),
+        ),
+        // A row of its own: inside the switch's title a screen reader would
+        // fold the button into the switch.
+        ListTile(
+          dense: true,
+          leading: const Icon(Icons.info_outline_rounded),
+          title: Text(l.settingsMoreInfo),
+          onTap: () => _explainStayLoggedIn(context),
         ),
         const AppLockSettingsTiles(),
         // Next to the account switch it is about; the demo has no second

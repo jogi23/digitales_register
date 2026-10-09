@@ -25,7 +25,8 @@ import '../settings_pump.dart';
 
 void main() {
   testWidgets('section header is a primary titleSmall header', (tester) async {
-    await pumpSettings(tester, const Scaffold(body: SettingsSectionHeader('Noten')));
+    await pumpSettings(
+        tester, const Scaffold(body: SettingsSectionHeader('Noten')));
     final handle = tester.ensureSemantics();
 
     final context = tester.element(find.text('Noten'));
@@ -43,18 +44,22 @@ void main() {
       matchesSemantics(label: 'Noten', isHeader: true),
     );
     final padding = tester.widget<Padding>(
-      find.ancestor(of: find.text('Noten'), matching: find.byType(Padding)).first,
+      find
+          .ancestor(of: find.text('Noten'), matching: find.byType(Padding))
+          .first,
     );
     expect(padding.padding, const EdgeInsets.fromLTRB(16, 24, 16, 8));
     handle.dispose();
   });
 
   testWidgets('subheader uses labelLarge', (tester) async {
-    await pumpSettings(tester, const Scaffold(body: SettingsSubheader('Anzeige')));
+    await pumpSettings(
+        tester, const Scaffold(body: SettingsSubheader('Anzeige')));
 
     final context = tester.element(find.text('Anzeige'));
     final text = tester.widget<Text>(find.text('Anzeige'));
-    expect(text.style?.fontSize, Theme.of(context).textTheme.labelLarge?.fontSize);
+    expect(
+        text.style?.fontSize, Theme.of(context).textTheme.labelLarge?.fontSize);
   });
 
   testWidgets('scaffold shows title and children', (tester) async {

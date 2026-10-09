@@ -39,7 +39,8 @@ class GradesSettingsPage extends ConsumerWidget {
       SettingsChoice(
         value: id,
         label: starColorName(context, id),
-        leading: Icon(Icons.star, color: resolveStarColor(context, id), size: 20),
+        leading:
+            Icon(Icons.star, color: resolveStarColor(context, id), size: 20),
       );
 
   Future<void> _addExcluded(BuildContext context, WidgetRef ref) async {
@@ -142,12 +143,16 @@ class GradesSettingsPage extends ConsumerWidget {
                       title: Text(subject),
                       trailing: IconButton(
                         icon: const Icon(Icons.close),
-                        tooltip:
-                            MaterialLocalizations.of(context).deleteButtonTooltip,
+                        tooltip: MaterialLocalizations.of(context)
+                            .deleteButtonTooltip,
                         onPressed: () async {
                           await delete();
+                          // The live list: another row may have been removed
+                          // while this one was animating out.
+                          final current =
+                              ref.read(settingsProvider).ignoreForGradesAverage;
                           notifier.setIgnoreForGradesAverage([
-                            for (final other in excluded)
+                            for (final other in current)
                               if (other != subject) other,
                           ]);
                         },

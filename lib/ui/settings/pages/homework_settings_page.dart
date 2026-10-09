@@ -83,7 +83,8 @@ class HomeworkSettingsPage extends ConsumerWidget {
           value: s.classbookDisplayMode,
           onChanged: notifier.setClassbookDisplayMode,
           offerTimeline: true,
-          timelineEnabled: s.classbookViewMode == ClassbookViewMode.chronological,
+          timelineEnabled:
+              s.classbookViewMode == ClassbookViewMode.chronological,
         ),
         SettingsSectionHeader(l.settingsHomeworkOverview),
         ArrangementTiles(

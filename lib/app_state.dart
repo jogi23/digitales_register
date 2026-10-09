@@ -433,7 +433,6 @@ class SettingsState {
   final bool askWhenDelete;
   final bool showCancelled;
 
-
   final bool showCalendarNicksBar;
   final bool showGradesDiagram;
   final bool showAllSubjectsAverage;

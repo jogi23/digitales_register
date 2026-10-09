@@ -91,7 +91,8 @@ class _AppearanceSettingsPageState
             for (final code in supportedLanguages)
               SettingsChoice(value: code, label: languageNames[code]!),
           ],
-          onChanged: (value) => notifier.setLanguage(value == '' ? null : value),
+          onChanged: (value) =>
+              notifier.setLanguage(value == '' ? null : value),
         ),
         SettingsChoiceTile<ThemeChoice>(
           icon: Icons.brightness_6_rounded,

@@ -26,6 +26,7 @@ import 'package:dr/ui/settings/pages/subjects_calendar_settings_page.dart';
 import 'package:dr/ui/settings/settings_hub_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'settings_pump.dart';
 
@@ -40,6 +41,8 @@ const _titles = [
 ];
 
 void main() {
+  setUp(() => SharedPreferences.setMockInitialValues({}));
+
   testWidgets('shows the seven categories in order', (tester) async {
     await pumpSettings(tester, const SettingsHubPage());
 
@@ -112,6 +115,38 @@ void main() {
     expect(find.text('App-Sperre aus'), findsOneWidget);
     expect(find.text('Diagnose-Protokoll aus'), findsOneWidget);
     expect(find.text('Geräte-Theme folgen · Italiano'), findsOneWidget);
+  });
+
+  testWidgets('the appearance summary follows a theme change made on its page',
+      (tester) async {
+    await pumpSettings(tester, const SettingsHubPage());
+    expect(find.text('Geräte-Theme folgen · Gerätesprache'), findsOneWidget);
+
+    await tester.tap(find.text('Darstellung'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Design'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.descendant(
+      of: find.byType(AlertDialog),
+      matching: find.text('Dunkel'),
+    ));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Zurück'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Dunkel · Gerätesprache'), findsOneWidget);
+  });
+
+  testWidgets('an unknown stored language does not break the hub',
+      (tester) async {
+    await pumpSettings(
+      tester,
+      const SettingsHubPage(),
+      settings: SettingsState(language: 'xx'),
+    );
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('Geräte-Theme folgen · Gerätesprache'), findsOneWidget);
   });
 
   testWidgets('demo mode keeps all seven categories', (tester) async {

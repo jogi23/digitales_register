@@ -67,9 +67,8 @@ enum SettingsCategory {
           : l.settingsSummaryNotificationsOff,
       appearance => l.settingsSummaryAppearance(
           themeChoiceLabel(context, currentThemeChoice(context)),
-          s.language == null
-              ? l.settingsLanguageDevice
-              : languageNames[s.language]!,
+          // A code this version does not know reads as the device language.
+          languageNames[s.language] ?? l.settingsLanguageDevice,
         ),
       subjectsCalendar => l.settingsSummarySubjectsCalendar,
       homework => l.settingsSummaryHomework,

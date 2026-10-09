@@ -47,15 +47,26 @@ void main() {
     expect(container.read(settingsProvider).noPasswordSaving, isTrue);
   });
 
-  testWidgets('the info button explains the two hints', (tester) async {
+  testWidgets('the info row explains the two hints and is its own tap target',
+      (tester) async {
     await pumpSettings(tester, const AccountSettingsPage());
+    final handle = tester.ensureSemantics();
 
-    await tester.tap(find.byTooltip('Mehr Informationen'));
+    // A row of its own: inside the switch's title TalkBack would fold it away.
+    expect(
+      find.ancestor(
+        of: find.text('Mehr Informationen'),
+        matching: find.byType(SwitchListTile),
+      ),
+      findsNothing,
+    );
+    await tester.tap(find.text('Mehr Informationen'));
     await tester.pumpAndSettle();
 
     expect(find.byType(AlertDialog), findsOneWidget);
     expect(find.textContaining('kein Kontowechsel'), findsOneWidget);
     expect(find.textContaining('SPID/CIE'), findsOneWidget);
+    handle.dispose();
   });
 
   testWidgets('staying on the page when switching accounts can be turned on',

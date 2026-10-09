@@ -75,7 +75,8 @@ void main() {
     }
   });
 
-  testWidgets('type switches and interval are disabled while notifications '
+  testWidgets(
+      'type switches and interval are disabled while notifications '
       'are off', (tester) async {
     _tall(tester);
     await pumpSettings(

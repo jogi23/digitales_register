@@ -52,8 +52,7 @@ void main() {
     expect(find.text('Dunkel'), findsOneWidget);
   });
 
-  testWidgets('picking the device theme turns followDevice on',
-      (tester) async {
+  testWidgets('picking the device theme turns followDevice on', (tester) async {
     await pumpSettings(tester, const AppearanceSettingsPage());
     await _choose(tester, 'Design', 'Hell');
     expect(_theme(tester).followDevice, isFalse);

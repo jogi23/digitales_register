@@ -143,6 +143,31 @@ void main() {
       );
     });
 
+    testWidgets('removing two subjects in quick succession removes both',
+        (tester) async {
+      _tall(tester);
+      final container = await pumpSettings(
+        tester,
+        const GradesSettingsPage(),
+        settings: SettingsState(ignoreForGradesAverage: ['A', 'B', 'C']),
+      );
+      Finder closeOf(String subject) => find.descendant(
+            of: find.ancestor(
+              of: find.text(subject),
+              matching: find.byType(ListTile),
+            ),
+            matching: find.byIcon(Icons.close),
+          );
+
+      await tester.tap(closeOf('A'));
+      await tester.pump(const Duration(milliseconds: 10));
+      await tester.tap(closeOf('B'));
+      await tester.pumpAndSettle();
+
+      expect(container.read(settingsProvider).ignoreForGradesAverage,
+          ['C'].toBuiltList());
+    });
+
     testWidgets('the empty hint is not a hardcoded grey', (tester) async {
       _tall(tester);
       await pumpSettings(tester, const GradesSettingsPage());
