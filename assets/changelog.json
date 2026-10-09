@@ -10,7 +10,9 @@
             "Über-Seite: „Über diese App“ öffnet jetzt eine eigene Seite statt eines Dialogs — mit Version, Entwicklern, Neuerungen, Quellcode, Open-Source-Lizenzen und dem Bereich „Rechtliches“ (Datenschutz, Impressum, Nutzungsbedingungen).",
             "Menü: Neuer Punkt „Andere Apps von Wertwerk“.",
             "Hilfe: „Häufige Fragen“ beantworten die wichtigsten Fragen direkt in der App, auch ohne Internet — zu Anmeldung, Benachrichtigungen, Konten, Hausaufgaben und App-Sperre.",
-            "Diagnose-Protokoll: In den Einstellungen unter „Erweitert“ zeichnet ein Schalter Netzwerkprotokoll und Debug-Log auf — standardmäßig aus. „Protokoll teilen“ schickt alles Aufgezeichnete, etwa an den Support; Passwörter werden geschwärzt. Die Seiten „Netzwerkprotokoll“ und „Debug-Log“ entfallen."
+            "Diagnose-Protokoll: In den Einstellungen unter „Erweitert“ zeichnet ein Schalter Netzwerkprotokoll und Debug-Log auf — standardmäßig aus. „Protokoll teilen“ schickt alles Aufgezeichnete, etwa an den Support; Passwörter werden geschwärzt. Die Seiten „Netzwerkprotokoll“ und „Debug-Log“ entfallen.",
+            "Benachrichtigungen: Hält Android die App im Hintergrund zurück (Akku-Optimierung), zeigen die Einstellungen einen Hinweis mit Knopf zur passenden Systemseite — sonst kommen Meldungen oft verspätet. Nach der Rückkehr wird neu geprüft.",
+            "Benachrichtigungen: Die Einstellungen zeigen jetzt, wie der letzte Hintergrundabruf lief — Zeitpunkt, Ergebnis je Konto und ob das System Benachrichtigungen erlaubt. „Jetzt prüfen“ gibt es auch in der Release-Version. Das hilft, wenn eine Meldung ausbleibt."
           ]
         },
         {
@@ -28,7 +30,9 @@
             "About page: “About this app” now opens a page of its own instead of a dialog — with version, developers, what's new, source code, open-source licenses and a “Legal” section (privacy, legal notice, terms of use).",
             "Menu: new entry “Other apps by Wertwerk”.",
             "Help: “Frequently asked questions” answer the most common questions inside the app, even offline — about signing in, notifications, accounts, homework and the app lock.",
-            "Diagnostic log: under “Advanced” in the settings, a switch records the network protocol and the debug log — off by default. “Share log” sends everything recorded, for example to support; passwords are masked. The “Network log” and “Debug log” pages are gone."
+            "Diagnostic log: under “Advanced” in the settings, a switch records the network protocol and the debug log — off by default. “Share log” sends everything recorded, for example to support; passwords are masked. The “Network log” and “Debug log” pages are gone.",
+            "Notifications: if Android holds the app back in the background (battery optimization), the settings show a hint with a button to the matching system page — otherwise messages often arrive late. It checks again when you return.",
+            "Notifications: the settings now show how the last background check went — time, result per account and whether the system allows notifications. “Check now” is available in the release version as well. This helps when a message does not show up."
           ]
         },
         {
@@ -46,7 +50,9 @@
             "Pagina Informazioni: «Informazioni sull'app» apre ora una pagina propria invece di una finestra — con versione, sviluppatori, novità, codice sorgente, licenze open source e la sezione «Informazioni legali» (privacy, Impressum, condizioni d'uso).",
             "Menu: nuova voce «Altre app di Wertwerk».",
             "Aiuto: le «Domande frequenti» rispondono alle domande più comuni direttamente nell'app, anche offline — su accesso, notifiche, account, compiti e blocco dell'app.",
-            "Registro diagnostico: in «Avanzate» nelle impostazioni, un interruttore registra il protocollo di rete e il log di debug — disattivato di default. «Condividi registro» invia tutto ciò che è stato registrato, ad esempio al supporto; le password vengono oscurate. Le pagine «Registro di rete» e «Registro di debug» non ci sono più."
+            "Registro diagnostico: in «Avanzate» nelle impostazioni, un interruttore registra il protocollo di rete e il log di debug — disattivato di default. «Condividi registro» invia tutto ciò che è stato registrato, ad esempio al supporto; le password vengono oscurate. Le pagine «Registro di rete» e «Registro di debug» non ci sono più.",
+            "Notifiche: se Android limita l'app in background (ottimizzazione della batteria), le impostazioni mostrano un avviso con un pulsante per la pagina di sistema giusta — altrimenti i messaggi arrivano spesso in ritardo. Al ritorno viene ricontrollato.",
+            "Notifiche: le impostazioni mostrano ora come è andato l'ultimo controllo in background — ora, risultato per account e se il sistema consente le notifiche. «Controlla ora» c'è anche nella versione release. Aiuta quando un messaggio non arriva."
           ]
         },
         {

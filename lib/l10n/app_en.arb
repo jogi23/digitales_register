@@ -327,6 +327,68 @@
   "diagnosticsShareWarningBody": "The log contains answers from the portal, such as grades, absences and messages, and may contain personal data. Share it only with people you trust, such as support.",
   "diagnosticsNothingRecorded": "Nothing recorded",
   "diagnosticsShareFailed": "Sharing failed",
+  "batteryHintTitle": "Notifications may arrive late",
+  "batteryHintBody": "To save battery, Android holds apps back in the background. Exempt DigiReg ST from battery optimization so new messages arrive on time.",
+  "batteryHintButton": "Open settings",
+  "batteryHintMore": "Guide for your device",
+  "statusTitle": "Last background check",
+  "statusNoRun": "No run yet",
+  "statusLastRun": "Last run: {time}",
+  "@statusLastRun": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "statusAccountOk": "{label}: {unread} unread, {fresh} new",
+  "@statusAccountOk": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "unread": {
+        "type": "int"
+      },
+      "fresh": {
+        "type": "int"
+      }
+    }
+  },
+  "statusAccountUnreachable": "{label}: not reached",
+  "@statusAccountUnreachable": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "statusAccountSkipped": "{label}: skipped, the app is signed in",
+  "@statusAccountSkipped": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "statusAccountFirstRun": "{label}: first run, {unread} unread",
+  "@statusAccountFirstRun": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "unread": {
+        "type": "int"
+      }
+    }
+  },
+  "statusNoAccounts": "No accounts with a saved password",
+  "statusPermissionGranted": "System permission for notifications: granted",
+  "statusPermissionDenied": "System permission for notifications: not granted",
+  "statusCheckNow": "Check now",
+  "statusCheckNowHint": "Starts after 10 seconds. Leave the app so a signed-in account is checked as well.",
+  "statusCheckStarted": "Check started",
+  "statusCheckFailed": "The check could not be started",
   "settingsSource": "Source code",
   "settingsAddSubject": "Add a subject",
   "loginOtherSchool": "Other school",

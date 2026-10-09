@@ -28,6 +28,7 @@ import 'package:dr/notification_type.dart';
 import 'package:dr/notification_visibility.dart';
 import 'package:dr/providers/account_profile_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
+import 'package:dr/services/background_status.dart';
 import 'package:dr/system_notifications.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
@@ -415,9 +416,12 @@ Future<void> checkForNewNotifications({
     for (final e in homeworkAtStart.entries) e.key: {...e.value}
   };
 
+  final results = <AccountCheckResult>[];
   for (final account in accounts) {
     final key = notificationAccountKey(account.user, account.url);
     final tag = accountTag(account.user, account.url);
+    final alias = (profiles[key] as Map<String, dynamic>?)?['alias'] as String?;
+    final label = alias ?? tag;
     // Read again for every account: the app may have signed in meanwhile,
     // and signing in here as well would end its session.
     await prefs.reload();
@@ -431,6 +435,7 @@ Future<void> checkForNewNotifications({
         LogCategory.background,
         '$tag: übersprungen, die App ist damit angemeldet',
       );
+      results.add(checkResultFor(label, appSignedIn: true));
       continue;
     }
     final result = testNotification
@@ -440,9 +445,9 @@ Future<void> checkForNewNotifications({
     // next round.
     if (result == null) {
       debugLog(LogCategory.background, '$tag: nicht erreicht');
+      results.add(checkResultFor(label, reached: false));
       continue;
     }
-    final alias = (profiles[key] as Map<String, dynamic>?)?['alias'] as String?;
     final fresh = testNotification
         ? result.unread
         : freshNotifications(
@@ -484,6 +489,12 @@ Future<void> checkForNewNotifications({
           ? null
           : {for (final h in homework) homeworkNotificationId(h.id)},
     );
+    results.add(checkResultFor(
+      label,
+      firstRun: known[key] == null,
+      unread: result.unread.length,
+      fresh: fresh.length + freshHw.length,
+    ));
     known[key] = {for (final n in result.unread) n.id};
     if (homework != null) {
       knownHomework[key] = {for (final h in homework) h.id};
@@ -495,6 +506,10 @@ Future<void> checkForNewNotifications({
   );
   // A test leaves the list of what was seen as it was.
   if (testNotification) return;
+  await writeBackgroundStatus(
+    prefs,
+    BackgroundStatus(finishedAt: DateTime.now(), accounts: results),
+  );
 
   final keys = {
     for (final a in accounts) notificationAccountKey(a.user, a.url),

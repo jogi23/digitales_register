@@ -348,6 +348,68 @@
   "diagnosticsShareWarningBody": "Das Protokoll enthält Antworten des Portals, etwa Noten, Absenzen und Mitteilungen, und kann persönliche Daten enthalten. Teile es nur mit Personen, denen du vertraust, zum Beispiel dem Support.",
   "diagnosticsNothingRecorded": "Nichts aufgezeichnet",
   "diagnosticsShareFailed": "Teilen fehlgeschlagen",
+  "batteryHintTitle": "Benachrichtigungen können sich verspäten",
+  "batteryHintBody": "Android hält Apps im Hintergrund zurück, um Akku zu sparen. Nimm DigiReg ST von der Akku-Optimierung aus, damit neue Meldungen pünktlich ankommen.",
+  "batteryHintButton": "Einstellungen öffnen",
+  "batteryHintMore": "Anleitung für dein Gerät",
+  "statusTitle": "Letzter Hintergrundabruf",
+  "statusNoRun": "Noch kein Lauf",
+  "statusLastRun": "Zuletzt: {time}",
+  "@statusLastRun": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "statusAccountOk": "{label}: {unread} ungelesen, {fresh} neu",
+  "@statusAccountOk": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "unread": {
+        "type": "int"
+      },
+      "fresh": {
+        "type": "int"
+      }
+    }
+  },
+  "statusAccountUnreachable": "{label}: nicht erreicht",
+  "@statusAccountUnreachable": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "statusAccountSkipped": "{label}: übersprungen, die App ist angemeldet",
+  "@statusAccountSkipped": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "statusAccountFirstRun": "{label}: erster Lauf, {unread} ungelesen",
+  "@statusAccountFirstRun": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "unread": {
+        "type": "int"
+      }
+    }
+  },
+  "statusNoAccounts": "Keine Konten mit gespeichertem Passwort",
+  "statusPermissionGranted": "Systemberechtigung für Benachrichtigungen: erteilt",
+  "statusPermissionDenied": "Systemberechtigung für Benachrichtigungen: nicht erteilt",
+  "statusCheckNow": "Jetzt prüfen",
+  "statusCheckNowHint": "Startet nach 10 Sekunden. Verlasse die App, damit auch ein angemeldetes Konto geprüft wird.",
+  "statusCheckStarted": "Prüfung gestartet",
+  "statusCheckFailed": "Prüfung konnte nicht gestartet werden",
   "settingsSource": "Zum Quellcode",
   "settingsAddSubject": "Fach hinzufügen",
   "loginOtherSchool": "Andere Schule",

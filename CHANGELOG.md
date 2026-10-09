@@ -11,6 +11,8 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 - Menü: Neuer Punkt „Andere Apps von Wertwerk“.
 - Hilfe: „Häufige Fragen“ beantworten die wichtigsten Fragen direkt in der App, auch ohne Internet — zu Anmeldung, Benachrichtigungen, Konten, Hausaufgaben und App-Sperre.
 - Diagnose-Protokoll: In den Einstellungen unter „Erweitert“ zeichnet ein Schalter Netzwerkprotokoll und Debug-Log auf — standardmäßig aus. „Protokoll teilen“ schickt alles Aufgezeichnete, etwa an den Support; Passwörter werden geschwärzt. Die Seiten „Netzwerkprotokoll“ und „Debug-Log“ entfallen.
+- Benachrichtigungen: Hält Android die App im Hintergrund zurück (Akku-Optimierung), zeigen die Einstellungen einen Hinweis mit Knopf zur passenden Systemseite — sonst kommen Meldungen oft verspätet. Nach der Rückkehr wird neu geprüft.
+- Benachrichtigungen: Die Einstellungen zeigen jetzt, wie der letzte Hintergrundabruf lief — Zeitpunkt, Ergebnis je Konto und ob das System Benachrichtigungen erlaubt. „Jetzt prüfen“ gibt es auch in der Release-Version. Das hilft, wenn eine Meldung ausbleibt.
 
 ### Fehlerbehebungen
 

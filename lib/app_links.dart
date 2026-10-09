@@ -52,6 +52,7 @@ abstract final class AppLinks {
   static final suggestFeature =
       Uri.parse('https://tally.so/r/Y5xKgv?app=digiregst');
   static final reportBug = Uri.parse('https://tally.so/r/yPdpP6?app=digiregst');
+  static final dontKillMyApp = Uri.parse('https://dontkillmyapp.com');
   static final source =
       Uri.parse('https://github.com/jogi23/digitales_register');
   static final playStore = Uri.parse(
