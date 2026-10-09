@@ -332,6 +332,62 @@
   "batteryHintBody": "Per risparmiare batteria, Android limita le app in background. Escludi DigiReg ST dall'ottimizzazione della batteria, così i nuovi messaggi arrivano in orario.",
   "batteryHintButton": "Apri impostazioni",
   "batteryHintMore": "Guida per il tuo dispositivo",
+  "statusTitle": "Ultimo controllo in background",
+  "statusNoRun": "Nessun controllo finora",
+  "statusLastRun": "Ultimo: {time}",
+  "@statusLastRun": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "statusAccountOk": "{label}: non lette {unread}, nuove {fresh}",
+  "@statusAccountOk": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "unread": {
+        "type": "int"
+      },
+      "fresh": {
+        "type": "int"
+      }
+    }
+  },
+  "statusAccountUnreachable": "{label}: non raggiunto",
+  "@statusAccountUnreachable": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "statusAccountSkipped": "{label}: saltato, l'app è connessa",
+  "@statusAccountSkipped": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "statusAccountFirstRun": "{label}: primo controllo, non lette {unread}",
+  "@statusAccountFirstRun": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "unread": {
+        "type": "int"
+      }
+    }
+  },
+  "statusNoAccounts": "Nessun account con password salvata",
+  "statusPermissionGranted": "Autorizzazione di sistema per le notifiche: concessa",
+  "statusPermissionDenied": "Autorizzazione di sistema per le notifiche: non concessa",
+  "statusCheckNow": "Controlla ora",
+  "statusCheckNowHint": "Parte dopo 10 secondi. Esci dall'app, così viene controllato anche un account connesso.",
   "settingsSource": "Codice sorgente",
   "settingsAddSubject": "Aggiungi materia",
   "loginOtherSchool": "Altra scuola",

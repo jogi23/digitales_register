@@ -140,6 +140,11 @@ Future<SystemNotificationTarget?> launchTarget() async {
   );
 }
 
+/// Whether the system lets the app show notifications; null where that cannot
+/// be told (off Android).
+Future<bool?> areSystemNotificationsAllowed() async =>
+    _android?.areNotificationsEnabled();
+
 /// Asks for the permission Android 13 and later want before anything shows.
 /// Older versions grant it with the installation.
 Future<bool> requestSystemNotificationPermission() async =>

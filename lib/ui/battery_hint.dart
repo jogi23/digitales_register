@@ -19,6 +19,7 @@ import 'package:dr/app_links.dart';
 import 'package:dr/l10n/l10n.dart';
 import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/services/battery_optimization.dart';
+import 'package:dr/ui/refresh_on_resume.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -35,26 +36,11 @@ class BatteryOptimizationHint extends ConsumerStatefulWidget {
 }
 
 class _BatteryOptimizationHintState
-    extends ConsumerState<BatteryOptimizationHint> with WidgetsBindingObserver {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
-
+    extends ConsumerState<BatteryOptimizationHint>
+    with WidgetsBindingObserver, RefreshOnResume {
   /// Back from the system page: look at what was decided there.
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      ref.invalidate(batteryOptimizationProvider);
-    }
-  }
+  List<ProviderOrFamily> get refreshOnResume => [batteryOptimizationProvider];
 
   @override
   Widget build(BuildContext context) {
