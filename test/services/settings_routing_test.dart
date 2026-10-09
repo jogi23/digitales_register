@@ -22,7 +22,6 @@ import 'package:dr/ui/settings/blocks/grades_block.dart';
 import 'package:dr/ui/settings/pages/content_settings_page.dart';
 import 'package:dr/ui/settings/settings_hub_page.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../ui/settings/settings_pump.dart';
