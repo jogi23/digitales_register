@@ -6,13 +6,14 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 
 ### Neue Funktionen
 
-- App-Sperre: In den Einstellungen unter „Anmeldung“ lässt sich die App mit der Sperre des Geräts schützen — Fingerabdruck, Gesicht oder Geräte-PIN. Sie fragt beim Start und nach der Rückkehr, wenn die App länger als gewählt im Hintergrund war (sofort, 1, 5 oder 15 Minuten). Solange sie an ist, zeigt die Übersicht der zuletzt genutzten Apps keinen Inhalt; Benachrichtigungen kommen weiter.
+- App-Sperre: In den Einstellungen unter „Konto & Sicherheit“ lässt sich die App mit der Sperre des Geräts schützen — Fingerabdruck, Gesicht oder Geräte-PIN. Sie fragt beim Start und nach der Rückkehr, wenn die App länger als gewählt im Hintergrund war (sofort, 1, 5 oder 15 Minuten). Solange sie an ist, zeigt die Übersicht der zuletzt genutzten Apps keinen Inhalt; Benachrichtigungen kommen weiter.
 - Über-Seite: „Über diese App“ öffnet jetzt eine eigene Seite statt eines Dialogs — mit Version, Entwicklern, Neuerungen, Quellcode, Open-Source-Lizenzen und dem Bereich „Rechtliches“ (Datenschutz, Impressum, Nutzungsbedingungen).
 - Menü: Neuer Punkt „Andere Apps von Wertwerk“.
 - Hilfe: „Häufige Fragen“ beantworten die wichtigsten Fragen direkt in der App, auch ohne Internet — zu Anmeldung, Benachrichtigungen, Konten, Hausaufgaben und App-Sperre.
 - Diagnose-Protokoll: In den Einstellungen unter „Erweitert“ zeichnet ein Schalter Netzwerkprotokoll und Debug-Log auf — standardmäßig aus. „Protokoll teilen“ schickt alles Aufgezeichnete, etwa an den Support; Passwörter werden geschwärzt. Die Seiten „Netzwerkprotokoll“ und „Debug-Log“ entfallen.
 - Benachrichtigungen: Hält Android die App im Hintergrund zurück (Akku-Optimierung), zeigen die Einstellungen einen Hinweis mit Knopf zur passenden Systemseite — sonst kommen Meldungen oft verspätet. Nach der Rückkehr wird neu geprüft.
 - Benachrichtigungen: Die Einstellungen zeigen jetzt, wie der letzte Hintergrundabruf lief — Zeitpunkt, Ergebnis je Konto und ob das System Benachrichtigungen erlaubt. „Jetzt prüfen“ gibt es auch in der Release-Version. Das hilft, wenn eine Meldung ausbleibt.
+- Einstellungen: Statt einer langen Liste öffnen die Einstellungen jetzt eine Übersicht mit fünf Gruppen — Konto & Sicherheit, Benachrichtigungen, Design & Sprache, Inhalte & Ansichten und Erweitert. Unter „Inhalte & Ansichten“ liegen Fächer & Kalender, Merkheft, Klassenbuch, Hausaufgaben, Absenzen und Noten in einklappbaren Blöcken. Jede Zeile zeigt, wie sie eingestellt ist. Die Farbkreise der Akzentfarbe sind größer zu treffen und werden von TalkBack als ausgewählt angesagt.
 
 ### Fehlerbehebungen
 
