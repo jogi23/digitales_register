@@ -22,23 +22,33 @@ import 'package:responsive_scaffold/responsive_scaffold.dart';
 
 /// Frame shared by the hub and every settings page: app bar with the
 /// connection status, and a list that keeps clear of the system bars.
+///
+/// The [root] is a page of the menu and carries its menu button; the others
+/// are pushed on top and carry the back arrow instead.
 class SettingsPageScaffold extends StatelessWidget {
   const SettingsPageScaffold({
     super.key,
     required this.title,
     required this.children,
+    this.root = false,
   });
 
   final String title;
   final List<Widget> children;
+  final bool root;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: ResponsiveAppBar(
-        title: Text(title),
-        actions: const [ConnectionStatusButton()],
-      ),
+      appBar: root
+          ? ResponsiveAppBar(
+              title: Text(title),
+              actions: const [ConnectionStatusButton()],
+            )
+          : AppBar(
+              title: Text(title),
+              actions: const [ConnectionStatusButton()],
+            ),
       body: ListView(
         padding: context.systemInsets,
         children: children,

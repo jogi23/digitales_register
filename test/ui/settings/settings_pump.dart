@@ -44,6 +44,8 @@ Future<ProviderContainer> pumpSettings(
   bool demo = false,
   double textScale = 1,
   List<Override> overrides = const [],
+  GlobalKey<NavigatorState>? navigatorKey,
+  RouteFactory? onGenerateRoute,
 }) async {
   final container = ProviderContainer(
     overrides: [
@@ -67,6 +69,8 @@ Future<ProviderContainer> pumpSettings(
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: const [Locale('de'), Locale('it'), Locale('en')],
+      navigatorKey: navigatorKey,
+      onGenerateRoute: onGenerateRoute,
       builder: (context, child) => MediaQuery(
         data: MediaQuery.of(context).copyWith(
           textScaler: TextScaler.linear(textScale),

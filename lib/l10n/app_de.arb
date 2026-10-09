@@ -822,5 +822,32 @@
   "settingsCategoryHomework": "Hausaufgaben & Klassenbuch",
   "settingsSectionGeneral": "Allgemein",
   "settingsCategoryGrades": "Noten",
-  "settingsCategoryAdvanced": "Erweitert"
+  "settingsCategoryAdvanced": "Erweitert",
+  "settingsSummaryNotificationsOn": "An · {interval}",
+  "@settingsSummaryNotificationsOn": {
+    "placeholders": {
+      "interval": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsSummaryNotificationsOff": "Aus",
+  "settingsSummaryAppearance": "{theme} · {language}",
+  "@settingsSummaryAppearance": {
+    "placeholders": {
+      "theme": {
+        "type": "String"
+      },
+      "language": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsSummaryAppLockOn": "App-Sperre an",
+  "settingsSummaryAppLockOff": "App-Sperre aus",
+  "settingsSummarySubjectsCalendar": "Kürzel, Farben, Kalender",
+  "settingsSummaryHomework": "Ansicht, Klassenbuch, Absenzen",
+  "settingsSummaryGrades": "Diagramm, Durchschnitt, Sterne",
+  "settingsSummaryDiagnosticsOn": "Diagnose-Protokoll an",
+  "settingsSummaryDiagnosticsOff": "Diagnose-Protokoll aus"
 }

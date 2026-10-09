@@ -19,6 +19,7 @@ import 'package:dr/ui/settings/widgets/settings_headers.dart';
 import 'package:dr/ui/settings/widgets/settings_page_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:responsive_scaffold/responsive_scaffold.dart';
 
 import '../settings_pump.dart';
 
@@ -64,5 +65,24 @@ void main() {
 
     expect(find.text('Titel'), findsOneWidget);
     expect(find.text('Inhalt'), findsOneWidget);
+  });
+
+  testWidgets('only the root page carries the menu button bar', (tester) async {
+    await pumpSettings(
+      tester,
+      const SettingsPageScaffold(
+        title: 'Wurzel',
+        root: true,
+        children: [Text('x')],
+      ),
+    );
+    expect(find.byType(ResponsiveAppBar), findsOneWidget);
+
+    await pumpSettings(
+      tester,
+      const SettingsPageScaffold(title: 'Unterseite', children: [Text('x')]),
+    );
+    expect(find.byType(ResponsiveAppBar), findsNothing);
+    expect(find.byType(AppBar), findsOneWidget);
   });
 }

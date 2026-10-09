@@ -764,5 +764,32 @@
   "settingsCategoryHomework": "Compiti e registro di classe",
   "settingsSectionGeneral": "Generale",
   "settingsCategoryGrades": "Voti",
-  "settingsCategoryAdvanced": "Avanzate"
+  "settingsCategoryAdvanced": "Avanzate",
+  "settingsSummaryNotificationsOn": "Attive · {interval}",
+  "@settingsSummaryNotificationsOn": {
+    "placeholders": {
+      "interval": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsSummaryNotificationsOff": "Disattivate",
+  "settingsSummaryAppearance": "{theme} · {language}",
+  "@settingsSummaryAppearance": {
+    "placeholders": {
+      "theme": {
+        "type": "String"
+      },
+      "language": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsSummaryAppLockOn": "Blocco app attivo",
+  "settingsSummaryAppLockOff": "Blocco app disattivato",
+  "settingsSummarySubjectsCalendar": "Abbreviazioni, colori, calendario",
+  "settingsSummaryHomework": "Vista, registro, assenze",
+  "settingsSummaryGrades": "Grafico, media, stelle",
+  "settingsSummaryDiagnosticsOn": "Registro diagnostico attivo",
+  "settingsSummaryDiagnosticsOff": "Registro diagnostico disattivato"
 }

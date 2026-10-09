@@ -31,16 +31,17 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+/// "Every 30 minutes", "Every 3 hours".
+String notificationIntervalLabel(BuildContext context, int minutes) {
+  final l = tr(context);
+  if (minutes < 60) return l.notificationsEveryMinutes(minutes);
+  return l.notificationsEveryHours(minutes ~/ 60);
+}
+
 /// Whether and how often the app looks for news in the background, and which
 /// kinds of news are announced.
 class NotificationSettingsPage extends ConsumerWidget {
   const NotificationSettingsPage({super.key});
-
-  String _intervalLabel(BuildContext context, int minutes) {
-    final l = tr(context);
-    if (minutes < 60) return l.notificationsEveryMinutes(minutes);
-    return l.notificationsEveryHours(minutes ~/ 60);
-  }
 
   /// One kind of news; locked while notifications as a whole are off.
   Widget _typeSwitch({
@@ -92,7 +93,7 @@ class NotificationSettingsPage extends ConsumerWidget {
             for (final minutes in allowedNotificationPollMinutes)
               SettingsChoice(
                 value: minutes,
-                label: _intervalLabel(context, minutes),
+                label: notificationIntervalLabel(context, minutes),
               ),
           ],
           onChanged: notifier.setNotificationPollMinutes,
