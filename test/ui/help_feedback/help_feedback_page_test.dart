@@ -15,11 +15,14 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'package:dr/app_links.dart';
 import 'package:dr/ui/help_feedback_page.dart';
 import 'package:dr/ui/help_page.dart';
 import 'package:flutter/material.dart';
+import 'package:dr/util.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../fake_url_launcher.dart';
 import '../../system_bars.dart';
 
 void main() {
@@ -59,6 +62,28 @@ void main() {
       expectClearOfSystemBars(tester, find.byType(ListTile).last);
     });
   }
+
+  testWidgets('each link entry opens its address from AppLinks',
+      (tester) async {
+    final launcher = FakeUrlLauncher.install();
+    await tester.pumpWidget(build());
+    await tester.pumpAndSettle();
+    for (final label in [
+      'Email schreiben',
+      'FAQ',
+      'Feature/Idee vorschlagen',
+      'Bug/Fehler melden',
+    ]) {
+      await tester.tap(find.text(label));
+      await tester.pumpAndSettle();
+    }
+    expect(launcher.launched, [
+      AppLinks.feedbackMail(appVersion).toString(),
+      AppLinks.faq.toString(),
+      AppLinks.suggestFeature.toString(),
+      AppLinks.reportBug.toString(),
+    ]);
+  });
 
   testWidgets('shows an icon for every entry', (tester) async {
     await tester.pumpWidget(build());
