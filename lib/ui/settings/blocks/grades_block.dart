@@ -22,7 +22,6 @@ import 'package:dr/providers/all_subjects_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/ui/settings/widgets/add_subject_dialog.dart';
 import 'package:dr/ui/settings/widgets/settings_choice_tile.dart';
-import 'package:dr/ui/settings/widgets/settings_page_scaffold.dart';
 import 'package:dr/ui/settings/widgets/view_option_tiles.dart';
 import 'package:dr/ui/star_rating.dart';
 import 'package:flutter/material.dart';
@@ -30,8 +29,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// What the grades page shows, how stars look, and which subjects stay out
 /// of the average.
-class GradesSettingsPage extends ConsumerWidget {
-  const GradesSettingsPage({super.key});
+class GradesBlock extends ConsumerWidget {
+  const GradesBlock({super.key});
 
   /// One palette entry, shown as a star in the colour it stands for so the
   /// choice can be made without applying it first.
@@ -66,8 +65,7 @@ class GradesSettingsPage extends ConsumerWidget {
     final s = ref.watch(settingsProvider);
     final notifier = ref.read(settingsProvider.notifier);
     final excluded = s.ignoreForGradesAverage;
-    return SettingsPageScaffold(
-      title: l.settingsCategoryGrades,
+    return Column(
       children: [
         SwitchListTile.adaptive(
           secondary: const Icon(Icons.show_chart_rounded),

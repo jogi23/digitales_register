@@ -1,0 +1,85 @@
+// Copyright (C) 2026 Johannes Feichter
+//
+// This file is part of digitales_register.
+//
+// digitales_register is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// digitales_register is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
+
+import 'package:dr/ui/settings/blocks/grades_block.dart';
+import 'package:dr/ui/settings/pages/content_settings_page.dart';
+import 'package:dr/ui/settings/widgets/settings_expandable_section.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import '../settings_pump.dart';
+
+const _titles = [
+  'Fächer & Kalender',
+  'Merkheft',
+  'Klassenbuch',
+  'Hausaufgaben',
+  'Absenzen',
+  'Noten',
+];
+
+void main() {
+  testWidgets('lists the six blocks, all closed, each with a summary',
+      (tester) async {
+    await pumpSettings(tester, const ContentSettingsPage());
+
+    final sections = find.byType(SettingsExpandableSection);
+    expect(sections, findsNWidgets(6));
+    for (final title in _titles) {
+      expect(find.text(title), findsOneWidget, reason: title);
+    }
+    expect(find.text('Kürzel, Farben, Kalender'), findsOneWidget);
+    expect(find.text('Diagramm, Durchschnitt, Sterne'), findsOneWidget);
+    expect(find.byType(GradesBlock), findsNothing);
+  });
+
+  testWidgets('opening a block shows its settings', (tester) async {
+    await pumpSettings(tester, const ContentSettingsPage());
+
+    await tester.tap(find.text('Noten'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(GradesBlock), findsOneWidget);
+    expect(find.text('Durchschnitt je Fach anzeigen'), findsOneWidget);
+  });
+
+  testWidgets('initiallyExpanded opens only the asked-for block',
+      (tester) async {
+    await pumpSettings(
+      tester,
+      const ContentSettingsPage(initiallyExpanded: {ContentBlock.grades}),
+    );
+
+    expect(find.byType(GradesBlock), findsOneWidget);
+    expect(find.text('Uhrzeiten im Kalender anzeigen'), findsNothing);
+  });
+
+  testWidgets('"Beim Löschen fragen" is in the Merkheft block', (tester) async {
+    await pumpSettings(
+      tester,
+      const ContentSettingsPage(initiallyExpanded: {ContentBlock.merkheft}),
+    );
+
+    expect(find.text('Beim Löschen von Erinnerungen fragen'), findsOneWidget);
+  });
+
+  testWidgets('meets tap target guidelines', (tester) async {
+    await pumpSettings(tester, const ContentSettingsPage());
+
+    await expectMeetsGuidelines(tester);
+  });
+}

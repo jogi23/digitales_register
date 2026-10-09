@@ -19,7 +19,7 @@ import 'package:built_collection/built_collection.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/ui/dialog.dart';
-import 'package:dr/ui/settings/pages/grades_settings_page.dart';
+import 'package:dr/ui/settings/blocks/grades_block.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -37,7 +37,8 @@ const _exclude = 'Fächer aus dem Notendurchschnitt ausschließen';
 void main() {
   testWidgets('the grade switches write their settings', (tester) async {
     _tall(tester);
-    final container = await pumpSettings(tester, const GradesSettingsPage());
+    final container =
+        await pumpSettings(tester, blockHost([const GradesBlock()]));
 
     final fields = <String, bool Function(SettingsState)>{
       'Noten in einem Diagramm darstellen': (s) => s.showGradesDiagram,
@@ -56,7 +57,8 @@ void main() {
 
   testWidgets('picking a star colour writes the setting', (tester) async {
     _tall(tester);
-    final container = await pumpSettings(tester, const GradesSettingsPage());
+    final container =
+        await pumpSettings(tester, blockHost([const GradesBlock()]));
     expect(container.read(settingsProvider).starColor, accentStarColorId);
 
     await tester.tap(find.text('Farbe der Sterne'));
@@ -72,7 +74,8 @@ void main() {
 
   testWidgets('the display mode writes the grades setting', (tester) async {
     _tall(tester);
-    final container = await pumpSettings(tester, const GradesSettingsPage());
+    final container =
+        await pumpSettings(tester, blockHost([const GradesBlock()]));
 
     await tester.tap(find.text('Karten'));
     await tester.pumpAndSettle();
@@ -85,7 +88,8 @@ void main() {
     testWidgets('adds an item, also with no known subject to suggest',
         (tester) async {
       _tall(tester);
-      final container = await pumpSettings(tester, const GradesSettingsPage());
+      final container =
+          await pumpSettings(tester, blockHost([const GradesBlock()]));
       await tester.tap(find.descendant(
         of: find.ancestor(
           of: find.text(_exclude),
@@ -113,7 +117,7 @@ void main() {
       _tall(tester);
       final container = await pumpSettings(
         tester,
-        const GradesSettingsPage(),
+        blockHost([const GradesBlock()]),
         settings: SettingsState(ignoreForGradesAverage: ['Fach1']),
       );
       // Both halves of the cross-fade are built; the list is the shown one.
@@ -148,7 +152,7 @@ void main() {
       _tall(tester);
       final container = await pumpSettings(
         tester,
-        const GradesSettingsPage(),
+        blockHost([const GradesBlock()]),
         settings: SettingsState(ignoreForGradesAverage: ['A', 'B', 'C']),
       );
       Finder closeOf(String subject) => find.descendant(
@@ -170,7 +174,7 @@ void main() {
 
     testWidgets('the empty hint is not a hardcoded grey', (tester) async {
       _tall(tester);
-      await pumpSettings(tester, const GradesSettingsPage());
+      await pumpSettings(tester, blockHost([const GradesBlock()]));
 
       final text = tester.widget<Text>(find.text('Kein Fach ausgeschlossen'));
       final context = tester.element(find.text('Kein Fach ausgeschlossen'));
@@ -180,7 +184,7 @@ void main() {
 
   testWidgets('meets tap target guidelines', (tester) async {
     _tall(tester);
-    await pumpSettings(tester, const GradesSettingsPage());
+    await pumpSettings(tester, blockHost([const GradesBlock()]));
 
     await expectMeetsGuidelines(tester);
   });

@@ -17,7 +17,7 @@
 
 import 'package:dr/app_state.dart';
 import 'package:dr/providers/settings_provider.dart';
-import 'package:dr/ui/settings/pages/subjects_calendar_settings_page.dart';
+import 'package:dr/ui/settings/blocks/subjects_calendar_block.dart';
 import 'package:dr/ui/subject_appearance_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -27,7 +27,7 @@ import '../settings_pump.dart';
 void main() {
   testWidgets('opens the subject appearance screen from "Kürzel und Farben"',
       (tester) async {
-    await pumpSettings(tester, const SubjectsCalendarSettingsPage());
+    await pumpSettings(tester, blockHost([const SubjectsCalendarBlock()]));
 
     await tester.tap(find.text('Kürzel und Farben'));
     await tester.pumpAndSettle();
@@ -37,7 +37,7 @@ void main() {
 
   testWidgets('each calendar switch writes its setting', (tester) async {
     final container =
-        await pumpSettings(tester, const SubjectsCalendarSettingsPage());
+        await pumpSettings(tester, blockHost([const SubjectsCalendarBlock()]));
 
     final fields = <String, bool Function(SettingsState)>{
       'Stunden im Kalender mit diesen Farben färben': (s) =>
@@ -56,7 +56,7 @@ void main() {
   });
 
   testWidgets('meets tap target guidelines', (tester) async {
-    await pumpSettings(tester, const SubjectsCalendarSettingsPage());
+    await pumpSettings(tester, blockHost([const SubjectsCalendarBlock()]));
 
     await expectMeetsGuidelines(tester);
   });

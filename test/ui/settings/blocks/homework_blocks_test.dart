@@ -17,7 +17,7 @@
 
 import 'package:dr/app_state.dart';
 import 'package:dr/providers/settings_provider.dart';
-import 'package:dr/ui/settings/pages/homework_settings_page.dart';
+import 'package:dr/ui/settings/blocks/homework_blocks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -30,10 +30,17 @@ void _tall(WidgetTester tester) {
   addTearDown(tester.view.reset);
 }
 
+final _host = blockHost(const [
+  MerkheftBlock(),
+  ClassbookBlock(),
+  OverviewBlock(),
+  AbsencesBlock(),
+]);
+
 void main() {
   testWidgets('picking the month view writes the setting', (tester) async {
     _tall(tester);
-    final container = await pumpSettings(tester, const HomeworkSettingsPage());
+    final container = await pumpSettings(tester, _host);
     expect(
       container.read(settingsProvider).dashboardViewMode,
       DashboardViewMode.list,
@@ -50,7 +57,7 @@ void main() {
 
   testWidgets('each switch writes its setting', (tester) async {
     _tall(tester);
-    final container = await pumpSettings(tester, const HomeworkSettingsPage());
+    final container = await pumpSettings(tester, _host);
 
     final fields = <String, bool Function(SettingsState)>{
       'Neue oder geänderte Einträge markieren': (s) =>
@@ -72,7 +79,7 @@ void main() {
   testWidgets('classbook and overview arrangements write their own setting',
       (tester) async {
     _tall(tester);
-    final container = await pumpSettings(tester, const HomeworkSettingsPage());
+    final container = await pumpSettings(tester, _host);
 
     await tester.tap(find.text('Nach Fach').at(0));
     await tester.pumpAndSettle();
@@ -90,7 +97,7 @@ void main() {
   testWidgets('classbook, overview and absences display modes are separate',
       (tester) async {
     _tall(tester);
-    final container = await pumpSettings(tester, const HomeworkSettingsPage());
+    final container = await pumpSettings(tester, _host);
 
     await tester.tap(find.text('Karten').at(0));
     await tester.pumpAndSettle();
@@ -112,7 +119,7 @@ void main() {
     _tall(tester);
     final container = await pumpSettings(
       tester,
-      const HomeworkSettingsPage(),
+      _host,
       settings: SettingsState(classbookViewMode: ClassbookViewMode.bySubject),
     );
     expect(find.text('Nur bei Anordnung nach Tagen'), findsOneWidget);
@@ -126,7 +133,7 @@ void main() {
 
   testWidgets('meets tap target guidelines', (tester) async {
     _tall(tester);
-    await pumpSettings(tester, const HomeworkSettingsPage());
+    await pumpSettings(tester, _host);
 
     await expectMeetsGuidelines(tester);
   });

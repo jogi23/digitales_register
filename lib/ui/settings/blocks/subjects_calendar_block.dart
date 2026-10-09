@@ -17,23 +17,20 @@
 
 import 'package:dr/l10n/l10n.dart';
 import 'package:dr/providers/settings_provider.dart';
-import 'package:dr/ui/settings/widgets/settings_headers.dart';
-import 'package:dr/ui/settings/widgets/settings_page_scaffold.dart';
 import 'package:dr/ui/subject_appearance_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// How subjects are named and coloured, and what the calendar shows of them.
-class SubjectsCalendarSettingsPage extends ConsumerWidget {
-  const SubjectsCalendarSettingsPage({super.key});
+class SubjectsCalendarBlock extends ConsumerWidget {
+  const SubjectsCalendarBlock({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = tr(context);
     final s = ref.watch(settingsProvider);
     final notifier = ref.read(settingsProvider.notifier);
-    return SettingsPageScaffold(
-      title: l.settingsCategorySubjectsCalendar,
+    return Column(
       children: [
         ListTile(
           leading: const Icon(Icons.palette_outlined),
@@ -46,7 +43,6 @@ class SubjectsCalendarSettingsPage extends ConsumerWidget {
             ),
           ),
         ),
-        SettingsSectionHeader(l.settingsSectionCalendar),
         SwitchListTile.adaptive(
           secondary: const Icon(Icons.format_color_fill_rounded),
           title: Text(l.settingsColorLessons),

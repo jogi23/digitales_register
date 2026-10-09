@@ -20,10 +20,8 @@ import 'package:dr/l10n/l10n.dart';
 import 'package:dr/ui/settings/pages/account_settings_page.dart';
 import 'package:dr/ui/settings/pages/advanced_settings_page.dart';
 import 'package:dr/ui/settings/pages/appearance_settings_page.dart';
-import 'package:dr/ui/settings/pages/grades_settings_page.dart';
-import 'package:dr/ui/settings/pages/homework_settings_page.dart';
+import 'package:dr/ui/settings/pages/content_settings_page.dart';
 import 'package:dr/ui/settings/pages/notification_settings_page.dart';
-import 'package:dr/ui/settings/pages/subjects_calendar_settings_page.dart';
 import 'package:flutter/material.dart';
 
 /// The groups the settings hub offers, in the order it lists them.
@@ -31,9 +29,7 @@ enum SettingsCategory {
   account(Icons.manage_accounts_rounded),
   notifications(Icons.notifications_active_rounded),
   appearance(Icons.palette_rounded),
-  subjectsCalendar(Icons.calendar_month_rounded),
-  homework(Icons.assignment_rounded),
-  grades(Icons.grade_rounded),
+  content(Icons.dashboard_customize_rounded),
   advanced(Icons.tune_rounded);
 
   const SettingsCategory(this.icon);
@@ -46,9 +42,7 @@ enum SettingsCategory {
       account => l.settingsCategoryAccount,
       notifications => l.settingsCategoryNotifications,
       appearance => l.settingsCategoryAppearance,
-      subjectsCalendar => l.settingsCategorySubjectsCalendar,
-      homework => l.settingsCategoryHomework,
-      grades => l.settingsCategoryGrades,
+      content => l.settingsCategoryContent,
       advanced => l.settingsCategoryAdvanced,
     };
   }
@@ -70,9 +64,7 @@ enum SettingsCategory {
           // A code this version does not know reads as the device language.
           languageNames[s.language] ?? l.settingsLanguageDevice,
         ),
-      subjectsCalendar => l.settingsSummarySubjectsCalendar,
-      homework => l.settingsSummaryHomework,
-      grades => l.settingsSummaryGrades,
+      content => l.settingsSummaryContent,
       advanced => s.diagnosticsEnabled
           ? l.settingsSummaryDiagnosticsOn
           : l.settingsSummaryDiagnosticsOff,
@@ -83,9 +75,7 @@ enum SettingsCategory {
         account => const AccountSettingsPage(),
         notifications => const NotificationSettingsPage(),
         appearance => const AppearanceSettingsPage(),
-        subjectsCalendar => const SubjectsCalendarSettingsPage(),
-        homework => const HomeworkSettingsPage(),
-        grades => const GradesSettingsPage(),
+        content => const ContentSettingsPage(),
         advanced => const AdvancedSettingsPage(),
       };
 }

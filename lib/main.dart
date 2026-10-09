@@ -26,7 +26,7 @@ import 'package:dr/container/notifications_page_container.dart';
 import 'package:dr/container/pass_reset_container.dart';
 import 'package:dr/container/profile_container.dart';
 import 'package:dr/container/request_pass_reset_container.dart';
-import 'package:dr/ui/settings/pages/grades_settings_page.dart';
+import 'package:dr/ui/settings/pages/content_settings_page.dart';
 import 'package:dr/ui/settings/settings_hub_page.dart';
 import 'package:dr/debug_log.dart';
 import 'package:dr/middleware/middleware.dart';
@@ -268,7 +268,9 @@ class RegisterApp extends ConsumerWidget {
               case "settingsGrades":
                 return MaterialPageRoute<void>(
                   settings: settings,
-                  builder: (_) => const GradesSettingsPage(),
+                  builder: (_) => const ContentSettingsPage(
+                    initiallyExpanded: {ContentBlock.grades},
+                  ),
                 );
               case "subjectAppearance":
                 return MaterialPageRoute<void>(

@@ -19,10 +19,8 @@ import 'package:dr/app_state.dart';
 import 'package:dr/ui/settings/pages/account_settings_page.dart';
 import 'package:dr/ui/settings/pages/advanced_settings_page.dart';
 import 'package:dr/ui/settings/pages/appearance_settings_page.dart';
-import 'package:dr/ui/settings/pages/grades_settings_page.dart';
-import 'package:dr/ui/settings/pages/homework_settings_page.dart';
+import 'package:dr/ui/settings/pages/content_settings_page.dart';
 import 'package:dr/ui/settings/pages/notification_settings_page.dart';
-import 'package:dr/ui/settings/pages/subjects_calendar_settings_page.dart';
 import 'package:dr/ui/settings/settings_hub_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -33,24 +31,22 @@ import 'settings_pump.dart';
 const _titles = [
   'Konto & Sicherheit',
   'Benachrichtigungen',
-  'Darstellung',
-  'Fächer & Kalender',
-  'Hausaufgaben & Klassenbuch',
-  'Noten',
+  'Design & Sprache',
+  'Inhalte & Ansichten',
   'Erweitert',
 ];
 
 void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
-  testWidgets('shows the seven categories in order', (tester) async {
+  testWidgets('shows the five categories in order', (tester) async {
     await pumpSettings(tester, const SettingsHubPage());
 
     final tops = [
       for (final title in _titles) tester.getTopLeft(find.text(title)).dy,
     ];
     expect(tops, orderedEquals([...tops]..sort()));
-    expect(find.byType(ListTile), findsNWidgets(7));
+    expect(find.byType(ListTile), findsNWidgets(5));
   });
 
   testWidgets('each category opens its page and back returns to the hub',
@@ -60,10 +56,8 @@ void main() {
     final pages = <String, Type>{
       'Konto & Sicherheit': AccountSettingsPage,
       'Benachrichtigungen': NotificationSettingsPage,
-      'Darstellung': AppearanceSettingsPage,
-      'Fächer & Kalender': SubjectsCalendarSettingsPage,
-      'Hausaufgaben & Klassenbuch': HomeworkSettingsPage,
-      'Noten': GradesSettingsPage,
+      'Design & Sprache': AppearanceSettingsPage,
+      'Inhalte & Ansichten': ContentSettingsPage,
       'Erweitert': AdvancedSettingsPage,
     };
     for (final entry in pages.entries) {
@@ -122,7 +116,7 @@ void main() {
     await pumpSettings(tester, const SettingsHubPage());
     expect(find.text('Geräte-Theme folgen · Gerätesprache'), findsOneWidget);
 
-    await tester.tap(find.text('Darstellung'));
+    await tester.tap(find.text('Design & Sprache'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Design'));
     await tester.pumpAndSettle();
@@ -149,7 +143,7 @@ void main() {
     expect(find.text('Geräte-Theme folgen · Gerätesprache'), findsOneWidget);
   });
 
-  testWidgets('demo mode keeps all seven categories', (tester) async {
+  testWidgets('demo mode keeps all five categories', (tester) async {
     await pumpSettings(tester, const SettingsHubPage(), demo: true);
 
     for (final title in _titles) {

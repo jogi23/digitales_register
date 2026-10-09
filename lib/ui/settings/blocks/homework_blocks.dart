@@ -18,25 +18,22 @@
 import 'package:dr/app_state.dart';
 import 'package:dr/l10n/l10n.dart';
 import 'package:dr/providers/settings_provider.dart';
-import 'package:dr/ui/settings/widgets/settings_headers.dart';
-import 'package:dr/ui/settings/widgets/settings_page_scaffold.dart';
 import 'package:dr/ui/settings/widgets/view_option_tiles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// How homework, the class register and absences are laid out.
-class HomeworkSettingsPage extends ConsumerWidget {
-  const HomeworkSettingsPage({super.key});
+/// The homework diary: how entries are shown and marked, and when deleting
+/// a reminder asks first.
+class MerkheftBlock extends ConsumerWidget {
+  const MerkheftBlock({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = tr(context);
     final s = ref.watch(settingsProvider);
     final notifier = ref.read(settingsProvider.notifier);
-    return SettingsPageScaffold(
-      title: l.settingsCategoryHomework,
+    return Column(
       children: [
-        SettingsSectionHeader(l.settingsSectionHomework),
         for (final entry in <DashboardViewMode, String>{
           DashboardViewMode.list: l.settingsViewList,
           DashboardViewMode.month: l.settingsViewMonth,
@@ -74,7 +71,27 @@ class HomeworkSettingsPage extends ConsumerWidget {
           value: s.dashboardColorBorders,
           onChanged: notifier.setDashboardColorBorders,
         ),
-        SettingsSectionHeader(l.settingsClassbook),
+        SwitchListTile.adaptive(
+          secondary: const Icon(Icons.delete_outline_rounded),
+          title: Text(l.settingsAskWhenDeleting),
+          value: s.askWhenDelete,
+          onChanged: notifier.setAskWhenDelete,
+        ),
+      ],
+    );
+  }
+}
+
+/// The class register: by day or by subject, and how entries are drawn.
+class ClassbookBlock extends ConsumerWidget {
+  const ClassbookBlock({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final s = ref.watch(settingsProvider);
+    final notifier = ref.read(settingsProvider.notifier);
+    return Column(
+      children: [
         ArrangementTiles(
           value: s.classbookViewMode,
           onChanged: notifier.setClassbookViewMode,
@@ -86,7 +103,21 @@ class HomeworkSettingsPage extends ConsumerWidget {
           timelineEnabled:
               s.classbookViewMode == ClassbookViewMode.chronological,
         ),
-        SettingsSectionHeader(l.settingsHomeworkOverview),
+      ],
+    );
+  }
+}
+
+/// The homework overview: by day or by subject, and how entries are drawn.
+class OverviewBlock extends ConsumerWidget {
+  const OverviewBlock({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final s = ref.watch(settingsProvider);
+    final notifier = ref.read(settingsProvider.notifier);
+    return Column(
+      children: [
         ArrangementTiles(
           value: s.homeworkViewMode,
           onChanged: notifier.setHomeworkViewMode,
@@ -95,19 +126,21 @@ class HomeworkSettingsPage extends ConsumerWidget {
           value: s.homeworkDisplayMode,
           onChanged: notifier.setHomeworkDisplayMode,
         ),
-        SettingsSectionHeader(l.settingsAbsences),
-        DisplayModeTiles(
-          value: s.absencesDisplayMode,
-          onChanged: notifier.setAbsencesDisplayMode,
-        ),
-        SettingsSectionHeader(l.settingsSectionGeneral),
-        SwitchListTile.adaptive(
-          secondary: const Icon(Icons.delete_outline_rounded),
-          title: Text(l.settingsAskWhenDeleting),
-          value: s.askWhenDelete,
-          onChanged: notifier.setAskWhenDelete,
-        ),
       ],
+    );
+  }
+}
+
+/// How absences are drawn.
+class AbsencesBlock extends ConsumerWidget {
+  const AbsencesBlock({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final s = ref.watch(settingsProvider);
+    return DisplayModeTiles(
+      value: s.absencesDisplayMode,
+      onChanged: ref.read(settingsProvider.notifier).setAbsencesDisplayMode,
     );
   }
 }

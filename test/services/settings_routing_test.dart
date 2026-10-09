@@ -17,7 +17,8 @@
 
 import 'package:dr/main.dart' as app;
 import 'package:dr/services/app_router.dart';
-import 'package:dr/ui/settings/pages/grades_settings_page.dart';
+import 'package:dr/ui/settings/blocks/grades_block.dart';
+import 'package:dr/ui/settings/pages/content_settings_page.dart';
 import 'package:dr/ui/settings/settings_hub_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -27,7 +28,7 @@ import '../ui/settings/settings_pump.dart';
 
 void main() {
   testWidgets(
-    'editing the grades average opens the hub, then the grades settings; '
+    'editing the grades average opens the hub, then the content settings with Noten open; '
     'back returns to the hub',
     (tester) async {
       final key = GlobalKey<NavigatorState>();
@@ -45,7 +46,9 @@ void main() {
             ),
           '/settingsGrades' => MaterialPageRoute<void>(
               settings: settings,
-              builder: (_) => const GradesSettingsPage(),
+              builder: (_) => const ContentSettingsPage(
+                initiallyExpanded: {ContentBlock.grades},
+              ),
             ),
           _ => null,
         },
@@ -53,11 +56,12 @@ void main() {
 
       container.read(appRouterProvider).showEditGradesAverageSettings();
       await tester.pumpAndSettle();
-      expect(find.byType(GradesSettingsPage), findsOneWidget);
+      expect(find.byType(ContentSettingsPage), findsOneWidget);
+      expect(find.byType(GradesBlock), findsOneWidget);
 
       key.currentState!.pop();
       await tester.pumpAndSettle();
-      expect(find.byType(GradesSettingsPage), findsNothing);
+      expect(find.byType(ContentSettingsPage), findsNothing);
       expect(find.byType(SettingsHubPage), findsOneWidget);
 
       key.currentState!.pop();

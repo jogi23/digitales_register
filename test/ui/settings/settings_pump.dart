@@ -100,3 +100,8 @@ Future<void> expectMeetsGuidelines(WidgetTester tester) async {
   await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
   handle.dispose();
 }
+
+/// Blocks as the content page shows them once open: their rows in a scroll view.
+Widget blockHost(List<Widget> blocks) => Scaffold(
+      body: SingleChildScrollView(child: Column(children: blocks)),
+    );

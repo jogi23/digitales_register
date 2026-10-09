@@ -203,8 +203,8 @@ class AppRouter {
     _ref.read(messagesProvider.notifier).select(id);
   }
 
-  /// The grades settings, with the settings hub underneath so that back leads
-  /// there.
+  /// The grades settings (the content page with Noten open), with the settings
+  /// hub underneath so that back leads there.
   void showEditGradesAverageSettings() {
     final navigator = navigatorKey!.currentState!;
     unawaited(navigator.pushNamed("/settings"));
