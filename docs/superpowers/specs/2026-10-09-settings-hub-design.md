@@ -18,12 +18,12 @@ Jede Einstellung ist in höchstens zwei Taps erreichbar und der Zustand wichtige
 - **Abschnittstitel:** `titleSmall` in Primärfarbe, `Semantics(header: true)`, Abstand oben 24, seitlich 16, unten 8. Ersetzt `headlineSmall` und die losen `Divider`.
 - **Zeilen:** Icon links (abgerundete Variante), Titel, Untertitel mit aktuellem Wert. Rechts Pfeil für Ziele in der App, `open_in_new` für externe Ziele. Schalter nutzen `secondary` als Icon. Radio-Gruppen bekommen kein Icon.
 - **Auswahl:** Sprache, Theme, Intervall, Sternfarbe als Zeile mit Wert im Untertitel, Tap öffnet einen Dialog mit Auswahl. Theme ist kein SegmentedButton mehr (BiboNest nutzt ebenfalls einen Dialog).
-Abweichung: Unterseiten behalten `ResponsiveAppBar` (Tablet-Logik) statt `SliverAppBar.medium`.
+Abweichung: Der Hub behält `ResponsiveAppBar` (Menü-Knopf, Tablet-Logik). Die Unterseiten nutzen eine normale `AppBar` mit Zurück-Pfeil, weil `ResponsiveAppBar` nie einen Zurück-Pfeil zeigt. Kein `SliverAppBar.medium`.
 
 ## Struktur und Navigation
 - `SettingsHubPage` ersetzt `SettingsPageWidget` als Ziel von `Pages.settings`. Sieben Zeilen mit Icon, Titel, Kurzstatus, Pfeil. Ganze Zeile tippbar.
 - Kurzstatus aus `settingsProvider`: Benachrichtigungen „An · alle 30 Min" / „Aus", Darstellung „Hell · Deutsch", Konto „App-Sperre an" usw.
-- Unterseiten unter `lib/ui/settings/`, je ein `ConsumerWidget` mit `Scaffold` und `ResponsiveAppBar`. `Navigator.push` im geschachtelten Navigator, Zurück führt zum Hub.
+- Unterseiten unter `lib/ui/settings/`, je ein `ConsumerWidget` mit `SettingsPageScaffold` (normale `AppBar`). `Navigator.push` im geschachtelten Navigator, Zurück führt zum Hub.
 - Demo-Modus: Profil und Konten entfallen. Wird eine Kategorie leer, verschwindet sie im Hub.
 - Noten-Deep-Link: `scrollToGrades` entfällt samt `AutoScrollController`, `cacheExtent`-Workaround und `showGradesSettings` im ViewModel. Stattdessen öffnet `showGradesSettings` des Routers den Hub und legt die Noten-Unterseite darüber.
 - Sidebar-Markierung bleibt `Pages.settings`, Unterseiten ändern sie nicht.
