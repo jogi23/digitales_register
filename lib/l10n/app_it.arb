@@ -756,5 +756,7 @@
   "settingsAppLockNoDeviceLock": "Sul dispositivo non è impostato alcun blocco schermo. Imposta prima un PIN, una sequenza o un'impronta nelle impostazioni del dispositivo.",
   "settingsCategoryAccount": "Account e sicurezza",
   "settingsMoreInfo": "Maggiori informazioni",
-  "settingsCategoryNotifications": "Notifiche"
+  "settingsCategoryNotifications": "Notifiche",
+  "settingsCategoryAppearance": "Aspetto",
+  "settingsTheme": "Tema"
 }
