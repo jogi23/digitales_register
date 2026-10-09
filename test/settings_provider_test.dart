@@ -188,14 +188,12 @@ void main() {
   });
 
   group('SettingsNotifier — load', () {
-    test('load restores settings and clears the grades scroll flag', () {
+    test('load restores the settings of the account', () {
       final c = _makeContainer();
-      c.read(settingsProvider.notifier).scrollToGradesSection();
       final saved = c.read(settingsProvider).copyWith(noPasswordSaving: true);
       c.read(settingsProvider.notifier).load(saved);
       final s = c.read(settingsProvider);
       expect(s.noPasswordSaving, true);
-      expect(s.scrollToGrades, false);
     });
   });
 

@@ -17,7 +17,6 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:dr/app_state.dart';
-import 'package:dr/container/settings_page.dart';
 import 'package:dr/ui/layout.dart';
 import 'package:dr/ui/no_internet.dart';
 import 'package:dr/ui/pull_to_refresh.dart';
@@ -28,7 +27,7 @@ import 'package:flutter/material.dart';
 class Profile extends StatelessWidget {
   final ProfileState profileState;
   final bool noInternet;
-  final OnSettingChanged<bool> setSendNotificationEmails;
+  final ValueChanged<bool> setSendNotificationEmails;
   final VoidCallback changeEmail;
   final VoidCallback changePass;
 

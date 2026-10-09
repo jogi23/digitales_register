@@ -17,7 +17,6 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:dr/app_state.dart';
-import 'package:dr/container/settings_page.dart';
 import 'package:dr/ui/no_internet.dart';
 import 'package:dr/ui/profile.dart';
 import 'package:flutter/material.dart';
@@ -46,7 +45,7 @@ Widget _build({
   bool noInternet = false,
   VoidCallback? onChangeEmail,
   VoidCallback? onChangePass,
-  OnSettingChanged<bool>? onNotifications,
+  ValueChanged<bool>? onNotifications,
 }) {
   return MaterialApp(
     home: Profile(

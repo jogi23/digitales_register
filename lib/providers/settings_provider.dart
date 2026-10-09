@@ -81,12 +81,11 @@ class SettingsNotifier extends Notifier<SettingsState> {
   /// been stored with an account: taking them from there beats resetting the
   /// user to defaults.
   void load(SettingsState settings) {
-    final restored = settings.copyWith(scrollToGrades: false);
     if (_globalStored) {
-      state = restored.withGlobalsFrom(state);
+      state = settings.withGlobalsFrom(state);
       return;
     }
-    state = restored;
+    state = settings;
     unawaited(_persistGlobal());
   }
 
@@ -256,11 +255,6 @@ class SettingsNotifier extends Notifier<SettingsState> {
   void setAccentBackground(bool value) =>
       _update(state.copyWith(accentBackground: value));
 
-  // ─── Routing-triggered ephemeral scroll state ─────────────────────────────
-
-  void scrollToGradesSection() => state = state.copyWith(scrollToGrades: true);
-
-  void resetScroll() => state = state.copyWith(scrollToGrades: false);
 }
 
 final settingsProvider =
