@@ -763,5 +763,6 @@
   "settingsSectionCalendar": "Calendario",
   "settingsCategoryHomework": "Compiti e registro di classe",
   "settingsSectionGeneral": "Generale",
-  "settingsCategoryGrades": "Voti"
+  "settingsCategoryGrades": "Voti",
+  "settingsCategoryAdvanced": "Avanzate"
 }

@@ -763,5 +763,6 @@
   "settingsSectionCalendar": "Calendar",
   "settingsCategoryHomework": "Homework & class register",
   "settingsSectionGeneral": "General",
-  "settingsCategoryGrades": "Grades"
+  "settingsCategoryGrades": "Grades",
+  "settingsCategoryAdvanced": "Advanced"
 }

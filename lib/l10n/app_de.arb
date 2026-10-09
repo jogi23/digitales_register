@@ -821,5 +821,6 @@
   "settingsSectionCalendar": "Kalender",
   "settingsCategoryHomework": "Hausaufgaben & Klassenbuch",
   "settingsSectionGeneral": "Allgemein",
-  "settingsCategoryGrades": "Noten"
+  "settingsCategoryGrades": "Noten",
+  "settingsCategoryAdvanced": "Erweitert"
 }
