@@ -762,5 +762,6 @@
   "settingsCategorySubjectsCalendar": "Materie e calendario",
   "settingsSectionCalendar": "Calendario",
   "settingsCategoryHomework": "Compiti e registro di classe",
-  "settingsSectionGeneral": "Generale"
+  "settingsSectionGeneral": "Generale",
+  "settingsCategoryGrades": "Voti"
 }
