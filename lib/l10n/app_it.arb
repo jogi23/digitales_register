@@ -787,5 +787,13 @@
   "settingsSummaryContent": "Compiti, calendario, voti",
   "settingsBlockSummaryMerkheft": "Vista, contrassegni, colori",
   "settingsBlockSummaryEntryView": "Disposizione, visualizzazione",
-  "settingsBlockSummaryAbsences": "Visualizzazione"
+  "settingsBlockSummaryAbsences": "Visualizzazione",
+  "settingsRemoveSubject": "Rimuovi {subject}",
+  "@settingsRemoveSubject": {
+    "placeholders": {
+      "subject": {
+        "type": "String"
+      }
+    }
+  }
 }

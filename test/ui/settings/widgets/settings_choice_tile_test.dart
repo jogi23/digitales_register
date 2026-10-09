@@ -97,11 +97,12 @@ void main() {
     expect(find.byType(AlertDialog), findsNothing);
   });
 
-  testWidgets('an unknown value shows an empty subtitle without throwing',
+  testWidgets('an unknown value shows the raw value without throwing',
       (tester) async {
     await pumpSettings(tester, _tile(value: 99, picked: []));
 
     expect(tester.takeException(), isNull);
+    expect(find.text('99'), findsOneWidget);
     expect(find.text('Eins'), findsNothing);
     expect(find.text('Zwei'), findsNothing);
   });

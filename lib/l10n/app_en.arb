@@ -787,5 +787,13 @@
   "settingsSummaryContent": "Homework, calendar, grades",
   "settingsBlockSummaryMerkheft": "View, marks, colours",
   "settingsBlockSummaryEntryView": "Arrangement, display",
-  "settingsBlockSummaryAbsences": "Display"
+  "settingsBlockSummaryAbsences": "Display",
+  "settingsRemoveSubject": "Remove {subject}",
+  "@settingsRemoveSubject": {
+    "placeholders": {
+      "subject": {
+        "type": "String"
+      }
+    }
+  }
 }

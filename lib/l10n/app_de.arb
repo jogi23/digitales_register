@@ -845,5 +845,13 @@
   "settingsSummaryContent": "Merkheft, Kalender, Noten",
   "settingsBlockSummaryMerkheft": "Ansicht, Markierungen, Farben",
   "settingsBlockSummaryEntryView": "Anordnung, Anzeige",
-  "settingsBlockSummaryAbsences": "Anzeige"
+  "settingsBlockSummaryAbsences": "Anzeige",
+  "settingsRemoveSubject": "{subject} entfernen",
+  "@settingsRemoveSubject": {
+    "placeholders": {
+      "subject": {
+        "type": "String"
+      }
+    }
+  }
 }

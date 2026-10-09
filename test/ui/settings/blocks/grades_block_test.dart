@@ -172,6 +172,37 @@ void main() {
           ['C'].toBuiltList());
     });
 
+    testWidgets('adding a subject that is already excluded changes nothing',
+        (tester) async {
+      _tall(tester);
+      final container = await pumpSettings(
+        tester,
+        blockHost([const GradesBlock()]),
+        settings: SettingsState(ignoreForGradesAverage: ['Fach1']),
+      );
+      await tester.tap(find.byTooltip('Fach hinzufügen'));
+      await tester.pumpAndSettle();
+      tester.testTextInput.enterText('Fach1');
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Fertig'));
+      await tester.pumpAndSettle();
+
+      expect(container.read(settingsProvider).ignoreForGradesAverage,
+          ['Fach1'].toBuiltList());
+    });
+
+    testWidgets('each remove button names its subject', (tester) async {
+      _tall(tester);
+      await pumpSettings(
+        tester,
+        blockHost([const GradesBlock()]),
+        settings: SettingsState(ignoreForGradesAverage: ['A', 'B']),
+      );
+
+      expect(find.byTooltip('A entfernen'), findsOneWidget);
+      expect(find.byTooltip('B entfernen'), findsOneWidget);
+    });
+
     testWidgets('the empty hint is not a hardcoded grey', (tester) async {
       _tall(tester);
       await pumpSettings(tester, blockHost([const GradesBlock()]));

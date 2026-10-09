@@ -52,11 +52,13 @@ class SettingsChoiceTile<T> extends StatelessWidget {
   final String? hint;
   final bool enabled;
 
-  String? get _currentLabel {
+  /// The label of the current value; a value this version does not offer
+  /// (stored by another one) shows as it is rather than as nothing.
+  String get _currentLabel {
     for (final choice in choices) {
       if (choice.value == value) return choice.label;
     }
-    return null;
+    return '$value';
   }
 
   Future<void> _open(BuildContext context) async {
@@ -109,12 +111,11 @@ class SettingsChoiceTile<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final label = _currentLabel;
     return ListTile(
       enabled: enabled,
       leading: Icon(icon),
       title: Text(title),
-      subtitle: label == null ? null : Text(label),
+      subtitle: Text(_currentLabel),
       onTap: enabled ? () => _open(context) : null,
     );
   }

@@ -52,7 +52,8 @@ class GradesBlock extends ConsumerWidget {
       context: context,
       builder: (context) => AddSubject(availableSubjects: available),
     );
-    if (subject != null) {
+    // Free text: the subject may already be on the list.
+    if (subject != null && !ignored.contains(subject)) {
       ref
           .read(settingsProvider.notifier)
           .setIgnoreForGradesAverage([...ignored, subject]);
@@ -141,8 +142,7 @@ class GradesBlock extends ConsumerWidget {
                       title: Text(subject),
                       trailing: IconButton(
                         icon: const Icon(Icons.close),
-                        tooltip: MaterialLocalizations.of(context)
-                            .deleteButtonTooltip,
+                        tooltip: l.settingsRemoveSubject(subject),
                         onPressed: () async {
                           await delete();
                           // The live list: another row may have been removed
