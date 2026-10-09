@@ -17,12 +17,15 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:collapsible_sidebar/collapsible_sidebar.dart';
+import 'package:dr/app_links.dart';
 import 'package:dr/middleware/middleware.dart';
 import 'package:dr/ui/app_about_dialog.dart';
+import 'package:dr/ui/changelog_page.dart';
 import 'package:dr/ui/help_feedback_page.dart';
 import 'package:dr/services/app_sharing.dart';
 import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Sidebar extends StatelessWidget {
   const Sidebar({
@@ -155,19 +158,38 @@ class Sidebar extends StatelessWidget {
           ),
         ),
         CollapsibleItem(
+          hasDivider: true,
+          text: tr(context).menuNews,
+          icon: Icons.new_releases_outlined,
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => const ChangelogPage(),
+            ),
+          ),
+        ),
+        CollapsibleItem(
           text: tr(context).menuRate,
           icon: Icons.star_outline,
           onPressed: openPlayStoreListing,
         ),
         CollapsibleItem(
-          text: tr(context).menuAbout,
-          icon: Icons.info_outline,
-          onPressed: () => showAppAboutDialog(context),
-        ),
-        CollapsibleItem(
           text: tr(context).menuShare,
           icon: Icons.share,
           onPressed: () => shareApp(context),
+        ),
+        CollapsibleItem(
+          text: tr(context).menuOtherApps,
+          icon: Icons.apps,
+          onPressed: () => launchUrl(
+            AppLinks.otherApps,
+            mode: LaunchMode.externalApplication,
+          ),
+        ),
+        CollapsibleItem(
+          hasDivider: true,
+          text: tr(context).menuAbout,
+          icon: Icons.info_outline,
+          onPressed: () => showAppAboutDialog(context),
         ),
         CollapsibleItem(
           hasDivider: true,

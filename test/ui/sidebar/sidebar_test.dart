@@ -16,12 +16,25 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'package:dr/app_links.dart';
 import 'package:dr/pages.dart';
+import 'package:dr/services/changelog.dart';
+import 'package:dr/ui/changelog_page.dart';
 import 'package:dr/ui/help_feedback_page.dart';
 import 'package:dr/ui/sidebar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
+import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
+
+import '../../fake_url_launcher.dart';
+
+class _NoChangelog extends Changelog {
+  @override
+  Future<List<ChangelogEntry>> load() async => const [];
+  @override
+  Future<String?> previousSeen() async => null;
+}
 
 // Sidebar requires a non-zero height to render items.
 const _testSize = Size(300, 700);
@@ -71,6 +84,8 @@ Widget _build({
 }
 
 void main() {
+  tearDown(() => changelog = Changelog());
+
   testWidgets('shows all navigation items', (tester) async {
     await tester.pumpWidget(_build());
     await tester.pumpAndSettle();
@@ -95,10 +110,9 @@ void main() {
     expect(find.text('Abmelden'), findsOneWidget);
   });
 
-  testWidgets('offers sharing between the about entry and signing out',
-      (tester) async {
-    // Der Platz ist gewollt: Teilen gehört zu den Punkten, die nichts mit
-    // dem eigenen Konto zu tun haben, und Abmelden bleibt der letzte.
+  testWidgets('lists the entries in the standard order', (tester) async {
+    // Hilfe, dann Verbreitung (Neuigkeiten, Bewerten, Teilen, Andere Apps),
+    // dann Über; Abmelden bleibt der letzte Punkt.
     await tester.pumpWidget(_build());
     await tester.pumpAndSettle();
     await tester.scrollUntilVisible(
@@ -108,12 +122,56 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('App teilen'), findsOneWidget);
-    final about = tester.getCenter(find.text('Über diese App')).dy;
-    final share = tester.getCenter(find.text('App teilen')).dy;
-    final logout = tester.getCenter(find.text('Abmelden')).dy;
-    expect(share, greaterThan(about));
-    expect(share, lessThan(logout));
+    const order = [
+      'Einstellungen',
+      'Hilfe und Feedback',
+      'Neuigkeiten',
+      'Bei Google Play bewerten',
+      'App teilen',
+      'Andere Apps von Wertwerk',
+      'Über diese App',
+      'Abmelden',
+    ];
+    final ys = [for (final t in order) tester.getCenter(find.text(t)).dy];
+    expect(ys, orderedEquals([...ys]..sort()));
+    expect(ys.toSet().length, order.length);
+  });
+
+  testWidgets('fits 17 entries without overflow', (tester) async {
+    await tester.pumpWidget(_build());
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('opens the changelog from "Neuigkeiten"', (tester) async {
+    changelog = _NoChangelog();
+    await tester.pumpWidget(_build());
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text('Neuigkeiten'),
+      500,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Neuigkeiten'));
+    await tester.pumpAndSettle();
+    expect(find.byType(ChangelogPage), findsOneWidget);
+  });
+
+  testWidgets('opens the developer page from "Andere Apps"', (tester) async {
+    final launcher = FakeUrlLauncher.install();
+    await tester.pumpWidget(_build());
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text('Andere Apps von Wertwerk'),
+      500,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Andere Apps von Wertwerk'));
+    await tester.pumpAndSettle();
+    expect(launcher.launched, [AppLinks.otherApps.toString()]);
+    expect(launcher.lastMode, PreferredLaunchMode.externalApplication);
   });
 
   group('callbacks', () {
