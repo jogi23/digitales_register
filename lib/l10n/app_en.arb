@@ -755,5 +755,6 @@
   "settingsAppLockGraceMinutes": "{minutes} min",
   "settingsAppLockNoDeviceLock": "No screen lock is set up on this device. Set up a PIN, pattern or fingerprint in the device settings first.",
   "settingsCategoryAccount": "Account & security",
-  "settingsMoreInfo": "More information"
+  "settingsMoreInfo": "More information",
+  "settingsCategoryNotifications": "Notifications"
 }
