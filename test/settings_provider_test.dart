@@ -18,6 +18,28 @@ void main() {
     SharedPreferences.setMockInitialValues({});
   });
 
+  group('diagnostics', () {
+    test('are off by default and stay on after a restart', () async {
+      final before = _makeContainer();
+      expect(before.read(settingsProvider).diagnosticsEnabled, isFalse);
+      before.read(settingsProvider.notifier).setDiagnosticsEnabled(true);
+      await pumpEventQueue();
+
+      final after = _makeContainer();
+      await after.read(settingsProvider.notifier).loadGlobal();
+      expect(after.read(settingsProvider).diagnosticsEnabled, isTrue);
+    });
+
+    test('storedDiagnosticsEnabled reads the stored flag', () async {
+      expect(await storedDiagnosticsEnabled(), isFalse);
+
+      final c = _makeContainer();
+      c.read(settingsProvider.notifier).setDiagnosticsEnabled(true);
+      await pumpEventQueue();
+      expect(await storedDiagnosticsEnabled(), isTrue);
+    });
+  });
+
   group('app-wide vs. per-account settings', () {
     test('an app-wide setting is still there after a restart', () async {
       final before = _makeContainer();

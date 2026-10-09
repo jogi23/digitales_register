@@ -422,6 +422,7 @@ class SettingsState {
     this.sixDayWeek = false,
     this.appLockEnabled = false,
     this.appLockGraceMinutes = 1,
+    this.diagnosticsEnabled = false,
   })  : ignoreForGradesAverage = ignoreForGradesAverage ?? [],
         classbookSubjects = classbookSubjects ?? [];
 
@@ -533,6 +534,10 @@ class SettingsState {
   /// [allowedAppLockGraceMinutes].
   final int appLockGraceMinutes;
 
+  /// Records the network protocol and the debug log, so they can be shared
+  /// when something goes wrong (#325). Off until the user turns it on.
+  final bool diagnosticsEnabled;
+
   SettingsState copyWith({
     bool? noPasswordSaving,
     bool? typeSorted,
@@ -576,6 +581,7 @@ class SettingsState {
     bool? sixDayWeek,
     bool? appLockEnabled,
     int? appLockGraceMinutes,
+    bool? diagnosticsEnabled,
   }) =>
       SettingsState(
         noPasswordSaving: noPasswordSaving ?? this.noPasswordSaving,
@@ -634,6 +640,7 @@ class SettingsState {
         sixDayWeek: sixDayWeek ?? this.sixDayWeek,
         appLockEnabled: appLockEnabled ?? this.appLockEnabled,
         appLockGraceMinutes: appLockGraceMinutes ?? this.appLockGraceMinutes,
+        diagnosticsEnabled: diagnosticsEnabled ?? this.diagnosticsEnabled,
       );
 
   Map<String, dynamic> toJson() => {
@@ -678,6 +685,7 @@ class SettingsState {
         'sixDayWeek': sixDayWeek,
         'appLockEnabled': appLockEnabled,
         'appLockGraceMinutes': appLockGraceMinutes,
+        'diagnosticsEnabled': diagnosticsEnabled,
       };
 
   factory SettingsState.fromJson(Map<dynamic, dynamic> json) => SettingsState(
@@ -754,6 +762,7 @@ class SettingsState {
         notifyAbsences: json['notifyAbsences'] as bool? ?? true,
         sixDayWeek: json['sixDayWeek'] as bool? ?? false,
         appLockEnabled: json['appLockEnabled'] as bool? ?? false,
+        diagnosticsEnabled: json['diagnosticsEnabled'] as bool? ?? false,
         appLockGraceMinutes: (() {
           final value = json['appLockGraceMinutes'];
           return value is int && allowedAppLockGraceMinutes.contains(value)
@@ -806,6 +815,7 @@ class SettingsState {
     'notifyAbsences',
     'appLockEnabled',
     'appLockGraceMinutes',
+    'diagnosticsEnabled',
   };
 
   /// Only the app-wide settings, for storing them on their own.
@@ -876,7 +886,8 @@ class SettingsState {
         other.notifyAbsences == notifyAbsences &&
         other.sixDayWeek == sixDayWeek &&
         other.appLockEnabled == appLockEnabled &&
-        other.appLockGraceMinutes == appLockGraceMinutes;
+        other.appLockGraceMinutes == appLockGraceMinutes &&
+        other.diagnosticsEnabled == diagnosticsEnabled;
   }
 
   @override
@@ -922,6 +933,7 @@ class SettingsState {
         sixDayWeek,
         appLockEnabled,
         appLockGraceMinutes,
+        diagnosticsEnabled,
       ]);
 }
 

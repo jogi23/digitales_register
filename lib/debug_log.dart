@@ -23,9 +23,10 @@ import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 
 // What happened in the app, for tests and for finding faults — in debug
-// builds only. The log gets shared, so nothing goes in that must not leave
-// the device: no passwords, cookies, tokens or codes, no message texts, and
-// accounts only by [accountTag]. Requests and answers belong in the network
+// builds, and in release builds once the diagnostic log is on. The log gets
+// shared, so nothing goes in that must not leave the device: no passwords,
+// cookies, tokens or codes, no message texts, and accounts only by
+// [accountTag]. Requests and answers belong in the network
 // protocol, not here.
 
 /// The categories entries are filed under; the log page filters by them.
@@ -101,7 +102,7 @@ class DebugLogEntry {
   }
 }
 
-/// App-wide debug log. All writes are no-ops in release builds.
+/// App-wide debug log. All writes are no-ops while it is not [enabled].
 ///
 /// Keeps the latest [capacity] entries in memory and, once [attachFile] was
 /// called, appends every entry to a file as well. The file outlives a crash
@@ -112,12 +113,20 @@ class DebugLogEntry {
 ///
 /// Use the top-level [debugLog] function to add entries from anywhere.
 class DebugLog {
-  DebugLog({this.capacity = 1000, this.maxFileBytes = 512 * 1024});
+  DebugLog({
+    this.capacity = 1000,
+    this.maxFileBytes = 512 * 1024,
+    bool? enabled,
+  }) : enabled = enabled ?? kDebugMode;
 
   static final DebugLog instance = DebugLog();
 
   final int capacity;
   final int maxFileBytes;
+
+  /// Whether entries are kept. Debug builds always do; a release build does
+  /// once the user turned the diagnostic log on (#325).
+  bool enabled;
 
   final _entries = ListQueue<DebugLogEntry>();
   File? _file;
@@ -129,7 +138,6 @@ class DebugLog {
   /// Writes to `debug_log.jsonl` in the app's support directory from now on.
   /// [isolate] marks the entries of an isolate other than the app's.
   Future<void> init({String? isolate}) async {
-    if (!kDebugMode) return;
     try {
       final dir = await getApplicationSupportDirectory();
       attachFile(File('${dir.path}/debug_log.jsonl'), isolate: isolate);
@@ -151,7 +159,7 @@ class DebugLog {
   }
 
   void add(String category, String message, {String? data}) {
-    if (!kDebugMode) return;
+    if (!enabled) return;
     final entry = DebugLogEntry(
       timestamp: DateTime.now(),
       category: category,
@@ -247,7 +255,8 @@ void debugLog(String category, String message, {String? data}) =>
     DebugLog.instance.add(category, message, data: data);
 
 /// Logs an error that got this far, stack trace included.
-void debugLogError(String where, Object? error, [StackTrace? stack]) => debugLog(
+void debugLogError(String where, Object? error, [StackTrace? stack]) =>
+    debugLog(
       LogCategory.error,
       '$where: ${error.runtimeType}: ${shorten('$error', 300)}',
       data: stack == null ? null : shorten('$stack', 4000),
