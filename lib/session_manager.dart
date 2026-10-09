@@ -430,7 +430,7 @@ class SessionManager {
     _authService.onAddProtocolItem?.call(NetworkProtocolItem((b) => b
       ..address = _apiClient.baseAddress + url
       ..response = stringifyMaybeJson(responseData)
-      ..parameters = stringifyMaybeJson(args)
+      ..parameters = stringifyMaybeJson(redactSensitive(args))
       ..timestamp = DateTime.now()
       ..error = error?.toString()));
   }

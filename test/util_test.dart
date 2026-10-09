@@ -30,6 +30,38 @@ void main() {
   // ---------------------------------------------------------------------------
   // fixupUrl
   // ---------------------------------------------------------------------------
+  group('redactSensitive', () {
+    test('masks password keys and leaves the rest', () {
+      expect(
+        redactSensitive({'email': 'a@b.it', 'password': 'geheim'}),
+        {'email': 'a@b.it', 'password': '***'},
+      );
+    });
+
+    test('masks nested and differently written keys', () {
+      expect(
+        redactSensitive({
+          'user': {'Password': 'x', 'newPassword': 'y', 'name': 'n'},
+          'list': [
+            {'pass': 'z', 'ok': 1},
+          ],
+        }),
+        {
+          'user': {'Password': '***', 'newPassword': '***', 'name': 'n'},
+          'list': [
+            {'pass': '***', 'ok': 1},
+          ],
+        },
+      );
+    });
+
+    test('does not change its input', () {
+      final input = {'password': 'geheim'};
+      redactSensitive(input);
+      expect(input['password'], 'geheim');
+    });
+  });
+
   group('fixupUrl', () {
     test('adds https scheme if missing', () {
       expect(fixupUrl('example.com'), 'https://example.com');
