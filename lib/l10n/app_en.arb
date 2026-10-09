@@ -348,9 +348,23 @@
   "passResetNotMatchingYet": "The passwords do not match yet",
   "commonOk": "Ok",
   "accountSheetClose": "Close the account card",
-  "aboutClientFor": "A client for the ",
-  "aboutDevelopedBy": "Developed by ",
   "aboutPrivacy": "Privacy policy",
+  "aboutVersion": "Version {version}",
+  "@aboutVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "aboutIndependent": "DigiReg ST is an independent app by Johannes Feichter and is not affiliated with Digitales Register.",
+  "aboutDevelopers": "Developers",
+  "aboutSourceCode": "Source code (GPL)",
+  "aboutLicenses": "Open-source licenses",
+  "aboutLegal": "Legal",
+  "aboutImprint": "Legal notice",
+  "aboutTerms": "Terms of use",
+  "aboutPrivacyShort": "Your login and school data only travel between the app and your school's portal; the login stays encrypted on your device. If the app crashes it may send technical error reports. There is no advertising and no tracking.",
   "calcNewGrade": "Create a grade",
   "commonAdd": "Add",
   "calcAddGrade": "Add a grade",
@@ -551,7 +565,6 @@
   "semesterBoth": "Both semesters",
   "passwordRules": "The new password has to:\n- be at least 10 characters long\n- contain at least one capital letter\n- contain at least one small letter\n- contain at least one digit\n- contain at least one special character\n- differ from the old password",
   "aboutFreeSoftware": "This is free software, and you are welcome to redistribute it under certain conditions.\nThis program comes with ABSOLUTELY NO WARRANTY.",
-  "aboutSeeLicence": "See the GNU General Public License for more details.",
   "shareInvitation": "Do you know the app for the Digital Register yet? Homework, grades and messages at a glance, without signing in through the browser every time:",
   "shareSubject": "The Digital Register as an app",
   "absenceJustified": "Justified",

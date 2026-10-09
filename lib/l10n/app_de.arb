@@ -369,9 +369,23 @@
   "passResetNotMatchingYet": "Die Passwörter stimmen noch nicht überein",
   "commonOk": "Ok",
   "accountSheetClose": "Konto schließen",
-  "aboutClientFor": "Ein Client für das ",
-  "aboutDevelopedBy": "Entwickelt von ",
   "aboutPrivacy": "Datenschutzerklärung",
+  "aboutVersion": "Version {version}",
+  "@aboutVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "aboutIndependent": "DigiReg ST ist eine unabhängige App von Johannes Feichter und steht in keiner Verbindung zum Digitalen Register.",
+  "aboutDevelopers": "Entwickler",
+  "aboutSourceCode": "Quellcode (GPL)",
+  "aboutLicenses": "Open-Source-Lizenzen",
+  "aboutLegal": "Rechtliches",
+  "aboutImprint": "Impressum",
+  "aboutTerms": "Nutzungsbedingungen",
+  "aboutPrivacyShort": "Zugangsdaten und Schuldaten gehen nur zwischen App und dem Portal deiner Schule hin und her; die Zugangsdaten bleiben verschlüsselt auf dem Gerät. Bei Abstürzen kann die App technische Fehlerberichte senden. Es gibt keine Werbung und kein Tracking.",
   "calcNewGrade": "Neue Note erstellen",
   "commonAdd": "Hinzufügen",
   "calcAddGrade": "Note hinzufügen",
@@ -572,7 +586,6 @@
   "semesterBoth": "Beide Semester",
   "passwordRules": "Das neue Passwort muss:\n- mindestens 10 Zeichen lang sein\n- mindestens einen Großbuchstaben enthalten\n- mindestens einen Kleinbuchstaben enthalten\n- mindestens eine Zahl enthalten\n- mindestens ein Sonderzeichen enthalten\n- nicht mit dem alten Passwort übereinstimmen",
   "aboutFreeSoftware": "Dies ist freie Software, und du darfst sie unter bestimmten Bedingungen weitergeben.\nFür dieses Programm gibt es KEINERLEI GARANTIE.",
-  "aboutSeeLicence": "Einzelheiten stehen in der GNU General Public License.",
   "shareInvitation": "Kennst du schon die App fürs Digitale Register? Hausaufgaben, Noten und Mitteilungen auf einen Blick — ohne jedes Mal im Browser einzuloggen:",
   "shareSubject": "Digitales Register als App",
   "absenceJustified": "Entschuldigt",

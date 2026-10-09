@@ -19,6 +19,7 @@
 import 'package:dr/app_links.dart';
 import 'package:dr/pages.dart';
 import 'package:dr/services/changelog.dart';
+import 'package:dr/ui/about_page.dart';
 import 'package:dr/ui/changelog_page.dart';
 import 'package:dr/ui/help_feedback_page.dart';
 import 'package:dr/ui/sidebar.dart';
@@ -218,7 +219,7 @@ void main() {
       expect(called, isTrue);
     });
 
-    testWidgets('shows about dialog when Über diese App tapped',
+    testWidgets('opens the about page when Über diese App tapped',
         (tester) async {
       await tester.pumpWidget(_build());
       await tester.pumpAndSettle();
@@ -230,11 +231,10 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Über diese App'));
       await tester.pumpAndSettle();
-      expect(find.byType(AboutDialog), findsOneWidget);
+      expect(find.byType(AboutPage), findsOneWidget);
     });
 
-    testWidgets(
-        'opens help & feedback page when Hilfe und Feedback tapped',
+    testWidgets('opens help & feedback page when Hilfe und Feedback tapped',
         (tester) async {
       await tester.pumpWidget(_build());
       await tester.pumpAndSettle();

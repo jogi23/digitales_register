@@ -26,6 +26,17 @@ abstract final class AppLinks {
   static const contactEmail = 'hallo@wertwerk.io';
   static const developerName = 'Johannes Feichter';
   static final developer = Uri.parse('https://wertwerk.io');
+
+  /// Everyone who wrote the app, with their page; the maintainer first.
+  static final developers = <(String, Uri)>[
+    (developerName, developer),
+    ('Michael Debertol', Uri.parse('https://blog.debertol.com')),
+    (
+      'Simon Wachtler',
+      Uri.parse('https://www.evvvolution.com/team/simon-wachtler'),
+    ),
+  ];
+
   static final faq =
       Uri.parse('https://wertwerk.io/projekte/digitale-register-app/#faq');
   static final privacy = Uri.parse('https://wertwerk.io/datenschutz/digiregst');

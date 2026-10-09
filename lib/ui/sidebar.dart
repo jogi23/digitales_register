@@ -19,7 +19,7 @@
 import 'package:collapsible_sidebar/collapsible_sidebar.dart';
 import 'package:dr/app_links.dart';
 import 'package:dr/middleware/middleware.dart';
-import 'package:dr/ui/app_about_dialog.dart';
+import 'package:dr/ui/about_page.dart';
 import 'package:dr/ui/changelog_page.dart';
 import 'package:dr/ui/help_feedback_page.dart';
 import 'package:dr/services/app_sharing.dart';
@@ -189,7 +189,11 @@ class Sidebar extends StatelessWidget {
           hasDivider: true,
           text: tr(context).menuAbout,
           icon: Icons.info_outline,
-          onPressed: () => showAppAboutDialog(context),
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => const AboutPage(),
+            ),
+          ),
         ),
         CollapsibleItem(
           hasDivider: true,

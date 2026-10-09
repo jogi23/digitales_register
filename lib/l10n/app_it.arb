@@ -348,9 +348,23 @@
   "passResetNotMatchingYet": "Le password non coincidono ancora",
   "commonOk": "Ok",
   "accountSheetClose": "Chiudi l'account",
-  "aboutClientFor": "Un client per il ",
-  "aboutDevelopedBy": "Sviluppata da ",
   "aboutPrivacy": "Informativa sulla privacy",
+  "aboutVersion": "Versione {version}",
+  "@aboutVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "aboutIndependent": "DigiReg ST è un'app indipendente di Johannes Feichter e non è collegata al Registro digitale.",
+  "aboutDevelopers": "Sviluppatori",
+  "aboutSourceCode": "Codice sorgente (GPL)",
+  "aboutLicenses": "Licenze open source",
+  "aboutLegal": "Informazioni legali",
+  "aboutImprint": "Impressum",
+  "aboutTerms": "Condizioni d'uso",
+  "aboutPrivacyShort": "Credenziali e dati scolastici viaggiano solo tra l'app e il portale della tua scuola; le credenziali restano cifrate sul dispositivo. In caso di arresto anomalo l'app può inviare rapporti tecnici sugli errori. Nessuna pubblicità, nessun tracciamento.",
   "calcNewGrade": "Crea un nuovo voto",
   "commonAdd": "Aggiungi",
   "calcAddGrade": "Aggiungi un voto",
@@ -551,7 +565,6 @@
   "semesterBoth": "Entrambi i semestri",
   "passwordRules": "La nuova password deve:\n- essere lunga almeno 10 caratteri\n- contenere almeno una lettera maiuscola\n- contenere almeno una lettera minuscola\n- contenere almeno una cifra\n- contenere almeno un carattere speciale\n- essere diversa dalla password precedente",
   "aboutFreeSoftware": "Questo è software libero e puoi ridistribuirlo a determinate condizioni.\nIl programma è fornito SENZA ALCUNA GARANZIA.",
-  "aboutSeeLicence": "I dettagli sono nella GNU General Public License.",
   "shareInvitation": "Conosci già l'app per il Registro Elettronico? Compiti, voti e comunicazioni a colpo d'occhio, senza accedere ogni volta dal browser:",
   "shareSubject": "Il Registro Elettronico come app",
   "absenceJustified": "Giustificata",
