@@ -6,7 +6,11 @@
         {
           "title": "Neue Funktionen",
           "items": [
-            "App-Sperre: In den Einstellungen unter „Anmeldung“ lässt sich die App mit der Sperre des Geräts schützen — Fingerabdruck, Gesicht oder Geräte-PIN. Sie fragt beim Start und nach der Rückkehr, wenn die App länger als gewählt im Hintergrund war (sofort, 1, 5 oder 15 Minuten). Solange sie an ist, zeigt die Übersicht der zuletzt genutzten Apps keinen Inhalt; Benachrichtigungen kommen weiter."
+            "App-Sperre: In den Einstellungen unter „Anmeldung“ lässt sich die App mit der Sperre des Geräts schützen — Fingerabdruck, Gesicht oder Geräte-PIN. Sie fragt beim Start und nach der Rückkehr, wenn die App länger als gewählt im Hintergrund war (sofort, 1, 5 oder 15 Minuten). Solange sie an ist, zeigt die Übersicht der zuletzt genutzten Apps keinen Inhalt; Benachrichtigungen kommen weiter.",
+            "Über-Seite: „Über diese App“ öffnet jetzt eine eigene Seite statt eines Dialogs — mit Version, Entwicklern, Neuerungen, Quellcode, Open-Source-Lizenzen und dem Bereich „Rechtliches“ (Datenschutz, Impressum, Nutzungsbedingungen).",
+            "Menü: Neue Punkte „Neuigkeiten“ (die Neuerungen der App) und „Andere Apps von Wertwerk“.",
+            "Hilfe: „Häufige Fragen“ beantworten die wichtigsten Fragen direkt in der App, auch ohne Internet — zu Anmeldung, Benachrichtigungen, Konten, Hausaufgaben und App-Sperre.",
+            "Diagnose-Protokoll: In den Einstellungen unter „Erweitert“ zeichnet ein Schalter Netzwerkprotokoll und Debug-Log auf — standardmäßig aus. „Protokoll teilen“ schickt alles Aufgezeichnete, etwa an den Support; Passwörter werden geschwärzt. Die Seiten „Netzwerkprotokoll“ und „Debug-Log“ entfallen."
           ]
         },
         {
@@ -20,7 +24,11 @@
         {
           "title": "New features",
           "items": [
-            "App lock: under “Sign-in” in the settings, the app can be protected with the device's lock — fingerprint, face or device PIN. It asks at start-up and on return when the app was in the background longer than chosen (immediately, 1, 5 or 15 minutes). While it is on, the recent apps overview shows no content; notifications keep coming."
+            "App lock: under “Sign-in” in the settings, the app can be protected with the device's lock — fingerprint, face or device PIN. It asks at start-up and on return when the app was in the background longer than chosen (immediately, 1, 5 or 15 minutes). While it is on, the recent apps overview shows no content; notifications keep coming.",
+            "About page: “About this app” now opens a page of its own instead of a dialog — with version, developers, what's new, source code, open-source licenses and a “Legal” section (privacy, legal notice, terms of use).",
+            "Menu: new entries “What's new” (the app's release notes) and “Other apps by Wertwerk”.",
+            "Help: “Frequently asked questions” answer the most common questions inside the app, even offline — about signing in, notifications, accounts, homework and the app lock.",
+            "Diagnostic log: under “Advanced” in the settings, a switch records the network protocol and the debug log — off by default. “Share log” sends everything recorded, for example to support; passwords are masked. The “Network log” and “Debug log” pages are gone."
           ]
         },
         {
@@ -34,7 +42,11 @@
         {
           "title": "Nuove funzioni",
           "items": [
-            "Blocco dell'app: nelle impostazioni, sotto «Accesso», l'app può essere protetta con il blocco del dispositivo — impronta, volto o PIN del dispositivo. Lo chiede all'avvio e al ritorno, se l'app è rimasta in background più a lungo del tempo scelto (subito, 1, 5 o 15 minuti). Finché è attivo, la panoramica delle app recenti non mostra contenuti; le notifiche continuano ad arrivare."
+            "Blocco dell'app: nelle impostazioni, sotto «Accesso», l'app può essere protetta con il blocco del dispositivo — impronta, volto o PIN del dispositivo. Lo chiede all'avvio e al ritorno, se l'app è rimasta in background più a lungo del tempo scelto (subito, 1, 5 o 15 minuti). Finché è attivo, la panoramica delle app recenti non mostra contenuti; le notifiche continuano ad arrivare.",
+            "Pagina Informazioni: «Informazioni sull'app» apre ora una pagina propria invece di una finestra — con versione, sviluppatori, novità, codice sorgente, licenze open source e la sezione «Informazioni legali» (privacy, Impressum, condizioni d'uso).",
+            "Menu: nuove voci «Novità» (le novità dell'app) e «Altre app di Wertwerk».",
+            "Aiuto: le «Domande frequenti» rispondono alle domande più comuni direttamente nell'app, anche offline — su accesso, notifiche, account, compiti e blocco dell'app.",
+            "Registro diagnostico: in «Avanzate» nelle impostazioni, un interruttore registra il protocollo di rete e il log di debug — disattivato di default. «Condividi registro» invia tutto ciò che è stato registrato, ad esempio al supporto; le password vengono oscurate. Le pagine «Registro di rete» e «Registro di debug» non ci sono più."
           ]
         },
         {
