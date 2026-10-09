@@ -17,6 +17,7 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:collection/collection.dart';
+import 'package:dr/app_links.dart';
 import 'package:dr/container/login_page.dart';
 import 'package:dr/ui/animated_linear_progress_indicator.dart';
 import 'package:dr/ui/autocomplete_options.dart';
@@ -270,15 +271,7 @@ class _LoginPageContentState extends State<LoginPageContent> {
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                           ),
                           onPressed: () async {
-                            await launchUrl(
-                              Uri(
-                                scheme: 'mailto',
-                                path: 'hallo@wertwerk.io',
-                                queryParameters: {
-                                  'subject': 'Feedback DigiReg ST $appVersion',
-                                },
-                              ),
-                            );
+                            await launchUrl(AppLinks.feedbackMail(appVersion));
                           },
                           child: Text(tr(context).loginFeedback),
                         ),

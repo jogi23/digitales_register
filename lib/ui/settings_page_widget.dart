@@ -20,6 +20,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:deleteable_tile/deleteable_tile.dart';
+import 'package:dr/app_links.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/background_check.dart';
 import 'package:dr/container/settings_page.dart';
@@ -805,7 +806,7 @@ class _SettingsPageWidgetState extends State<SettingsPageWidget> {
             trailing: const Icon(Icons.open_in_new),
             title: Text(tr(context).settingsSource),
             onTap: () => launchUrl(
-              Uri.parse("https://github.com/jogi23/digitales_register"),
+              AppLinks.source,
             ),
           ),
         ],
