@@ -57,14 +57,14 @@ Reihenfolge = Ziel-Reihenfolge, Gruppen durch Trennlinien getrennt.
 | Eintrag | Stand |
 |---|---|
 | Einstellungen / Sprache / Design | vorhanden |
-| Diagnose-Schalter | fehlt, [#325](https://github.com/jogi23/digitales_register/issues/325) |
-| Hilfe/FAQ in der App | nur Online-FAQ, [#326](https://github.com/jogi23/digitales_register/issues/326) |
+| Diagnose-Schalter | vorhanden („Diagnose-Protokoll“ mit Teilen), [#325](https://github.com/jogi23/digitales_register/issues/325) |
+| Hilfe/FAQ in der App | vorhanden, [#326](https://github.com/jogi23/digitales_register/issues/326) |
 | Kontakt, Vorschlag, Fehler | vorhanden |
-| Neuigkeiten | nur im Über-Dialog, [#323](https://github.com/jogi23/digitales_register/issues/323) |
+| Neuigkeiten | eigener Menüpunkt, [#323](https://github.com/jogi23/digitales_register/issues/323) |
 | Bewerten | vorhanden |
 | Teilen | vorhanden |
-| Andere Apps | fehlt, [#329](https://github.com/jogi23/digitales_register/issues/329) |
-| Über-Seite | nur Dialog, [#324](https://github.com/jogi23/digitales_register/issues/324) |
-| Impressum / Nutzungsbedingungen | fehlt, [#327](https://github.com/jogi23/digitales_register/issues/327) |
-| Links zentral (`AppLinks`) | fehlt, [#328](https://github.com/jogi23/digitales_register/issues/328) |
+| Andere Apps | Menüpunkt zur Entwicklerseite im Play Store, [#329](https://github.com/jogi23/digitales_register/issues/329) |
+| Über-Seite | eigene Seite, [#324](https://github.com/jogi23/digitales_register/issues/324) |
+| Impressum / Nutzungsbedingungen | verlinkt aus „Rechtliches“, [#327](https://github.com/jogi23/digitales_register/issues/327) |
+| Links zentral (`AppLinks`) | vorhanden, [#328](https://github.com/jogi23/digitales_register/issues/328) |
 | Abmelden | vorhanden |
