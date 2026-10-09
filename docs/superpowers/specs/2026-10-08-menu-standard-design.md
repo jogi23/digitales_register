@@ -20,8 +20,8 @@ DigiReg ST entspricht dem Wertwerk-Standardmenü. Nutzer können Benachrichtigun
 Umstellen: `help_feedback_page.dart`, `app_about_dialog.dart` (entfällt), `settings_page_widget.dart` (Quellcode), `api_client.dart`, `services/app_sharing.dart` soweit URLs dort stehen.
 
 ### 2. Menü (#323, #329)
-`sidebar.dart`, Reihenfolge: Inhalte, Einstellungen, Hilfe, Neuigkeiten, Bewerten, Teilen, Andere Apps, Über, Abmelden. Trennlinien an Gruppengrenzen.
-- Neuigkeiten: Icon `new_releases_outlined`, öffnet `ChangelogPage`.
+`sidebar.dart`, Reihenfolge: Inhalte, Einstellungen, Hilfe, Bewerten, Teilen, Andere Apps, Über, Abmelden. Trennlinien an Gruppengrenzen.
+- Neuigkeiten: kein Menüpunkt (Entscheid 2026-10-09). Der Changelog bleibt in der Über-Seite; die Dashboard-Karte meldet neue Versionen.
 - Andere Apps: Icon `apps`, öffnet `AppLinks.otherApps` extern.
 
 ### 3. Über-Seite und Rechtliches (#324, #327)
