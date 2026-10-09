@@ -74,3 +74,18 @@ Neu: sieben Kategorietitel, Kurzstatus-Muster, Info-Dialog „Angemeldet bleiben
 
 ## Nicht im Umfang
 Teil B (Menü-Icons, Auswahlkontrast, Rand-Wischen) und Teil C außer den hier genannten Farbkreisen und `Colors.grey`. Suche in den Einstellungen. Master-Detail auf dem Tablet.
+
+## Änderung 2026-10-09 (nach erstem Gerätetest): fünf statt sieben Kategorien
+Fächer & Kalender, Hausaufgaben & Klassenbuch und Noten gehören zusammen: Sie bestimmen, wie die App Schulinhalte zeigt. Sie bilden eine Seite mit einklappbaren Blöcken.
+
+| # | Kategorie | Inhalt |
+|---|---|---|
+| 1 | Konto & Sicherheit | unverändert |
+| 2 | Benachrichtigungen | unverändert |
+| 3 | Design & Sprache (vorher „Darstellung") | Sprache, Design, Akzentfarbe, Akzent-Hintergrund |
+| 4 | Inhalte & Ansichten | Blöcke: Fächer & Kalender, Merkheft (mit „Beim Löschen fragen"), Klassenbuch, Hausaufgaben-Übersicht, Absenzen, Noten |
+| 5 | Erweitert | unverändert |
+
+- Blöcke sind `ExpansionTile`s, standardmäßig zu, mehrere dürfen offen sein, der Zustand wird nicht gespeichert. Unter dem Titel steht ein statischer Kurztext.
+- Der Noten-Deep-Link öffnet „Inhalte & Ansichten" mit dem Block „Noten" aufgeklappt.
+- Namen: de „Design & Sprache" / „Inhalte & Ansichten", en „Theme & language" / „Content & views", it „Tema e lingua" / „Contenuti e viste".
