@@ -818,5 +818,7 @@
   "settingsCategoryAppearance": "Darstellung",
   "settingsTheme": "Design",
   "settingsCategorySubjectsCalendar": "Fächer & Kalender",
-  "settingsSectionCalendar": "Kalender"
+  "settingsSectionCalendar": "Kalender",
+  "settingsCategoryHomework": "Hausaufgaben & Klassenbuch",
+  "settingsSectionGeneral": "Allgemein"
 }

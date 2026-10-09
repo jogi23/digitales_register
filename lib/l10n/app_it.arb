@@ -760,5 +760,7 @@
   "settingsCategoryAppearance": "Aspetto",
   "settingsTheme": "Tema",
   "settingsCategorySubjectsCalendar": "Materie e calendario",
-  "settingsSectionCalendar": "Calendario"
+  "settingsSectionCalendar": "Calendario",
+  "settingsCategoryHomework": "Compiti e registro di classe",
+  "settingsSectionGeneral": "Generale"
 }
