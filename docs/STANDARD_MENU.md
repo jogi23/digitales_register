@@ -60,7 +60,7 @@ Reihenfolge = Ziel-Reihenfolge, Gruppen durch Trennlinien getrennt.
 | Diagnose-Schalter | vorhanden („Diagnose-Protokoll“ mit Teilen), [#325](https://github.com/jogi23/digitales_register/issues/325) |
 | Hilfe/FAQ in der App | vorhanden, [#326](https://github.com/jogi23/digitales_register/issues/326) |
 | Kontakt, Vorschlag, Fehler | vorhanden |
-| Neuigkeiten | eigener Menüpunkt, [#323](https://github.com/jogi23/digitales_register/issues/323) |
+| Neuigkeiten | in der Über-Seite statt im Menü, [#323](https://github.com/jogi23/digitales_register/issues/323) |
 | Bewerten | vorhanden |
 | Teilen | vorhanden |
 | Andere Apps | Menüpunkt zur Entwicklerseite im Play Store, [#329](https://github.com/jogi23/digitales_register/issues/329) |

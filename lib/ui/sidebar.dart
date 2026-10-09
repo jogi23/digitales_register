@@ -20,7 +20,6 @@ import 'package:collapsible_sidebar/collapsible_sidebar.dart';
 import 'package:dr/app_links.dart';
 import 'package:dr/middleware/middleware.dart';
 import 'package:dr/ui/about_page.dart';
-import 'package:dr/ui/changelog_page.dart';
 import 'package:dr/ui/help_feedback_page.dart';
 import 'package:dr/services/app_sharing.dart';
 import 'package:dr/l10n/l10n.dart';
@@ -75,7 +74,7 @@ class Sidebar extends StatelessWidget {
       minWidth: 70,
       screenPadding: 0,
       // Kein Kopf mit Konto: Der Avatar steht in jeder Titelzeile, und das
-      // Menü ist mit siebzehn Punkten ohnehin länger als der Bildschirm.
+      // Menü ist mit sechzehn Punkten ohnehin länger als der Bildschirm.
       titleTooltip: '',
       toggleTooltipCollapsed: tr(context).menuExpand,
       toggleTooltipExpanded: tr(context).menuCollapse,
@@ -159,15 +158,6 @@ class Sidebar extends StatelessWidget {
         ),
         CollapsibleItem(
           hasDivider: true,
-          text: tr(context).menuNews,
-          icon: Icons.new_releases_outlined,
-          onPressed: () => Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) => const ChangelogPage(),
-            ),
-          ),
-        ),
-        CollapsibleItem(
           text: tr(context).menuRate,
           icon: Icons.star_outline,
           onPressed: openPlayStoreListing,

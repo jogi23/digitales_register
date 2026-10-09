@@ -18,9 +18,7 @@
 
 import 'package:dr/app_links.dart';
 import 'package:dr/pages.dart';
-import 'package:dr/services/changelog.dart';
 import 'package:dr/ui/about_page.dart';
-import 'package:dr/ui/changelog_page.dart';
 import 'package:dr/ui/help_feedback_page.dart';
 import 'package:dr/ui/sidebar.dart';
 import 'package:flutter/material.dart';
@@ -29,13 +27,6 @@ import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
 
 import '../../fake_url_launcher.dart';
-
-class _NoChangelog extends Changelog {
-  @override
-  Future<List<ChangelogEntry>> load() async => const [];
-  @override
-  Future<String?> previousSeen() async => null;
-}
 
 // Sidebar requires a non-zero height to render items.
 const _testSize = Size(300, 700);
@@ -85,8 +76,6 @@ Widget _build({
 }
 
 void main() {
-  tearDown(() => changelog = Changelog());
-
   testWidgets('shows all navigation items', (tester) async {
     await tester.pumpWidget(_build());
     await tester.pumpAndSettle();
@@ -126,7 +115,6 @@ void main() {
     const order = [
       'Einstellungen',
       'Hilfe und Feedback',
-      'Neuigkeiten',
       'Bei Google Play bewerten',
       'App teilen',
       'Andere Apps von Wertwerk',
@@ -138,25 +126,22 @@ void main() {
     expect(ys.toSet().length, order.length);
   });
 
-  testWidgets('fits 17 entries without overflow', (tester) async {
+  testWidgets('fits 16 entries without overflow', (tester) async {
     await tester.pumpWidget(_build());
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('opens the changelog from "Neuigkeiten"', (tester) async {
-    changelog = _NoChangelog();
+  testWidgets('has no "Neuigkeiten" entry: the changelog is in the about page',
+      (tester) async {
     await tester.pumpWidget(_build());
     await tester.pumpAndSettle();
     await tester.scrollUntilVisible(
-      find.text('Neuigkeiten'),
+      find.text('Abmelden'),
       500,
       scrollable: find.byType(Scrollable).first,
     );
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Neuigkeiten'));
-    await tester.pumpAndSettle();
-    expect(find.byType(ChangelogPage), findsOneWidget);
+    expect(find.text('Neuigkeiten'), findsNothing);
   });
 
   testWidgets('opens the developer page from "Andere Apps"', (tester) async {
