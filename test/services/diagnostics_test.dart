@@ -81,7 +81,11 @@ void main() {
         log: DebugLog(), debugBuild: false, exporter: export);
     c.read(settingsProvider.notifier).setDiagnosticsEnabled(true);
     c.read(settingsProvider.notifier).setDiagnosticsEnabled(false);
-    await pumpEventQueue();
+    // The files go in the background, on the real file system.
+    for (var i = 0; i < 100; i++) {
+      if (dir.listSync(recursive: true).whereType<File>().isEmpty) break;
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+    }
 
     expect(dir.listSync(recursive: true).whereType<File>(), isEmpty);
   });
