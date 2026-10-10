@@ -1,0 +1,24 @@
+  :root {
+    --c1: #7fe7ff; --c1rgb: 127, 231, 255;
+    --c2: #ffb84a; --c2rgb: 255, 184, 74;
+    --hl: #ffd76a; --hlrgb: 255, 215, 106;
+    --good: #9dff7a; --goodrgb: 157, 255, 122;
+    --bad: #ff4d4d; --badrgb: 255, 77, 77;
+    --bg: #07051a;
+    --panel: linear-gradient(180deg, #2a1f4a, #150f2c);
+    --chip-bg: rgba(20, 12, 40, .6);
+    --btn-bg: linear-gradient(180deg, #3b2f66, #241a45);
+    --overlay-bg: radial-gradient(circle at 50% 20%, rgba(70, 30, 110, .9), rgba(7, 5, 26, .96));
+    --line: #4a3d78; --dim: #b3a8d6; --sub: #ddd2f5;
+    --font-ui: Nunito, 'Trebuchet MS', sans-serif;
+    --font-num: Nunito, 'Trebuchet MS', sans-serif;
+    --font-title: 'Cinzel Decorative', Cinzel, serif;
+    --radius: 12px; --radius-s: 10px; --radius-cta: 14px;
+  }
+  .ans { border-color: #c9a24a; box-shadow: inset 0 0 0 2px rgba(0,0,0,.35), inset 0 -6px 0 rgba(0,0,0,.25), 0 0 12px rgba(var(--c1rgb), .25); font-size: clamp(28px, 7.5vw, 38px); }
+  .ans:active:not(:disabled), .ans.press { background: var(--c1); }
+  .title { letter-spacing: 1px; }
+  .group-label { font-family: Cinzel, serif; font-weight: 700; }
+  .cta { font-family: Cinzel, serif; }
+  #controls { border-top: 3px solid #c9a24a; }
+  #lives i { clip-path: polygon(0 0, 100% 0, 100% 55%, 50% 100%, 0 55%); background: linear-gradient(160deg, #ffe7a0, #c9a24a 55%, #8a6420); filter: drop-shadow(0 0 6px rgba(255,215,106,.8)); }

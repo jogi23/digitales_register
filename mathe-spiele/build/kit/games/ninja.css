@@ -1,0 +1,24 @@
+  :root { --bg: linear-gradient(180deg, #0f1430, #2a1f55); --ink: #1d1b3a; --soft: #5f5a85; --primary: #ff3d6e; --primary-dk: #b81f48; --edge: rgba(0, 0, 0, .35); }
+  .city { position: relative; height: 380px; background: linear-gradient(180deg, #0b1030 0%, #2b1f5a 60%, #ff6b8a 100%); overflow: hidden; }
+  .city .moon { position: absolute; right: 30px; top: 22px; width: 54px; height: 54px; border-radius: 50%; background: #fff4cf; box-shadow: 0 0 30px #fff4cf; }
+  .skyline { position: absolute; left: 0; right: 0; bottom: 0; height: 200px; background:
+      linear-gradient(#1a1440, #1a1440) 0 60px / 60px 140px no-repeat, linear-gradient(#1a1440, #1a1440) 70px 20px / 50px 180px no-repeat, linear-gradient(#1a1440, #1a1440) 130px 90px / 80px 110px no-repeat,
+      linear-gradient(#1a1440, #1a1440) 220px 40px / 60px 160px no-repeat, linear-gradient(#1a1440, #1a1440) 290px 100px / 90px 100px no-repeat, linear-gradient(#1a1440, #1a1440) 390px 30px / 50px 170px no-repeat,
+      linear-gradient(#1a1440, #1a1440) 450px 80px / 80px 120px no-repeat, linear-gradient(#1a1440, #1a1440) 540px 50px / 60px 150px no-repeat, linear-gradient(#1a1440, #1a1440) 610px 110px / 100px 90px no-repeat; background-repeat: repeat-x; opacity: .9; animation: scroll 30s linear infinite; }
+  @keyframes scroll { to { background-position-x: -720px; } }
+  .task { position: absolute; left: 50%; top: 12px; transform: translateX(-50%); background: #fff; border-radius: 14px; padding: 4px 16px; font-family: var(--font-display); font-size: clamp(26px, 7vw, 34px); z-index: 6; box-shadow: 0 4px 0 var(--edge); }
+  .fuse { position: absolute; left: 50%; top: 66px; transform: translateX(-50%); width: 60%; height: 8px; border-radius: 6px; background: rgba(255, 255, 255, .2); overflow: hidden; z-index: 6; }
+  .fuse i { display: block; height: 100%; background: linear-gradient(90deg, #ff3d6e, #ffd23f); transform-origin: left; }
+  .world { position: absolute; inset: 0; }
+  .roof { position: absolute; bottom: 0; width: 18%; background: linear-gradient(180deg, #3a3170, #241c4d); border-top: 6px solid #5b4fa0; z-index: 3; }
+  .roof .win { position: absolute; inset: 16px 10px 0; background: repeating-linear-gradient(0deg, transparent 0 14px, rgba(255, 220, 120, .55) 14px 22px), repeating-linear-gradient(90deg, transparent 0 8px, #241c4d 8px 14px); opacity: .7; }
+  .roof .num { position: absolute; left: 50%; top: -46px; transform: translateX(-50%); background: #ff3d6e; color: #fff; font-family: var(--font-display); font-size: 26px; padding: 0 10px; border-radius: 10px; box-shadow: 0 0 16px #ff3d6e; white-space: nowrap; }
+  .roof.target { cursor: pointer; }
+  .roof.target:hover .num { transform: translateX(-50%) scale(1.1); }
+  .roof.crumble { animation: crumble .9s ease-in forwards; }
+  @keyframes crumble { 20% { transform: translateX(-4px); } 40% { transform: translateX(4px); } 100% { transform: translateY(260px) rotate(8deg); } }
+  .ninja { position: absolute; font-size: 46px; line-height: 1; z-index: 5; transform: translate(-50%, -100%); }
+  .ninja.run { animation: run .3s steps(2) infinite; }
+  @keyframes run { 50% { margin-top: -4px; } }
+  .bin { position: absolute; bottom: 4px; font-size: 40px; z-index: 4; }
+  @media (max-width: 420px) { .roof .num { font-size: 21px; } .ninja { font-size: 38px; } }

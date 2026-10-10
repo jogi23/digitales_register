@@ -1,0 +1,20 @@
+  :root { --bg: linear-gradient(180deg, #9fdcff 0%, #d9f3ff 45%, #b9e48a 46%, #8ccf5a 100%); --primary: #e8573c; --primary-dk: #a8321c; --edge: rgba(90, 60, 20, .18); }
+  .farm { position: relative; min-height: 340px; background: linear-gradient(180deg, #ffe8b8 0 62%, #c98f4e 62% 66%, #a8e070 66%); display: flex; flex-direction: column; }
+  .farm .sign { align-self: center; margin-top: 10px; background: #8a5a2b; color: #fff; font-family: var(--font-display); font-size: clamp(26px, 7vw, 36px); padding: 4px 18px; border-radius: 12px; box-shadow: 0 5px 0 #5c3a16; z-index: 2; }
+  .farm .sign b { color: #ffd23f; }
+  .coop { position: relative; flex: 1; display: grid; grid-template-columns: repeat(var(--n), 1fr); gap: 2px; padding: 8px 64px 10px 8px; align-items: end; }
+  .hen { display: flex; flex-direction: column; align-items: center; min-width: 0; }
+  .hen .h { font-size: clamp(22px, calc(52vw / var(--n)), 46px); line-height: 1; transform-origin: 50% 100%; }
+  .hen.lay .h { animation: lay .35s ease-in-out 2; }
+  @keyframes lay { 50% { transform: scale(1.18, .8) translateY(4px); } }
+  .pile { width: 100%; min-height: 96px; display: flex; flex-wrap: wrap-reverse; justify-content: center; align-content: flex-start; padding: 0 1px; }
+  .pile i { font-style: normal; font-size: clamp(12px, calc(30vw / var(--n)), 22px); line-height: 1.05; animation: eggIn .3s backwards cubic-bezier(.3, 1.6, .5, 1); }
+  .nestbar { width: 100%; height: 14px; border-radius: 50%; background: radial-gradient(ellipse, #e0b060, #a8743d); box-shadow: 0 3px 0 rgba(0, 0, 0, .15); }
+  .pile i.gold { filter: sepia(1) saturate(6) hue-rotate(5deg) brightness(1.1) drop-shadow(0 0 4px #ffd23f); }
+  @keyframes eggIn { from { transform: translateY(-26px) scale(.4); opacity: 0; } }
+  .farmer { position: absolute; right: 6px; bottom: 6px; font-size: 54px; line-height: 1; z-index: 3; }
+  .farmer .hit { position: absolute; left: 50%; top: -6px; transform: translateX(-50%); font-size: 30px; animation: splat .3s cubic-bezier(.3, 1.6, .5, 1); }
+  @keyframes splat { from { transform: translateX(-50%) scale(2); } }
+  .farmer.ouch { animation: shake .4s; }
+  .flyegg { position: absolute; font-size: 20px; z-index: 4; }
+  .count { position: absolute; left: 10px; top: 10px; background: #fff; border-radius: 12px; padding: 3px 10px; font-size: 15px; box-shadow: 0 3px 0 var(--edge); z-index: 2; }

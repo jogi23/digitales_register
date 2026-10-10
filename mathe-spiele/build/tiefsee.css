@@ -1,0 +1,20 @@
+  :root {
+    --c1: #3ef0d0; --c1rgb: 62, 240, 208;
+    --c2: #ff7a8a; --c2rgb: 255, 122, 138;
+    --hl: #ffe066; --hlrgb: 255, 224, 102;
+    --good: #7dff9b; --goodrgb: 125, 255, 155;
+    --bad: #ff6b7a; --badrgb: 255, 107, 122;
+    --bg: #021626;
+    --panel: linear-gradient(180deg, #0a3550, #041a2c);
+    --chip-bg: rgba(2, 30, 50, .55);
+    --btn-bg: radial-gradient(circle at 30% 25%, rgba(255,255,255,.25), rgba(255,255,255,0) 40%), linear-gradient(180deg, #0f4d6e, #08304a);
+    --overlay-bg: radial-gradient(circle at 50% 20%, rgba(14, 106, 143, .9), rgba(2, 22, 38, .96));
+    --line: #23577a; --dim: #8fb8cf; --sub: #c4e6f2;
+    --font-ui: 'Baloo 2', 'Trebuchet MS', sans-serif;
+    --font-num: 'Baloo 2', 'Trebuchet MS', sans-serif;
+    --font-title: 'Baloo 2', 'Trebuchet MS', sans-serif;
+    --radius: 26px; --radius-s: 14px; --radius-cta: 50px;
+  }
+  .title { letter-spacing: 1px; }
+  .ans { font-size: clamp(28px, 7.5vw, 38px); }
+  #lives i { border-radius: 50%; background: radial-gradient(circle at 32% 28%, #fff 0 12%, var(--c1) 45%, #138f7c 100%); box-shadow: 0 0 10px var(--c1); }

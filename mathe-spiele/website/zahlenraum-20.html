@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+</head>
+<body class="day">
+<title>Zahlenraum bis 20</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@600;800;900&display=swap">
+<style>
+  /* Layout: Hauptseite mit zwei großen Toren (Nacht = 1×1, Tag = Zahlenraum 20); Unterseiten mit Kartenraster in den Farben der Spiele. */
+  :root {
+    --bg: #14112e;
+    --bg-2: #1f1a4a;
+    --ink: #f4f1ff;
+    --muted: #b8b2e0;
+    --accent: #ffd95e;
+    --line: rgba(255, 255, 255, .12);
+    --card-ink: #f4f1ff;
+    --card-muted: #b8b2e0;
+    --chip: rgba(255, 255, 255, .08);
+    --day: #fff4d6;
+    --day-2: #ffd9a8;
+    --day-ink: #4a3423;
+    --day-soft: #7a5a40;
+    --fox: #ff8a1f;
+    --font-display: 'Lilita One', 'Arial Rounded MT Bold', 'Trebuchet MS', sans-serif;
+    --font-body: Nunito, 'Trebuchet MS', system-ui, sans-serif;
+    color-scheme: dark;
+  }
+  /* Zahlenraum-20-Seite: warmes Tageslicht */
+  body.day {
+    --bg: #ffe9c4; --bg-2: #fff7e6; --ink: #4a3423; --muted: #7a5a40; --accent: #ff8a1f;
+    --line: rgba(74, 52, 35, .14); --card-ink: #4a3423; --card-muted: #7a5a40; --chip: rgba(74, 52, 35, .08);
+    color-scheme: light;
+  }
+  * { box-sizing: border-box; }
+  html, body { min-height: 100%; }
+  body {
+    margin: 0;
+    background: radial-gradient(120% 70% at 50% 0%, var(--bg-2), var(--bg) 70%) fixed, var(--bg);
+    color: var(--ink); font-family: var(--font-body); font-weight: 600;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding-inline: 16px; padding-block: 28px 48px; display: flex; flex-direction: column; gap: 28px; }
+  .kicker { font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); font-weight: 900; }
+  h1 { font-family: var(--font-display); font-weight: 400; font-size: clamp(40px, 8vw, 66px); line-height: .98; margin: 6px 0 12px; text-wrap: balance; letter-spacing: .01em; }
+  h1 .t { color: var(--fox); text-shadow: 0 0 24px rgba(255, 138, 31, .4); }
+  h1 .i { color: #ffd95e; text-shadow: 0 0 24px rgba(255, 217, 94, .4); }
+  .lead { margin: 0; color: var(--muted); font-size: 17px; line-height: 1.55; max-width: 48ch; }
+  .back { align-self: flex-start; text-decoration: none; color: var(--muted); font-weight: 900; font-size: 15px; padding: 8px 14px; border-radius: 999px; border: 2px solid var(--line); }
+  .back:hover { color: var(--ink); }
+  .back:focus-visible, .gate:focus-visible, .game:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+  header.sub { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 24px; align-items: center; }
+
+  /* ---------- Hauptseite: zwei Tore ---------- */
+  .gates { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .gate { position: relative; display: flex; flex-direction: column; gap: 14px; padding: 22px; border-radius: 28px; text-decoration: none; overflow: hidden; transition: transform .2s, box-shadow .2s; min-width: 0; }
+  .gate:hover { transform: translateY(-5px); }
+  .gate.night { background: linear-gradient(160deg, #2a2266, #120f2c); color: #f4f1ff; border: 1px solid rgba(255, 255, 255, .12); box-shadow: 0 18px 40px rgba(0, 0, 0, .4); }
+  .gate.sun { background: linear-gradient(160deg, var(--day), var(--day-2)); color: var(--day-ink); box-shadow: 0 12px 0 rgba(217, 101, 10, .3), 0 18px 40px rgba(0, 0, 0, .3); }
+  .gate .who { font-size: 13px; font-weight: 900; letter-spacing: .14em; text-transform: uppercase; }
+  .gate.night .who { color: #ffd95e; } .gate.sun .who { color: #d9650a; }
+  .gate h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: clamp(32px, 5.5vw, 44px); line-height: 1; }
+  .gate p { margin: 0; font-size: 15px; line-height: 1.5; }
+  .gate.night p { color: #c9c3ee; } .gate.sun p { color: var(--day-soft); }
+  .gate .icons { display: flex; flex-wrap: wrap; gap: 6px; font-size: 30px; }
+  .gate .icons span { display: inline-block; animation: bob 3s ease-in-out infinite; animation-delay: calc(var(--n) * -.4s); }
+  @keyframes bob { 50% { transform: translateY(-5px); } }
+  .gate .go { margin-top: auto; display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; border-radius: 16px; font-weight: 900; font-size: 17px; }
+  .gate.night .go { background: #ffd95e; color: #2a1f00; } .gate.sun .go { background: var(--fox); color: #fff; }
+  .gate .go::after { content: '▶'; font-size: 13px; }
+
+  /* Einmaleins-Tafel */
+  .table { display: grid; grid-template-columns: repeat(10, 1fr); gap: 3px; width: 100%; max-width: 300px; padding: 10px; border-radius: 16px; background: rgba(255, 255, 255, .05); border: 1px solid rgba(255, 255, 255, .12); font-variant-numeric: tabular-nums; }
+  .table i { font-style: normal; aspect-ratio: 1; display: grid; place-items: center; font-size: clamp(6px, 1vw, 10px); font-weight: 800; color: rgba(255, 255, 255, .32); border-radius: 4px; background: rgba(255, 255, 255, .03); transition: background .5s, color .5s, transform .5s; }
+  .table i.row { background: rgba(255, 217, 94, .14); color: rgba(255, 233, 160, .85); }
+  .table i.hit { background: #ffd95e; color: #2a1f00; transform: scale(1.25); box-shadow: 0 0 14px rgba(255, 217, 94, .8); }
+  /* Zwanzigerfeld */
+  .field { display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; width: 100%; max-width: 300px; padding: 12px; border-radius: 16px; background: #fff; box-shadow: 0 5px 0 rgba(217, 101, 10, .2); }
+  .field i { aspect-ratio: 1; border-radius: 50%; border: 2px dashed #e6cfae; transition: background .35s, border-color .35s, transform .35s; }
+  .field i:nth-child(5n) { margin-right: 3px; }
+  .field i.a { background: #ff8a1f; border: 2px solid #d9650a; }
+  .field i.b { background: #5ec8ff; border: 2px solid #1f8ccc; }
+  .field i.x { background: #ffd3d3; border: 2px solid #e57373; transform: scale(.75); }
+  .cap { margin-top: 8px; text-align: center; font-size: 14px; font-variant-numeric: tabular-nums; }
+  .cap b { font-family: var(--font-display); font-weight: 400; font-size: 20px; letter-spacing: .03em; }
+  .gate.night .cap, .sub .cap.n { color: #b8b2e0; } .gate.night .cap b, .sub .cap.n b { color: #ffd95e; }
+  .gate.sun .cap, .sub .cap.d { color: var(--day-soft); } .gate.sun .cap b, .sub .cap.d b { color: #d9650a; }
+
+  /* ---------- Unterseiten: Spielkarten ---------- */
+  .games { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+  .game.span2 { grid-column: span 2; }
+  .game { position: relative; display: flex; flex-direction: column; border-radius: 22px; overflow: hidden; text-decoration: none; color: var(--card-ink); background: var(--card); border: 1px solid var(--line); box-shadow: 0 14px 30px rgba(0, 0, 0, .25); transition: transform .2s, box-shadow .2s; min-width: 0; }
+  .day .game { box-shadow: 0 10px 0 rgba(217, 101, 10, .16); }
+  .game:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0, 0, 0, .3), 0 0 0 2px var(--acc); }
+  .game.new::before { content: 'NEU'; position: absolute; top: 10px; right: 10px; z-index: 2; font-size: 11px; font-weight: 900; letter-spacing: .1em; padding: 3px 8px; border-radius: 999px; background: #ff4f9a; color: #fff; }
+  .scene { position: relative; height: 124px; background: var(--scene); overflow: hidden; display: grid; place-items: center; }
+  .scene .icon { font-size: 56px; line-height: 1; filter: drop-shadow(0 0 18px var(--acc)); animation: drift 4s ease-in-out infinite; animation-delay: var(--dl, 0s); }
+  .day .scene .icon { filter: drop-shadow(0 6px 0 rgba(0, 0, 0, .12)); }
+  @keyframes drift { 50% { transform: translateY(-8px) rotate(5deg); } }
+  .scene .sum { position: absolute; font-family: var(--sum-font, var(--font-body)); font-weight: 900; font-size: 13px; color: var(--acc); background: rgba(0, 0, 0, .45); border: 1px solid var(--acc); border-radius: var(--sum-r, 8px); padding: 3px 7px; white-space: nowrap; }
+  .day .scene .sum, .light-sums .scene .sum { background: #fff; color: #3b2a20; border-color: rgba(0, 0, 0, .08); }
+  .scene .s1 { left: 10%; top: 18%; } .scene .s2 { right: 9%; top: 56%; }
+  .body { padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+  .name { font-family: var(--font-display); font-weight: 400; font-size: 23px; line-height: 1.05; letter-spacing: .01em; }
+  .desc { margin: 0; color: var(--card-muted); font-size: 15px; line-height: 1.5; }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; padding-top: 6px; }
+  .tag { font-size: 11px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; padding: 4px 9px; border-radius: 999px; background: var(--chip); color: var(--card-muted); }
+  .tag.calm { background: rgba(168, 255, 207, .16); color: #a8ffcf; }
+  .day .tag.calm { background: rgba(46, 125, 50, .14); color: #2e7d32; }
+  .play { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; padding: 12px 16px; border-radius: 14px; background: var(--acc); color: var(--on-acc, #10102a); font-weight: 900; font-size: 16px; letter-spacing: .02em; }
+  .play::after { content: '▶'; font-size: 13px; }
+  .group-title { margin: 6px 0 -4px; font-size: 14px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 900; }
+
+  .modes { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+  .mode { padding: 14px 16px; border-radius: 16px; border: 1px solid var(--line); background: rgba(255, 255, 255, .03); min-width: 0; }
+  .mode b { display: block; font-size: 15px; font-weight: 900; margin-bottom: 4px; }
+  .mode span { color: var(--muted); font-size: 14px; line-height: 1.45; }
+  .mode code { font-family: var(--font-body); font-weight: 900; color: var(--accent); }
+  footer { color: var(--muted); font-size: 14px; line-height: 1.5; border-top: 1px solid var(--line); padding-top: 16px; }
+
+  @media (max-width: 760px) {
+    .gates { grid-template-columns: 1fr; }
+    header.sub { grid-template-columns: minmax(0, 1fr); }
+    .games { grid-template-columns: 1fr 1fr; }
+    .game.span2 { grid-column: 1 / -1; }
+    .modes { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 480px) {
+    .games, .modes { grid-template-columns: 1fr; }
+    .game.span2 { grid-column: auto; }
+    header.sub > div:last-child { display: flex; flex-direction: column; align-items: center; }
+    .table, .field { max-width: 240px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .scene .icon, .gate .icons span { animation: none; } .table i, .field i { transition: none; } }
+  .game.wide { grid-column: 1 / -1; flex-direction: row; }
+  .game.wide .scene { width: 38%; height: auto; min-height: 124px; flex: none; }
+  @media (max-width: 480px) { .game.wide { flex-direction: column; } .game.wide .scene { width: auto; } }
+  .viz { width: min(300px, 100%); align-self: flex-start; }
+  .gate .viz { width: min(250px, 100%); }
+  .viz .table, .viz .field { max-width: none; }
+  @media (max-width: 760px) { header.sub .viz { align-self: center; } }
+</style>
+<div class="wrap">
+  <a class="back" href="index.html">← Übersicht</a>
+  <header class="sub">
+    <div>
+      <div class="kicker">Für Theo · 12 Spiele · alle mit Vorlese-Knopf</div>
+      <h1><span class="t">Zahlenraum bis 20</span></h1>
+      <p class="lead">Plus und Minus, verliebte Zahlen, Zerlegen und Rechenpyramiden. Bei Fehlern gibt es Tipps, und nach jeder Runde Sterne.</p>
+    </div>
+    <div class="viz"><div class="field" id="field" aria-hidden="true"></div><div class="cap d" id="fieldCap"><b>8 + 5 = 13</b></div></div>
+  </header>
+  <div class="games">
+    <a class="game new" href="dino-eier.html" style="--card:#fff;--scene:linear-gradient(180deg, #ffd08a 50%, #8fd16a 50%);--acc:#2e9b4c;--on-acc:#fff">
+      <div class="scene"><span class="sum s1">5 + 7</span><span class="icon">🥚</span><span class="sum s2">13 − 6</span></div>
+      <div class="body"><div class="name">Dino-Eier</div><p class="desc">In jedem Ei steckt eine Aufgabe. Richtig gerechnet schlüpft ein Baby-Dino und zieht in deinen Dino-Zoo.</p><div class="tags"><span class="tag calm">Ohne Kämpfen</span><span class="tag">Sammeln</span></div><span class="play">Spielen</span></div>
+    </a>
+    <a class="game new" href="zahlen-zug.html" style="--card:#fff;--scene:linear-gradient(180deg, #bfe9ff 55%, #a8e070 55%);--acc:#e53935;--on-acc:#fff">
+      <div class="scene"><span class="sum s1">7 + 3</span><span class="icon">🚂</span><span class="sum s2">15 − 8</span></div>
+      <div class="body"><div class="name">Zahlen-Zug</div><p class="desc">Kopple den Wagen mit der richtigen Zahl an. Im Zug fahren Kühe, Pudding und ein Klavier mit!</p><div class="tags"><span class="tag calm">Ohne Kämpfen</span><span class="tag">Lustig</span></div><span class="play">Spielen</span></div>
+    </a>
+    <a class="game new" href="zirkus-kanone.html" style="--card:#fff;--scene:repeating-linear-gradient(90deg, #e53935 0 30px, #fff2e0 30px 60px);--acc:#e53935;--on-acc:#fff">
+      <div class="scene"><span class="sum s1">8 + 5</span><span class="icon">🤡</span><span class="sum s2">12 − 7</span></div>
+      <div class="body"><div class="name">Zirkus-Kanone</div><p class="desc">Clown Pepe fliegt aus der Kanone. Richtig gerechnet landet er im Netz, sonst im Eimer oder bei den Elefanten!</p><div class="tags"><span class="tag">Spannend</span><span class="tag">Lustig</span></div><span class="play">Spielen</span></div>
+    </a>
+    <a class="game new" href="geisterhaus-tueren.html" style="--card:#fff;--scene:repeating-linear-gradient(90deg, #3d2a5c 0 24px, #45306a 24px 48px);--acc:#7c4dff;--on-acc:#fff">
+      <div class="scene"><span class="sum s1">3 + 6</span><span class="icon">👻</span><span class="sum s2">11 − 4</span></div>
+      <div class="body"><div class="name">Geisterhaus-Türen</div><p class="desc">Öffne die Tür mit der richtigen Zahl. Hinter den falschen wartet ein Gespenst in Unterhose – BUH!</p><div class="tags"><span class="tag">Lustig</span><span class="tag">Gruselig-nett</span></div><span class="play">Spielen</span></div>
+    </a>
+    <a class="game new" href="frosch-fliegen.html" style="--card:#fff;--scene:linear-gradient(180deg, #bfeaff 55%, #8fd16a 55%);--acc:#2e9b4c;--on-acc:#fff">
+      <div class="scene"><span class="sum s1">9 + 4</span><span class="icon">🐸</span><span class="sum s2">14 − 5</span></div>
+      <div class="body"><div class="name">Frosch-Fliegen-Fangen</div><p class="desc">Tippe auf die Fliege mit dem richtigen Ergebnis – schwupps, Zunge raus! Falsche Fliegen sind superscharf.</p><div class="tags"><span class="tag calm">Ohne Kämpfen</span><span class="tag">Flink</span></div><span class="play">Spielen</span></div>
+    </a>
+    <a class="game" href="monster-mampf.html" style="--card:#fff;--scene:linear-gradient(180deg, #b9a6ff, #ffd6f0);--acc:#7c4dff;--on-acc:#fff">
+      <div class="scene"><span class="sum s1">7 + 5</span><span class="icon">🍪</span><span class="sum s2">14 − 8</span></div>
+      <div class="body"><div class="name">Monster-Mampf</div><p class="desc">Kekse rollen übers Fließband. Füttere das Monster mit der richtigen Zahl – es schmatzt, rülpst und wird dicker.</p><div class="tags"><span class="tag calm">Ohne Kämpfen</span><span class="tag">Lustig</span></div><span class="play">Spielen</span></div>
+    </a>
+    <a class="game" href="turbo-schnecke.html" style="--card:#fff;--scene:linear-gradient(180deg, #6fd0ff 0 45%, #7cd65a 45% 60%, #d9a066 60%);--acc:#ff5b2e;--on-acc:#fff">
+      <div class="scene"><span class="sum s1">8 + 6</span><span class="icon">🐌</span><span class="sum s2">12 − 4</span></div>
+      <div class="body"><div class="name">Turbo-Schnecke</div><p class="desc">Wettrennen gegen Toni die Schildkröte! Richtige Antworten zünden den Raketen-Turbo.</p><div class="tags"><span class="tag">Spannend</span><span class="tag">Rennen</span></div><span class="play">Spielen</span></div>
+    </a>
+    <a class="game" href="ballon-jagd.html" style="--card:#fff;--scene:linear-gradient(180deg, #7fd0ff, #e9f8ff);--acc:#e9679a;--on-acc:#fff">
+      <div class="scene"><span class="sum s1">3 + ? = 10</span><span class="icon">🎈</span><span class="sum s2">6 + 4</span></div>
+      <div class="body"><div class="name">Ballon-Jagd</div><p class="desc">Verliebte Zahlen: Welche Zahl macht die 10 voll? Der richtige Ballon platzt.</p><div class="tags"><span class="tag calm">Ohne Kämpfen</span><span class="tag">Bis 10</span></div><span class="play">Spielen</span></div>
+    </a>
+    <a class="game" href="affen-fuettern.html" style="--card:#fff;--scene:linear-gradient(180deg, #4fbf6a, #dff6c9);--acc:#3f9a2a;--on-acc:#fff">
+      <div class="scene"><span class="sum s1">12 = 5 + ?</span><span class="icon">🐵</span><span class="sum s2">🍌 × 9</span></div>
+      <div class="body"><div class="name">Affen füttern</div><p class="desc">Zahlen zerlegen: Wie viele Bananen bekommt der zweite Affe? Zu viele, und ihm wird schlecht!</p><div class="tags"><span class="tag calm">Ohne Kämpfen</span><span class="tag">Zerlegen</span></div><span class="play">Spielen</span></div>
+    </a>
+    <a class="game" href="frosch-huepfen.html" style="--card:#fff;--scene:linear-gradient(180deg, #6fcf62 0 25%, #3fb6d6 25%, #2a9cc9);--acc:#16a9cf;--on-acc:#fff">
+      <div class="scene"><span class="sum s1">9 + 7</span><span class="icon">🐸</span><span class="sum s2">15 − 6</span></div>
+      <div class="body"><div class="name">Frosch hüpfen</div><p class="desc">Hilf dem Frosch aufs richtige Seerosenblatt. Plus und Minus in drei Stufen.</p><div class="tags"><span class="tag calm">Ohne Kämpfen</span><span class="tag">3 Stufen</span></div><span class="play">Spielen</span></div>
+    </a>
+    <a class="game" href="baustelle.html" style="--card:#fff;--scene:linear-gradient(180deg, #ffd99a, #fff6e6);--acc:#ef7d1a;--on-acc:#fff">
+      <div class="scene"><span class="sum s1">6 + 7 = ?</span><span class="icon">🏗️</span><span class="sum s2">? + 4 = 9</span></div>
+      <div class="body"><div class="name">Baustelle</div><p class="desc">Rechenpyramiden: Zwei Steine nebeneinander ergeben den Stein darüber. Welcher fehlt?</p><div class="tags"><span class="tag calm">Ohne Kämpfen</span><span class="tag">Knobeln</span></div><span class="play">Spielen</span></div>
+    </a>
+    <a class="game" href="zufalls-mix.html" style="--card:#fff;--scene:linear-gradient(160deg, #efe4ff, #c9adff);--acc:#7c4dff;--on-acc:#fff">
+      <div class="scene"><span class="sum s1">4 + ? = 10</span><span class="icon">🎲</span><span class="sum s2">17 − 9</span></div>
+      <div class="body"><div class="name">Zufalls-Mix</div><p class="desc">Ballons, Affen, Frosch und Baustelle wechseln sich ab. Für Profis!</p><div class="tags"><span class="tag calm">Ohne Kämpfen</span><span class="tag">Für Profis</span></div><span class="play">Spielen</span></div>
+    </a>
+  </div>
+</div>
+
+<script>
+  // Einmaleins-Tafel und Zwanzigerfeld: zeigen nacheinander Beispielaufgaben.
+  (() => {
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const rnd = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+    const table = document.getElementById('table');
+    if (table) {
+      const cap = document.getElementById('tableCap'), cells = [];
+      for (let a = 1; a <= 10; a++) for (let b = 1; b <= 10; b++) { const i = document.createElement('i'); i.textContent = a * b; table.appendChild(i); cells.push({ a, b, el: i }); }
+      const show = (a, b) => { cells.forEach(c => { c.el.classList.toggle('row', c.a === a); c.el.classList.toggle('hit', c.a === a && c.b === b); }); cap.innerHTML = `<b>${a} · ${b} = ${a * b}</b>`; };
+      show(7, 8);
+      if (!reduce) setInterval(() => show(rnd(1, 10), rnd(1, 10)), 2200);
+    }
+    const field = document.getElementById('field');
+    if (field) {
+      const cap = document.getElementById('fieldCap'), dots = [];
+      for (let k = 0; k < 20; k++) { const i = document.createElement('i'); field.appendChild(i); dots.push(i); }
+      const show = (a, b, add) => {
+        dots.forEach((d, k) => { d.className = add ? (k < a ? 'a' : k < a + b ? 'b' : '') : (k < a - b ? 'a' : k < a ? 'x' : ''); });
+        cap.innerHTML = `<b>${a} ${add ? '+' : '−'} ${b} = ${add ? a + b : a - b}</b>`;
+      };
+      show(8, 5, true);
+      if (!reduce) setInterval(() => { const add = Math.random() < .5; if (add) { const a = rnd(2, 15); show(a, rnd(1, 20 - a), true); } else { const a = rnd(6, 20); show(a, rnd(1, a - 1), false); } }, 2400);
+    }
+  })();
+</script>
+</body>
+</html>

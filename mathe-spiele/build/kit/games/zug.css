@@ -1,0 +1,29 @@
+  :root { --bg: linear-gradient(180deg, #a8e2ff, #e8f7d0); --ink: #24343f; --soft: #5a6f7c; --primary: #e53935; --primary-dk: #a01d1a; --edge: rgba(20, 60, 90, .2); }
+  .land { position: relative; height: 330px; background: radial-gradient(ellipse at 20% 100%, #8ccf5a 0 40%, transparent 41%), radial-gradient(ellipse at 85% 100%, #7cc457 0 45%, transparent 46%), linear-gradient(180deg, #bfe9ff 0 55%, #a8e070 55%); overflow: hidden; }
+  .land .sun { position: absolute; left: 20px; top: 16px; font-size: 40px; }
+  .rail { position: absolute; left: 0; right: 0; height: 12px; background: repeating-linear-gradient(90deg, #7a5230 0 6px, transparent 6px 22px), linear-gradient(transparent 3px, #888 3px 5px, transparent 5px 8px, #888 8px 10px, transparent 10px); }
+  .rail.main { bottom: 34px; }
+  .rail.side { top: 150px; }
+  .yard { position: absolute; left: 0; right: 0; top: 64px; height: 92px; display: flex; justify-content: center; gap: 14px; align-items: flex-end; z-index: 3; }
+  .sign { position: absolute; right: 12px; top: 12px; background: #fff; border-radius: 12px; padding: 4px 12px; font-family: var(--font-display); font-size: clamp(24px, 6.5vw, 32px); box-shadow: 0 4px 0 var(--edge); z-index: 4; }
+  .sign small { font-family: var(--font-body); font-size: 13px; display: block; color: var(--soft); }
+  .wagon { position: relative; width: 78px; height: 70px; flex: none; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; }
+  .wagon .cargo { font-size: 34px; line-height: 1; margin-bottom: -6px; z-index: 1; }
+  .wagon .box { width: 78px; height: 36px; background: var(--wc, #4fb6f0); border-radius: 6px; border: 3px solid rgba(0, 0, 0, .2); display: grid; place-items: center; font-family: var(--font-display); font-size: 24px; color: #fff; text-shadow: 0 2px 0 rgba(0, 0, 0, .2); z-index: 2; }
+  .wagon .wheels { display: flex; gap: 26px; margin-top: -6px; z-index: 3; }
+  .wagon .wheels i { width: 16px; height: 16px; border-radius: 50%; background: #333; border: 3px solid #999; }
+  .yard .wagon { cursor: pointer; transition: transform .2s; }
+  .yard .wagon:hover { transform: translateY(-4px); }
+  .yard .wagon.wrong { animation: shake .4s; }
+  .yard .wagon.used { opacity: .3; pointer-events: none; filter: grayscale(.8); }
+  .train { position: absolute; left: 10px; bottom: 40px; display: flex; align-items: flex-end; gap: 4px; z-index: 3; transition: transform .6s ease-out; }
+  .loco { font-size: 74px; line-height: .9; }
+  .train .wagon { width: 62px; height: 60px; }
+  .train .wagon .box { width: 62px; height: 30px; font-size: 18px; }
+  .train .wagon .cargo { font-size: 28px; }
+  .train .wagon .wheels { gap: 18px; }
+  .train .wagon.new { animation: couple .4s cubic-bezier(.3, 1.6, .5, 1); }
+  @keyframes couple { from { transform: translateX(30px); } }
+  .puffs { position: absolute; font-size: 26px; z-index: 4; animation: puffUp 1.2s ease-out forwards; }
+  @keyframes puffUp { to { transform: translate(-20px, -60px) scale(2); opacity: 0; } }
+  @media (max-width: 420px) { .yard { gap: 6px; } .yard .wagon { width: 70px; } .yard .wagon .box { width: 70px; } }

@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#2fb5e8">
+<title>Turbo-Schnecke</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Bowlby+One&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #20374a;
+    --soft: #5b7487;
+    --sky1: #6fd0ff;
+    --sky2: #d8f4ff;
+    --grass: #7cd65a;
+    --dirt: #d9a066;
+    --race: #ff5b2e;
+    --race-dk: #c7381a;
+    --go: #2fbf5a;
+    --font-display: 'Bowlby One', 'Arial Black', Impact, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    font-family: Fredoka, 'Comic Sans MS', 'Trebuchet MS', system-ui, sans-serif; font-weight: 600; color: var(--ink);
+    background: linear-gradient(180deg, var(--sky1), var(--sky2) 55%, #eaffd8);
+    min-height: 100dvh; overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none;
+  }
+  button { font: inherit; color: inherit; border: 0; background: none; cursor: pointer; touch-action: manipulation; }
+  button:focus-visible { outline: 4px solid #1b5fd9; outline-offset: 3px; }
+  .hidden { display: none !important; }
+  .screen { min-height: 100dvh; padding: calc(12px + env(safe-area-inset-top)) 16px calc(20px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; align-items: center; animation: screenIn .45s cubic-bezier(.2, .9, .3, 1.2); }
+  @keyframes screenIn { from { opacity: 0; transform: translateY(16px); } }
+  .icon-btn { width: 52px; height: 52px; flex: none; border-radius: 16px; background: #fff; box-shadow: 0 5px 0 #b9d9ea; font-size: 26px; display: grid; place-items: center; }
+  .icon-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 #b9d9ea; }
+  .flip { display: inline-block; transform: scaleX(-1); }
+
+  /* ---------- Menü ---------- */
+  .menu-card { width: 100%; max-width: 620px; margin: auto 0; background: rgba(255, 255, 255, .93); border-radius: 34px; padding: 24px 20px; box-shadow: 0 14px 0 rgba(255, 91, 46, .3), 0 30px 60px rgba(20, 80, 120, .2); text-align: center; display: flex; flex-direction: column; gap: 12px; }
+  .menu-racers { display: flex; justify-content: center; align-items: flex-end; gap: 26px; font-size: 64px; height: 90px; }
+  .menu-racers .snail { position: relative; animation: zoom 1.6s ease-in-out infinite; }
+  .menu-racers .snail .r { position: absolute; left: -30px; top: -2px; font-size: 34px; transform: rotate(45deg); }
+  .menu-racers .turtle { animation: snooze 3s ease-in-out infinite; }
+  @keyframes zoom { 50% { transform: translateX(10px) rotate(-3deg); } }
+  @keyframes snooze { 50% { transform: translateY(3px) rotate(2deg); } }
+  h1 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: clamp(36px, 9vw, 58px); line-height: 1; color: var(--race); text-shadow: 0 4px 0 #ffd0bf; letter-spacing: 1px; transform: skewX(-8deg); }
+  .tagline { margin: 0; color: var(--soft); font-size: 17px; line-height: 1.45; }
+  .label { margin: 4px 0 0; font-size: 15px; color: var(--soft); }
+  .seg { display: grid; gap: 8px; }
+  .seg.four { grid-template-columns: repeat(2, 1fr); }
+  .seg.three { grid-template-columns: repeat(3, 1fr); }
+  .seg button { background: #f0f8fc; border: 3px solid #d6ebf5; border-radius: 16px; padding: 9px 4px; display: flex; flex-direction: column; align-items: center; color: #4f6f84; }
+  .seg button b { font-size: 17px; } .seg button small { font-size: 12.5px; opacity: .85; }
+  .seg button.active { background: linear-gradient(160deg, #ff8a5c, var(--race)); border-color: var(--race-dk); color: #fff; box-shadow: 0 5px 0 var(--race-dk); transform: translateY(-2px); }
+  .best { font-size: 15px; color: var(--soft); }
+  .best b { color: var(--race); }
+  .big-btn { padding: 16px 20px; border-radius: 22px; font-size: 24px; font-weight: 700; color: #fff; background: linear-gradient(180deg, #4fdc7a, var(--go)); box-shadow: 0 8px 0 #1d8a3e; }
+  .big-btn:active { transform: translateY(6px); box-shadow: 0 2px 0 #1d8a3e; }
+  .big-btn.alt { background: linear-gradient(180deg, #6fc9ff, #2f9be8); box-shadow: 0 8px 0 #1a6fb0; }
+  .hub-link { color: var(--soft); font-size: 16px; text-decoration: underline; text-underline-offset: 4px; }
+
+  /* ---------- Rennen ---------- */
+  .wrap { width: 100%; max-width: 760px; display: flex; flex-direction: column; gap: 10px; }
+  .topbar { display: flex; align-items: center; gap: 8px; }
+  .score { flex: 1; min-height: 52px; background: rgba(255, 255, 255, .88); border-radius: 16px; box-shadow: 0 5px 0 #b9d9ea; display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 18px; font-variant-numeric: tabular-nums; }
+  .score b { color: var(--race); }
+  .track { position: relative; border-radius: 26px; overflow: hidden; background: linear-gradient(180deg, #9be3ff 0 20%, var(--grass) 20%); box-shadow: 0 8px 0 rgba(0, 0, 0, .08); padding-top: 64px; }
+  .clouds { position: absolute; inset: 0 0 auto 0; height: 60px; }
+  .clouds i { position: absolute; top: var(--y); left: -120px; width: 90px; height: 26px; border-radius: 30px; background: #fff; opacity: .9; animation: cloud var(--t) linear infinite; animation-delay: var(--d); }
+  @keyframes cloud { to { left: calc(100% + 120px); } }
+  .crowd { position: absolute; top: 22px; left: 0; right: 0; display: flex; justify-content: space-around; font-size: 26px; z-index: 2; }
+  .crowd span { display: inline-block; transition: transform .2s; }
+  .crowd.cheer span { animation: cheer .5s ease 2; }
+  .crowd.cheer span:nth-child(2n) { animation-delay: .1s; }
+  @keyframes cheer { 50% { transform: translateY(-14px) rotate(-8deg); } }
+  .fence { position: absolute; top: 46px; left: 0; right: 0; height: 18px; background: repeating-linear-gradient(90deg, #fff 0 6px, transparent 6px 26px), linear-gradient(#fff, #fff) 0 4px / 100% 3px no-repeat, linear-gradient(#fff, #fff) 0 11px / 100% 3px no-repeat; opacity: .85; z-index: 1; }
+  .lane { position: relative; height: 78px; background: linear-gradient(180deg, #e2ad74, var(--dirt)); border-top: 4px solid #b97f45; }
+  .lane + .lane { border-top: 4px dashed rgba(255, 255, 255, .7); }
+  .lane:last-of-type { border-bottom: 4px solid #b97f45; }
+  .lane .name { position: absolute; left: 8px; top: 4px; font-size: 12px; color: rgba(80, 45, 10, .7); letter-spacing: 1px; }
+  .finish { position: absolute; top: 64px; bottom: 16px; right: 34px; width: 18px; background: conic-gradient(#222 25%, #fff 0 50%, #222 0 75%, #fff 0) 0 0 / 18px 18px; z-index: 1; }
+  .flag { position: absolute; top: 30px; right: 22px; font-size: 32px; z-index: 3; }
+  .startline { position: absolute; top: 64px; bottom: 16px; left: 62px; width: 4px; background: #fff; opacity: .8; }
+  .grass-bottom { height: 16px; }
+  .racer { position: absolute; bottom: 6px; left: 0; width: 70px; height: 64px; font-size: 54px; line-height: 64px; text-align: center; z-index: 4; will-change: transform; }
+  .racer .emo { display: inline-block; transform: scaleX(-1); }
+  .snail .rocket { position: absolute; left: -12px; top: -4px; font-size: 28px; transform: rotate(45deg); }
+  .snail .flame { position: absolute; left: -44px; top: 4px; font-size: 30px; transform: rotate(-90deg); opacity: 0; transition: opacity .2s; }
+  .snail.boost .flame { opacity: 1; animation: flicker .1s steps(2) infinite; }
+  @keyframes flicker { 50% { transform: rotate(-90deg) scale(1.2, .85); } }
+  .snail.boost .emo { animation: wobble .3s ease-in-out infinite; }
+  @keyframes wobble { 50% { transform: scaleX(-1) translateY(-4px) rotate(4deg); } }
+  .snail.slip .emo { animation: spin .9s ease-in-out; }
+  @keyframes spin { 50% { transform: scaleX(-1) rotate(-200deg) translateY(-14px); } 100% { transform: scaleX(-1) rotate(-360deg); } }
+  .peel { position: absolute; font-size: 28px; bottom: 6px; z-index: 3; animation: peel 1.4s ease-out forwards; }
+  @keyframes peel { 0% { transform: scale(0); } 20% { transform: scale(1.2); } 80% { opacity: 1; } 100% { opacity: 0; transform: translateX(-30px) rotate(-90deg); } }
+  .turtle.walk .emo { animation: walk .5s ease-in-out infinite; }
+  @keyframes walk { 50% { transform: scaleX(-1) translateY(-3px) rotate(-3deg); } }
+  .bubble { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%) scale(0); background: #fff; border-radius: 12px; padding: 2px 8px; font-size: 14px; line-height: 1.4; white-space: nowrap; box-shadow: 0 3px 0 rgba(0, 0, 0, .12); transition: transform .2s cubic-bezier(.3, 1.6, .5, 1); }
+  .bubble.show { transform: translateX(-50%) scale(1); }
+  .speedline { position: absolute; height: 3px; border-radius: 3px; background: rgba(255, 255, 255, .9); z-index: 3; animation: speed .45s linear forwards; }
+  @keyframes speed { from { transform: translateX(0); opacity: 1; } to { transform: translateX(-60px); opacity: 0; } }
+  .dust { position: absolute; width: 14px; height: 14px; border-radius: 50%; background: #f3d6b0; z-index: 3; animation: dust .7s ease-out forwards; }
+  @keyframes dust { to { transform: translate(-30px, -16px) scale(2.2); opacity: 0; } }
+  .countdown { position: absolute; inset: 0; display: grid; place-items: center; z-index: 10; pointer-events: none; }
+  .countdown span { font-family: var(--font-display); font-size: 92px; color: #fff; -webkit-text-stroke: 4px var(--race-dk); text-shadow: 0 6px 0 var(--race-dk); animation: count .9s ease-out forwards; }
+  .countdown span.go { color: #fff; -webkit-text-stroke-color: #1d8a3e; text-shadow: 0 6px 0 #1d8a3e; }
+  @keyframes count { from { transform: scale(2.4); opacity: 0; } 30% { transform: scale(1); opacity: 1; } 100% { transform: scale(.9); opacity: 0; } }
+
+  .commentary { min-height: 28px; text-align: center; font-size: clamp(16px, 4vw, 19px); color: var(--ink); }
+  .commentary.hot { color: var(--race-dk); }
+  .board { background: #fff; border-radius: 26px; padding: 14px; box-shadow: 0 8px 0 rgba(0, 0, 0, .08); display: flex; flex-direction: column; gap: 12px; }
+  .task { text-align: center; font-family: var(--font-display); font-weight: 400; font-size: clamp(38px, 11vw, 60px); letter-spacing: 2px; color: var(--ink); line-height: 1.1; }
+  .task .q { color: var(--race); }
+  .task.pop { animation: pop .35s cubic-bezier(.2, .9, .3, 1.5); }
+  @keyframes pop { from { transform: scale(.7); opacity: .3; } }
+  .answers { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .ans { height: clamp(68px, 16vw, 86px); border-radius: 20px; font-family: var(--font-display); font-weight: 400; font-size: clamp(30px, 8vw, 40px); color: #fff; background: linear-gradient(180deg, #ffb04d, #ff8a1f); box-shadow: 0 7px 0 #c9620a; transition: transform .1s, box-shadow .1s, opacity .3s; }
+  .ans:nth-child(2) { background: linear-gradient(180deg, #6fc9ff, #2f9be8); box-shadow: 0 7px 0 #1a6fb0; }
+  .ans:nth-child(3) { background: linear-gradient(180deg, #b38cff, #8a5cf5); box-shadow: 0 7px 0 #5b33c4; }
+  .ans:nth-child(4) { background: linear-gradient(180deg, #ff86be, #ff4f9a); box-shadow: 0 7px 0 #c92f73; }
+  .ans:active:not(:disabled) { transform: translateY(5px); box-shadow: 0 2px 0 rgba(0, 0, 0, .25); }
+  .ans:disabled { opacity: .35; filter: grayscale(.6); }
+  .ans.hint { animation: hintGlow .9s ease-in-out infinite; }
+  @keyframes hintGlow { 50% { transform: scale(1.06); filter: brightness(1.15) drop-shadow(0 0 12px #ffe066); } }
+
+  /* ---------- Ende ---------- */
+  .overlay { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; padding: 16px; background: rgba(20, 60, 90, .45); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+  .end-card { width: min(440px, 100%); background: #fff; border-radius: 34px; padding: 24px 20px; text-align: center; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 16px 0 rgba(255, 91, 46, .35); animation: popIn .5s cubic-bezier(.2, .9, .3, 1.5); }
+  @keyframes popIn { from { transform: scale(.6); opacity: 0; } }
+  .end-card h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 34px; color: var(--race); }
+  .podium { font-size: 64px; line-height: 1; }
+  .end-stars { font-size: 52px; letter-spacing: 6px; }
+  .end-stars span { color: #e6eef3; display: inline-block; }
+  .end-stars span.on { color: #ffc400; text-shadow: 0 4px 0 #e09a00; animation: starIn .55s backwards cubic-bezier(.2, .9, .3, 1.8); }
+  @keyframes starIn { from { transform: scale(0) rotate(-180deg); } }
+  .end-card p { margin: 0; color: var(--soft); font-size: 18px; line-height: 1.45; }
+  .end-actions { display: flex; gap: 10px; }
+  .end-actions .big-btn { flex: 1; font-size: 20px; }
+  #confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; }
+
+  @media (max-width: 520px) { .answers { grid-template-columns: repeat(2, 1fr); } .racer { font-size: 44px; width: 58px; } .crowd { font-size: 22px; } }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; } }
+
+  /* ---------- Pause ---------- */
+  body.paused *, body.paused *::before, body.paused *::after { animation-play-state: paused !important; }
+  #pauseOv { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding: 16px; background: rgba(30, 30, 60, .5); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+  #pauseOv.hidden { display: none; }
+  #pauseOv .pcard { width: min(400px, 100%); background: #fff; border-radius: 30px; padding: 24px 20px; text-align: center; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 14px 0 rgba(0, 0, 0, .15); color: #3b2a20; }
+  #pauseOv .pcard div { font-size: 60px; line-height: 1; }
+  #pauseOv h2 { margin: 0; font-size: 32px; }
+  #pauseOv p { margin: 0; color: #7a6352; font-size: 17px; }
+  #pauseOv .prow { display: flex; gap: 10px; }
+  #pauseOv button { flex: 1; padding: 14px 10px; border-radius: 20px; font-size: 20px; font-weight: 700; color: #fff; background: #2fbf5a; box-shadow: 0 7px 0 #1d8a3e; }
+  #pauseOv button.alt { background: #4fb6f0; box-shadow: 0 7px 0 #1a6fb0; }
+  #pauseOv button:active { transform: translateY(5px); box-shadow: 0 2px 0 rgba(0, 0, 0, .25); }
+  @media (max-width: 520px) { .topbar .icon-btn { width: 40px; height: 40px; font-size: 20px; } .topbar { gap: 5px; } .score { font-size: 14px; gap: 6px; } }
+</style>
+</head>
+<body>
+
+<main id="menu" class="screen">
+  <div class="menu-card">
+    <div class="menu-racers" aria-hidden="true"><span class="snail"><span class="r">🚀</span><span class="flip">🐌</span></span><span class="turtle"><span class="flip">🐢</span></span></div>
+    <h1>Turbo-Schnecke</h1>
+    <p class="tagline">Turbo die Schnecke fordert Toni die Schildkröte heraus! Jede richtige Antwort zündet den Raketen-Turbo.</p>
+    <p class="label">Was möchtest du rechnen?</p>
+    <div class="seg four" id="levels">
+      <button data-level="1"><b>Plus</b><small>bis 10</small></button>
+      <button data-level="2"><b>Plus &amp; Minus</b><small>bis 10</small></button>
+      <button data-level="3"><b>Bis 20</b><small>ohne Übergang</small></button>
+      <button data-level="4"><b>Bis 20</b><small>mit Übergang</small></button>
+    </div>
+    <p class="label">Wie schnell ist Toni?</p>
+    <div class="seg three" id="tempo">
+      <button data-tempo="110"><b>Gemütlich</b><small>🐢 schläft viel</small></button>
+      <button data-tempo="80"><b>Normal</b><small>🐢 läuft</small></button>
+      <button data-tempo="55"><b>Flott</b><small>🐢 rennt!</small></button>
+    </div>
+    <div class="best" id="best"></div>
+    <button class="big-btn" id="startBtn">🏁 Rennen starten</button>
+    <a class="hub-link" href="zahlenraum-20.html">← Alle Spiele</a>
+  </div>
+</main>
+
+<main id="game" class="screen hidden">
+  <div class="wrap">
+    <div class="topbar">
+      <button class="icon-btn" id="homeBtn" aria-label="Zurück zum Menü">🏠</button>
+      <div class="score"><span>⏱️ <b id="clock">0,0</b> s</span><span>🚀 <b id="hits">0</b>/10</span></div>
+      <button class="icon-btn" id="pauseBtn" aria-label="Pause">⏸️</button>
+      <button class="icon-btn" id="speakBtn" aria-label="Aufgabe vorlesen">🗣️</button>
+      <button class="icon-btn" id="soundBtn" aria-label="Ton an/aus">🔊</button>
+    </div>
+    <div class="track" id="track">
+      <div class="clouds"><i style="--y:6px;--t:40s;--d:-8s"></i><i style="--y:18px;--t:55s;--d:-30s"></i></div>
+      <div class="crowd" id="crowd" aria-hidden="true"><span>🐰</span><span>🦔</span><span>🐿️</span><span>🐸</span><span>🐤</span><span>🦊</span><span>🐻</span><span>🐞</span></div>
+      <div class="fence"></div>
+      <div class="startline"></div>
+      <div class="finish"></div>
+      <div class="flag">🏁</div>
+      <div class="lane" id="laneT"><span class="name">TONI</span><div class="racer turtle" id="turtle"><span class="emo">🐢</span><span class="bubble"></span></div></div>
+      <div class="lane" id="laneS"><span class="name">TURBO (DU)</span><div class="racer snail" id="snail"><span class="flame">🔥</span><span class="rocket">🚀</span><span class="emo">🐌</span><span class="bubble"></span></div></div>
+      <div class="grass-bottom"></div>
+      <div class="countdown" id="countdown"></div>
+    </div>
+    <div class="commentary" id="commentary">Auf die Plätze …</div>
+    <div class="board">
+      <div class="task" id="task">?</div>
+      <div class="answers" id="answers">
+        <button class="ans" data-i="0"></button><button class="ans" data-i="1"></button><button class="ans" data-i="2"></button><button class="ans" data-i="3"></button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="overlay hidden" id="end">
+  <div class="end-card" role="dialog" aria-modal="true" aria-labelledby="endTitle">
+    <div class="podium" id="podium">🏆</div>
+    <h2 id="endTitle">Gewonnen!</h2>
+    <div class="end-stars" id="endStars"></div>
+    <p id="endText"></p>
+    <div class="end-actions">
+      <button class="big-btn" id="againBtn">🔁 Revanche</button>
+      <button class="big-btn alt" id="menuBtn">🏠 Menü</button>
+    </div>
+  </div>
+</div>
+<canvas id="confetti" aria-hidden="true"></canvas>
+
+<script>
+(() => {
+  'use strict';
+  const $ = s => document.querySelector(s);
+  const rnd = (a, b) => Math.floor(Math.random() * (b - a + 1)) + a;
+  const pick = a => a[Math.floor(Math.random() * a.length)];
+  const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem('turboSchnecke.' + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem('turboSchnecke.' + k, JSON.stringify(v)); } catch (e) { /* egal */ } }
+  };
+  const GOAL = 10;
+
+  function makeTask(level) {
+    const add = level === 1 || Math.random() < 0.5;
+    let a, b;
+    if (level <= 2) {
+      if (add) { a = rnd(1, 9); b = rnd(1, 10 - a); } else { a = rnd(2, 10); b = rnd(1, a - 1); }
+    } else if (level === 3) {
+      if (add) { const ua = rnd(1, 8), ub = rnd(1, 9 - ua); a = 10 + ua; b = ub; if (Math.random() < 0.3) [a, b] = [b, a]; }
+      else { const ua = rnd(1, 9); a = 10 + ua; b = Math.random() < 0.15 ? 10 : rnd(1, ua); }
+    } else {
+      if (add) { a = rnd(2, 9); b = rnd(11 - a, 9); if (Math.random() < 0.5) [a, b] = [b, a]; }
+      else { a = rnd(11, 18); b = rnd((a % 10) + 1, 9); }
+    }
+    const correct = add ? a + b : a - b, max = level <= 2 ? 10 : 20;
+    const set = new Set([correct]);
+    for (const o of shuffle([-1, 1, -2, 2, -3, 3, 4, -4])) { if (set.size >= 4) break; const v = correct + o; if (v >= 0 && v <= max) set.add(v); }
+    return { a, b, add, correct, key: `${a}${add}${b}`, text: `${a} ${add ? '+' : '−'} ${b}`, say: `${a} ${add ? 'plus' : 'minus'} ${b}`, choices: shuffle([...set]) };
+  }
+
+  // ---------- Sound ----------
+  const sfx = (() => {
+    let ctx = null, nb = null, on = store.get('sound', true);
+    const ac = () => {
+      if (!ctx) { const C = window.AudioContext || window.webkitAudioContext; if (!C) return null; ctx = new C(); nb = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate); const d = nb.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; }
+      if (ctx.state === 'suspended') ctx.resume(); return ctx;
+    };
+    function tone(f, s, dur, type = 'sine', vol = .16, to) {
+      if (!on) return; const c = ac(); if (!c) return;
+      const t = c.currentTime + s, o = c.createOscillator(), g = c.createGain();
+      o.type = type; o.frequency.setValueAtTime(f, t); if (to) o.frequency.exponentialRampToValueAtTime(to, t + dur);
+      g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + .015); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+      o.connect(g).connect(c.destination); o.start(t); o.stop(t + dur + .05);
+    }
+    function noise(s, dur, vol, f1, f2, type = 'bandpass') {
+      if (!on) return; const c = ac(); if (!c) return;
+      const t = c.currentTime + s, src = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain();
+      src.buffer = nb; src.loop = true; f.type = type; f.Q.value = 1.5; f.frequency.setValueAtTime(f1, t); f.frequency.exponentialRampToValueAtTime(f2, t + dur);
+      g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + .05); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+      src.connect(f).connect(g).connect(c.destination); src.start(t); src.stop(t + dur + .05);
+    }
+    return {
+      unlock: ac, get on() { return on; }, toggle() { on = !on; store.set('sound', on); return on; },
+      click() { tone(520, 0, .07, 'triangle', .1); },
+      beep(go) { tone(go ? 880 : 440, 0, go ? .5 : .25, 'square', .08); },
+      boost() { noise(0, .7, .5, 400, 3000); tone(120, 0, .6, 'sawtooth', .08, 260); },
+      cheer() { noise(0, 1.1, .18, 1200, 900); },
+      slip() { tone(900, 0, .5, 'sine', .14, 200); tone(1600, .05, .35, 'sine', .06, 400); },
+      snore() { tone(90, 0, .6, 'sawtooth', .05, 70); },
+      win() { [523, 659, 784, 1047, 784, 1047].forEach((f, i) => tone(f, i * .12, .3, 'triangle', .16)); },
+      lose() { [392, 349, 330, 262].forEach((f, i) => tone(f, i * .2, .35, 'triangle', .12)); }
+    };
+  })();
+  const canSpeak = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+  function speak(t) { if (!canSpeak) return; try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(t); u.lang = 'de-DE'; u.rate = .9; u.pitch = 1.2; speechSynthesis.speak(u); } catch (e) { /* egal */ } }
+
+  const confetti = (() => {
+    const cv = $('#confetti'), cx = cv.getContext('2d'); let parts = [], running = false;
+    const resize = () => { const d = devicePixelRatio || 1; cv.width = innerWidth * d; cv.height = innerHeight * d; cx.setTransform(d, 0, 0, d, 0, 0); };
+    addEventListener('resize', resize); resize();
+    function burst(x, y, n, power = 8) {
+      for (let i = 0; i < n; i++) { const a = Math.random() * Math.PI * 2, s = Math.random() * power + 2; parts.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - power * .5, r: Math.random() * 6 + 4, c: pick(['#ff5b2e', '#2fbf5a', '#ffd23f', '#2f9be8', '#ff4f9a']), rot: 0, vr: (Math.random() - .5) * .4, life: 1 }); }
+      if (!running) { running = true; requestAnimationFrame(tick); }
+    }
+    function tick() {
+      cx.clearRect(0, 0, innerWidth, innerHeight);
+      parts = parts.filter(p => p.life > 0 && p.y < innerHeight + 30);
+      parts.forEach(p => { p.vy += .3; p.x += p.vx; p.y += p.vy; p.rot += p.vr; p.life -= .008; cx.save(); cx.globalAlpha = Math.min(1, p.life * 2); cx.translate(p.x, p.y); cx.rotate(p.rot); cx.fillStyle = p.c; cx.fillRect(-p.r / 2, -p.r / 3, p.r, p.r * .66); cx.restore(); });
+      if (parts.length) requestAnimationFrame(tick); else { running = false; cx.clearRect(0, 0, innerWidth, innerHeight); }
+    }
+    return { burst, rain() { for (let i = 0; i < 6; i++) setTimeout(() => burst(Math.random() * innerWidth, -10, 30, 4), i * 150); } };
+  })();
+
+  // ---------- Zustand ----------
+  const S = {
+    level: store.get('level', 1), tempo: store.get('tempo', 110),
+    phase: 'menu', q: null, lastKey: '', wrong: 0, hits: 0, mistakes: 0,
+    me: 0, meShown: 0, toni: 0, napUntil: 0, naps: 0, nextNapAt: 0, time: 0, last: 0, said: {}
+  };
+  const snail = $('#snail'), turtle = $('#turtle');
+
+  function renderMenu() {
+    document.querySelectorAll('#levels button').forEach(b => b.classList.toggle('active', +b.dataset.level === S.level));
+    document.querySelectorAll('#tempo button').forEach(b => b.classList.toggle('active', +b.dataset.tempo === S.tempo));
+    const best = store.get(`best.${S.level}.${S.tempo}`, null);
+    $('#best').innerHTML = best ? `Deine Bestzeit: <b>${best.toFixed(1).replace('.', ',')} s</b>` : 'Noch keine Bestzeit – fahr los!';
+  }
+  $('#levels').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; sfx.unlock(); sfx.click(); S.level = +b.dataset.level; store.set('level', S.level); renderMenu(); });
+  $('#tempo').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; sfx.unlock(); sfx.click(); S.tempo = +b.dataset.tempo; store.set('tempo', S.tempo); renderMenu(); });
+
+  function show(id) { ['menu', 'game'].forEach(s => $('#' + s).classList.toggle('hidden', s !== id)); $('#end').classList.add('hidden'); scrollTo(0, 0); }
+  function say(el, text, ms = 1500) { const b = el.querySelector('.bubble'); b.textContent = text; b.classList.add('show'); clearTimeout(b._t); b._t = setTimeout(() => b.classList.remove('show'), ms); }
+  function comment(text, hot) { const c = $('#commentary'); c.textContent = text; c.className = 'commentary' + (hot ? ' hot' : ''); }
+
+  function trackLen() { return $('#track').clientWidth - 70 - 52 - snail.clientWidth; }
+  function place() {
+    const L = trackLen();
+    snail.style.transform = `translateX(${62 + S.meShown * L}px)`;
+    turtle.style.transform = `translateX(${62 + S.toni * L}px)`;
+  }
+
+  function startRace() {
+    sfx.unlock();
+    Object.assign(S, { phase: 'count', wrong: 0, hits: 0, mistakes: 0, me: 0, meShown: 0, toni: 0, napUntil: 0, naps: 0, time: 0, said: {} });
+    S.nextNapAt = 0.25 + Math.random() * 0.2;
+    show('game');
+    $('#speakBtn').classList.toggle('hidden', !canSpeak);
+    $('#hits').textContent = 0; $('#clock').textContent = '0,0';
+    snail.className = 'racer snail'; turtle.className = 'racer turtle';
+    place();
+    newTask();
+    setAnswers(false);
+    comment('Auf die Plätze …');
+    const cd = $('#countdown');
+    ['3', '2', '1', 'LOS!'].forEach((t, i) => setTimeout(() => {
+      if (S.phase !== 'count') return;
+      cd.innerHTML = `<span class="${t === 'LOS!' ? 'go' : ''}">${t}</span>`;
+      sfx.beep(t === 'LOS!');
+      if (t === 'LOS!') { S.phase = 'race'; S.last = 0; setAnswers(true); comment('Und los geht\'s! Rechne schnell!'); turtle.classList.add('walk'); setTimeout(() => cd.innerHTML = '', 900); }
+    }, i * 900));
+  }
+
+  function newTask() {
+    let q, n = 0;
+    do { q = makeTask(S.level); } while (q.key === S.lastKey && ++n < 8);
+    S.lastKey = q.key; S.q = q; S.wrong = 0;
+    const t = $('#task'); t.innerHTML = `${q.text} = <span class="q">?</span>`; t.classList.remove('pop'); void t.offsetWidth; t.classList.add('pop');
+    document.querySelectorAll('.ans').forEach((b, i) => { b.textContent = q.choices[i]; b.disabled = S.phase !== 'race' && S.phase !== 'count'; b.classList.remove('hint'); });
+  }
+  function setAnswers(on) { document.querySelectorAll('.ans').forEach(b => b.disabled = !on); }
+
+  function answer(i) {
+    if (S.phase !== 'race' || (window.GamePause && GamePause.on)) return;
+    const b = document.querySelectorAll('.ans')[i];
+    if (!b || b.disabled) return;
+    const q = S.q;
+    if (q.choices[i] === q.correct) {
+      S.hits++; S.me = S.hits / GOAL;
+      $('#hits').textContent = S.hits;
+      boost();
+      if (S.hits >= GOAL) return;
+      newTask();
+    } else {
+      S.wrong++; S.mistakes++;
+      b.disabled = true;
+      slip();
+      if (S.wrong >= 2) document.querySelectorAll('.ans')[q.choices.indexOf(q.correct)].classList.add('hint');
+    }
+  }
+  document.querySelectorAll('.ans').forEach((b, i) => b.addEventListener('click', () => answer(i)));
+
+  function boost() {
+    sfx.boost();
+    snail.classList.add('boost'); clearTimeout(snail._b); snail._b = setTimeout(() => snail.classList.remove('boost'), 900);
+    say(snail, pick(['WUSCH!', 'Turbo!', 'Juhuu!', 'Zisch!', 'Brumm!']), 900);
+    const crowd = $('#crowd'); crowd.classList.remove('cheer'); void crowd.offsetWidth; crowd.classList.add('cheer');
+    if (S.hits % 3 === 0) sfx.cheer();
+    const lane = $('#laneS'), x = parseFloat(snail.style.transform.slice(11)) || 60;
+    for (let k = 0; k < 4; k++) { const l = document.createElement('div'); l.className = 'speedline'; l.style.left = (x - 10 - k * 6) + 'px'; l.style.top = (16 + k * 12) + 'px'; l.style.width = (30 + Math.random() * 30) + 'px'; lane.appendChild(l); setTimeout(() => l.remove(), 450); }
+    for (let k = 0; k < 3; k++) { const d = document.createElement('div'); d.className = 'dust'; d.style.left = (x + 4) + 'px'; d.style.bottom = (4 + k * 6) + 'px'; lane.appendChild(d); setTimeout(() => d.remove(), 700); }
+    const diff = S.me - S.toni;
+    if (S.hits >= GOAL) return;
+    if (diff > 0.15) comment(pick(['Turbo liegt vorne!', 'Toni sieht nur noch Schleim!', 'Was für ein Tempo!']), true);
+    else if (diff > -0.05) comment(pick(['Kopf an Kopf!', 'Ganz knapp!', 'Spannend!']), true);
+    else comment(pick(['Turbo holt auf!', 'Weiter so, aufholen!', 'Gib Gas!']), true);
+  }
+
+  function slip() {
+    sfx.slip();
+    snail.classList.remove('slip'); void snail.offsetWidth; snail.classList.add('slip');
+    setTimeout(() => snail.classList.remove('slip'), 900);
+    say(snail, pick(['Huiii!', 'Uiuiui!', 'Rutschig!', 'Hoppla!']), 1100);
+    const lane = $('#laneS'), x = parseFloat(snail.style.transform.slice(11)) || 60;
+    const p = document.createElement('div'); p.className = 'peel'; p.textContent = '🍌'; p.style.left = (x + 50) + 'px'; lane.appendChild(p); setTimeout(() => p.remove(), 1400);
+    const q = S.q;
+    comment(q.add ? `Bananenschale! Tipp: Zähle von ${q.a} aus ${q.b} weiter.` : `Bananenschale! Tipp: Zähle von ${q.a} aus ${q.b} zurück.`);
+  }
+
+  function loop(now) {
+    const dt = S.last ? Math.min(50, now - S.last) : 16; S.last = now;
+    if (S.phase === 'race' && !(window.GamePause && GamePause.on)) {
+      S.time += dt;
+      $('#clock').textContent = (S.time / 1000).toFixed(1).replace('.', ',');
+      // Toni läuft gleichmäßig – macht aber ab und zu ein Nickerchen
+      const napping = now < S.napUntil;
+      if (!napping) {
+        S.toni = Math.min(1, S.toni + dt / (S.tempo * 1000));
+        if (turtle.classList.contains('nap')) { turtle.classList.remove('nap'); turtle.classList.add('walk'); say(turtle, 'Huch! Weiter!', 1000); }
+        const maxNaps = S.tempo >= 110 ? 3 : S.tempo >= 80 ? 2 : 1;
+        if (S.naps < maxNaps && S.toni > S.nextNapAt) {
+          S.naps++; S.napUntil = now + (S.tempo >= 110 ? 4000 : 2600); S.nextNapAt = S.toni + 0.2 + Math.random() * 0.15;
+          turtle.classList.remove('walk'); turtle.classList.add('nap'); say(turtle, 'Zzz … 💤', 2400); sfx.snore();
+          comment('Toni macht ein Nickerchen – jetzt schnell!', true);
+        }
+      } else if (Math.random() < 0.01) sfx.snore();
+      if (!S.said.half && S.toni > 0.5 && S.me < 0.5) { S.said.half = true; say(turtle, 'Hihi, ich bin schneller!', 1500); }
+      if (S.toni >= 1) finish(false);
+    }
+    // Schnecke gleitet weich zur Zielposition
+    S.meShown += (S.me - S.meShown) * Math.min(1, dt / 140);
+    if (S.phase === 'race' && S.hits >= GOAL && S.meShown > 0.985) finish(true);
+    if (!$('#game').classList.contains('hidden')) place();
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+
+  function finish(won) {
+    if (S.phase !== 'race') return;
+    S.phase = 'done';
+    setAnswers(false);
+    turtle.classList.remove('walk', 'nap');
+    const secs = S.time / 1000;
+    const stars = won ? (S.mistakes <= 1 ? 3 : 2) : 1;
+    $('#podium').innerHTML = won ? '🏆<span class="flip">🐌</span>' : '🥈<span class="flip">🐢</span>';
+    $('#endTitle').textContent = won ? pick(['Gewonnen!', 'Sieg für Turbo!', 'Erster!']) : 'Knapp verloren!';
+    $('#endStars').innerHTML = [1, 2, 3].map(i => `<span class="${i <= stars ? 'on' : ''}" style="animation-delay:${.2 + i * .22}s">★</span>`).join('');
+    let text;
+    if (won) {
+      const key = `best.${S.level}.${S.tempo}`, best = store.get(key, null);
+      const rec = best === null || secs < best;
+      if (rec) store.set(key, secs);
+      text = `Zeit: ${secs.toFixed(1).replace('.', ',')} Sekunden${rec ? ' – neue Bestzeit! 🎉' : ''}. ${S.mistakes === 0 ? 'Und kein einziger Fehler!' : `${S.mistakes} Bananenschale${S.mistakes > 1 ? 'n' : ''}.`}`;
+      comment('Turbo gewinnt! Was für ein Rennen!', true);
+      sfx.win(); sfx.cheer(); confetti.rain();
+    } else {
+      text = `Toni war diesmal schneller. Du hattest ${S.hits} von ${GOAL} Turbos – probier's gleich nochmal!`;
+      comment('Toni ist im Ziel … Revanche?');
+      say(turtle, 'Langsam, aber gewonnen!', 2000);
+      sfx.lose();
+    }
+    $('#endText').textContent = text;
+    setTimeout(() => $('#end').classList.remove('hidden'), won ? 700 : 1200);
+  }
+
+  function goMenu() { S.phase = 'menu'; if (canSpeak) speechSynthesis.cancel(); renderMenu(); show('menu'); }
+  $('#startBtn').addEventListener('click', () => { sfx.click(); startRace(); });
+  $('#againBtn').addEventListener('click', () => { sfx.click(); startRace(); });
+  $('#menuBtn').addEventListener('click', goMenu);
+  $('#homeBtn').addEventListener('click', goMenu);
+  $('#speakBtn').addEventListener('click', () => S.q && speak(S.q.say));
+  const renderSound = () => { $('#soundBtn').textContent = sfx.on ? '🔊' : '🔇'; };
+  $('#soundBtn').addEventListener('click', () => { sfx.toggle(); renderSound(); sfx.click(); });
+  document.addEventListener('keydown', e => { const n = parseInt(e.key, 10); if (n >= 1 && n <= 4) answer(n - 1); if (e.key === 'Escape' && S.phase !== 'menu') goMenu(); });
+  addEventListener('resize', place);
+  // Nickerchen-Zeit nach einer Pause verlängern
+  document.addEventListener('gamepause', e => { if (!e.detail.paused) S.napUntil += e.detail.ms; });
+  renderSound();
+  renderMenu();
+})();
+</script>
+
+<div id="pauseOv" class="hidden" role="dialog" aria-modal="true" aria-labelledby="pTitle">
+  <div class="pcard"><div>⏸️</div><h2 id="pTitle">Pause</h2><p>Kurz durchatmen! Das Spiel wartet auf dich.</p>
+    <div class="prow"><button id="pResume">▶ Weiter</button><button class="alt" id="pMenu">🏠 Menü</button></div></div>
+</div>
+<script>
+  // Pause: hält Animationen, Bewegungen und Zeit an
+  (() => {
+    const ov = document.getElementById('pauseOv'); let on = false, frozen = [], since = 0;
+    window.GamePause = {
+      get on() { return on; },
+      set(v) {
+        if (v === on) return; on = v;
+        document.body.classList.toggle('paused', v); ov.classList.toggle('hidden', !v);
+        if (document.getAnimations) {
+          if (v) { frozen = document.getAnimations().filter(a => a.playState === 'running'); frozen.forEach(a => { try { a.pause(); } catch (e) {} }); }
+          else { frozen.forEach(a => { try { if (a.playState === 'paused') a.play(); } catch (e) {} }); frozen = []; }
+        }
+        if (v && 'speechSynthesis' in window) speechSynthesis.cancel();
+        const ms = v ? 0 : performance.now() - since; if (v) since = performance.now();
+        document.dispatchEvent(new CustomEvent('gamepause', { detail: { paused: v, ms } }));
+      }
+    };
+    const inGame = () => !document.getElementById('game').classList.contains('hidden') && document.getElementById('end').classList.contains('hidden');
+    document.getElementById('pauseBtn').addEventListener('click', () => { if (inGame()) GamePause.set(true); });
+    document.getElementById('pResume').addEventListener('click', () => GamePause.set(false));
+    document.getElementById('pMenu').addEventListener('click', () => { GamePause.set(false); document.getElementById('homeBtn').click(); });
+    document.addEventListener('visibilitychange', () => { if (document.hidden && inGame()) GamePause.set(true); });
+    document.addEventListener('keydown', e => { if ((e.key === 'p' || e.key === 'P') && inGame()) GamePause.set(!on); }, true);
+  })();
+</script>
+</body>
+</html>

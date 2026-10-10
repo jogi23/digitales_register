@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<!-- Macht das Spiel zur Web-App auf dem Homescreen (versteckt Browser-Leisten) -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#050510">
+<title>Neon Math Defender</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cyan: #00f0ff;
+    --pink: #ff2bd6;
+    --yellow: #ffe94a;
+    --green: #3dff8b;
+    --red: #ff3355;
+    --bg: #050510;
+    --panel: #0a0a1c;
+    /* Abstand unten, damit Systemleisten / schwebende Buttons nichts verdecken */
+    --bottom-safe: 72px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    overflow: hidden;
+    background: var(--bg);
+    font-family: 'Orbitron', 'Segoe UI', system-ui, sans-serif;
+    color: #fff;
+    touch-action: none;
+    height: 100dvh;
+    -webkit-user-select: none; user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  button { font-family: inherit; cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+  button:focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
+  .hidden { display: none !important; }
+
+  #game { position: relative; width: 100vw; height: 100%; display: flex; flex-direction: column; }
+  #field { position: relative; flex: 1; min-height: 0; overflow: hidden; }
+  canvas { display: block; width: 100%; height: 100%; }
+
+  /* ---------- HUD ---------- */
+  #hud { position: absolute; inset: 0 0 auto 0; padding: calc(10px + env(safe-area-inset-top)) 12px 0; display: grid; grid-template-columns: 1fr auto 1fr; align-items: start; gap: 8px; pointer-events: none; z-index: 10; }
+  .hud-col { display: flex; flex-direction: column; gap: 6px; }
+  .hud-col.right { align-items: flex-end; }
+  .chip { font-size: clamp(11px, 2.8vw, 14px); font-weight: 700; letter-spacing: 1px; padding: 5px 10px; border-radius: 10px; background: rgba(10, 10, 30, .55); border: 1px solid rgba(0, 240, 255, .25); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); width: max-content; }
+  #lvl { color: var(--green); text-shadow: 0 0 8px rgba(61, 255, 139, .8); }
+  #score { color: var(--cyan); text-shadow: 0 0 8px rgba(0, 240, 255, .8); font-size: clamp(14px, 3.6vw, 18px); }
+  #score.bump { animation: bump .25s; }
+  @keyframes bump { 50% { transform: scale(1.15); } }
+  #hi { color: var(--yellow); text-shadow: 0 0 8px rgba(255, 233, 74, .7); }
+  .timebox { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+  #time { font-size: clamp(20px, 5vw, 28px); font-weight: 900; text-shadow: 0 0 12px rgba(255, 255, 255, .8); }
+  #time.warn { animation: pulseRed 1s infinite; }
+  @keyframes pulseRed { 50% { color: var(--red); text-shadow: 0 0 18px var(--red); transform: scale(1.12); } }
+  .timebar { width: clamp(90px, 26vw, 180px); height: 6px; border-radius: 6px; background: rgba(255, 255, 255, .12); overflow: hidden; }
+  .timebar i { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, var(--pink), var(--cyan)); box-shadow: 0 0 10px var(--cyan); transform-origin: left; }
+  #lives { display: flex; gap: 5px; }
+  #lives i { width: 22px; height: 24px; clip-path: polygon(50% 0, 100% 22%, 100% 62%, 50% 100%, 0 62%, 0 22%); background: var(--pink); box-shadow: 0 0 10px var(--pink); transition: all .3s; }
+  #lives i.off { background: rgba(255, 255, 255, .12); box-shadow: none; transform: scale(.8); }
+  #lives i.lost { animation: lost .6s; }
+  @keyframes lost { 0% { transform: scale(1.6); background: #fff; } }
+  .hud-btns { display: flex; gap: 6px; pointer-events: auto; }
+  .hud-btn { width: 40px; height: 40px; border-radius: 12px; background: rgba(10, 10, 30, .6); border: 1px solid rgba(0, 240, 255, .4); color: #fff; font-size: 17px; display: grid; place-items: center; }
+  .hud-btn:active { background: rgba(0, 240, 255, .3); }
+
+  #combo { position: absolute; left: 50%; top: calc(86px + env(safe-area-inset-top)); transform: translateX(-50%); font-weight: 900; font-size: clamp(14px, 3.6vw, 18px); color: var(--yellow); text-shadow: 0 0 12px rgba(255, 180, 0, .9); pointer-events: none; z-index: 10; white-space: nowrap; }
+  #combo.pop { animation: comboPop .4s cubic-bezier(.2, .9, .3, 1.6); }
+  @keyframes comboPop { from { transform: translateX(-50%) scale(1.8); opacity: .3; } }
+
+  /* ---------- Steuerung ---------- */
+  #controls { position: relative; background: linear-gradient(180deg, #0e0e26, var(--panel)); border-top: 2px solid var(--cyan); box-shadow: 0 -6px 26px rgba(0, 240, 255, .25); padding: 10px 10px calc(var(--bottom-safe) + env(safe-area-inset-bottom)); z-index: 20; }
+  #question { display: flex; align-items: center; justify-content: center; gap: 12px; height: 44px; margin-bottom: 8px; }
+  #question .qlabel { font-size: 11px; letter-spacing: 3px; color: rgba(255, 233, 74, .7); border: 1px solid rgba(255, 233, 74, .5); border-radius: 6px; padding: 3px 6px; }
+  #qtext { font-size: clamp(24px, 6.5vw, 34px); font-weight: 900; color: var(--yellow); text-shadow: 0 0 14px rgba(255, 233, 74, .8); letter-spacing: 2px; }
+  #qtext.idle { color: #555a7a; text-shadow: none; font-size: 16px; }
+  #qtext.swap { animation: swapIn .3s ease-out; }
+  @keyframes swapIn { from { transform: translateY(10px) scale(.9); opacity: 0; } }
+  .answers { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .ans {
+    position: relative; height: clamp(62px, 9vh, 82px); border-radius: 14px; border: 2px solid var(--cyan);
+    background: linear-gradient(160deg, #1b1b44, #0b0b24); color: #fff; font-size: clamp(24px, 6.5vw, 32px); font-weight: 900;
+    box-shadow: inset 0 0 14px rgba(0, 240, 255, .2), 0 0 12px rgba(0, 240, 255, .35);
+    transition: transform .08s, background .15s, box-shadow .15s, opacity .2s;
+  }
+  .ans small { position: absolute; top: 4px; left: 7px; font-size: 10px; color: rgba(0, 240, 255, .55); font-weight: 500; }
+  @media (hover: none) { .ans small { display: none; } }
+  .ans:active:not(:disabled), .ans.press { transform: scale(.94); background: var(--cyan); color: #000; box-shadow: 0 0 26px var(--cyan); }
+  .ans:disabled { opacity: .35; cursor: default; }
+  .ans.bad { animation: badShake .35s; background: #5a0012; border-color: var(--red); box-shadow: 0 0 22px var(--red); }
+  @keyframes badShake { 20% { transform: translateX(-8px); } 40% { transform: translateX(7px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(3px); } }
+  .ans.hint { border-color: var(--yellow); animation: hint 0.9s ease-in-out infinite; }
+  @keyframes hint { 50% { box-shadow: 0 0 28px var(--yellow), inset 0 0 18px rgba(255, 233, 74, .35); } }
+  .ans.swap { animation: swapIn .25s ease-out backwards; }
+  .ans.swap:nth-child(2) { animation-delay: .03s; } .ans.swap:nth-child(3) { animation-delay: .06s; } .ans.swap:nth-child(4) { animation-delay: .09s; }
+
+  /* ---------- Overlays ---------- */
+  .overlay { position: absolute; inset: 0; z-index: 50; display: flex; flex-direction: column; align-items: center; justify-content: safe center; padding: calc(20px + env(safe-area-inset-top)) 16px calc(20px + env(safe-area-inset-bottom)); overflow-y: auto; background: radial-gradient(circle at 50% 30%, rgba(30, 10, 60, .88), rgba(5, 5, 16, .95)); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); touch-action: pan-y; animation: fadeIn .35s; }
+  @keyframes fadeIn { from { opacity: 0; } }
+  .panel { width: min(520px, 100%); display: flex; flex-direction: column; align-items: center; gap: 16px; animation: rise .5s cubic-bezier(.2, .9, .3, 1.2); }
+  @keyframes rise { from { transform: translateY(24px); opacity: 0; } }
+  .title { margin: 0; font-size: clamp(34px, 10vw, 56px); font-weight: 900; text-align: center; line-height: 1.05; letter-spacing: 2px; color: #fff; text-shadow: 0 0 10px var(--cyan), 0 0 30px var(--cyan), 0 0 60px rgba(0, 240, 255, .5); animation: flicker 5s infinite; }
+  .title em { font-style: normal; color: #fff; text-shadow: 0 0 10px var(--pink), 0 0 30px var(--pink), 0 0 60px rgba(255, 43, 214, .5); }
+  @keyframes flicker { 0%, 92%, 96%, 100% { opacity: 1; } 94% { opacity: .55; } }
+  .title.green { text-shadow: 0 0 12px var(--green), 0 0 36px var(--green); }
+  .title.red { text-shadow: 0 0 12px var(--red), 0 0 36px var(--red); }
+  .title.small { font-size: clamp(26px, 7vw, 40px); }
+  .subtitle { margin: 0; color: #b5b8d6; text-align: center; font-size: clamp(13px, 3.4vw, 15px); line-height: 1.6; font-family: system-ui, sans-serif; }
+  .subtitle b { color: var(--yellow); }
+  .group { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .group-label { font-size: 12px; letter-spacing: 3px; color: var(--cyan); text-shadow: 0 0 6px rgba(0, 240, 255, .6); }
+  .seg { display: flex; gap: 8px; width: 100%; }
+  .seg button { flex: 1; background: rgba(255, 255, 255, .03); border: 2px solid #34365a; color: #9a9cc0; padding: 10px 4px; border-radius: 10px; font-size: clamp(12px, 3.3vw, 15px); font-weight: 700; transition: all .2s; }
+  .seg button.active { border-color: var(--cyan); color: #fff; background: rgba(0, 240, 255, .12); box-shadow: 0 0 16px rgba(0, 240, 255, .4), inset 0 0 10px rgba(0, 240, 255, .2); }
+  .rows { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; width: 100%; }
+  .rows button { background: rgba(255, 255, 255, .03); border: 2px solid #34365a; color: #9a9cc0; padding: 9px 0; border-radius: 10px; font-weight: 700; font-size: 15px; transition: all .2s; }
+  .rows button.active { border-color: var(--pink); color: #fff; background: rgba(255, 43, 214, .14); box-shadow: 0 0 14px rgba(255, 43, 214, .45); }
+  .cta { margin-top: 4px; background: transparent; border: 3px solid var(--pink); color: #fff; padding: 15px 34px; font-size: clamp(16px, 4.4vw, 20px); font-weight: 900; border-radius: 50px; letter-spacing: 2px; text-shadow: 0 0 10px var(--pink); box-shadow: 0 0 22px rgba(255, 43, 214, .55), inset 0 0 14px rgba(255, 43, 214, .45); animation: breathe 2.2s ease-in-out infinite; transition: background .15s; }
+  @keyframes breathe { 50% { box-shadow: 0 0 38px rgba(255, 43, 214, .85), inset 0 0 18px rgba(255, 43, 214, .6); } }
+  .cta:hover, .cta:active { background: var(--pink); color: #000; text-shadow: none; }
+  .cta.green { border-color: var(--green); text-shadow: 0 0 10px var(--green); box-shadow: 0 0 22px rgba(61, 255, 139, .5), inset 0 0 14px rgba(61, 255, 139, .4); animation: none; }
+  .cta.green:hover, .cta.green:active { background: var(--green); }
+  .cta.red { border-color: var(--red); text-shadow: 0 0 10px var(--red); box-shadow: 0 0 22px rgba(255, 51, 85, .5), inset 0 0 14px rgba(255, 51, 85, .4); animation: none; }
+  .cta.red:hover, .cta.red:active { background: var(--red); }
+  .link-btn { background: none; border: 0; color: #8a8db5; font-size: 13px; letter-spacing: 2px; padding: 8px; text-decoration: underline; text-underline-offset: 4px; }
+  .best-line { font-size: 13px; color: var(--yellow); letter-spacing: 2px; text-shadow: 0 0 8px rgba(255, 233, 74, .6); }
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
+  .stat { background: rgba(255, 255, 255, .04); border: 1px solid rgba(0, 240, 255, .25); border-radius: 12px; padding: 10px; text-align: center; }
+  .stat b { display: block; font-size: 22px; color: #fff; text-shadow: 0 0 10px rgba(0, 240, 255, .7); }
+  .stat span { font-size: 10px; letter-spacing: 2px; color: #8a8db5; }
+  .big-score { font-size: clamp(32px, 9vw, 46px); font-weight: 900; color: var(--cyan); text-shadow: 0 0 18px var(--cyan); }
+  .badge { background: var(--yellow); color: #000; font-weight: 900; padding: 6px 14px; border-radius: 30px; font-size: 13px; letter-spacing: 2px; box-shadow: 0 0 22px var(--yellow); animation: breathe 1.2s infinite; }
+  .next-info { font-size: 14px; color: #b5b8d6; letter-spacing: 1px; }
+  .next-info b { color: var(--pink); text-shadow: 0 0 8px var(--pink); }
+
+  #game.shake-hit { animation: hitFlash .45s ease-out; }
+  @keyframes hitFlash { 0% { box-shadow: inset 0 0 120px rgba(255, 0, 60, .9); } 100% { box-shadow: inset 0 0 0 transparent; } }
+
+  @media (max-height: 620px) { :root { --bottom-safe: 24px; } #question { height: 36px; margin-bottom: 6px; } }
+  @media (prefers-reduced-motion: reduce) { .title, .cta { animation: none; } }
+</style>
+</head>
+<body>
+<div id="game">
+  <div id="field">
+    <canvas id="c"></canvas>
+    <div id="hud">
+      <div class="hud-col">
+        <div class="chip" id="lvl">WELLE 1</div>
+        <div class="chip" id="score">0</div>
+      </div>
+      <div class="timebox">
+        <div id="time">01:00</div>
+        <div class="timebar"><i id="timefill"></i></div>
+      </div>
+      <div class="hud-col right">
+        <div id="lives"><i></i><i></i><i></i></div>
+        <div class="hud-btns">
+          <button class="hud-btn" id="pauseBtn" aria-label="Pause">❚❚</button>
+          <button class="hud-btn" id="muteBtn" aria-label="Ton an/aus">🔊</button>
+        </div>
+        <div class="chip" id="hi">HI 0</div>
+      </div>
+    </div>
+    <div id="combo"></div>
+  </div>
+
+  <div id="controls">
+    <div id="question"><span class="qlabel">ZIEL</span><span id="qtext" class="idle">ZIELERFASSUNG…</span></div>
+    <div class="answers" id="answers">
+      <button class="ans" data-i="0" disabled><small>1</small><span>–</span></button>
+      <button class="ans" data-i="1" disabled><small>2</small><span>–</span></button>
+      <button class="ans" data-i="2" disabled><small>3</small><span>–</span></button>
+      <button class="ans" data-i="3" disabled><small>4</small><span>–</span></button>
+    </div>
+  </div>
+
+  <!-- Start -->
+  <div id="startScreen" class="overlay">
+    <div class="panel">
+      <h1 class="title">NEON MATH<br><em>DEFENDER</em></h1>
+      <p class="subtitle">Verteidige die Basis! Löse die Malaufgabe auf dem <b>markierten</b> Kometen<br>und tippe auf das richtige Ergebnis, um ihn abzuschießen.</p>
+
+      <div class="group">
+        <div class="group-label">MODUS</div>
+        <div class="seg" id="modeSeg">
+          <button data-mode="campaign">KAMPAGNE</button>
+          <button data-mode="training">TRAINING</button>
+        </div>
+      </div>
+      <div class="group" id="rowGroup">
+        <div class="group-label">EINMALEINS-REIHE</div>
+        <div class="rows" id="rowSeg"></div>
+      </div>
+      <div class="group">
+        <div class="group-label">SCHWIERIGKEIT</div>
+        <div class="seg" id="diffSeg">
+          <button data-diff="0.7">LEICHT</button>
+          <button data-diff="1">MITTEL</button>
+          <button data-diff="1.4">SCHWER</button>
+        </div>
+      </div>
+      <div class="group">
+        <div class="group-label">RUNDENDAUER</div>
+        <div class="seg" id="timeSeg">
+          <button data-time="30000">30 S</button>
+          <button data-time="60000">1 MIN</button>
+          <button data-time="120000">2 MIN</button>
+        </div>
+      </div>
+      <button class="cta" id="startBtn">MISSION STARTEN</button>
+      <div class="best-line" id="bestLine"></div>
+      <a class="link-btn" id="hubBtn" href="einmaleins.html">← ALLE SPIELE</a>
+    </div>
+  </div>
+
+  <!-- Pause -->
+  <div id="pauseScreen" class="overlay hidden">
+    <div class="panel">
+      <h2 class="title small">PAUSE</h2>
+      <button class="cta green" id="resumeBtn">WEITER</button>
+      <button class="link-btn" id="quitBtn">MISSION ABBRECHEN</button>
+    </div>
+  </div>
+
+  <!-- Welle geschafft -->
+  <div id="waveScreen" class="overlay hidden">
+    <div class="panel">
+      <h2 class="title small green" id="waveTitle">WELLE ABGEWEHRT</h2>
+      <div class="big-score" id="waveScore">0</div>
+      <div class="stats" id="waveStats"></div>
+      <div class="next-info" id="nextInfo"></div>
+      <button class="cta green" id="nextBtn">NÄCHSTE WELLE</button>
+      <button class="link-btn" id="waveMenuBtn">ZUM MENÜ</button>
+    </div>
+  </div>
+
+  <!-- Game Over -->
+  <div id="overScreen" class="overlay hidden">
+    <div class="panel">
+      <h2 class="title small red">SYSTEMVERSAGEN</h2>
+      <div id="overBadge"></div>
+      <div class="big-score" id="overScore">0</div>
+      <div class="stats" id="overStats"></div>
+      <button class="cta red" id="restartBtn">NEUSTART</button>
+      <button class="link-btn" id="overMenuBtn">ZUM MENÜ</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const rand = (a, b) => Math.random() * (b - a) + a;
+  const randInt = (a, b) => Math.floor(rand(a, b + 1));
+  const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+  const shuffle = arr => { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; };
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem('neonMath.' + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem('neonMath.' + k, JSON.stringify(v)); } catch (e) { /* egal */ } }
+  };
+
+  // ---------- Einstellungen ----------
+  // Reihenfolge der Einmaleins-Reihen in der Kampagne (ab Welle 11 gemischt)
+  const CAMPAIGN = [[1], [10], [2], [5], [4], [8], [3], [6], [9], [7], [2, 3, 4, 5, 6, 7, 8, 9, 10]];
+  const MIX_ROWS = [2, 3, 4, 5, 6, 7, 8, 9, 10];
+  const settings = {
+    mode: store.get('mode', 'campaign'),
+    row: store.get('row', 2),          // Zahl oder 'mix'
+    diff: store.get('diff', 1),
+    roundMs: store.get('roundMs', 60000)
+  };
+  // Alter Highscore aus der ersten Version übernehmen
+  let legacyHi = 0;
+  try { legacyHi = +localStorage.getItem('neonMathHighScore') || 0; } catch (e) { /* egal */ }
+  let highScore = Math.max(store.get('hi', 0), legacyHi);
+
+  const rowsFor = lvl => settings.mode === 'training'
+    ? (settings.row === 'mix' ? MIX_ROWS : [settings.row])
+    : CAMPAIGN[Math.min(lvl - 1, CAMPAIGN.length - 1)];
+  const rowLabel = lvl => { const r = rowsFor(lvl); return r.length > 1 ? 'MIX-WELLE' : `${r[0]}ER-REIHE`; };
+
+  // ---------- Audio (eigene WebAudio-Synths, keine externe Bibliothek nötig) ----------
+  const audio = (() => {
+    let ctx = null, master = null, noiseBuf = null, on = store.get('sound', true);
+    let musicTimer = null, nextNote = 0, step = 0;
+    function init() {
+      if (ctx) { if (ctx.state === 'suspended') ctx.resume(); return; }
+      const C = window.AudioContext || window.webkitAudioContext; if (!C) return;
+      ctx = new C();
+      master = ctx.createGain(); master.gain.value = on ? 0.55 : 0; master.connect(ctx.destination);
+      noiseBuf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
+      const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    }
+    function osc(type, f1, f2, dur, vol, t0 = 0) {
+      if (!ctx) return;
+      const t = ctx.currentTime + t0, o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = type; o.frequency.setValueAtTime(f1, t);
+      if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + dur);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g).connect(master); o.start(t); o.stop(t + dur + 0.05);
+    }
+    function noise(dur, vol, freq, t0 = 0, type = 'lowpass', when) {
+      if (!ctx) return;
+      const t = when !== undefined ? when : ctx.currentTime + t0;
+      const s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+      s.buffer = noiseBuf; f.type = type; f.frequency.value = freq;
+      g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      s.connect(f).connect(g).connect(master); s.start(t); s.stop(t + dur + 0.05);
+    }
+    const BASS = ['C2', 'C2', 'D#2', 'C2', 'F2', 'C2', 'D#2', 'A#1'];
+    const freq = n => { const m = { C: 0, 'C#': 1, D: 2, 'D#': 3, E: 4, F: 5, 'F#': 6, G: 7, 'G#': 8, A: 9, 'A#': 10, B: 11 }; const name = n.slice(0, -1), oct = +n.slice(-1); return 440 * Math.pow(2, (m[name] + (oct + 1) * 12 - 69) / 12); };
+    function scheduleMusic() {
+      const spb = 60 / 140 / 2; // Achtelnoten bei 140 BPM
+      while (nextNote < ctx.currentTime + 0.12) {
+        const f = freq(BASS[step % BASS.length]), t = nextNote;
+        const o = ctx.createOscillator(), fl = ctx.createBiquadFilter(), g = ctx.createGain();
+        o.type = 'square'; o.frequency.value = f;
+        fl.type = 'lowpass'; fl.frequency.setValueAtTime(900, t); fl.frequency.exponentialRampToValueAtTime(160, t + spb);
+        g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.09, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + spb * 0.95);
+        o.connect(fl).connect(g).connect(master); o.start(t); o.stop(t + spb);
+        noise(0.04, step % 2 ? 0.025 : 0.05, 7000, 0, 'highpass', t);
+        if (step % 4 === 0) { const k = ctx.createOscillator(), kg = ctx.createGain(); k.frequency.setValueAtTime(140, t); k.frequency.exponentialRampToValueAtTime(40, t + 0.15); kg.gain.setValueAtTime(0.25, t); kg.gain.exponentialRampToValueAtTime(0.0001, t + 0.2); k.connect(kg).connect(master); k.start(t); k.stop(t + 0.22); }
+        nextNote += spb; step++;
+      }
+    }
+    return {
+      init,
+      get on() { return on; },
+      toggle() { on = !on; store.set('sound', on); if (master) master.gain.setTargetAtTime(on ? 0.55 : 0, ctx.currentTime, 0.02); return on; },
+      laser() { osc('square', 1500, 220, 0.16, 0.09); osc('sine', 900, 1800, 0.08, 0.06); },
+      boom(big) { noise(big ? 0.7 : 0.45, big ? 0.5 : 0.35, 1400); osc('sine', 140, 40, 0.35, 0.3); },
+      error() { osc('sawtooth', 180, 90, 0.25, 0.12); },
+      hit() { noise(0.8, 0.6, 700); osc('sawtooth', 90, 30, 0.6, 0.25); },
+      lock() { osc('sine', 1200, 1500, 0.05, 0.04); },
+      combo() { osc('triangle', 880, 0, 0.1, 0.08); osc('triangle', 1320, 0, 0.14, 0.08, 0.07); },
+      wave() { [523, 659, 784, 1047, 1319].forEach((f, i) => osc('triangle', f, 0, 0.3, 0.12, i * 0.09)); },
+      over() { [392, 330, 262, 196].forEach((f, i) => osc('sawtooth', f, f * 0.97, 0.35, 0.09, i * 0.18)); },
+      tick() { osc('square', 1000, 0, 0.04, 0.04); },
+      startMusic() { if (!ctx || musicTimer) return; nextNote = ctx.currentTime + 0.05; step = 0; musicTimer = setInterval(scheduleMusic, 30); },
+      stopMusic() { clearInterval(musicTimer); musicTimer = null; }
+    };
+  })();
+
+  // ---------- Canvas ----------
+  const canvas = $('c'), ctx = canvas.getContext('2d'), field = $('field');
+  let W = 0, H = 0, DPR = 1;
+  let starLayers = [], nebula = null, city = null;
+
+  function resize() {
+    W = field.clientWidth; H = field.clientHeight;
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.round(W * DPR); canvas.height = Math.round(H * DPR);
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    buildBackground();
+    enemies.forEach(e => { e.x = Math.min(Math.max(e.x, e.r), W - e.r); });
+  }
+
+  function buildBackground() {
+    // Drei Sternenebenen für Parallax-Effekt
+    starLayers = [0.012, 0.03, 0.06].map((speed, li) => Array.from({ length: Math.round((W * H) / (li === 0 ? 4000 : li === 1 ? 9000 : 22000)) }, () => ({
+      x: Math.random() * W, y: Math.random() * H, s: (li + 1) * 0.6 + Math.random() * 0.6, a: 0.25 + li * 0.25 + Math.random() * 0.2, tw: Math.random() * Math.PI * 2, speed
+    })));
+    // Nebel einmal vorrendern (spart Rechenzeit)
+    nebula = document.createElement('canvas');
+    nebula.width = Math.max(1, Math.round(W / 2)); nebula.height = Math.max(1, Math.round(H / 2));
+    const n = nebula.getContext('2d');
+    const blob = (x, y, r, c) => { const g = n.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, c); g.addColorStop(1, 'rgba(0,0,0,0)'); n.fillStyle = g; n.fillRect(0, 0, nebula.width, nebula.height); };
+    const nw = nebula.width, nh = nebula.height;
+    blob(nw * 0.2, nh * 0.25, nw * 0.6, 'rgba(120,20,160,0.35)');
+    blob(nw * 0.85, nh * 0.45, nw * 0.55, 'rgba(0,120,200,0.25)');
+    blob(nw * 0.5, nh * 0.9, nw * 0.7, 'rgba(255,40,180,0.18)');
+    // Stadt-Silhouette mit Neonfenstern
+    city = document.createElement('canvas');
+    city.width = Math.round(W * DPR); city.height = Math.round(90 * DPR);
+    const cc = city.getContext('2d'); cc.scale(DPR, DPR);
+    let x = 0;
+    while (x < W) {
+      const bw = rand(18, 46), bh = rand(22, 70);
+      const g = cc.createLinearGradient(0, 90 - bh, 0, 90); g.addColorStop(0, '#16163a'); g.addColorStop(1, '#0a0a1e');
+      cc.fillStyle = g; cc.fillRect(x, 90 - bh, bw - 2, bh);
+      cc.fillStyle = 'rgba(0,240,255,0.35)'; cc.fillRect(x, 90 - bh, bw - 2, 1.5);
+      for (let wy = 90 - bh + 6; wy < 86; wy += 7) for (let wx = x + 4; wx < x + bw - 6; wx += 6) {
+        if (Math.random() < 0.35) { cc.fillStyle = Math.random() < 0.7 ? 'rgba(255,43,214,0.55)' : 'rgba(255,233,74,0.6)'; cc.fillRect(wx, wy, 2, 3); }
+      }
+      x += bw;
+    }
+  }
+
+  // ---------- Spielzustand ----------
+  let phase = 'menu';     // menu | playing | paused | wave | over
+  let level = 1, score = 0, lives = 3, timeLeft = 0, spawnTimer = 0, speedMult = 1;
+  let enemies = [], lasers = [], particles = [], rings = [], floats = [];
+  let target = null, answers = [], wrongOnTarget = 0;
+  let combo = 0, bestCombo = 0;
+  let stats = { hits: 0, misses: 0, lost: 0 };
+  let total = { hits: 0, misses: 0, lost: 0 };
+  let shake = 0, turretAngle = -Math.PI / 2, banner = null, lastSecond = -1, waveDone = false;
+  const BASE_H = 46;
+
+  const comboMult = () => Math.min(4, 1 + Math.floor(combo / 5));
+
+  function makeProblem() {
+    const rows = rowsFor(level);
+    for (let tries = 0; tries < 20; tries++) {
+      const row = pick(rows), m = randInt(1, 10);
+      let [a, b] = Math.random() < 0.5 ? [row, m] : [m, row];
+      const text = `${a} · ${b}`;
+      if (enemies.some(e => e.problem.text === text) && tries < 19) continue;
+      const answer = a * b;
+      // Falsche Antworten, die typische Fehler abbilden: Nachbaraufgaben, ±1, ±10, vertauschte Ziffern
+      const cands = [(a + 1) * b, (a - 1) * b, a * (b + 1), a * (b - 1), answer + 1, answer - 1, answer + 2, answer - 2, answer + 10, answer - 10, a + b];
+      if (answer >= 10) { const sw = +String(answer).split('').reverse().join(''); cands.push(sw); }
+      const wrong = [];
+      for (const c of shuffle(cands)) {
+        if (c > 0 && c !== answer && !wrong.includes(c)) wrong.push(c);
+        if (wrong.length === 3) break;
+      }
+      let k = 3; while (wrong.length < 3) { if (!wrong.includes(answer + k)) wrong.push(answer + k); k++; }
+      return { text, answer, wrong };
+    }
+  }
+
+  class Comet {
+    constructor() {
+      this.r = rand(32, 42) * Math.min(1, Math.max(0.8, W / 420));
+      this.x = rand(this.r + 8, W - this.r - 8);
+      this.y = -this.r - 10;
+      const fallSeconds = rand(9, 12.5);
+      this.vy = (H / (fallSeconds * 1000)) * speedMult * settings.diff;
+      this.vx = rand(-0.006, 0.006);
+      this.problem = makeProblem();
+      this.hue = rand(275, 335);
+      this.rot = Math.random() * Math.PI * 2;
+      this.vr = rand(-0.0008, 0.0008);
+      this.flash = 0; this.doomed = false; this.born = performance.now();
+      const pts = randInt(8, 11);
+      this.verts = Array.from({ length: pts }, (_, i) => { const a = (i / pts) * Math.PI * 2, rr = this.r * rand(0.82, 1.08); return [Math.cos(a) * rr, Math.sin(a) * rr]; });
+      this.craters = Array.from({ length: 3 }, () => [rand(-0.45, 0.45) * this.r, rand(-0.45, 0.45) * this.r, rand(0.1, 0.2) * this.r]);
+    }
+    update(dt) {
+      this.y += this.vy * dt;
+      this.x += this.vx * dt;
+      if (this.x < this.r || this.x > W - this.r) this.vx *= -1;
+      this.rot += this.vr * dt;
+      if (this.flash > 0) this.flash -= dt / 400;
+      if (Math.random() < 0.35) particles.push(new Particle(this.x + rand(-this.r, this.r) * 0.5, this.y - this.r * 0.6, `hsl(${this.hue + rand(-20, 30)},100%,65%)`, { vx: rand(-0.02, 0.02), vy: -rand(0.01, 0.05), life: rand(400, 800), size: rand(1.5, 3.5) }));
+    }
+    draw(t) {
+      const { x, y, r } = this;
+      // Schweif
+      const tail = ctx.createLinearGradient(x, y, x, y - r * 4);
+      tail.addColorStop(0, `hsla(${this.hue},100%,65%,0.55)`);
+      tail.addColorStop(1, `hsla(${this.hue},100%,65%,0)`);
+      ctx.fillStyle = tail;
+      ctx.beginPath(); ctx.moveTo(x - r * 0.85, y); ctx.quadraticCurveTo(x, y - r * 4.6, x + r * 0.85, y); ctx.closePath(); ctx.fill();
+
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.save();
+      ctx.rotate(this.rot);
+      const isTarget = this === target;
+      ctx.shadowBlur = isTarget ? 28 : 16;
+      ctx.shadowColor = this.flash > 0 ? '#ff3355' : isTarget ? '#00f0ff' : `hsl(${this.hue},100%,60%)`;
+      ctx.beginPath(); this.verts.forEach(([vx, vy], i) => i ? ctx.lineTo(vx, vy) : ctx.moveTo(vx, vy)); ctx.closePath();
+      const body = ctx.createRadialGradient(-r * 0.3, -r * 0.3, r * 0.1, 0, 0, r * 1.1);
+      body.addColorStop(0, `hsl(${this.hue},45%,30%)`); body.addColorStop(1, `hsl(${this.hue},55%,9%)`);
+      ctx.fillStyle = body; ctx.fill();
+      ctx.lineWidth = isTarget ? 3.5 : 2.5;
+      ctx.strokeStyle = this.flash > 0 ? '#ff3355' : isTarget ? '#00f0ff' : `hsl(${this.hue},100%,62%)`;
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = 'rgba(0,0,0,0.28)';
+      this.craters.forEach(([cx, cy, cr]) => { ctx.beginPath(); ctx.arc(cx, cy, cr, 0, Math.PI * 2); ctx.fill(); });
+      ctx.restore();
+
+      // Zielmarkierung
+      if (isTarget) {
+        const rr = r + 12 + Math.sin(t / 180) * 2.5;
+        ctx.save(); ctx.rotate(t / 700);
+        ctx.strokeStyle = 'rgba(0,240,255,0.9)'; ctx.lineWidth = 2.5; ctx.shadowBlur = 12; ctx.shadowColor = '#00f0ff';
+        for (let i = 0; i < 4; i++) { ctx.beginPath(); ctx.arc(0, 0, rr, i * Math.PI / 2 + 0.25, i * Math.PI / 2 + 1.15); ctx.stroke(); }
+        ctx.restore();
+        ctx.fillStyle = '#00f0ff';
+        [[0, -rr - 8], [0, rr + 8], [-rr - 8, 0], [rr + 8, 0]].forEach(([px, py]) => { ctx.beginPath(); ctx.arc(px, py, 2.5, 0, Math.PI * 2); ctx.fill(); });
+      }
+
+      // Aufgabe gut lesbar auf einem Schild
+      const fs = Math.round(Math.max(17, r * 0.52));
+      ctx.font = `900 ${fs}px Orbitron, sans-serif`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      const tw = ctx.measureText(this.problem.text).width + 16;
+      ctx.fillStyle = isTarget ? 'rgba(0,30,40,0.85)' : 'rgba(5,5,20,0.7)';
+      roundRect(-tw / 2, -fs * 0.72, tw, fs * 1.44, 8); ctx.fill();
+      if (isTarget) { ctx.strokeStyle = 'rgba(0,240,255,0.7)'; ctx.lineWidth = 1.5; ctx.stroke(); }
+      ctx.fillStyle = isTarget ? '#ffe94a' : '#fff';
+      ctx.fillText(this.problem.text, 0, 1);
+      ctx.restore();
+    }
+  }
+
+  class Particle {
+    constructor(x, y, color, o = {}) {
+      const a = Math.random() * Math.PI * 2, sp = o.speed !== undefined ? o.speed : rand(0.05, 0.38);
+      this.x = x; this.y = y; this.color = color;
+      this.vx = o.vx !== undefined ? o.vx : Math.cos(a) * sp; this.vy = o.vy !== undefined ? o.vy : Math.sin(a) * sp;
+      this.max = o.life || rand(500, 1100); this.life = this.max;
+      this.size = o.size || rand(1.5, 4.5); this.drag = o.drag || 0.996;
+    }
+    update(dt) { this.x += this.vx * dt; this.y += this.vy * dt; this.vx *= Math.pow(this.drag, dt); this.vy *= Math.pow(this.drag, dt); this.life -= dt; }
+    draw() { const k = Math.max(0, this.life / this.max); ctx.globalAlpha = k; ctx.fillStyle = this.color; ctx.beginPath(); ctx.arc(this.x, this.y, this.size * (0.4 + k * 0.6), 0, Math.PI * 2); ctx.fill(); }
+  }
+
+  function roundRect(x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
+
+  const muzzle = () => ({ x: W / 2 + Math.cos(turretAngle) * 30, y: H - BASE_H + 6 + Math.sin(turretAngle) * 30 });
+
+  class Laser {
+    constructor(tgt) { this.tgt = tgt; this.t = 0; this.dur = 130; this.fade = 0; this.hit = false; const m = muzzle(); this.sx = m.x; this.sy = m.y; }
+    update(dt) {
+      if (!this.hit) { this.t += dt; if (this.t >= this.dur) { this.hit = true; explode(this.tgt); } }
+      else this.fade += dt;
+    }
+    get done() { return this.hit && this.fade > 220; }
+    draw() {
+      const k = Math.min(1, this.t / this.dur);
+      const ex = this.sx + (this.tgt.x - this.sx) * k, ey = this.sy + (this.tgt.y - this.sy) * k;
+      const alpha = this.hit ? 1 - this.fade / 220 : 1;
+      ctx.save(); ctx.globalAlpha = Math.max(0, alpha); ctx.lineCap = 'round';
+      ctx.strokeStyle = '#00f0ff'; ctx.lineWidth = 9; ctx.shadowBlur = 24; ctx.shadowColor = '#00f0ff';
+      ctx.beginPath(); ctx.moveTo(this.sx, this.sy); ctx.lineTo(ex, ey); ctx.stroke();
+      ctx.strokeStyle = '#fff'; ctx.lineWidth = 3; ctx.shadowBlur = 0;
+      ctx.beginPath(); ctx.moveTo(this.sx, this.sy); ctx.lineTo(ex, ey); ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  function addFloat(x, y, text, color, size = 20, life = 1100) { floats.push({ x, y, text, color, size, life, max: life }); }
+
+  function explode(e) {
+    audio.boom(false);
+    enemies = enemies.filter(o => o !== e);
+    for (let i = 0; i < 34; i++) particles.push(new Particle(e.x, e.y, pick([`hsl(${e.hue},100%,65%)`, '#00f0ff', '#fff', '#ffe94a'])));
+    for (let i = 0; i < 10; i++) particles.push(new Particle(e.x, e.y, '#fff', { speed: rand(0.3, 0.6), life: rand(150, 300), size: rand(1, 2), drag: 0.99 }));
+    rings.push({ x: e.x, y: e.y, r: e.r * 0.5, max: e.r * 2.8, life: 450, maxLife: 450, color: '#00f0ff' });
+    rings.push({ x: e.x, y: e.y, r: 4, max: e.r * 1.4, life: 220, maxLife: 220, color: '#fff', fill: true });
+    shake = Math.max(shake, 5);
+
+    const mult = comboMult();
+    const pts = Math.round(100 * (1 + (level - 1) * 0.5) * settings.diff) * mult;
+    score += pts;
+    addFloat(e.x, e.y - e.r, `+${pts}`, '#3dff8b', 22);
+    if (mult > 1) addFloat(e.x, e.y - e.r + 24, `COMBO ×${mult}`, '#ffe94a', 14);
+    setHigh();
+    renderScore(true);
+  }
+
+  // ---------- Zielauswahl ----------
+  function setTarget(e) {
+    target = e; wrongOnTarget = 0;
+    const qt = $('qtext');
+    const btns = document.querySelectorAll('.ans');
+    if (!e) {
+      answers = [];
+      qt.textContent = phase === 'playing' && timeLeft <= 0 ? 'LETZTE KOMETEN…' : 'WARTE AUF ZIELE…'; qt.className = 'idle';
+      btns.forEach(b => { b.disabled = true; b.querySelector('span').textContent = '–'; b.classList.remove('hint', 'bad', 'swap'); });
+      return;
+    }
+    audio.lock();
+    qt.textContent = e.problem.text; qt.className = ''; void qt.offsetWidth; qt.className = 'swap';
+    answers = shuffle([e.problem.answer, ...e.problem.wrong]);
+    btns.forEach((b, i) => {
+      b.disabled = false; b.querySelector('span').textContent = answers[i];
+      b.classList.remove('hint', 'bad', 'swap'); void b.offsetWidth; b.classList.add('swap');
+    });
+  }
+
+  function retarget(force = false) {
+    const free = enemies.filter(e => !e.doomed);
+    if (!free.length) { if (target || force) setTarget(null); return; }
+    const lowest = free.reduce((a, b) => (b.y > a.y ? b : a));
+    if (!target || target.doomed || !enemies.includes(target)) { setTarget(lowest); return; }
+    // Ziel nur wechseln, wenn ein anderer Komet gefährlich nah an der Basis ist – sonst bleiben die Antworten stabil.
+    if (lowest !== target && lowest.y > H * 0.66 && lowest.y > target.y + 50) setTarget(lowest);
+  }
+
+  // ---------- Eingabe ----------
+  function answer(i) {
+    if (phase !== 'playing' || !target) return;
+    const btn = document.querySelectorAll('.ans')[i];
+    if (!btn || btn.disabled) return;
+    const val = answers[i];
+    if (val === target.problem.answer) {
+      audio.laser();
+      target.doomed = true;
+      lasers.push(new Laser(target));
+      stats.hits++; combo++; bestCombo = Math.max(bestCombo, combo);
+      if (combo > 0 && combo % 5 === 0) { audio.combo(); showCombo(true); } else showCombo(false);
+      btn.classList.add('press'); setTimeout(() => btn.classList.remove('press'), 120);
+      setTarget(null);
+      retarget(true);
+    } else {
+      audio.error();
+      stats.misses++; combo = 0; showCombo(false);
+      wrongOnTarget++;
+      score = Math.max(0, score - 50); renderScore();
+      target.flash = 1;
+      addFloat(target.x, target.y - target.r - 6, '−50', '#ff3355', 16, 800);
+      btn.classList.remove('bad'); void btn.offsetWidth; btn.classList.add('bad');
+      btn.disabled = true;
+      setTimeout(() => btn.classList.remove('bad'), 400);
+      if (wrongOnTarget >= 2) {
+        const ci = answers.indexOf(target.problem.answer);
+        document.querySelectorAll('.ans')[ci].classList.add('hint');
+      }
+    }
+  }
+  document.querySelectorAll('.ans').forEach(b => b.addEventListener('pointerdown', e => { e.preventDefault(); answer(+b.dataset.i); }));
+
+  document.addEventListener('keydown', e => {
+    if (e.repeat) return;
+    const k = e.key;
+    if (phase === 'playing') {
+      const n = ['1', '2', '3', '4'].indexOf(k);
+      if (n >= 0) { answer(n); const b = document.querySelectorAll('.ans')[n]; if (!b.disabled) { b.classList.add('press'); setTimeout(() => b.classList.remove('press'), 120); } }
+      if (k === 'Escape' || k === 'p' || k === 'P') pause();
+    } else if (phase === 'paused' && (k === 'Escape' || k === 'p' || k === 'P' || k === 'Enter')) resume();
+    else if (k === 'Enter' || k === ' ') {
+      if (phase === 'menu') startGame();
+      else if (phase === 'wave') nextWave();
+      else if (phase === 'over') startGame();
+    }
+  });
+
+  // ---------- Ablauf ----------
+  function showOnly(id) {
+    ['startScreen', 'pauseScreen', 'waveScreen', 'overScreen'].forEach(s => $(s).classList.toggle('hidden', s !== id));
+  }
+
+  function startGame() {
+    audio.init();
+    score = 0; lives = 3; bestCombo = 0;
+    total = { hits: 0, misses: 0, lost: 0 };
+    startLevel(1);
+  }
+
+  function startLevel(l) {
+    level = l;
+    timeLeft = settings.roundMs; spawnTimer = 1400; speedMult = 1;
+    enemies = []; lasers = []; floats = []; rings = [];
+    combo = 0; stats = { hits: 0, misses: 0, lost: 0 };
+    waveDone = false; lastSecond = -1;
+    phase = 'playing';
+    showOnly(null);
+    setTarget(null);
+    renderHUD(); renderScore(); showCombo(false);
+    banner = { title: `WELLE ${level}`, sub: rowLabel(level), life: 2200, max: 2200 };
+    audio.startMusic();
+  }
+
+  function nextWave() { audio.init(); startLevel(level + 1); }
+
+  function pause() {
+    if (phase !== 'playing') return;
+    phase = 'paused'; audio.stopMusic(); showOnly('pauseScreen');
+  }
+  function resume() {
+    if (phase !== 'paused') return;
+    audio.init(); phase = 'playing'; showOnly(null); audio.startMusic();
+  }
+  function toMenu() {
+    phase = 'menu'; audio.stopMusic();
+    enemies = []; lasers = []; floats = []; rings = []; setTarget(null);
+    renderMenu(); showOnly('startScreen');
+  }
+
+  function loseLife(e) {
+    audio.hit();
+    lives--; stats.lost++; combo = 0; showCombo(false);
+    shake = 16;
+    const g = $('game'); g.classList.remove('shake-hit'); void g.offsetWidth; g.classList.add('shake-hit');
+    for (let i = 0; i < 40; i++) particles.push(new Particle(e.x, H - BASE_H, pick(['#ff3355', '#ff2bd6', '#ffe94a', '#fff']), { speed: rand(0.1, 0.5) }));
+    rings.push({ x: e.x, y: H - BASE_H, r: 10, max: 140, life: 600, maxLife: 600, color: '#ff3355' });
+    // Lösung zeigen, damit man daraus lernt
+    addFloat(Math.min(Math.max(e.x, 90), W - 90), H - BASE_H - 50, `${e.problem.text} = ${e.problem.answer}`, '#ffe94a', 22, 2200);
+    renderHUD(true);
+    if (lives <= 0) gameOver();
+  }
+
+  function finishWave() {
+    waveDone = true; phase = 'wave';
+    audio.stopMusic(); audio.wave();
+    const { hits, misses } = stats;
+    addTotals();
+    const tries = hits + misses;
+    const acc = tries ? Math.round((hits / tries) * 100) : 100;
+    const bonus = Math.round(acc * 5 * settings.diff) + lives * 100;
+    score += bonus; setHigh(); renderScore(true);
+    $('waveTitle').textContent = `WELLE ${level} ABGEWEHRT`;
+    $('waveStats').innerHTML = statHtml([[hits, 'TREFFER'], [misses, 'FEHLER'], [acc + '%', 'GENAUIGKEIT'], ['+' + bonus, 'BONUS']]);
+    $('nextInfo').innerHTML = `NÄCHSTE WELLE: <b>${rowLabel(level + 1)}</b>`;
+    countUp($('waveScore'), score - bonus, score);
+    showOnly('waveScreen');
+  }
+
+  function gameOver() {
+    phase = 'over';
+    audio.stopMusic(); audio.over();
+    addTotals();
+    const isRecord = score > 0 && score >= highScore;
+    $('overBadge').innerHTML = isRecord ? '<span class="badge">NEUER HIGHSCORE!</span>' : '';
+    const tries = total.hits + total.misses;
+    $('overStats').innerHTML = statHtml([[level, 'WELLE'], [total.hits, 'TREFFER'], [tries ? Math.round(total.hits / tries * 100) + '%' : '–', 'GENAUIGKEIT'], [bestCombo, 'BESTE SERIE']]);
+    countUp($('overScore'), 0, score);
+    setTimeout(() => { if (phase === 'over') showOnly('overScreen'); }, 900);
+  }
+
+  function addTotals() { total.hits += stats.hits; total.misses += stats.misses; total.lost += stats.lost; stats = { hits: 0, misses: 0, lost: 0 }; }
+  const statHtml = list => list.map(([v, l]) => `<div class="stat"><b>${v}</b><span>${l}</span></div>`).join('');
+  function countUp(el, from, to) {
+    const t0 = performance.now(), d = 900;
+    const step = now => { const k = Math.min(1, (now - t0) / d); el.textContent = Math.round(from + (to - from) * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  }
+
+  function setHigh() { if (score > highScore) { highScore = score; store.set('hi', highScore); } }
+
+  // ---------- HUD ----------
+  function renderScore(bump) {
+    const s = $('score'); s.textContent = score.toLocaleString('de-DE');
+    if (bump) { s.classList.remove('bump'); void s.offsetWidth; s.classList.add('bump'); }
+    $('hi').textContent = 'HI ' + highScore.toLocaleString('de-DE');
+  }
+  function renderHUD(lost) {
+    $('lvl').textContent = `WELLE ${level}`;
+    const icons = $('lives').children;
+    for (let i = 0; i < 3; i++) {
+      icons[i].className = i < lives ? '' : 'off';
+      if (lost && i === lives) icons[i].classList.add('lost');
+    }
+  }
+  function renderTime() {
+    const sec = Math.ceil(Math.max(0, timeLeft) / 1000);
+    if (sec === lastSecond) return;
+    lastSecond = sec;
+    $('time').textContent = `${String(Math.floor(sec / 60)).padStart(2, '0')}:${String(sec % 60).padStart(2, '0')}`;
+    $('time').classList.toggle('warn', sec <= 10 && sec > 0);
+    if (sec <= 5 && sec > 0 && phase === 'playing') audio.tick();
+  }
+  function showCombo(pop) {
+    const el = $('combo'), m = comboMult();
+    el.textContent = combo >= 3 ? `🔥 ${combo}ER-SERIE${m > 1 ? ' · PUNKTE ×' + m : ''}` : '';
+    if (pop) { el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); }
+  }
+
+  // ---------- Hauptschleife ----------
+  let last = 0;
+  function loop(now) {
+    let dt = last ? now - last : 16; last = now;
+    if (dt > 50) dt = 16;
+    if (phase === 'playing') update(dt);
+    else if (phase === 'over' || phase === 'wave') updateFx(dt);
+    draw(now, dt);
+    requestAnimationFrame(loop);
+  }
+
+  function update(dt) {
+    if (timeLeft > 0) {
+      timeLeft = Math.max(0, timeLeft - dt);
+      const progress = 1 - timeLeft / settings.roundMs;
+      speedMult = 1 + (level - 1) * 0.12 + progress * 0.7;
+      const interval = Math.max(950, 3300 - speedMult * 650) / settings.diff;
+      spawnTimer += dt;
+      // Kein Leerlauf: Ist der Himmel leer, kommt der nächste Komet sofort
+      if (!enemies.some(e => !e.doomed)) spawnTimer = Math.max(spawnTimer, interval - 500);
+      const maxOnScreen = 3 + Math.min(3, Math.floor(level / 2));
+      if (spawnTimer >= interval && enemies.length < maxOnScreen) {
+        spawnTimer = 0;
+        enemies.push(new Comet());
+        if (!target) retarget();
+      }
+    }
+    $('timefill').style.transform = `scaleX(${timeLeft / settings.roundMs})`;
+    renderTime();
+
+    for (let i = enemies.length - 1; i >= 0; i--) {
+      const e = enemies[i];
+      e.update(dt);
+      if (e.y + e.r * 0.4 >= H - BASE_H) {
+        enemies.splice(i, 1);
+        if (e === target) setTarget(null);
+        if (!e.doomed) loseLife(e);
+        if (phase !== 'playing') return;
+      }
+    }
+    retarget();
+    updateFx(dt);
+
+    if (timeLeft <= 0 && !waveDone) {
+      if (enemies.length === 0 && lasers.length === 0) finishWave();
+    }
+  }
+
+  function updateFx(dt) {
+    lasers.forEach(l => l.update(dt)); lasers = lasers.filter(l => !l.done);
+    particles.forEach(p => p.update(dt)); particles = particles.filter(p => p.life > 0);
+    if (particles.length > 700) particles.splice(0, particles.length - 700);
+    rings.forEach(r => { r.life -= dt; r.r += (r.max - r.r) * Math.min(1, dt / 90); }); rings = rings.filter(r => r.life > 0);
+    floats.forEach(f => { f.life -= dt; f.y -= dt * 0.035; }); floats = floats.filter(f => f.life > 0);
+    if (banner) { banner.life -= dt; if (banner.life <= 0) banner = null; }
+    shake *= Math.pow(0.9, dt / 16);
+  }
+
+  function draw(now, dt) {
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    ctx.fillStyle = '#050510'; ctx.fillRect(0, 0, W, H);
+    if (nebula) ctx.drawImage(nebula, 0, 0, W, H);
+
+    const moving = phase === 'playing' || phase === 'menu';
+    starLayers.forEach(layer => layer.forEach(s => {
+      if (moving) { s.y += s.speed * dt * (phase === 'menu' ? 1.5 : speedMult); if (s.y > H) { s.y = -2; s.x = Math.random() * W; } }
+      ctx.globalAlpha = s.a * (0.75 + Math.sin(now / 500 + s.tw) * 0.25);
+      ctx.fillStyle = '#fff'; ctx.fillRect(s.x, s.y, s.s, s.s);
+    }));
+    ctx.globalAlpha = 1;
+
+    ctx.save();
+    if (shake > 0.3) ctx.translate(rand(-shake, shake), rand(-shake, shake));
+
+    drawBase(now);
+
+    // Ziellinie vom Geschütz zum Ziel
+    if (target && phase === 'playing') {
+      const m = muzzle();
+      ctx.save(); ctx.setLineDash([4, 10]); ctx.lineDashOffset = -now / 30;
+      ctx.strokeStyle = 'rgba(0,240,255,0.22)'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(m.x, m.y); ctx.lineTo(target.x, target.y); ctx.stroke(); ctx.restore();
+    }
+
+    enemies.forEach(e => e.draw(now));
+    lasers.forEach(l => l.draw());
+
+    ctx.globalCompositeOperation = 'lighter';
+    particles.forEach(p => p.draw());
+    ctx.globalAlpha = 1;
+    rings.forEach(r => {
+      const k = r.life / r.maxLife;
+      ctx.globalAlpha = k;
+      if (r.fill) { ctx.fillStyle = r.color; ctx.beginPath(); ctx.arc(r.x, r.y, r.r, 0, Math.PI * 2); ctx.fill(); }
+      else { ctx.strokeStyle = r.color; ctx.lineWidth = 3 * k + 1; ctx.beginPath(); ctx.arc(r.x, r.y, r.r, 0, Math.PI * 2); ctx.stroke(); }
+    });
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+
+    floats.forEach(f => {
+      const k = f.life / f.max;
+      ctx.globalAlpha = Math.min(1, k * 2.5);
+      ctx.font = `900 ${f.size}px Orbitron, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.shadowBlur = 12; ctx.shadowColor = f.color; ctx.fillStyle = f.color;
+      ctx.fillText(f.text, f.x, f.y);
+    });
+    ctx.shadowBlur = 0; ctx.globalAlpha = 1;
+    ctx.restore();
+
+    if (banner) {
+      const k = banner.life / banner.max, a = Math.min(1, k * 3, (1 - k) * 6);
+      ctx.globalAlpha = a; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.font = `900 ${Math.min(52, W / 8)}px Orbitron, sans-serif`;
+      ctx.shadowBlur = 24; ctx.shadowColor = '#ff2bd6'; ctx.fillStyle = '#fff';
+      ctx.fillText(banner.title, W / 2, H * 0.4);
+      ctx.font = `700 ${Math.min(22, W / 18)}px Orbitron, sans-serif`;
+      ctx.shadowColor = '#00f0ff'; ctx.fillStyle = '#00f0ff';
+      ctx.fillText(banner.sub, W / 2, H * 0.4 + 46);
+      ctx.shadowBlur = 0; ctx.globalAlpha = 1;
+    }
+  }
+
+  function drawBase(now) {
+    if (city) ctx.drawImage(city, 0, H - 90 - BASE_H * 0.4, W, 90);
+    // Schutzschild – Farbe zeigt die verbleibenden Leben
+    const col = lives >= 3 ? '0,240,255' : lives === 2 ? '255,233,74' : '255,51,85';
+    const pulse = 0.5 + Math.sin(now / 400) * 0.15;
+    const g = ctx.createLinearGradient(0, H - BASE_H - 24, 0, H);
+    g.addColorStop(0, `rgba(${col},0)`); g.addColorStop(1, `rgba(${col},${0.22 * pulse + 0.05})`);
+    ctx.fillStyle = g; ctx.fillRect(0, H - BASE_H - 24, W, BASE_H + 24);
+    ctx.strokeStyle = `rgba(${col},${0.55 + pulse * 0.3})`; ctx.lineWidth = 2; ctx.shadowBlur = 14; ctx.shadowColor = `rgb(${col})`;
+    ctx.beginPath(); ctx.moveTo(0, H - BASE_H); ctx.lineTo(W, H - BASE_H); ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // Geschütz dreht sich weich zum Ziel
+    const cx = W / 2, cy = H - BASE_H + 6;
+    let want = -Math.PI / 2;
+    if (target) want = Math.atan2(target.y - cy, target.x - cx);
+    turretAngle += (want - turretAngle) * 0.15;
+    ctx.save(); ctx.translate(cx, cy);
+    ctx.rotate(turretAngle);
+    ctx.fillStyle = '#1a1a40'; ctx.strokeStyle = '#00f0ff'; ctx.lineWidth = 2; ctx.shadowBlur = 14; ctx.shadowColor = '#00f0ff';
+    roundRect(0, -6, 34, 12, 4); ctx.fill(); ctx.stroke();
+    ctx.restore();
+    ctx.save(); ctx.translate(cx, cy);
+    ctx.shadowBlur = 20; ctx.shadowColor = '#ff2bd6';
+    const dome = ctx.createRadialGradient(-6, -8, 2, 0, 0, 26);
+    dome.addColorStop(0, '#5a2a8a'); dome.addColorStop(1, '#14143a');
+    ctx.fillStyle = dome; ctx.strokeStyle = '#ff2bd6'; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.arc(0, 0, 24, Math.PI, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#00f0ff'; ctx.shadowColor = '#00f0ff';
+    ctx.beginPath(); ctx.arc(0, -8, 4 + Math.sin(now / 200) * 1, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+
+  // ---------- Menü ----------
+  function renderMenu() {
+    const markSeg = (id, attr, val) => document.querySelectorAll(`#${id} button`).forEach(b => b.classList.toggle('active', String(b.dataset[attr]) === String(val)));
+    markSeg('modeSeg', 'mode', settings.mode);
+    markSeg('diffSeg', 'diff', settings.diff);
+    markSeg('timeSeg', 'time', settings.roundMs);
+    $('rowGroup').classList.toggle('hidden', settings.mode !== 'training');
+    $('rowSeg').innerHTML = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 'mix'].map(r => `<button data-row="${r}" class="${String(r) === String(settings.row) ? 'active' : ''}" ${r === 'mix' ? 'style="grid-column: span 2"' : ''}>${r === 'mix' ? 'MIX' : r}</button>`).join('');
+    $('bestLine').textContent = highScore > 0 ? `HIGHSCORE: ${highScore.toLocaleString('de-DE')}` : 'TASTEN 1–4 ODER ANTIPPEN';
+    renderScore();
+  }
+  $('modeSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; settings.mode = b.dataset.mode; store.set('mode', settings.mode); renderMenu(); });
+  $('diffSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; settings.diff = +b.dataset.diff; store.set('diff', settings.diff); renderMenu(); });
+  $('timeSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; settings.roundMs = +b.dataset.time; store.set('roundMs', settings.roundMs); renderMenu(); });
+  $('rowSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; settings.row = b.dataset.row === 'mix' ? 'mix' : +b.dataset.row; store.set('row', settings.row); renderMenu(); });
+
+  $('startBtn').addEventListener('click', startGame);
+  $('restartBtn').addEventListener('click', startGame);
+  $('nextBtn').addEventListener('click', nextWave);
+  $('resumeBtn').addEventListener('click', resume);
+  $('quitBtn').addEventListener('click', toMenu);
+  $('waveMenuBtn').addEventListener('click', toMenu);
+  $('overMenuBtn').addEventListener('click', toMenu);
+  $('pauseBtn').addEventListener('click', () => phase === 'paused' ? resume() : pause());
+  const renderMute = () => { $('muteBtn').textContent = audio.on ? '🔊' : '🔇'; };
+  $('muteBtn').addEventListener('click', () => { audio.init(); audio.toggle(); renderMute(); });
+  document.addEventListener('visibilitychange', () => { if (document.hidden) pause(); });
+
+  window.addEventListener('resize', resize);
+  resize();
+  renderMute();
+  renderMenu();
+  renderHUD();
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

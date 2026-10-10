@@ -1,0 +1,23 @@
+  :root { --bg: linear-gradient(180deg, #ffd6e8, #c9f0ee); --ink: #4a2a3d; --soft: #8a5a75; --primary: #ff4f9a; --primary-dk: #c92f73; --edge: rgba(150, 40, 90, .2); }
+  .salon { position: relative; height: 380px; background: repeating-linear-gradient(90deg, #ffe7f1 0 40px, #fff4f9 40px 80px); overflow: hidden; }
+  .salon .floor { position: absolute; left: 0; right: 0; bottom: 0; height: 70px; background: conic-gradient(#2d2d3a 25%, #fff 0 50%, #2d2d3a 0 75%, #fff 0) 0 0 / 40px 40px; opacity: .85; }
+  .mirror { position: absolute; left: 50%; top: 18px; transform: translateX(-50%); width: min(78%, 360px); height: 230px; border-radius: 50% 50% 18px 18px; background: linear-gradient(160deg, #e9fbff, #bfe6f2); border: 8px solid #f2c14e; box-shadow: 0 6px 0 rgba(0, 0, 0, .1); }
+  .order { position: absolute; left: 10px; top: 10px; background: #fff; border-radius: 14px; padding: 4px 12px; font-family: var(--font-display); font-size: clamp(24px, 6.5vw, 32px); box-shadow: 0 4px 0 var(--edge); z-index: 5; }
+  .chair { position: absolute; left: 50%; bottom: 40px; transform: translateX(-50%); width: 150px; height: 70px; background: linear-gradient(#ff6fae, #c92f73); border-radius: 30px 30px 10px 10px; z-index: 2; }
+  .dog { position: absolute; left: 50%; bottom: 76px; transform: translateX(-50%); font-size: 108px; line-height: 1; z-index: 3; }
+  .dog.in { animation: dogIn .6s cubic-bezier(.3, 1.4, .5, 1); }
+  @keyframes dogIn { from { transform: translateX(-250%) rotate(-15deg); } }
+  .dog.happy { animation: wag .4s ease-in-out 3; }
+  @keyframes wag { 50% { transform: translateX(-50%) rotate(8deg) translateY(-8px); } }
+  .deco { position: absolute; left: 50%; bottom: 168px; transform: translateX(-50%); display: grid; gap: 1px; z-index: 4; }
+  .deco i { font-style: normal; line-height: 1; text-align: center; animation: popD .3s backwards cubic-bezier(.3, 1.6, .5, 1); }
+  @keyframes popD { from { transform: scale(0) rotate(-90deg); } }
+  .wild { position: absolute; left: 50%; bottom: 168px; transform: translateX(-50%); font-size: 64px; z-index: 4; animation: popD .4s cubic-bezier(.3, 1.6, .5, 1); }
+  .flash { position: absolute; inset: 0; background: #fff; z-index: 8; animation: flash .45s ease-out forwards; pointer-events: none; }
+  @keyframes flash { from { opacity: .95; } to { opacity: 0; } }
+  .album { display: flex; gap: 6px; overflow-x: auto; padding: 8px 2px 2px; min-height: 76px; }
+  .photo { flex: none; width: 62px; height: 66px; background: #fff; border-radius: 6px; box-shadow: 0 3px 0 var(--edge); padding: 4px 4px 14px; position: relative; animation: popD .4s cubic-bezier(.3, 1.6, .5, 1); transform: rotate(var(--r)); }
+  .photo div { width: 100%; height: 100%; border-radius: 3px; background: #cfeef5; display: grid; place-items: center; font-size: 26px; position: relative; }
+  .photo div small { position: absolute; top: 0; left: 50%; transform: translateX(-50%); font-size: 13px; }
+  .photo span { position: absolute; bottom: 1px; left: 0; right: 0; text-align: center; font-size: 9px; color: var(--soft); }
+  .album-label { font-size: 13px; color: var(--soft); margin-top: 4px; }

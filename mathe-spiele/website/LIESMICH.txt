@@ -1,0 +1,28 @@
+Theos und Idas Mathe-Spiele
+===========================
+
+23 Lernspiele: 11 fürs kleine Einmaleins, 12 für den Zahlenraum bis 20.
+Startseite: index.html
+
+LOKAL SPIELEN
+  Den ganzen Ordner entpacken und index.html im Browser öffnen
+  (alle Dateien müssen im selben Ordner bleiben).
+
+ALS WEBSITE VERÖFFENTLICHEN (kostenlos, ohne Programmierkenntnisse)
+  Netlify Drop:   https://app.netlify.com/drop
+                  -> den Ordner "mathe-spiele" ins Browserfenster ziehen. Fertig,
+                     man bekommt sofort eine Adresse wie https://xyz.netlify.app
+  GitHub Pages:   Ordnerinhalt in ein GitHub-Repository hochladen,
+                  Settings -> Pages -> "Deploy from branch" (main, /root).
+  Cloudflare Pages oder jeder normale Webspace funktionieren genauso:
+                  einfach alle Dateien hochladen.
+
+AUFS HANDY
+  Website-Adresse im Browser öffnen, dann "Teilen" -> "Zum Home-Bildschirm".
+
+HINWEISE
+  - Es wird kein Server-Code benötigt, alles läuft im Browser.
+  - Nur die Schriftarten werden von Google Fonts geladen; ohne Internet
+    erscheinen Ersatzschriften, die Spiele funktionieren trotzdem.
+  - Sterne, Rekorde und der Dino-Zoo werden im Browser des jeweiligen
+    Geräts gespeichert.

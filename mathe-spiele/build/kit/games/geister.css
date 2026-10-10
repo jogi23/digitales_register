@@ -1,0 +1,24 @@
+  :root { --bg: linear-gradient(180deg, #2b1d44, #4a3168); --ink: #2b1d44; --soft: #6e5a8a; --primary: #7c4dff; --primary-dk: #4a24b8; --edge: rgba(10, 0, 30, .35); }
+  .hall { position: relative; height: 380px; background: radial-gradient(circle at 50% 0, rgba(255, 220, 120, .25), transparent 40%), repeating-linear-gradient(90deg, #3d2a5c 0 30px, #45306a 30px 60px); overflow: hidden; }
+  .hall .floor { position: absolute; left: 0; right: 0; bottom: 0; height: 50px; background: linear-gradient(#5a3b20, #3b240c); }
+  .hall .web { position: absolute; left: 0; top: 0; font-size: 44px; opacity: .6; }
+  .hall .bat { position: absolute; right: 20px; top: 20px; font-size: 30px; animation: bat 3s ease-in-out infinite; }
+  @keyframes bat { 50% { transform: translate(-40px, 16px); } }
+  .banner { position: absolute; left: 50%; top: 14px; transform: translateX(-50%); background: #f5e6c4; color: #3b2a20; border-radius: 10px; padding: 3px 14px; font-family: var(--font-display); font-size: clamp(24px, 6.5vw, 32px); z-index: 4; box-shadow: 0 4px 0 var(--edge); white-space: nowrap; }
+  .room { position: absolute; left: 12px; top: 16px; color: #e8dcff; font-size: 14px; z-index: 4; }
+  .doors { position: absolute; left: 0; right: 0; bottom: 50px; display: flex; justify-content: center; gap: clamp(10px, 5vw, 36px); perspective: 600px; z-index: 3; }
+  .door { position: relative; width: clamp(84px, 24vw, 120px); height: 210px; border-radius: 50px 50px 4px 4px; background: #120a20; }
+  .door .behind { position: absolute; inset: 0; border-radius: inherit; display: grid; place-items: center; font-size: 54px; overflow: hidden; }
+  .door .leaf { position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(90deg, #6b3f1d, #8a5a2b 50%, #6b3f1d); border: 5px solid #3b240c; transform-origin: 0 50%; transition: transform .6s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; cursor: pointer; z-index: 2; }
+  .door .leaf::after { content: ''; position: absolute; right: 12px; top: 52%; width: 12px; height: 12px; border-radius: 50%; background: #ffd23f; }
+  .door .plate { background: #ffd23f; color: #3b240c; font-family: var(--font-display); font-size: 30px; border-radius: 8px; padding: 0 10px; box-shadow: 0 3px 0 rgba(0, 0, 0, .3); }
+  .door .knock { font-size: 22px; opacity: .6; }
+  .door.open .leaf { transform: rotateY(-105deg); }
+  .door.used { opacity: .45; pointer-events: none; }
+  .door.good .behind { background: radial-gradient(circle, #fff3c4, #ffc94a); }
+  .door.bad .behind { background: radial-gradient(circle, #e6f7ff, #9fd5ff); }
+  .ghost { display: flex; flex-direction: column; align-items: center; line-height: .9; animation: boo .4s cubic-bezier(.3, 1.8, .5, 1); }
+  .ghost .g { font-size: 58px; } .ghost .u { font-size: 30px; margin-top: -10px; }
+  @keyframes boo { from { transform: scale(.2) translateY(40px); } }
+  .fade { position: absolute; inset: 0; background: #000; z-index: 9; animation: fadeRoom .9s ease-in-out forwards; pointer-events: none; }
+  @keyframes fadeRoom { 0% { opacity: 0; } 45%, 55% { opacity: 1; } 100% { opacity: 0; } }

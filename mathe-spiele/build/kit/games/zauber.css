@@ -1,0 +1,32 @@
+  :root { --bg: linear-gradient(180deg, #2a1b4d, #4b2a6b); --ink: #2d1b47; --soft: #6e5a8a; --primary: #8a4dff; --primary-dk: #5523b8; --edge: rgba(20, 0, 40, .35); }
+  .kitchen { position: relative; height: 400px; background: radial-gradient(ellipse at 50% 100%, #6b3fa0 0 30%, transparent 60%), linear-gradient(180deg, #23163f, #3a2463); overflow: hidden; }
+  .kitchen .shelf { position: absolute; top: 14px; left: 0; right: 0; height: 8px; background: #6b4423; }
+  .kitchen .jars { position: absolute; top: -16px; left: 12px; right: 12px; display: flex; justify-content: space-between; font-size: 24px; opacity: .7; }
+  .recipe { position: absolute; left: 50%; top: 34px; transform: translateX(-50%); background: #f5e6c4; color: #5a3b17; border-radius: 6px 18px 6px 18px; padding: 6px 16px; text-align: center; box-shadow: 0 5px 0 rgba(0, 0, 0, .3); z-index: 3; white-space: nowrap; }
+  .recipe small { display: block; font-size: 14px; }
+  .recipe b { font-family: var(--font-display); font-weight: 400; font-size: clamp(26px, 7vw, 34px); }
+  .cauldron { position: absolute; left: 50%; bottom: 20px; width: 150px; height: 110px; transform: translateX(-50%); z-index: 2; }
+  .cauldron .pot { position: absolute; inset: 22px 0 0; background: radial-gradient(circle at 35% 30%, #555 0, #222 60%, #111); border-radius: 30% 30% 46% 46% / 20% 20% 80% 80%; box-shadow: inset 0 -10px 0 rgba(0, 0, 0, .4); }
+  .cauldron .brew { position: absolute; left: 10px; right: 10px; top: 12px; height: 26px; border-radius: 50%; background: var(--brew, #5dff7a); box-shadow: 0 0 30px var(--brew, #5dff7a); transition: background .5s, box-shadow .5s; }
+  .cauldron .bub { position: absolute; bottom: 90px; width: 14px; height: 14px; border-radius: 50%; background: var(--brew, #5dff7a); opacity: .8; animation: bubble 1.6s ease-in infinite; }
+  @keyframes bubble { from { transform: translateY(0) scale(.5); opacity: .9; } to { transform: translateY(-50px) scale(1.2); opacity: 0; } }
+  .wizard { position: absolute; left: 8px; bottom: 20px; font-size: 64px; z-index: 2; }
+  .wizard .soot { position: absolute; inset: 0; display: grid; place-items: center; font-size: 46px; animation: bubIn .3s; }
+  .creature { position: absolute; right: 10px; bottom: 20px; width: 90px; text-align: center; z-index: 2; }
+  .creature .c { font-size: 64px; line-height: 1; display: inline-block; }
+  .creature .c.morph { animation: morph .6s cubic-bezier(.3, 1.6, .5, 1); }
+  @keyframes morph { from { transform: scale(0) rotate(-200deg); } }
+  .creature .n { font-size: 13px; color: #e8dcff; }
+  .pedestal { position: absolute; right: 16px; bottom: 0; width: 80px; height: 22px; background: #5a4380; border-radius: 6px 6px 0 0; }
+  .bottles { position: absolute; left: 0; right: 0; top: 112px; display: flex; justify-content: center; gap: clamp(8px, 4vw, 30px); z-index: 4; }
+  .bottle { position: relative; width: 64px; height: 92px; display: flex; flex-direction: column; align-items: center; transition: opacity .3s, transform .2s; }
+  .bottle:hover { transform: translateY(-4px); }
+  .bottle .neck { width: 20px; height: 22px; background: rgba(255, 255, 255, .5); border: 2px solid rgba(255, 255, 255, .7); border-bottom: 0; border-radius: 4px 4px 0 0; position: relative; }
+  .bottle .neck::before { content: ''; position: absolute; top: -8px; left: -3px; right: -3px; height: 9px; background: #8a5a2b; border-radius: 3px; }
+  .bottle .body { width: 64px; height: 66px; border-radius: 50% 50% 40% 40%; background: radial-gradient(circle at 35% 30%, rgba(255, 255, 255, .7) 0 8%, var(--col) 30%, color-mix(in srgb, var(--col) 60%, #000)); border: 2px solid rgba(255, 255, 255, .6); display: grid; place-items: center; box-shadow: 0 0 18px var(--col); }
+  .bottle .body span { background: #f5e6c4; color: #3b2a20; font-family: var(--font-display); font-size: 24px; border-radius: 8px; padding: 0 6px; min-width: 38px; text-align: center; }
+  .bottle.wrong { animation: shake .4s; }
+  .bottle.used { opacity: .25; pointer-events: none; filter: grayscale(.8); }
+  .puff { position: absolute; width: 50px; height: 50px; border-radius: 50%; background: var(--pc, #c58cff); z-index: 5; animation: puff 1s ease-out forwards; }
+  @keyframes puff { to { transform: translate(var(--px), -60px) scale(2.6); opacity: 0; } }
+  @media (max-width: 420px) { .bottle { width: 56px; } .bottle .body { width: 56px; height: 58px; } .cauldron { width: 120px; } .wizard, .creature .c { font-size: 50px; } }

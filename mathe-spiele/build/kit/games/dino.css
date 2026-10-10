@@ -1,0 +1,27 @@
+  :root { --bg: linear-gradient(180deg, #ffe0a8, #b8e07a); --ink: #3a2a14; --soft: #7a6040; --primary: #2e9b4c; --primary-dk: #1d6b31; --edge: rgba(60, 40, 10, .2); }
+  .jungle { position: relative; height: 340px; background: radial-gradient(ellipse at 80% 30%, #ff9a4a 0 8%, transparent 9%), linear-gradient(180deg, #ffd08a 0%, #ffe6b8 50%, #8fd16a 51%, #5fb24a 100%); overflow: hidden; }
+  .volcano { position: absolute; right: 8%; bottom: 49%; width: 0; height: 0; border-left: 90px solid transparent; border-right: 90px solid transparent; border-bottom: 110px solid #8a5a3c; }
+  .volcano::after { content: '💨'; position: absolute; left: -16px; top: -10px; font-size: 30px; animation: fume 3s ease-out infinite; }
+  @keyframes fume { from { transform: translateY(0); opacity: 1; } to { transform: translateY(-40px) scale(1.6); opacity: 0; } }
+  .palm { position: absolute; left: 6px; bottom: 40%; font-size: 70px; }
+  .nest { position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%); width: 200px; height: 44px; border-radius: 50%; background: repeating-linear-gradient(20deg, #c98f4e 0 4px, #a8743d 4px 8px); box-shadow: 0 6px 0 rgba(0, 0, 0, .15); }
+  .egg { position: absolute; left: 50%; bottom: 40px; width: 150px; height: 190px; transform: translateX(-50%); z-index: 2; }
+  .egg .half { position: absolute; left: 0; right: 0; background: radial-gradient(circle at 30% 30%, #fffdf2, #f3e3b8 70%, #d9c38a); overflow: hidden; }
+  .egg .half::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 25% 60%, #8fc46a 0 9px, transparent 10px), radial-gradient(circle at 70% 30%, #8fc46a 0 12px, transparent 13px), radial-gradient(circle at 60% 75%, #8fc46a 0 7px, transparent 8px); }
+  .egg .top { top: 0; height: 52%; border-radius: 50% 50% 0 0 / 70% 70% 0 0; clip-path: polygon(0 0, 100% 0, 100% 100%, 85% 85%, 70% 100%, 55% 85%, 40% 100%, 25% 85%, 10% 100%, 0 88%); z-index: 2; }
+  .egg .bot { bottom: 0; height: 52%; border-radius: 0 0 50% 50% / 0 0 60% 60%; background-position: 0 100%; }
+  .egg .t { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); background: #fff; border-radius: 12px; padding: 2px 10px; font-family: var(--font-display); font-size: clamp(26px, 7vw, 34px); z-index: 3; white-space: nowrap; box-shadow: 0 3px 0 rgba(0, 0, 0, .15); }
+  .egg.wobble { animation: wob .5s ease-in-out 2; }
+  @keyframes wob { 25% { transform: translateX(-50%) rotate(-8deg); } 75% { transform: translateX(-50%) rotate(8deg); } }
+  .egg.crack .top { animation: lid 1s ease-out forwards; }
+  @keyframes lid { 20% { transform: translateY(-6px) rotate(-6deg); } 100% { transform: translate(-60px, -150px) rotate(-120deg); opacity: 0; } }
+  .egg.crack .t { animation: fadeOut .3s forwards; }
+  @keyframes fadeOut { to { opacity: 0; } }
+  .baby { position: absolute; left: 50%; bottom: 112px; transform: translateX(-50%); font-size: 92px; line-height: 1; z-index: 3; animation: hatch .6s .3s backwards cubic-bezier(.3, 1.6, .5, 1); }
+  .baby .acc { position: absolute; left: 50%; top: -18px; transform: translateX(-50%); font-size: 40px; }
+  @keyframes hatch { from { transform: translateX(-50%) translateY(60px) scale(.3); } }
+  .zoo { margin-top: 8px; background: rgba(255, 255, 255, .7); border-radius: 18px; padding: 8px 10px; }
+  .zoo b { font-size: 14px; color: var(--soft); }
+  .zoo div { display: flex; flex-wrap: wrap; gap: 2px; font-size: 26px; min-height: 32px; }
+  .zoo span { animation: popZ .4s cubic-bezier(.3, 1.6, .5, 1); }
+  @keyframes popZ { from { transform: scale(0); } }
