@@ -26,6 +26,11 @@ import 'package:intl/intl.dart';
 
 DateTime dateOnly(DateTime date) => DateTime(date.year, date.month, date.day);
 
+/// [date] moved by whole calendar days. Not `add(Duration)`: across the
+/// autumn clock change that lands on 23:00 of the day before.
+DateTime _addDays(DateTime date, int days) =>
+    DateTime(date.year, date.month, date.day + days);
+
 /// Shown for a day or week that carries nothing.
 const _noEntries = "(Kein Eintrag)";
 
@@ -444,7 +449,7 @@ class _MonthGrid extends StatelessWidget {
               // The row always starts on a Monday, which for the first row
               // can still lie in the previous month.
               child: _week(
-                first.subtract(Duration(days: leading - week * 7)),
+                _addDays(first, week * 7 - leading),
                 today,
               ),
             ),
@@ -467,7 +472,7 @@ class _MonthGrid extends StatelessWidget {
           ),
         ),
         for (var i = 0; i < 7; i++)
-          Expanded(child: _cell(monday.add(Duration(days: i)), today)),
+          Expanded(child: _cell(_addDays(monday, i), today)),
       ],
     );
   }
