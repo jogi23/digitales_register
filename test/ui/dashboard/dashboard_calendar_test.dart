@@ -391,6 +391,22 @@ Future<void> main() async {
     });
   });
 
+  group('the week rows', () {
+    testWidgets('show October 2026 without a doubled day', (tester) async {
+      // The clocks go back on the 25th; stepping by 24-hour durations used
+      // to land the last row on the 25th again.
+      await pumpCalendar(tester);
+      for (var i = 0; i < 5; i++) {
+        await tester.tap(find.byTooltip('Nächster Monat'));
+        await tester.pumpAndSettle();
+      }
+      expect(find.text('Oktober 2026'), findsOneWidget);
+      expect(find.text('25'), findsOneWidget);
+      expect(find.text('26'), findsOneWidget);
+      expect(find.byTooltip('Kalenderwoche 44'), findsOneWidget);
+    });
+  });
+
   group('days of the neighbouring months (#298)', () {
     /// The cell of the [index]th day drawn with [dayOfMonth] — the grid
     /// shows the 30th of April and of May alike.
