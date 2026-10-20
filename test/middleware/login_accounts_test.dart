@@ -16,7 +16,8 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:dr/middleware/middleware.dart' show accountsWithCurrent;
-import 'package:dr/util.dart' show credentialsComplete;
+import 'package:dr/util.dart'
+    show cleanPassword, cleanUsername, credentialsComplete;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -26,6 +27,16 @@ void main() {
       expect(credentialsComplete('', 'geheim'), isFalse);
       expect(credentialsComplete('anna', ''), isFalse);
       expect(credentialsComplete('   ', 'geheim'), isFalse);
+    });
+
+    test('pasted name loses surrounding whitespace', () {
+      expect(cleanUsername(' 2020kaslil_2 \n'), '2020kaslil_2');
+    });
+
+    test('pasted password loses only a trailing line break', () {
+      expect(cleanPassword('geheim\r\n'), 'geheim');
+      expect(cleanPassword('geheim\n'), 'geheim');
+      expect(cleanPassword(' geh eim '), ' geh eim ');
     });
   });
 
