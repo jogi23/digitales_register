@@ -20,7 +20,8 @@
           "title": "Fehlerbehebungen",
           "items": [
             "Benachrichtigungen: Systembenachrichtigungen zeigten als Zeitpunkt einen in der Zukunft — im Sommer zwei Stunden, etwa „in 1 Std.“. Jetzt steht die Zeit da, zu der der Eintrag kam.",
-            "Merkheft-Monatsansicht: Im Oktober 2026 kam der 25. in der letzten Zeile doppelt vor, und die Kalenderwoche stimmte nicht. Ursache war die Zeitumstellung am 25.10. Die Wochen werden jetzt in Kalendertagen gezählt."
+            "Merkheft-Monatsansicht: Im Oktober 2026 kam der 25. in der letzten Zeile doppelt vor, und die Kalenderwoche stimmte nicht. Ursache war die Zeitumstellung am 25.10. Die Wochen werden jetzt in Kalendertagen gezählt.",
+            "Anmeldung: Aus dem Browser kopierte Zugangsdaten scheiterten mit „Ungültiger Benutzername/Passwort“, wenn ein Leerzeichen oder Zeilenumbruch mitkam. Die App entfernt das jetzt vor dem Senden."
           ]
         }
       ],
@@ -42,7 +43,8 @@
           "title": "Bug fixes",
           "items": [
             "Notifications: system notifications showed a time in the future — two hours ahead in summer, such as “in 1 hr”. Now they show the time the entry came in.",
-            "Planner month view: in October 2026 the 25th appeared twice in the last row and the calendar week was wrong. The clock change on 25 October caused it. Weeks are now counted in calendar days."
+            "Planner month view: in October 2026 the 25th appeared twice in the last row and the calendar week was wrong. The clock change on 25 October caused it. Weeks are now counted in calendar days.",
+            "Sign-in: credentials copied from the browser failed with “Invalid username/password” when a space or line break came along. The app now removes it before sending."
           ]
         }
       ],
@@ -64,7 +66,8 @@
           "title": "Correzioni",
           "items": [
             "Notifiche: le notifiche di sistema mostravano un orario nel futuro — d'estate due ore avanti, ad esempio «tra 1 ora». Ora mostrano l'ora in cui è arrivata la voce.",
-            "Vista mensile dell'agenda: a ottobre 2026 il 25 compariva due volte nell'ultima riga e la settimana del calendario era sbagliata. La causa era il cambio dell'ora del 25 ottobre. Ora le settimane si contano in giorni di calendario."
+            "Vista mensile dell'agenda: a ottobre 2026 il 25 compariva due volte nell'ultima riga e la settimana del calendario era sbagliata. La causa era il cambio dell'ora del 25 ottobre. Ora le settimane si contano in giorni di calendario.",
+            "Accesso: le credenziali copiate dal browser non funzionavano («Nome utente/password non validi») se si copiava anche uno spazio o un a capo. Ora l'app li rimuove prima dell'invio."
           ]
         }
       ]
