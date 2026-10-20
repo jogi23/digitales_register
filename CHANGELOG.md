@@ -22,7 +22,7 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 
 ### Intern
 
-- Debug-Log: Neue Kategorie „Anhänge“. Sie beschreibt jeden Anhang aus Merkheft, Kalender und Mitteilungen nach Art, Dateityp und Endung, ohne Namen, Links oder Texte, und beim Herunterladen den Dateityp des Servers. So lassen sich Audio-Anhänge belegen (#339).
+- Anhänge: Die App meldet an den Fehlerbericht-Dienst, wenn im Merkheft, im Kalender oder in Mitteilungen ein Anhang einer Art auftaucht, die sie noch nicht kennt, etwa Audio oder Links. Übermittelt werden nur Art, Dateityp und Endung, nie Titel, Dateiname, Link oder Text, und jede Art höchstens einmal pro Installation. Das Debug-Log beschreibt Anhänge in der neuen Kategorie „Anhänge“ ebenso, dazu beim Herunterladen den Dateityp des Servers (#339).
 
 ## 1.5.0 — 2026-10-06
 

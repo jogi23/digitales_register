@@ -264,36 +264,6 @@ void debugLogError(String where, Object? error, [StackTrace? stack]) =>
       data: stack == null ? null : shorten('$stack', 4000),
     );
 
-final _loggedAttachments = <String>{};
-
-/// Describes the shape of each attachment in [submissions], once per run.
-///
-/// Evidence for kinds the app does not know yet (#339), audio above all.
-/// Only what tells the kind apart goes in: no title, name, link or text.
-void logAttachments(String where, List<dynamic>? submissions) {
-  for (final s in submissions ?? const <dynamic>[]) {
-    if (s is! Map) continue;
-    final id = s['id'];
-    if (!_loggedAttachments.add('$where $id')) continue;
-    final name = s['originalName'];
-    final dot = name is String ? name.lastIndexOf('.') : -1;
-    var extension = dot < 0 ? '-' : (name as String).substring(dot + 1);
-    // Anything longer is part of a name, not an extension.
-    if (!RegExp(r'^[A-Za-z0-9]{1,5}$').hasMatch(extension)) extension = '?';
-    final filled = [
-      for (final key in const ['title', 'link', 'file', 'text'])
-        if (s[key] != null && s[key] != '') key,
-    ];
-    debugLog(
-      LogCategory.attachments,
-      '$where $id: type=${s['type']}, typeName=${s['typeName']}, '
-      'Endung=$extension, isDownloadable=${s['isDownloadable']}, '
-      'belegt=[${filled.join(', ')}]',
-      data: 'Felder: ${s.keys.join(', ')}',
-    );
-  }
-}
-
 /// A short stand-in for an account: the same for the same user on the same
 /// school, but naming neither.
 String accountTag(String? user, String? url) {

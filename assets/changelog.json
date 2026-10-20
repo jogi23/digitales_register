@@ -26,7 +26,7 @@
         {
           "title": "Intern",
           "items": [
-            "Debug-Log: Neue Kategorie „Anhänge“. Sie beschreibt jeden Anhang aus Merkheft, Kalender und Mitteilungen nach Art, Dateityp und Endung, ohne Namen, Links oder Texte, und beim Herunterladen den Dateityp des Servers. So lassen sich Audio-Anhänge belegen (#339)."
+            "Anhänge: Die App meldet an den Fehlerbericht-Dienst, wenn im Merkheft, im Kalender oder in Mitteilungen ein Anhang einer Art auftaucht, die sie noch nicht kennt, etwa Audio oder Links. Übermittelt werden nur Art, Dateityp und Endung, nie Titel, Dateiname, Link oder Text, und jede Art höchstens einmal pro Installation. Das Debug-Log beschreibt Anhänge in der neuen Kategorie „Anhänge“ ebenso, dazu beim Herunterladen den Dateityp des Servers (#339)."
           ]
         }
       ],
@@ -54,7 +54,7 @@
         {
           "title": "Internal",
           "items": [
-            "Debug log: new category “Anhänge” (attachments). It describes every attachment in the homework diary, calendar and messages by kind, file type and extension, without names, links or texts, and the server’s file type on download. This helps pin down audio attachments (#339)."
+            "Attachments: the app tells the error reporting service when the homework diary, calendar or messages contain an attachment of a kind it does not know yet, such as audio or links. Only the kind, file type and extension are sent, never the title, file name, link or text, and each kind at most once per install. The debug log describes attachments the same way in the new category “Anhänge”, plus the server’s file type on download (#339)."
           ]
         }
       ],
@@ -82,7 +82,7 @@
         {
           "title": "Interno",
           "items": [
-            "Log di debug: nuova categoria «Anhänge» (allegati). Descrive ogni allegato di diario, calendario e comunicazioni per tipo, formato ed estensione, senza nomi, link o testi, e al download il formato indicato dal server. Serve a documentare gli allegati audio (#339)."
+            "Allegati: l’app segnala al servizio di report degli errori quando nel diario, nel calendario o nelle comunicazioni compare un allegato di un tipo che non conosce ancora, ad esempio audio o link. Vengono inviati solo tipo, formato ed estensione, mai titolo, nome del file, link o testo, e ogni tipo al massimo una volta per installazione. Il log di debug descrive gli allegati allo stesso modo nella nuova categoria «Anhänge», più il formato indicato dal server al download (#339)."
           ]
         }
       ]
