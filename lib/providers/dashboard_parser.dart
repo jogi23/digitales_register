@@ -19,6 +19,7 @@ import 'dart:developer';
 
 import 'package:built_collection/built_collection.dart';
 import 'package:dr/data.dart';
+import 'package:dr/debug_log.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
 
@@ -61,6 +62,7 @@ Day parseDay(Map<dynamic, dynamic> data, {required bool deduplicate}) {
 
 /// Parses a single homework map into a [Homework].
 Homework parseHomework(Map<dynamic, dynamic> data) {
+  logAttachments('Merkheft', getList(data['gradeGroupSubmissions']));
   return Homework((b) {
     b
       ..id = getInt(data['id'])

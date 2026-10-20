@@ -19,6 +19,7 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:dr/debug_log.dart';
+import 'package:dr/providers/dashboard_parser.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -219,6 +220,91 @@ void main() {
       expect(entry.category, LogCategory.error);
       expect(entry.message, 'Test: StateError: Bad state: kaputt');
       expect(entry.data, isNotEmpty);
+    });
+  });
+
+  group('logAttachments', () {
+    List<DebugLogEntry> attachmentEntries() => DebugLog.instance.entries
+        .where((e) => e.category == LogCategory.attachments)
+        .toList();
+
+    test('describes the shape, never names, links or texts', () {
+      final before = attachmentEntries().length;
+      logAttachments('Merkheft', [
+        {
+          'id': 9001,
+          'type': 'file',
+          'typeName': 'M4A',
+          'originalName': 'Aufnahme Max Muster.m4a',
+          'title': 'Lesen üben',
+          'link': null,
+          'text': null,
+          'file': 'f_1_abc.m4a',
+          'isDownloadable': true,
+        },
+        {
+          'id': 9002,
+          'type': 'link',
+          'typeName': 'Link',
+          'originalName': null,
+          'link': 'https://youtube.com/watch?v=geheim',
+          'isDownloadable': true,
+        },
+      ]);
+      final entries = attachmentEntries().sublist(before);
+      expect(entries, hasLength(2));
+      expect(
+        entries.first.message,
+        'Merkheft 9001: type=file, typeName=M4A, Endung=m4a, '
+        'isDownloadable=true, belegt=[title, file]',
+      );
+      expect(entries.first.data, contains('originalName'));
+      expect(entries.last.message, contains('type=link'));
+      expect(entries.last.message, contains('belegt=[link]'));
+      final all = entries.map((e) => '${e.message} ${e.data}').join();
+      expect(all, isNot(contains('Max Muster')));
+      expect(all, isNot(contains('Lesen')));
+      expect(all, isNot(contains('geheim')));
+      expect(all, isNot(contains('f_1_abc')));
+    });
+
+    test('keeps a name after the last dot out', () {
+      logAttachments('Merkheft', [
+        {'id': 9201, 'type': 'file', 'originalName': 'Aufnahme.Max Muster'},
+      ]);
+      final entry = attachmentEntries().last;
+      expect(entry.message, contains('Endung=?'));
+      expect(entry.message, isNot(contains('Max')));
+    });
+
+    test('logs each attachment once per run', () {
+      final before = attachmentEntries().length;
+      final list = [
+        {'id': 9101, 'type': 'file', 'originalName': 'a.pdf'},
+      ];
+      logAttachments('Kalender', list);
+      logAttachments('Kalender', list);
+      expect(attachmentEntries().length, before + 1);
+    });
+
+    test('the Merkheft parser reports its attachments', () {
+      parseHomework({
+        'id': 1,
+        'title': 'Italienisch',
+        'subtitle': 'Lessico',
+        'type': 'gradeGroup',
+        'gradeGroupSubmissions': [
+          {'id': 9301, 'type': 'file', 'typeName': 'MP3'},
+        ],
+      });
+      expect(attachmentEntries().last.message, startsWith('Merkheft 9301:'));
+    });
+
+    test('copes with null and garbage', () {
+      final before = attachmentEntries().length;
+      logAttachments('Mitteilung', null);
+      logAttachments('Mitteilung', ['kein Map', 3]);
+      expect(attachmentEntries().length, before);
     });
   });
 }

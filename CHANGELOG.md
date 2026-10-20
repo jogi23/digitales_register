@@ -20,6 +20,10 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 - Benachrichtigungen: Systembenachrichtigungen zeigten als Zeitpunkt einen in der Zukunft — im Sommer zwei Stunden, etwa „in 1 Std.“. Jetzt steht die Zeit da, zu der der Eintrag kam.
 - Merkheft-Monatsansicht: Im Oktober 2026 kam der 25. in der letzten Zeile doppelt vor, und die Kalenderwoche stimmte nicht. Ursache war die Zeitumstellung am 25.10. Die Wochen werden jetzt in Kalendertagen gezählt.
 
+### Intern
+
+- Debug-Log: Neue Kategorie „Anhänge“. Sie beschreibt jeden Anhang aus Merkheft, Kalender und Mitteilungen nach Art, Dateityp und Endung, ohne Namen, Links oder Texte, und beim Herunterladen den Dateityp des Servers. So lassen sich Audio-Anhänge belegen (#339).
+
 ## 1.5.0 — 2026-10-06
 
 ### Neue Funktionen

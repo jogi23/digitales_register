@@ -18,6 +18,7 @@
 import 'package:built_collection/built_collection.dart';
 import 'package:collection/collection.dart';
 import 'package:dr/data.dart';
+import 'package:dr/debug_log.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
 
@@ -148,6 +149,10 @@ CalendarHourBuilder _parseHour(
 }
 
 HomeworkExam _parseHomeworkExam(Map homeworkExam) {
+  logAttachments(
+    'Kalender Prüfung/Hausaufgabe',
+    getList(homeworkExam["gradeGroupSubmissions"]),
+  );
   return HomeworkExam(
     (b) => b
       ..deadline = UtcDateTime.parse(getString(homeworkExam["deadline"])!)
@@ -169,6 +174,10 @@ LessonContent _parseLessonContent(
   UtcDateTime date,
   CalendarHour? oldHour,
 ) {
+  logAttachments(
+    'Kalender Unterrichtsinhalt',
+    getList(lessonContent["lessonContentSubmissions"]),
+  );
   return LessonContent(
     (b) => b
       ..name = getString(lessonContent["name"])

@@ -602,8 +602,16 @@ Future<bool> downloadFile(
     await sink.flush();
     await sink.close();
     success = result.statusCode == 200;
+    // The server's MIME type, to tell which kinds the device can open (#339).
+    debugLog(
+      LogCategory.attachments,
+      'Download ${Uri.parse(url).path}: ${result.statusCode}, '
+      '${result.headers.value('content-type')}',
+    );
   } catch (e) {
     log("failed to download file $url: $e");
+    debugLog(LogCategory.attachments,
+        'Download ${Uri.parse(url).path}: ${e.runtimeType}');
     success = false;
   }
 

@@ -410,6 +410,7 @@ class MessagesNotifier extends Notifier<MessagesState> {
       ..id = id
       ..responseInfo = _parseResponseInfo(json)?.toBuilder();
     final attachments = ListBuilder<MessageAttachmentFile>();
+    logAttachments('Mitteilung', getList(json["submissions"]));
     for (final attachmentJson
         in getList(json["submissions"]) ?? <dynamic>[]) {
       final attachment =
