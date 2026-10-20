@@ -11,6 +11,7 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 ### Fehlerbehebungen
 
 - Benachrichtigungen: Systembenachrichtigungen zeigten als Zeitpunkt einen in der Zukunft — im Sommer zwei Stunden, etwa „in 1 Std.“. Jetzt steht die Zeit da, zu der der Eintrag kam.
+- Merkheft-Monatsansicht: Im Oktober 2026 kam der 25. in der letzten Zeile doppelt vor, und die Kalenderwoche stimmte nicht. Ursache war die Zeitumstellung am 25.10. Die Wochen werden jetzt in Kalendertagen gezählt.
 
 ## 1.5.0 — 2026-10-06
 
