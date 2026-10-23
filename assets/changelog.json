@@ -22,6 +22,12 @@
             "Benachrichtigungen: Systembenachrichtigungen zeigten als Zeitpunkt einen in der Zukunft — im Sommer zwei Stunden, etwa „in 1 Std.“. Jetzt steht die Zeit da, zu der der Eintrag kam.",
             "Merkheft-Monatsansicht: Im Oktober 2026 kam der 25. in der letzten Zeile doppelt vor, und die Kalenderwoche stimmte nicht. Ursache war die Zeitumstellung am 25.10. Die Wochen werden jetzt in Kalendertagen gezählt."
           ]
+        },
+        {
+          "title": "Intern",
+          "items": [
+            "Anhänge: Die App meldet an den Fehlerbericht-Dienst, wenn im Merkheft, im Kalender oder in Mitteilungen ein Anhang einer Art auftaucht, die sie noch nicht kennt, etwa Audio oder Links. Übermittelt werden nur Art, Dateityp und Endung, nie Titel, Dateiname, Link oder Text, und jede Art höchstens einmal pro Installation. Das Debug-Log beschreibt Anhänge in der neuen Kategorie „Anhänge“ ebenso, dazu beim Herunterladen den Dateityp des Servers (#339)."
+          ]
         }
       ],
       "en": [
@@ -44,6 +50,12 @@
             "Notifications: system notifications showed a time in the future — two hours ahead in summer, such as “in 1 hr”. Now they show the time the entry came in.",
             "Planner month view: in October 2026 the 25th appeared twice in the last row and the calendar week was wrong. The clock change on 25 October caused it. Weeks are now counted in calendar days."
           ]
+        },
+        {
+          "title": "Internal",
+          "items": [
+            "Attachments: the app tells the error reporting service when the homework diary, calendar or messages contain an attachment of a kind it does not know yet, such as audio or links. Only the kind, file type and extension are sent, never the title, file name, link or text, and each kind at most once per install. The debug log describes attachments the same way in the new category “Anhänge”, plus the server’s file type on download (#339)."
+          ]
         }
       ],
       "it": [
@@ -65,6 +77,12 @@
           "items": [
             "Notifiche: le notifiche di sistema mostravano un orario nel futuro — d'estate due ore avanti, ad esempio «tra 1 ora». Ora mostrano l'ora in cui è arrivata la voce.",
             "Vista mensile dell'agenda: a ottobre 2026 il 25 compariva due volte nell'ultima riga e la settimana del calendario era sbagliata. La causa era il cambio dell'ora del 25 ottobre. Ora le settimane si contano in giorni di calendario."
+          ]
+        },
+        {
+          "title": "Interno",
+          "items": [
+            "Allegati: l’app segnala al servizio di report degli errori quando nel diario, nel calendario o nelle comunicazioni compare un allegato di un tipo che non conosce ancora, ad esempio audio o link. Vengono inviati solo tipo, formato ed estensione, mai titolo, nome del file, link o testo, e ogni tipo al massimo una volta per installazione. Il log di debug descrive gli allegati allo stesso modo nella nuova categoria «Anhänge», più il formato indicato dal server al download (#339)."
           ]
         }
       ]
