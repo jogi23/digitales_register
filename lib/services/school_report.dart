@@ -17,9 +17,9 @@
 
 import 'package:dio/dio.dart';
 import 'package:dr/config.dart';
+import 'package:dr/services/report_once.dart';
 import 'package:dr/util.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 /// Whether a failed login means the school's address does not exist.
 ///
@@ -91,12 +91,11 @@ class SchoolReporter {
       final listed = schools.values.any((url) => _schoolHost(url) == host);
       if (listed != reportIfListed) return;
 
-      final prefs = await SharedPreferences.getInstance();
-      final sent = prefs.getStringList(_reportedKey) ?? const <String>[];
-      final key = '${kind.name}:$host';
-      if (sent.contains(key)) return;
-      await _send(kind, host);
-      await prefs.setStringList(_reportedKey, [...sent, key]);
+      await reportOncePerInstall(
+        _reportedKey,
+        '${kind.name}:$host',
+        () => _send(kind, host),
+      );
     } catch (_) {
       // Nothing the user could do about it.
     }

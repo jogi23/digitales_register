@@ -411,9 +411,9 @@ class MessagesNotifier extends Notifier<MessagesState> {
       ..id = id
       ..responseInfo = _parseResponseInfo(json)?.toBuilder();
     final attachments = ListBuilder<MessageAttachmentFile>();
-    noteAttachments('Mitteilung', getList(json["submissions"]));
-    for (final attachmentJson
-        in getList(json["submissions"]) ?? <dynamic>[]) {
+    final submissions = getList(json["submissions"]);
+    noteAttachments('Mitteilung', submissions);
+    for (final attachmentJson in submissions ?? <dynamic>[]) {
       final attachment =
           _parseAttachment(getMap(attachmentJson)!, oldMessage);
       if (attachment != null) {

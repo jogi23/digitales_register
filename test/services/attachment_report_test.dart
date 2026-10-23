@@ -70,11 +70,41 @@ void main() {
       );
       expect(shape['extension'], '?');
     });
+
+    test('keeps a short name after the dot out as well', () {
+      for (final name in ['Aufnahme.Anna', 'Referat von Tom.Lisa', 'x.Max']) {
+        expect(
+          attachmentShape({'type': 'file', 'originalName': name})['extension'],
+          '?',
+          reason: name,
+        );
+      }
+      expect(
+        attachmentShape(
+            {'typeName': 'OPUS', 'originalName': 'a.opus'})['extension'],
+        'opus',
+      );
+    });
+
+    test('passes type and typeName only as short plain tokens', () {
+      final shape = attachmentShape({
+        'type': 'Hausaufgabe von Anna Muster',
+        'typeName': 'x' * 30,
+      });
+      expect(shape['type'], '?');
+      expect(shape['typeName'], '?');
+      expect(
+          attachmentShape({'type': 'link', 'typeName': 'Link'}),
+          allOf(
+            containsPair('type', 'link'),
+            containsPair('typeName', 'Link'),
+          ));
+    });
   });
 
   group('isKnownAttachment', () {
     test('files the app opens every day are known', () {
-      for (final typeName in ['PDF', 'JPG', 'JPEG', 'PNG', 'DOCX']) {
+      for (final typeName in ['PDF', 'JPG', 'jpeg', 'Png', 'DOCX']) {
         expect(
           isKnownAttachment({'type': 'file', 'typeName': typeName}),
           isTrue,
@@ -98,14 +128,19 @@ void main() {
         .where((e) => e.category == LogCategory.attachments)
         .toList();
 
+    /// A reporter whose Sentry is on and whose reports land in [sent].
+    AttachmentReporter reporter() => AttachmentReporter(
+          enabled: () => true,
+          send: (where, shape) async => sent.add((where, shape)),
+        );
+
     setUp(() {
       SharedPreferences.setMockInitialValues({});
       sent = [];
-      sut = AttachmentReporter(
-        enabled: () => true,
-        send: (where, shape) async => sent.add((where, shape)),
-      );
+      sut = reporter();
+      final original = attachmentReporter;
       attachmentReporter = sut;
+      addTearDown(() => attachmentReporter = original);
     });
 
     test('logs every attachment once per run', () async {
@@ -144,14 +179,20 @@ void main() {
       await sut.note('Merkheft', [
         {..._audio, 'id': 9003},
       ]);
-      await AttachmentReporter(
-        enabled: () => true,
-        send: (where, shape) async => sent.add((where, shape)),
-      ).note('Merkheft', [_audio]);
+      await reporter().note('Merkheft', [_audio]);
 
       expect(sent, hasLength(1));
       expect(sent.single.$1, 'Merkheft');
       expect(sent.single.$2['typeName'], 'M4A');
+    });
+
+    test('kinds noted at the same time all stay marked as sent', () async {
+      await Future.wait([
+        sut.note('Merkheft', [_audio]),
+        sut.note('Merkheft', [_link]),
+      ]);
+      await reporter().note('Merkheft', [_audio, _link]);
+      expect(sent, hasLength(2));
     });
 
     test('the same kind somewhere else is a report of its own', () async {
@@ -173,6 +214,15 @@ void main() {
       expect(sent, hasLength(1));
     });
 
+    test('a failed send is not marked, the next run tries again', () async {
+      await AttachmentReporter(
+        enabled: () => true,
+        send: (where, shape) async => throw StateError('offline'),
+      ).note('Merkheft', [_audio]);
+      await sut.note('Merkheft', [_audio]);
+      expect(sent, hasLength(1));
+    });
+
     test('copes with null and garbage', () async {
       await sut.note('Mitteilung', null);
       await sut.note('Mitteilung', ['kein Map', 3]);
@@ -189,8 +239,21 @@ void main() {
           {'id': 9301, 'type': 'file', 'typeName': 'MP3'},
         ],
       });
+      final before = logged().length;
+      parseHomework({
+        'id': 2,
+        'title': 'Italienisch',
+        'subtitle': 'Lessico',
+        'type': 'gradeGroup',
+        'gradeGroupSubmissions': [
+          {'id': 9302, 'type': 'file', 'typeName': 'MP3'},
+        ],
+      });
       await pumpEventQueue();
-      expect(logged().last.message, startsWith('Merkheft 9301:'));
+      expect(
+        logged().sublist(before).map((e) => e.message),
+        [startsWith('Merkheft 9302:')],
+      );
       expect(sent.single.$2['typeName'], 'MP3');
     });
   });

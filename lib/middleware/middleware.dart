@@ -582,6 +582,7 @@ Future<bool> downloadFile(
   }
 
   await wrapper.ensureLoggedIn();
+  final path = Uri.parse(url).path;
   var success = true;
   if (saveFile.existsSync()) {
     final shouldOverwrite = await askShouldOverwriteFile(fileName);
@@ -605,13 +606,15 @@ Future<bool> downloadFile(
     // The server's MIME type, to tell which kinds the device can open (#339).
     debugLog(
       LogCategory.attachments,
-      'Download ${Uri.parse(url).path}: ${result.statusCode}, '
+      'Download $path: ${result.statusCode}, '
       '${result.headers.value('content-type')}',
     );
   } catch (e) {
     log("failed to download file $url: $e");
-    debugLog(LogCategory.attachments,
-        'Download ${Uri.parse(url).path}: ${e.runtimeType}');
+    // Dio throws on a 4xx/5xx; the status is what tells the cause.
+    final status = e is dio.DioException ? e.response?.statusCode : null;
+    debugLog(
+        LogCategory.attachments, 'Download $path: ${e.runtimeType} $status');
     success = false;
   }
 

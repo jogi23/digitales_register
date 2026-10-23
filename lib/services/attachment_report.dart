@@ -16,8 +16,8 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:dr/debug_log.dart';
+import 'package:dr/services/report_once.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 // Attachments the app cannot show yet, audio above all (#339). The portal
 // sends them in `*Submissions` lists; which kinds exist is only known from
@@ -29,22 +29,44 @@ const _knownTypeNames = {
   'DOC', 'DOCX', 'ODT', 'XLS', 'XLSX', 'PPT', 'PPTX', 'TXT',
 };
 
+/// Audio and video extensions, worth naming even when the server's
+/// `typeName` says something else.
+const _mediaExtensions = {
+  'MP3', 'M4A', 'AAC', 'WAV', 'OGG', 'OGA', 'OPUS', 'AMR', 'FLAC', 'WMA', //
+  'WEBM', 'MP4', 'MOV', '3GP', 'HEIC', 'WEBP',
+};
+
+final _plainToken = RegExp(r'^[A-Za-z0-9_.-]{1,12}$');
+
+/// [value] when it is a short plain token, such as `file` or `M4A`; `?` for
+/// anything that could be free text.
+String _token(Object? value) {
+  final text = '$value';
+  return _plainToken.hasMatch(text) ? text : '?';
+}
+
+/// The extension of [name], `-` without one. Only a known extension or the
+/// one the server names: anything else after the last dot may be part of a
+/// name ("Aufnahme.Anna"), and becomes `?`.
+String _extension(Object? name, String typeName) {
+  if (name is! String || !name.contains('.')) return '-';
+  final suffix = name.split('.').last;
+  final upper = suffix.toUpperCase();
+  return upper == typeName.toUpperCase() ||
+          _knownTypeNames.contains(upper) ||
+          _mediaExtensions.contains(upper)
+      ? suffix
+      : '?';
+}
+
 /// What tells an attachment's kind apart — and nothing that names it: no
 /// title, file name, link or text.
 Map<String, String> attachmentShape(Map<dynamic, dynamic> s) {
-  final name = s['originalName'];
-  final dot = name is String ? name.lastIndexOf('.') : -1;
-  final suffix = dot < 0 ? null : (name as String).substring(dot + 1);
-  final extension = suffix == null
-      ? '-'
-      // Anything longer is part of a name, not an extension.
-      : RegExp(r'^[A-Za-z0-9]{1,5}$').hasMatch(suffix)
-          ? suffix
-          : '?';
+  final typeName = _token(s['typeName']);
   return {
-    'type': '${s['type']}',
-    'typeName': '${s['typeName']}',
-    'extension': extension,
+    'type': _token(s['type']),
+    'typeName': typeName,
+    'extension': _extension(s['originalName'], typeName),
     'isDownloadable': '${s['isDownloadable']}',
     'filled': [
       for (final key in const ['title', 'link', 'file', 'text'])
@@ -56,7 +78,8 @@ Map<String, String> attachmentShape(Map<dynamic, dynamic> s) {
 
 /// Whether the app shows [s] the way it should: a file of a common type.
 bool isKnownAttachment(Map<dynamic, dynamic> s) =>
-    s['type'] == 'file' && _knownTypeNames.contains(s['typeName']);
+    s['type'] == 'file' &&
+    _knownTypeNames.contains('${s['typeName']}'.toUpperCase());
 
 /// The reporter the app uses, replaceable in tests.
 AttachmentReporter attachmentReporter = AttachmentReporter();
@@ -87,21 +110,30 @@ class AttachmentReporter {
       : _send = send ?? _sendToSentry,
         _enabled = enabled ?? (() => Sentry.isEnabled);
 
+  /// Never throws: a note must not cost the parse it sits in, and a failed
+  /// send stays unmarked for the next run.
   Future<void> note(String where, List<dynamic>? submissions) async {
-    for (final s in submissions ?? const <dynamic>[]) {
-      if (s is! Map) continue;
-      final shape = attachmentShape(s);
-      if (_logged.add('$where ${s['id']}')) {
-        debugLog(
-          LogCategory.attachments,
-          '$where ${s['id']}: type=${shape['type']}, '
-          'typeName=${shape['typeName']}, Endung=${shape['extension']}, '
-          'isDownloadable=${shape['isDownloadable']}, '
-          'belegt=[${shape['filled']}]',
-          data: 'Felder: ${shape['fields']}',
-        );
+    try {
+      for (final s in submissions ?? const <dynamic>[]) {
+        if (s is! Map) continue;
+        final firstSeen = _logged.add('$where ${s['id']}');
+        final known = isKnownAttachment(s);
+        if (!firstSeen && known) continue;
+        final shape = attachmentShape(s);
+        if (firstSeen) {
+          debugLog(
+            LogCategory.attachments,
+            '$where ${s['id']}: type=${shape['type']}, '
+            'typeName=${shape['typeName']}, Endung=${shape['extension']}, '
+            'isDownloadable=${shape['isDownloadable']}, '
+            'belegt=[${shape['filled']}]',
+            data: 'Felder: ${shape['fields']}',
+          );
+        }
+        if (!known) await _report(where, shape);
       }
-      if (!isKnownAttachment(s)) await _report(where, shape);
+    } catch (_) {
+      // Nothing the user could do about it.
     }
   }
 
@@ -111,15 +143,7 @@ class AttachmentReporter {
     if (!_enabled()) return;
     final key = '$where:${shape['type']}:${shape['typeName']}';
     if (!_checked.add(key)) return;
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final sent = prefs.getStringList(_reportedKey) ?? const <String>[];
-      if (sent.contains(key)) return;
-      await _send(where, shape);
-      await prefs.setStringList(_reportedKey, [...sent, key]);
-    } catch (_) {
-      // Nothing the user could do about it.
-    }
+    await reportOncePerInstall(_reportedKey, key, () => _send(where, shape));
   }
 }
 
