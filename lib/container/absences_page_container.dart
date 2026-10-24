@@ -58,6 +58,7 @@ class AbsencesPageContainer extends ConsumerWidget {
         builder: (_) => FutureAbsencePage(
           hourCount: hourCount(ref.read(calendarProvider)),
           signature: ref.read(settingsProvider).messageSignature,
+          times: ref.read(lessonTimesProvider),
         ),
       ),
     );

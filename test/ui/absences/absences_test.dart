@@ -336,15 +336,41 @@ void main() {
   });
 
   group('Melde-Formular', () {
-    Widget formular({int hourCount = 6, String? signature}) => MaterialApp(
+    Widget formular({
+      int hourCount = 6,
+      String? signature,
+      LessonTimes times = const {},
+    }) =>
+        MaterialApp(
           supportedLocales: const [Locale('de', 'DE')],
           localizationsDelegates: const [
             GlobalCupertinoLocalizations.delegate,
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
           ],
-          home: FutureAbsencePage(hourCount: hourCount, signature: signature),
+          home: FutureAbsencePage(
+            hourCount: hourCount,
+            signature: signature,
+            times: times,
+          ),
         );
+
+    testWidgets('nennt zur Stunde ihren Beginn, auch den eigenen (#345)',
+        (tester) async {
+      await tester.pumpWidget(
+        formular(
+            times: const {1: LessonTime(480, 530), 6: LessonTime(785, 835)}),
+      );
+      await tester.pumpAndSettle();
+      // "Von" shows the first lesson, "Bis" the last one.
+      expect(find.text('1. (08:00)'), findsOneWidget);
+      expect(find.text('6. (13:05)'), findsOneWidget);
+
+      // The list of the lessons carries the times too.
+      await tester.tap(find.text('1. (08:00)'));
+      await tester.pumpAndSettle();
+      expect(find.text('6. (13:05)'), findsWidgets);
+    });
 
     testWidgets('übernimmt die zuletzt genutzte Unterschrift', (tester) async {
       await tester.pumpWidget(formular(signature: 'Demo Elternteil'));

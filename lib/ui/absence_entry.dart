@@ -17,6 +17,7 @@
 
 import 'package:dr/data.dart';
 import 'package:dr/l10n/l10n.dart';
+import 'package:dr/lesson_times.dart';
 import 'package:dr/ui/dialog.dart';
 import 'package:dr/ui/layout.dart';
 import 'package:dr/ui/primary_action_button.dart';
@@ -312,6 +313,9 @@ class FutureAbsencePage extends StatefulWidget {
   /// How many lessons a day of this school has, for the lesson pickers.
   final int hourCount;
 
+  /// The times of the lessons, to say when each one begins.
+  final LessonTimes times;
+
   /// The name last used to sign, so it does not have to be typed again.
   final String? signature;
 
@@ -319,6 +323,7 @@ class FutureAbsencePage extends StatefulWidget {
     super.key,
     required this.hourCount,
     this.signature,
+    this.times = const {},
   });
 
   @override
@@ -402,7 +407,10 @@ class _FutureAbsencePageState extends State<FutureAbsencePage> {
         value: value,
         items: [
           for (var hour = 1; hour <= widget.hourCount; hour++)
-            DropdownMenuItem(value: hour, child: Text("$hour.")),
+            DropdownMenuItem(
+              value: hour,
+              child: Text("$hour.${lessonTimeNote(widget.times, hour, hour)}"),
+            ),
         ],
         onChanged: (picked) {
           if (picked != null) onChanged(picked);
