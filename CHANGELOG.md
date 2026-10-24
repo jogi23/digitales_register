@@ -14,7 +14,7 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 - Benachrichtigungen: Hält Android die App im Hintergrund zurück (Akku-Optimierung), zeigen die Einstellungen einen Hinweis mit Knopf zur passenden Systemseite — sonst kommen Meldungen oft verspätet. Nach der Rückkehr wird neu geprüft.
 - Benachrichtigungen: Die Einstellungen zeigen jetzt, wie der letzte Hintergrundabruf lief — Zeitpunkt, Ergebnis je Konto und ob das System Benachrichtigungen erlaubt. „Jetzt prüfen“ gibt es auch in der Release-Version. Das hilft, wenn eine Meldung ausbleibt.
 - Einstellungen: Statt einer langen Liste öffnen die Einstellungen jetzt eine Übersicht mit fünf Gruppen — Konto & Sicherheit, Benachrichtigungen, Design & Sprache, Inhalte & Ansichten und Erweitert. Unter „Inhalte & Ansichten“ liegen Fächer & Kalender, Merkheft, Klassenbuch, Hausaufgaben, Absenzen und Noten in einklappbaren Blöcken. Jede Zeile zeigt, wie sie eingestellt ist. Die Farbkreise der Akzentfarbe sind größer zu treffen und werden von TalkBack als ausgewählt angesagt.
-- Kalender und Klassenbuch: Stunden, in denen du gefehlt hast oder abwesend gemeldet bist, tragen jetzt ein Abwesend-Zeichen — im Kalender und in der Wochenansicht des Merkhefts unten links in der Stunde, im Klassenbuch am Eintrag. Das gilt auch für Verspätungen und früheres Gehen (#350).
+- Kalender und Klassenbuch: Stunden, in denen du gefehlt hast oder abwesend gemeldet bist, sind jetzt erkennbar — im Kalender und in der Wochenansicht des Merkhefts schraffiert und mit Abwesend-Zeichen unten links, im Klassenbuch am Eintrag. Verspätungen und früheres Gehen zählen mit, Absenzen „für die Schule“ nicht (#350).
 
 ### Fehlerbehebungen
 

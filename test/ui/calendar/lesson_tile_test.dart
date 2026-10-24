@@ -402,11 +402,22 @@ Future<void> main() async {
     expect(icon.bottom, lessThan(tile.bottom));
     expect(icon.left, greaterThan(tile.left + 5));
     expect(icon.center.dx, lessThan(tile.center.dx));
+    // The hatching covers the whole tile, beneath the text.
+    expect(find.byType(AbsenceHatch), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(HourWidget).at(1),
+        matching: find.byType(AbsenceHatch),
+      ),
+      findsOneWidget,
+    );
+    expect(tester.getSize(find.byType(AbsenceHatch)), tile.size);
   });
 
   testWidgets('without absences no lesson is marked', (tester) async {
     await pumpWeek(tester, _reportedRow());
     expect(find.byIcon(Icons.person_off_outlined), findsNothing);
+    expect(find.byType(AbsenceHatch), findsNothing);
   });
 
   testWidgets('teachers are set in italics', (tester) async {

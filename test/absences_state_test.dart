@@ -7,12 +7,13 @@ import 'package:flutter_test/flutter_test.dart';
 AbsencesState _state({
   List<Absence> absences = const [],
   List<FutureAbsence> futureAbsences = const [],
+  AbsenceJustified justified = AbsenceJustified.justified,
 }) =>
     AbsencesState((b) => b
       ..absences = ListBuilder([
         if (absences.isNotEmpty)
           AbsenceGroup((g) => g
-            ..justified = AbsenceJustified.justified
+            ..justified = justified
             ..hours = absences.length
             ..minutes = 0
             ..absences = ListBuilder(absences)),
@@ -55,6 +56,14 @@ void main() {
       expect(state.coversLesson(monday, 2, 4), isTrue);
       expect(state.coversLesson(monday, 4, 5), isFalse);
       expect(state.coversLesson(tuesday, 3, 3), isFalse);
+    });
+
+    test('time away for the school is no absence', () {
+      final state = _state(
+        absences: [_absence(monday, 3)],
+        justified: AbsenceJustified.forSchool,
+      );
+      expect(state.coversLesson(monday, 3, 3), isFalse);
     });
 
     test('a reported absence on one day covers its hours only', () {

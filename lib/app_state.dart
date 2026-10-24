@@ -978,6 +978,8 @@ abstract class AbsencesState
     final day = dayOf(date);
 
     for (final group in absences) {
+      // A trip or a contest for the school is no missed lesson.
+      if (group.justified == AbsenceJustified.forSchool) continue;
       for (final absence in group.absences) {
         if (dayOf(absence.date) == day &&
             absence.hour >= fromHour &&
