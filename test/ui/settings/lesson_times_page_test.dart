@@ -102,7 +102,7 @@ void main() {
     await tester.tap(find.text('Abbrechen'));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byTooltip('Ende der 1. Stunde'));
+    await tester.tap(find.byTooltip('1. Stunde: Ende ändern'));
     await tester.pumpAndSettle();
     expect(find.text('Ende der 1. Stunde'), findsOneWidget);
   });

@@ -84,17 +84,14 @@ void main() {
     final c = _container();
     c
         .read(settingsProvider.notifier)
-        .setLessonTime(serverKey(_school), 1, const LessonTime(490, 540));
+        .setLessonTimes(serverKey(_school), {1: const LessonTime(490, 540)});
     expect(c.read(lessonTimesProvider)[1], const LessonTime(490, 540));
   });
 
   test('an entry of another school does not count', () {
     final c = _container();
-    c.read(settingsProvider.notifier).setLessonTime(
-          serverKey('https://b.example.it'),
-          1,
-          const LessonTime(490, 540),
-        );
+    c.read(settingsProvider.notifier).setLessonTimes(
+        serverKey('https://b.example.it'), {1: const LessonTime(490, 540)});
     expect(c.read(lessonTimesProvider)[1], const LessonTime(480, 530));
   });
 
@@ -102,7 +99,7 @@ void main() {
     final c = _container();
     c
         .read(settingsProvider.notifier)
-        .setLessonTime(serverKey(_school), 1, const LessonTime(490, 540));
+        .setLessonTimes(serverKey(_school), {1: const LessonTime(490, 540)});
     final shown = c.read(displayCalendarProvider);
     expect(
       shown.days.values.single.hours.single.timeSpans.single.from,
@@ -127,7 +124,7 @@ void main() {
     final c = _container();
     final settings = c.read(settingsProvider.notifier);
     final key = serverKey(_school);
-    settings.setLessonTime(key, 1, const LessonTime(490, 540));
+    settings.setLessonTimes(key, {1: const LessonTime(490, 540)});
     settings.resetLessonTime(key, 1);
     expect(c.read(lessonTimesProvider)[1], const LessonTime(480, 530));
     expect(c.read(settingsProvider).lessonTimes, isEmpty);

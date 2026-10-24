@@ -318,6 +318,14 @@
   "lessonTimesCustom": "Customised",
   "lessonTimesHint": "Tap to change the start; the lesson keeps its length. A new end sets the start of the next lesson.",
   "lessonTimesInvalid": "The end must be after the start, a lesson must not begin before the previous one ends, and none may run past midnight.",
+  "lessonTimesEditEnd": "Lesson {hour}: change end",
+  "@lessonTimesEditEnd": {
+    "placeholders": {
+      "hour": {
+        "type": "int"
+      }
+    }
+  },
   "lessonTimesStart": "Start of lesson {hour}",
   "@lessonTimesStart": {
     "placeholders": {

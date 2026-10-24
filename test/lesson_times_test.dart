@@ -297,6 +297,26 @@ void main() {
       expect(editLessonTime(times, 1, end: 24 * 60 + 1), isNull);
     });
 
+    test('a gap in the hour numbers ends the cascade', () {
+      const gap = {
+        1: LessonTime(480, 530),
+        2: LessonTime(535, 585),
+        4: LessonTime(600, 650),
+      };
+      expect(editLessonTime(gap, 2, end: 590)!.keys, [2]);
+    });
+
+    test('a break closed by the cascade pulls later lessons earlier', () {
+      const withBreak = {
+        1: LessonTime(480, 530),
+        2: LessonTime(535, 585),
+        3: LessonTime(600, 650),
+      };
+      // Documented behaviour: the start of the next lesson is the end before.
+      expect(editLessonTime(withBreak, 1, start: 490)![3],
+          const LessonTime(590, 640));
+    });
+
     test('an hour nobody knows cannot be edited', () {
       expect(editLessonTime(times, 9, start: 600), isNull);
     });

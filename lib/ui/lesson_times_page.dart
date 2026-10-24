@@ -120,6 +120,7 @@ class LessonTimesPage extends ConsumerWidget {
       );
       return;
     }
+    if (changes.isEmpty) return;
     ref.read(settingsProvider.notifier).setLessonTimes(school, changes);
   }
 }
@@ -166,7 +167,7 @@ class _LessonTimeTile extends StatelessWidget {
         children: [
           IconButton(
             icon: const Icon(Icons.edit_calendar_outlined),
-            tooltip: l.lessonTimesEnd(hour),
+            tooltip: l.lessonTimesEditEnd(hour),
             onPressed: onPickEnd,
           ),
           if (custom)

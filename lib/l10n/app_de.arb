@@ -325,6 +325,14 @@
   "lessonTimesCustom": "Angepasst",
   "lessonTimesHint": "Tippen ändert den Beginn, die Stunde bleibt gleich lang. Ein neues Ende setzt den Beginn der nächsten Stunde.",
   "lessonTimesInvalid": "Das Ende muss nach dem Beginn liegen, die Stunde darf nicht vor dem Ende der vorigen beginnen und nicht über Mitternacht reichen.",
+  "lessonTimesEditEnd": "{hour}. Stunde: Ende ändern",
+  "@lessonTimesEditEnd": {
+    "placeholders": {
+      "hour": {
+        "type": "int"
+      }
+    }
+  },
   "lessonTimesStart": "Beginn der {hour}. Stunde",
   "@lessonTimesStart": {
     "placeholders": {
