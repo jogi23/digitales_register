@@ -18,8 +18,8 @@
 
 import 'package:dr/app_state.dart';
 import 'package:dr/data.dart';
-import 'package:dr/providers/calendar_provider.dart';
 import 'package:dr/providers/config_provider.dart';
+import 'package:dr/providers/lesson_times_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/providers/subject_appearance_provider.dart';
@@ -38,7 +38,7 @@ class CalendarWeekContainer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final calendarState = ref.watch(calendarProvider);
+    final calendarState = ref.watch(displayCalendarProvider);
     final noInternet = ref.watch(noInternetProvider);
     final settings = ref.watch(settingsProvider);
     final subjectAppearance = ref.watch(subjectAppearanceProvider);

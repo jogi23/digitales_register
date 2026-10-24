@@ -16,17 +16,13 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
-import 'package:dr/app_links.dart';
 import 'package:dr/pages.dart';
-import 'package:dr/ui/about_page.dart';
+import 'package:dr/ui/about_hub_page.dart';
 import 'package:dr/ui/help_feedback_page.dart';
 import 'package:dr/ui/sidebar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
-import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
-
-import '../../fake_url_launcher.dart';
 
 // Sidebar requires a non-zero height to render items.
 const _testSize = Size(300, 700);
@@ -88,6 +84,7 @@ void main() {
     expect(find.text('Klassenbuch'), findsOneWidget);
     expect(find.text('Einstellungen'), findsOneWidget);
     expect(find.text('Hilfe und Feedback'), findsOneWidget);
+    expect(find.text('Hausaufgaben'), findsOneWidget);
     // The sidebar list is scrollable and doesn't build off-screen items
     // eagerly, so the ones further down need scrolling into view first.
     await tester.scrollUntilVisible(
@@ -96,13 +93,13 @@ void main() {
       scrollable: find.byType(Scrollable).first,
     );
     await tester.pumpAndSettle();
-    expect(find.text('Über diese App'), findsOneWidget);
+    expect(find.text('Über'), findsOneWidget);
     expect(find.text('Abmelden'), findsOneWidget);
   });
 
   testWidgets('lists the entries in the standard order', (tester) async {
-    // Hilfe, dann Verbreitung (Neuigkeiten, Bewerten, Teilen, Andere Apps),
-    // dann Über; Abmelden bleibt der letzte Punkt.
+    // Hilfe, dann Über (Bewerten, Teilen, Andere Apps liegen auf dessen
+    // Seite); Abmelden bleibt der letzte Punkt.
     await tester.pumpWidget(_build());
     await tester.pumpAndSettle();
     await tester.scrollUntilVisible(
@@ -115,10 +112,7 @@ void main() {
     const order = [
       'Einstellungen',
       'Hilfe und Feedback',
-      'Bei Google Play bewerten',
-      'App teilen',
-      'Andere Apps von Wertwerk',
-      'Über diese App',
+      'Über',
       'Abmelden',
     ];
     final ys = [for (final t in order) tester.getCenter(find.text(t)).dy];
@@ -126,7 +120,7 @@ void main() {
     expect(ys.toSet().length, order.length);
   });
 
-  testWidgets('fits 16 entries without overflow', (tester) async {
+  testWidgets('fits 13 entries without overflow', (tester) async {
     await tester.pumpWidget(_build());
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
@@ -144,20 +138,38 @@ void main() {
     expect(find.text('Neuigkeiten'), findsNothing);
   });
 
-  testWidgets('opens the developer page from "Andere Apps"', (tester) async {
-    final launcher = FakeUrlLauncher.install();
+  testWidgets('has no entries for rating, sharing or other apps',
+      (tester) async {
     await tester.pumpWidget(_build());
     await tester.pumpAndSettle();
     await tester.scrollUntilVisible(
-      find.text('Andere Apps von Wertwerk'),
+      find.text('Abmelden'),
+      500,
+      scrollable: find.byType(Scrollable).first,
+    );
+    for (final gone in [
+      'Bei Google Play bewerten',
+      'App teilen',
+      'Andere Apps von Wertwerk',
+    ]) {
+      expect(find.text(gone), findsNothing, reason: gone);
+    }
+  });
+
+  testWidgets('no icon appears twice', (tester) async {
+    await tester.pumpWidget(_build());
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text('Abmelden'),
       500,
       scrollable: find.byType(Scrollable).first,
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Andere Apps von Wertwerk'));
-    await tester.pumpAndSettle();
-    expect(launcher.launched, [AppLinks.otherApps.toString()]);
-    expect(launcher.lastMode, PreferredLaunchMode.externalApplication);
+    final icons = [
+      for (final e in tester.widgetList<Icon>(find.byType(Icon)))
+        e.icon!.codePoint,
+    ];
+    expect(icons.toSet().length, icons.length, reason: 'icons repeat');
   });
 
   group('callbacks', () {
@@ -204,19 +216,18 @@ void main() {
       expect(called, isTrue);
     });
 
-    testWidgets('opens the about page when Über diese App tapped',
-        (tester) async {
+    testWidgets('opens the about page when Über tapped', (tester) async {
       await tester.pumpWidget(_build());
       await tester.pumpAndSettle();
       await tester.scrollUntilVisible(
-        find.text('Über diese App'),
+        find.text('Über'),
         500,
         scrollable: find.byType(Scrollable).first,
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Über diese App'));
+      await tester.tap(find.text('Über'));
       await tester.pumpAndSettle();
-      expect(find.byType(AboutPage), findsOneWidget);
+      expect(find.byType(AboutHubPage), findsOneWidget);
     });
 
     testWidgets('opens help & feedback page when Hilfe und Feedback tapped',
@@ -233,7 +244,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(HelpFeedbackPage), findsOneWidget);
       expect(find.text('Email schreiben'), findsOneWidget);
-      expect(find.text('FAQ'), findsOneWidget);
+      expect(find.text('Häufige Fragen'), findsOneWidget);
       expect(find.text('Feature/Idee vorschlagen'), findsOneWidget);
       expect(find.text('Bug/Fehler melden'), findsOneWidget);
     });

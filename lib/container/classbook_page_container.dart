@@ -18,6 +18,7 @@
 import 'package:dr/l10n/l10n.dart';
 import 'package:dr/providers/absences_provider.dart';
 import 'package:dr/providers/calendar_provider.dart';
+import 'package:dr/providers/lesson_times_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/providers/subject_appearance_provider.dart';
 import 'package:dr/ui/account_avatar_button.dart';
@@ -34,7 +35,7 @@ class ClassbookPageContainer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final calendar = ref.watch(calendarProvider);
+    final calendar = ref.watch(displayCalendarProvider);
     final settings = ref.watch(settingsProvider);
     final appearance = ref.watch(subjectAppearanceProvider);
     // Der Kalender ist die Quelle: Jede geladene Woche bringt die Einträge

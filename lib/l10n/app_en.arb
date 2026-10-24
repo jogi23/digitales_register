@@ -15,7 +15,7 @@
   "menuSettings": "Settings",
   "menuHelp": "Help and feedback",
   "menuRate": "Rate on Google Play",
-  "menuAbout": "About this app",
+  "menuAbout": "About",
   "menuShare": "Share the app",
   "menuOtherApps": "Other apps by Wertwerk",
   "menuLogout": "Sign out",
@@ -297,6 +297,62 @@
   "settingsShowTimes": "Show times in the calendar",
   "settingsSixDayWeek": "6-day week (beta)",
   "settingsSixDayWeekHint": "Saturday counts as a school day",
+  "settingsLessonTimes": "Lesson times",
+  "settingsLessonTimesHint": "Your own start and end times for the lessons",
+  "lessonTimesSchool": "Applies to all accounts at {school}",
+  "@lessonTimesSchool": {
+    "placeholders": {
+      "school": {
+        "type": "String"
+      }
+    }
+  },
+  "lessonTimesHour": "Lesson {hour}",
+  "@lessonTimesHour": {
+    "placeholders": {
+      "hour": {
+        "type": "int"
+      }
+    }
+  },
+  "lessonTimesCustom": "Customised",
+  "lessonTimesHint": "Tap to change the start; the lesson keeps its length. A new end sets the start of the next lesson.",
+  "lessonTimesInvalid": "The end must be after the start, a lesson must not begin before the previous one ends, and none may run past midnight.",
+  "lessonTimesEditEnd": "Lesson {hour}: change end",
+  "@lessonTimesEditEnd": {
+    "placeholders": {
+      "hour": {
+        "type": "int"
+      }
+    }
+  },
+  "lessonTimesStart": "Start of lesson {hour}",
+  "@lessonTimesStart": {
+    "placeholders": {
+      "hour": {
+        "type": "int"
+      }
+    }
+  },
+  "lessonTimesEnd": "End of lesson {hour}",
+  "@lessonTimesEnd": {
+    "placeholders": {
+      "hour": {
+        "type": "int"
+      }
+    }
+  },
+  "lessonTimesResetHour": "Reset lesson {hour}",
+  "@lessonTimesResetHour": {
+    "placeholders": {
+      "hour": {
+        "type": "int"
+      }
+    }
+  },
+  "lessonTimesResetAll": "Reset all",
+  "lessonTimesPortal": "Portal times",
+  "lessonTimesEmpty": "No lessons known yet. Load the calendar first.",
   "settingsShowAllDetails": "Show all details in the calendar",
   "settingsShowAllDetailsHint": "Teachers and room right in the lesson, as far as there is space",
   "calendarRoomTooltip": "Room: {room}",
@@ -399,7 +455,7 @@
   "loginOtherAccounts": "Other accounts",
   "helpTitle": "Help & feedback",
   "helpWriteEmail": "Write an email",
-  "helpFaq": "FAQ",
+  "helpFaq": "Online FAQ",
   "helpOfflineFaq": "Frequently asked questions",
   "faqLoginQ": "How do I sign in?",
   "faqLoginA": "Choose your school and enter your username and password for Digitales Register. If your account asks for a confirmation code, the app will ask for it. Forgot your password? You can reset it on the sign-in page.",
@@ -421,6 +477,9 @@
   "passResetNotMatchingYet": "The passwords do not match yet",
   "commonOk": "Ok",
   "accountSheetClose": "Close the account card",
+  "linkOpensOutside": "Opens outside the app",
+  "aboutTitle": "About the app",
+  "aboutOtherAppsSubtitle": "More apps on Google Play",
   "aboutPrivacy": "Privacy policy",
   "aboutVersion": "Version {version}",
   "@aboutVersion": {

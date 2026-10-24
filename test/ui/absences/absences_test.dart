@@ -20,7 +20,9 @@ import 'package:built_collection/built_collection.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/container/absences_page_container.dart';
 import 'package:dr/data.dart';
+import 'package:dr/lesson_times.dart';
 import 'package:dr/providers/absences_provider.dart';
+import 'package:dr/providers/lesson_times_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/ui/absence_entry.dart';
 import 'package:dr/ui/absences_page.dart';
@@ -42,9 +44,13 @@ class _TestAbsencesNotifier extends AbsencesNotifier {
   AbsencesState build() => _initialState;
 }
 
-Widget _buildTestWidget({required AbsencesState initialState}) {
+Widget _buildTestWidget({
+  required AbsencesState initialState,
+  LessonTimes times = const {},
+}) {
   return ProviderScope(
     overrides: [
+      lessonTimesProvider.overrideWithValue(times),
       absencesProvider.overrideWith(
         () => _TestAbsencesNotifier(initialState),
       ),
@@ -103,6 +109,50 @@ void main() {
       find.byType(AbsencesPageContainer),
       matchesGoldenFile("no_absences.png"),
     );
+  });
+
+  group('Beginnzeit der Stunde (#345)', () {
+    final everyHour = {
+      for (var h = 1; h <= 12; h++)
+        h: LessonTime(480 + (h - 1) * 55, 480 + (h - 1) * 55 + 50),
+    };
+    final timeNote = find.textContaining(RegExp(r'h \(\d\d:\d\d'));
+
+    testWidgets('shows when the lesson of an absence begins', (tester) async {
+      await tester.pumpWidget(
+        _buildTestWidget(initialState: _demoAbsencesState, times: everyHour),
+      );
+      await tester.pumpAndSettle();
+      expect(timeNote, findsWidgets);
+    });
+
+    testWidgets('leaves the text as it was without known times',
+        (tester) async {
+      await tester
+          .pumpWidget(_buildTestWidget(initialState: _demoAbsencesState));
+      await tester.pumpAndSettle();
+      expect(timeNote, findsNothing);
+    });
+
+    testWidgets('names the begin of a planned absence', (tester) async {
+      final state = _demoAbsencesState.rebuild(
+        (b) => b.futureAbsences = ListBuilder([
+          FutureAbsence(
+            (f) => f
+              ..justified = AbsenceJustified.notYetJustified
+              ..startDate = DateTime(2026, 11, 3)
+              ..endDate = DateTime(2026, 11, 3)
+              ..startHour = 3
+              ..endHour = 3,
+          ),
+        ]),
+      );
+      await tester.pumpWidget(
+        _buildTestWidget(initialState: state, times: everyHour),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Di. 3.11.2026, 3. h (09:50–10:40)'), findsOneWidget);
+    });
   });
 
   group('demo data Absenzen', () {
@@ -286,15 +336,62 @@ void main() {
   });
 
   group('Melde-Formular', () {
-    Widget formular({int hourCount = 6, String? signature}) => MaterialApp(
+    Widget formular({
+      int hourCount = 6,
+      String? signature,
+      LessonTimes times = const {},
+    }) =>
+        MaterialApp(
           supportedLocales: const [Locale('de', 'DE')],
           localizationsDelegates: const [
             GlobalCupertinoLocalizations.delegate,
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
           ],
-          home: FutureAbsencePage(hourCount: hourCount, signature: signature),
+          home: FutureAbsencePage(
+            hourCount: hourCount,
+            signature: signature,
+            times: times,
+          ),
         );
+
+    testWidgets('nennt zur Stunde ihren Beginn, auch den eigenen (#345)',
+        (tester) async {
+      await tester.pumpWidget(
+        formular(
+            times: const {1: LessonTime(480, 530), 6: LessonTime(785, 835)}),
+      );
+      await tester.pumpAndSettle();
+      // "Von" shows the first lesson, "Bis" the last one.
+      expect(find.text('1. (08:00–08:50)'), findsOneWidget);
+      expect(find.text('6. (13:05–13:55)'), findsOneWidget);
+
+      // The list of the lessons carries the times too.
+      await tester.tap(find.text('1. (08:00–08:50)'));
+      await tester.pumpAndSettle();
+      expect(find.text('6. (13:05–13:55)'), findsWidgets);
+    });
+
+    testWidgets('ohne Zeiten bleibt es bei der Nummer', (tester) async {
+      await tester.pumpWidget(formular(times: const {6: LessonTime(785, 835)}));
+      await tester.pumpAndSettle();
+      expect(find.text('1.'), findsOneWidget);
+      expect(find.text('6. (13:05–13:55)'), findsOneWidget);
+    });
+
+    testWidgets('läuft bei doppelter Schrift nicht über', (tester) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 2;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(2)),
+          child: formular(times: const {1: LessonTime(480, 530)}),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    });
 
     testWidgets('übernimmt die zuletzt genutzte Unterschrift', (tester) async {
       await tester.pumpWidget(formular(signature: 'Demo Elternteil'));

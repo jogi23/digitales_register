@@ -15,7 +15,7 @@
   "menuSettings": "Einstellungen",
   "menuHelp": "Hilfe und Feedback",
   "menuRate": "Bei Google Play bewerten",
-  "menuAbout": "Über diese App",
+  "menuAbout": "Über",
   "menuShare": "App teilen",
   "menuOtherApps": "Andere Apps von Wertwerk",
   "menuLogout": "Abmelden",
@@ -304,6 +304,62 @@
   "settingsShowTimes": "Uhrzeiten im Kalender anzeigen",
   "settingsSixDayWeek": "6-Tages-Woche (beta)",
   "settingsSixDayWeekHint": "Samstag gilt als Schultag",
+  "settingsLessonTimes": "Stundenzeiten",
+  "settingsLessonTimesHint": "Eigene Beginn- und Endzeiten der Schulstunden",
+  "lessonTimesSchool": "Gilt für alle Konten an {school}",
+  "@lessonTimesSchool": {
+    "placeholders": {
+      "school": {
+        "type": "String"
+      }
+    }
+  },
+  "lessonTimesHour": "{hour}. Stunde",
+  "@lessonTimesHour": {
+    "placeholders": {
+      "hour": {
+        "type": "int"
+      }
+    }
+  },
+  "lessonTimesCustom": "Angepasst",
+  "lessonTimesHint": "Tippen ändert den Beginn, die Stunde bleibt gleich lang. Ein neues Ende setzt den Beginn der nächsten Stunde.",
+  "lessonTimesInvalid": "Das Ende muss nach dem Beginn liegen, die Stunde darf nicht vor dem Ende der vorigen beginnen und nicht über Mitternacht reichen.",
+  "lessonTimesEditEnd": "{hour}. Stunde: Ende ändern",
+  "@lessonTimesEditEnd": {
+    "placeholders": {
+      "hour": {
+        "type": "int"
+      }
+    }
+  },
+  "lessonTimesStart": "Beginn der {hour}. Stunde",
+  "@lessonTimesStart": {
+    "placeholders": {
+      "hour": {
+        "type": "int"
+      }
+    }
+  },
+  "lessonTimesEnd": "Ende der {hour}. Stunde",
+  "@lessonTimesEnd": {
+    "placeholders": {
+      "hour": {
+        "type": "int"
+      }
+    }
+  },
+  "lessonTimesResetHour": "{hour}. Stunde zurücksetzen",
+  "@lessonTimesResetHour": {
+    "placeholders": {
+      "hour": {
+        "type": "int"
+      }
+    }
+  },
+  "lessonTimesResetAll": "Alle zurücksetzen",
+  "lessonTimesPortal": "Zeiten des Portals",
+  "lessonTimesEmpty": "Keine Stunden bekannt. Lade zuerst den Kalender.",
   "settingsShowAllDetails": "Alle Details im Kalender anzeigen",
   "settingsShowAllDetailsHint": "Lehrpersonen und Raum direkt in der Stunde, soweit Platz ist",
   "calendarRoomTooltip": "Raum: {room}",
@@ -420,7 +476,7 @@
   "loginOtherAccounts": "Andere Accounts",
   "helpTitle": "Hilfe & Feedback",
   "helpWriteEmail": "Email schreiben",
-  "helpFaq": "FAQ",
+  "helpFaq": "Online-FAQ",
   "helpOfflineFaq": "Häufige Fragen",
   "faqLoginQ": "Wie melde ich mich an?",
   "faqLoginA": "Wähle deine Schule und gib Benutzername und Passwort des Digitalen Registers ein. Verlangt dein Konto einen Bestätigungscode, fragt die App danach. Passwort vergessen? Auf der Anmeldeseite kannst du es zurücksetzen.",
@@ -442,6 +498,9 @@
   "passResetNotMatchingYet": "Die Passwörter stimmen noch nicht überein",
   "commonOk": "Ok",
   "accountSheetClose": "Konto schließen",
+  "linkOpensOutside": "Öffnet außerhalb der App",
+  "aboutTitle": "Über die App",
+  "aboutOtherAppsSubtitle": "Weitere Apps im Play Store",
   "aboutPrivacy": "Datenschutzerklärung",
   "aboutVersion": "Version {version}",
   "@aboutVersion": {

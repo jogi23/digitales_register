@@ -17,6 +17,7 @@
 
 import 'package:dr/l10n/l10n.dart';
 import 'package:dr/providers/settings_provider.dart';
+import 'package:dr/ui/lesson_times_page.dart';
 import 'package:dr/ui/subject_appearance_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -54,6 +55,18 @@ class SubjectsCalendarBlock extends ConsumerWidget {
           title: Text(l.settingsShowTimes),
           value: s.calendarShowTimes,
           onChanged: notifier.setCalendarShowTimes,
+        ),
+        ListTile(
+          leading: const Icon(Icons.access_time_rounded),
+          title: Text(l.settingsLessonTimes),
+          subtitle: Text(l.settingsLessonTimesHint),
+          trailing: const Icon(Icons.chevron_right_rounded),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute<void>(
+              builder: (context) => const LessonTimesPage(),
+            ),
+          ),
         ),
         SwitchListTile.adaptive(
           secondary: const Icon(Icons.unfold_more_rounded),

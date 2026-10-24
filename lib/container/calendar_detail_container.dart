@@ -18,6 +18,7 @@
 
 import 'package:collection/collection.dart';
 import 'package:dr/providers/calendar_provider.dart';
+import 'package:dr/providers/lesson_times_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/ui/calendar_detail.dart';
 import 'package:dr/utc_date_time.dart';
@@ -57,7 +58,7 @@ class CalendarDetailItemContainer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final calendarState = ref.watch(calendarProvider);
+    final calendarState = ref.watch(displayCalendarProvider);
     final noInternet = ref.watch(noInternetProvider);
 
     final day = calendarState.days[date];
