@@ -53,6 +53,9 @@ class LessonEntry {
   /// "Mündliche Prüfung".
   final String typeName;
 
+  /// Whether the pupil missed the lesson or is reported to miss it (#350).
+  final bool absent;
+
   const LessonEntry({
     required this.date,
     required this.fromHour,
@@ -63,6 +66,7 @@ class LessonEntry {
     required this.teachers,
     required this.title,
     required this.typeName,
+    this.absent = false,
   }) : toHour = toHour ?? fromHour;
 }
 
@@ -479,6 +483,13 @@ class _EntryTile extends StatelessWidget {
       child: ListTile(
         dense: true,
         leading: Icon(Icons.school, color: theme.colorScheme.primary),
+        trailing: entry.absent
+            ? Icon(
+                Icons.person_off_outlined,
+                color: theme.colorScheme.error,
+                semanticLabel: tr(context).lessonAbsent,
+              )
+            : null,
         title: Text(entry.title),
         // Hervorgehoben, weil hier das Suchbare steht: Fach, Stunde,
         // Lehrperson. Der Eintragstext darüber ist oft lang, und ohne
@@ -567,6 +578,24 @@ class _LessonDetails extends StatelessWidget {
               style: theme.textTheme.labelMedium
                   ?.copyWith(color: theme.colorScheme.primary),
             ),
+        ],
+        if (first.absent) ...[
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Icon(
+                Icons.person_off_outlined,
+                size: 18,
+                color: theme.colorScheme.error,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                tr(context).lessonAbsent,
+                style: theme.textTheme.bodyMedium
+                    ?.copyWith(color: theme.colorScheme.error),
+              ),
+            ],
+          ),
         ],
         if (first.teachers.isNotEmpty) ...[
           const SizedBox(height: 8),

@@ -563,4 +563,61 @@ void main() {
       expect(find.byType(EntryCard), findsNWidgets(2));
     });
   });
+
+  group('absences (#350)', () {
+    // Am Dienstag in der ersten Stunde gefehlt.
+    final absences = AbsencesState((b) => b
+      ..absences = ListBuilder([
+        AbsenceGroup((g) => g
+          ..justified = AbsenceJustified.justified
+          ..hours = 1
+          ..minutes = 0
+          ..absences = ListBuilder([
+            Absence((a) => a
+              ..date = _dienstag
+              ..hour = 1
+              ..minutes = 50
+              ..minutesCameTooLate = 0
+              ..minutesLeftTooEarly = 0),
+          ])),
+      ]));
+
+    test('marks the entries of a missed lesson only', () {
+      final entries = classbookEntries(_tage(), absences: absences);
+      expect(
+        {for (final e in entries) e.title: e.absent},
+        {
+          'Diktat': true,
+          'Leseübung': true,
+          'Notenlehre': false,
+          'Silbenlesen': false,
+        },
+      );
+      expect(classbookEntries(_tage()).any((e) => e.absent), isFalse);
+    });
+
+    for (final display in EntryDisplayMode.values) {
+      testWidgets('shows the missed lesson as absent, ${display.name}',
+          (tester) async {
+        await tester.pumpWidget(_seite(
+          classbookEntries(_tage(), absences: absences),
+          display: display,
+        ));
+        await tester.pumpAndSettle();
+        // In der Liste trägt jede Zeile die Marke, sonst die eine Stunde.
+        expect(
+          find.byIcon(Icons.person_off_outlined),
+          findsNWidgets(display == EntryDisplayMode.list ? 2 : 1),
+        );
+        if (display == EntryDisplayMode.list) {
+          for (final icon in tester
+              .widgetList<Icon>(find.byIcon(Icons.person_off_outlined))) {
+            expect(icon.semanticLabel, 'Abwesend');
+          }
+        } else {
+          expect(find.text('Abwesend'), findsOneWidget);
+        }
+      });
+    }
+  });
 }

@@ -677,6 +677,7 @@
   "accountSwitchDisabled": "Cambia account (salvataggio della password disattivato)",
   "weekLessonHasEntry": "Qualcosa da fare",
   "weekLessonFinished": "Tutto fatto",
+  "lessonAbsent": "Assente",
   "accountPhotoChange": "Cambia la foto",
   "accountPhotoRemove": "Rimuovi la foto",
   "photoCropTitle": "Scegli l'inquadratura",

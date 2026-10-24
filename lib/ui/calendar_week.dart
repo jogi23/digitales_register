@@ -19,6 +19,7 @@
 import 'package:dr/app_state.dart';
 import 'package:dr/container/calendar_week_container.dart';
 import 'package:dr/data.dart';
+import 'package:dr/providers/absences_provider.dart';
 import 'package:dr/providers/calendar_provider.dart';
 import 'package:dr/providers/subject_appearance_provider.dart';
 import 'package:dr/ui/calendar_grid.dart';
@@ -649,6 +650,9 @@ class HourWidget extends ConsumerWidget {
 
   Widget _lesson(BuildContext context, WidgetRef ref) {
     final rooms = tileRooms(hour.rooms);
+    final absent = ref.watch(absencesProvider.select(
+      (s) => s.coversLesson(day.date, hour.fromHour, hour.toHour),
+    ));
     final tile = InkWell(
       onTap: onEntryTap ??
           () {
@@ -715,6 +719,18 @@ class HourWidget extends ConsumerWidget {
                       semanticLabel: finished
                           ? tr(context).weekLessonFinished
                           : tr(context).weekLessonHasEntry,
+                    ),
+                  ),
+                // The last free corner; past the warning edge (#350).
+                if (absent)
+                  Positioned(
+                    bottom: 1,
+                    left: 6,
+                    child: Icon(
+                      Icons.person_off_outlined,
+                      size: 12,
+                      color: Theme.of(context).colorScheme.error,
+                      semanticLabel: tr(context).lessonAbsent,
                     ),
                   ),
               ],

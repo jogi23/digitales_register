@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'package:dr/app_state.dart';
 import 'package:dr/data.dart';
 import 'package:dr/ui/lesson_entry_list.dart';
 
@@ -22,11 +23,15 @@ import 'package:dr/ui/lesson_entry_list.dart';
 /// sind erwähnenswert.
 const ordinaryLessonType = 'Fachunterricht';
 
-/// Every lesson content in [days], newest lesson first.
+/// Every lesson content in [days], newest lesson first, marked where
+/// [absences] say the pupil was not there.
 ///
 /// Hours without an entry are left out: an empty lesson says nothing, and
 /// carrying it would bury the ones that do.
-List<LessonEntry> classbookEntries(Iterable<CalendarDay> days) {
+List<LessonEntry> classbookEntries(
+  Iterable<CalendarDay> days, {
+  AbsencesState? absences,
+}) {
   final entries = <LessonEntry>[
     for (final day in days)
       for (final hour in day.hours)
@@ -43,6 +48,12 @@ List<LessonEntry> classbookEntries(Iterable<CalendarDay> days) {
             ],
             title: content.name,
             typeName: content.typeName,
+            absent: absences?.coversLesson(
+                  day.date,
+                  hour.fromHour,
+                  hour.toHour,
+                ) ??
+                false,
           ),
   ];
   entries.sort((a, b) {
@@ -51,4 +62,3 @@ List<LessonEntry> classbookEntries(Iterable<CalendarDay> days) {
   });
   return entries;
 }
-

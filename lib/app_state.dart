@@ -970,6 +970,34 @@ abstract class AbsencesState
 
   UtcDateTime? get lastFetched;
 
+  /// Whether the pupil missed, or is reported to miss, any hour from
+  /// [fromHour] to [toHour] on [date]. The calendar does not say it (#350).
+  bool coversLesson(UtcDateTime date, int fromHour, int toHour) {
+    // By day alone: UtcDateTime and DateTime never compare equal otherwise.
+    DateTime dayOf(DateTime d) => DateTime(d.year, d.month, d.day);
+    final day = dayOf(date);
+
+    for (final group in absences) {
+      for (final absence in group.absences) {
+        if (dayOf(absence.date) == day &&
+            absence.hour >= fromHour &&
+            absence.hour <= toHour) {
+          return true;
+        }
+      }
+    }
+    for (final reported in futureAbsences) {
+      final start = dayOf(reported.startDate);
+      final end = dayOf(reported.endDate);
+      if (day.isBefore(start) || day.isAfter(end)) continue;
+      // The start hour holds on the first day only, the end hour on the last.
+      final first = day == start ? reported.startHour : fromHour;
+      final last = day == end ? reported.endHour : toHour;
+      if (fromHour <= last && toHour >= first) return true;
+    }
+    return false;
+  }
+
   /// The new fields start empty, so state saved before them still loads.
   static void _initializeBuilder(AbsencesStateBuilder builder) {
     builder

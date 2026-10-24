@@ -16,8 +16,10 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:built_collection/built_collection.dart';
+import 'package:dr/app_state.dart';
 import 'package:dr/container/calendar_week_container.dart';
 import 'package:dr/data.dart';
+import 'package:dr/providers/absences_provider.dart';
 import 'package:dr/ui/calendar_week.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:flutter/material.dart';
@@ -74,6 +76,14 @@ List<CalendarDay> _reportedRow() => <CalendarDay>[
       ),
     ];
 
+class _Absences extends AbsencesNotifier {
+  final AbsencesState initial;
+  _Absences(this.initial);
+
+  @override
+  AbsencesState build() => initial;
+}
+
 Future<void> main() async {
   setUpAll(() => initializeDateFormatting('de'));
 
@@ -82,9 +92,14 @@ Future<void> main() async {
     List<CalendarDay> days, {
     double height = 600,
     bool showAllDetails = false,
+    AbsencesState? absences,
   }) async {
     await tester.pumpWidget(
       ProviderScope(
+        overrides: [
+          if (absences != null)
+            absencesProvider.overrideWith(() => _Absences(absences)),
+        ],
         child: MaterialApp(
           home: Scaffold(
             body: SizedBox(
@@ -195,8 +210,7 @@ Future<void> main() async {
     expect(find.textContaining("kamera"), findsNothing);
   });
 
-  testWidgets('with the setting the room follows the teachers',
-      (tester) async {
+  testWidgets('with the setting the room follows the teachers', (tester) async {
     await pumpWeek(tester, _reportedRow(), showAllDetails: true);
     final room = find.text("Schlanders Ausweichraum 1. Stock");
     expect(find.text("Lechner"), findsOneWidget);
@@ -351,6 +365,50 @@ Future<void> main() async {
     });
   });
 
+  testWidgets('a lesson the pupil missed is marked bottom left (#350)',
+      (tester) async {
+    await pumpWeek(
+      tester,
+      _reportedRow(),
+      absences: AbsencesState((b) => b
+        ..absences = ListBuilder([
+          AbsenceGroup((g) => g
+            ..justified = AbsenceJustified.justified
+            ..hours = 1
+            ..minutes = 0
+            ..absences = ListBuilder([
+              Absence((a) => a
+                ..date = UtcDateTime(2026, 9, 9)
+                ..hour = 1
+                ..minutes = 50
+                ..minutesCameTooLate = 0
+                ..minutesLeftTooEarly = 0),
+            ])),
+        ])),
+    );
+    expect(
+      tester.widget<Icon>(find.byIcon(Icons.person_off_outlined)).semanticLabel,
+      "Abwesend",
+    );
+    expect(
+      find.descendant(
+        of: find.byType(HourWidget).at(1),
+        matching: find.byIcon(Icons.person_off_outlined),
+      ),
+      findsOneWidget,
+    );
+    final tile = tester.getRect(find.byType(HourWidget).at(1));
+    final icon = tester.getRect(find.byIcon(Icons.person_off_outlined));
+    expect(icon.bottom, lessThan(tile.bottom));
+    expect(icon.left, greaterThan(tile.left + 5));
+    expect(icon.center.dx, lessThan(tile.center.dx));
+  });
+
+  testWidgets('without absences no lesson is marked', (tester) async {
+    await pumpWeek(tester, _reportedRow());
+    expect(find.byIcon(Icons.person_off_outlined), findsNothing);
+  });
+
   testWidgets('teachers are set in italics', (tester) async {
     await pumpWeek(tester, _reportedRow());
     expect(styleOf(tester, "Fleischmann").fontStyle, FontStyle.italic);
@@ -378,9 +436,8 @@ Future<void> main() async {
       (tester) async {
     await pumpWeek(tester, _reportedRow());
     final tile = find.byType(HourWidget).at(1);
-    final background = find
-        .descendant(of: tile, matching: find.byType(DecoratedBox))
-        .first;
+    final background =
+        find.descendant(of: tile, matching: find.byType(DecoratedBox)).first;
     expect(tester.getSize(background).width, tester.getSize(tile).width);
   });
 

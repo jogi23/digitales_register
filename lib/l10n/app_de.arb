@@ -698,6 +698,7 @@
   "accountSwitchDisabled": "Konto wechseln (Passwort-Speicherung deaktiviert)",
   "weekLessonHasEntry": "Etwas eingetragen",
   "weekLessonFinished": "Alles erledigt",
+  "lessonAbsent": "Abwesend",
   "accountPhotoChange": "Foto ändern",
   "accountPhotoRemove": "Foto entfernen",
   "photoCropTitle": "Ausschnitt wählen",
