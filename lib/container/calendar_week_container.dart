@@ -18,7 +18,6 @@
 
 import 'package:dr/app_state.dart';
 import 'package:dr/data.dart';
-import 'package:dr/providers/calendar_provider.dart';
 import 'package:dr/providers/lesson_times_provider.dart';
 import 'package:dr/providers/config_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
