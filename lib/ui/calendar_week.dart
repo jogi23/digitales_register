@@ -19,8 +19,10 @@
 import 'package:dr/app_state.dart';
 import 'package:dr/container/calendar_week_container.dart';
 import 'package:dr/data.dart';
+import 'package:dr/providers/absences_provider.dart';
 import 'package:dr/providers/calendar_provider.dart';
 import 'package:dr/providers/subject_appearance_provider.dart';
+import 'package:dr/ui/absent_mark.dart';
 import 'package:dr/ui/calendar_grid.dart';
 import 'package:dr/ui/layout.dart';
 import 'package:dr/ui/no_internet.dart';
@@ -649,6 +651,9 @@ class HourWidget extends ConsumerWidget {
 
   Widget _lesson(BuildContext context, WidgetRef ref) {
     final rooms = tileRooms(hour.rooms);
+    final absent = ref.watch(absencesProvider.select(
+      (s) => s.coversLesson(day.date, hour.fromHour, hour.toHour),
+    ));
     final tile = InkWell(
       onTap: onEntryTap ??
           () {
@@ -685,6 +690,8 @@ class HourWidget extends ConsumerWidget {
           child: SizedBox.expand(
             child: Stack(
               children: <Widget>[
+                // Beneath the label, so the text stays on top of the lines.
+                if (absent) const Positioned.fill(child: AbsenceHatch()),
                 Positioned.fill(
                   child: _LessonLabel(
                     subject: subjectNicks[hour.subject.toLowerCase()] ??
@@ -715,6 +722,18 @@ class HourWidget extends ConsumerWidget {
                       semanticLabel: finished
                           ? tr(context).weekLessonFinished
                           : tr(context).weekLessonHasEntry,
+                    ),
+                  ),
+                // The last free corner; past the warning edge (#350).
+                if (absent)
+                  Positioned(
+                    bottom: 1,
+                    left: 6,
+                    child: Icon(
+                      absentIcon,
+                      size: 12,
+                      color: Theme.of(context).colorScheme.error,
+                      semanticLabel: tr(context).lessonAbsent,
                     ),
                   ),
               ],
@@ -772,6 +791,50 @@ class _CornerPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_CornerPainter oldDelegate) => oldDelegate.color != color;
+}
+
+/// Diagonal lines across a lesson the pupil missed (#350).
+///
+/// A pattern rather than a colour: it reads on every subject colour, in dark
+/// mode and without telling colours apart. Faint, so the text stays legible.
+class AbsenceHatch extends StatelessWidget {
+  const AbsenceHatch({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      painter: _HatchPainter(
+        Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.18),
+      ),
+    );
+  }
+}
+
+class _HatchPainter extends CustomPainter {
+  final Color color;
+
+  const _HatchPainter(this.color);
+
+  static const gap = 7.0;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 1.5;
+    canvas.clipRect(Offset.zero & size);
+    // Lines from bottom left to top right, one every [gap] along the bottom.
+    for (var x = -size.height; x < size.width; x += gap) {
+      canvas.drawLine(
+        Offset(x, size.height),
+        Offset(x + size.height, 0),
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_HatchPainter oldDelegate) => oldDelegate.color != color;
 }
 
 /// Subject, teachers and, if asked for, the room of one lesson tile in the

@@ -18,6 +18,7 @@
 
 import 'package:dr/app_state.dart';
 import 'package:dr/data.dart';
+import 'package:dr/ui/absent_mark.dart';
 import 'package:dr/ui/animated_linear_progress_indicator.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
@@ -38,6 +39,9 @@ class CalendarCard extends StatelessWidget {
   /// ("Tests immer rot umrahmen").
   final bool colorTestsInRed;
 
+  /// Whether the pupil missed the lesson or is reported to miss it (#350).
+  final bool absent;
+
   const CalendarCard({
     super.key,
     required this.hour,
@@ -46,6 +50,7 @@ class CalendarCard extends StatelessWidget {
     required this.onOpenFile,
     required this.noInternet,
     this.colorTestsInRed = false,
+    this.absent = false,
   });
 
   String formatTime(UtcDateTime dateTime) {
@@ -105,11 +110,14 @@ class CalendarCard extends StatelessWidget {
                   .join(", "),
               icon: Icons.schedule,
             ),
+            if (absent) const AbsentMark(),
 
             // Content
             if (hour.teachers.isNotEmpty)
               _ContentItem(
-                title: hour.teachers.length == 1 ? tr(context).teacher : tr(context).teachers,
+                title: hour.teachers.length == 1
+                    ? tr(context).teacher
+                    : tr(context).teachers,
                 content: hour.teachers
                     .map((t) => "${t.firstName} ${t.lastName}")
                     .join(", "),

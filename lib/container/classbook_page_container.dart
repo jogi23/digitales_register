@@ -16,6 +16,7 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:dr/l10n/l10n.dart';
+import 'package:dr/providers/absences_provider.dart';
 import 'package:dr/providers/calendar_provider.dart';
 import 'package:dr/providers/lesson_times_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
@@ -52,7 +53,10 @@ class ClassbookPageContainer extends ConsumerWidget {
         // holen, mit der die Seite auch öffnet.
         onRefresh: ref.read(calendarProvider.notifier).loadCurrentWeek,
         child: LessonEntryList(
-          entries: classbookEntries(calendar.days.values),
+          entries: classbookEntries(
+            calendar.days.values,
+            absences: ref.watch(absencesProvider),
+          ),
           viewMode: settings.classbookViewMode,
           displayMode: settings.classbookDisplayMode,
           selectedSubjects: settings.classbookSubjects,
@@ -60,8 +64,7 @@ class ClassbookPageContainer extends ConsumerWidget {
               ref.read(settingsProvider.notifier).setClassbookSubjects,
           // Ohne hinterlegtes Kürzel bleibt der volle Name stehen - ein
           // leerer Chip wäre schlimmer als ein langer.
-          subjectLabel: (subject) =>
-              appearance.nickFor(subject) ?? subject,
+          subjectLabel: (subject) => appearance.nickFor(subject) ?? subject,
           loading: calendar.loadingWeeks.isNotEmpty,
           loadingText: tr(context).classbookLoading,
           emptyText: tr(context).classbookEmpty,

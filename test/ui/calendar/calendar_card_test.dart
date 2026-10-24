@@ -107,6 +107,48 @@ void main() {
     });
   });
 
+  group('absence (#350)', () {
+    Future<void> pumpCard(WidgetTester tester, {required bool absent}) =>
+        tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: CalendarCard(
+                  hour: _hour(test: false),
+                  theme: const SubjectTheme(),
+                  selected: false,
+                  onOpenFile: (_) {},
+                  noInternet: false,
+                  absent: absent,
+                ),
+              ),
+            ),
+          ),
+        );
+
+    testWidgets('a missed lesson says so', (tester) async {
+      await pumpCard(tester, absent: true);
+      expect(find.text('Abwesend'), findsOneWidget);
+      expect(find.byIcon(Icons.person_off_outlined), findsOneWidget);
+    });
+
+    testWidgets('an ordinary lesson does not', (tester) async {
+      await pumpCard(tester, absent: false);
+      expect(find.text('Abwesend'), findsNothing);
+    });
+
+    testWidgets('tapping the mark explains it', (tester) async {
+      await pumpCard(tester, absent: true);
+      await tester.tap(find.text('Abwesend'));
+      await tester.pumpAndSettle();
+      expect(find.byType(AlertDialog), findsOneWidget);
+      expect(find.textContaining('für die Schule'), findsOneWidget);
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+      expect(find.byType(AlertDialog), findsNothing);
+    });
+  });
+
   testWidgets('a picked lesson keeps its accent frame', (tester) async {
     final side = await frameOf(
       tester,

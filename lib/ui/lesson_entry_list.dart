@@ -17,6 +17,7 @@
 
 import 'package:dr/app_state.dart';
 import 'package:dr/l10n/l10n.dart';
+import 'package:dr/ui/absent_mark.dart';
 import 'package:dr/ui/entry_card.dart';
 import 'package:dr/ui/layout.dart';
 import 'package:dr/utc_date_time.dart';
@@ -53,6 +54,9 @@ class LessonEntry {
   /// "Mündliche Prüfung".
   final String typeName;
 
+  /// Whether the pupil missed the lesson or is reported to miss it (#350).
+  final bool absent;
+
   const LessonEntry({
     required this.date,
     required this.fromHour,
@@ -63,6 +67,7 @@ class LessonEntry {
     required this.teachers,
     required this.title,
     required this.typeName,
+    this.absent = false,
   }) : toHour = toHour ?? fromHour;
 }
 
@@ -479,6 +484,13 @@ class _EntryTile extends StatelessWidget {
       child: ListTile(
         dense: true,
         leading: Icon(Icons.school, color: theme.colorScheme.primary),
+        trailing: entry.absent
+            ? IconButton(
+                icon: Icon(absentIcon, color: theme.colorScheme.error),
+                tooltip: tr(context).lessonAbsentInfoTooltip,
+                onPressed: () => showAbsentInfo(context),
+              )
+            : null,
         title: Text(entry.title),
         // Hervorgehoben, weil hier das Suchbare steht: Fach, Stunde,
         // Lehrperson. Der Eintragstext darüber ist oft lang, und ohne
@@ -567,6 +579,10 @@ class _LessonDetails extends StatelessWidget {
               style: theme.textTheme.labelMedium
                   ?.copyWith(color: theme.colorScheme.primary),
             ),
+        ],
+        if (first.absent) ...[
+          const SizedBox(height: 4),
+          const AbsentMark(),
         ],
         if (first.teachers.isNotEmpty) ...[
           const SizedBox(height: 8),

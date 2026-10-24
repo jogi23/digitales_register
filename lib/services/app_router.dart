@@ -108,6 +108,8 @@ class AppRouter {
     // bliebe die Seite leer, ohne dass jemand wüsste warum.
     final monday = _ref.read(calendarProvider).shownMonday;
     unawaited(_ref.read(calendarProvider.notifier).load(monday));
+    // The absence marks come from here, not from the calendar (#350).
+    unawaited(_ref.read(absencesProvider.notifier).load());
   }
 
   void showCalendar() {
@@ -120,6 +122,7 @@ class AppRouter {
     final monday = _ref.read(calendarProvider).shownMonday;
     _ref.read(calendarProvider.notifier).setCurrentMonday(monday);
     unawaited(_ref.read(calendarProvider.notifier).load(monday));
+    unawaited(_ref.read(absencesProvider.notifier).load());
   }
 
   void showGrades() {
