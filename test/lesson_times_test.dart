@@ -181,16 +181,16 @@ void main() {
       5: LessonTime(705, 755),
     };
 
-    test('one hour names its begin', () {
-      expect(lessonTimeNote(times, 3, 3), ' (09:55)');
+    test('one hour names its whole period', () {
+      expect(lessonTimeNote(times, 3, 3), ' (09:55–10:45)');
     });
 
     test('several hours run from the first begin to the last end', () {
       expect(lessonTimeNote(times, 3, 5), ' (09:55–12:35)');
     });
 
-    test('a last hour without time falls back to the begin', () {
-      expect(lessonTimeNote(times, 3, 4), ' (09:55)');
+    test('a last hour without time falls back to the end of the first', () {
+      expect(lessonTimeNote(times, 3, 4), ' (09:55–10:45)');
     });
 
     test('an unknown first hour leaves the note out', () {
@@ -224,7 +224,7 @@ void main() {
     final tuesday = DateTime(2026, 2, 3);
 
     test('one lesson', () {
-      expect(text(monday, 3, monday, 3), '2.2., 3. h (09:55)');
+      expect(text(monday, 3, monday, 3), '2.2., 3. h (09:55–10:45)');
     });
 
     test('several lessons of one day', () {
@@ -234,7 +234,7 @@ void main() {
     test('several days name the begin of both lessons', () {
       expect(
         text(monday, 3, tuesday, 5),
-        '2.2. 3. h (09:55) - 3.2. 5. h (11:45)',
+        '2.2. 3. h (09:55–10:45) - 3.2. 5. h (11:45–12:35)',
       );
     });
 

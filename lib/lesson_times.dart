@@ -173,21 +173,19 @@ LessonTimes? editLessonTime(
   return changes;
 }
 
-/// " (09:55)" für eine Stunde, " (09:55–11:45)" für mehrere, wo die Zeiten
-/// bekannt sind; sonst nichts. Hängt direkt an "3. h".
+/// " (09:55–10:45)" für eine Stunde, " (09:55–11:45)" vom Beginn der ersten
+/// bis zum Ende der letzten bei mehreren, wo die Zeiten bekannt sind; sonst
+/// nichts. Hängt direkt an "3. h".
 String lessonTimeNote(LessonTimes times, int fromHour, int toHour) {
   final first = times[fromHour];
   if (first == null) return '';
-  final last = times[toHour];
-  if (fromHour == toHour || last == null) {
-    return ' (${formatMinutes(first.start)})';
-  }
-  return ' (${formatMinutes(first.start)}–${formatMinutes(last.end)})';
+  final end = (times[toHour] ?? first).end;
+  return ' (${formatMinutes(first.start)}–${formatMinutes(end)})';
 }
 
 /// Die Tage und Stunden einer Absenz, z. B. "Mo 5.2.2026, 3. - 5. h
 /// (09:55–11:45)": am selben Tag eine Stunde oder ein Bereich, über mehrere
-/// Tage Datum und Beginn der ersten und der letzten Stunde.
+/// Tage Datum und Datum und Zeitraum der ersten und der letzten Stunde.
 String absenceRangeText({
   required DateFormat dateFormat,
   required DateTime startDate,

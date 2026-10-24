@@ -151,7 +151,7 @@ void main() {
         _buildTestWidget(initialState: state, times: everyHour),
       );
       await tester.pumpAndSettle();
-      expect(find.text('Di. 3.11.2026, 3. h (09:50)'), findsOneWidget);
+      expect(find.text('Di. 3.11.2026, 3. h (09:50–10:40)'), findsOneWidget);
     });
   });
 
@@ -363,20 +363,20 @@ void main() {
       );
       await tester.pumpAndSettle();
       // "Von" shows the first lesson, "Bis" the last one.
-      expect(find.text('1. (08:00)'), findsOneWidget);
-      expect(find.text('6. (13:05)'), findsOneWidget);
+      expect(find.text('1. (08:00–08:50)'), findsOneWidget);
+      expect(find.text('6. (13:05–13:55)'), findsOneWidget);
 
       // The list of the lessons carries the times too.
-      await tester.tap(find.text('1. (08:00)'));
+      await tester.tap(find.text('1. (08:00–08:50)'));
       await tester.pumpAndSettle();
-      expect(find.text('6. (13:05)'), findsWidgets);
+      expect(find.text('6. (13:05–13:55)'), findsWidgets);
     });
 
     testWidgets('ohne Zeiten bleibt es bei der Nummer', (tester) async {
       await tester.pumpWidget(formular(times: const {6: LessonTime(785, 835)}));
       await tester.pumpAndSettle();
       expect(find.text('1.'), findsOneWidget);
-      expect(find.text('6. (13:05)'), findsOneWidget);
+      expect(find.text('6. (13:05–13:55)'), findsOneWidget);
     });
 
     testWidgets('läuft bei doppelter Schrift nicht über', (tester) async {
