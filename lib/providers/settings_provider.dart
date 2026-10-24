@@ -19,6 +19,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:dr/app_state.dart';
+import 'package:dr/lesson_times.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -165,6 +166,36 @@ class SettingsNotifier extends Notifier<SettingsState> {
 
   void setDiagnosticsEnabled(bool value) =>
       _update(state.copyWith(diagnosticsEnabled: value));
+
+  // ─── Lesson times ─────────────────────────────────────────────────────────
+
+  /// Sets the times of the given hours for the school [school] (see
+  /// [serverKey]).
+  void setLessonTimes(String school, LessonTimes changes) =>
+      _setSchoolLessonTimes(school, {
+        ...?state.lessonTimes[school],
+        ...changes,
+      });
+
+  /// Back to the portal's times for [hour].
+  void resetLessonTime(String school, int hour) => _setSchoolLessonTimes(
+        school,
+        {...?state.lessonTimes[school]}..remove(hour),
+      );
+
+  /// Back to the portal's times for every hour of [school].
+  void resetLessonTimes(String school) =>
+      _setSchoolLessonTimes(school, const {});
+
+  void _setSchoolLessonTimes(String school, LessonTimes times) {
+    final all = {...state.lessonTimes};
+    if (times.isEmpty) {
+      all.remove(school);
+    } else {
+      all[school] = times;
+    }
+    _update(state.copyWith(lessonTimes: all));
+  }
 
   // ─── App lock ─────────────────────────────────────────────────────────────
 

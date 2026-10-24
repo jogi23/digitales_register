@@ -17,7 +17,9 @@
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
 import 'package:dr/data.dart';
+import 'package:dr/lesson_times.dart';
 import 'package:dr/providers/absences_provider.dart';
+import 'package:dr/providers/lesson_times_provider.dart';
 import 'package:dr/ui/absence.dart';
 import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
@@ -42,7 +44,11 @@ class AbsenceGroupContainer extends ConsumerWidget {
     final absenceGroup =
         ref.watch(absencesProvider.select((s) => s.absences[group]));
     final l = tr(context);
-    final fromTo = absenceGroupRange(context, absenceGroup);
+    final fromTo = absenceGroupRange(
+      context,
+      absenceGroup,
+      times: ref.watch(lessonTimesProvider),
+    );
     var duration = "";
     if (absenceGroup.hours != 0) {
       duration += l.absenceHours(absenceGroup.hours);
@@ -88,29 +94,30 @@ class AbsenceGroupContainer extends ConsumerWidget {
   }
 }
 
-/// The days and lessons an absence covers, e.g. "Mo 5.2.2026, 3. - 5. h".
+/// The days and lessons an absence covers, e.g. "Mo 5.2.2026, 3. - 5. h
+/// (09:55–11:45)"; the times are left out for lessons [times] does not know.
 ///
 /// Also what the reason dialog shows above its fields, so the reader can see
 /// which absence they are about to sign for.
-String absenceGroupRange(BuildContext context, AbsenceGroup group) {
-  final l = tr(context);
+String absenceGroupRange(
+  BuildContext context,
+  AbsenceGroup group, {
+  LessonTimes times = const {},
+}) {
   if (group.absences.isEmpty) return "";
   final first = group.absences.last; //<--- flip is intentional
   final last = group.absences.first; //<---
-  var fromTo = "";
-  if (first.date == last.date) {
-    fromTo += "${DateFormat("EE d.M.yyyy", l.localeName).format(first.date)}, ";
-    if (first == last) {
-      fromTo += "${first.hour}. h";
-    } else {
-      fromTo += "${first.hour}. - ${last.hour}. h";
-    }
-  } else {
-    fromTo +=
-        "${DateFormat("EE d.M.yyyy", l.localeName).format(first.date)} ${first.hour}. h - "
-        "${DateFormat("EE d.M.yyyy", l.localeName).format(last.date)} ${last.hour}. h ";
-  }
-  return fromTo;
+  final range = absenceRangeText(
+    dateFormat: DateFormat("EE d.M.yyyy", tr(context).localeName),
+    startDate: first.date,
+    startHour: first.hour,
+    endDate: last.date,
+    endHour: last.hour,
+    times: times,
+  );
+  // Over several days the text has always ended in a space; the goldens
+  // carry it.
+  return first.date == last.date ? range : "$range ";
 }
 
 class AbsencesViewModel {

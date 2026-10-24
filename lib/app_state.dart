@@ -23,6 +23,7 @@ import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
 import 'package:collection/collection.dart';
 import 'package:dr/data.dart';
+import 'package:dr/lesson_times.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart' show now, toMonday;
 
@@ -422,6 +423,7 @@ class SettingsState {
     this.appLockEnabled = false,
     this.appLockGraceMinutes = 1,
     this.diagnosticsEnabled = false,
+    this.lessonTimes = const {},
   })  : ignoreForGradesAverage = ignoreForGradesAverage ?? [],
         classbookSubjects = classbookSubjects ?? [];
 
@@ -534,6 +536,11 @@ class SettingsState {
   /// when something goes wrong (#325). Off until the user turns it on.
   final bool diagnosticsEnabled;
 
+  /// Die Stundenzeiten, die eine Schule selbst festgelegt hat, je Schule (siehe
+  /// [serverKey]). Gelten für alle Konten dieser Schule; ohne Eintrag gelten
+  /// die Zeiten des Portals.
+  final Map<String, LessonTimes> lessonTimes;
+
   SettingsState copyWith({
     bool? noPasswordSaving,
     bool? typeSorted,
@@ -577,6 +584,7 @@ class SettingsState {
     bool? appLockEnabled,
     int? appLockGraceMinutes,
     bool? diagnosticsEnabled,
+    Map<String, LessonTimes>? lessonTimes,
   }) =>
       SettingsState(
         noPasswordSaving: noPasswordSaving ?? this.noPasswordSaving,
@@ -635,6 +643,7 @@ class SettingsState {
         appLockEnabled: appLockEnabled ?? this.appLockEnabled,
         appLockGraceMinutes: appLockGraceMinutes ?? this.appLockGraceMinutes,
         diagnosticsEnabled: diagnosticsEnabled ?? this.diagnosticsEnabled,
+        lessonTimes: lessonTimes ?? this.lessonTimes,
       );
 
   Map<String, dynamic> toJson() => {
@@ -680,6 +689,13 @@ class SettingsState {
         'appLockEnabled': appLockEnabled,
         'appLockGraceMinutes': appLockGraceMinutes,
         'diagnosticsEnabled': diagnosticsEnabled,
+        'lessonTimes': {
+          for (final school in lessonTimes.entries)
+            school.key: {
+              for (final hour in school.value.entries)
+                '${hour.key}': hour.value.toJson(),
+            },
+        },
       };
 
   factory SettingsState.fromJson(Map<dynamic, dynamic> json) => SettingsState(
@@ -757,6 +773,7 @@ class SettingsState {
         sixDayWeek: json['sixDayWeek'] as bool? ?? false,
         appLockEnabled: json['appLockEnabled'] as bool? ?? false,
         diagnosticsEnabled: json['diagnosticsEnabled'] as bool? ?? false,
+        lessonTimes: _lessonTimesFromJson(json['lessonTimes']),
         appLockGraceMinutes: (() {
           final value = json['appLockGraceMinutes'];
           return value is int && allowedAppLockGraceMinutes.contains(value)
@@ -810,6 +827,7 @@ class SettingsState {
     'appLockEnabled',
     'appLockGraceMinutes',
     'diagnosticsEnabled',
+    'lessonTimes',
   };
 
   /// Only the app-wide settings, for storing them on their own.
@@ -878,7 +896,8 @@ class SettingsState {
         other.sixDayWeek == sixDayWeek &&
         other.appLockEnabled == appLockEnabled &&
         other.appLockGraceMinutes == appLockGraceMinutes &&
-        other.diagnosticsEnabled == diagnosticsEnabled;
+        other.diagnosticsEnabled == diagnosticsEnabled &&
+        const DeepCollectionEquality().equals(other.lessonTimes, lessonTimes);
   }
 
   @override
@@ -924,7 +943,34 @@ class SettingsState {
         appLockEnabled,
         appLockGraceMinutes,
         diagnosticsEnabled,
+        const DeepCollectionEquality().hash(lessonTimes),
       ]);
+}
+
+/// Stored times, leaving out whatever is not a school, an hour number and a
+/// pair of minutes — one bad entry must not cost the user all the settings.
+Map<String, LessonTimes> _lessonTimesFromJson(Object? json) {
+  if (json is! Map) return const {};
+  final result = <String, LessonTimes>{};
+  for (final school in json.entries) {
+    final hours = school.value;
+    if (school.key is! String || hours is! Map) continue;
+    final times = <int, LessonTime>{};
+    for (final hour in hours.entries) {
+      final number = int.tryParse('${hour.key}');
+      final pair = hour.value;
+      if (number == null ||
+          pair is! List ||
+          pair.length != 2 ||
+          pair[0] is! int ||
+          pair[1] is! int) {
+        continue;
+      }
+      times[number] = LessonTime.fromJson(pair);
+    }
+    if (times.isNotEmpty) result[school.key as String] = times;
+  }
+  return result;
 }
 
 abstract class ProfileState

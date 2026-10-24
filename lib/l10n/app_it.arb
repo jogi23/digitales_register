@@ -297,6 +297,62 @@
   "settingsShowTimes": "Mostra gli orari nel calendario",
   "settingsSixDayWeek": "Settimana di 6 giorni (beta)",
   "settingsSixDayWeekHint": "Il sabato conta come giorno di scuola",
+  "settingsLessonTimes": "Orari delle lezioni",
+  "settingsLessonTimesHint": "Orari di inizio e fine personalizzati delle lezioni",
+  "lessonTimesSchool": "Vale per tutti gli account presso {school}",
+  "@lessonTimesSchool": {
+    "placeholders": {
+      "school": {
+        "type": "String"
+      }
+    }
+  },
+  "lessonTimesHour": "{hour}ª ora",
+  "@lessonTimesHour": {
+    "placeholders": {
+      "hour": {
+        "type": "int"
+      }
+    }
+  },
+  "lessonTimesCustom": "Personalizzato",
+  "lessonTimesHint": "Tocca per cambiare l'inizio; l'ora mantiene la durata. Una nuova fine fissa l'inizio dell'ora successiva.",
+  "lessonTimesInvalid": "La fine deve essere dopo l'inizio, un'ora non può iniziare prima della fine della precedente né oltre la mezzanotte.",
+  "lessonTimesEditEnd": "{hour}ª ora: cambia la fine",
+  "@lessonTimesEditEnd": {
+    "placeholders": {
+      "hour": {
+        "type": "int"
+      }
+    }
+  },
+  "lessonTimesStart": "Inizio della {hour}ª ora",
+  "@lessonTimesStart": {
+    "placeholders": {
+      "hour": {
+        "type": "int"
+      }
+    }
+  },
+  "lessonTimesEnd": "Fine della {hour}ª ora",
+  "@lessonTimesEnd": {
+    "placeholders": {
+      "hour": {
+        "type": "int"
+      }
+    }
+  },
+  "lessonTimesResetHour": "Ripristina la {hour}ª ora",
+  "@lessonTimesResetHour": {
+    "placeholders": {
+      "hour": {
+        "type": "int"
+      }
+    }
+  },
+  "lessonTimesResetAll": "Ripristina tutto",
+  "lessonTimesPortal": "Orari del portale",
+  "lessonTimesEmpty": "Nessuna ora nota. Carica prima il calendario.",
   "settingsShowAllDetails": "Mostra tutti i dettagli nel calendario",
   "settingsShowAllDetailsHint": "Docenti e aula direttamente nella lezione, se c'è spazio",
   "calendarRoomTooltip": "Aula: {room}",

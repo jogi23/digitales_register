@@ -1,5 +1,6 @@
 // Copyright (C) 2026 Johannes Feichter
 import 'package:dr/app_state.dart';
+import 'package:dr/lesson_times.dart';
 import 'package:dr/providers/config_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -486,6 +487,19 @@ void main() {
       notifier.removeIgnoredSubject('Z');
 
       expect(c.read(settingsProvider).ignoreForGradesAverage.toList(), ['A']);
+    });
+  });
+
+  group('lesson times', () {
+    test('setLessonTimes keeps the hours it does not name', () {
+      final c = _makeContainer();
+      final settings = c.read(settingsProvider.notifier);
+      settings.setLessonTimes('s', {1: const LessonTime(1, 2)});
+      settings.setLessonTimes('s', {2: const LessonTime(3, 4)});
+      expect(c.read(settingsProvider).lessonTimes['s'], {
+        1: const LessonTime(1, 2),
+        2: const LessonTime(3, 4),
+      });
     });
   });
 }
