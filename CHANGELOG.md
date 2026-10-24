@@ -8,7 +8,7 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 
 - App-Sperre: In den Einstellungen unter „Konto & Sicherheit“ lässt sich die App mit der Sperre des Geräts schützen — Fingerabdruck, Gesicht oder Geräte-PIN. Sie fragt beim Start und nach der Rückkehr, wenn die App länger als gewählt im Hintergrund war (sofort, 1, 5 oder 15 Minuten). Solange sie an ist, zeigt die Übersicht der zuletzt genutzten Apps keinen Inhalt; Benachrichtigungen kommen weiter.
 - Über-Seite: „Über diese App“ öffnet jetzt eine eigene Seite statt eines Dialogs — mit Version, Entwicklern, Neuerungen, Quellcode, Open-Source-Lizenzen und dem Bereich „Rechtliches“ (Datenschutz, Impressum, Nutzungsbedingungen).
-- Menü: Neuer Punkt „Andere Apps von Wertwerk“.
+- Menü: „Hilfe und Feedback“ und „Über“ öffnen je eine Seite im Stil der übrigen Wertwerk-Apps — mit Symbolen, der E-Mail-Adresse und der Version. „Bewerten“, „App teilen“ und „Andere Apps von Wertwerk“ liegen jetzt auf der Seite „Über“. Alle 13 Menüpunkte haben einheitliche, unterscheidbare Symbole.
 - Hilfe: „Häufige Fragen“ beantworten die wichtigsten Fragen direkt in der App, auch ohne Internet — zu Anmeldung, Benachrichtigungen, Konten, Hausaufgaben und App-Sperre.
 - Diagnose-Protokoll: In den Einstellungen unter „Erweitert“ zeichnet ein Schalter Netzwerkprotokoll und Debug-Log auf — standardmäßig aus. „Protokoll teilen“ schickt alles Aufgezeichnete, etwa an den Support; Passwörter werden geschwärzt. Die Seiten „Netzwerkprotokoll“ und „Debug-Log“ entfallen.
 - Benachrichtigungen: Hält Android die App im Hintergrund zurück (Akku-Optimierung), zeigen die Einstellungen einen Hinweis mit Knopf zur passenden Systemseite — sonst kommen Meldungen oft verspätet. Nach der Rückkehr wird neu geprüft.

@@ -209,12 +209,12 @@ void main() {
     // Das Menü ist inzwischen länger als der Bildschirm; ohne Scrollen
     // ginge der Tipp ins Leere.
     await tester.scrollUntilVisible(
-      find.byIcon(Icons.settings),
+      find.byIcon(Icons.settings_rounded),
       500,
       scrollable: find.byType(Scrollable).first,
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.byIcon(Icons.settings));
+    await tester.tap(find.byIcon(Icons.settings_rounded));
     await tester.pumpAndSettle();
 
     // The settings open on an overview; the profile row is in this group.

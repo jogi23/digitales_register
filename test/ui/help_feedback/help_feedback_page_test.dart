@@ -18,8 +18,8 @@
 import 'package:dr/app_links.dart';
 import 'package:dr/ui/help_feedback_page.dart';
 import 'package:dr/ui/help_page.dart';
-import 'package:flutter/material.dart';
 import 'package:dr/util.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../fake_url_launcher.dart';
@@ -34,7 +34,7 @@ void main() {
     expect(find.text('Hilfe & Feedback'), findsOneWidget);
     expect(find.text('Häufige Fragen'), findsOneWidget);
     expect(find.text('Email schreiben'), findsOneWidget);
-    expect(find.text('FAQ'), findsOneWidget);
+    expect(find.text('hallo@wertwerk.io'), findsOneWidget);
     expect(find.text('Feature/Idee vorschlagen'), findsOneWidget);
     expect(find.text('Bug/Fehler melden'), findsOneWidget);
   });
@@ -70,7 +70,6 @@ void main() {
     await tester.pumpAndSettle();
     for (final label in [
       'Email schreiben',
-      'FAQ',
       'Feature/Idee vorschlagen',
       'Bug/Fehler melden',
     ]) {
@@ -79,19 +78,22 @@ void main() {
     }
     expect(launcher.launched, [
       AppLinks.feedbackMail(appVersion).toString(),
-      AppLinks.faq.toString(),
       AppLinks.suggestFeature.toString(),
       AppLinks.reportBug.toString(),
     ]);
   });
 
-  testWidgets('shows an icon for every entry', (tester) async {
+  testWidgets('every entry has a rounded icon and a 48 dp tap target',
+      (tester) async {
     await tester.pumpWidget(build());
     await tester.pumpAndSettle();
-    expect(find.byIcon(Icons.quiz_outlined), findsOneWidget);
-    expect(find.byIcon(Icons.email), findsOneWidget);
-    expect(find.byIcon(Icons.help_outline), findsOneWidget);
-    expect(find.byIcon(Icons.lightbulb_outline), findsOneWidget);
-    expect(find.byIcon(Icons.bug_report_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.quiz_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.email_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.lightbulb_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.bug_report_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.chevron_right_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.open_in_new_rounded), findsNWidgets(3));
+    await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+    await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
   });
 }
