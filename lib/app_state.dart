@@ -943,23 +943,35 @@ class SettingsState {
         appLockEnabled,
         appLockGraceMinutes,
         diagnosticsEnabled,
-        ...lessonTimes.entries.map((e) => Object.hash(
-            e.key,
-            Object.hashAll(
-                e.value.entries.map((h) => Object.hash(h.key, h.value))))),
+        const DeepCollectionEquality().hash(lessonTimes),
       ]);
 }
 
-Map<String, LessonTimes> _lessonTimesFromJson(Object? json) => json is Map
-    ? {
-        for (final school in json.entries)
-          school.key as String: {
-            for (final hour in (school.value as Map).entries)
-              int.parse(hour.key as String):
-                  LessonTime.fromJson(hour.value as List<dynamic>),
-          },
+/// Stored times, leaving out whatever is not a school, an hour number and a
+/// pair of minutes — one bad entry must not cost the user all the settings.
+Map<String, LessonTimes> _lessonTimesFromJson(Object? json) {
+  if (json is! Map) return const {};
+  final result = <String, LessonTimes>{};
+  for (final school in json.entries) {
+    final hours = school.value;
+    if (school.key is! String || hours is! Map) continue;
+    final times = <int, LessonTime>{};
+    for (final hour in hours.entries) {
+      final number = int.tryParse('${hour.key}');
+      final pair = hour.value;
+      if (number == null ||
+          pair is! List ||
+          pair.length != 2 ||
+          pair[0] is! int ||
+          pair[1] is! int) {
+        continue;
       }
-    : const {};
+      times[number] = LessonTime.fromJson(pair);
+    }
+    if (times.isNotEmpty) result[school.key as String] = times;
+  }
+  return result;
+}
 
 abstract class ProfileState
     implements Built<ProfileState, ProfileStateBuilder> {

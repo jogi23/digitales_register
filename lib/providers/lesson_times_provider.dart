@@ -15,11 +15,14 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'package:built_collection/built_collection.dart';
 import 'package:dr/app_state.dart';
+import 'package:dr/data.dart';
 import 'package:dr/lesson_times.dart';
 import 'package:dr/providers/calendar_provider.dart';
 import 'package:dr/providers/login_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
+import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -54,11 +57,24 @@ final lessonTimesProvider = Provider<LessonTimes>(
 /// The calendar as the screens show it: the loaded days with the school's own
 /// lesson times. The stored state keeps the portal's, so taking an entry back
 /// needs no reload.
+///
+/// Whatever shows a lesson time reads this, not [calendarProvider].
 final displayCalendarProvider = Provider<CalendarState>((ref) {
   final calendar = ref.watch(calendarProvider);
+  final days = ref.watch(_displayDaysProvider);
+  return identical(days, calendar.days)
+      ? calendar
+      : calendar.rebuild((b) => b.days.replace(days));
+});
+
+/// The loaded days with the school's times — worked out again only when the
+/// days or the times change, not on a selection or a week still loading.
+final _displayDaysProvider =
+    Provider<BuiltMap<UtcDateTime, CalendarDay>>((ref) {
+  final days = ref.watch(calendarProvider.select((s) => s.days));
   final overrides = ref.watch(lessonTimeOverridesProvider);
-  if (overrides.isEmpty) return calendar;
-  return calendar.rebuild(
-    (b) => b.days.updateAllValues((_, day) => applyLessonTimes(day, overrides)),
+  if (overrides.isEmpty) return days;
+  return days.rebuild(
+    (b) => b.updateAllValues((_, day) => applyLessonTimes(day, overrides)),
   );
 });

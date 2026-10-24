@@ -63,11 +63,11 @@ class AbsenceGroupContainer extends ConsumerWidget {
         justifiedString = absenceGroup.reasonSignature != null &&
                 absenceGroup.reasonTimestamp != null
             ? l.absenceJustifiedAs(
-                DateFormat("EE d.M.yyyy", l.localeName)
-                    .format(absenceGroup.reasonTimestamp!),
-                DateFormat("HH:mm").format(absenceGroup.reasonTimestamp!),
-                absenceGroup.reasonSignature!,
-              )
+                    DateFormat("EE d.M.yyyy", l.localeName)
+                        .format(absenceGroup.reasonTimestamp!),
+                    DateFormat("HH:mm").format(absenceGroup.reasonTimestamp!),
+                    absenceGroup.reasonSignature!,
+                  )
             : l.absenceJustified;
       case AbsenceJustified.forSchool:
         justifiedString = l.absenceForSchool;
@@ -104,26 +104,20 @@ String absenceGroupRange(
   AbsenceGroup group, {
   LessonTimes times = const {},
 }) {
-  final l = tr(context);
   if (group.absences.isEmpty) return "";
   final first = group.absences.last; //<--- flip is intentional
   final last = group.absences.first; //<---
-  var fromTo = "";
-  if (first.date == last.date) {
-    fromTo += "${DateFormat("EE d.M.yyyy", l.localeName).format(first.date)}, ";
-    if (first == last) {
-      fromTo +=
-          "${first.hour}. h${lessonTimeNote(times, first.hour, first.hour)}";
-    } else {
-      fromTo += "${first.hour}. - ${last.hour}. h"
-          "${lessonTimeNote(times, first.hour, last.hour)}";
-    }
-  } else {
-    fromTo +=
-        "${DateFormat("EE d.M.yyyy", l.localeName).format(first.date)} ${first.hour}. h${lessonTimeNote(times, first.hour, first.hour)} - "
-        "${DateFormat("EE d.M.yyyy", l.localeName).format(last.date)} ${last.hour}. h${lessonTimeNote(times, last.hour, last.hour)} ";
-  }
-  return fromTo;
+  final range = absenceRangeText(
+    dateFormat: DateFormat("EE d.M.yyyy", tr(context).localeName),
+    startDate: first.date,
+    startHour: first.hour,
+    endDate: last.date,
+    endHour: last.hour,
+    times: times,
+  );
+  // Over several days the text has always ended in a space; the goldens
+  // carry it.
+  return first.date == last.date ? range : "$range ";
 }
 
 class AbsencesViewModel {

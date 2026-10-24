@@ -77,8 +77,9 @@ class AbsenceGroupWidget extends StatelessWidget {
           title,
           style: TextStyle(color: theme.colorScheme.primary),
         ),
-        subtitle:
-            subtitleParts.isNotEmpty ? Text(subtitleParts.join(' · ')) : null,
+        subtitle: subtitleParts.isNotEmpty
+            ? Text(subtitleParts.join(' · '))
+            : null,
         trailing: onJustify == null
             ? null
             : IconButton(
@@ -111,22 +112,14 @@ class FutureAbsenceWidget extends ConsumerWidget {
 
     final l = tr(context);
     final times = ref.watch(lessonTimesProvider);
-    var fromTo = '';
-    if (absence.startDate == absence.endDate) {
-      fromTo +=
-          '${DateFormat("EE d.M.yyyy", l.localeName).format(absence.startDate)}, ';
-      if (absence.startHour == absence.endHour) {
-        fromTo +=
-            '${absence.startHour}. h${lessonTimeNote(times, absence.startHour, absence.startHour)}';
-      } else {
-        fromTo += '${absence.startHour}. - ${absence.endHour}. h'
-            '${lessonTimeNote(times, absence.startHour, absence.endHour)}';
-      }
-    } else {
-      fromTo +=
-          '${DateFormat("EE d.M.yyyy", l.localeName).format(absence.startDate)} ${absence.startHour}. h${lessonTimeNote(times, absence.startHour, absence.startHour)}'
-          ' - ${DateFormat("EE d.M.yyyy", l.localeName).format(absence.endDate)} ${absence.endHour}. h${lessonTimeNote(times, absence.endHour, absence.endHour)}';
-    }
+    final fromTo = absenceRangeText(
+      dateFormat: DateFormat("EE d.M.yyyy", l.localeName),
+      startDate: absence.startDate,
+      startHour: absence.startHour,
+      endDate: absence.endDate,
+      endHour: absence.endHour,
+      times: times,
+    );
 
     final isApproved = absence.justified == AbsenceJustified.justified ||
         absence.justified == AbsenceJustified.forSchool;
@@ -182,8 +175,9 @@ class FutureAbsenceWidget extends ConsumerWidget {
           fromTo,
           style: TextStyle(color: theme.colorScheme.primary),
         ),
-        subtitle:
-            subtitleParts.isNotEmpty ? Text(subtitleParts.join('\n')) : null,
+        subtitle: subtitleParts.isNotEmpty
+            ? Text(subtitleParts.join('\n'))
+            : null,
         trailing: onDelete == null
             ? null
             : IconButton(

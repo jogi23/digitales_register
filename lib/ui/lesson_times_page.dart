@@ -18,7 +18,6 @@
 import 'package:dr/l10n/l10n.dart';
 import 'package:dr/lesson_times.dart';
 import 'package:dr/providers/lesson_times_provider.dart';
-import 'package:dr/providers/login_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
 import 'package:dr/ui/layout.dart';
 import 'package:flutter/material.dart';
@@ -35,12 +34,11 @@ class LessonTimesPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = tr(context);
     final school = ref.watch(schoolKeyProvider);
-    final host =
-        Uri.tryParse(ref.watch(loginProvider.select((s) => s.url)) ?? '')?.host;
+    final host = school == null ? null : Uri.parse(school).host;
     final portal = ref.watch(portalLessonTimesProvider);
     final overrides = ref.watch(lessonTimeOverridesProvider);
     final times = ref.watch(lessonTimesProvider);
-    final hours = ({...portal.keys, ...overrides.keys}.toList()..sort());
+    final hours = times.keys.toList()..sort();
     return Scaffold(
       appBar: AppBar(
         title: Text(l.settingsLessonTimes),
@@ -100,13 +98,13 @@ class LessonTimesPage extends ConsumerWidget {
     final start = await showTimePicker(
       context: context,
       initialTime: of(current.start),
-      helpText: tr(context).lessonTimesHour(hour),
+      helpText: tr(context).lessonTimesStart(hour),
     );
     if (start == null || !context.mounted) return;
     final end = await showTimePicker(
       context: context,
       initialTime: of(current.end),
-      helpText: tr(context).lessonTimesHour(hour),
+      helpText: tr(context).lessonTimesEnd(hour),
     );
     if (end == null || !context.mounted) return;
 
@@ -144,21 +142,22 @@ class _LessonTimeTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = tr(context);
+    final showsPortal = custom && portalTime != null;
     return ListTile(
       leading: const Icon(Icons.schedule_rounded),
       title: Text(l.lessonTimesHour(hour)),
       subtitle: Text(
-        custom && portalTime != null
+        showsPortal
             ? '${_range(time)} · ${l.lessonTimesCustom}\n'
                 '${l.lessonTimesPortal}: ${_range(portalTime!)}'
             : _range(time),
       ),
-      isThreeLine: custom && portalTime != null,
+      isThreeLine: showsPortal,
       onTap: onPick,
       trailing: custom
           ? IconButton(
               icon: const Icon(Icons.restart_alt_rounded),
-              tooltip: l.lessonTimesReset,
+              tooltip: l.lessonTimesResetHour(hour),
               onPressed: onReset,
             )
           : null,

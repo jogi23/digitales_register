@@ -345,8 +345,7 @@ bool sameServer(String? a, String? b) {
 String serverKey(String url) {
   final uri = Uri.tryParse(fixupUrl(url.trim()));
   if (uri == null || uri.host.isEmpty) return url;
-  return '${uri.scheme.toLowerCase()}://${uri.host.toLowerCase()}'
-      '${uri.hasPort ? ':${uri.port}' : ''}';
+  return '${uri.scheme.toLowerCase()}://${uri.host.toLowerCase()}:${uri.port}';
 }
 
 Future<bool> cannotConnectTo(String url) async {

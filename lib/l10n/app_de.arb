@@ -324,7 +324,30 @@
   },
   "lessonTimesCustom": "Angepasst",
   "lessonTimesInvalid": "Das Ende muss nach dem Beginn liegen, und Stunden dürfen sich nicht überlappen.",
-  "lessonTimesReset": "Zurücksetzen",
+  "lessonTimesStart": "Beginn der {hour}. Stunde",
+  "@lessonTimesStart": {
+    "placeholders": {
+      "hour": {
+        "type": "int"
+      }
+    }
+  },
+  "lessonTimesEnd": "Ende der {hour}. Stunde",
+  "@lessonTimesEnd": {
+    "placeholders": {
+      "hour": {
+        "type": "int"
+      }
+    }
+  },
+  "lessonTimesResetHour": "{hour}. Stunde zurücksetzen",
+  "@lessonTimesResetHour": {
+    "placeholders": {
+      "hour": {
+        "type": "int"
+      }
+    }
+  },
   "lessonTimesResetAll": "Alle zurücksetzen",
   "lessonTimesPortal": "Zeiten des Portals",
   "lessonTimesEmpty": "Keine Stunden bekannt. Lade zuerst den Kalender.",

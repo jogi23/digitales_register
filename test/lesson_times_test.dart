@@ -22,6 +22,7 @@ import 'package:dr/lesson_times.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/intl.dart';
 
 TimeSpan _span(int fromH, int fromM, int toH, int toM) => TimeSpan(
       (b) => b
@@ -88,6 +89,15 @@ void main() {
       expect(times[2], const LessonTime(535, 585));
       expect(times[3], const LessonTime(600, 650));
     });
+    test('a double lesson with a single span is no time of its own', () {
+      final times = portalLessonTimes([
+        _day([
+          _hour(3, 4, [_span(9, 55, 11, 45)]),
+          _hour(5, 5, [_span(12, 0, 12, 50)]),
+        ]),
+      ]);
+      expect(times.keys, [5]);
+    });
   });
 
   group('applyLessonTimes', () {
@@ -127,6 +137,27 @@ void main() {
       expect(span, _span(8, 0, 9, 50));
     });
 
+    test(
+        'keeps the portal span where an override would end it before it begins',
+        () {
+      final day = _day([
+        _hour(1, 2, [_span(8, 0, 9, 45)]),
+      ]);
+      // Only the begin of hour 1 is set, past the portal's end.
+      final result = applyLessonTimes(day, {1: const LessonTime(600, 650)});
+      expect(result.hours.single.timeSpans.single, _span(8, 0, 9, 45));
+    });
+
+    test('an entry for another hour leaves the day as it is', () {
+      final day = _day([
+        _hour(1, 1, [_span(8, 0, 8, 50)]),
+      ]);
+      expect(
+        identical(applyLessonTimes(day, {7: const LessonTime(1, 2)}), day),
+        isTrue,
+      );
+    });
+
     test('without entries the day is returned as it is', () {
       final day = _day([
         _hour(1, 1, [_span(8, 0, 8, 50)]),
@@ -155,6 +186,51 @@ void main() {
 
     test('an unknown first hour leaves the note out', () {
       expect(lessonTimeNote(times, 4, 5), '');
+    });
+  });
+
+  group('absenceRangeText', () {
+    final format = DateFormat('d.M.');
+    const times = {
+      3: LessonTime(595, 645),
+      5: LessonTime(705, 755),
+    };
+    String text(
+      DateTime startDate,
+      int startHour,
+      DateTime endDate,
+      int endHour, [
+      LessonTimes t = times,
+    ]) =>
+        absenceRangeText(
+          dateFormat: format,
+          startDate: startDate,
+          startHour: startHour,
+          endDate: endDate,
+          endHour: endHour,
+          times: t,
+        );
+
+    final monday = DateTime(2026, 2, 2);
+    final tuesday = DateTime(2026, 2, 3);
+
+    test('one lesson', () {
+      expect(text(monday, 3, monday, 3), '2.2., 3. h (09:55)');
+    });
+
+    test('several lessons of one day', () {
+      expect(text(monday, 3, monday, 5), '2.2., 3. - 5. h (09:55–12:35)');
+    });
+
+    test('several days name the begin of both lessons', () {
+      expect(
+        text(monday, 3, tuesday, 5),
+        '2.2. 3. h (09:55) - 3.2. 5. h (11:45)',
+      );
+    });
+
+    test('without times the text is as it was', () {
+      expect(text(monday, 3, monday, 5, const {}), '2.2., 3. - 5. h');
     });
   });
 
@@ -207,6 +283,39 @@ void main() {
 
     test('older json without it gives none', () {
       expect(SettingsState.fromJson(const {}).lessonTimes, isEmpty);
+    });
+
+    test('a bad entry is skipped, the good ones stay', () {
+      final state = SettingsState.fromJson({
+        'lessonTimes': {
+          'https://a.example.it': {
+            '1': [480, 530],
+            'x': [1, 2],
+            '2': 'kaputt',
+            '3': [1],
+          },
+          'https://b.example.it': 'kaputt',
+          'https://c.example.it': {
+            '1': ['a', 'b']
+          },
+        },
+      });
+      expect(state.lessonTimes, {
+        'https://a.example.it': {1: const LessonTime(480, 530)},
+      });
+    });
+
+    test('equal settings hash equal whatever the order of the schools', () {
+      final a = SettingsState(lessonTimes: {
+        'a': {1: const LessonTime(1, 2)},
+        'b': {1: const LessonTime(3, 4)},
+      });
+      final b = SettingsState(lessonTimes: {
+        'b': {1: const LessonTime(3, 4)},
+        'a': {1: const LessonTime(1, 2)},
+      });
+      expect(a, b);
+      expect(a.hashCode, b.hashCode);
     });
   });
 }

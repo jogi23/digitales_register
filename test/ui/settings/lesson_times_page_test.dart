@@ -61,7 +61,7 @@ void main() {
     expect(find.text('08:00 – 08:50'), findsOneWidget);
     expect(find.text('2. Stunde'), findsOneWidget);
     expect(find.text('08:55 – 09:45'), findsOneWidget);
-    expect(find.byTooltip('Zurücksetzen'), findsNothing);
+    expect(find.byTooltip('1. Stunde zurücksetzen'), findsNothing);
   });
 
   testWidgets('names the school the times apply to', (tester) async {
@@ -76,7 +76,7 @@ void main() {
     expect(find.textContaining('Zeiten des Portals: 08:00 – 08:50'),
         findsOneWidget);
 
-    await tester.tap(find.byTooltip('Zurücksetzen'));
+    await tester.tap(find.byTooltip('1. Stunde zurücksetzen'));
     await tester.pump();
 
     expect(c.read(settingsProvider).lessonTimes, isEmpty);

@@ -18,6 +18,7 @@
 import 'package:built_collection/built_collection.dart';
 import 'package:dr/data.dart';
 import 'package:dr/utc_date_time.dart';
+import 'package:intl/intl.dart';
 
 /// Beginn und Ende einer Schulstunde, in Minuten ab Mitternacht.
 class LessonTime {
@@ -55,10 +56,15 @@ LessonTime _timeOf(TimeSpan span) =>
 
 /// Die Zeiten, wie das Portal sie schickt: je Stundennummer die erste, die in
 /// den Tagen vorkommt. Eine Doppelstunde bringt eine Zeitspanne je Stunde mit.
+///
+/// shortcut: eine Zeit je Stundennummer für alle Wochentage, ein kürzerer
+/// Freitag geht verloren; erst ändern, wenn eine Schule das braucht.
 LessonTimes portalLessonTimes(Iterable<CalendarDay> days) {
   final times = <int, LessonTime>{};
   for (final day in days) {
     for (final lesson in day.hours) {
+      // Eine Zeitspanne über mehrere Stunden gehört keiner einzelnen.
+      if (_spansWholeLesson(lesson)) continue;
       for (var i = 0; i < lesson.timeSpans.length; i++) {
         times.putIfAbsent(
             lesson.fromHour + i, () => _timeOf(lesson.timeSpans[i]));
@@ -74,37 +80,48 @@ LessonTimes portalLessonTimes(Iterable<CalendarDay> days) {
 /// Zeitspanne, läuft sie vom Beginn der ersten bis zum Ende der letzten Stunde.
 CalendarDay applyLessonTimes(CalendarDay day, LessonTimes overrides) {
   if (overrides.isEmpty) return day;
-  return day.rebuild(
-    (b) =>
-        b.hours = ListBuilder(day.hours.map((h) => _applyToHour(h, overrides))),
-  );
+  final hours = day.hours.map((h) => _applyToHour(h, overrides)).toList();
+  final changed = Iterable<int>.generate(hours.length)
+      .any((i) => !identical(hours[i], day.hours[i]));
+  return changed ? day.rebuild((b) => b.hours = ListBuilder(hours)) : day;
 }
+
+/// Eine einzige Zeitspanne über mehrere Stunden: eine Doppelstunde, die das
+/// Portal nicht je Stunde aufteilt.
+bool _spansWholeLesson(CalendarHour hour) =>
+    hour.timeSpans.length == 1 && hour.toHour > hour.fromHour;
 
 CalendarHour _applyToHour(CalendarHour hour, LessonTimes overrides) {
   final spans = hour.timeSpans;
-  final wholeLesson = spans.length == 1 && hour.toHour > hour.fromHour;
-  return hour.rebuild(
-    (b) => b.timeSpans = ListBuilder(
-      [
-        for (var i = 0; i < spans.length; i++)
-          _applyToSpan(
-            spans[i],
-            overrides[hour.fromHour + i],
-            wholeLesson ? overrides[hour.toHour] : overrides[hour.fromHour + i],
-          ),
-      ],
-    ),
-  );
+  final wholeLesson = _spansWholeLesson(hour);
+  final applied = [
+    for (var i = 0; i < spans.length; i++)
+      _applyToSpan(
+        spans[i],
+        overrides[hour.fromHour + i],
+        wholeLesson ? overrides[hour.toHour] : overrides[hour.fromHour + i],
+      ),
+  ];
+  final changed = Iterable<int>.generate(applied.length)
+      .any((i) => !identical(applied[i], spans[i]));
+  return changed
+      ? hour.rebuild((b) => b.timeSpans = ListBuilder(applied))
+      : hour;
 }
 
 TimeSpan _applyToSpan(TimeSpan span, LessonTime? first, LessonTime? last) {
   if (first == null && last == null) return span;
   UtcDateTime at(UtcDateTime date, int minutes) =>
       UtcDateTime(date.year, date.month, date.day, minutes ~/ 60, minutes % 60);
+  final from = first == null ? span.from : at(span.from, first.start);
+  final to = last == null ? span.to : at(span.to, last.end);
+  // Nur der Beginn eingestellt und das Portal-Ende liegt davor: lieber die
+  // Zeit des Portals als eine Stunde, die endet, bevor sie beginnt.
+  if (!to.isAfter(from)) return span;
   return TimeSpan(
     (b) => b
-      ..from = first == null ? span.from : at(span.from, first.start)
-      ..to = last == null ? span.to : at(span.to, last.end),
+      ..from = from
+      ..to = to,
   );
 }
 
@@ -129,4 +146,26 @@ String lessonTimeNote(LessonTimes times, int fromHour, int toHour) {
     return ' (${formatMinutes(first.start)})';
   }
   return ' (${formatMinutes(first.start)}–${formatMinutes(last.end)})';
+}
+
+/// Die Tage und Stunden einer Absenz, z. B. "Mo 5.2.2026, 3. - 5. h
+/// (09:55–11:45)": am selben Tag eine Stunde oder ein Bereich, über mehrere
+/// Tage Datum und Beginn der ersten und der letzten Stunde.
+String absenceRangeText({
+  required DateFormat dateFormat,
+  required DateTime startDate,
+  required int startHour,
+  required DateTime endDate,
+  required int endHour,
+  required LessonTimes times,
+}) {
+  String hour(int h) => '$h. h${lessonTimeNote(times, h, h)}';
+  final start = dateFormat.format(startDate);
+  if (startDate != endDate) {
+    return '$start ${hour(startHour)} - '
+        '${dateFormat.format(endDate)} ${hour(endHour)}';
+  }
+  if (startHour == endHour) return '$start, ${hour(startHour)}';
+  return '$start, $startHour. - $endHour. h'
+      '${lessonTimeNote(times, startHour, endHour)}';
 }

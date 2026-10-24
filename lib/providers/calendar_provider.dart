@@ -217,5 +217,7 @@ class CalendarNotifier extends Notifier<CalendarState> {
       parseCalendarWeek(data, previous: state.days.toMap());
 }
 
+/// The calendar as the portal sent it. Screens that show lesson times read
+/// [displayCalendarProvider] instead, which carries the school's own times.
 final calendarProvider =
     NotifierProvider<CalendarNotifier, CalendarState>(CalendarNotifier.new);

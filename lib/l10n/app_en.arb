@@ -317,7 +317,30 @@
   },
   "lessonTimesCustom": "Customised",
   "lessonTimesInvalid": "The end must be after the start, and lessons must not overlap.",
-  "lessonTimesReset": "Reset",
+  "lessonTimesStart": "Start of lesson {hour}",
+  "@lessonTimesStart": {
+    "placeholders": {
+      "hour": {
+        "type": "int"
+      }
+    }
+  },
+  "lessonTimesEnd": "End of lesson {hour}",
+  "@lessonTimesEnd": {
+    "placeholders": {
+      "hour": {
+        "type": "int"
+      }
+    }
+  },
+  "lessonTimesResetHour": "Reset lesson {hour}",
+  "@lessonTimesResetHour": {
+    "placeholders": {
+      "hour": {
+        "type": "int"
+      }
+    }
+  },
   "lessonTimesResetAll": "Reset all",
   "lessonTimesPortal": "Portal times",
   "lessonTimesEmpty": "No lessons known yet. Load the calendar first.",
