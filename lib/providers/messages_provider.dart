@@ -26,6 +26,7 @@ import 'package:dr/middleware/middleware.dart'
     show canOpenFile, downloadFile, openFile, wrapper;
 import 'package:dr/notification_type.dart';
 import 'package:dr/providers/notifications_provider.dart';
+import 'package:dr/services/attachment_report.dart';
 import 'package:dr/utc_date_time.dart';
 import 'package:dr/util.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -410,8 +411,9 @@ class MessagesNotifier extends Notifier<MessagesState> {
       ..id = id
       ..responseInfo = _parseResponseInfo(json)?.toBuilder();
     final attachments = ListBuilder<MessageAttachmentFile>();
-    for (final attachmentJson
-        in getList(json["submissions"]) ?? <dynamic>[]) {
+    final submissions = getList(json["submissions"]);
+    noteAttachments('Mitteilung', submissions);
+    for (final attachmentJson in submissions ?? <dynamic>[]) {
       final attachment =
           _parseAttachment(getMap(attachmentJson)!, oldMessage);
       if (attachment != null) {

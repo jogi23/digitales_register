@@ -371,3 +371,10 @@ Future<bool> cannotConnectTo(String url) async {
 /// saved password.
 bool credentialsComplete(String user, String pass) =>
     user.trim().isNotEmpty && pass.isNotEmpty;
+
+/// A name copied from the browser often brings a space or line break along,
+/// and the server then answers `password_wrong`.
+String cleanUsername(String user) => user.trim();
+
+/// Only a trailing line break goes: spaces may belong to the password.
+String cleanPassword(String pass) => pass.replaceFirst(RegExp(r'[\r\n]+$'), '');

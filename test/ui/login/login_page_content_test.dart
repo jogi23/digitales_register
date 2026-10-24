@@ -127,6 +127,48 @@ void main() {
     expect(loginUrl, 'https://vinzentinum.digitalesregister.it');
   });
 
+  testWidgets('pasted credentials go out without stray whitespace',
+      (tester) async {
+    String? user, pass;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: LoginPageContent(
+          vm: buildVm(
+            servers: const {
+              'Vinzentinum': 'https://vinzentinum.digitalesregister.it',
+            },
+            url: 'https://vinzentinum.digitalesregister.it',
+          ),
+          onLogin: (u, p, _) {
+            user = u;
+            pass = p;
+          },
+          setSaveNoPass: (_) {},
+          onReload: () {},
+          onChangePass: (_, __, ___, ____) {},
+          onRequestPassReset: (_) {},
+          onSelectAccount: (_) {},
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Benutzername'),
+      ' anna ',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Passwort'),
+      'geh eim\n',
+    );
+    await tester.pump();
+
+    final login = find.widgetWithText(ElevatedButton, 'Login');
+    await tester.ensureVisible(login);
+    await tester.tap(login);
+    expect(user, 'anna');
+    expect(pass, 'geh eim');
+  });
+
   for (final holding in Holding.values) {
     testWidgets('the form stays clear of the system bars, ${holding.name}',
         (tester) async {
