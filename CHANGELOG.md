@@ -14,6 +14,8 @@ Erzeugt aus `assets/changelog.json` mit `dart tools/generate_changelog.dart` —
 - Benachrichtigungen: Hält Android die App im Hintergrund zurück (Akku-Optimierung), zeigen die Einstellungen einen Hinweis mit Knopf zur passenden Systemseite — sonst kommen Meldungen oft verspätet. Nach der Rückkehr wird neu geprüft.
 - Benachrichtigungen: Die Einstellungen zeigen jetzt, wie der letzte Hintergrundabruf lief — Zeitpunkt, Ergebnis je Konto und ob das System Benachrichtigungen erlaubt. „Jetzt prüfen“ gibt es auch in der Release-Version. Das hilft, wenn eine Meldung ausbleibt.
 - Einstellungen: Statt einer langen Liste öffnen die Einstellungen jetzt eine Übersicht mit fünf Gruppen — Konto & Sicherheit, Benachrichtigungen, Design & Sprache, Inhalte & Ansichten und Erweitert. Unter „Inhalte & Ansichten“ liegen Fächer & Kalender, Merkheft, Klassenbuch, Hausaufgaben, Absenzen und Noten in einklappbaren Blöcken. Jede Zeile zeigt, wie sie eingestellt ist. Die Farbkreise der Akzentfarbe sind größer zu treffen und werden von TalkBack als ausgewählt angesagt.
+- Stundenzeiten: Manche Schulen haben andere Zeiten, als das Portal angibt. In den Einstellungen unter „Inhalte & Ansichten“, „Fächer & Kalender“, „Stundenzeiten“ lassen sich Beginn und Ende jeder Stunde einstellen — für alle Konten derselben Schule. Ein neuer Beginn verschiebt das Ende mit, ein neues Ende setzt den Beginn der nächsten Stunde. Kalender, Merkheft, Klassenbuch und Hausaufgaben zeigen dann die eigenen Zeiten.
+- Absenzen: Hinter der Stunde steht jetzt ihr Zeitraum, etwa „3. h (09:55–10:45)“ — in der Liste, bei geplanten Absenzen, im Dialog zum Begründen und im Formular „Absenz melden“. Es gelten die eigenen Stundenzeiten.
 
 ### Fehlerbehebungen
 
