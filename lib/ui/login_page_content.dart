@@ -434,15 +434,15 @@ class _LoginPageContentState extends State<LoginPageContent> {
                                     widget.setSaveNoPass(safeMode);
                                     if (widget.vm.changePass) {
                                       widget.onChangePass(
-                                        _usernameController.text,
-                                        _passwordController.text,
+                                        cleanUsername(_usernameController.text),
+                                        cleanPassword(_passwordController.text),
                                         _newPassword1Controller.text,
                                         url,
                                       );
                                     } else {
                                       widget.onLogin(
-                                        _usernameController.value.text,
-                                        _passwordController.value.text,
+                                        cleanUsername(_usernameController.text),
+                                        cleanPassword(_passwordController.text),
                                         url,
                                       );
                                     }
