@@ -297,6 +297,30 @@
   "settingsShowTimes": "Mostra gli orari nel calendario",
   "settingsSixDayWeek": "Settimana di 6 giorni (beta)",
   "settingsSixDayWeekHint": "Il sabato conta come giorno di scuola",
+  "settingsLessonTimes": "Orari delle lezioni",
+  "settingsLessonTimesHint": "Orari di inizio e fine personalizzati delle lezioni",
+  "lessonTimesSchool": "Vale per tutti gli account presso {school}",
+  "@lessonTimesSchool": {
+    "placeholders": {
+      "school": {
+        "type": "String"
+      }
+    }
+  },
+  "lessonTimesHour": "{hour}ª ora",
+  "@lessonTimesHour": {
+    "placeholders": {
+      "hour": {
+        "type": "int"
+      }
+    }
+  },
+  "lessonTimesCustom": "Personalizzato",
+  "lessonTimesInvalid": "La fine deve essere dopo l'inizio e le ore non possono sovrapporsi.",
+  "lessonTimesReset": "Ripristina",
+  "lessonTimesResetAll": "Ripristina tutto",
+  "lessonTimesPortal": "Orari del portale",
+  "lessonTimesEmpty": "Nessuna ora nota. Carica prima il calendario.",
   "settingsShowAllDetails": "Mostra tutti i dettagli nel calendario",
   "settingsShowAllDetailsHint": "Docenti e aula direttamente nella lezione, se c'è spazio",
   "calendarRoomTooltip": "Aula: {room}",

@@ -297,6 +297,30 @@
   "settingsShowTimes": "Show times in the calendar",
   "settingsSixDayWeek": "6-day week (beta)",
   "settingsSixDayWeekHint": "Saturday counts as a school day",
+  "settingsLessonTimes": "Lesson times",
+  "settingsLessonTimesHint": "Your own start and end times for the lessons",
+  "lessonTimesSchool": "Applies to all accounts at {school}",
+  "@lessonTimesSchool": {
+    "placeholders": {
+      "school": {
+        "type": "String"
+      }
+    }
+  },
+  "lessonTimesHour": "Lesson {hour}",
+  "@lessonTimesHour": {
+    "placeholders": {
+      "hour": {
+        "type": "int"
+      }
+    }
+  },
+  "lessonTimesCustom": "Customised",
+  "lessonTimesInvalid": "The end must be after the start, and lessons must not overlap.",
+  "lessonTimesReset": "Reset",
+  "lessonTimesResetAll": "Reset all",
+  "lessonTimesPortal": "Portal times",
+  "lessonTimesEmpty": "No lessons known yet. Load the calendar first.",
   "settingsShowAllDetails": "Show all details in the calendar",
   "settingsShowAllDetailsHint": "Teachers and room right in the lesson, as far as there is space",
   "calendarRoomTooltip": "Room: {room}",

@@ -340,6 +340,15 @@ bool sameServer(String? a, String? b) {
       left.port == right.port;
 }
 
+/// Schlüssel einer Schule: Schema, Host und Port ihrer Serveradresse, ohne
+/// Schreibweise, Pfad und Schrägstrich — dieselben Server wie bei [sameServer].
+String serverKey(String url) {
+  final uri = Uri.tryParse(fixupUrl(url.trim()));
+  if (uri == null || uri.host.isEmpty) return url;
+  return '${uri.scheme.toLowerCase()}://${uri.host.toLowerCase()}'
+      '${uri.hasPort ? ':${uri.port}' : ''}';
+}
+
 Future<bool> cannotConnectTo(String url) async {
   var noInternet = false;
   try {

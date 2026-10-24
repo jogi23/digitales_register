@@ -304,6 +304,30 @@
   "settingsShowTimes": "Uhrzeiten im Kalender anzeigen",
   "settingsSixDayWeek": "6-Tages-Woche (beta)",
   "settingsSixDayWeekHint": "Samstag gilt als Schultag",
+  "settingsLessonTimes": "Stundenzeiten",
+  "settingsLessonTimesHint": "Eigene Beginn- und Endzeiten der Schulstunden",
+  "lessonTimesSchool": "Gilt für alle Konten an {school}",
+  "@lessonTimesSchool": {
+    "placeholders": {
+      "school": {
+        "type": "String"
+      }
+    }
+  },
+  "lessonTimesHour": "{hour}. Stunde",
+  "@lessonTimesHour": {
+    "placeholders": {
+      "hour": {
+        "type": "int"
+      }
+    }
+  },
+  "lessonTimesCustom": "Angepasst",
+  "lessonTimesInvalid": "Das Ende muss nach dem Beginn liegen, und Stunden dürfen sich nicht überlappen.",
+  "lessonTimesReset": "Zurücksetzen",
+  "lessonTimesResetAll": "Alle zurücksetzen",
+  "lessonTimesPortal": "Zeiten des Portals",
+  "lessonTimesEmpty": "Keine Stunden bekannt. Lade zuerst den Kalender.",
   "settingsShowAllDetails": "Alle Details im Kalender anzeigen",
   "settingsShowAllDetailsHint": "Lehrpersonen und Raum direkt in der Stunde, soweit Platz ist",
   "calendarRoomTooltip": "Raum: {room}",
