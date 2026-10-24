@@ -372,6 +372,27 @@ void main() {
       expect(find.text('6. (13:05)'), findsWidgets);
     });
 
+    testWidgets('ohne Zeiten bleibt es bei der Nummer', (tester) async {
+      await tester.pumpWidget(formular(times: const {6: LessonTime(785, 835)}));
+      await tester.pumpAndSettle();
+      expect(find.text('1.'), findsOneWidget);
+      expect(find.text('6. (13:05)'), findsOneWidget);
+    });
+
+    testWidgets('läuft bei doppelter Schrift nicht über', (tester) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 2;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(2)),
+          child: formular(times: const {1: LessonTime(480, 530)}),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('übernimmt die zuletzt genutzte Unterschrift', (tester) async {
       await tester.pumpWidget(formular(signature: 'Demo Elternteil'));
       await tester.pumpAndSettle();
