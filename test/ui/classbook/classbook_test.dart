@@ -610,13 +610,14 @@ void main() {
           findsNWidgets(display == EntryDisplayMode.list ? 2 : 1),
         );
         if (display == EntryDisplayMode.list) {
-          for (final icon in tester
-              .widgetList<Icon>(find.byIcon(Icons.person_off_outlined))) {
-            expect(icon.semanticLabel, 'Abwesend');
-          }
+          expect(find.byTooltip('Was heißt abwesend?'), findsNWidgets(2));
         } else {
           expect(find.text('Abwesend'), findsOneWidget);
         }
+        // Tapping the mark explains what it means.
+        await tester.tap(find.byIcon(Icons.person_off_outlined).first);
+        await tester.pumpAndSettle();
+        expect(find.byType(AlertDialog), findsOneWidget);
       });
     }
   });

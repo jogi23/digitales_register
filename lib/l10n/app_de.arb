@@ -758,6 +758,8 @@
   "weekLessonHasEntry": "Etwas eingetragen",
   "weekLessonFinished": "Alles erledigt",
   "lessonAbsent": "Abwesend",
+  "lessonAbsentInfoTooltip": "Was heißt abwesend?",
+  "lessonAbsentInfo": "Für diese Stunde ist eine Absenz eingetragen oder eine Abwesenheit gemeldet. Verspätungen und früheres Gehen zählen mit, Absenzen „für die Schule“ nicht. Einzelheiten stehen unter Absenzen.",
   "accountPhotoChange": "Foto ändern",
   "accountPhotoRemove": "Foto entfernen",
   "photoCropTitle": "Ausschnitt wählen",

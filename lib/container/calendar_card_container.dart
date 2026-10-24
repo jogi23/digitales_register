@@ -16,6 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'package:dr/providers/absences_provider.dart';
 import 'package:dr/providers/calendar_provider.dart';
 import 'package:dr/providers/lesson_times_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
@@ -53,6 +54,9 @@ class CalendarCardContainer extends ConsumerWidget {
       colorTestsInRed: ref.watch(
         settingsProvider.select((s) => s.dashboardColorTestsInRed),
       ),
+      absent: ref.watch(absencesProvider.select(
+        (s) => s.coversLesson(day, hour.fromHour, hour.toHour),
+      )),
     );
   }
 }

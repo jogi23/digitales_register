@@ -22,6 +22,7 @@ import 'package:dr/data.dart';
 import 'package:dr/providers/absences_provider.dart';
 import 'package:dr/providers/calendar_provider.dart';
 import 'package:dr/providers/subject_appearance_provider.dart';
+import 'package:dr/ui/absent_mark.dart';
 import 'package:dr/ui/calendar_grid.dart';
 import 'package:dr/ui/layout.dart';
 import 'package:dr/ui/no_internet.dart';
@@ -729,7 +730,7 @@ class HourWidget extends ConsumerWidget {
                     bottom: 1,
                     left: 6,
                     child: Icon(
-                      Icons.person_off_outlined,
+                      absentIcon,
                       size: 12,
                       color: Theme.of(context).colorScheme.error,
                       semanticLabel: tr(context).lessonAbsent,

@@ -17,6 +17,7 @@
 
 import 'package:dr/app_state.dart';
 import 'package:dr/l10n/l10n.dart';
+import 'package:dr/ui/absent_mark.dart';
 import 'package:dr/ui/entry_card.dart';
 import 'package:dr/ui/layout.dart';
 import 'package:dr/utc_date_time.dart';
@@ -484,10 +485,10 @@ class _EntryTile extends StatelessWidget {
         dense: true,
         leading: Icon(Icons.school, color: theme.colorScheme.primary),
         trailing: entry.absent
-            ? Icon(
-                Icons.person_off_outlined,
-                color: theme.colorScheme.error,
-                semanticLabel: tr(context).lessonAbsent,
+            ? IconButton(
+                icon: Icon(absentIcon, color: theme.colorScheme.error),
+                tooltip: tr(context).lessonAbsentInfoTooltip,
+                onPressed: () => showAbsentInfo(context),
               )
             : null,
         title: Text(entry.title),
@@ -580,22 +581,8 @@ class _LessonDetails extends StatelessWidget {
             ),
         ],
         if (first.absent) ...[
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Icon(
-                Icons.person_off_outlined,
-                size: 18,
-                color: theme.colorScheme.error,
-              ),
-              const SizedBox(width: 6),
-              Text(
-                tr(context).lessonAbsent,
-                style: theme.textTheme.bodyMedium
-                    ?.copyWith(color: theme.colorScheme.error),
-              ),
-            ],
-          ),
+          const SizedBox(height: 4),
+          const AbsentMark(),
         ],
         if (first.teachers.isNotEmpty) ...[
           const SizedBox(height: 8),
