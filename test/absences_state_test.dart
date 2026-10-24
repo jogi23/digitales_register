@@ -27,9 +27,9 @@ Absence _absence(UtcDateTime date, int hour) => Absence((b) => b
   ..minutesLeftTooEarly = 0);
 
 FutureAbsence _reported(
-  DateTime start,
+  UtcDateTime start,
   int startHour,
-  DateTime end,
+  UtcDateTime end,
   int endHour,
 ) =>
     FutureAbsence((b) => b
@@ -59,9 +59,7 @@ void main() {
 
     test('a reported absence on one day covers its hours only', () {
       final state = _state(
-        futureAbsences: [
-          _reported(DateTime(2026, 2, 3), 2, DateTime(2026, 2, 3), 4)
-        ],
+        futureAbsences: [_reported(tuesday, 2, tuesday, 4)],
       );
       expect(state.coversLesson(tuesday, 1, 1), isFalse);
       expect(state.coversLesson(tuesday, 1, 2), isTrue);
@@ -72,9 +70,7 @@ void main() {
 
     test('a reported absence over days holds its hours on the edge days', () {
       final state = _state(
-        futureAbsences: [
-          _reported(DateTime(2026, 2, 2), 5, DateTime(2026, 2, 4), 2)
-        ],
+        futureAbsences: [_reported(monday, 5, wednesday, 2)],
       );
       expect(state.coversLesson(monday, 1, 4), isFalse);
       expect(state.coversLesson(monday, 5, 5), isTrue);
