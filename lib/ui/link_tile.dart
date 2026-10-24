@@ -15,10 +15,16 @@
 // You should have received a copy of the GNU General Public License
 // along with digitales_register.  If not, see <http://www.gnu.org/licenses/>.
 
+import 'package:dr/l10n/l10n.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-/// A row that opens a page in the app ([internal], arrow) or leaves the app
-/// (external symbol).
+/// Opens [uri] in the browser or the app that handles it.
+Future<bool> openExternal(Uri uri) =>
+    launchUrl(uri, mode: LaunchMode.externalApplication);
+
+/// A row that opens a page in the app ([internal], arrow), leaves the app
+/// (external symbol) or just does something ([action], no symbol).
 class LinkTile extends StatelessWidget {
   const LinkTile({
     super.key,
@@ -27,12 +33,14 @@ class LinkTile extends StatelessWidget {
     required this.onTap,
     this.subtitle,
     this.internal = false,
+    this.action = false,
   });
 
   final IconData icon;
   final String title;
   final String? subtitle;
   final bool internal;
+  final bool action;
   final VoidCallback onTap;
 
   @override
@@ -41,9 +49,14 @@ class LinkTile extends StatelessWidget {
       leading: Icon(icon),
       title: Text(title),
       subtitle: subtitle == null ? null : Text(subtitle!),
-      trailing: Icon(
-        internal ? Icons.chevron_right_rounded : Icons.open_in_new_rounded,
-      ),
+      trailing: action
+          ? null
+          : internal
+              ? const Icon(Icons.chevron_right_rounded)
+              : Icon(
+                  Icons.open_in_new_rounded,
+                  semanticLabel: tr(context).linkOpensOutside,
+                ),
       onTap: onTap,
     );
   }

@@ -156,7 +156,7 @@ void main() {
     }
   });
 
-  testWidgets('every entry has its own rounded icon', (tester) async {
+  testWidgets('no icon appears twice', (tester) async {
     await tester.pumpWidget(_build());
     await tester.pumpAndSettle();
     await tester.scrollUntilVisible(

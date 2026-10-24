@@ -20,6 +20,8 @@ import 'package:dr/ui/help_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
+
 import '../../fake_url_launcher.dart';
 
 void main() {
@@ -61,8 +63,9 @@ void main() {
     final launcher = FakeUrlLauncher.install();
     await tester.pumpWidget(build());
     await tester.pumpAndSettle();
-    await tester.tap(find.text('FAQ'));
+    await tester.tap(find.text('Online-FAQ'));
     await tester.pumpAndSettle();
     expect(launcher.launched, [AppLinks.faq.toString()]);
+    expect(launcher.lastMode, PreferredLaunchMode.externalApplication);
   });
 }

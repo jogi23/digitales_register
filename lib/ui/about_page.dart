@@ -22,7 +22,6 @@ import 'package:dr/ui/layout.dart';
 import 'package:dr/ui/link_tile.dart';
 import 'package:dr/util.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 /// Version, who makes the app, independence note, legal texts and licenses.
 class AboutPage extends StatelessWidget {
@@ -89,7 +88,7 @@ class AboutPage extends StatelessWidget {
               icon: Icons.person_outline_rounded,
               title: name,
               subtitle: uri.host,
-              onTap: () => _open(uri),
+              onTap: () => openExternal(uri),
             ),
           const Divider(),
           LinkTile(
@@ -104,7 +103,7 @@ class AboutPage extends StatelessWidget {
             icon: Icons.code_rounded,
             title: l.aboutSourceCode,
             subtitle: l.aboutFreeSoftware,
-            onTap: () => _open(AppLinks.source),
+            onTap: () => openExternal(AppLinks.source),
           ),
           LinkTile(
             icon: Icons.description_outlined,
@@ -129,17 +128,17 @@ class AboutPage extends StatelessWidget {
           LinkTile(
             icon: Icons.policy_outlined,
             title: l.aboutPrivacy,
-            onTap: () => _open(AppLinks.privacy),
+            onTap: () => openExternal(AppLinks.privacy),
           ),
           LinkTile(
             icon: Icons.badge_outlined,
             title: l.aboutImprint,
-            onTap: () => _open(AppLinks.imprint),
+            onTap: () => openExternal(AppLinks.imprint),
           ),
           LinkTile(
             icon: Icons.gavel_rounded,
             title: l.aboutTerms,
-            onTap: () => _open(AppLinks.terms),
+            onTap: () => openExternal(AppLinks.terms),
           ),
           Padding(
             padding: const EdgeInsets.all(24),
@@ -156,9 +155,6 @@ class AboutPage extends StatelessWidget {
 
   static const _legalese =
       '© 2026 Johannes Feichter\n© 2019–2022 Michael Debertol, Simon Wachtler';
-
-  static Future<bool> _open(Uri uri) =>
-      launchUrl(uri, mode: LaunchMode.externalApplication);
 }
 
 class _Header extends StatelessWidget {

@@ -23,7 +23,6 @@ import 'package:dr/ui/layout.dart';
 import 'package:dr/ui/link_tile.dart';
 import 'package:dr/util.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 /// The menu's "Über": spreading the word, other apps, and the way on to
 /// the about page.
@@ -46,17 +45,14 @@ class AboutHubPage extends StatelessWidget {
           LinkTile(
             icon: Icons.share_rounded,
             title: l.menuShare,
-            internal: true,
+            action: true,
             onTap: () => shareApp(context),
           ),
           LinkTile(
             icon: Icons.apps_rounded,
             title: l.menuOtherApps,
             subtitle: l.aboutOtherAppsSubtitle,
-            onTap: () => launchUrl(
-              AppLinks.otherApps,
-              mode: LaunchMode.externalApplication,
-            ),
+            onTap: () => openExternal(AppLinks.otherApps),
           ),
           LinkTile(
             icon: Icons.info_rounded,

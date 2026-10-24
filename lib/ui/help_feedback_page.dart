@@ -53,18 +53,15 @@ class HelpFeedbackPage extends StatelessWidget {
           LinkTile(
             icon: Icons.lightbulb_rounded,
             title: l.helpSuggestFeature,
-            onTap: () => _open(AppLinks.suggestFeature),
+            onTap: () => openExternal(AppLinks.suggestFeature),
           ),
           LinkTile(
             icon: Icons.bug_report_rounded,
             title: l.helpReportBug,
-            onTap: () => _open(AppLinks.reportBug),
+            onTap: () => openExternal(AppLinks.reportBug),
           ),
         ],
       ),
     );
   }
-
-  static Future<bool> _open(Uri uri) =>
-      launchUrl(uri, mode: LaunchMode.externalApplication);
 }

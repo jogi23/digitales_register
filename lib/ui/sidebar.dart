@@ -71,7 +71,7 @@ class Sidebar extends StatelessWidget {
       minWidth: 70,
       screenPadding: 0,
       // Kein Kopf mit Konto: Der Avatar steht in jeder Titelzeile, und das
-      // Menü ist mit dreizehn Punkten ohnehin länger als der Bildschirm.
+      // Menü ohnehin länger als der Bildschirm.
       titleTooltip: '',
       toggleTooltipCollapsed: tr(context).menuExpand,
       toggleTooltipExpanded: tr(context).menuCollapse,

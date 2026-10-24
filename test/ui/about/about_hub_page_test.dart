@@ -19,6 +19,7 @@ import 'package:dr/app_links.dart';
 import 'package:dr/services/app_sharing.dart';
 import 'package:dr/ui/about_hub_page.dart';
 import 'package:dr/ui/about_page.dart';
+import 'package:dr/util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
@@ -43,7 +44,7 @@ void main() {
     expect(find.text('Andere Apps von Wertwerk'), findsOneWidget);
     expect(find.text('Weitere Apps im Play Store'), findsOneWidget);
     expect(find.text('Über die App'), findsOneWidget);
-    expect(find.text('Version 1.0'), findsOneWidget);
+    expect(find.text('Version $appVersion'), findsOneWidget);
   });
 
   testWidgets('every row has a rounded icon and the right trailing symbol',
@@ -54,7 +55,7 @@ void main() {
     expect(find.byIcon(Icons.apps_rounded), findsOneWidget);
     expect(find.byIcon(Icons.info_rounded), findsOneWidget);
     expect(find.byIcon(Icons.open_in_new_rounded), findsNWidgets(2));
-    expect(find.byIcon(Icons.chevron_right_rounded), findsNWidgets(2));
+    expect(find.byIcon(Icons.chevron_right_rounded), findsOneWidget);
   });
 
   testWidgets('"Bewerten" opens the store listing', (tester) async {
