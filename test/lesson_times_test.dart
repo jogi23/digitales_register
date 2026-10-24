@@ -69,6 +69,15 @@ void main() {
       );
     });
 
+    test('the usual port is the same server and adds nothing to the key', () {
+      expect(serverKey('https://school.example.it:443'),
+          'https://school.example.it');
+      expect(
+          serverKey('http://school.example.it/'), 'http://school.example.it');
+      expect(serverKey('https://school.example.it:8443'),
+          'https://school.example.it:8443');
+    });
+
     test('keeps different servers apart', () {
       expect(
         serverKey('https://a.example.it'),
