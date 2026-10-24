@@ -19,7 +19,6 @@ import 'package:dr/app_links.dart';
 import 'package:dr/ui/help_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
 
 import '../../fake_url_launcher.dart';
