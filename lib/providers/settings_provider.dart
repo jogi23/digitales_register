@@ -171,9 +171,13 @@ class SettingsNotifier extends Notifier<SettingsState> {
 
   /// Sets the times of [hour] for the school [school] (see [serverKey]).
   void setLessonTime(String school, int hour, LessonTime time) =>
+      setLessonTimes(school, {hour: time});
+
+  /// Sets the times of several hours of [school] at once.
+  void setLessonTimes(String school, LessonTimes changes) =>
       _setSchoolLessonTimes(school, {
         ...?state.lessonTimes[school],
-        hour: time,
+        ...changes,
       });
 
   /// Back to the portal's times for [hour].

@@ -316,7 +316,8 @@
     }
   },
   "lessonTimesCustom": "Personalizzato",
-  "lessonTimesInvalid": "La fine deve essere dopo l'inizio e le ore non possono sovrapporsi.",
+  "lessonTimesHint": "Tocca per cambiare l'inizio; l'ora mantiene la durata. Una nuova fine fissa l'inizio dell'ora successiva.",
+  "lessonTimesInvalid": "La fine deve essere dopo l'inizio, un'ora non può iniziare prima della fine della precedente né oltre la mezzanotte.",
   "lessonTimesStart": "Inizio della {hour}ª ora",
   "@lessonTimesStart": {
     "placeholders": {

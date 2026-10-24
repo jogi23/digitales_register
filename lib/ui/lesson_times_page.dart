@@ -65,6 +65,7 @@ class LessonTimesPage extends ConsumerWidget {
                   ListTile(
                     leading: const Icon(Icons.school_outlined),
                     title: Text(l.lessonTimesSchool(host)),
+                    subtitle: Text(l.lessonTimesHint),
                   ),
                 for (final hour in hours)
                   _LessonTimeTile(
@@ -72,7 +73,10 @@ class LessonTimesPage extends ConsumerWidget {
                     time: times[hour]!,
                     portalTime: portal[hour],
                     custom: overrides.containsKey(hour),
-                    onPick: () => _pick(context, ref, school, hour, times),
+                    onPickStart: () =>
+                        _pick(context, ref, school, hour, times, end: false),
+                    onPickEnd: () =>
+                        _pick(context, ref, school, hour, times, end: true),
                     onReset: () => ref
                         .read(settingsProvider.notifier)
                         .resetLessonTime(school, hour),
@@ -82,40 +86,41 @@ class LessonTimesPage extends ConsumerWidget {
     );
   }
 
-  /// Asks for the start, then the end, and keeps the pair if it fits.
+  /// Asks for the start or the end of [hour] and applies what follows from it
+  /// (see [editLessonTime]).
   Future<void> _pick(
     BuildContext context,
     WidgetRef ref,
     String school,
     int hour,
-    LessonTimes times,
-  ) async {
+    LessonTimes times, {
+    required bool end,
+  }) async {
     final current = times[hour]!;
-    TimeOfDay of(int minutes) =>
-        TimeOfDay(hour: minutes ~/ 60, minute: minutes % 60);
-    int minutesOf(TimeOfDay t) => t.hour * 60 + t.minute;
-
-    final start = await showTimePicker(
+    final minutes = end ? current.end : current.start;
+    final picked = await showTimePicker(
       context: context,
-      initialTime: of(current.start),
-      helpText: tr(context).lessonTimesStart(hour),
+      initialTime: TimeOfDay(hour: minutes ~/ 60, minute: minutes % 60),
+      helpText: end
+          ? tr(context).lessonTimesEnd(hour)
+          : tr(context).lessonTimesStart(hour),
     );
-    if (start == null || !context.mounted) return;
-    final end = await showTimePicker(
-      context: context,
-      initialTime: of(current.end),
-      helpText: tr(context).lessonTimesEnd(hour),
-    );
-    if (end == null || !context.mounted) return;
+    if (picked == null || !context.mounted) return;
 
-    final picked = LessonTime(minutesOf(start), minutesOf(end));
-    if (!lessonTimeFits(times, hour, picked)) {
+    final value = picked.hour * 60 + picked.minute;
+    final changes = editLessonTime(
+      times,
+      hour,
+      start: end ? null : value,
+      end: end ? value : null,
+    );
+    if (changes == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(tr(context).lessonTimesInvalid)),
       );
       return;
     }
-    ref.read(settingsProvider.notifier).setLessonTime(school, hour, picked);
+    ref.read(settingsProvider.notifier).setLessonTimes(school, changes);
   }
 }
 
@@ -125,7 +130,8 @@ class _LessonTimeTile extends StatelessWidget {
     required this.time,
     required this.portalTime,
     required this.custom,
-    required this.onPick,
+    required this.onPickStart,
+    required this.onPickEnd,
     required this.onReset,
   });
 
@@ -133,7 +139,8 @@ class _LessonTimeTile extends StatelessWidget {
   final LessonTime time;
   final LessonTime? portalTime;
   final bool custom;
-  final VoidCallback onPick;
+  final VoidCallback onPickStart;
+  final VoidCallback onPickEnd;
   final VoidCallback onReset;
 
   static String _range(LessonTime t) =>
@@ -153,14 +160,23 @@ class _LessonTimeTile extends StatelessWidget {
             : _range(time),
       ),
       isThreeLine: showsPortal,
-      onTap: onPick,
-      trailing: custom
-          ? IconButton(
+      onTap: onPickStart,
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.edit_calendar_outlined),
+            tooltip: l.lessonTimesEnd(hour),
+            onPressed: onPickEnd,
+          ),
+          if (custom)
+            IconButton(
               icon: const Icon(Icons.restart_alt_rounded),
               tooltip: l.lessonTimesResetHour(hour),
               onPressed: onReset,
-            )
-          : null,
+            ),
+        ],
+      ),
     );
   }
 }

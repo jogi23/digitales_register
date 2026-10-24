@@ -323,7 +323,8 @@
     }
   },
   "lessonTimesCustom": "Angepasst",
-  "lessonTimesInvalid": "Das Ende muss nach dem Beginn liegen, und Stunden dürfen sich nicht überlappen.",
+  "lessonTimesHint": "Tippen ändert den Beginn, die Stunde bleibt gleich lang. Ein neues Ende setzt den Beginn der nächsten Stunde.",
+  "lessonTimesInvalid": "Das Ende muss nach dem Beginn liegen, die Stunde darf nicht vor dem Ende der vorigen beginnen und nicht über Mitternacht reichen.",
   "lessonTimesStart": "Beginn der {hour}. Stunde",
   "@lessonTimesStart": {
     "placeholders": {

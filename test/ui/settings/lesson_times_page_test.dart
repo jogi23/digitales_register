@@ -93,6 +93,20 @@ void main() {
     expect(c.read(settingsProvider).lessonTimes, isEmpty);
   });
 
+  testWidgets('tapping an hour asks for its start, the end button for its end',
+      (tester) async {
+    await pump(tester);
+    await tester.tap(find.text('1. Stunde'));
+    await tester.pumpAndSettle();
+    expect(find.text('Beginn der 1. Stunde'), findsOneWidget);
+    await tester.tap(find.text('Abbrechen'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('Ende der 1. Stunde'));
+    await tester.pumpAndSettle();
+    expect(find.text('Ende der 1. Stunde'), findsOneWidget);
+  });
+
   testWidgets('says so while no hour is known', (tester) async {
     await pump(tester, portal: const {});
     expect(find.textContaining('Keine Stunden bekannt'), findsOneWidget);

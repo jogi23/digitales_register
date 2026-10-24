@@ -125,15 +125,52 @@ TimeSpan _applyToSpan(TimeSpan span, LessonTime? first, LessonTime? last) {
   );
 }
 
-/// Ob [time] für [hour] passt: Ende nach Beginn, und weder die vorherige
-/// Stunde überlappt noch die nächste.
-bool lessonTimeFits(LessonTimes all, int hour, LessonTime time) {
-  if (time.end <= time.start) return false;
-  for (final entry in all.entries) {
-    if (entry.key < hour && entry.value.end > time.start) return false;
-    if (entry.key > hour && entry.value.start < time.end) return false;
+const _minutesPerDay = 24 * 60;
+
+/// Was sich ändert, wenn [hour] einen neuen [start] oder ein neues [end]
+/// bekommt — nur die geänderten Stunden, oder null, wo es nicht geht.
+///
+/// - Ein neuer Beginn verschiebt das Ende mit: die Stunde dauert gleich lang.
+/// - Ein neues Ende lässt den Beginn stehen.
+/// - Hat sich das Ende geändert, beginnt die nächste Stunde zu dieser Zeit
+///   und behält ihre Dauer; ihr neues Ende zieht die übernächste nach, und so
+///   weiter, bis sich ein Ende nicht mehr ändert. Umgekehrt ändert der Beginn
+///   einer Stunde nie das Ende der vorigen.
+/// - Es geht nicht, wenn das Ende nicht nach dem Beginn liegt, die Stunde vor
+///   dem Ende einer früheren beginnt oder eine Stunde über Mitternacht reicht.
+LessonTimes? editLessonTime(
+  LessonTimes all,
+  int hour, {
+  int? start,
+  int? end,
+}) {
+  final old = all[hour];
+  if (old == null) return null;
+  final shift = start == null ? 0 : start - old.start;
+  final edited = LessonTime(old.start + shift, end ?? old.end + shift);
+  if (edited.start < 0 ||
+      edited.end <= edited.start ||
+      edited.end > _minutesPerDay) {
+    return null;
   }
-  return true;
+  if (all.entries.any((e) => e.key < hour && e.value.end > edited.start)) {
+    return null;
+  }
+  if (edited == old) return const {};
+
+  final changes = {hour: edited};
+  var current = edited;
+  var h = hour;
+  while (current.end != all[h]!.end) {
+    final following = all[h + 1];
+    if (following == null) break;
+    final delta = current.end - following.start;
+    if (delta == 0) break;
+    current = LessonTime(current.end, following.end + delta);
+    if (current.end > _minutesPerDay) return null;
+    changes[++h] = current;
+  }
+  return changes;
 }
 
 /// " (09:55)" für eine Stunde, " (09:55–11:45)" für mehrere, wo die Zeiten

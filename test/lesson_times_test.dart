@@ -234,30 +234,71 @@ void main() {
     });
   });
 
-  group('lessonTimeFits', () {
+  group('editLessonTime', () {
     const times = {
       1: LessonTime(480, 530),
-      2: LessonTime(540, 590),
+      2: LessonTime(535, 585),
       3: LessonTime(600, 650),
     };
 
-    test('accepts a time between its neighbours', () {
-      expect(lessonTimeFits(times, 2, const LessonTime(535, 595)), isTrue);
+    test('a new start moves the end along, the lesson keeps its length', () {
+      expect(
+          editLessonTime(times, 3, start: 610)![3], const LessonTime(610, 660));
     });
 
-    test('rejects an end before the start', () {
-      expect(lessonTimeFits(times, 2, const LessonTime(590, 540)), isFalse);
-      expect(lessonTimeFits(times, 2, const LessonTime(540, 540)), isFalse);
+    test('a new end leaves the start alone', () {
+      expect(
+          editLessonTime(times, 3, end: 655)![3], const LessonTime(600, 655));
     });
 
-    test('rejects an overlap with the previous or next hour', () {
-      expect(lessonTimeFits(times, 2, const LessonTime(520, 590)), isFalse);
-      expect(lessonTimeFits(times, 2, const LessonTime(540, 610)), isFalse);
+    test('a new end sets the start of the next lesson, which keeps its length',
+        () {
+      final changes = editLessonTime(times, 1, end: 540)!;
+      expect(changes[1], const LessonTime(480, 540));
+      expect(changes[2], const LessonTime(540, 590));
     });
 
-    test('has no neighbours for the first and last hour', () {
-      expect(lessonTimeFits(times, 1, const LessonTime(0, 100)), isTrue);
-      expect(lessonTimeFits(times, 3, const LessonTime(600, 1000)), isTrue);
+    test('the next start never changes the end before it', () {
+      final changes = editLessonTime(times, 3, start: 620)!;
+      expect(changes.keys, [3]);
+      expect(editLessonTime(times, 2, start: 535, end: null), const {});
+    });
+
+    test('the following lessons are pulled along one after the other', () {
+      final changes = editLessonTime(times, 1, start: 490)!;
+      expect(changes, {
+        1: const LessonTime(490, 540),
+        2: const LessonTime(540, 590),
+        3: const LessonTime(590, 640),
+      });
+    });
+
+    test('stops where the next lesson already begins at the new end', () {
+      expect(editLessonTime(times, 1, start: 485)!.keys, [1]);
+    });
+
+    test('nothing changes where nothing is different', () {
+      expect(editLessonTime(times, 2, end: 585), const {});
+    });
+
+    test('rejects an end that is not after the start', () {
+      expect(editLessonTime(times, 2, end: 535), isNull);
+      expect(editLessonTime(times, 2, end: 500), isNull);
+    });
+
+    test('rejects a start before the end of an earlier lesson', () {
+      expect(editLessonTime(times, 2, start: 520), isNull);
+      expect(
+          editLessonTime(times, 2, start: 530)![2], const LessonTime(530, 580));
+    });
+
+    test('rejects what would run past midnight', () {
+      expect(editLessonTime(times, 3, start: 24 * 60 - 10), isNull);
+      expect(editLessonTime(times, 1, end: 24 * 60 + 1), isNull);
+    });
+
+    test('an hour nobody knows cannot be edited', () {
+      expect(editLessonTime(times, 9, start: 600), isNull);
     });
   });
 
