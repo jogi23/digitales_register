@@ -20,7 +20,9 @@ import 'package:built_collection/built_collection.dart';
 import 'package:dr/app_state.dart';
 import 'package:dr/container/absences_page_container.dart';
 import 'package:dr/data.dart';
+import 'package:dr/lesson_times.dart';
 import 'package:dr/providers/absences_provider.dart';
+import 'package:dr/providers/lesson_times_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/ui/absence_entry.dart';
 import 'package:dr/ui/absences_page.dart';
@@ -42,9 +44,13 @@ class _TestAbsencesNotifier extends AbsencesNotifier {
   AbsencesState build() => _initialState;
 }
 
-Widget _buildTestWidget({required AbsencesState initialState}) {
+Widget _buildTestWidget({
+  required AbsencesState initialState,
+  LessonTimes times = const {},
+}) {
   return ProviderScope(
     overrides: [
+      lessonTimesProvider.overrideWithValue(times),
       absencesProvider.overrideWith(
         () => _TestAbsencesNotifier(initialState),
       ),
@@ -103,6 +109,50 @@ void main() {
       find.byType(AbsencesPageContainer),
       matchesGoldenFile("no_absences.png"),
     );
+  });
+
+  group('Beginnzeit der Stunde (#345)', () {
+    final everyHour = {
+      for (var h = 1; h <= 12; h++)
+        h: LessonTime(480 + (h - 1) * 55, 480 + (h - 1) * 55 + 50),
+    };
+    final timeNote = find.textContaining(RegExp(r'h \(\d\d:\d\d'));
+
+    testWidgets('shows when the lesson of an absence begins', (tester) async {
+      await tester.pumpWidget(
+        _buildTestWidget(initialState: _demoAbsencesState, times: everyHour),
+      );
+      await tester.pumpAndSettle();
+      expect(timeNote, findsWidgets);
+    });
+
+    testWidgets('leaves the text as it was without known times',
+        (tester) async {
+      await tester
+          .pumpWidget(_buildTestWidget(initialState: _demoAbsencesState));
+      await tester.pumpAndSettle();
+      expect(timeNote, findsNothing);
+    });
+
+    testWidgets('names the begin of a planned absence', (tester) async {
+      final state = _demoAbsencesState.rebuild(
+        (b) => b.futureAbsences = ListBuilder([
+          FutureAbsence(
+            (f) => f
+              ..justified = AbsenceJustified.notYetJustified
+              ..startDate = DateTime(2026, 11, 3)
+              ..endDate = DateTime(2026, 11, 3)
+              ..startHour = 3
+              ..endHour = 3,
+          ),
+        ]),
+      );
+      await tester.pumpWidget(
+        _buildTestWidget(initialState: state, times: everyHour),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Di. 3.11.2026, 3. h (09:50)'), findsOneWidget);
+    });
   });
 
   group('demo data Absenzen', () {

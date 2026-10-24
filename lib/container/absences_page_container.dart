@@ -22,6 +22,7 @@ import 'package:dr/container/absence_group_container.dart';
 import 'package:dr/data.dart';
 import 'package:dr/l10n/l10n.dart';
 import 'package:dr/providers/absences_provider.dart';
+import 'package:dr/providers/lesson_times_provider.dart';
 import 'package:dr/providers/calendar_provider.dart';
 import 'package:dr/providers/no_internet_provider.dart';
 import 'package:dr/providers/settings_provider.dart';
@@ -121,7 +122,11 @@ class AbsencesPageContainer extends ConsumerWidget {
         : state.selfDeclarations.toList();
     final input = await showAbsenceReasonDialog(
       context,
-      absence: absenceGroupRange(context, group),
+      absence: absenceGroupRange(
+        context,
+        group,
+        times: ref.read(lessonTimesProvider),
+      ),
       reason: group.reason,
       signature:
           group.reasonSignature ?? ref.read(settingsProvider).messageSignature,

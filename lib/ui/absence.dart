@@ -19,8 +19,11 @@
 import 'package:dr/container/absence_group_container.dart';
 import 'package:dr/data.dart';
 import 'package:dr/l10n/l10n.dart';
+import 'package:dr/lesson_times.dart';
+import 'package:dr/providers/lesson_times_provider.dart';
 import 'package:dr/ui/entry_card.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 class AbsenceGroupWidget extends StatelessWidget {
@@ -74,9 +77,8 @@ class AbsenceGroupWidget extends StatelessWidget {
           title,
           style: TextStyle(color: theme.colorScheme.primary),
         ),
-        subtitle: subtitleParts.isNotEmpty
-            ? Text(subtitleParts.join(' · '))
-            : null,
+        subtitle:
+            subtitleParts.isNotEmpty ? Text(subtitleParts.join(' · ')) : null,
         trailing: onJustify == null
             ? null
             : IconButton(
@@ -89,7 +91,7 @@ class AbsenceGroupWidget extends StatelessWidget {
   }
 }
 
-class FutureAbsenceWidget extends StatelessWidget {
+class FutureAbsenceWidget extends ConsumerWidget {
   final FutureAbsence absence;
   final Color? tileColor;
 
@@ -104,23 +106,26 @@ class FutureAbsenceWidget extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
 
     final l = tr(context);
+    final times = ref.watch(lessonTimesProvider);
     var fromTo = '';
     if (absence.startDate == absence.endDate) {
       fromTo +=
           '${DateFormat("EE d.M.yyyy", l.localeName).format(absence.startDate)}, ';
       if (absence.startHour == absence.endHour) {
-        fromTo += '${absence.startHour}. h';
+        fromTo +=
+            '${absence.startHour}. h${lessonTimeNote(times, absence.startHour, absence.startHour)}';
       } else {
-        fromTo += '${absence.startHour}. - ${absence.endHour}. h';
+        fromTo += '${absence.startHour}. - ${absence.endHour}. h'
+            '${lessonTimeNote(times, absence.startHour, absence.endHour)}';
       }
     } else {
       fromTo +=
-          '${DateFormat("EE d.M.yyyy", l.localeName).format(absence.startDate)} ${absence.startHour}. h'
-          ' - ${DateFormat("EE d.M.yyyy", l.localeName).format(absence.endDate)} ${absence.endHour}. h';
+          '${DateFormat("EE d.M.yyyy", l.localeName).format(absence.startDate)} ${absence.startHour}. h${lessonTimeNote(times, absence.startHour, absence.startHour)}'
+          ' - ${DateFormat("EE d.M.yyyy", l.localeName).format(absence.endDate)} ${absence.endHour}. h${lessonTimeNote(times, absence.endHour, absence.endHour)}';
     }
 
     final isApproved = absence.justified == AbsenceJustified.justified ||
@@ -177,9 +182,8 @@ class FutureAbsenceWidget extends StatelessWidget {
           fromTo,
           style: TextStyle(color: theme.colorScheme.primary),
         ),
-        subtitle: subtitleParts.isNotEmpty
-            ? Text(subtitleParts.join('\n'))
-            : null,
+        subtitle:
+            subtitleParts.isNotEmpty ? Text(subtitleParts.join('\n')) : null,
         trailing: onDelete == null
             ? null
             : IconButton(

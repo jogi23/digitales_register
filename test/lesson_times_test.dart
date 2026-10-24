@@ -135,6 +135,29 @@ void main() {
     });
   });
 
+  group('lessonTimeNote', () {
+    const times = {
+      3: LessonTime(595, 645),
+      5: LessonTime(705, 755),
+    };
+
+    test('one hour names its begin', () {
+      expect(lessonTimeNote(times, 3, 3), ' (09:55)');
+    });
+
+    test('several hours run from the first begin to the last end', () {
+      expect(lessonTimeNote(times, 3, 5), ' (09:55–12:35)');
+    });
+
+    test('a last hour without time falls back to the begin', () {
+      expect(lessonTimeNote(times, 3, 4), ' (09:55)');
+    });
+
+    test('an unknown first hour leaves the note out', () {
+      expect(lessonTimeNote(times, 4, 5), '');
+    });
+  });
+
   group('lessonTimeFits', () {
     const times = {
       1: LessonTime(480, 530),

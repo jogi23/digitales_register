@@ -118,3 +118,15 @@ bool lessonTimeFits(LessonTimes all, int hour, LessonTime time) {
   }
   return true;
 }
+
+/// " (09:55)" für eine Stunde, " (09:55–11:45)" für mehrere, wo die Zeiten
+/// bekannt sind; sonst nichts. Hängt direkt an "3. h".
+String lessonTimeNote(LessonTimes times, int fromHour, int toHour) {
+  final first = times[fromHour];
+  if (first == null) return '';
+  final last = times[toHour];
+  if (fromHour == toHour || last == null) {
+    return ' (${formatMinutes(first.start)})';
+  }
+  return ' (${formatMinutes(first.start)}–${formatMinutes(last.end)})';
+}
